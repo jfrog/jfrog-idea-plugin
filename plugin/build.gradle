@@ -1,0 +1,35 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+plugins {
+    id "org.jetbrains.intellij" version "0.2.9"
+}
+
+apply plugin: 'idea'
+apply plugin: 'org.jetbrains.intellij'
+apply plugin: 'java'
+
+intellij {
+    version 'IC-2016.2'
+    // IntelliJ IDEA 2016.3 dependency; for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
+    plugins 'coverage' //Bundled plugin dependencies
+    plugins 'maven'
+    pluginName 'JFrog'
+    updateSinceUntilBuild = false
+}
+
+repositories {
+    maven { url "https://oss.jfrog.org/jfrog-dependencies" }
+    jcenter()
+    mavenLocal()
+}
+
+dependencies {
+    compile 'com.google.code.findbugs:jsr305:2.0.2'
+    compile 'org.jfrog.xray.client:xray-client-java-service:0.1.0-SNAPSHOT'
+}
+group 'org.jfrog'
+version '1.0' // Plugin version

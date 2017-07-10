@@ -1,0 +1,54 @@
+<idea-plugin version="2">
+    <id>org.jfrog.idea</id>
+    <name>JFrog</name>
+    <version>1.0</version>
+    <vendor email="https://www.jfrog.com/support-service" url="https://www.jfrog.com">JFrog</vendor>
+
+    <description><![CDATA[
+      JFrog Intellij Idea plugin
+    ]]></description>
+
+    <change-notes><![CDATA[
+      Xray support
+    ]]>
+    </change-notes>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+    <idea-version since-build="162"/>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.modules.lang</depends>
+    -->
+    <depends>com.intellij.modules.lang</depends>
+    <depends>org.jetbrains.idea.maven</depends>
+
+    <application-components>
+        <component>
+            <implementation-class>org.jfrog.idea.configuration.GlobalSettings</implementation-class>
+        </component>
+    </application-components>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationConfigurable id="JFrog" displayName="JFrog Xray Configuration"
+                                 instance="org.jfrog.idea.ui.configuration.XrayGlobalConfiguration"/>
+        <projectService serviceImplementation="org.jfrog.idea.xray.ScanManagerFactory"/>
+        <projectService serviceInterface="org.jfrog.idea.ui.xray.XrayToolWindow"
+                        serviceImplementation="org.jfrog.idea.ui.xray.XrayToolWindow"/>
+        <projectService serviceImplementation="org.jfrog.idea.xray.persistency.ScanCache"/>
+        <projectService serviceImplementation="org.jfrog.idea.xray.FilterManager"/>
+        <toolWindow id="JFrog" anchor="bottom" icon="/icons/jfrog_icon.png"
+                    factoryClass="org.jfrog.idea.ui.xray.XrayToolWindowFactory" canCloseContents="true"/>
+    </extensions>
+
+    <actions>
+        <action id="Xray.Refresh"
+                class="org.jfrog.idea.xray.actions.RefreshAction"
+                text="Refresh scan"
+                description="Force Xray scan"
+                icon="AllIcons.Actions.Refresh">
+        </action>
+    </actions>
+
+</idea-plugin>

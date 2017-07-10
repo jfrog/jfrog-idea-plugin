@@ -1,0 +1,198 @@
+import static java.lang.System.getenv
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath(group: 'org.jfrog.buildinfo', name: 'build-info-extractor-gradle', version: '4.+')
+    }
+}
+
+allprojects {
+    apply plugin: 'idea'
+    apply plugin: 'maven-publish'
+    apply plugin: 'com.jfrog.artifactory'
+    apply plugin: 'maven'
+
+    group = 'org.jfrog.xray.client'
+
+    artifactory {
+        contextUrl = 'https://oss.jfrog.org'
+        resolve {
+            repository {
+                repoKey = 'libs-release'
+            }
+        }
+
+        publish {
+            repository {
+                repoKey = 'oss-snapshot-local'   //The Artifactory repository key to publish to
+                username = project.hasProperty('artifactoryUser') ? project.artifactoryUser : getenv()['ARTIFACTORY_USER']
+                password = project.hasProperty('artifactoryKey') ? project.artifactoryKey : getenv()['ARTIFACTORY_KEY']
+            }
+            defaults {
+                publications 'main'
+                properties = ['xray.repo': 'jfrog/jfrog-jars', 'xray.package': 'xray-client-java', 'xray.version': version.toString()]
+            }
+        }
+    }
+}
+
+artifactoryPublish.skip = true
+
+subprojects() {
+    repositories {
+        jcenter()
+        mavenLocal()
+    }
+
+    apply plugin: 'java'
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+
+    dependencies {
+        compile addSlf4J('slf4j-api')
+        compile addSlf4J('log4j-over-slf4j')
+        compile addSlf4J('jcl-over-slf4j')
+        compile 'commons-io:commons-io:2.1'
+        compile "com.fasterxml.jackson.core:jackson-databind:2.8.1"
+        compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.8.1'
+    }
+
+    task sourcesJar(type: Jar) {
+        from sourceSets.main.allSource
+        classifier = 'sources'
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    task testResultsZip(type: Zip) {
+        classifier = 'testreports'
+        from testReportDir
+    }
+
+    test {
+        jvmArgs(['-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.SimpleLog',
+                 '-Dorg.apache.commons.logging.simplelog.showdatetime=true',
+                 '-Dorg.apache.commons.logging.simplelog.log.org.apache.http=ERROR',
+                 '-Dorg.apache.commons.logging.simplelog.log.org.apache.http.wire=ERROR'])
+        testLogging {
+            exceptionFormat "full"
+            events "started", "passed", "skipped", "failed", "standardOut", "standardError"
+            minGranularity 0
+        }
+        // Have the XraySpecSuite run all tests
+        exclude 'com/jfrog/xray/client/test/spec'
+        finalizedBy(testResultsZip)
+    }
+
+    publishing {
+        publications {
+            main(MavenPublication) {
+                from components.java
+                artifact sourcesJar
+                artifact javadocJar
+                if (testResultsZip.archivePath.exists()) {
+                    artifact testResultsZip
+                }
+
+                pom.withXml {
+                    asNode().with {
+                        appendNode('packaging', 'jar')
+                        appendNode('name', 'Xray Java client')
+                        appendNode('description', 'Java client for working with Xray')
+                        appendNode('url', 'https://github.com/jfrogdev/xray-client-java')
+                        appendNode('licenses').with {
+                            appendNode('license').with {
+                                appendNode('name', 'The Apache Software License, Version 2.0')
+                                appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0')
+                            }
+                        }
+                        appendNode('developers').with {
+                            appendNode('developer').with {
+                                appendNode('id', 'NoamTenne')
+                                appendNode('name', 'Noam Tenne')
+                                appendNode('email', 'NoamT@jfrog.com')
+                            }
+                            appendNode('developer').with {
+                                appendNode('id', 'jbaruch')
+                                appendNode('name', 'Baruch Sadogursky')
+                                appendNode('email', 'jbaruch@jfrog.com')
+                            }
+                            appendNode('developer').with {
+                                appendNode('id', 'danf')
+                                appendNode('name', 'Dan Feldman')
+                                appendNode('email', 'danf@jfrog.com')
+                            }
+                        }
+                        appendNode('scm').with {
+                            appendNode('connection', 'git@github.com:JFrogDev/xray/xray-client-java.git')
+                            appendNode('developerConnection', 'git@github.com:xray/xray-client-java.git')
+                            appendNode('url', 'https://github.com/jfrogdev/xray-client-java')
+                        }
+                    }
+                    asNode().dependencies.'*'.findAll() {
+                        it.scope.text() == 'runtime' && project.configurations.compile.allDependencies.find { dep ->
+                            dep.name == it.artifactId.text()
+                        }
+                    }.each() {
+                        it.scope*.value = 'compile'
+                    }
+                }
+            }
+        }
+    }
+}
+
+project(':xray-client-java-service') {
+    dependencies {
+        compile project(':xray-client-java-api')
+        compile 'commons-lang:commons-lang:2.6'
+        compile 'org.jfrog.common:jfrog-http-client:1.0.2'
+        testCompile group: 'org.testng', name: 'testng', version: '6.5.2'
+    }
+
+    test {
+        useTestNG()
+        testLogging {
+            exceptionFormat "full"
+            events "started", "passed", "skipped", "failed", "standardOut", "standardError"
+            minGranularity 0
+        }
+    }
+}
+
+project(':xray-client-java-api') {
+    apply plugin: 'java'
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+}
+
+def addSlf4J(name) {
+    [group: 'org.slf4j', name: name, version: '1.7.5']
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.4'
+}
+
+idea {
+    project {
+        jdkName = '1.7'
+        languageLevel = '1.7'
+        wildcards += '?*.gradle'
+        ipr {
+            withXml { provider ->
+                def node = provider.asNode()
+                // Use git
+                def vcsConfig = node.component.find { it.'@name' == 'VcsDirectoryMappings' }
+                vcsConfig.mapping[0].'@vcs' = 'Git'
+            }
+        }
+    }
+}

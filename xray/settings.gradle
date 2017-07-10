@@ -1,0 +1,6 @@
+String rootName = 'xray-client-java'
+include 'api', 'impl'
+rootProject.name = rootName
+
+project(":api").name = "$rootName-api"
+project(":impl").name = "$rootName-service"
