@@ -9,10 +9,20 @@ IntelliJ IDEA version 2016.2 and above.
 JFrog Xray version 1.7.2.3 and above.
 
 ### Installation
-From IntelliJ IDEA:
+#### Installing from IntelliJ IDEA:
 
 Go to Settings (Preferences) -> Plugins -> Browse repositories -> Search for JFrog -> Install
 ![Alt text](docs/install.png?raw=true "Installing JFrog plugin")
+
+#### Manual installation
+
+Download the latest JFrog IDEA plugin from [Bintray](https://bintray.com/jfrog/jfrog-jars/download_file?file_path=org%2Fjfrog%2Fidea%2Fjfrog-idea-plugin%2F1.0.0%2FJFrog-1.0.0.zip).
+
+Go to Settings (Preferences) -> Plugins -> Install plugin from disk...
+
+Select the downloaded JFrog IDEA plugin file and press `OK`
+
+![Alt text](docs/manual_install.png?raw=true "Manually Installing JFrog plugin")
 
 ### User Guide
 
