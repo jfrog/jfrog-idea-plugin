@@ -77,3 +77,6 @@ gradle test
 * From the *Gradle Projects* window, expand *Idea --> Tasks -->  IntelliJ*
 * Run the *buildPlugin* task.
 * Run the *runIdea* task.
+
+# Release Notes
+The release are available on [Bintray](https://bintray.com/jfrog/jfrog-jars/jfrog-idea-plugin#release).
