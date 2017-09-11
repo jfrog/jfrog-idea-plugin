@@ -32,4 +32,4 @@ dependencies {
     compile 'org.jfrog.xray.client:xray-client-java-service:0.1.0-SNAPSHOT'
 }
 group 'org.jfrog'
-version '1.0' // Plugin version
+version currentVersion // Plugin version
