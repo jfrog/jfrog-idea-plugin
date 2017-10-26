@@ -24,9 +24,11 @@ import org.jfrog.idea.xray.FilterManager;
 import org.jfrog.idea.xray.ScanTreeNode;
 import org.jfrog.idea.xray.persistency.ScanCache;
 import org.jfrog.idea.xray.persistency.types.Artifact;
+import org.jfrog.idea.xray.persistency.types.Issue;
 import org.jfrog.idea.xray.persistency.types.License;
 import org.jfrog.idea.xray.utils.Utils;
 
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.tree.TreeModel;
 import java.io.IOException;
@@ -150,7 +152,11 @@ public abstract class ScanManager {
      * @return filtered scan components tree model according the user filters.
      */
     public TreeModel getFilteredScanTreeModel() {
-        return FilterManager.getInstance(project).filterComponents(scanResults);
+        FilterManager filterManager = FilterManager.getInstance(project);
+        if (filterManager != null) {
+            return filterManager.filterComponents(scanResults);
+        }
+        return scanResults;
     }
 
     /**
@@ -158,7 +164,26 @@ public abstract class ScanManager {
      * @return filtered issues according to the selected component and user filters.
      */
     public TableModel getFilteredScanIssues(ScanTreeNode node) {
-        return FilterManager.getInstance(project).filterIssues(node.getAllIssues());
+        FilterManager filterManager = FilterManager.getInstance(project);
+        if (filterManager != null) {
+            return filterManager.filterIssues(node.getAllIssues());
+        }
+        return createIssuesTableModel(node.getAllIssues());
+    }
+
+    public static TableModel createIssuesTableModel(Set<Issue> issues) {
+        DefaultTableModel model = new DefaultTableModel() {
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                if (columnIndex == 0) {
+                    return Issue.class;
+                }
+                return super.getColumnClass(columnIndex);
+            }
+        };
+
+        model.addColumn("issues", issues.toArray());
+        return model;
     }
 
     /**

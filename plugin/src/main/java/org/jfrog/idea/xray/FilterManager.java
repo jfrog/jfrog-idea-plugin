@@ -7,11 +7,11 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import org.jetbrains.annotations.Nullable;
-import org.jfrog.idea.xray.persistency.types.Severity;
 import org.jfrog.idea.xray.persistency.types.Issue;
 import org.jfrog.idea.xray.persistency.types.License;
+import org.jfrog.idea.xray.persistency.types.Severity;
+import org.jfrog.idea.xray.scan.ScanManager;
 
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
@@ -122,18 +122,6 @@ public final class FilterManager implements PersistentStateComponent<FilterManag
                 filteredIssues.add(xrayIssue);
             }
         });
-
-        DefaultTableModel model = new DefaultTableModel() {
-            @Override
-            public Class<?> getColumnClass(int columnIndex) {
-                if (columnIndex == 0) {
-                    return Issue.class;
-                }
-                return super.getColumnClass(columnIndex);
-            }
-        };
-
-        model.addColumn("issues", filteredIssues.toArray());
-        return model;
+        return ScanManager.createIssuesTableModel(filteredIssues);
     }
 }
