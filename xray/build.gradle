@@ -1,46 +1,10 @@
-import static java.lang.System.getenv
-
-buildscript {
-    repositories {
-        jcenter()
-    }
-
-    dependencies {
-        classpath(group: 'org.jfrog.buildinfo', name: 'build-info-extractor-gradle', version: '4.+')
-    }
-}
-
 allprojects {
     apply plugin: 'idea'
     apply plugin: 'maven-publish'
-    apply plugin: 'com.jfrog.artifactory'
     apply plugin: 'maven'
 
     group = 'org.jfrog.xray.client'
-
-    artifactory {
-        contextUrl = 'https://oss.jfrog.org'
-        resolve {
-            repository {
-                repoKey = 'libs-release'
-            }
-        }
-
-        publish {
-            repository {
-                repoKey = 'oss-snapshot-local'   //The Artifactory repository key to publish to
-                username = project.hasProperty('artifactoryUser') ? project.artifactoryUser : getenv()['ARTIFACTORY_USER']
-                password = project.hasProperty('artifactoryKey') ? project.artifactoryKey : getenv()['ARTIFACTORY_KEY']
-            }
-            defaults {
-                publications 'main'
-                properties = ['xray.repo': 'jfrog/jfrog-jars', 'xray.package': 'xray-client-java', 'xray.version': version.toString()]
-            }
-        }
-    }
 }
-
-artifactoryPublish.skip = true
 
 subprojects() {
     repositories {
