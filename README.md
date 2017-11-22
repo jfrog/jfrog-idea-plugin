@@ -58,6 +58,7 @@ There are two ways to filter the scan results:
 ![Alt text](docs/filter_issues.png?raw=true "Issues filter")
 ![Alt text](docs/filter_licenses.png?raw=true "Licenses filter")
 # Building and Testing the Sources
+
 To buid the plugin sources, please follow these steps:
 1. Clone the code from git.
 2. CD to the *xray* directory located under the *jfrog-idea-plugin* directory.
@@ -72,11 +73,27 @@ gradle clean install
 ```
 gradle test
 ```
-5. From IntelliJ, open the plugin project, by selecting *jfrog-idea-plugin/plugin/build.gradle* file.
-6. Build the sources and launch the plugin by the following these steps:
+5. CD to the *plugin* directory located under the *jfrog-idea-plugin* directory.
+6. Build and create the JFrog IDEA Plugin zip file by running the following gradle command.
+After the build finishes, you'll find the zip file in the *plugin/build/distributions* directory, located under the *jfrog-idea-plugin* directory.
+The zip file can be loaded into IntelliJ
+
+```
+gradle clean build
+```
+
+# Developing the Plugin Code
+If you'd like to help us develop and enhance the plugin, this section is for you.
+To build and run the plugin following your code changes, follow these steps:
+
+1. From IntelliJ, open the plugin project, by selecting *jfrog-idea-plugin/plugin/build.gradle* file.
+2. Build the sources and launch the plugin by the following these steps:
 * From the *Gradle Projects* window, expand *Idea --> Tasks -->  IntelliJ*
 * Run the *buildPlugin* task.
 * Run the *runIdea* task.
+
+# Code Contributions
+We welcome community contribution through pull requests.
 
 # Release Notes
 The release are available on [Bintray](https://bintray.com/jfrog/jfrog-jars/jfrog-idea-plugin#release).
