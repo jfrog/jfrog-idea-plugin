@@ -267,7 +267,7 @@ public abstract class ScanManager {
 
     private void scanComponents(Xray xray, Components artifactsToScan) throws IOException {
         ScanCache scanCache = ScanCache.getInstance(project);
-        SummaryResponse summary = xray.summary().componentSummary(artifactsToScan);
+        SummaryResponse summary = xray.summary().component(artifactsToScan);
         // Update cached artifact summary
         for (com.jfrog.xray.client.services.summary.Artifact summaryArtifact : summary.getArtifacts()) {
             if (summaryArtifact == null || summaryArtifact.getGeneral() == null) {

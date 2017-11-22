@@ -22,7 +22,7 @@ public class SummaryTests extends XrayTestsBase {
     public void testArtifactSummaryNonExistingSha() throws IOException {
         List<String> checksums = new ArrayList<>();
         checksums.add("nonExistingSha");
-        SummaryResponse summary = xray.summary().artifactSummary(checksums, null);
+        SummaryResponse summary = xray.summary().artifact(checksums, null);
         for (Error err : summary.getErrors()) {
             assertEquals(err.getError(), "Artifact doesn't exist or not indexed/cached in Xray");
         }
@@ -32,7 +32,7 @@ public class SummaryTests extends XrayTestsBase {
     public void testArtifactSummaryComponent() throws IOException {
         Components components = ComponentsFactory.create();
         components.addComponent("gav://org.acegisecurity:acegi-security:1.0.5", "2132981748912741");
-        SummaryResponse summary = xray.summary().componentSummary(components);
+        SummaryResponse summary = xray.summary().component(components);
 
         assertNull(summary.getErrors());
         assertNotNull(summary.getArtifacts());
@@ -50,7 +50,7 @@ public class SummaryTests extends XrayTestsBase {
     public void testArtifactSummaryNonExistingPath() throws IOException {
         List<String> paths = new ArrayList<>();
         paths.add("non/existing/path");
-        SummaryResponse summary = xray.summary().artifactSummary(null, paths);
+        SummaryResponse summary = xray.summary().artifact(null, paths);
         for (Error err : summary.getErrors()) {
             assertEquals(err.getError(), "Artifact doesn't exist or not indexed/cached in Xray");
         }
@@ -58,7 +58,7 @@ public class SummaryTests extends XrayTestsBase {
 
     @Test
     public void testArtifactSummary() throws IOException {
-        SummaryResponse summary = xray.summary().artifactSummary(null, null);
+        SummaryResponse summary = xray.summary().artifact(null, null);
         assertNull(summary.getArtifacts());
         assertNull(summary.getErrors());
     }

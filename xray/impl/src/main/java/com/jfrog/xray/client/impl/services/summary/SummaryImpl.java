@@ -29,7 +29,7 @@ public class SummaryImpl implements Summary {
     }
 
     @Override
-    public SummaryResponse artifactSummary(List<String> checksums, List<String> paths) throws IOException {
+    public SummaryResponse artifact(List<String> checksums, List<String> paths) throws IOException {
         if (checksums == null && paths == null) {
             return new SummaryResponseImpl();
         }
@@ -48,12 +48,7 @@ public class SummaryImpl implements Summary {
     }
 
     @Override
-    public SummaryResponse buildSummary(String buildName, String buildNumber) {
-        return null;
-    }
-
-    @Override
-    public SummaryResponse componentSummary(Components components) throws IOException {
+    public SummaryResponse component(Components components) throws IOException {
         if (components == null) {
             return new SummaryResponseImpl();
         }
@@ -73,8 +68,8 @@ public class SummaryImpl implements Summary {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private class ArtifactSummaryBody {
 
-        private List<String> checksums = null;
-        private List<String> paths = null;
+        private List<String> checksums;
+        private List<String> paths;
 
         public ArtifactSummaryBody(List<String> checksums, List<String> paths) {
             this.checksums = checksums;

@@ -9,9 +9,7 @@ import java.util.List;
  */
 public interface Summary extends Serializable {
 
-    SummaryResponse artifactSummary(List<String> checksums, List<String> paths) throws IOException;
+    SummaryResponse artifact(List<String> checksums, List<String> paths) throws IOException;
 
-    SummaryResponse buildSummary(String buildName, String buildNumber);
-
-    SummaryResponse componentSummary(Components components) throws IOException;
+    SummaryResponse component(Components components) throws IOException;
 }

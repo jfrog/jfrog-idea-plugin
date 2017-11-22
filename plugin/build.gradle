@@ -28,6 +28,7 @@ repositories {
 }
 
 dependencies {
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
     compile 'com.google.code.findbugs:jsr305:2.0.2'
     compile 'org.jfrog.xray.client:xray-client-java-api:0.1.0-SNAPSHOT'
     compile 'org.jfrog.xray.client:xray-client-java-service:0.1.0-SNAPSHOT'
