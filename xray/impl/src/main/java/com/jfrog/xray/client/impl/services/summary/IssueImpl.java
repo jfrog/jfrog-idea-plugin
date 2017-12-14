@@ -9,6 +9,8 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class IssueImpl implements Issue {
 
+    private static final long serialVersionUID = 1L;
+
     private String summary;
     private String description;
     private String severity;
@@ -65,5 +67,12 @@ public class IssueImpl implements Issue {
     public boolean equals(Object obj) {
         IssueImpl issue = (IssueImpl) obj;
         return issue.summary.equals(summary) && issue.description.equals(description);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = description.hashCode();
+        result = 31 * result + summary.hashCode();
+        return result;
     }
 }

@@ -2,7 +2,6 @@ package org.jfrog.idea.ui.configuration;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
-import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
@@ -26,6 +25,7 @@ import javax.swing.*;
 import java.io.IOException;
 
 import static org.jfrog.idea.xray.utils.Utils.MINIMAL_XRAY_VERSION_SUPPORTED;
+import static org.jfrog.idea.xray.utils.Utils.MINIMAL_XRAY_VERSION_UNSUPPORTED;
 
 /**
  * Created by romang on 1/29/17.
@@ -52,7 +52,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
 
                 if (!Utils.isXrayVersionSupported(xrayVersion)) {
                     connectionResults.setText("ERROR: Unsupported Xray version: " + xrayVersion.getVersion() +
-                            ", version " + MINIMAL_XRAY_VERSION_SUPPORTED + " or above is required.");
+                            ", version above " + MINIMAL_XRAY_VERSION_SUPPORTED + " and below " + MINIMAL_XRAY_VERSION_UNSUPPORTED + " is required.");
                 } else {
                     Pair<Boolean, String> testComponentPermissionRes = testComponentPermission(xrayClient);
                     if (!testComponentPermissionRes.getLeft()) {
@@ -112,7 +112,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
     }
 
     @Override
-    public void apply() throws ConfigurationException {
+    public void apply() {
         GlobalSettings globalSettings = GlobalSettings.getInstance();
         globalSettings.setXrayConfig(xrayConfig);
         MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();

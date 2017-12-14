@@ -6,7 +6,6 @@ import org.testng.annotations.BeforeClass;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.util.Properties;
 
 import static com.jfrog.xray.client.impl.XrayClient.create;
@@ -26,7 +25,7 @@ public class XrayTestsBase {
     protected Xray xray;
 
     @BeforeClass
-    public void init() throws IOException, URISyntaxException {
+    public void init() throws IOException {
 
         Properties props = new Properties();
         // This file is not in GitHub. Create your own in src/test/resources.
@@ -81,7 +80,7 @@ public class XrayTestsBase {
     }
 
     @AfterClass
-    public void clean() throws IOException {
+    public void clean() {
         xray.close();
     }
 }

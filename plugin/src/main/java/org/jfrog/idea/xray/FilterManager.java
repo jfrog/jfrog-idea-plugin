@@ -1,127 +1,107 @@
 package org.jfrog.idea.xray;
 
-import com.intellij.openapi.components.PersistentStateComponent;
+import com.google.common.collect.Maps;
 import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.components.State;
-import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
-import com.intellij.util.xmlb.XmlSerializerUtil;
-import org.jetbrains.annotations.Nullable;
+import org.apache.commons.lang.mutable.MutableBoolean;
 import org.jfrog.idea.xray.persistency.types.Issue;
 import org.jfrog.idea.xray.persistency.types.License;
 import org.jfrog.idea.xray.persistency.types.Severity;
-import org.jfrog.idea.xray.scan.ScanManager;
 
-import javax.swing.table.TableModel;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeModel;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by romang on 4/16/17.
  */
+public class FilterManager {
 
-@State(name = "FilterManager", storages = {@Storage(file = "FilterManager.xml")})
-public final class FilterManager implements PersistentStateComponent<FilterManager> {
-
-    public Set<Severity> selectedSeverity = new HashSet<>();
-    public Set<License> selectedLicenses = new HashSet<>();
+    public Map<Severity, Boolean> selectedSeverities = Maps.newTreeMap(Collections.reverseOrder());
+    public Map<License, Boolean> selectedLicenses = Maps.newHashMap();
 
     public static FilterManager getInstance(Project project) {
         return ServiceManager.getService(project, FilterManager.class);
     }
 
-    @Nullable
-    @Override
-    public FilterManager getState() {
-        return this;
-    }
-
-    @Override
-    public void loadState(FilterManager state) {
-        XmlSerializerUtil.copyBean(state, this);
-    }
-
-    public boolean isFiltered(Issue issue) {
-        if (selectedSeverity.isEmpty()) {
-            return true;
-        }
-        if (selectedSeverity.contains(issue.getSeverity())) {
-            return true;
-        }
-        return false;
-    }
-
-    public boolean isFiltered(License license) {
-        if (selectedLicenses.isEmpty() || selectedLicenses.contains(license)) {
-            return true;
-        }
-        return false;
-    }
-
-    public boolean isIssuesFiltered(ScanTreeNode node) {
-        Set<Issue> issues = node.getAllIssues();
-        boolean issuesSelected = issues.isEmpty() && selectedSeverity.isEmpty();
-        for (Issue issue : issues) {
-            if (isFiltered(issue)) {
-                issuesSelected = true;
-                break;
-            }
-        }
-        return issuesSelected;
-    }
-
-    public boolean isLicenseFiltered(ScanTreeNode node) {
-        Set<License> licenses = node.getLicenses();
-        if (licenses.isEmpty()) {
-            License license = new License();
-            license.name = "Unknown";
-            licenses = Collections.singleton(license);
-        }
-        boolean licensesSelected = false;
-        for (License license : licenses) {
-            if (isFiltered(license)) {
-                licensesSelected = true;
-                break;
-            }
-        }
-        return licensesSelected;
-    }
-
-    public TreeModel filterComponents(TreeModel scanResults) {
-        TreeModel issuesTree = new DefaultTreeModel(new ScanTreeNode("All Components"), false);
-        getFilterredComponents((ScanTreeNode) scanResults.getRoot(), (ScanTreeNode) issuesTree.getRoot(), true);
-        return issuesTree;
-    }
-
-    private void getFilterredComponents(ScanTreeNode node, ScanTreeNode filteredNode, boolean rootNode) {
-        for (int i = 0; i < node.getChildCount(); i++) {
-            ScanTreeNode unfilteredChildNode = (ScanTreeNode) node.getChildAt(i);
-            // Filter licenses
-            if (rootNode && !isLicenseFiltered(unfilteredChildNode)) {
-                continue;
-            }
-
-            // Filter issues
-            if (!isIssuesFiltered(unfilteredChildNode)) {
-                getFilterredComponents(unfilteredChildNode, filteredNode, false);
-            } else {
-                ScanTreeNode filteredChildNode = (ScanTreeNode) unfilteredChildNode.clone();
-                filteredNode.add(filteredChildNode);
-                getFilterredComponents(unfilteredChildNode, filteredChildNode, false);
-            }
-        }
-    }
-
-    public TableModel filterIssues(Set<Issue> allIssues) {
-        Set<Issue> filteredIssues = new HashSet<>();
-        allIssues.forEach(xrayIssue -> {
-            if (isFiltered(xrayIssue)) {
-                filteredIssues.add(xrayIssue);
+    public void setLicenses(Set<License> scanLicenses) {
+        scanLicenses.forEach(license -> {
+            if (!selectedLicenses.containsKey(license)) {
+                selectedLicenses.put(license, true);
             }
         });
-        return ScanManager.createIssuesTableModel(filteredIssues);
+    }
+
+    private boolean isSeveritySelected(Issue issue) {
+        return selectedSeverities.get(issue.getSeverity());
+    }
+
+    private boolean isSeveritySelected(ScanTreeNode node) {
+        if (node.getIssues().size() == 0 && selectedSeverities.get(Severity.Normal)) {
+            return true;
+        }
+        for (Issue issue : node.getIssues()) {
+            if (isSeveritySelected(issue)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isLicenseSelected(License license) {
+        return selectedLicenses.containsKey(license) && selectedLicenses.get(license);
+    }
+
+    private boolean isLicenseSelected(ScanTreeNode node) {
+        for (License license : node.getLicenses()) {
+            if (isLicenseSelected(license)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Set<Issue> filterIssues(Set<Issue> allIssues) {
+        return allIssues.stream().
+                filter(this::isSeveritySelected).
+                collect(Collectors.toSet());
+    }
+
+    /**
+     * Filter scan results
+     * @param unfilteredRoot In - The scan results
+     * @param issuesFilteredRoot Out - Filtered issues tree
+     * @param LicenseFilteredRoot Out - Filtered licenses tree
+     */
+    public void applyFilters(ScanTreeNode unfilteredRoot, ScanTreeNode issuesFilteredRoot, ScanTreeNode LicenseFilteredRoot) {
+        applyFilters(unfilteredRoot, issuesFilteredRoot, LicenseFilteredRoot, new MutableBoolean(), new MutableBoolean());
+    }
+
+    private void applyFilters(ScanTreeNode unfilteredRoot, ScanTreeNode issuesFilteredRoot, ScanTreeNode licenseFilteredRoot, MutableBoolean severitySelected, MutableBoolean licenseSelected) {
+        severitySelected.setValue(isSeveritySelected(unfilteredRoot));
+        licenseSelected.setValue(isLicenseSelected(unfilteredRoot));
+        for (int i = 0; i < unfilteredRoot.getChildCount(); i++) {
+            ScanTreeNode unfilteredChild = (ScanTreeNode) unfilteredRoot.getChildAt(i);
+            ScanTreeNode filteredSeverityChild = getFilteredTreeNode(unfilteredChild);
+            ScanTreeNode filteredLicenseChild = (ScanTreeNode) unfilteredChild.clone();
+            MutableBoolean childSeveritySelected = new MutableBoolean();
+            MutableBoolean childLicenseSelected = new MutableBoolean();
+            applyFilters(unfilteredChild, filteredSeverityChild, filteredLicenseChild, childSeveritySelected, childLicenseSelected);
+            if (childSeveritySelected.booleanValue()) {
+                severitySelected.setValue(true);
+                issuesFilteredRoot.add(filteredSeverityChild);
+            }
+            if (childLicenseSelected.booleanValue()) {
+                licenseSelected.setValue(true);
+                licenseFilteredRoot.add(filteredLicenseChild);
+            }
+        }
+    }
+
+    private ScanTreeNode getFilteredTreeNode(ScanTreeNode unfilteredChild) {
+        ScanTreeNode filteredSeverityChild = (ScanTreeNode) unfilteredChild.clone();
+        filteredSeverityChild.setIssues(filterIssues(unfilteredChild.getIssues()));
+        return filteredSeverityChild;
     }
 }

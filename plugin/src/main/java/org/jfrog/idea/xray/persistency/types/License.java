@@ -26,13 +26,14 @@ public class License implements Comparable<License> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
+        if (this == o) {
+            return true;
+        }
+        if (getClass() != o.getClass()) {
+            return false;
+        }
         License license = (License) o;
-
-        if (!fullName.equals(license.fullName)) return false;
-        return name.equals(license.name);
+        return fullName.equals(license.fullName) && name.equals(license.name);
     }
 
     @Override
@@ -44,8 +45,14 @@ public class License implements Comparable<License> {
 
     @Override
     public int compareTo(@NotNull License o) {
-        if (this == o) return 0;
-        if (o == null) return 1;
+        if (this == o) {
+            return 0;
+        }
         return name.compareTo(o.name) != 0 ? name.compareTo(o.name) : fullName.compareTo(o.fullName);
+    }
+
+    @Override
+    public String toString() {
+        return this.name;
     }
 }

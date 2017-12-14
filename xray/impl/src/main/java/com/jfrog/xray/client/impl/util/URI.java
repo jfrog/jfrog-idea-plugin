@@ -1073,13 +1073,13 @@ public class URI {
         if (component == null) {
             throw new IllegalArgumentException("Component array of chars may not be null");
         }
-        byte[] rawdata = null;
+        byte[] rawData;
         try {
-            rawdata = URLCodec.decodeUrl(EncodingUtils.getAsciiBytes(component));
+            rawData = URLCodec.decodeUrl(EncodingUtils.getAsciiBytes(component));
         } catch (DecoderException e) {
             throw new HttpException(e.getMessage());
         }
-        return EncodingUtils.getString(rawdata, charset);
+        return EncodingUtils.getString(rawData, charset);
     }
 
 }

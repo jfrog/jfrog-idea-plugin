@@ -16,7 +16,7 @@ intellij {
     version 'IC-2016.2'
     // IntelliJ IDEA 2016.3 dependency; for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
     plugins 'coverage' //Bundled plugin dependencies
-    plugins 'maven'
+    plugins 'gradle', 'maven'
     pluginName 'JFrog'
     updateSinceUntilBuild = false
 }
@@ -29,6 +29,7 @@ repositories {
 
 dependencies {
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+    compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1'
     compile 'com.google.code.findbugs:jsr305:2.0.2'
     compile 'org.jfrog.xray.client:xray-client-java-api:0.1.1'
     compile 'org.jfrog.xray.client:xray-client-java-service:0.1.1'

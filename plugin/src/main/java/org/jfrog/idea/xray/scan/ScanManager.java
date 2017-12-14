@@ -1,9 +1,12 @@
 package org.jfrog.idea.xray.scan;
 
-import com.intellij.notification.Notification;
+import com.google.common.collect.Sets;
 import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.externalSystem.model.DataNode;
+import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
+import com.intellij.openapi.externalSystem.model.project.ProjectData;
+import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefreshCallback;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -17,9 +20,11 @@ import com.jfrog.xray.client.services.summary.ComponentDetail;
 import com.jfrog.xray.client.services.summary.Components;
 import com.jfrog.xray.client.services.summary.SummaryResponse;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jfrog.idea.Events;
 import org.jfrog.idea.configuration.GlobalSettings;
 import org.jfrog.idea.configuration.XrayServerConfig;
+import org.jfrog.idea.ui.xray.models.IssuesTableModel;
 import org.jfrog.idea.xray.FilterManager;
 import org.jfrog.idea.xray.ScanTreeNode;
 import org.jfrog.idea.xray.persistency.ScanCache;
@@ -28,79 +33,88 @@ import org.jfrog.idea.xray.persistency.types.Issue;
 import org.jfrog.idea.xray.persistency.types.License;
 import org.jfrog.idea.xray.utils.Utils;
 
-import javax.swing.table.DefaultTableModel;
+import javax.swing.*;
 import javax.swing.table.TableModel;
 import javax.swing.tree.TreeModel;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.jfrog.idea.xray.utils.Utils.MINIMAL_XRAY_VERSION_SUPPORTED;
+import static org.jfrog.idea.xray.utils.Utils.MINIMAL_XRAY_VERSION_UNSUPPORTED;
 
 /**
  * Created by romang on 4/26/17.
  */
 public abstract class ScanManager {
 
-    protected final Project project;
-    private TreeModel scanResults;
+    public static final String ROOT_NODE_HEADER = "All components";
+    static final String GAV_PREFIX = "gav://";
     private final static int NUMBER_OF_ARTIFACTS_BULK_SCAN = 100;
 
-    // Lock to prevent multiple simultaneous scans
-    AtomicBoolean scanInProgress = new AtomicBoolean(false);
-    private static final Logger log = Logger.getInstance(ScanManager.class);
+    final Project project;
+    private TreeModel scanResults;
+    static final Logger logger = Logger.getInstance(ScanManager.class);
 
-    protected ScanManager(Project project) {
+    // Lock to prevent multiple simultaneous scans
+    private AtomicBoolean scanInProgress = new AtomicBoolean(false);
+
+    ScanManager(Project project) {
         this.project = project;
         registerOnChangeHandlers();
     }
 
     /**
+     * Refresh project dependencies.
+     */
+    protected abstract void refreshDependencies(ExternalProjectRefreshCallback cbk, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies);
+
+    /**
      * Collect and return {@link Components} to be scanned by JFrog Xray.
      * Implementation should be project type specific.
-     *
-     * @return Components
      */
-    protected abstract Components collectComponentsToScan();
+    protected abstract Components collectComponentsToScan(@Nullable DataNode<ProjectData> externalProject);
 
     /**
      * Create new {@link TreeModel} scan results, old scan results available if needed.
-     *
-     * @param currentScanResults
-     * @return TreeModel
      */
     protected abstract TreeModel updateResultsTree(TreeModel currentScanResults);
 
     /**
-     * Scan and update dependency components.
-     *
-     * @param quickScan
-     * @param indicator
+     * Populate a ScanTreeNode with issues, licenses and general info from the scan cache.
      */
-    private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator) {
+    void populateScanTreeNode(ScanTreeNode scanTreeNode) {
+        Artifact scanArtifact = getArtifactSummary(scanTreeNode.toString());
+        if (scanArtifact != null) {
+            scanTreeNode.setIssues(Sets.newHashSet(scanArtifact.issues));
+            scanTreeNode.setLicenses(Sets.newHashSet(scanArtifact.licenses));
+            scanTreeNode.setGeneralInfo(scanArtifact.general);
+        }
+    }
+
+    /**
+     * Scan and update dependency components.
+     */
+    private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies) {
         // Don't scan if Xray is not configured
         if (!GlobalSettings.getInstance().isCredentialsSet()) {
-            Notifications.Bus.notify(new Notification("JFrog", "JFrog Xray scan failed", "Xray server is not configured.", NotificationType.ERROR));
+            Utils.notify(logger, "JFrog Xray scan failed", "Xray server is not configured.", NotificationType.ERROR);
             return;
         }
         // Prevent multiple simultaneous scans
         if (!scanInProgress.compareAndSet(false, true)) {
             if (!quickScan) {
-                Notifications.Bus.notify(new Notification("JFrog", "JFrog Xray", "Scan already in progress.", NotificationType.INFORMATION));
+                Utils.notify(logger, "JFrog Xray", "Scan already in progress.", NotificationType.INFORMATION);
             }
             return;
         }
-
         try {
-            // Collect -> Scan and store to cache -> update view
-            Components components = collectComponentsToScan();
-            scanAndCacheArtifacs(components, quickScan, indicator);
-            scanResults = updateResultsTree(scanResults);
-            MessageBus messageBus = project.getMessageBus();
-            messageBus.syncPublisher(Events.ON_SCAN_COMPONENTS_CHANGE).update();
+            // Refresh dependencies -> Collect -> Scan and store to cache -> Update view
+            refreshDependencies(getRefreshDependenciesCbk(quickScan, indicator), libraryDependencies);
         } finally {
             scanInProgress.set(false);
         }
@@ -108,17 +122,49 @@ public abstract class ScanManager {
 
     /**
      * Launch async dependency scan.
-     *
-     * @param quickScan
      */
-    public void asyncScanAndUpdateResults(boolean quickScan) {
-        ProgressManager.getInstance().run(new Task.Backgroundable(project, "Xray: scanning for vulnerabilities...") {
+    public void asyncScanAndUpdateResults(boolean quickScan, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies) {
+        Task.Backgroundable scanAndUpdateTask = new Task.Backgroundable(project, "Xray: Scanning for Vulnerabilities...") {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
-                scanAndUpdate(quickScan, indicator);
+                scanAndUpdate(quickScan, indicator, libraryDependencies);
                 indicator.finishNonCancelableSection();
             }
-        });
+        };
+        // The progress manager is only good for foreground threads.
+        if (SwingUtilities.isEventDispatchThread()) {
+            ProgressManager.getInstance().run(scanAndUpdateTask);
+        } else {
+            // Run the scan task when the thread is in the foreground.
+            SwingUtilities.invokeLater(() -> ProgressManager.getInstance().run(scanAndUpdateTask));
+        }
+    }
+
+    /**
+     * Launch async dependency scan.
+     */
+    public void asyncScanAndUpdateResults(boolean quickScan) {
+        asyncScanAndUpdateResults(quickScan, null);
+    }
+
+    private ExternalProjectRefreshCallback getRefreshDependenciesCbk(boolean quickScan, ProgressIndicator indicator) {
+        return new ExternalProjectRefreshCallback() {
+            @Override
+            public void onSuccess(@Nullable DataNode<ProjectData> externalProject) {
+                Components components = collectComponentsToScan(externalProject);
+                scanAndCacheArtifacs(components, quickScan, indicator);
+                scanResults = updateResultsTree(scanResults);
+                setUiLicenses();
+                MessageBus messageBus = project.getMessageBus();
+                messageBus.syncPublisher(Events.ON_SCAN_COMPONENTS_CHANGE).update();
+            }
+
+            @Override
+            public void onFailure(@NotNull String errorMessage, @Nullable String errorDetails) {
+                String details = errorDetails == null ? "" : errorDetails;
+                Utils.notify(logger, "JFrog Xray scan failed: " + errorMessage, details, NotificationType.ERROR);
+            }
+        };
     }
 
     private void registerOnChangeHandlers() {
@@ -131,6 +177,10 @@ public abstract class ScanManager {
 
         busConnection.subscribe(Events.ON_CONFIGURATION_DETAILS_CHANGE,
                 () -> asyncScanAndUpdateResults(true));
+    }
+
+    private void setUiLicenses() {
+        FilterManager.getInstance(project).setLicenses(getAllLicenses());
     }
 
     /**
@@ -149,48 +199,34 @@ public abstract class ScanManager {
     }
 
     /**
-     * @return filtered scan components tree model according the user filters.
+     * filter scan components tree model according to the user filters and sort the issues tree.
      */
-    public TreeModel getFilteredScanTreeModel() {
-        FilterManager filterManager = FilterManager.getInstance(project);
-        if (filterManager != null) {
-            return filterManager.filterComponents(scanResults);
+    public void filterAndSort(TreeModel issuesTreeModel, TreeModel licensesTreeModel) {
+        if (scanResults == null) {
+            return;
         }
-        return scanResults;
+        FilterManager filterManager = FilterManager.getInstance(project);
+        ScanTreeNode issuesFilteredRoot = (ScanTreeNode) issuesTreeModel.getRoot();
+        ScanTreeNode licenseFilteredRoot = (ScanTreeNode) licensesTreeModel.getRoot();
+        filterManager.applyFilters((ScanTreeNode) scanResults.getRoot(), issuesFilteredRoot, licenseFilteredRoot);
+        issuesFilteredRoot.setIssues(issuesFilteredRoot.processTreeIssues());
     }
 
     /**
-     * @param node
-     * @return filtered issues according to the selected component and user filters.
+     * return filtered issues according to the selected component and user filters.
      */
-    public TableModel getFilteredScanIssues(ScanTreeNode node) {
+    public TableModel getFilteredScanIssues(List<ScanTreeNode> selectedNodes) {
         FilterManager filterManager = FilterManager.getInstance(project);
-        if (filterManager != null) {
-            return filterManager.filterIssues(node.getAllIssues());
-        }
-        return createIssuesTableModel(node.getAllIssues());
-    }
-
-    public static TableModel createIssuesTableModel(Set<Issue> issues) {
-        DefaultTableModel model = new DefaultTableModel() {
-            @Override
-            public Class<?> getColumnClass(int columnIndex) {
-                if (columnIndex == 0) {
-                    return Issue.class;
-                }
-                return super.getColumnClass(columnIndex);
-            }
-        };
-
-        model.addColumn("issues", issues.toArray());
-        return model;
+        Set<Issue> filteredIssues = Sets.newHashSet();
+        selectedNodes.forEach(node -> filteredIssues.addAll(filterManager.filterIssues(node.getIssues())));
+        return new IssuesTableModel(filteredIssues);
     }
 
     /**
      * @param componentId artifact component ID
      * @return {@link Artifact} according to the component ID.
      */
-    Artifact getArtifactSummary(String componentId) {
+    private Artifact getArtifactSummary(String componentId) {
         ScanCache scanCache = ScanCache.getInstance(project);
         return scanCache.getArtifact(componentId);
     }
@@ -233,7 +269,7 @@ public abstract class ScanManager {
             List<ComponentDetail> componentsList = componentsToScan.getComponentDetails();
             while (currentIndex + NUMBER_OF_ARTIFACTS_BULK_SCAN < componentsList.size()) {
                 if (indicator.isCanceled()) {
-                    log.info("Xray scan was canceled");
+                    logger.info("Xray scan was canceled");
                     return;
                 }
 
@@ -249,7 +285,7 @@ public abstract class ScanManager {
             scanComponents(xray, partialComponents);
             indicator.setFraction(1);
         } catch (IOException e) {
-            Notifications.Bus.notify(new Notification("JFrog", "JFrog Xray scan failed", e.getMessage(), NotificationType.ERROR));
+            Utils.notify(logger, "JFrog Xray scan failed", e.getMessage(), NotificationType.ERROR);
         }
     }
 
@@ -258,9 +294,9 @@ public abstract class ScanManager {
             if (Utils.isXrayVersionSupported(xray.system().version())) {
                 return true;
             }
-            Notifications.Bus.notify(new Notification("JFrog", "Unsupported JFrog Xray version", "Required JFrog Xray version " + MINIMAL_XRAY_VERSION_SUPPORTED + " and above", NotificationType.ERROR));
+            Utils.notify(logger, "Unsupported JFrog Xray version", "Required JFrog Xray version at least " + MINIMAL_XRAY_VERSION_SUPPORTED + " and below " + MINIMAL_XRAY_VERSION_UNSUPPORTED, NotificationType.ERROR);
         } catch (IOException e) {
-            Notifications.Bus.notify(new Notification("JFrog", "JFrog Xray scan failed", e.getMessage(), NotificationType.ERROR));
+            Utils.notify(logger, "JFrog Xray scan failed", e.getMessage(), NotificationType.ERROR);
         }
         return false;
     }

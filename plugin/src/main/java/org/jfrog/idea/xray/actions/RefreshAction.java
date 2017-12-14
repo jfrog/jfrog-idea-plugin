@@ -11,6 +11,8 @@ public class RefreshAction extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {
-        ScanManagerFactory.getScanManager(e.getProject()).asyncScanAndUpdateResults(false);
+        if (e.getProject() != null) {
+            ScanManagerFactory.getScanManager(e.getProject()).asyncScanAndUpdateResults(false);
+        }
     }
 }

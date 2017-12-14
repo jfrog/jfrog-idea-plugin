@@ -28,4 +28,9 @@ public class ComponentDetailImpl implements ComponentDetail {
     public String getSha1() {
         return sha1;
     }
+
+    @Override
+    public String toString() {
+        return componentId;
+    }
 }

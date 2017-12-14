@@ -5,9 +5,10 @@ import org.jfrog.idea.xray.persistency.types.Issue;
 import org.jfrog.idea.xray.persistency.types.License;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import java.util.Enumeration;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Vector;
 
 /**
  * Created by romang on 3/9/17.
@@ -17,6 +18,7 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
     private Set<Issue> issues = new HashSet<>();
     private Set<License> licenses = new HashSet<>();
     private GeneralInfo generalInfo;
+    private Issue topIssue = new Issue();
 
     public ScanTreeNode(Object userObject) {
         super(userObject);
@@ -28,6 +30,17 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
 
     public void setLicenses(Set<License> licenses) {
         this.licenses = licenses;
+    }
+
+    public void setGeneralInfo(GeneralInfo generalInfo) {
+        this.generalInfo = generalInfo;
+    }
+
+    /**
+     * @return current node's general info
+     */
+    public GeneralInfo getGeneralInfo() {
+        return generalInfo;
     }
 
     /**
@@ -45,31 +58,61 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
     }
 
     /**
+     * @return top severity issue of the current node and it's ancestors
+     */
+    public Issue getTopIssue() {
+        return topIssue;
+    }
+
+    /**
+     * @return total number of issues of the current node and it's ancestors
+     */
+    public int getIssueCount() {
+        return issues.size();
+    }
+
+    /**
+     * @return Node's children
+     */
+    public Vector<ScanTreeNode> getChildren() {
+        return children != null ? children : new Vector<>();
+    }
+
+    /**
+     * 1. Populate current node's issues components
+     * 2. Populate current node and subtree's issues
+     * 3. Populate current node and subtree's top issue
+     * 4. Sort the tree
      * @return all issues of the current node and it's ancestors
      */
-    public Set<Issue> getAllIssues() {
-        Set<Issue> allIssues = new HashSet<>();
-        addIssuesRecursive(allIssues);
-        return allIssues;
+    public Set<Issue> processTreeIssues() {
+        setIssuesComponent();
+        getChildren().forEach(child -> issues.addAll(child.processTreeIssues()));
+        setTopIssue();
+        sortChildren();
+        return issues;
     }
 
-    private void addIssuesRecursive(Set<Issue> issues) {
-        if (!this.issues.isEmpty()) {
-            issues.addAll(this.issues);
-        }
-
-        Enumeration c = children();
-        while (c.hasMoreElements()) {
-            ScanTreeNode node = (ScanTreeNode) c.nextElement();
-            node.addIssuesRecursive(issues);
-        }
+    private void setIssuesComponent() {
+        issues.forEach(issue -> issue.setComponent(getUserObject().toString()));
     }
 
-    public void setGeneralInfo(GeneralInfo generalInfo) {
-        this.generalInfo = generalInfo;
+    private void sortChildren() {
+        getChildren().sort(Comparator
+                .comparing(ScanTreeNode::getTopIssue, Comparator.comparing(Issue::getSeverity))
+                .thenComparing(ScanTreeNode::getIssueCount)
+                .thenComparing(ScanTreeNode::getChildCount)
+                .reversed());
     }
 
-    public GeneralInfo getGeneralInfo() {
-        return generalInfo;
+    private void setTopIssue() {
+        issues.forEach(issue -> {
+            if (topIssue.isTopSeverity()) {
+                return;
+            }
+            if (issue.isHigherSeverityThan(topIssue)) {
+                topIssue = issue;
+            }
+        });
     }
 }

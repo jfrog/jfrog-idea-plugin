@@ -6,7 +6,6 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import org.jetbrains.annotations.Nullable;
 import org.jfrog.idea.xray.persistency.types.Artifact;
 
 import java.time.LocalDateTime;
@@ -27,7 +26,6 @@ public final class ScanCache implements PersistentStateComponent<ScanCache> {
         return ServiceManager.getService(project, ScanCache.class);
     }
 
-    @Nullable
     @Override
     public ScanCache getState() {
         return this;

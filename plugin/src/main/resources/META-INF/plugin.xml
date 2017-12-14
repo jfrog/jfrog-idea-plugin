@@ -1,7 +1,6 @@
-<idea-plugin version="2">
+<idea-plugin>
     <id>org.jfrog.idea</id>
     <name>JFrog</name>
-    <version>1.0</version>
     <vendor email="https://www.jfrog.com/support-service" url="https://www.jfrog.com">JFrog</vendor>
 
     <description><![CDATA[
@@ -22,6 +21,7 @@
     <depends>com.intellij.modules.lang</depends>
     -->
     <depends>com.intellij.modules.lang</depends>
+    <depends>org.jetbrains.plugins.gradle</depends>
     <depends>org.jetbrains.idea.maven</depends>
 
     <application-components>
@@ -33,6 +33,8 @@
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable id="JFrog" displayName="JFrog Xray Configuration"
                                  instance="org.jfrog.idea.ui.configuration.XrayGlobalConfiguration"/>
+        <externalProjectDataService implementation="org.jfrog.idea.xray.XrayDependencyDataService"/>
+        <projectService serviceImplementation="org.jfrog.idea.xray.XrayDependencyDataService"/>
         <projectService serviceImplementation="org.jfrog.idea.xray.ScanManagerFactory"/>
         <projectService serviceInterface="org.jfrog.idea.ui.xray.XrayToolWindow"
                         serviceImplementation="org.jfrog.idea.ui.xray.XrayToolWindow"/>

@@ -8,10 +8,10 @@ import java.util.List;
  */
 public interface Artifact extends Serializable {
 
-    public General getGeneral();
+    General getGeneral();
 
-    public List<? extends Issue> getIssues();
+    List<? extends Issue> getIssues();
 
-    public List<? extends License> getLicenses();
+    List<? extends License> getLicenses();
 }
 
