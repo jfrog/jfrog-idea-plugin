@@ -96,6 +96,8 @@ public class XrayToolWindow implements Disposable {
         ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
         Content issuesContent = contentFactory.createContent(createIssuesViewTab(), "Issues", false);
         Content licenseContent = contentFactory.createContent(createLicenseInfoTab(), "Licenses Info", false);
+        issuesContent.setCloseable(false);
+        licenseContent.setCloseable(false);
         populateTrees();
         contentManager.addContent(issuesContent);
         contentManager.addContent(licenseContent);
