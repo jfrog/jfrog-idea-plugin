@@ -43,10 +43,11 @@ public class MavenScanManager extends ScanManager {
     @Override
     protected Components collectComponentsToScan(@Nullable DataNode<ProjectData> externalProject) {
         Components components = ComponentsFactory.create();
-        Set<String> seen = Sets.newHashSet();
+        // This set is used to make sure the artifacts added are unique
+        Set<String> added = Sets.newHashSet();
         for (MavenProject mavenProject : MavenProjectsManager.getInstance(project).getProjects()) {
             for (MavenArtifactNode mavenArtifactNode : mavenProject.getDependencyTree()) {
-                if (seen.add(mavenArtifactNode.getArtifact().getDisplayStringSimple())) {
+                if (added.add(mavenArtifactNode.getArtifact().getDisplayStringForLibraryName())) {
                     addArtifact(components, mavenArtifactNode.getArtifact());
                     for (MavenArtifactNode artifactNode : mavenArtifactNode.getDependencies()) {
                         addArtifact(components, artifactNode.getArtifact());
@@ -65,9 +66,13 @@ public class MavenScanManager extends ScanManager {
     protected TreeModel updateResultsTree(TreeModel currentScanResults) {
         ScanTreeNode rootNode = new ScanTreeNode(ROOT_NODE_HEADER);
         TreeModel issuesTree = new DefaultTreeModel(rootNode);
+        // This set is used to make sure the artifacts added are unique
+        Set<String> added = Sets.newHashSet();
         for (MavenProject mavenProject : MavenProjectsManager.getInstance(project).getProjects()) {
             for (MavenArtifactNode dependencyTree : mavenProject.getDependencyTree()) {
-                updateChildrenNodes(rootNode, dependencyTree);
+                if (added.add(dependencyTree.getArtifact().getDisplayStringForLibraryName())) {
+                    updateChildrenNodes(rootNode, dependencyTree);
+                }
             }
         }
         return issuesTree;
