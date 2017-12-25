@@ -1,0 +1,11 @@
+{
+  "name": "application-name1",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app"
+  },
+  "dependencies": {
+    "debug": "3.1.0"
+  }
+}

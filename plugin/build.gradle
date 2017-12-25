@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
     }
 }
 
@@ -14,15 +14,12 @@ apply plugin: 'java'
 
 intellij {
     version 'IC-2016.2'
-    // IntelliJ IDEA 2016.3 dependency; for a full list of IntelliJ IDEA releases please see https://www.jetbrains.com/intellij-repository/releases
-    plugins 'coverage' //Bundled plugin dependencies
     plugins 'gradle', 'maven'
     pluginName 'JFrog'
     updateSinceUntilBuild = false
 }
 
 repositories {
-    maven { url "https://oss.jfrog.org/jfrog-dependencies" }
     jcenter()
     mavenLocal()
 }
@@ -30,9 +27,25 @@ repositories {
 dependencies {
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
     compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1'
-    compile 'com.google.code.findbugs:jsr305:2.0.2'
-    compile 'org.jfrog.xray.client:xray-client-java-api:0.1.1'
-    compile 'org.jfrog.xray.client:xray-client-java-service:0.1.1'
+    compile group: 'org.jfrog.xray.client', name: 'xray-client-java-api', version :'0.1.1-SNAPSHOT'
+    compile group: 'org.jfrog.xray.client', name: 'xray-client-java-service', version: '0.1.1-SNAPSHOT'
+    testCompile group: 'org.testng', name: 'testng', version: '6.13.1'
 }
+
+test {
+    useTestNG()
+    testLogging {
+        exceptionFormat "full"
+        events "started", "passed", "skipped", "failed", "standardOut", "standardError"
+        minGranularity 0
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Version': currentVersion
+    }
+}
+
 group 'org.jfrog'
 version currentVersion // Plugin version

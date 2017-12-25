@@ -3,6 +3,8 @@ package org.jfrog.idea.xray.persistency.types;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 /**
  * Created by romang on 4/12/17.
  */
@@ -55,35 +57,29 @@ public class Issue implements Comparable<Issue> {
     }
 
     @Override
-    public int compareTo(@NotNull Issue issue) {
-        return Integer.compare(hashCode(), issue.hashCode());
+    public int compareTo(@NotNull Issue otherIssue) {
+        return Integer.compare(hashCode(), Objects.hashCode(otherIssue));
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object other) {
+        if (this == other) {
             return true;
         }
-        if (getClass() != o.getClass()) {
+        if (other == null || getClass() != other.getClass()) {
             return false;
         }
-        Issue issue = (Issue) o;
-        String component = this.component != null ? this.component : "";
-        String summary = this.summary != null ? this.summary : "";
-        String description = this.description != null ? this.description : "";
+        Issue otherIssue = (Issue) other;
         if (StringUtils.isEmpty(component)) {
-            return description.equals(issue.description) && summary.equals(issue.summary);
+            return StringUtils.equals(description, otherIssue.description) && StringUtils.equals(summary, otherIssue.summary);
         }
-        return component.equals(issue.component) && summary.equals(issue.summary);
+        return StringUtils.equals(component, otherIssue.component) && StringUtils.equals(summary, otherIssue.summary);
     }
 
     @Override
     public int hashCode() {
-        String component = this.component != null ? this.component : "";
-        String summary = this.summary != null ? this.summary : "";
-        String description = this.description != null ? this.description : "";
-        int result = summary.hashCode();
-        result += StringUtils.isEmpty(component) ? description.hashCode() : component.hashCode();
+        int result = Objects.hashCode(summary);
+        result += StringUtils.isEmpty(component) ? Objects.hashCode(description) : Objects.hashCode(component);
         return result * 31;
     }
 }

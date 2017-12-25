@@ -1,5 +1,6 @@
 package org.jfrog.idea.xray.scan;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.diagnostic.Logger;
@@ -16,6 +17,7 @@ import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.impl.ComponentsFactory;
 import com.jfrog.xray.client.impl.XrayClient;
+import com.jfrog.xray.client.impl.services.summary.ComponentDetailImpl;
 import com.jfrog.xray.client.services.summary.ComponentDetail;
 import com.jfrog.xray.client.services.summary.Components;
 import com.jfrog.xray.client.services.summary.SummaryResponse;
@@ -38,14 +40,8 @@ import javax.swing.table.TableModel;
 import javax.swing.tree.TreeModel;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.jfrog.idea.xray.utils.Utils.MINIMAL_XRAY_VERSION_SUPPORTED;
-import static org.jfrog.idea.xray.utils.Utils.MINIMAL_XRAY_VERSION_UNSUPPORTED;
 
 /**
  * Created by romang on 4/26/17.
@@ -56,12 +52,15 @@ public abstract class ScanManager {
     static final String GAV_PREFIX = "gav://";
     private final static int NUMBER_OF_ARTIFACTS_BULK_SCAN = 100;
 
-    final Project project;
+    Project project;
     private TreeModel scanResults;
     static final Logger logger = Logger.getInstance(ScanManager.class);
 
     // Lock to prevent multiple simultaneous scans
     private AtomicBoolean scanInProgress = new AtomicBoolean(false);
+
+    ScanManager() {
+    }
 
     ScanManager(Project project) {
         this.project = project;
@@ -94,6 +93,21 @@ public abstract class ScanManager {
             scanTreeNode.setLicenses(Sets.newHashSet(scanArtifact.licenses));
             scanTreeNode.setGeneralInfo(scanArtifact.general);
         }
+    }
+
+    void scanTree(ScanTreeNode rootNode) {
+        rootNode.getChildren().forEach(child -> {
+            populateScanTreeNode(child);
+            scanTree(child);
+        });
+    }
+
+    void addAllArtifacts(Components components, ScanTreeNode rootNode, String prefix) {
+        rootNode.getChildren().forEach(child -> {
+            ComponentDetailImpl scanComponent = (ComponentDetailImpl) child.getUserObject();
+            components.addComponent(prefix + scanComponent.getComponentId(), scanComponent.getSha1());
+            addAllArtifacts(components, child, prefix);
+        });
     }
 
     /**
@@ -151,12 +165,16 @@ public abstract class ScanManager {
         return new ExternalProjectRefreshCallback() {
             @Override
             public void onSuccess(@Nullable DataNode<ProjectData> externalProject) {
-                Components components = collectComponentsToScan(externalProject);
-                scanAndCacheArtifacs(components, quickScan, indicator);
-                scanResults = updateResultsTree(scanResults);
-                setUiLicenses();
-                MessageBus messageBus = project.getMessageBus();
-                messageBus.syncPublisher(Events.ON_SCAN_COMPONENTS_CHANGE).update();
+                try {
+                    Components components = collectComponentsToScan(externalProject);
+                    scanAndCacheArtifacts(components, quickScan, indicator);
+                    scanResults = updateResultsTree(scanResults);
+                    setUiLicenses();
+                    MessageBus messageBus = project.getMessageBus();
+                    messageBus.syncPublisher(Events.ON_SCAN_COMPONENTS_CHANGE).update();
+                } catch (Exception e) {
+                    Utils.notify(logger, "JFrog Xray scan failed: " + e.getMessage(), Arrays.toString(e.getStackTrace()), NotificationType.ERROR);
+                }
             }
 
             @Override
@@ -238,7 +256,7 @@ public abstract class ScanManager {
      * @param quickScan  quick or full scan.
      * @param indicator  UI indicator.
      */
-    private void scanAndCacheArtifacs(Components components, boolean quickScan, ProgressIndicator indicator) {
+    private void scanAndCacheArtifacts(Components components, boolean quickScan, ProgressIndicator indicator) {
         if (components == null) {
             return;
         }
@@ -266,7 +284,7 @@ public abstract class ScanManager {
 
         try {
             int currentIndex = 0;
-            List<ComponentDetail> componentsList = componentsToScan.getComponentDetails();
+            List<ComponentDetail> componentsList = Lists.newArrayList(componentsToScan.getComponentDetails());
             while (currentIndex + NUMBER_OF_ARTIFACTS_BULK_SCAN < componentsList.size()) {
                 if (indicator.isCanceled()) {
                     logger.info("Xray scan was canceled");
@@ -274,14 +292,14 @@ public abstract class ScanManager {
                 }
 
                 List<ComponentDetail> partialComponentsDetails = componentsList.subList(currentIndex, currentIndex + NUMBER_OF_ARTIFACTS_BULK_SCAN);
-                Components partialComponents = ComponentsFactory.create(partialComponentsDetails);
+                Components partialComponents = ComponentsFactory.create(Sets.newHashSet(partialComponentsDetails));
                 scanComponents(xray, partialComponents);
                 indicator.setFraction(((double) currentIndex + 1) / (double) componentsList.size());
                 currentIndex += NUMBER_OF_ARTIFACTS_BULK_SCAN;
             }
 
             List<ComponentDetail> partialComponentsDetails = componentsList.subList(currentIndex, componentsList.size());
-            Components partialComponents = ComponentsFactory.create(partialComponentsDetails);
+            Components partialComponents = ComponentsFactory.create(Sets.newHashSet(partialComponentsDetails));
             scanComponents(xray, partialComponents);
             indicator.setFraction(1);
         } catch (IOException e) {
@@ -294,7 +312,7 @@ public abstract class ScanManager {
             if (Utils.isXrayVersionSupported(xray.system().version())) {
                 return true;
             }
-            Utils.notify(logger, "Unsupported JFrog Xray version", "Required JFrog Xray version at least " + MINIMAL_XRAY_VERSION_SUPPORTED + " and below " + MINIMAL_XRAY_VERSION_UNSUPPORTED, NotificationType.ERROR);
+            Utils.notify(logger, "Unsupported JFrog Xray version", "Required JFrog Xray version at least " + Utils.MINIMAL_XRAY_VERSION_SUPPORTED + " and below " + Utils.MINIMAL_XRAY_VERSION_UNSUPPORTED, NotificationType.ERROR);
         } catch (IOException e) {
             Utils.notify(logger, "JFrog Xray scan failed", e.getMessage(), NotificationType.ERROR);
         }
@@ -313,5 +331,9 @@ public abstract class ScanManager {
             scanCache.updateArtifact(componentId, summaryArtifact);
             scanCache.setLastUpdated(componentId);
         }
+    }
+
+    static String getProjectBasePath(Project project) {
+        return project.getBasePath() != null ? project.getBasePath() : "./";
     }
 }

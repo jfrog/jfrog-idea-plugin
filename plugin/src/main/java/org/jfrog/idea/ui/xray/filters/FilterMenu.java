@@ -5,6 +5,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBPopupMenu;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -24,10 +25,10 @@ public class FilterMenu<FilterType> extends JBPopupMenu {
      * Add all menu's components in 3 steps: Clean, set listeners and add the required components.
      * @param selectionMap map between FilterType and boolean that represents whether the filter is checked or not
      */
-    void addComponents(@NotNull Map<FilterType, Boolean> selectionMap) {
+    void addComponents(@NotNull Map<FilterType, Boolean> selectionMap, boolean putUnknownLast) {
         removeOldComponents();
         setListeners(selectionMap);
-        addCheckboxes();
+        addCheckboxes(putUnknownLast);
     }
 
     private void removeOldComponents() {
@@ -41,8 +42,14 @@ public class FilterMenu<FilterType> extends JBPopupMenu {
         selectAllCheckbox.setListeners(project, selectionMap, checkBoxMenuItems);
     }
 
-    private void addCheckboxes() {
+    private void addCheckboxes(boolean putUnknownLast) {
         add(selectAllCheckbox);
-        checkBoxMenuItems.forEach(this::add);
+        if (putUnknownLast) {
+            checkBoxMenuItems.stream()
+                    .sorted(Comparator.comparing(item -> "Unknown".equals(item.getText()) ? 1 : -1))
+                    .forEach(this::add);
+        } else {
+            checkBoxMenuItems.forEach(this::add);
+        }
     }
 }

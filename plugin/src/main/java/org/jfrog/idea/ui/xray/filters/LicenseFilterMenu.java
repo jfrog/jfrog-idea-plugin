@@ -25,6 +25,6 @@ public class LicenseFilterMenu extends FilterMenu<License> {
                 selectedLicenses.put(license, true);
             }
         });
-        addComponents(selectedLicenses);
+        addComponents(selectedLicenses, true);
     }
 }

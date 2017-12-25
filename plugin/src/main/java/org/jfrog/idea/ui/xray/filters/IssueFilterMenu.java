@@ -18,6 +18,6 @@ public class IssueFilterMenu extends FilterMenu<Severity> {
         for (Severity severity : Severity.values()) {
             severitiesFilters.put(severity, true);
         }
-        addComponents(severitiesFilters);
+        addComponents(severitiesFilters, false);
     }
 }

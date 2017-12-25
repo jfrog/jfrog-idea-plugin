@@ -13,7 +13,7 @@ public class Artifact implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public GeneralInfo general;
+    public GeneralInfo general = new GeneralInfo();
     public Set<Issue> issues = Sets.newHashSet();
     public Set<License> licenses = Sets.newHashSet();
 

@@ -14,6 +14,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 /**
  * Created by romang on 5/8/17.
@@ -79,6 +80,25 @@ public class Utils {
                 sb.append(Integer.toString((mdByte & 0xff) + 0x100, 16).substring(1));
             }
             return sb.toString();
+        }
+    }
+
+    private static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().contains("win");
+    }
+
+    private static boolean isMac() {
+        return System.getProperty("os.name").toLowerCase().contains("mac");
+    }
+
+    public static Process exeCommand(List<String> args) throws IOException {
+        String strArgs = String.join(" ", args);
+        if (isWindows()) {
+            return Runtime.getRuntime().exec(new String[]{"cmd", "/c" ,strArgs});
+        } else if (isMac()) {
+            return Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c" ,strArgs}, new String[]{"PATH=$PATH:/usr/local/bin"});
+        } else {
+            return Runtime.getRuntime().exec(args.toArray(new String[0]));
         }
     }
 }

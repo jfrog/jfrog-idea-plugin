@@ -32,6 +32,8 @@ import static org.jfrog.idea.xray.utils.Utils.MINIMAL_XRAY_VERSION_UNSUPPORTED;
  */
 public class XrayGlobalConfiguration implements Configurable, Configurable.NoScroll {
 
+    private static final String USER_AGENT = "jfrog-idea-plugin/" + XrayGlobalConfiguration.class.getPackage().getImplementationVersion();
+
     private JPanel config;
     private JBTextField url;
     private JBTextField username;
@@ -47,7 +49,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
                 config.validate();
                 config.repaint();
                 // use as a workaround to version not being username password validated
-                Xray xrayClient = XrayClient.create(StringUtil.trim(url.getText()), StringUtil.trim(username.getText()), String.valueOf(password.getPassword()));
+                Xray xrayClient = XrayClient.create(StringUtil.trim(url.getText()), StringUtil.trim(username.getText()), String.valueOf(password.getPassword()), USER_AGENT);
                 Version xrayVersion = xrayClient.system().version();
 
                 if (!Utils.isXrayVersionSupported(xrayVersion)) {

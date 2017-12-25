@@ -2,11 +2,11 @@ package com.jfrog.xray.client.impl.services.summary;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.Sets;
 import com.jfrog.xray.client.services.summary.ComponentDetail;
 import com.jfrog.xray.client.services.summary.Components;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -16,25 +16,25 @@ import java.util.List;
 public class ComponentsImpl implements Components {
 
     @JsonProperty("component_details")
-    private List<ComponentDetail> componentDetails;
+    private Set<ComponentDetail> componentDetails;
 
     public ComponentsImpl() {
-        componentDetails = new ArrayList<>();
+        componentDetails = Sets.newHashSet();
     }
 
-    public ComponentsImpl(List<ComponentDetail> componentDetails) {
+    public ComponentsImpl(Set<ComponentDetail> componentDetails) {
         this.componentDetails = componentDetails;
     }
 
     @JsonProperty("component_details")
     @Override
-    public List<ComponentDetail> getComponentDetails() {
+    public Set<ComponentDetail> getComponentDetails() {
         return componentDetails;
     }
 
     @JsonProperty("component_details")
     @Override
-    public void setComponentDetails(List<ComponentDetail> componentDetails) {
+    public void setComponentDetails(Set<ComponentDetail> componentDetails) {
         this.componentDetails = componentDetails;
     }
 

@@ -10,6 +10,7 @@ import org.jfrog.idea.configuration.GlobalSettings;
 import org.jfrog.idea.xray.ScanManagerFactory;
 import org.jfrog.idea.xray.scan.GradleScanManager;
 import org.jfrog.idea.xray.scan.MavenScanManager;
+import org.jfrog.idea.xray.scan.NpmScanManager;
 import org.jfrog.idea.xray.scan.ScanManager;
 
 public class XrayToolWindowFactory implements ToolWindowFactory {
@@ -25,6 +26,8 @@ public class XrayToolWindowFactory implements ToolWindowFactory {
     }
 
     private boolean isSupported(Project project) {
-        return MavenScanManager.isApplicable(project) || GradleScanManager.isApplicable(project);
+        return MavenScanManager.isApplicable(project) ||
+                GradleScanManager.isApplicable(project) ||
+                NpmScanManager.isApplicable(project);
     }
 }

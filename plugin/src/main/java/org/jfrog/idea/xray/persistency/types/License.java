@@ -1,9 +1,11 @@
 package org.jfrog.idea.xray.persistency.types;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by romang on 4/12/17.
@@ -25,30 +27,33 @@ public class License implements Comparable<License> {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object other) {
+        if (this == other) {
             return true;
         }
-        if (getClass() != o.getClass()) {
+        if (other == null || getClass() != other.getClass()) {
             return false;
         }
-        License license = (License) o;
-        return fullName.equals(license.fullName) && name.equals(license.name);
+        License otherLicense = (License) other;
+        return StringUtils.equals(fullName, otherLicense.fullName) && StringUtils.equals(name, otherLicense.name);
     }
 
     @Override
     public int hashCode() {
-        int result = fullName != null ? fullName.hashCode() : 0;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        return result;
+        int result = Objects.hashCode(fullName);
+        result += Objects.hashCode(name);
+        return result * 31;
     }
 
     @Override
-    public int compareTo(@NotNull License o) {
-        if (this == o) {
+    public int compareTo(@NotNull License otherLicense) {
+        if (this == otherLicense) {
             return 0;
         }
-        return name.compareTo(o.name) != 0 ? name.compareTo(o.name) : fullName.compareTo(o.fullName);
+        if (otherLicense == null) {
+            return 1;
+        }
+        return StringUtils.equals(name, otherLicense.name) ? StringUtils.compare(fullName, otherLicense.fullName) : StringUtils.compare(name, otherLicense.name);
     }
 
     @Override

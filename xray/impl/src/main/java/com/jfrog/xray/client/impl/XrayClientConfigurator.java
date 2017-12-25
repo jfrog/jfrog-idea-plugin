@@ -12,5 +12,8 @@ public class XrayClientConfigurator extends HttpClientConfiguratorBase {
         // Preemptive authorization interceptor
         builder.addInterceptorFirst(new PreemptiveAuthInterceptor());
     }
-}
 
+    public void setUserAgent(String userAgent) {
+        builder.setUserAgent(userAgent);
+    }
+}

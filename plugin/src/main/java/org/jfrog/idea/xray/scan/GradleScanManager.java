@@ -24,7 +24,6 @@ import org.jfrog.idea.xray.ScanTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -53,7 +52,7 @@ public class GradleScanManager extends ScanManager {
             this.libraryDependencies = libraryDependencies;
         }
         if (this.libraryDependencies == null) {
-            ExternalSystemUtil.refreshProject(project, GradleConstants.SYSTEM_ID, Objects.requireNonNull(project.getBasePath()), cbk, false, ProgressExecutionMode.IN_BACKGROUND_ASYNC);
+            ExternalSystemUtil.refreshProject(project, GradleConstants.SYSTEM_ID, getProjectBasePath(project), cbk, false, ProgressExecutionMode.IN_BACKGROUND_ASYNC);
         } else {
             cbk.onSuccess(null);
         }
@@ -70,7 +69,7 @@ public class GradleScanManager extends ScanManager {
                 .filter(GradleScanManager::isRootDependency)
                 .filter(distinctByName(dataNode -> dataNode.getData().getExternalName()))
                 .forEach(dataNode -> populateDependenciesTree(rootNode, dataNode));
-        addAllArtifacts(components, rootNode);
+        addAllArtifacts(components, rootNode, GAV_PREFIX);
         return components;
     }
 
@@ -113,21 +112,6 @@ public class GradleScanManager extends ScanManager {
             populateDependenciesTree(treeNode, child);
         }
         scanTreeNode.add(treeNode);
-    }
-
-    private void addAllArtifacts(Components components, ScanTreeNode rootNode) {
-        rootNode.getChildren().forEach(child -> {
-            ComponentDetailImpl scanComponent = (ComponentDetailImpl) child.getUserObject();
-            components.addComponent(GAV_PREFIX + scanComponent.getComponentId(), scanComponent.getSha1());
-            addAllArtifacts(components, child);
-        });
-    }
-
-    private void scanTree(ScanTreeNode rootNode) {
-        rootNode.getChildren().forEach(child -> {
-            populateScanTreeNode(child);
-            scanTree(child);
-        });
     }
 
     // Currently, this method always return an empty string, since the checksum is not sent to Xray.

@@ -51,10 +51,24 @@ public class DetailsViewFactory extends JBPanel {
         }
         JPanel gridPanel = new JBPanel(new GridBagLayout());
         gridPanel.setBackground(UIUtil.getTableBackground());
-        addJtext(gridPanel, 0, "Group:", node.getGeneralInfo().getGroupId());
-        addJtext(gridPanel, 1, "Artifact:", node.getGeneralInfo().getArtifactId());
-        addJtext(gridPanel, 2, "Version:", node.getGeneralInfo().getVersion());
-        addJtext(gridPanel, 3, "Type:", StringUtils.capitalize(node.getGeneralInfo().pkgType));
+        String pkgType = StringUtils.capitalize(node.getGeneralInfo().pkgType);
+        if (StringUtils.isBlank(pkgType)) {
+            // No package type
+            addJtext(gridPanel, 0, "Group:", node.getGeneralInfo().getGroupId());
+            addJtext(gridPanel, 1, "Artifact:", node.getGeneralInfo().getArtifactId());
+            addJtext(gridPanel, 2, "Version:", node.getGeneralInfo().getVersion());
+        } else if (pkgType.equals("Npm")) {
+            // Npm
+            addJtext(gridPanel, 0, "Package:", node.getGeneralInfo().getGroupId());
+            addJtext(gridPanel, 1, "Version:", node.getGeneralInfo().getVersion());
+            addJtext(gridPanel, 2, "Type:", pkgType);
+        } else {
+            // Maven/Gradle
+            addJtext(gridPanel, 0, "Group:", node.getGeneralInfo().getGroupId());
+            addJtext(gridPanel, 1, "Artifact:", node.getGeneralInfo().getArtifactId());
+            addJtext(gridPanel, 2, "Version:", node.getGeneralInfo().getVersion());
+            addJtext(gridPanel, 3, "Type:", StringUtils.capitalize(node.getGeneralInfo().pkgType));
+        }
         addLicenses(gridPanel, node.getLicenses());
         return gridPanel;
     }
