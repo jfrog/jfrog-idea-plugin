@@ -39,6 +39,9 @@ test {
         events "started", "passed", "skipped", "failed", "standardOut", "standardError"
         minGranularity 0
     }
+    if (project.hasProperty('excludeTests')) {
+        exclude project.property('excludeTests')
+    }
 }
 
 jar {
