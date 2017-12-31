@@ -13,6 +13,7 @@ import com.intellij.openapi.vfs.VirtualFileManager;
 import com.jfrog.xray.client.impl.ComponentsFactory;
 import com.jfrog.xray.client.impl.services.summary.ComponentDetailImpl;
 import com.jfrog.xray.client.services.summary.Components;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfrog.idea.xray.ScanTreeNode;
@@ -106,11 +107,7 @@ public class NpmScanManager extends ScanManager {
                     dependencies.fields().forEachRemaining(stringJsonNodeEntry -> {
                         String componentId = getComponentId(stringJsonNodeEntry);
                         if (added.add(componentId)) {
-                            ComponentDetailImpl scanComponent = new ComponentDetailImpl(componentId, "");
-                            ScanTreeNode childTreeNode = new ScanTreeNode(scanComponent);
-                            JsonNode childDependencies = stringJsonNodeEntry.getValue().get("dependencies");
-                            populateDependenciesTree(childTreeNode, childDependencies);
-                            rootNode.add(childTreeNode);
+                            addSubtree(stringJsonNodeEntry, rootNode, componentId); // Populate the tree recursively
                         }
                     });
                 }
@@ -134,24 +131,31 @@ public class NpmScanManager extends ScanManager {
         return new DefaultTreeModel(rootNode, false);
     }
 
+    private void addSubtree(Map.Entry<String, JsonNode> stringJsonNodeEntry, ScanTreeNode node, String componentId) {
+        if (StringUtils.isBlank(componentId)) {
+            return;
+        }
+        ComponentDetailImpl scanComponent = new ComponentDetailImpl(componentId, "");
+        ScanTreeNode childTreeNode = new ScanTreeNode(scanComponent);
+        JsonNode childDependencies = stringJsonNodeEntry.getValue().get("dependencies");
+        populateDependenciesTree(childTreeNode, childDependencies); // Mutual recursive call
+        node.add(childTreeNode);
+    }
+
     private void populateDependenciesTree(ScanTreeNode scanTreeNode, @Nullable JsonNode dependencies) {
         if (dependencies == null) {
             return;
         }
         dependencies.fields().forEachRemaining(stringJsonNodeEntry -> {
             String componentId = getComponentId(stringJsonNodeEntry);
-            ComponentDetailImpl scanComponent = new ComponentDetailImpl(componentId, "");
-            ScanTreeNode childTreeNode = new ScanTreeNode(scanComponent);
-            JsonNode childDependencies = stringJsonNodeEntry.getValue().get("dependencies");
-            populateDependenciesTree(childTreeNode, childDependencies);
-            scanTreeNode.add(childTreeNode);
+            addSubtree(stringJsonNodeEntry, scanTreeNode, componentId); // Mutual recursive call
         });
     }
 
     private String getComponentId(Map.Entry<String, JsonNode> stringJsonNodeEntry) {
         String artifactId = stringJsonNodeEntry.getKey();
-        String version = stringJsonNodeEntry.getValue().get("version").textValue();
-        return artifactId + ":" + version;
+        JsonNode version = stringJsonNodeEntry.getValue().get("version");
+        return version == null ? "" : artifactId + ":" + version.textValue();
     }
 
     /**
