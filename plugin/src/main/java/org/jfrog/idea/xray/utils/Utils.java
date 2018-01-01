@@ -14,6 +14,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -28,17 +29,30 @@ public class Utils {
         return version.isAtLeast(MINIMAL_XRAY_VERSION_SUPPORTED) && !version.isAtLeast(MINIMAL_XRAY_VERSION_UNSUPPORTED);
     }
 
-    public static void notify(Logger logger, String title, String details, NotificationType level) {
-        Notifications.Bus.notify(new Notification("JFrog", title, details, level));
+    public static void notify(Logger logger, String title, String details, NotificationType level, boolean makeToast) {
+        if (makeToast) {
+            Notifications.Bus.notify(new Notification("JFrog", title, details, level));
+        }
+        log(logger, title, details, level);
+    }
+
+    public static void notify(Logger logger, String title, Exception exception, NotificationType level, boolean makeToast) {
+        if (makeToast) {
+            Notifications.Bus.notify(new Notification("JFrog", title, exception.getMessage(), level));
+        }
+        log(logger, exception.getMessage(), Arrays.toString(exception.getStackTrace()), level);
+    }
+
+    private static void log(Logger logger, String title, String details, NotificationType level) {
         switch (level) {
             case ERROR:
                 logger.error(title, details);
                 break;
             case WARNING:
-                logger.warn(title + ": " + details);
+                logger.warn(title + "\n" + details);
                 break;
             default:
-                logger.info(title + ": " + details);
+                logger.info(title + "\n" + details);
         }
     }
 

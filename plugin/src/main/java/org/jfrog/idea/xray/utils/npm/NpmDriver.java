@@ -34,7 +34,7 @@ public class NpmDriver {
                     if (StringUtils.isBlank(errMsg)) {
                         errMsg = writer.toString();
                     }
-                    throw new IOException("'" + String.join(" ", args) + "' command failed with error code " + errCode + ": " + errMsg);
+                    throw new IOException("'" + String.join(" ", args) + "' command failed with error code " + errCode, new Throwable(errMsg));
                 }
                 return writer.toString();
             }

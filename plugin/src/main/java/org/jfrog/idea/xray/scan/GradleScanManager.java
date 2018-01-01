@@ -1,12 +1,15 @@
 package org.jfrog.idea.xray.scan;
 
 import com.google.common.collect.Sets;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.ProjectKeys;
 import com.intellij.openapi.externalSystem.model.project.AbstractDependencyData;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
 import com.intellij.openapi.externalSystem.model.project.ProjectData;
+import com.intellij.openapi.externalSystem.model.task.ExternalSystemTaskType;
 import com.intellij.openapi.externalSystem.service.execution.ProgressExecutionMode;
+import com.intellij.openapi.externalSystem.service.internal.ExternalSystemProcessingManager;
 import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefreshCallback;
 import com.intellij.openapi.externalSystem.util.ExternalSystemApiUtil;
 import com.intellij.openapi.externalSystem.util.ExternalSystemUtil;
@@ -50,12 +53,19 @@ public class GradleScanManager extends ScanManager {
         if (libraryDependencies != null) {
             // Change the dependencies only if there are new dependencies
             this.libraryDependencies = libraryDependencies;
-        }
-        if (this.libraryDependencies == null) {
-            ExternalSystemUtil.refreshProject(project, GradleConstants.SYSTEM_ID, getProjectBasePath(project), cbk, false, ProgressExecutionMode.IN_BACKGROUND_ASYNC);
-        } else {
             cbk.onSuccess(null);
+            return;
         }
+        if (this.libraryDependencies != null) {
+            cbk.onSuccess(null);
+            return;
+        }
+        ExternalSystemProcessingManager processingManager = ServiceManager.getService(ExternalSystemProcessingManager.class);
+        if (processingManager != null && processingManager.findTask(ExternalSystemTaskType.RESOLVE_PROJECT, GradleConstants.SYSTEM_ID, getProjectBasePath(project)) != null) {
+            // Another scan in progress
+            return;
+        }
+        ExternalSystemUtil.refreshProject(project, GradleConstants.SYSTEM_ID, getProjectBasePath(project), cbk, false, ProgressExecutionMode.IN_BACKGROUND_ASYNC);
     }
 
     @Override

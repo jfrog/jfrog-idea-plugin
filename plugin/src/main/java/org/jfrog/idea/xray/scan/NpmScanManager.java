@@ -52,7 +52,7 @@ public class NpmScanManager extends ScanManager {
             Path installationPath = Paths.get(getProjectBasePath(project), INSTALLATION_DIR);
             Files.createDirectories(installationPath);
         } catch (IOException e) {
-            Utils.notify(logger, "Failed to create installation directory", e.getMessage(), NotificationType.ERROR);
+            Utils.notify(logger, "Failed to create installation directory", e, NotificationType.ERROR, true);
         }
         FileChangeListener.Callback asyncScanCbk = getFileListenerCbk();
         VirtualFileManager.getInstance().addVirtualFileListener(new FileChangeListener(Arrays.asList(NPM_FILES), asyncScanCbk));
@@ -114,7 +114,7 @@ public class NpmScanManager extends ScanManager {
             }
             cbk.onSuccess(null);
         } catch (Exception e) {
-            cbk.onFailure(e.getMessage(), Arrays.toString(e.getStackTrace()));
+            cbk.onFailure(e.getMessage(), e.getCause().getMessage());
         }
     }
 
@@ -193,7 +193,7 @@ public class NpmScanManager extends ScanManager {
                 }
 
             } catch (IOException e) {
-                Utils.notify(logger, "Fail to delete file", e.getMessage(), NotificationType.WARNING);
+                Utils.notify(logger, "Fail to delete file", e, NotificationType.WARNING, false);
             }
 
             NpmScanManager.super.asyncScanAndUpdateResults(true);
