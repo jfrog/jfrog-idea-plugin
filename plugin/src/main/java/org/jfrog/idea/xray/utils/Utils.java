@@ -1,15 +1,12 @@
 package org.jfrog.idea.xray.utils;
 
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
+import com.intellij.notification.*;
 import com.intellij.openapi.diagnostic.Logger;
 import com.jfrog.xray.client.services.system.Version;
+import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.MessageDigest;
@@ -24,26 +21,25 @@ public class Utils {
 
     public final static String MINIMAL_XRAY_VERSION_SUPPORTED = "1.7.2.3";
     public final static String MINIMAL_XRAY_VERSION_UNSUPPORTED = "2.0";
+    private static final NotificationGroup EVENT_LOG_NOTIFIER = new NotificationGroup("JFROG_LOG", NotificationDisplayType.NONE, true);
+    private static final NotificationGroup BALLOON_NOTIFIER = new NotificationGroup("JFROG_BALLOON", NotificationDisplayType.BALLOON, false);
+    private static Notification lastNotification;
 
     public static boolean isXrayVersionSupported(Version version) {
         return version.isAtLeast(MINIMAL_XRAY_VERSION_SUPPORTED) && !version.isAtLeast(MINIMAL_XRAY_VERSION_UNSUPPORTED);
     }
 
-    public static void notify(Logger logger, String title, String details, NotificationType level, boolean makeToast) {
-        if (makeToast) {
-            Notifications.Bus.notify(new Notification("JFrog", title, details, level));
-        }
+    public static void notify(Logger logger, String title, String details, NotificationType level) {
+        popupBalloon(title, details, level);
         log(logger, title, details, level);
     }
 
-    public static void notify(Logger logger, String title, Exception exception, NotificationType level, boolean makeToast) {
-        if (makeToast) {
-            Notifications.Bus.notify(new Notification("JFrog", title, exception.getMessage(), level));
-        }
+    public static void notify(Logger logger, String title, Exception exception, NotificationType level) {
+        popupBalloon(title, exception.getMessage(), level);
         log(logger, exception.getMessage(), Arrays.toString(exception.getStackTrace()), level);
     }
 
-    private static void log(Logger logger, String title, String details, NotificationType level) {
+    public static void log(Logger logger, String title, String details, NotificationType level) {
         switch (level) {
             case ERROR:
                 logger.error(title, details);
@@ -54,6 +50,16 @@ public class Utils {
             default:
                 logger.info(title + "\n" + details);
         }
+        Notifications.Bus.notify(EVENT_LOG_NOTIFIER.createNotification(title, details, level, null));
+    }
+
+    private static void popupBalloon(String title, String details, NotificationType level) {
+        if (lastNotification != null) {
+            lastNotification.hideBalloon();
+        }
+        Notification notification = BALLOON_NOTIFIER.createNotification(title, details, level, null);
+        lastNotification = notification;
+        Notifications.Bus.notify(notification);
     }
 
     /**
@@ -113,6 +119,13 @@ public class Utils {
             return Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c" ,strArgs}, new String[]{"PATH=$PATH:/usr/local/bin"});
         } else {
             return Runtime.getRuntime().exec(args.toArray(new String[0]));
+        }
+    }
+
+    public static String readStream(InputStream stream) throws IOException {
+        try (StringWriter writer = new StringWriter()){
+            IOUtils.copy(stream, writer, "UTF-8");
+            return writer.toString();
         }
     }
 }

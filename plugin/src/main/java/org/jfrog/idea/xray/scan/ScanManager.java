@@ -119,13 +119,13 @@ public abstract class ScanManager {
     private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies) {
         // Don't scan if Xray is not configured
         if (!GlobalSettings.getInstance().isCredentialsSet()) {
-            Utils.notify(logger, "JFrog Xray scan failed", "Xray server is not configured.", NotificationType.ERROR, true);
+            Utils.notify(logger, "JFrog Xray scan failed", "Xray server is not configured.", NotificationType.ERROR);
             return;
         }
         // Prevent multiple simultaneous scans
         if (!scanInProgress.compareAndSet(false, true)) {
             if (!quickScan) {
-                Utils.notify(logger, "JFrog Xray", "Scan already in progress.", NotificationType.INFORMATION, true);
+                Utils.notify(logger, "JFrog Xray", "Scan already in progress.", NotificationType.INFORMATION);
             }
             return;
         }
@@ -176,7 +176,7 @@ public abstract class ScanManager {
                     MessageBus messageBus = project.getMessageBus();
                     messageBus.syncPublisher(Events.ON_SCAN_COMPONENTS_CHANGE).update();
                 } catch (Exception e) {
-                    Utils.notify(logger, "JFrog Xray scan failed", e, NotificationType.ERROR, true);
+                    Utils.notify(logger, "JFrog Xray scan failed", e, NotificationType.ERROR);
                 }
             }
 
@@ -190,7 +190,7 @@ public abstract class ScanManager {
                 } else {
                     details = errorMessage;
                 }
-                Utils.notify(logger, title, details, NotificationType.ERROR, true);
+                Utils.notify(logger, title, details, NotificationType.ERROR);
             }
         };
     }
@@ -313,7 +313,7 @@ public abstract class ScanManager {
             scanComponents(xray, partialComponents);
             indicator.setFraction(1);
         } catch (IOException e) {
-            Utils.notify(logger, "JFrog Xray scan failed", e, NotificationType.ERROR, true);
+            Utils.notify(logger, "JFrog Xray scan failed", e, NotificationType.ERROR);
         }
     }
 
@@ -322,9 +322,9 @@ public abstract class ScanManager {
             if (Utils.isXrayVersionSupported(xray.system().version())) {
                 return true;
             }
-            Utils.notify(logger, "Unsupported JFrog Xray version", "Required JFrog Xray version at least " + Utils.MINIMAL_XRAY_VERSION_SUPPORTED + " and below " + Utils.MINIMAL_XRAY_VERSION_UNSUPPORTED, NotificationType.ERROR, true);
+            Utils.notify(logger, "Unsupported JFrog Xray version", "Required JFrog Xray version at least " + Utils.MINIMAL_XRAY_VERSION_SUPPORTED + " and below " + Utils.MINIMAL_XRAY_VERSION_UNSUPPORTED, NotificationType.ERROR);
         } catch (IOException e) {
-            Utils.notify(logger, "JFrog Xray scan failed", e, NotificationType.ERROR, true);
+            Utils.notify(logger, "JFrog Xray scan failed", e, NotificationType.ERROR);
         }
         return false;
     }

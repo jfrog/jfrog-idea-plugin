@@ -1,9 +1,7 @@
 package org.jfrog.idea.xray.utils.npm;
 
 import com.google.common.collect.Lists;
-import com.intellij.notification.NotificationType;
 import com.intellij.openapi.diagnostic.Logger;
-import org.jfrog.idea.xray.utils.Utils;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -47,7 +45,6 @@ public class NpmPackageFileFinder implements FileVisitor<Path> {
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
         String fileName = file.getFileName().toString();
         if (isYarn(fileName)) {
-            Utils.notify(logger, "JFrog Xray", "Yarn is not supported", NotificationType.INFORMATION, true);
             throw new IOException("Yarn is not supported");
         }
         if (isPackageFile(fileName)) {

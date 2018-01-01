@@ -1,43 +1,38 @@
 package org.jfrog.idea.xray.utils.npm;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.collect.Lists;
-import org.apache.commons.io.IOUtils;
+import com.intellij.notification.NotificationType;
+import com.intellij.openapi.diagnostic.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.idea.xray.utils.Utils;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.List;
+
+import static org.jfrog.idea.xray.utils.Utils.readStream;
 
 /**
  * Created by Yahav Itzhak on 17 Dec 2017.
  */
 public class NpmDriver {
 
-    private static String exeNpmCommand(List<String> args) throws InterruptedException, IOException {
+    private static final Logger logger = Logger.getInstance(NpmDriver.class);
+    private static ObjectReader jsonReader = new ObjectMapper().reader();
+
+    private static NpmCommandRes exeNpmCommand(List<String> args) throws InterruptedException, IOException {
         args.add(0, "npm");
         Process process = null;
         try {
+            NpmCommandRes npmCommandRes = new NpmCommandRes();
             process = Utils.exeCommand(args);
-            try (StringWriter writer = new StringWriter()){
-                IOUtils.copy(process.getInputStream(), writer, "UTF-8");
-                int errCode = process.waitFor();
-                if (errCode != 0) {
-                    String errMsg;
-                    try (StringWriter errWriter = new StringWriter()) {
-                        IOUtils.copy(process.getErrorStream(), errWriter, "UTF-8");
-                        errMsg = errWriter.toString();
-                    }
-                    if (StringUtils.isBlank(errMsg)) {
-                        errMsg = writer.toString();
-                    }
-                    throw new IOException("'" + String.join(" ", args) + "' command failed with error code " + errCode, new Throwable(errMsg));
-                }
-                return writer.toString();
+            npmCommandRes.res = readStream(process.getInputStream());
+            if (process.waitFor() != 0) {
+                npmCommandRes.err = readStream(process.getErrorStream());
             }
+            return npmCommandRes;
         } finally {
             if (process != null) {
                 process.getInputStream().close();
@@ -47,26 +42,49 @@ public class NpmDriver {
         }
     }
 
-    public static boolean isInstalled() {
+    public static boolean isNpmInstalled() {
         List<String> args = Lists.newArrayList("version");
         try {
-            exeNpmCommand(args);
+            NpmCommandRes npmCommandRes = exeNpmCommand(args);
+            return npmCommandRes.isOk();
         } catch (IOException|InterruptedException e) {
             return false;
         }
-        return true;
     }
 
-    public void install(String appDir) throws IOException, InterruptedException {
+    public void install(String appDir) throws IOException {
         List<String> args = Lists.newArrayList("install", "--only=production", "--prefix", appDir);
-        exeNpmCommand(args);
+        try {
+            NpmCommandRes npmCommandRes = exeNpmCommand(args);
+            if (!npmCommandRes.isOk()) {
+                throw new IOException(npmCommandRes.err);
+            }
+        } catch (IOException|InterruptedException e) {
+            throw new IOException("'npm install' failed", e);
+        }
     }
 
-    public JsonNode list(String appDir) throws IOException, InterruptedException {
+    public JsonNode list(String appDir) throws IOException {
         List<String> args = Lists.newArrayList("ls", "--prefix", appDir, "--json");
-        String npmLsJson = exeNpmCommand(args);
-        JsonFactory factory = new JsonFactory();
-        ObjectMapper mapper = new ObjectMapper(factory);
-        return mapper.readTree(npmLsJson);
+        try {
+            NpmCommandRes npmCommandRes = exeNpmCommand(args);
+            JsonNode jsonNode = jsonReader.readTree(npmCommandRes.res);
+            if (!npmCommandRes.isOk()) {
+                Utils.notify(logger, "JFrog Xray", "JFrog Xray scan encountered errors. See logs for further information.", NotificationType.WARNING);
+                Utils.log(logger, "JFrog Xray", npmCommandRes.err, NotificationType.WARNING);
+            }
+            return jsonNode;
+        } catch (IOException|InterruptedException e) {
+            throw new IOException("'npm ls' failed", e);
+        }
+    }
+
+    private static class NpmCommandRes {
+        String res;
+        String err;
+
+        private boolean isOk() {
+            return StringUtils.isBlank(err);
+        }
     }
 }

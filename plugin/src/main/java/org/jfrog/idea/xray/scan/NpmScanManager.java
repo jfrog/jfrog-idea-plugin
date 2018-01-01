@@ -52,7 +52,7 @@ public class NpmScanManager extends ScanManager {
             Path installationPath = Paths.get(getProjectBasePath(project), INSTALLATION_DIR);
             Files.createDirectories(installationPath);
         } catch (IOException e) {
-            Utils.notify(logger, "Failed to create installation directory", e, NotificationType.ERROR, true);
+            Utils.notify(logger, "Failed to create installation directory", e, NotificationType.ERROR);
         }
         FileChangeListener.Callback asyncScanCbk = getFileListenerCbk();
         VirtualFileManager.getInstance().addVirtualFileListener(new FileChangeListener(Arrays.asList(NPM_FILES), asyncScanCbk));
@@ -73,7 +73,7 @@ public class NpmScanManager extends ScanManager {
 
     public static boolean isApplicable(@NotNull Project project) {
         // 1. Check that npm is installed.
-        if (!NpmDriver.isInstalled()) {
+        if (!NpmDriver.isNpmInstalled()) {
             return false;
         }
         // 2. Check for existence of package.json files.
@@ -193,7 +193,7 @@ public class NpmScanManager extends ScanManager {
                 }
 
             } catch (IOException e) {
-                Utils.notify(logger, "Fail to delete file", e, NotificationType.WARNING, false);
+                Utils.notify(logger, "Fail to delete file", e, NotificationType.WARNING);
             }
 
             NpmScanManager.super.asyncScanAndUpdateResults(true);
