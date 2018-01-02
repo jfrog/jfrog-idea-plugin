@@ -164,7 +164,7 @@ public class XrayToolWindow implements Disposable {
 
     private JPanel createUnsupportedView() {
         JLabel label = new JBLabel();
-        label.setText("Unsupported project type, currently only Maven, Gradle and Npm projects are supported.");
+        label.setText("Unsupported project type, currently only Maven, Gradle and npm projects are supported.");
 
         JBPanel panel = new JBPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();

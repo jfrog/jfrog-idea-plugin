@@ -175,6 +175,9 @@ public class NpmScanManager extends ScanManager {
      */
     private FileChangeListener.Callback getFileListenerCbk() {
         return (virtualFileEvent, fileEventType) -> {
+            if (project.isDisposed()) {
+                return;
+            }
             String projectBasePath = getProjectBasePath(project);
             Path originPath = Paths.get(virtualFileEvent.getFile().getPath());
             String relativeOriginPath = new File(projectBasePath).toURI().relativize(originPath.toUri()).getPath();
