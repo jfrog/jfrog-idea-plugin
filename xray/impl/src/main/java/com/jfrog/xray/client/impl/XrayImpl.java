@@ -6,6 +6,7 @@ import com.jfrog.xray.client.impl.services.system.SystemImpl;
 import com.jfrog.xray.client.impl.util.URIUtil;
 import com.jfrog.xray.client.services.summary.Summary;
 import com.jfrog.xray.client.services.system.System;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.*;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.Map;
 
 
@@ -105,16 +107,28 @@ public class XrayImpl implements Xray {
         StatusLine statusLine = response.getStatusLine();
         int statusCode = statusLine.getStatusCode();
         if (statusNotOk(statusCode)) {
+            String body = "";
             if (response.getEntity() != null) {
                 try {
+                    body = readStream(response.getEntity().getContent());
                     EntityUtils.consume(response.getEntity());
                 } catch (IOException e) {
                     // Ignore
                 }
             }
             String message = String.format("Received %d %s response from Xray", statusCode, statusLine);
+            if (!body.isEmpty()) {
+                message += ". " + body;
+            }
             throw new HttpResponseException(statusCode, message);
         }
         return response;
+    }
+
+    private static String readStream(InputStream stream) throws IOException {
+        try (StringWriter writer = new StringWriter()){
+            IOUtils.copy(stream, writer, "UTF-8");
+            return writer.toString();
+        }
     }
 }

@@ -31,7 +31,7 @@ public class SummaryTests extends XrayTestsBase {
     @Test
     public void testArtifactSummaryComponent() throws IOException {
         Components components = ComponentsFactory.create();
-        components.addComponent("gav://org.acegisecurity:acegi-security:1.0.5", "2132981748912741");
+        components.addComponent("gav://org.acegisecurity:acegi-security:1.0.5", "");
         SummaryResponse summary = xray.summary().component(components);
 
         assertNull(summary.getErrors());
