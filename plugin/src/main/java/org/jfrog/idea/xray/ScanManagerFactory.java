@@ -15,6 +15,10 @@ public class ScanManagerFactory {
     private ScanManager scanManager;
 
     public ScanManagerFactory(Project project) {
+        initScanManager(project);
+    }
+
+    public void initScanManager(Project project) {
         // create the proper scan manager according to the project type.
         if (MavenScanManager.isApplicable(project)) {
             scanManager = new MavenScanManager(project);

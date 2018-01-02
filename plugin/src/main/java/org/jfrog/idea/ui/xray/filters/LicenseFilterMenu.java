@@ -19,6 +19,9 @@ public class LicenseFilterMenu extends FilterMenu<License> {
 
     public void setLicenses() {
         ScanManager scanManager = ScanManagerFactory.getScanManager(project);
+        if (scanManager == null) {
+            return;
+        }
         Map<License, Boolean> selectedLicenses =  FilterManager.getInstance(project).selectedLicenses;
         scanManager.getAllLicenses().forEach(license -> {
             if (!selectedLicenses.containsKey(license)) {

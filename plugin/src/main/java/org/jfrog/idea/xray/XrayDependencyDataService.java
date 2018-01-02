@@ -1,5 +1,7 @@
 package org.jfrog.idea.xray;
 
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.Key;
 import com.intellij.openapi.externalSystem.model.ProjectKeys;
@@ -11,9 +13,11 @@ import com.intellij.openapi.externalSystem.util.ExternalSystemConstants;
 import com.intellij.openapi.externalSystem.util.Order;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.util.messages.MessageBus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.gradle.util.GradleConstants;
+import org.jfrog.idea.Events;
 import org.jfrog.idea.configuration.GlobalSettings;
 import org.jfrog.idea.xray.scan.ScanManager;
 
@@ -48,6 +52,16 @@ public class XrayDependencyDataService extends AbstractProjectDataService<Librar
         }
 
         ScanManager scanManager = ScanManagerFactory.getScanManager(project);
+        if (scanManager == null) {
+            ScanManagerFactory scanManagerFactory = ServiceManager.getService(project, ScanManagerFactory.class);
+            scanManagerFactory.initScanManager(project);
+            scanManager = ScanManagerFactory.getScanManager(project);
+            if (scanManager == null) {
+                return;
+            }
+            MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
+            messageBus.syncPublisher(Events.ON_IDEA_FRAMEWORK_CHANGE).update();
+        }
         if (GlobalSettings.getInstance().isCredentialsSet()) {
             scanManager.asyncScanAndUpdateResults(true, toImport);
         }

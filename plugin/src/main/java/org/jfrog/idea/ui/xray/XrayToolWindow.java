@@ -34,6 +34,7 @@ import org.jfrog.idea.ui.xray.renderers.IssuesTreeCellRenderer;
 import org.jfrog.idea.ui.xray.renderers.LicensesTreeCellRenderer;
 import org.jfrog.idea.xray.ScanManagerFactory;
 import org.jfrog.idea.xray.ScanTreeNode;
+import org.jfrog.idea.xray.scan.ScanManager;
 
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
@@ -83,19 +84,14 @@ public class XrayToolWindow implements Disposable {
 
     void initToolWindow(@NotNull ToolWindow toolWindow, boolean supported) {
         ContentManager contentManager = toolWindow.getContentManager();
-        if (!supported) {
-            contentManager.addContent(createUnsupportedView());
-            return;
-        }
-
-        addContent(contentManager);
+        addContent(contentManager, supported);
         registerListeners();
     }
 
-    private void addContent(ContentManager contentManager) {
+    private void addContent(ContentManager contentManager, boolean supported) {
         ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
-        Content issuesContent = contentFactory.createContent(createIssuesViewTab(), "Issues", false);
-        Content licenseContent = contentFactory.createContent(createLicenseInfoTab(), "Licenses Info", false);
+        Content issuesContent = contentFactory.createContent(createIssuesViewTab(supported), "Issues", false);
+        Content licenseContent = contentFactory.createContent(createLicenseInfoTab(supported), "Licenses Info", false);
         issuesContent.setCloseable(false);
         licenseContent.setCloseable(false);
         populateTrees();
@@ -107,7 +103,10 @@ public class XrayToolWindow implements Disposable {
         licenseFilterMenu.setLicenses();
         TreeModel issuesTreeModel = new DefaultTreeModel(new ScanTreeNode("SeveritiesTree"));
         TreeModel licensesTreeModel = new DefaultTreeModel(new ScanTreeNode("LicensesTree"));
-        ScanManagerFactory.getScanManager(project).filterAndSort(issuesTreeModel, licensesTreeModel);
+        ScanManager scanManager = ScanManagerFactory.getScanManager(project);
+        if (scanManager != null) {
+            scanManager.filterAndSort(issuesTreeModel, licensesTreeModel);
+        }
 
         ScanTreeNode root = (ScanTreeNode) issuesTreeModel.getRoot();
         issuesCount.setText("Issues (" + root.getIssueCount() + ") ");
@@ -122,7 +121,7 @@ public class XrayToolWindow implements Disposable {
         setIssuesCountPanel();
     }
 
-    private JPanel createIssuesViewTab() {
+    private JPanel createIssuesViewTab(boolean supported) {
         ActionToolbar toolbar = ComponentUtils.createActionToolbar(issuesComponentsTree);
         IssueFilterMenu issueFilterMenu = new IssueFilterMenu(project);
         JPanel filterButton = new FilterButton(issueFilterMenu, "Severity", "Select severities to show");
@@ -132,7 +131,7 @@ public class XrayToolWindow implements Disposable {
 
         issuesPanel = createComponentsIssueDetailView();
         issuesRightHorizontalSplit = new OnePixelSplitter(true, 0.55f);
-        issuesRightHorizontalSplit.setFirstComponent(createComponentsDetailsView());
+        issuesRightHorizontalSplit.setFirstComponent(createComponentsDetailsView(supported));
         issuesRightHorizontalSplit.setSecondComponent(issuesPanel);
 
         OnePixelSplitter centralVerticalSplit = new OnePixelSplitter(false, 0.33f);
@@ -145,7 +144,7 @@ public class XrayToolWindow implements Disposable {
         return issuesViewTab;
     }
 
-    private JPanel createLicenseInfoTab() {
+    private JPanel createLicenseInfoTab(boolean supported) {
         ActionToolbar toolbar = ComponentUtils.createActionToolbar(licensesComponentsTree);
         licenseFilterMenu = new LicenseFilterMenu(project);
         FilterButton licensesFilterButton = new FilterButton(licenseFilterMenu, "License", "Select licenses to show");
@@ -157,30 +156,41 @@ public class XrayToolWindow implements Disposable {
         JPanel licenseTab = new JBPanel(new BorderLayout());
         licensesCentralVerticalSplit = new OnePixelSplitter(false, 0.3f);
         licensesCentralVerticalSplit.setFirstComponent(createLicensesComponentsTreeView());
-        licensesCentralVerticalSplit.setSecondComponent(createLicenseDetailsView());
+        licensesCentralVerticalSplit.setSecondComponent(createLicenseDetailsView(supported));
         licenseTab.add(filterPanel, BorderLayout.NORTH);
         licenseTab.add(licensesCentralVerticalSplit, BorderLayout.CENTER);
         return licenseTab;
     }
 
-    private Content createUnsupportedView() {
-        JPanel panel = new JBPanel(new BorderLayout()).withBackground(UIUtil.getTableBackground());
-        panel.add(ComponentUtils.createDisabledTextLabel("Unsupported project type, currently only Maven, Gradle and Npm projects are supported."), BorderLayout.CENTER);
+    private JPanel createUnsupportedView() {
+        JLabel label = new JBLabel();
+        label.setText("Unsupported project type, currently only Maven, Gradle and Npm projects are supported.");
 
-        ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
-        return contentFactory.createContent(panel, "unsupported project type", false);
+        JBPanel panel = new JBPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.BOTH;
+        c.anchor = GridBagConstraints.CENTER;
+        panel.add(label, c);
+        panel.setBackground(UIUtil.getTableBackground());
+        return panel;
+    }
+
+    private Events createOnConfigurationChangeHandler() {
+        return () -> ApplicationManager.getApplication().invokeLater(() -> {
+            issuesRightHorizontalSplit.setFirstComponent(createComponentsDetailsView(true));
+            licensesCentralVerticalSplit.setSecondComponent(createLicenseDetailsView(true));
+            issuesPanel.validate();
+            issuesPanel.repaint();
+        });
     }
 
     private void registerListeners() {
         MessageBusConnection busConnection = project.getMessageBus().connect(project);
         // Xray credentials were set listener
-        busConnection.subscribe(Events.ON_CONFIGURATION_DETAILS_CHANGE, ()
-                -> ApplicationManager.getApplication().invokeLater(() -> {
-            issuesRightHorizontalSplit.setFirstComponent(createComponentsDetailsView());
-            licensesCentralVerticalSplit.setSecondComponent(createLicenseDetailsView());
-            issuesPanel.validate();
-            issuesPanel.repaint();
-        }));
+        busConnection.subscribe(Events.ON_CONFIGURATION_DETAILS_CHANGE, createOnConfigurationChangeHandler());
+
+        // Idea framework change listener
+        busConnection.subscribe(Events.ON_IDEA_FRAMEWORK_CHANGE, createOnConfigurationChangeHandler());
 
         // Component tree change listener
         busConnection.subscribe(Events.ON_SCAN_COMPONENTS_CHANGE, ()
@@ -211,9 +221,12 @@ public class XrayToolWindow implements Disposable {
         busConnection.subscribe(Events.ON_SCAN_ISSUES_CHANGE, () -> ApplicationManager.getApplication().invokeLater(this::updateIssuesTable));
     }
 
-    private JComponent createComponentsDetailsView() {
+    private JComponent createComponentsDetailsView(boolean supported) {
         if (!GlobalSettings.getInstance().isCredentialsSet()) {
             return createNoCredentialsView();
+        }
+        if (!supported) {
+            return createUnsupportedView();
         }
         JLabel title = new JBLabel(" Component Details");
         title.setFont(title.getFont().deriveFont(TITLE_FONT_SIZE));
@@ -224,9 +237,12 @@ public class XrayToolWindow implements Disposable {
         return new TitledPane(JSplitPane.VERTICAL_SPLIT, TITLE_LABEL_SIZE, title, issuesDetailsScroll);
     }
 
-    private JComponent createLicenseDetailsView() {
+    private JComponent createLicenseDetailsView(boolean supported) {
         if (!GlobalSettings.getInstance().isCredentialsSet()) {
             return createNoCredentialsView();
+        }
+        if (!supported) {
+            return createUnsupportedView();
         }
         JLabel title = new JBLabel(" Details");
         title.setFont(title.getFont().deriveFont(TITLE_FONT_SIZE));

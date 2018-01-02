@@ -23,6 +23,9 @@ import static org.jfrog.idea.xray.scan.NpmScanManager.NPM_PREFIX;
 import static org.jfrog.idea.xray.scan.ScanManager.getProjectBasePath;
 import static org.testng.Assert.*;
 
+/**
+ * Created by Yahav Itzhak on 25 Dec 2017.
+ */
 public class NpmScanManagerTests {
 
     private Project project;

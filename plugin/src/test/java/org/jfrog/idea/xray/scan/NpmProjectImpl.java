@@ -14,6 +14,9 @@ import org.picocontainer.PicoContainer;
 
 import java.nio.file.Paths;
 
+/**
+ * Created by Yahav Itzhak on 25 Dec 2017.
+ */
 public class NpmProjectImpl implements Project{
 
     private String bashPath = Paths.get(".").toAbsolutePath().normalize().resolve(Paths.get("src", "test", "resources", "org", "jfrog", "idea", "xray", "scan", "test")).toString();

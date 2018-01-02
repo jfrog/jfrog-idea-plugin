@@ -12,6 +12,9 @@ import java.util.Set;
 import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 
+/**
+ * Created by Yahav Itzhak on 25 Dec 2017.
+ */
 public class ScanTreeNodeTests extends ScanTreeNodeBase {
 
     @BeforeClass

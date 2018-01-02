@@ -6,6 +6,9 @@ import org.jfrog.idea.xray.persistency.types.Severity;
 
 import java.util.UUID;
 
+/**
+ * Created by Yahav Itzhak on 25 Dec 2017.
+ */
 public class ScanTreeNodeBase {
 
     ScanTreeNode root, one, two, three, four, five;

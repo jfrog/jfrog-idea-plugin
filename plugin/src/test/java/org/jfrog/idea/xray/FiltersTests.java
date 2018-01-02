@@ -13,6 +13,9 @@ import java.util.Set;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.fail;
 
+/**
+ * Created by Yahav Itzhak on 25 Dec 2017.
+ */
 public class FiltersTests extends ScanTreeNodeBase {
 
     private FilterManager filterManager = new FilterManager();
