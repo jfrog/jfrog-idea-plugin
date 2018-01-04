@@ -196,7 +196,7 @@ public class NpmScanManager extends ScanManager {
                 }
 
             } catch (IOException e) {
-                Utils.notify(logger, "Fail to delete file", e, NotificationType.WARNING);
+                Utils.notify(logger, "Failed to delete file", e, NotificationType.WARNING);
             }
 
             NpmScanManager.super.asyncScanAndUpdateResults(true);

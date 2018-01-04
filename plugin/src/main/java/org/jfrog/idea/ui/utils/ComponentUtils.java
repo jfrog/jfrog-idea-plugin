@@ -8,10 +8,10 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.treeStructure.Tree;
-import com.intellij.ui.treeStructure.actions.CollapseAllAction;
-import com.intellij.ui.treeStructure.actions.ExpandAllAction;
 import com.intellij.util.ui.JBDimension;
 import com.intellij.util.ui.UIUtil;
+import org.jfrog.idea.xray.actions.CollapseAllAction;
+import org.jfrog.idea.xray.actions.ExpandAllAction;
 
 import javax.swing.*;
 import javax.swing.tree.TreeNode;

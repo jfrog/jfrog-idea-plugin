@@ -4,8 +4,11 @@ import com.intellij.notification.*;
 import com.intellij.openapi.diagnostic.Logger;
 import com.jfrog.xray.client.services.system.Version;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jfrog.idea.ui.xray.listeners.IssuesTreeExpansionListener;
 
+import javax.swing.event.TreeExpansionListener;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -50,12 +53,18 @@ public class Utils {
             default:
                 logger.info(title + "\n" + details);
         }
+        if (StringUtils.isBlank(details)) {
+            details = title;
+        }
         Notifications.Bus.notify(EVENT_LOG_NOTIFIER.createNotification(title, details, level, null));
     }
 
     private static void popupBalloon(String title, String details, NotificationType level) {
         if (lastNotification != null) {
             lastNotification.hideBalloon();
+        }
+        if (StringUtils.isBlank(details)) {
+            details = title;
         }
         Notification notification = BALLOON_NOTIFIER.createNotification(title, details, level, null);
         lastNotification = notification;
@@ -123,9 +132,24 @@ public class Utils {
     }
 
     public static String readStream(InputStream stream) throws IOException {
+        if (stream == null) {
+            return "";
+        }
         try (StringWriter writer = new StringWriter()){
             IOUtils.copy(stream, writer, "UTF-8");
             return writer.toString();
         }
+    }
+
+    public static TreeExpansionListener getIssuesTreeExpansionListener(TreeExpansionListener[] treeExpansionListeners) {
+        if (treeExpansionListeners == null) {
+            return null;
+        }
+        for (TreeExpansionListener treeExpansionListener : treeExpansionListeners) {
+            if (treeExpansionListener instanceof IssuesTreeExpansionListener) {
+                return treeExpansionListener;
+            }
+        }
+        return null;
     }
 }

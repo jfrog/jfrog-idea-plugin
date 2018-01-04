@@ -49,8 +49,11 @@
                 class="org.jfrog.idea.xray.actions.RefreshAction"
                 text="Refresh scan"
                 description="Force Xray scan"
-                icon="AllIcons.Actions.Refresh">
-        </action>
+                icon="AllIcons.Actions.Refresh"/>
+        <action id="Xray.CollapseAll"
+                class="org.jfrog.idea.xray.actions.CollapseAllAction"/>
+        <action id="Xray.ExpandAll"
+                class="org.jfrog.idea.xray.actions.ExpandAllAction"/>
     </actions>
 
 </idea-plugin>

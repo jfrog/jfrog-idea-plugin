@@ -7,6 +7,7 @@ import com.jfrog.xray.client.impl.util.URIUtil;
 import com.jfrog.xray.client.services.summary.Summary;
 import com.jfrog.xray.client.services.system.System;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.*;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
@@ -107,7 +108,7 @@ public class XrayImpl implements Xray {
         StatusLine statusLine = response.getStatusLine();
         int statusCode = statusLine.getStatusCode();
         if (statusNotOk(statusCode)) {
-            String body = "";
+            String body = null;
             if (response.getEntity() != null) {
                 try {
                     body = readStream(response.getEntity().getContent());
@@ -117,7 +118,7 @@ public class XrayImpl implements Xray {
                 }
             }
             String message = String.format("Received %d %s response from Xray", statusCode, statusLine);
-            if (!body.isEmpty()) {
+            if (StringUtils.isNotBlank(body)) {
                 message += ". " + body;
             }
             throw new HttpResponseException(statusCode, message);
@@ -126,6 +127,9 @@ public class XrayImpl implements Xray {
     }
 
     private static String readStream(InputStream stream) throws IOException {
+        if (stream == null) {
+            return "";
+        }
         try (StringWriter writer = new StringWriter()){
             IOUtils.copy(stream, writer, "UTF-8");
             return writer.toString();

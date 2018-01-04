@@ -29,6 +29,7 @@ import org.jfrog.idea.ui.configuration.XrayGlobalConfiguration;
 import org.jfrog.idea.ui.utils.ComponentUtils;
 import org.jfrog.idea.ui.xray.filters.IssueFilterMenu;
 import org.jfrog.idea.ui.xray.filters.LicenseFilterMenu;
+import org.jfrog.idea.ui.xray.listeners.IssuesTreeExpansionListener;
 import org.jfrog.idea.ui.xray.models.IssuesTableModel;
 import org.jfrog.idea.ui.xray.renderers.IssuesTreeCellRenderer;
 import org.jfrog.idea.ui.xray.renderers.LicensesTreeCellRenderer;
@@ -37,8 +38,6 @@ import org.jfrog.idea.xray.ScanTreeNode;
 import org.jfrog.idea.xray.scan.ScanManager;
 
 import javax.swing.*;
-import javax.swing.event.TreeExpansionEvent;
-import javax.swing.event.TreeExpansionListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.tree.DefaultTreeModel;
@@ -70,6 +69,7 @@ public class XrayToolWindow implements Disposable {
     private JLabel issuesCount;
     private JPanel issuesCountPanel;
     private Map<TreePath, JPanel> issuesCountPanels = Maps.newHashMap();
+    private IssuesTreeExpansionListener issuesTreeExpansionListener;
 
     // Licenses Tab
     private Tree licensesComponentsTree = new Tree(new ScanTreeNode(null));
@@ -118,7 +118,7 @@ public class XrayToolWindow implements Disposable {
         licensesComponentsTree.validate();
         licensesComponentsTree.repaint();
 
-        setIssuesCountPanel();
+        issuesTreeExpansionListener.setIssuesCountPanel();
     }
 
     private JPanel createIssuesViewTab(boolean supported) {
@@ -196,11 +196,19 @@ public class XrayToolWindow implements Disposable {
         busConnection.subscribe(Events.ON_SCAN_COMPONENTS_CHANGE, ()
                 -> ApplicationManager.getApplication().invokeLater(this::populateTrees));
 
+        // Issues component expansion listener
+        issuesComponentsTree.addTreeExpansionListener(issuesTreeExpansionListener);
+
         // Issues component selection listener
         issuesComponentsTree.addTreeSelectionListener(e -> {
             updateIssuesTable();
             if (e == null || e.getNewLeadSelectionPath() == null) {
                 return;
+            }
+            // Color the issues count panel
+            for (TreePath path : e.getPaths()) {
+                JPanel issueCountPanel = issuesCountPanels.get(path);
+                issueCountPanel.setBackground(e.isAddedPath(path) ? UIUtil.getTreeSelectionBackground() : UIUtil.getTableBackground());
             }
             DetailsViewFactory.createIssuesDetailsView(issuesDetailsPanel, (ScanTreeNode) e.getNewLeadSelectionPath().getLastPathComponent());
             // Scroll back to the beginning of the scrollable panel
@@ -267,8 +275,7 @@ public class XrayToolWindow implements Disposable {
         issuesComponentsTree.setCellRenderer(new IssuesTreeCellRenderer());
         issuesComponentsTree.expandRow(0);
         issuesComponentsTree.setRootVisible(false);
-        setTreeExpansionListener();
-        setTreeSelectionListener();
+        issuesTreeExpansionListener = new IssuesTreeExpansionListener(issuesComponentsTree, issuesCountPanel, issuesCountPanels);
 
         JBPanel treePanel = new JBPanel(new BorderLayout()).withBackground(UIUtil.getTableBackground());
         TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(issuesComponentsTree);
@@ -277,57 +284,6 @@ public class XrayToolWindow implements Disposable {
         JScrollPane treeScrollPane = ScrollPaneFactory.createScrollPane(treePanel);
         treeScrollPane.getVerticalScrollBar().setUnitIncrement(SCROLL_BAR_SCROLLING_UNITS);
         return new TitledPane(JSplitPane.VERTICAL_SPLIT, TITLE_LABEL_SIZE, componentsTreePanel, treeScrollPane);
-    }
-
-    private void setTreeExpansionListener() {
-        issuesComponentsTree.addTreeExpansionListener(new TreeExpansionListener() {
-            @Override
-            public void treeExpanded(TreeExpansionEvent event) {
-                setIssuesCountPanel();
-            }
-
-            @Override
-            public void treeCollapsed(TreeExpansionEvent event) {
-                setIssuesCountPanel();
-            }
-        });
-    }
-
-    private void setTreeSelectionListener() {
-        issuesComponentsTree.addTreeSelectionListener(e -> {
-            TreePath[] paths = e.getPaths();
-            for (TreePath path : paths) {
-                JPanel issueCountPanel = issuesCountPanels.get(path);
-                if (e.isAddedPath(path)) {
-                    issueCountPanel.setBackground(UIUtil.getTreeSelectionBackground());
-                } else {
-                    issueCountPanel.setBackground(UIUtil.getTableBackground());
-                }
-            }
-        });
-    }
-
-    private void setIssuesCountPanel() {
-        issuesCountPanel.removeAll();
-        ScanTreeNode root = (ScanTreeNode) issuesComponentsTree.getModel().getRoot();
-        setIssuesCountPanel(root, ComponentUtils.getTreePath(root));
-    }
-
-    private void setIssuesCountPanel(ScanTreeNode root, TreePath rootPath) {
-        if (issuesComponentsTree.isExpanded(rootPath)) {
-            root.getChildren().forEach(child -> {
-                TreePath childTreePath = ComponentUtils.getTreePath(child);
-                JPanel issueCountPanel = issuesCountPanels.get(childTreePath);
-                if (issueCountPanel != null) {
-                    ComponentUtils.setIssueCountPanel(child.getIssueCount(), issueCountPanel);
-                } else {
-                    issueCountPanel = ComponentUtils.createIssueCountLabel(child.getIssueCount(), issuesComponentsTree.getRowBounds(0).height);
-                    issuesCountPanels.put(childTreePath, issueCountPanel);
-                }
-                issuesCountPanel.add(issueCountPanel);
-                setIssuesCountPanel(child, childTreePath);
-            });
-        }
     }
 
     private JComponent createLicensesComponentsTreeView() {
