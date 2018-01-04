@@ -124,11 +124,12 @@ public class Utils {
         String strArgs = String.join(" ", args);
         if (isWindows()) {
             return Runtime.getRuntime().exec(new String[]{"cmd", "/c" ,strArgs});
-        } else if (isMac()) {
-            return Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c" ,strArgs}, new String[]{"PATH=$PATH:/usr/local/bin"});
-        } else {
-            return Runtime.getRuntime().exec(args.toArray(new String[0]));
         }
+        if (isMac()) {
+            return Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c" ,strArgs}, new String[]{"PATH=$PATH:/usr/local/bin"});
+        }
+        // Linux
+        return Runtime.getRuntime().exec(args.toArray(new String[0]));
     }
 
     public static String readStream(InputStream stream) throws IOException {
