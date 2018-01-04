@@ -53,7 +53,7 @@ public class NpmDriver {
     }
 
     public void install(String appDir) throws IOException {
-        List<String> args = Lists.newArrayList("install", "--only=production", "--prefix", appDir);
+        List<String> args = Lists.newArrayList("install", "--only=production", appDir, "--prefix", appDir);
         try {
             NpmCommandRes npmCommandRes = exeNpmCommand(args);
             if (!npmCommandRes.isOk()) {
