@@ -297,7 +297,7 @@ public abstract class ScanManager {
             int currentIndex = 0;
             List<ComponentDetail> componentsList = Lists.newArrayList(componentsToScan.getComponentDetails());
             while (currentIndex + NUMBER_OF_ARTIFACTS_BULK_SCAN < componentsList.size()) {
-                ProgressManager.checkCanceled();
+                checkCanceled();
                 List<ComponentDetail> partialComponentsDetails = componentsList.subList(currentIndex, currentIndex + NUMBER_OF_ARTIFACTS_BULK_SCAN);
                 Components partialComponents = ComponentsFactory.create(Sets.newHashSet(partialComponentsDetails));
                 scanComponents(xray, partialComponents);
@@ -344,5 +344,13 @@ public abstract class ScanManager {
 
     static String getProjectBasePath(Project project) {
         return project.getBasePath() != null ? project.getBasePath() : "./";
+    }
+
+    void checkCanceled() {
+        if (project.isOpen()) {
+            // The project is closed if we are in test mode.
+            // In tests we can't check if the user canceled the scan, since we don't have the ProgressManager service.
+            ProgressManager.checkCanceled();
+        }
     }
 }

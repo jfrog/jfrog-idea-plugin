@@ -99,7 +99,7 @@ public class NpmScanManager extends ScanManager {
             // This set is used to make sure the artifacts added are unique
             Set<String> added = Sets.newHashSet();
             for (String appDir : applicationsDirs) {
-                ProgressManager.checkCanceled();
+                checkCanceled();
                 Path relativeSource = Paths.get(projectBasePath).relativize(Paths.get(appDir));
                 Path dest = Paths.get(projectBasePath, INSTALLATION_DIR).resolve(relativeSource);
                 copyNpmFiles(Paths.get(appDir), dest);
