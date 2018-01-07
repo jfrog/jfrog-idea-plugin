@@ -8,6 +8,7 @@ import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
 import com.intellij.openapi.externalSystem.model.project.ProjectData;
 import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefreshCallback;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -296,11 +297,7 @@ public abstract class ScanManager {
             int currentIndex = 0;
             List<ComponentDetail> componentsList = Lists.newArrayList(componentsToScan.getComponentDetails());
             while (currentIndex + NUMBER_OF_ARTIFACTS_BULK_SCAN < componentsList.size()) {
-                if (indicator.isCanceled()) {
-                    logger.info("Xray scan was canceled");
-                    return;
-                }
-
+                ProgressManager.checkCanceled();
                 List<ComponentDetail> partialComponentsDetails = componentsList.subList(currentIndex, currentIndex + NUMBER_OF_ARTIFACTS_BULK_SCAN);
                 Components partialComponents = ComponentsFactory.create(Sets.newHashSet(partialComponentsDetails));
                 scanComponents(xray, partialComponents);
@@ -312,6 +309,8 @@ public abstract class ScanManager {
             Components partialComponents = ComponentsFactory.create(Sets.newHashSet(partialComponentsDetails));
             scanComponents(xray, partialComponents);
             indicator.setFraction(1);
+        } catch (ProcessCanceledException e) {
+            Utils.notify(logger, "JFrog Xray","Xray scan was canceled", NotificationType.INFORMATION);
         } catch (IOException e) {
             Utils.notify(logger, "JFrog Xray scan failed", e, NotificationType.ERROR);
         }

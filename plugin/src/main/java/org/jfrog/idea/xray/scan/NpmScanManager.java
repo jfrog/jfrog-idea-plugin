@@ -8,6 +8,8 @@ import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
 import com.intellij.openapi.externalSystem.model.project.ProjectData;
 import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefreshCallback;
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.jfrog.xray.client.impl.ComponentsFactory;
@@ -97,6 +99,7 @@ public class NpmScanManager extends ScanManager {
             // This set is used to make sure the artifacts added are unique
             Set<String> added = Sets.newHashSet();
             for (String appDir : applicationsDirs) {
+                ProgressManager.checkCanceled();
                 Path relativeSource = Paths.get(projectBasePath).relativize(Paths.get(appDir));
                 Path dest = Paths.get(projectBasePath, INSTALLATION_DIR).resolve(relativeSource);
                 copyNpmFiles(Paths.get(appDir), dest);
@@ -113,6 +116,8 @@ public class NpmScanManager extends ScanManager {
                 }
             }
             cbk.onSuccess(null);
+        } catch (ProcessCanceledException e) {
+            Utils.notify(logger, "JFrog Xray","Xray scan was canceled", NotificationType.INFORMATION);
         } catch (Exception e) {
             cbk.onFailure(e.getMessage(), e.getCause().getMessage());
         }
