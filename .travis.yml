@@ -1,0 +1,11 @@
+os:
+  - osx
+  - linux
+language: java
+addons:
+  apt:
+    packages:
+    - npm
+script:
+  - xray/gradlew install -p xray
+  - plugin/gradlew test -p plugin

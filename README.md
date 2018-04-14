@@ -1,4 +1,4 @@
-# Overview
+# JFrog Idea Plugin [![Build Status](https://travis-ci.org/jfrogdev/jfrog-idea-plugin.svg?branch=master)](https://travis-ci.org/yahavi/jfrog-idea-plugin)
 JFrog IntelliJ IDEA plugin adds JFrog Xray scanning of Maven, Gradle and Npm project dependencies to your IntelliJ IDEA.
 
 # Building and Testing the Sources
