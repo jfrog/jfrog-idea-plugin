@@ -25,7 +25,6 @@ import javax.swing.*;
 import java.io.IOException;
 
 import static org.jfrog.idea.xray.utils.Utils.MINIMAL_XRAY_VERSION_SUPPORTED;
-import static org.jfrog.idea.xray.utils.Utils.MINIMAL_XRAY_VERSION_UNSUPPORTED;
 
 /**
  * Created by romang on 1/29/17.
@@ -54,7 +53,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
 
                 if (!Utils.isXrayVersionSupported(xrayVersion)) {
                     connectionResults.setText("ERROR: Unsupported Xray version: " + xrayVersion.getVersion() +
-                            ", version above " + MINIMAL_XRAY_VERSION_SUPPORTED + " and below " + MINIMAL_XRAY_VERSION_UNSUPPORTED + " is required.");
+                            ", version " + MINIMAL_XRAY_VERSION_SUPPORTED + " or above is required.");
                 } else {
                     Pair<Boolean, String> testComponentPermissionRes = testComponentPermission(xrayClient);
                     if (!testComponentPermissionRes.getLeft()) {

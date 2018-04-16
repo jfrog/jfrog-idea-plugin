@@ -23,7 +23,7 @@ public class VersionTests {
     private Object[][] provideVersion() {
 
         return new Object[][]{
-                //      Version           AtLeast           Expected
+                // Version, AtLeast, Expected
                 {"1.0.0", "0.0.0", true},
                 {"1.0.0", "0.0. ", true},
                 {"1.0.0", "0.0", true},
@@ -62,7 +62,7 @@ public class VersionTests {
                 {"1.0.0", "1.1-SNAPSHOT", false},
                 {"1.0.0", "1.1.1-SNAPSHOT", false},
 
-                //      Version           AtLeast           Expected
+                // Version, AtLeast, Expected
                 {"1.0.", "0.0.0", true},
                 {"1.0.", "0.0. ", true},
                 {"1.0.", "0.0", true},
@@ -101,7 +101,7 @@ public class VersionTests {
                 {"1.0.", "1.1-SNAPSHOT", false},
                 {"1.0.", "1.1.1-SNAPSHOT", false},
 
-                //      Version           AtLeast           Expected
+                // Version, AtLeast, Expected
                 {"1.0", "0.0.0", true},
                 {"1.0", "0.0. ", true},
                 {"1.0", "0.0", true},
@@ -140,7 +140,7 @@ public class VersionTests {
                 {"1.0", "1.1-SNAPSHOT", false},
                 {"1.0", "1.1.1-SNAPSHOT", false},
 
-                //      Version           AtLeast           Expected
+                // Version, AtLeast, Expected
                 {"1.", "0.0.0", true},
                 {"1.", "0.0. ", true},
                 {"1.", "0.0", true},
@@ -179,7 +179,7 @@ public class VersionTests {
                 {"1.", "1.1-SNAPSHOT", false},
                 {"1.", "1.1.1-SNAPSHOT", false},
 
-                //      Version           AtLeast           Expected
+                // Version, AtLeast, Expected
                 {"1", "0.0.0", true},
                 {"1", "0.0. ", true},
                 {"1", "0.0", true},
@@ -218,7 +218,7 @@ public class VersionTests {
                 {"1", "1.1-SNAPSHOT", false},
                 {"1", "1.1.1-SNAPSHOT", false},
 
-                //      Version           AtLeast           Expected
+                // Version, AtLeast, Expected
                 {"1.0.0-SNAPSHOT", "0.0.0", true},
                 {"1.0.0-SNAPSHOT", "0.1.0", true},
                 {"1.0.0-SNAPSHOT", "0.0.1", true},
@@ -236,7 +236,7 @@ public class VersionTests {
                 {"1.0.0-SNAPSHOT", "1.1.0-SNAPSHOT", false},
                 {"1.0.0-SNAPSHOT", "1.1.1-SNAPSHOT", false},
 
-                //      Version           AtLeast           Expected
+                // Version, AtLeast, Expected
                 {"1.0.0-A", "0.0.0", true},
                 {"1.0.0-A", "0.1.0", true},
                 {"1.0.0-A", "0.0.1", true},
@@ -254,7 +254,7 @@ public class VersionTests {
                 {"1.0.0-A", "1.1.0-B", false},
                 {"1.0.0-A", "1.1.1-B", false},
 
-                //      Version           AtLeast           Expected
+                // Version, AtLeast, Expected
                 {"1.0.0-B", "0.0.0-A", true},
                 {"1.0.0-B", "0.0.1-A", true},
                 {"1.0.0-B", "0.1.0-A", true},
@@ -264,7 +264,7 @@ public class VersionTests {
                 {"1.0.0-B", "1.1.0-A", false},
                 {"1.0.0-B", "1.1.1-A", false},
 
-                //      Version           AtLeast           Expected
+                // Version, AtLeast, Expected
                 {"12.0.0", "0.0.0", true},
                 {"12.0.0", "0.0.2", true},
                 {"12.0.0", "0.2.0", true},
@@ -288,7 +288,8 @@ public class VersionTests {
                 {"12.0.0", "2.0.3-SNAPSHOT", true},
                 {"12.0.0", "2.3.0-SNAPSHOT", true},
                 {"12.0.0", "2.3.4-SNAPSHOT", true},
-                {"12.0.0", "12.0.0-SNAPSHOT", false}
+                {"12.0.0", "12.0.0-SNAPSHOT", false},
+                {"2.0.0-m003", "1.7.2.3", true}
         };
     }
 }

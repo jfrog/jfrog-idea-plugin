@@ -23,13 +23,12 @@ import java.util.List;
 public class Utils {
 
     public final static String MINIMAL_XRAY_VERSION_SUPPORTED = "1.7.2.3";
-    public final static String MINIMAL_XRAY_VERSION_UNSUPPORTED = "2.0";
     private static final NotificationGroup EVENT_LOG_NOTIFIER = new NotificationGroup("JFROG_LOG", NotificationDisplayType.NONE, true);
     private static final NotificationGroup BALLOON_NOTIFIER = new NotificationGroup("JFROG_BALLOON", NotificationDisplayType.BALLOON, false);
     private static Notification lastNotification;
 
     public static boolean isXrayVersionSupported(Version version) {
-        return version.isAtLeast(MINIMAL_XRAY_VERSION_SUPPORTED) && !version.isAtLeast(MINIMAL_XRAY_VERSION_UNSUPPORTED);
+        return version.isAtLeast(MINIMAL_XRAY_VERSION_SUPPORTED);
     }
 
     public static void notify(Logger logger, String title, String details, NotificationType level) {

@@ -47,6 +47,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.jfrog.idea.xray.utils.Utils.MINIMAL_XRAY_VERSION_SUPPORTED;
+
 /**
  * Created by romang on 4/26/17.
  */
@@ -321,7 +323,7 @@ public abstract class ScanManager {
             if (Utils.isXrayVersionSupported(xray.system().version())) {
                 return true;
             }
-            Utils.notify(logger, "Unsupported JFrog Xray version", "Required JFrog Xray version at least " + Utils.MINIMAL_XRAY_VERSION_SUPPORTED + " and below " + Utils.MINIMAL_XRAY_VERSION_UNSUPPORTED, NotificationType.ERROR);
+            Utils.notify(logger, "Unsupported JFrog Xray version", "Required JFrog Xray version " + MINIMAL_XRAY_VERSION_SUPPORTED + " and above", NotificationType.ERROR);
         } catch (IOException e) {
             Utils.notify(logger, "JFrog Xray scan failed", e, NotificationType.ERROR);
         }
