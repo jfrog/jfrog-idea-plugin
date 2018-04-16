@@ -7,5 +7,6 @@ addons:
     packages:
     - npm
 script:
-  - xray/gradlew install -p xray
+  - xray/gradlew test -p xray
+  - xray/gradlew clean install -p xray
   - plugin/gradlew test -p plugin
