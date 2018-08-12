@@ -278,7 +278,7 @@ public class XrayToolWindow implements Disposable {
         issuesTreeExpansionListener = new IssuesTreeExpansionListener(issuesComponentsTree, issuesCountPanel, issuesCountPanels);
 
         JBPanel treePanel = new JBPanel(new BorderLayout()).withBackground(UIUtil.getTableBackground());
-        TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(issuesComponentsTree);
+        TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(issuesComponentsTree, this::getPathSearchString, true);
         treePanel.add(treeSpeedSearch.getComponent(), BorderLayout.WEST);
         treePanel.add(issuesCountPanel, BorderLayout.CENTER);
         JScrollPane treeScrollPane = ScrollPaneFactory.createScrollPane(treePanel);
@@ -296,11 +296,18 @@ public class XrayToolWindow implements Disposable {
         licensesComponentsTree.expandRow(0);
         licensesComponentsTree.setRootVisible(false);
         licensesComponentsTree.setCellRenderer(new LicensesTreeCellRenderer());
-        TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(licensesComponentsTree);
+        TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(licensesComponentsTree, this::getPathSearchString, true);
         JScrollPane treeScrollPane = ScrollPaneFactory.createScrollPane(treeSpeedSearch.getComponent());
         treeScrollPane.getVerticalScrollBar().setUnitIncrement(SCROLL_BAR_SCROLLING_UNITS);
         return new TitledPane(JSplitPane.VERTICAL_SPLIT, TITLE_LABEL_SIZE, componentsTreePanel, treeScrollPane);
+    }
 
+    private String getPathSearchString(TreePath path) {
+        ScanTreeNode node = (ScanTreeNode) path.getLastPathComponent();
+        if (node != null) {
+            return node.toString();
+        }
+        return "";
     }
 
     private JComponent createComponentsIssueDetailView() {
@@ -361,6 +368,5 @@ public class XrayToolWindow implements Disposable {
 
     @Override
     public void dispose() {
-
     }
 }
