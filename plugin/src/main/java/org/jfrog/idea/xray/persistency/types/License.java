@@ -11,12 +11,16 @@ import java.util.Objects;
  * Created by romang on 4/12/17.
  */
 public class License implements Comparable<License> {
+    public static String UNKNOWN_LICENCE_FULL_NAME = "Unknown license";
+    public static String UNKNOWN_LICENCE_NAME = "Unknown";
     public List<String> components = new ArrayList<>();
     public String fullName;
     public String name;
     public List<String> moreInfoUrl = new ArrayList<>();
 
     public License() {
+        this.fullName = UNKNOWN_LICENCE_FULL_NAME;
+        this.name = UNKNOWN_LICENCE_NAME;
     }
 
     public License(com.jfrog.xray.client.services.summary.License license) {

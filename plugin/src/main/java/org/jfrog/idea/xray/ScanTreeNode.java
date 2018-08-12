@@ -61,6 +61,9 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
      * @return current node's licenses
      */
     public Set<License> getLicenses() {
+        if (licenses == null) {
+            Sets.newHashSet(new License());
+        }
         return licenses;
     }
 

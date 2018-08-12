@@ -225,10 +225,13 @@ public abstract class ScanManager {
             return allLicenses;
         }
         ScanTreeNode node = (ScanTreeNode) scanResults.getRoot();
-        for (int i = 0; i < node.getChildCount(); i++) {
-            allLicenses.addAll(((ScanTreeNode) node.getChildAt(i)).getLicenses());
-        }
+        getAllLicenses(node, allLicenses);
         return allLicenses;
+    }
+
+    private void getAllLicenses(ScanTreeNode node, Set<License> allLicenses) {
+        allLicenses.addAll(node.getLicenses());
+        node.getChildren().forEach(child -> getAllLicenses(child, allLicenses));
     }
 
     /**

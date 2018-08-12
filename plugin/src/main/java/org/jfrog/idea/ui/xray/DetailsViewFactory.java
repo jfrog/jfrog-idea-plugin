@@ -109,7 +109,7 @@ public class DetailsViewFactory extends JBPanel {
     }
 
     private static String createLicenseString(License license) {
-        if (StringUtils.isBlank(license.fullName) || StringUtils.isBlank(license.name) || license.fullName.equals("Unknown license")) {
+        if (StringUtils.isBlank(license.fullName) || StringUtils.isBlank(license.name) || license.fullName.equals(License.UNKNOWN_LICENCE_FULL_NAME)) {
             return license.name;
         }
         return license.fullName + " (" + license.name + ")";
