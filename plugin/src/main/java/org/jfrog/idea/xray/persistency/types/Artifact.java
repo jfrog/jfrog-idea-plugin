@@ -23,8 +23,14 @@ public class Artifact implements Serializable {
 
     public Artifact(com.jfrog.xray.client.services.summary.Artifact artifact) {
         general = new GeneralInfo(artifact.getGeneral());
-        issues.addAll(artifact.getIssues().stream().map(Issue::new).collect(Collectors.toSet()));
-        licenses.addAll(artifact.getLicenses().stream().map(License::new).collect(Collectors.toSet()));
+        issues.addAll(artifact.getIssues()
+                .stream()
+                .map(Issue::new)
+                .collect(Collectors.toSet()));
+        licenses.addAll(artifact.getLicenses()
+                .stream()
+                .map(License::new)
+                .collect(Collectors.toSet()));
     }
 }
 

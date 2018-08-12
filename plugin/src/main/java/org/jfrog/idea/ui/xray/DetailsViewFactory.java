@@ -43,7 +43,7 @@ public class DetailsViewFactory extends JBPanel {
         replaceAndUpdateUI(panel, gridPanel, BorderLayout.NORTH);
     }
 
-    private static JPanel createCommonGridPanel(JPanel panel, ScanTreeNode node) {
+    private static JPanel createCommonGridPanel(JPanel panel, ScanTreeNode node) { // todo continue from here 
         if (node == null || node.getGeneralInfo() == null) {
             replaceAndUpdateUI(panel, createDisabledTextLabel("Component information is not available"),
                     BorderLayout.CENTER);
@@ -52,7 +52,7 @@ public class DetailsViewFactory extends JBPanel {
         JPanel gridPanel = new JBPanel(new GridBagLayout());
         gridPanel.setBackground(UIUtil.getTableBackground());
         String pkgType = StringUtils.capitalize(node.getGeneralInfo().pkgType);
-        if (StringUtils.isBlank(pkgType)) {
+        if (StringUtils.isBlank(pkgType)) { //todo some bug here with war package
             // No package type
             addJtext(gridPanel, 0, "Group:", node.getGeneralInfo().getGroupId());
             addJtext(gridPanel, 1, "Artifact:", node.getGeneralInfo().getArtifactId());
@@ -109,7 +109,7 @@ public class DetailsViewFactory extends JBPanel {
     }
 
     private static String createLicenseString(License license) {
-        if (license.fullName.equals("Unknown license")) {
+        if (StringUtils.isBlank(license.fullName) || StringUtils.isBlank(license.name) || license.fullName.equals("Unknown license")) {
             return license.name;
         }
         return license.fullName + " (" + license.name + ")";

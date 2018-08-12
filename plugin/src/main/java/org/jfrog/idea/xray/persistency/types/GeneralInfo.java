@@ -50,6 +50,31 @@ public class GeneralInfo implements Serializable {
         return isValid() ? componentId.substring(componentId.lastIndexOf(":") + 1) : "";
     }
 
+    public GeneralInfo componentId(String componentId) {
+        this.componentId = componentId;
+        return this;
+    }
+
+    public GeneralInfo name(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public GeneralInfo path(String path) {
+        this.path = path;
+        return this;
+    }
+
+    public GeneralInfo pkgType(String pkgType) {
+        this.pkgType = pkgType;
+        return this;
+    }
+
+    public GeneralInfo sha256(String sha256) {
+        this.sha256 = sha256;
+        return this;
+    }
+
     private boolean isValid() {
         int colonCount = StringUtils.countMatches(componentId, ":");
         if (colonCount != 1 && colonCount != 2) {

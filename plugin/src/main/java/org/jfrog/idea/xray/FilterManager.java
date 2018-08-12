@@ -63,9 +63,10 @@ public class FilterManager {
     }
 
     public Set<Issue> filterIssues(Set<Issue> allIssues) {
-        return allIssues.stream().
-                filter(this::isSeveritySelected).
-                collect(Collectors.toSet());
+        return allIssues
+                .stream()
+                .filter(this::isSeveritySelected)
+                .collect(Collectors.toSet());
     }
 
     /**

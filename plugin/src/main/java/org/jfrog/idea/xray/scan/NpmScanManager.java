@@ -48,7 +48,7 @@ public class NpmScanManager extends ScanManager {
     private NpmDriver npmDriver;
 
     public NpmScanManager(Project project) {
-        super(project);
+        super(project, false);
         npmDriver = new NpmDriver();
         try {
             Path installationPath = Paths.get(getProjectBasePath(project), INSTALLATION_DIR);
@@ -71,6 +71,10 @@ public class NpmScanManager extends ScanManager {
         Path InstallationPath = Paths.get(getProjectBasePath(project), INSTALLATION_DIR);
         Files.createDirectories(InstallationPath);
         return npmScanManager;
+    }
+
+    public static List<Path> GetNpmProjectPaths(Project project) {
+        return new LinkedList<>();
     }
 
     public static boolean isApplicable(@NotNull Project project) {
@@ -127,6 +131,7 @@ public class NpmScanManager extends ScanManager {
     protected Components collectComponentsToScan(@Nullable DataNode<ProjectData> externalProject) {
         Components components = ComponentsFactory.create();
         addAllArtifacts(components, rootNode, NPM_PREFIX);
+//        addModule(components, rootNode, NPM_PREFIX);
         return components;
     }
 

@@ -55,6 +55,7 @@ import static org.jfrog.idea.xray.utils.Utils.MINIMAL_XRAY_VERSION_SUPPORTED;
 public abstract class ScanManager {
 
     public static final String ROOT_NODE_HEADER = "All components";
+    boolean isMultimoduleProject;
     static final String GAV_PREFIX = "gav://";
     private final static int NUMBER_OF_ARTIFACTS_BULK_SCAN = 100;
 
@@ -68,8 +69,9 @@ public abstract class ScanManager {
     ScanManager() {
     }
 
-    ScanManager(Project project) {
+    ScanManager(Project project, boolean isMultiModule) {
         this.project = project;
+        this.isMultimoduleProject = isMultiModule;
         registerOnChangeHandlers();
     }
 
@@ -257,7 +259,7 @@ public abstract class ScanManager {
      * @param componentId artifact component ID
      * @return {@link Artifact} according to the component ID.
      */
-    private Artifact getArtifactSummary(String componentId) {
+    Artifact getArtifactSummary(String componentId) {
         ScanCache scanCache = ScanCache.getInstance(project);
         return scanCache.getArtifact(componentId);
     }

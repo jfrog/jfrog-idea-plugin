@@ -45,7 +45,8 @@ public class FilterMenu<FilterType> extends JBPopupMenu {
     private void addCheckboxes(boolean putUnknownLast) {
         add(selectAllCheckbox);
         if (putUnknownLast) {
-            checkBoxMenuItems.stream()
+            checkBoxMenuItems
+                    .stream()
                     .sorted(Comparator.comparing(item -> "Unknown".equals(item.getText()) ? 1 : -1))
                     .forEach(this::add);
         } else {

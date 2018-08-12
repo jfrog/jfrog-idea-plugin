@@ -39,13 +39,22 @@ public class GradleScanManager extends ScanManager {
     private Collection<DataNode<LibraryDependencyData>> libraryDependencies;
     private ScanTreeNode rootNode = new ScanTreeNode(ScanManager.ROOT_NODE_HEADER);
 
-    public GradleScanManager(Project project) {
-        super(project);
+    public GradleScanManager(Project project, boolean isMultiModule) {
+        super(project, isMultiModule || isMultiModuleProject(project));
     }
 
     public static boolean isApplicable(@NotNull Project project) {
         GradleSettings.MyState state = GradleSettings.getInstance(project).getState();
         return state != null && !state.getLinkedExternalProjectsSettings().isEmpty();
+    }
+
+    private static boolean isMultiModuleProject(@NotNull Project project) {
+        GradleSettings.MyState state = GradleSettings.getInstance(project).getState();
+        if (state == null || state.getLinkedExternalProjectsSettings() == null) {
+            return false;
+        }
+        return state.getLinkedExternalProjectsSettings().size() > 1 ||
+                state.getLinkedExternalProjectsSettings().iterator().next().getModules().size() > 1;
     }
 
     @Override
@@ -74,8 +83,9 @@ public class GradleScanManager extends ScanManager {
         rootNode = new ScanTreeNode(ScanManager.ROOT_NODE_HEADER);
         if (libraryDependencies == null) {
             libraryDependencies = ExternalSystemApiUtil.findAllRecursively(externalProject, ProjectKeys.LIBRARY_DEPENDENCY);
-        }
-        libraryDependencies.stream()
+        }// todo
+        libraryDependencies
+                .stream()
                 .filter(GradleScanManager::isRootDependency)
                 .filter(distinctByName(dataNode -> dataNode.getData().getExternalName()))
                 .forEach(dataNode -> populateDependenciesTree(rootNode, dataNode));

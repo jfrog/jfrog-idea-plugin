@@ -1,5 +1,7 @@
 package org.jfrog.idea.xray;
 
+import com.google.common.collect.Sets;
+import org.apache.commons.lang.StringUtils;
 import org.jfrog.idea.xray.persistency.types.GeneralInfo;
 import org.jfrog.idea.xray.persistency.types.Issue;
 import org.jfrog.idea.xray.persistency.types.License;
@@ -19,6 +21,7 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
     private Set<License> licenses = new HashSet<>();
     private GeneralInfo generalInfo;
     private Issue topIssue = new Issue();
+    private String moduleName = "";
 
     public ScanTreeNode(Object userObject) {
         super(userObject);
@@ -34,6 +37,10 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
 
     public void setGeneralInfo(GeneralInfo generalInfo) {
         this.generalInfo = generalInfo;
+    }
+
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
     }
 
     /**
@@ -79,6 +86,13 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
     }
 
     /**
+     * @return Module name or empty a string if the node is not module
+     */
+    public String getModuleName() {
+        return moduleName;
+    }
+
+    /**
      * 1. Populate current node's issues components
      * 2. Populate current node and subtree's issues
      * 3. Populate current node and subtree's top issue
@@ -114,5 +128,10 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
                 topIssue = issue;
             }
         });
+    }
+
+    @Override
+    public String toString() {
+        return StringUtils.isNotBlank(moduleName) ? moduleName : super.toString();
     }
 }
