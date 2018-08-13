@@ -117,11 +117,10 @@ public class MavenScanManager extends ScanManager {
      * Populate root modules ScanTreeNode with issues, licenses and general info from the scan cache.
      */
     private ScanTreeNode populateScanTreeNode(MavenProject mavenProject) {
-        ScanTreeNode node = new ScanTreeNode(mavenProject.getMavenId());
+        ScanTreeNode node = new ScanTreeNode(mavenProject.getMavenId().getArtifactId(), true);
         node.setGeneralInfo(new GeneralInfo()
                 .componentId(mavenProject.getMavenId().toString())
                 .pkgType("maven"));
-        node.setModuleName(mavenProject.getMavenId().getArtifactId());
         Artifact scanArtifact = getArtifactSummary(mavenProject.getMavenId().getArtifactId());
         if (scanArtifact != null) {
             node.setLicenses(Sets.newHashSet(scanArtifact.licenses));

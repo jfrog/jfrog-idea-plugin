@@ -21,10 +21,15 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
     private Set<License> licenses = new HashSet<>();
     private GeneralInfo generalInfo;
     private Issue topIssue = new Issue();
-    private String moduleName = "";
+    private boolean isModule;
 
     public ScanTreeNode(Object userObject) {
         super(userObject);
+    }
+
+    public ScanTreeNode(Object userObject, boolean isModule) {
+        super(userObject);
+        this.isModule = isModule;
     }
 
     public void setIssues(Set<Issue> issues) {
@@ -37,10 +42,6 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
 
     public void setGeneralInfo(GeneralInfo generalInfo) {
         this.generalInfo = generalInfo;
-    }
-
-    public void setModuleName(String moduleName) {
-        this.moduleName = moduleName;
     }
 
     /**
@@ -89,10 +90,10 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
     }
 
     /**
-     * @return true iff this node is module
+     * @return true iff this node is a module
      */
     public boolean isModule() {
-        return StringUtils.isNotBlank(moduleName);
+        return this.isModule;
     }
 
     /**
@@ -132,10 +133,5 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
                 topIssue = issue;
             }
         });
-    }
-
-    @Override
-    public String toString() {
-        return StringUtils.isNotBlank(moduleName) ? moduleName : super.toString();
     }
 }
