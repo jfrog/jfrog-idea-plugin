@@ -14,6 +14,7 @@ import com.intellij.openapi.externalSystem.util.Order;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.messages.MessageBus;
+import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.gradle.util.GradleConstants;
@@ -22,6 +23,7 @@ import org.jfrog.idea.configuration.GlobalSettings;
 import org.jfrog.idea.xray.scan.ScanManager;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by Yahav Itzhak on 9 Nov 2017.
@@ -51,19 +53,19 @@ public class XrayDependencyDataService extends AbstractProjectDataService<Librar
             return;
         }
 
-        ScanManager scanManager = ScanManagerFactory.getScanManager(project);
-        if (scanManager == null) {
-            ScanManagerFactory scanManagerFactory = ServiceManager.getService(project, ScanManagerFactory.class);
-            scanManagerFactory.initScanManager(project);
-            scanManager = ScanManagerFactory.getScanManager(project);
-            if (scanManager == null) {
+        List<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(project);
+        if (CollectionUtils.isEmpty(scanManagers)) {
+            ScanManagersFactory scanManagersFactory = ServiceManager.getService(project, ScanManagersFactory.class);
+            scanManagersFactory.initScanManagers(project);
+            scanManagers = ScanManagersFactory.getScanManagers(project);
+            if (CollectionUtils.isEmpty(scanManagers)) {
                 return;
             }
             MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
             messageBus.syncPublisher(Events.ON_IDEA_FRAMEWORK_CHANGE).update();
         }
         if (GlobalSettings.getInstance().isCredentialsSet()) {
-            scanManager.asyncScanAndUpdateResults(true, toImport);
+            scanManagers.forEach(scanManager -> scanManager.asyncScanAndUpdateResults(true, toImport));
         }
     }
 }

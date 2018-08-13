@@ -39,7 +39,7 @@ public class NpmScanManager extends ScanManager {
     private NpmDriver npmDriver;
 
     public NpmScanManager(Project project) {
-        super(project, true);
+        super(project);
         npmDriver = new NpmDriver();
     }
 

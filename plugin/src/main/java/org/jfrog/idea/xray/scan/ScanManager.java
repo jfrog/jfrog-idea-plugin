@@ -22,13 +22,11 @@ import com.jfrog.xray.client.impl.services.summary.ComponentDetailImpl;
 import com.jfrog.xray.client.services.summary.ComponentDetail;
 import com.jfrog.xray.client.services.summary.Components;
 import com.jfrog.xray.client.services.summary.SummaryResponse;
-import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfrog.idea.Events;
 import org.jfrog.idea.configuration.GlobalSettings;
 import org.jfrog.idea.configuration.XrayServerConfig;
-import org.jfrog.idea.ui.xray.models.IssuesTableModel;
 import org.jfrog.idea.xray.FilterManager;
 import org.jfrog.idea.xray.ScanTreeNode;
 import org.jfrog.idea.xray.persistency.ScanCache;
@@ -38,7 +36,6 @@ import org.jfrog.idea.xray.persistency.types.License;
 import org.jfrog.idea.xray.utils.Utils;
 
 import javax.swing.*;
-import javax.swing.table.TableModel;
 import javax.swing.tree.TreeModel;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -55,8 +52,7 @@ import static org.jfrog.idea.xray.utils.Utils.MINIMAL_XRAY_VERSION_SUPPORTED;
  */
 public abstract class ScanManager {
 
-    static final String ROOT_NODE_HEADER = "All components";
-    boolean isMultimoduleProject;
+    public static final String ROOT_NODE_HEADER = "All components";
     static final String GAV_PREFIX = "gav://";
     private final static int NUMBER_OF_ARTIFACTS_BULK_SCAN = 100;
 
@@ -70,9 +66,8 @@ public abstract class ScanManager {
     ScanManager() {
     }
 
-    ScanManager(Project project, boolean isMultiModule) {
+    ScanManager(Project project) {
         this.project = project;
-        this.isMultimoduleProject = isMultiModule;
         registerOnChangeHandlers();
     }
 
@@ -240,25 +235,31 @@ public abstract class ScanManager {
     /**
      * filter scan components tree model according to the user filters and sort the issues tree.
      */
-    public void filterAndSort(TreeModel issuesTreeModel, TreeModel licensesTreeModel) {
+    public void filterAndSort(TreeModel issuesTreeModel, TreeModel licensesTreeModel, boolean isSingleScanner) {
         if (scanResults == null) {
             return;
         }
         FilterManager filterManager = FilterManager.getInstance(project);
         ScanTreeNode issuesFilteredRoot = (ScanTreeNode) issuesTreeModel.getRoot();
         ScanTreeNode licenseFilteredRoot = (ScanTreeNode) licensesTreeModel.getRoot();
-        filterManager.applyFilters((ScanTreeNode) scanResults.getRoot(), issuesFilteredRoot, licenseFilteredRoot);
+        ScanTreeNode unfilteredRoot = (ScanTreeNode) scanResults.getRoot();
+        // Existence of more than one scanner indicates that there are more than one technology in the project. Therefor,
+        // the base module should be displayed.
+        if (isSingleScanner && unfilteredRoot.getChildren().size() == 1) {
+            unfilteredRoot = unfilteredRoot.getChildren().firstElement();
+        }
+        filterManager.applyFilters(unfilteredRoot, issuesFilteredRoot, licenseFilteredRoot);
         issuesFilteredRoot.setIssues(issuesFilteredRoot.processTreeIssues());
     }
 
     /**
      * return filtered issues according to the selected component and user filters.
      */
-    public TableModel getFilteredScanIssues(List<ScanTreeNode> selectedNodes) {
+    public Set<Issue> getFilteredScanIssues(List<ScanTreeNode> selectedNodes) {
         FilterManager filterManager = FilterManager.getInstance(project);
         Set<Issue> filteredIssues = Sets.newHashSet();
         selectedNodes.forEach(node -> filteredIssues.addAll(filterManager.filterIssues(node.getIssues())));
-        return new IssuesTableModel(filteredIssues);
+        return filteredIssues;
     }
 
     /**
@@ -320,7 +321,7 @@ public abstract class ScanManager {
             scanComponents(xray, partialComponents);
             indicator.setFraction(1);
         } catch (ProcessCanceledException e) {
-            Utils.notify(logger, "JFrog Xray","Xray scan was canceled", NotificationType.INFORMATION);
+            Utils.notify(logger, "JFrog Xray", "Xray scan was canceled", NotificationType.INFORMATION);
         } catch (IOException e) {
             Utils.notify(logger, "JFrog Xray scan failed", e, NotificationType.ERROR);
         }

@@ -29,8 +29,8 @@ import java.util.*;
  */
 public class MavenScanManager extends ScanManager {
 
-    public MavenScanManager(Project project, boolean isMultiModule) {
-        super(project, isMultiModule || MavenProjectsManager.getInstance(project).getRootProjects().size() > 1);
+    public MavenScanManager(Project project) {
+        super(project);
         MavenProjectsManager.getInstance(project).addManagerListener(new MavenProjectsListener());
     }
 
@@ -74,13 +74,6 @@ public class MavenScanManager extends ScanManager {
         // Any parent pom will appear in the dependencies tree. We want to display it as a module instead.
         Set<String> projects = Sets.newHashSet();
         MavenProjectsManager.getInstance(project).getProjects().forEach(project -> projects.add(project.getMavenId().getKey()));
-        if (!isMultimoduleProject) {
-            MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject -> {
-                addMavenProjectDependencies(rootNode, rootMavenProject, added, projects);
-                addSubmodules(rootNode, rootMavenProject, added, projects);
-            });
-            return issuesTree;
-        }
         MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject ->
                 populateMavenModule(rootNode, rootMavenProject, added, projects));
         return issuesTree;
