@@ -89,10 +89,10 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
     }
 
     /**
-     * @return Module name or empty a string if the node is not module
+     * @return true iff this node is module
      */
-    public String getModuleName() {
-        return moduleName;
+    public boolean isModule() {
+        return StringUtils.isNotBlank(moduleName);
     }
 
     /**
@@ -118,6 +118,7 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
         getChildren().sort(Comparator
                 .comparing(ScanTreeNode::getTopIssue, Comparator.comparing(Issue::getSeverity))
                 .thenComparing(ScanTreeNode::getIssueCount)
+                .thenComparing(ScanTreeNode::isModule)
                 .thenComparing(ScanTreeNode::getChildCount)
                 .reversed());
     }

@@ -32,7 +32,7 @@ public class IssuesTreeCellRenderer extends JBDefaultTreeCellRenderer {
         cellRenderer.setIcon(IconUtils.load(StringUtils.lowerCase(topIssue.getSeverity().toString())));
 
         Font font = cellRenderer.getFont();
-        if (StringUtils.isNotBlank(((ScanTreeNode) value).getModuleName())) {
+        if (((ScanTreeNode) value).isModule()) {
             cellRenderer.setFont(new Font(font.getName(), Font.BOLD, originalFontSize + 1));
             return cellRenderer;
         }
