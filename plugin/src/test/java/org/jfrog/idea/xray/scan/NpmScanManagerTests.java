@@ -8,7 +8,10 @@ import com.jfrog.xray.client.services.summary.Components;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jfrog.idea.xray.ScanTreeNode;
+import org.jfrog.idea.xray.utils.npm.NpmDriver;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
@@ -30,19 +33,22 @@ public class NpmScanManagerTests {
 
     private Project project;
     private NpmScanManager scanManager;
+    private static final String FIRST_PACKAGE = "package-name1";
+    private static final String SECOND_PACKAGE = "package-name2";
     private static final String DEBUG_COMPONENT_ID = "debug:3.1.0";
     private static final String SEND_COMPONENT_ID = "send:0.1.0";
     private static final List<String> DEBUG_COMPONENTS_IDS = Lists.newArrayList("ms:2.0.0");
     private static final List<String> SEND_COMPONENTS_IDS = Lists.newArrayList("debug:3.1.0", "fresh:0.1.0", "mime:1.2.6", "range-parser:0.0.4");
 
     @BeforeTest
-    public void initProject() {
+    public void init() {
         project = new NpmProjectImpl();
-        try {
-            scanManager = NpmScanManager.CreateNpmScanManager(project);
-        } catch (IOException e) {
-            fail("Fail to create NpmScanManager", e);
-        }
+        scanManager = NpmScanManager.CreateNpmScanManager(project);
+    }
+
+    @AfterTest
+    public void terminate() {
+        project.dispose();
     }
 
     @Test
@@ -59,28 +65,38 @@ public class NpmScanManagerTests {
      */
     @Test(dependsOnMethods = {"testIsApplicable"})
     public void testRefreshDependencies() {
+        NpmDriver npmDriver = new NpmDriver();
+        try {
+            npmDriver.install(project.getBasePath());
+            npmDriver.install(Paths.get(project.getBasePath(), "a").toString());
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
         scanManager.refreshDependencies(getRefreshDependenciesCbk(), null);
         assertEquals(2, scanManager.rootNode.getChildCount());
         scanManager.rootNode.getChildren().forEach(child -> {
-            String childComponent = child.getUserObject().toString();
-            assertNotNull(childComponent);
-            switch (childComponent) {
-                case DEBUG_COMPONENT_ID:
-                    assertEquals(DEBUG_COMPONENTS_IDS.size(), child.getChildCount());
-                    child.getChildren().forEach(debugChild -> {
+            assertEquals(child.getChildCount(), 1);
+            String packageName = child.getUserObject().toString();
+            assertNotNull(packageName);
+            ScanTreeNode dependency = child.getChildren().get(0);
+            switch (packageName) {
+                case FIRST_PACKAGE:
+                    assertEquals(DEBUG_COMPONENTS_IDS.size(), dependency.getChildCount());
+                    dependency.getChildren().forEach(debugChild -> {
                         String debugChildComponent = debugChild.getUserObject().toString();
                         assertTrue(DEBUG_COMPONENTS_IDS.contains(debugChildComponent));
                     });
                     break;
-                case SEND_COMPONENT_ID:
-                    assertEquals(SEND_COMPONENTS_IDS.size(), child.getChildCount());
-                    child.getChildren().forEach(sendChild -> {
+
+                case SECOND_PACKAGE:
+                    assertEquals(SEND_COMPONENTS_IDS.size(), dependency.getChildCount());
+                    dependency.getChildren().forEach(sendChild -> {
                         String sendChildComponent = sendChild.getUserObject().toString();
                         assertTrue(SEND_COMPONENTS_IDS.contains(sendChildComponent));
                     });
                     break;
                 default:
-                    fail("Wrong child " + childComponent);
+                    fail("Wrong child " + packageName);
                     break;
             }
         });

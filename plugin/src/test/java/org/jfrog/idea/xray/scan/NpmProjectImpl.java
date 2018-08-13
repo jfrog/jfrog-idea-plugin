@@ -8,18 +8,34 @@ import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.impl.MessageBusImpl;
+import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.picocontainer.PicoContainer;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+
+import static org.testng.Assert.fail;
 
 /**
  * Created by Yahav Itzhak on 25 Dec 2017.
  */
 public class NpmProjectImpl implements Project{
 
-    private String bashPath = Paths.get(".").toAbsolutePath().normalize().resolve(Paths.get("src", "test", "resources", "org", "jfrog", "idea", "xray", "scan", "test")).toString();
+    private File PROJECT_PATH = Paths.get(".").toAbsolutePath().normalize().resolve(Paths.get("src", "test", "resources", "org", "jfrog", "idea", "xray", "scan", "test")).toFile();
+    private File bashPath;
+
+    public NpmProjectImpl() {
+        try {
+            bashPath = Files.createTempDirectory("NpmScanManagerTestProject").toFile();
+            FileUtils.copyDirectory(PROJECT_PATH, bashPath);
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+    }
 
     @NotNull
     @Override
@@ -32,10 +48,9 @@ public class NpmProjectImpl implements Project{
         return null;
     }
 
-    @Nullable
     @Override
     public String getBasePath() {
-        return bashPath;
+        return bashPath.getAbsolutePath();
     }
 
     @Nullable
@@ -145,7 +160,11 @@ public class NpmProjectImpl implements Project{
 
     @Override
     public void dispose() {
-
+        try {
+            FileUtils.forceDelete(bashPath);
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
     }
 
     @Nullable

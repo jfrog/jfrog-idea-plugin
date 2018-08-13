@@ -1,7 +1,6 @@
 package org.jfrog.idea.xray.utils.npm;
 
 import com.google.common.collect.Lists;
-import com.intellij.openapi.diagnostic.Logger;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -11,17 +10,14 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 
-import static org.jfrog.idea.xray.scan.NpmScanManager.INSTALLATION_DIR;
-
 /**
  * Created by Yahav Itzhak on 17 Dec 2017.
  */
 public class NpmPackageFileFinder implements FileVisitor<Path> {
 
-    private static final List<String> EXCLUDED_DIRS = Lists.newArrayList("node_modules", INSTALLATION_DIR);
+    private static final List<String> EXCLUDED_DIRS = Lists.newArrayList("node_modules", ".idea");
     private Path projectPath;
     private List<String> applicationPaths = Lists.newArrayList();
-    static final Logger logger = Logger.getInstance(NpmPackageFileFinder.class);
 
     public NpmPackageFileFinder(Path projectPath) {
         this.projectPath = projectPath;
