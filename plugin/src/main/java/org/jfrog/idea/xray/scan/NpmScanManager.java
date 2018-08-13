@@ -85,8 +85,7 @@ public class NpmScanManager extends ScanManager {
                 if (jsonRoot.get("problems") != null) {
                     packageName += " (Installation required)";
                 }
-                ScanTreeNode module = new ScanTreeNode(packageName);
-                module.setModuleName(packageName);
+                ScanTreeNode module = new ScanTreeNode(packageName, true);
                 rootNode.add(module);
                 JsonNode dependencies = jsonRoot.get("dependencies");
                 if (dependencies != null) {
