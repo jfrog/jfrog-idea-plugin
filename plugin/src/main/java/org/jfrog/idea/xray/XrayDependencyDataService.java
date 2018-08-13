@@ -53,14 +53,16 @@ public class XrayDependencyDataService extends AbstractProjectDataService<Librar
             return;
         }
 
+        // Check if the project was supported
         List<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(project);
+        boolean isScannersExists = CollectionUtils.isNotEmpty(scanManagers);
+        ScanManagersFactory.refreshScanManagers(project);
+        scanManagers = ScanManagersFactory.getScanManagers(project);
         if (CollectionUtils.isEmpty(scanManagers)) {
-            ScanManagersFactory scanManagersFactory = ServiceManager.getService(project, ScanManagersFactory.class);
-            scanManagersFactory.initScanManagers(project);
-            scanManagers = ScanManagersFactory.getScanManagers(project);
-            if (CollectionUtils.isEmpty(scanManagers)) {
-                return;
-            }
+            return;
+        }
+        // Case project was not supported or did not initialized
+        if (!isScannersExists) {
             MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
             messageBus.syncPublisher(Events.ON_IDEA_FRAMEWORK_CHANGE).update();
         }

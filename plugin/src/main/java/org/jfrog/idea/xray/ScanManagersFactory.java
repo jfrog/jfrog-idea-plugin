@@ -39,4 +39,9 @@ public class ScanManagersFactory {
         ScanManagersFactory scanManagersFactory = ServiceManager.getService(project, ScanManagersFactory.class);
         return scanManagersFactory.scanManagers;
     }
+
+    public static void refreshScanManagers(@NotNull Project project) {
+        ScanManagersFactory scanManagersFactory = ServiceManager.getService(project, ScanManagersFactory.class);
+        scanManagersFactory.initScanManagers(project);
+    }
 }
