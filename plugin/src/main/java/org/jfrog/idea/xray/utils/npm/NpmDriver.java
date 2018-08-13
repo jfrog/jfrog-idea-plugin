@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.collect.Lists;
-import com.intellij.notification.NotificationType;
-import com.intellij.openapi.diagnostic.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.idea.xray.utils.Utils;
 
@@ -19,7 +17,6 @@ import static org.jfrog.idea.xray.utils.Utils.readStream;
  */
 public class NpmDriver {
 
-    private static final Logger logger = Logger.getInstance(NpmDriver.class);
     private static ObjectReader jsonReader = new ObjectMapper().reader();
 
     private static NpmCommandRes exeNpmCommand(List<String> args) throws InterruptedException, IOException {
@@ -53,7 +50,7 @@ public class NpmDriver {
     }
 
     public void install(String appDir) throws IOException {
-        List<String> args = Lists.newArrayList("install", "--only=production", appDir, "--prefix", appDir);
+        List<String> args = Lists.newArrayList("install", "--only=production", "\"" + appDir + "\"", "--prefix", "\"" + appDir + "\"");
         try {
             NpmCommandRes npmCommandRes = exeNpmCommand(args);
             if (!npmCommandRes.isOk()) {
@@ -65,15 +62,10 @@ public class NpmDriver {
     }
 
     public JsonNode list(String appDir) throws IOException {
-        List<String> args = Lists.newArrayList("ls", "--prefix", appDir, "--json");
+        List<String> args = Lists.newArrayList("ls", "--prefix", "\"" + appDir + "\"", "--json");
         try {
             NpmCommandRes npmCommandRes = exeNpmCommand(args);
-            JsonNode jsonNode = jsonReader.readTree(npmCommandRes.res);
-            if (!npmCommandRes.isOk()) {
-                Utils.notify(logger, "JFrog Xray", "JFrog Xray scan encountered errors. See logs for further information.", NotificationType.WARNING);
-                Utils.log(logger, "JFrog Xray", npmCommandRes.err, NotificationType.WARNING);
-            }
-            return jsonNode;
+            return jsonReader.readTree(npmCommandRes.res);
         } catch (IOException|InterruptedException e) {
             throw new IOException("'npm ls' failed", e);
         }
