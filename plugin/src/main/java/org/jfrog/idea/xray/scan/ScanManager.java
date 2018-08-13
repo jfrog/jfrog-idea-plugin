@@ -113,7 +113,7 @@ public abstract class ScanManager {
 
     void addAllArtifacts(Components components, ScanTreeNode rootNode, String prefix) {
         rootNode.getChildren().forEach(child -> {
-            if (StringUtils.isBlank(child.getModuleName())) {
+            if (!child.isModule()) {
                 ComponentDetailImpl scanComponent = (ComponentDetailImpl) child.getUserObject();
                 components.addComponent(prefix + scanComponent.getComponentId(), scanComponent.getSha1());
             }

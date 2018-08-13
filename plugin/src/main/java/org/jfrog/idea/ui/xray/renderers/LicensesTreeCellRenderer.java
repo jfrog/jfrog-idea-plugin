@@ -26,7 +26,7 @@ public class LicensesTreeCellRenderer extends JBDefaultTreeCellRenderer {
         tree.putClientProperty(TREE_TABLE_TREE_KEY, new JBTable());
         cellRenderer.setIcon(null);
         Font font = cellRenderer.getFont();
-        if (StringUtils.isNotBlank(((ScanTreeNode) value).getModuleName())) {
+        if (((ScanTreeNode) value).isModule()) {
             cellRenderer.setFont(new Font(font.getName(), Font.BOLD, originalFontSize + 1));
             return cellRenderer;
         }
