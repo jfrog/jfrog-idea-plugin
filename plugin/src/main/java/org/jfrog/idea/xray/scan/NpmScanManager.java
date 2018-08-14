@@ -70,7 +70,7 @@ public class NpmScanManager extends ScanManager {
                 JsonNode jsonRoot = npmDriver.list(appDir);
                 String packageName = jsonRoot.get("name").asText();
                 if (jsonRoot.get("problems") != null) {
-                    packageName += " (Partial Information - see logs for more info)";
+                    packageName += " (Missing Information)";
                     Utils.log(logger, "JFrog Xray - npm ls command result had errors", jsonRoot.get("problems").toString(), NotificationType.ERROR);
                 }
                 ScanTreeNode module = new ScanTreeNode(packageName, true);

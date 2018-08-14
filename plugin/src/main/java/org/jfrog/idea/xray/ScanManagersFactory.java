@@ -13,8 +13,8 @@ import org.jfrog.idea.xray.utils.Utils;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by romang on 3/2/17.
@@ -51,11 +51,9 @@ public class ScanManagersFactory {
 
     private void addNpmScannerIfNeeded(Project project) {
         Set<Path> projectPaths = new HashSet<>();
-        scanManagers
-                .stream()
-                .filter(scanManager -> !(scanManager instanceof NpmScanManager))
-                .forEach(scanManager -> projectPaths.addAll(scanManager.getProjectPaths()));
-        Set<Path> finalProjectPaths = filterProjectPaths(projectPaths);
+        projectPaths.add(Paths.get(ScanManager.getProjectBasePath(project)));
+        scanManagers.forEach(scanManager -> projectPaths.addAll(scanManager.getProjectPaths()));
+        Set<Path> finalProjectPaths = Utils.filterProjectPaths(projectPaths);
         Set<String> applicationsDirs;
         try {
             applicationsDirs = NpmScanManager.findApplicationDirs(finalProjectPaths);
@@ -79,38 +77,5 @@ public class ScanManagersFactory {
         scanManagersFactory.setScanManagers(project);
     }
 
-    /**
-     *
-     * @param projectPaths
-     * @return
-     */
-    private static Set<Path> filterProjectPaths(Set<Path> projectPaths) {
-        Set<Path> finalPaths = new HashSet<>();
-        Comparator<Path> compByPathLength = Comparator.comparingInt(pathA -> pathA.toString().length());
-        // Sort paths by length
-        List<Path> sortedList = projectPaths.stream().sorted(compByPathLength).collect(Collectors.toList());
-        projectPaths.forEach(path -> {
-                    Iterator iterator = sortedList.iterator();
-                    boolean isARootPath = true;
-                    // Iterate over the sorted by length list, todo add documentation
-                    while (iterator.hasNext()) {
-                        Path shorterPath = (Path) iterator.next();
-                        // Path is shorter than the shortPath therefore all the next paths will not patch
-                        if (path.toString().length() <= shorterPath.toString().length()) {
-                            break;
-                        }
-                        // The path is subPath and we should not add it to the list
-                        if (path.startsWith(shorterPath)) {
-                            isARootPath = false;
-                            break;
-                        }
-                    }
-                    if (isARootPath) {
-                        finalPaths.add(path);
-                    }
-                }
 
-        );
-        return finalPaths;
-    }
 }

@@ -60,10 +60,6 @@ public class NpmPackageFileFinder implements FileVisitor<Path> {
         return exc == null ? FileVisitResult.CONTINUE : FileVisitResult.SKIP_SUBTREE;
     }
 
-    private static boolean isYarn(String fileName) {
-        return "yarn.lock".equals(fileName);
-    }
-
     private static boolean isPackageFile(String fileName) {
         return "package.json".equals(fileName);
     }

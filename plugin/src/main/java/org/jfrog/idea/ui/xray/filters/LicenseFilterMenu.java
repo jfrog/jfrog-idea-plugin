@@ -28,7 +28,7 @@ public class LicenseFilterMenu extends FilterMenu<License> {
         scanManagers.forEach(scanManager ->
                 scanManager.getAllLicenses()
                         .stream()
-                        .filter(selectedLicenses::containsKey) // todo test
+                        .filter(license -> !selectedLicenses.containsKey(license))
                         .forEach(license -> selectedLicenses.put(license, true)));
         addComponents(selectedLicenses, true);
     }

@@ -12,10 +12,11 @@ import javax.swing.event.TreeExpansionListener;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by romang on 5/8/17.
@@ -151,5 +152,40 @@ public class Utils {
             }
         }
         return null;
+    }
+
+    /**
+     *
+     * @param projectPaths
+     * @return
+     */
+    public static Set<Path> filterProjectPaths(Set<Path> projectPaths) {
+        Set<Path> finalPaths = new HashSet<>();
+        Comparator<Path> compByPathLength = Comparator.comparingInt(pathA -> pathA.toString().length());
+        // Sort paths by length
+        List<Path> sortedList = projectPaths.stream().sorted(compByPathLength).collect(Collectors.toList());
+        projectPaths.forEach(path -> {
+                    Iterator iterator = sortedList.iterator();
+                    boolean isARootPath = true;
+                    // Iterate over the sorted by length list, todo add documentation
+                    while (iterator.hasNext()) {
+                        Path shorterPath = (Path) iterator.next();
+                        // Path is shorter than the shortPath therefore all the next paths will not patch
+                        if (path.toString().length() <= shorterPath.toString().length()) {
+                            break;
+                        }
+                        // The path is subPath and we should not add it to the list
+                        if (path.startsWith(shorterPath)) {
+                            isARootPath = false;
+                            break;
+                        }
+                    }
+                    if (isARootPath) {
+                        finalPaths.add(path);
+                    }
+                }
+
+        );
+        return finalPaths;
     }
 }

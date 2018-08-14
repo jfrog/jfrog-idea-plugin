@@ -31,9 +31,6 @@ import java.util.*;
  */
 public class MavenScanManager extends ScanManager {
 
-    public MavenScanManager() {
-    }
-
     public MavenScanManager(Project project) {
         super(project);
         MavenProjectsManager.getInstance(project).addManagerListener(new MavenProjectsListener());

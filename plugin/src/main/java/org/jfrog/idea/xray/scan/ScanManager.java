@@ -169,8 +169,6 @@ public abstract class ScanManager {
     }
 
     /**
-
-    /**
      * Launch async dependency scan.
      */
     public void asyncScanAndUpdateResults(boolean quickScan) {
@@ -363,7 +361,7 @@ public abstract class ScanManager {
         }
     }
 
-    static String getProjectBasePath(Project project) {
+    public static String getProjectBasePath(Project project) {
         return project.getBasePath() != null ? project.getBasePath() : "./";
     }
 

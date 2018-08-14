@@ -121,7 +121,8 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
                 .thenComparing(ScanTreeNode::getIssueCount)
                 .thenComparing(ScanTreeNode::isModule)
                 .thenComparing(ScanTreeNode::getChildCount)
-                .reversed());
+                .reversed()
+                .thenComparing(ScanTreeNode::toString));
     }
 
     private void setTopIssue() {
