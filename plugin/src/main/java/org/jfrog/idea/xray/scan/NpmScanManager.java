@@ -15,6 +15,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.jfrog.idea.xray.ScanTreeNode;
+import org.jfrog.idea.xray.persistency.types.GeneralInfo;
 import org.jfrog.idea.xray.utils.Utils;
 import org.jfrog.idea.xray.utils.npm.NpmDriver;
 import org.jfrog.idea.xray.utils.npm.NpmPackageFileFinder;
@@ -23,7 +24,10 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Yahav Itzhak on 13 Dec 2017.
@@ -73,7 +77,9 @@ public class NpmScanManager extends ScanManager {
                     packageName += " (Missing Information)";
                     Utils.log(logger, "JFrog Xray - npm ls command result had errors", jsonRoot.get("problems").toString(), NotificationType.ERROR);
                 }
+                String packageVersion = jsonRoot.get("version").asText();
                 ScanTreeNode module = new ScanTreeNode(packageName, true);
+                module.setGeneralInfo(new GeneralInfo().componentId(packageName + ":" + packageVersion).pkgType("npm").path(appDir));
                 rootNode.add(module);
                 JsonNode dependencies = jsonRoot.get("dependencies");
                 if (dependencies != null) {

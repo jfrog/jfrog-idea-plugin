@@ -18,13 +18,14 @@ import org.jetbrains.idea.maven.project.MavenProjectsManager;
 import org.jfrog.idea.xray.ScanTreeNode;
 import org.jfrog.idea.xray.persistency.types.Artifact;
 import org.jfrog.idea.xray.persistency.types.GeneralInfo;
-import org.jfrog.idea.xray.persistency.types.License;
 
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Created by romang on 3/2/17.
@@ -134,7 +135,6 @@ public class MavenScanManager extends ScanManager {
             node.setLicenses(Sets.newHashSet(scanArtifact.licenses));
             return node;
         }
-        node.setLicenses(new HashSet<>(Collections.singletonList(new License())));
         return node;
     }
 
