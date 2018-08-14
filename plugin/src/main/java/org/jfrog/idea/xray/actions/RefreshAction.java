@@ -10,6 +10,7 @@ import org.jfrog.idea.xray.ScanManagersFactory;
 import org.jfrog.idea.xray.scan.ScanManager;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by romang on 3/6/17.
@@ -20,7 +21,7 @@ public class RefreshAction extends AnAction {
     public void actionPerformed(AnActionEvent e) {
         if (e.getProject() != null) {
             // Check if the project was supported
-            List<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(e.getProject());
+            Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(e.getProject());
             boolean isScannersExists = CollectionUtils.isNotEmpty(scanManagers);
             ScanManagersFactory.refreshScanManagers(e.getProject());
             scanManagers = ScanManagersFactory.getScanManagers(e.getProject());

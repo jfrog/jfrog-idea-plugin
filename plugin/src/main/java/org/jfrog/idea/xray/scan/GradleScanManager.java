@@ -26,6 +26,7 @@ import org.jfrog.idea.xray.ScanTreeNode;
 
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.Function;
@@ -39,6 +40,9 @@ public class GradleScanManager extends ScanManager {
     private Collection<DataNode<LibraryDependencyData>> libraryDependencies;
     private ScanTreeNode rootNode = new ScanTreeNode(ScanManager.ROOT_NODE_HEADER);
 
+    public GradleScanManager() {
+    }
+
     public GradleScanManager(Project project) {
         super(project);
     }
@@ -46,6 +50,12 @@ public class GradleScanManager extends ScanManager {
     public static boolean isApplicable(@NotNull Project project) {
         GradleSettings.MyState state = GradleSettings.getInstance(project).getState();
         return state != null && !state.getLinkedExternalProjectsSettings().isEmpty();
+    }
+
+    public Set<Path> getProjectPaths() {
+        Set<Path> paths = super.getProjectPaths();
+        // todo
+        return paths;
     }
 
     @Override

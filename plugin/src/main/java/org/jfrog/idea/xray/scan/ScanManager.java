@@ -38,6 +38,8 @@ import org.jfrog.idea.xray.utils.Utils;
 import javax.swing.*;
 import javax.swing.tree.TreeModel;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
@@ -159,6 +161,14 @@ public abstract class ScanManager {
             SwingUtilities.invokeLater(() -> ProgressManager.getInstance().run(scanAndUpdateTask));
         }
     }
+
+    public Set<Path> getProjectPaths() {
+        Set<Path> paths = new HashSet<>();
+        paths.add(Paths.get(getProjectBasePath(project)));
+        return paths;
+    }
+
+    /**
 
     /**
      * Launch async dependency scan.
@@ -363,5 +373,14 @@ public abstract class ScanManager {
             // In tests we can't check if the user canceled the scan, since we don't have the ProgressManager service.
             ProgressManager.checkCanceled();
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getClass().hashCode();
+    }
+    @Override
+    public boolean equals(Object obj) {
+        return this.getClass().toString().equals(obj.getClass().toString());
     }
 }

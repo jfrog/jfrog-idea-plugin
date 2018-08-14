@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Yahav Itzhak on 17 Dec 2017.
@@ -16,11 +17,11 @@ import java.util.List;
 public class NpmPackageFileFinder implements FileVisitor<Path> {
 
     private static final List<String> EXCLUDED_DIRS = Lists.newArrayList("node_modules", ".idea");
-    private Path projectPath;
+    private Set<Path> projectPaths;
     private List<String> applicationPaths = Lists.newArrayList();
 
-    public NpmPackageFileFinder(Path projectPath) {
-        this.projectPath = projectPath;
+    public NpmPackageFileFinder(Set<Path> projectPaths) {
+        this.projectPaths = projectPaths;
     }
 
     /**
@@ -28,7 +29,9 @@ public class NpmPackageFileFinder implements FileVisitor<Path> {
      * @return List of package.json's parent directories.
      */
     public List<String> getPackageFilePairs() throws IOException {
-        Files.walkFileTree(projectPath, this);
+        for (Path projectPath : projectPaths) {
+            Files.walkFileTree(projectPath, this);
+        }
         return applicationPaths;
     }
 
@@ -40,9 +43,6 @@ public class NpmPackageFileFinder implements FileVisitor<Path> {
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
         String fileName = file.getFileName().toString();
-        if (isYarn(fileName)) {
-            throw new IOException("Yarn is not supported");
-        }
         if (isPackageFile(fileName)) {
             applicationPaths.add(file.getParent().toString());
         }

@@ -42,16 +42,16 @@ public class Utils {
     }
 
     public static void log(Logger logger, String title, String details, NotificationType level) {
-        switch (level) {
-            case ERROR:
-                logger.error(title, details);
-                break;
-            case WARNING:
-                logger.warn(title + "\n" + details);
-                break;
-            default:
-                logger.info(title + "\n" + details);
-        }
+//        switch (level) { // todo test logs
+//            case ERROR:
+//                logger.error(title, details);
+//                break;
+//            case WARNING:
+//                logger.warn(title + "\n" + details);
+//                break;
+//            default:
+//                logger.info(title + "\n" + details);
+//        }
         if (StringUtils.isBlank(details)) {
             details = title;
         }

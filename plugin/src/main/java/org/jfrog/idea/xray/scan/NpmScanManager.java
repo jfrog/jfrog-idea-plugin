@@ -1,7 +1,6 @@
 package org.jfrog.idea.xray.scan;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.Lists;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
@@ -12,8 +11,8 @@ import com.intellij.openapi.project.Project;
 import com.jfrog.xray.client.impl.ComponentsFactory;
 import com.jfrog.xray.client.impl.services.summary.ComponentDetailImpl;
 import com.jfrog.xray.client.services.summary.Components;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfrog.idea.xray.ScanTreeNode;
 import org.jfrog.idea.xray.utils.Utils;
@@ -24,10 +23,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Yahav Itzhak on 13 Dec 2017.
@@ -37,53 +33,45 @@ public class NpmScanManager extends ScanManager {
     static final String NPM_PREFIX = "npm://";
     ScanTreeNode rootNode = new ScanTreeNode(ROOT_NODE_HEADER);
     private NpmDriver npmDriver;
+    private Set<String> applicationsDirs;
 
-    public NpmScanManager(Project project) {
+    public NpmScanManager() {
+    }
+
+    public NpmScanManager(Project project, Set<String> applicationsDirs) {
         super(project);
         npmDriver = new NpmDriver();
+        this.applicationsDirs = applicationsDirs;
     }
 
-    private NpmScanManager() {
+    private NpmScanManager(Set<String> applicationsDirs) {
         super();
+        this.applicationsDirs = applicationsDirs;
     }
 
-    static NpmScanManager CreateNpmScanManager(Project project) {
-        NpmScanManager npmScanManager = new NpmScanManager();
+    static NpmScanManager CreateNpmScanManager(Project project, Set<String> applicationsDirs) {
+        NpmScanManager npmScanManager = new NpmScanManager(applicationsDirs);
         npmScanManager.project = project;
         npmScanManager.npmDriver = new NpmDriver();
         return npmScanManager;
     }
 
-    public static boolean isApplicable(@NotNull Project project) {
-        // 1. Check that npm is installed.
-        if (!NpmDriver.isNpmInstalled()) {
-            return false;
-        }
-        // 2. Check for existence of package.json files.
-        List<String> packageAppsPairs = Lists.newArrayList(); // List of package.json's directories.
-        try {
-            String basePath = getProjectBasePath(project);
-            findApplicationDirs(Paths.get(basePath), packageAppsPairs);
-        } catch (IOException e) {
-            return false;
-        }
-        return !packageAppsPairs.isEmpty();
+    public static boolean isApplicable(Set<String> applicationsDirs) {
+        // Check that npm is installed and application dirs exists
+        return NpmDriver.isNpmInstalled() && CollectionUtils.isNotEmpty(applicationsDirs);
     }
 
     @Override
     protected void refreshDependencies(ExternalProjectRefreshCallback cbk, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies) {
         try {
             rootNode = new ScanTreeNode(ROOT_NODE_HEADER);
-            String projectBasePath = getProjectBasePath(project);
-            List<String> applicationsDirs = Lists.newArrayList(); // Lists of package.json parent directories
-            findApplicationDirs(Paths.get(projectBasePath), applicationsDirs);
-            // This set is used to make sure the artifacts added are unique
             for (String appDir : applicationsDirs) {
                 checkCanceled();
                 JsonNode jsonRoot = npmDriver.list(appDir);
                 String packageName = jsonRoot.get("name").asText();
                 if (jsonRoot.get("problems") != null) {
-                    packageName += " (Installation required)";
+                    packageName += " (Partial Information - see logs for more info)";
+                    Utils.log(logger, "JFrog Xray - npm ls command result had errors", jsonRoot.get("problems").toString(), NotificationType.ERROR);
                 }
                 ScanTreeNode module = new ScanTreeNode(packageName, true);
                 rootNode.add(module);
@@ -97,7 +85,7 @@ public class NpmScanManager extends ScanManager {
             }
             cbk.onSuccess(null);
         } catch (ProcessCanceledException e) {
-            Utils.notify(logger, "JFrog Xray","Xray scan was canceled", NotificationType.INFORMATION);
+            Utils.notify(logger, "JFrog Xray", "Xray scan was canceled", NotificationType.INFORMATION);
         } catch (Exception e) {
             cbk.onFailure(e.getMessage(), e.getCause().getMessage());
         }
@@ -145,11 +133,13 @@ public class NpmScanManager extends ScanManager {
 
     /**
      * Get package.json parent directories.
-     * @param path - Input - The project base path
-     * @param applicationsDirs - Output - List of package.json parent directories
+     *
+     * @param paths - Input - List of project base paths
      */
-    private static void findApplicationDirs(Path path, List<String> applicationsDirs) throws IOException {
-        NpmPackageFileFinder npmPackageFileFinder = new NpmPackageFileFinder(path);
+    public static Set<String> findApplicationDirs(Set<Path> paths) throws IOException {
+        Set<String> applicationsDirs = new HashSet<>();
+        NpmPackageFileFinder npmPackageFileFinder = new NpmPackageFileFinder(paths);
         applicationsDirs.addAll(npmPackageFileFinder.getPackageFilePairs());
+        return applicationsDirs;
     }
 }

@@ -11,12 +11,12 @@ import org.jfrog.idea.configuration.GlobalSettings;
 import org.jfrog.idea.xray.ScanManagersFactory;
 import org.jfrog.idea.xray.scan.ScanManager;
 
-import java.util.List;
+import java.util.Set;
 
 public class XrayToolWindowFactory implements ToolWindowFactory {
     @Override
     public void createToolWindowContent(@NotNull final Project project, @NotNull final ToolWindow toolWindow) {
-        List<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(project);
+        Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(project);
         boolean isSupported = CollectionUtils.isNotEmpty(scanManagers);
         DumbService.getInstance(project).runWhenSmart(() ->
                 ServiceManager.getService(project, XrayToolWindow.class).initToolWindow(toolWindow, isSupported));

@@ -20,9 +20,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.jfrog.idea.xray.scan.NpmScanManager.NPM_PREFIX;
+import static org.jfrog.idea.xray.scan.NpmScanManager.findApplicationDirs;
 import static org.jfrog.idea.xray.scan.ScanManager.getProjectBasePath;
 import static org.testng.Assert.*;
 
@@ -43,7 +46,13 @@ public class NpmScanManagerTests {
     @BeforeTest
     public void init() {
         project = new NpmProjectImpl();
-        scanManager = NpmScanManager.CreateNpmScanManager(project);
+        Set<String> applicationDirs = new HashSet<>();
+        try {
+            applicationDirs = findApplicationDirs(new HashSet<>());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        scanManager = NpmScanManager.CreateNpmScanManager(project, applicationDirs);
     }
 
     @AfterTest
@@ -53,7 +62,13 @@ public class NpmScanManagerTests {
 
     @Test
     public void testIsApplicable() {
-        assertTrue(NpmScanManager.isApplicable(project));
+        Set<String> applicationDirs = new HashSet<>();
+        try {
+            applicationDirs = findApplicationDirs(new HashSet<>());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assertTrue(NpmScanManager.isApplicable(applicationDirs));
     }
 
     /**

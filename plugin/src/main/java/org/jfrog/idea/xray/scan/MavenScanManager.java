@@ -22,12 +22,17 @@ import org.jfrog.idea.xray.persistency.types.License;
 
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
  * Created by romang on 3/2/17.
  */
 public class MavenScanManager extends ScanManager {
+
+    public MavenScanManager() {
+    }
 
     public MavenScanManager(Project project) {
         super(project);
@@ -36,6 +41,12 @@ public class MavenScanManager extends ScanManager {
 
     public static boolean isApplicable(@NotNull Project project) {
         return MavenProjectsManager.getInstance(project).hasProjects();
+    }
+
+    public Set<Path> getProjectPaths() {
+        Set<Path> paths = super.getProjectPaths();
+        MavenProjectsManager.getInstance(project).getProjects().forEach(mavenProject -> paths.add(Paths.get(mavenProject.getDirectory()).toAbsolutePath()));
+        return paths;
     }
 
     @Override

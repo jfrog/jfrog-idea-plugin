@@ -107,7 +107,7 @@ public class XrayToolWindow implements Disposable {
         licenseFilterMenu.setLicenses();
         TreeModel issuesTreeModel = new DefaultTreeModel(new ScanTreeNode("SeveritiesTree"));
         TreeModel licensesTreeModel = new DefaultTreeModel(new ScanTreeNode("LicensesTree"));
-        List<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(project);
+        Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(project);
         if (CollectionUtils.isNotEmpty(scanManagers)) {
             scanManagers.forEach(scanManager -> scanManager.filterAndSort(issuesTreeModel, licensesTreeModel, scanManagers.size() == 1));
         }

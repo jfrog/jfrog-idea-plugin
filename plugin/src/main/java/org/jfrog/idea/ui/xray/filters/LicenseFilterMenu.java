@@ -8,8 +8,8 @@ import org.jfrog.idea.xray.ScanManagersFactory;
 import org.jfrog.idea.xray.persistency.types.License;
 import org.jfrog.idea.xray.scan.ScanManager;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Yahav Itzhak on 23 Nov 2017.
@@ -20,7 +20,7 @@ public class LicenseFilterMenu extends FilterMenu<License> {
     }
 
     public void setLicenses() {
-        List<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(project);
+        Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(project);
         if (CollectionUtils.isEmpty(scanManagers)) {
             return;
         }
@@ -28,7 +28,7 @@ public class LicenseFilterMenu extends FilterMenu<License> {
         scanManagers.forEach(scanManager ->
                 scanManager.getAllLicenses()
                         .stream()
-                        .filter(selectedLicenses::containsKey)
+                        .filter(selectedLicenses::containsKey) // todo test
                         .forEach(license -> selectedLicenses.put(license, true)));
         addComponents(selectedLicenses, true);
     }

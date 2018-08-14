@@ -23,7 +23,7 @@ import org.jfrog.idea.configuration.GlobalSettings;
 import org.jfrog.idea.xray.scan.ScanManager;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Yahav Itzhak on 9 Nov 2017.
@@ -54,7 +54,7 @@ public class XrayDependencyDataService extends AbstractProjectDataService<Librar
         }
 
         // Check if the project was supported
-        List<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(project);
+        Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(project);
         boolean isScannersExists = CollectionUtils.isNotEmpty(scanManagers);
         ScanManagersFactory.refreshScanManagers(project);
         scanManagers = ScanManagersFactory.getScanManagers(project);
