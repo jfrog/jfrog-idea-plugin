@@ -9,7 +9,6 @@ import org.jfrog.idea.Events;
 import org.jfrog.idea.xray.ScanManagersFactory;
 import org.jfrog.idea.xray.scan.ScanManager;
 
-import java.util.List;
 import java.util.Set;
 
 /**

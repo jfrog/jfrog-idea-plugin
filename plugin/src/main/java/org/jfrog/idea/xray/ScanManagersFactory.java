@@ -1,5 +1,7 @@
 package org.jfrog.idea.xray;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
@@ -14,68 +16,69 @@ import org.jfrog.idea.xray.utils.Utils;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by romang on 3/2/17.
  */
 public class ScanManagersFactory {
-    private Set<ScanManager> scanManagers;
+    private Map<Class, ScanManager> scanManagers = Maps.newHashMap();
     private static final Logger logger = Logger.getInstance(ScanManagersFactory.class);
 
     public ScanManagersFactory(Project project) {
-        initScanManagers(project);
-    }
-
-    public void initScanManagers(Project project) {
-        scanManagers = new HashSet<>();
         setScanManagers(project);
     }
 
     private void setScanManagers(Project project) {
-        // create the proper scan manager according to the project type.
+        // Create the proper scan manager according to the project type.
         if (MavenScanManager.isApplicable(project)) {
-            scanManagers.add(new MavenScanManager(project));
+            scanManagers.put(MavenScanManager.class, new MavenScanManager(project));
         } else {
-            scanManagers.remove(new MavenScanManager(project));
+            scanManagers.remove(MavenScanManager.class);
         }
 
         if (GradleScanManager.isApplicable(project)) {
-            scanManagers.add(new GradleScanManager(project));
+            scanManagers.put(GradleScanManager.class, new GradleScanManager(project));
         } else {
-            scanManagers.remove(new GradleScanManager(project));
+            scanManagers.remove(GradleScanManager.class);
         }
-        scanManagers.remove(new NpmScanManager());
-        addNpmScannerIfNeeded(project);
+
+        Set<String> applicationsDirs = getApplicationsDirs(project);
+        if (NpmScanManager.isApplicable(applicationsDirs)) {
+            scanManagers.put(NpmScanManager.class, new NpmScanManager(project, applicationsDirs));
+        } else {
+            scanManagers.remove(NpmScanManager.class);
+        }
     }
 
-    private void addNpmScannerIfNeeded(Project project) {
-        Set<Path> projectPaths = new HashSet<>();
-        projectPaths.add(Paths.get(ScanManager.getProjectBasePath(project)));
-        scanManagers.forEach(scanManager -> projectPaths.addAll(scanManager.getProjectPaths()));
-        Set<Path> finalProjectPaths = Utils.filterProjectPaths(projectPaths);
-        Set<String> applicationsDirs;
+    private Set<String> getApplicationsDirs(Project project) {
+        Set<Path> projectPaths = getProjectPaths(project);
+        Set<String> applicationsDirs = Sets.newHashSet();
         try {
-            applicationsDirs = NpmScanManager.findApplicationDirs(finalProjectPaths);
+            applicationsDirs = NpmScanManager.findApplicationDirs(projectPaths);
         } catch (IOException e) {
             Utils.log(logger, "JFrog Xray npm module scan failed", Arrays.toString(e.getStackTrace()), NotificationType.ERROR);
-            return;
         }
-        if (NpmScanManager.isApplicable(applicationsDirs)) {
-            NpmScanManager npmScanManager = new NpmScanManager(project, applicationsDirs);
-            scanManagers.add(npmScanManager);
-        }
+        return applicationsDirs;
+    }
+
+    private Set<Path> getProjectPaths(Project project) {
+        Set<Path> projectPaths = Sets.newHashSet();
+        projectPaths.add(Paths.get(ScanManager.getProjectBasePath(project)));
+        scanManagers.values().forEach(scanManager -> projectPaths.addAll(scanManager.getProjectPaths()));
+        return Utils.filterProjectPaths(projectPaths);
     }
 
     public static Set<ScanManager> getScanManagers(@NotNull Project project) {
         ScanManagersFactory scanManagersFactory = ServiceManager.getService(project, ScanManagersFactory.class);
-        return scanManagersFactory.scanManagers;
+        return Sets.newHashSet(scanManagersFactory.scanManagers.values());
     }
 
     public static void refreshScanManagers(@NotNull Project project) {
         ScanManagersFactory scanManagersFactory = ServiceManager.getService(project, ScanManagersFactory.class);
         scanManagersFactory.setScanManagers(project);
     }
-
 
 }
