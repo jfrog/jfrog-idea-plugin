@@ -61,6 +61,12 @@ public class GradleScanManager extends ScanManager {
         return state != null && !state.getLinkedExternalProjectsSettings().isEmpty();
     }
 
+    /**
+     * Returns all project modules locations as Paths.
+     * Other scanners such as npm will use this paths in order to find modules.
+     *
+     * @return all project modules locations as Paths
+     */
     public Set<Path> getProjectPaths() {
         Set<Path> paths = super.getProjectPaths();
         GradleSettings.MyState gradleState = GradleSettings.getInstance(project).getState();

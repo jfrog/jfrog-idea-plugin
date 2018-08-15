@@ -308,10 +308,7 @@ public class XrayToolWindow implements Disposable {
 
     private String getPathSearchString(TreePath path) {
         ScanTreeNode node = (ScanTreeNode) path.getLastPathComponent();
-        if (node != null) {
-            return node.toString();
-        }
-        return "";
+        return node == null ? "" : node.toString();
     }
 
     private JComponent createComponentsIssueDetailView() {

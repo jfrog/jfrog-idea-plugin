@@ -27,7 +27,8 @@ public class IssuesTreeCellRenderer extends JBDefaultTreeCellRenderer {
         if (regularFont == null) {
             setFonts(cellRenderer);
         }
-        tree.putClientProperty(TREE_TABLE_TREE_KEY, emptyTable); // Avoid setting TreeUnfocusedSelectionBackground
+        // Avoid setting TreeUnfocusedSelectionBackground
+        tree.putClientProperty(TREE_TABLE_TREE_KEY, emptyTable);
 
         // Set icon
         Issue topIssue = scanTreeNode.getTopIssue();

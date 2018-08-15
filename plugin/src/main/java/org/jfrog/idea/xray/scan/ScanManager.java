@@ -160,6 +160,12 @@ public abstract class ScanManager {
         }
     }
 
+    /**
+     * Returns all project modules locations as Paths.
+     * Other scanners such as npm will use this paths in order to find modules.
+     *
+     * @return all project modules locations as Paths
+     */
     public Set<Path> getProjectPaths() {
         Set<Path> paths = new HashSet<>();
         paths.add(Paths.get(getProjectBasePath(project)));
@@ -229,13 +235,13 @@ public abstract class ScanManager {
             return allLicenses;
         }
         ScanTreeNode node = (ScanTreeNode) scanResults.getRoot();
-        getAllLicenses(node, allLicenses);
+        collectAllLicenses(node, allLicenses);
         return allLicenses;
     }
 
-    private void getAllLicenses(ScanTreeNode node, Set<License> allLicenses) {
+    private void collectAllLicenses(ScanTreeNode node, Set<License> allLicenses) {
         allLicenses.addAll(node.getLicenses());
-        node.getChildren().forEach(child -> getAllLicenses(child, allLicenses));
+        node.getChildren().forEach(child -> collectAllLicenses(child, allLicenses));
     }
 
     /**
@@ -249,7 +255,7 @@ public abstract class ScanManager {
         ScanTreeNode issuesFilteredRoot = (ScanTreeNode) issuesTreeModel.getRoot();
         ScanTreeNode licenseFilteredRoot = (ScanTreeNode) licensesTreeModel.getRoot();
         ScanTreeNode unfilteredRoot = (ScanTreeNode) scanResults.getRoot();
-        // Existence of more than one scanner indicates that there are more than one technology in the project. Therefore,
+        // Existence of more than one scanner indicates that there is more than one technology in the project. Therefore,
         // the base module should be displayed.
         if (isSingleScanner && unfilteredRoot.getChildren().size() == 1) {
             unfilteredRoot = unfilteredRoot.getChildren().firstElement();
@@ -369,14 +375,5 @@ public abstract class ScanManager {
             // In tests we can't check if the user canceled the scan, since we don't have the ProgressManager service.
             ProgressManager.checkCanceled();
         }
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getClass().hashCode();
-    }
-    @Override
-    public boolean equals(Object obj) {
-        return this.getClass().toString().equals(obj.getClass().toString());
     }
 }

@@ -39,6 +39,7 @@ public class NpmScanManager extends ScanManager {
     static final String NPM_PREFIX = "npm://";
     ScanTreeNode rootNode = new ScanTreeNode(ROOT_NODE_HEADER);
     private NpmDriver npmDriver;
+    // Directories that contains a package.json file and will be considered as root directories of npm modules.
     private Set<String> applicationsDirs;
 
     public NpmScanManager(Project project, Set<String> applicationsDirs) {

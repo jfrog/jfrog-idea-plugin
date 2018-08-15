@@ -19,16 +19,16 @@ public class RefreshAction extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent e) {
         if (e.getProject() != null) {
-            // Check if the project was supported
+            // Before we refresh the scanners, let's check if the project is supported.
             Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(e.getProject());
-            boolean areScannersExistsBeforeRefresh = CollectionUtils.isNotEmpty(scanManagers);
+            boolean scannersExistBeforeRefresh = CollectionUtils.isNotEmpty(scanManagers);
             ScanManagersFactory.refreshScanManagers(e.getProject());
             scanManagers = ScanManagersFactory.getScanManagers(e.getProject());
             if (CollectionUtils.isEmpty(scanManagers)) {
                 return;
             }
-            // Case project was not supported or did not initialized
-            if (!areScannersExistsBeforeRefresh) {
+            // The project was not supported before the refresh or it hasn't been initialised.
+            if (!scannersExistBeforeRefresh) {
                 MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
                 messageBus.syncPublisher(Events.ON_IDEA_FRAMEWORK_CHANGE).update();
             }

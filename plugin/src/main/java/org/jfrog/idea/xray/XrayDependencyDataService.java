@@ -39,9 +39,10 @@ public class XrayDependencyDataService extends AbstractProjectDataService<Librar
 
     /**
      * This function is called after change in the build.gradle file or refresh gradle dependencies call.
-     * @param toImport the project dependencies
-     * @param projectData the project data
-     * @param project the current project
+     *
+     * @param toImport       the project dependencies
+     * @param projectData    the project data
+     * @param project        the current project
      * @param modelsProvider contains the project modules
      */
     @Override
@@ -53,16 +54,16 @@ public class XrayDependencyDataService extends AbstractProjectDataService<Librar
             return;
         }
 
-        // Check if the project was supported
+        // Before we refresh the scanners, let's check if the project is supported.
         Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(project);
-        boolean areScannersExistsBeforeRefresh = CollectionUtils.isNotEmpty(scanManagers);
+        boolean scannersExistBeforeRefresh = CollectionUtils.isNotEmpty(scanManagers);
         ScanManagersFactory.refreshScanManagers(project);
         scanManagers = ScanManagersFactory.getScanManagers(project);
         if (CollectionUtils.isEmpty(scanManagers)) {
             return;
         }
-        // Case project was not supported or did not initialized
-        if (!areScannersExistsBeforeRefresh) {
+        // The project was not supported before the refresh or it hasn't been initialised.
+        if (!scannersExistBeforeRefresh) {
             MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
             messageBus.syncPublisher(Events.ON_IDEA_FRAMEWORK_CHANGE).update();
         }

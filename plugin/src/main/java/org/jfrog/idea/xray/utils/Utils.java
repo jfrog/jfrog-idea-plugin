@@ -115,10 +115,10 @@ public class Utils {
     public static Process exeCommand(List<String> args) throws IOException {
         String strArgs = String.join(" ", args);
         if (isWindows()) {
-            return Runtime.getRuntime().exec(new String[]{"cmd", "/c" ,strArgs});
+            return Runtime.getRuntime().exec(new String[]{"cmd", "/c", strArgs});
         }
         if (isMac()) {
-            return Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c" ,strArgs}, new String[]{"PATH=$PATH:/usr/local/bin"});
+            return Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", strArgs}, new String[]{"PATH=$PATH:/usr/local/bin"});
         }
         // Linux
         return Runtime.getRuntime().exec(args.toArray(new String[0]));
@@ -128,7 +128,7 @@ public class Utils {
         if (stream == null) {
             return "";
         }
-        try (StringWriter writer = new StringWriter()){
+        try (StringWriter writer = new StringWriter()) {
             IOUtils.copy(stream, writer, "UTF-8");
             return writer.toString();
         }
@@ -149,6 +149,7 @@ public class Utils {
     /**
      * Returns Set of Paths cleaned of subdirectories.
      * For example the set ["/a", "/b/c", "/a/d"] will become ["/a", "/b/c"]
+     *
      * @param projectPaths Paths to filter
      * @return Set of Paths cleaned of subdirectories.
      */
@@ -157,27 +158,26 @@ public class Utils {
         Comparator<Path> compByPathLength = Comparator.comparingInt(pathA -> pathA.toString().length());
         // Create a sorted by length list of paths
         List<Path> sortedList = projectPaths.stream().sorted(compByPathLength).collect(Collectors.toList());
-        projectPaths.forEach(pathToExam -> {
-                    Iterator iterator = sortedList.iterator();
-                    boolean isARootPath = true;
+        projectPaths.forEach(currentPath -> {
+            Iterator<Path> iterator = sortedList.iterator();
+                    boolean isRootPath = true;
                     // Iterate over the sorted by length list.
                     while (iterator.hasNext()) {
-                        Path shorterPath = (Path) iterator.next();
-                        // PathToExam is shorter or equals to the shortPath therefore all the next paths can't contain the pathToExam
-                        if (pathToExam.toString().length() <= shorterPath.toString().length()) {
+                        Path shorterPath = iterator.next();
+                        // CurrentPath is shorter or equals to the shortPath therefore all the next paths can't contain the currentPath
+                        if (currentPath.toString().length() <= shorterPath.toString().length()) {
                             break;
                         }
-                        // The pathToExam is subPath and we should not add it to the list
-                        if (pathToExam.startsWith(shorterPath)) {
-                            isARootPath = false;
+                        // The currentPath is subPath and we should not add it to the list
+                        if (currentPath.startsWith(shorterPath)) {
+                            isRootPath = false;
                             break;
                         }
                     }
-                    if (isARootPath) {
-                        finalPaths.add(pathToExam);
+                    if (isRootPath) {
+                        finalPaths.add(currentPath);
                     }
                 }
-
         );
         return finalPaths;
     }

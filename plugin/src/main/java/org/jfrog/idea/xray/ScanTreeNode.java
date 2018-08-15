@@ -90,7 +90,7 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
     }
 
     /**
-     * @return true iff this node is a module
+     * @return true if this node is a module
      */
     public boolean isModule() {
         return this.isModule;
@@ -101,6 +101,7 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
      * 2. Populate current node and subtree's issues
      * 3. Populate current node and subtree's top issue
      * 4. Sort the tree
+     *
      * @return all issues of the current node and it's ancestors
      */
     public Set<Issue> processTreeIssues() {
