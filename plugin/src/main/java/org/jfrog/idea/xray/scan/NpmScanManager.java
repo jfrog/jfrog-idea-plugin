@@ -1,6 +1,7 @@
 package org.jfrog.idea.xray.scan;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Sets;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
@@ -79,7 +80,12 @@ public class NpmScanManager extends ScanManager {
                 jsonNode = jsonRoot.get("version");
                 String packageVersion = jsonNode != null ? jsonNode.asText() : "N/A";
                 ScanTreeNode module = new ScanTreeNode(packageName, true);
-                module.setGeneralInfo(new GeneralInfo().componentId(packageName + ":" + packageVersion).pkgType("npm").path(appDir));
+                module.setGeneralInfo(new GeneralInfo()
+                        .componentId(packageName + ":" + packageVersion)
+                        .pkgType("npm")
+                        .path(appDir)
+                        .artifactId(packageName)
+                        .version(packageVersion));
                 rootNode.add(module);
                 JsonNode dependencies = jsonRoot.get("dependencies");
                 if (dependencies != null) {
@@ -154,9 +160,7 @@ public class NpmScanManager extends ScanManager {
      * @param paths - Input - List of project base paths
      */
     public static Set<String> findApplicationDirs(Set<Path> paths) throws IOException {
-        Set<String> applicationsDirs = new HashSet<>();
         NpmPackageFileFinder npmPackageFileFinder = new NpmPackageFileFinder(paths);
-        applicationsDirs.addAll(npmPackageFileFinder.getPackageFilePairs());
-        return applicationsDirs;
+        return Sets.newHashSet(npmPackageFileFinder.getPackageFilePairs());
     }
 }

@@ -251,7 +251,7 @@ public abstract class ScanManager {
         ScanTreeNode issuesFilteredRoot = (ScanTreeNode) issuesTreeModel.getRoot();
         ScanTreeNode licenseFilteredRoot = (ScanTreeNode) licensesTreeModel.getRoot();
         ScanTreeNode unfilteredRoot = (ScanTreeNode) scanResults.getRoot();
-        // Existence of more than one scanner indicates that there are more than one technology in the project. Therefor,
+        // Existence of more than one scanner indicates that there are more than one technology in the project. Therefore,
         // the base module should be displayed.
         if (isSingleScanner && unfilteredRoot.getChildren().size() == 1) {
             unfilteredRoot = unfilteredRoot.getChildren().firstElement();

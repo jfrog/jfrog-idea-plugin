@@ -17,7 +17,7 @@ public class UtilsTests extends ScanTreeNodeBase {
     @Test(dataProvider = "Paths")
     public void testFilterProjectPaths(Set<Path> given, Set<Path> expected) {
         Set<Path> results = Utils.filterProjectPaths(given);
-        assertEquals(results.size(), expected.size());
+        assertEquals(expected.size(), results.size());
         expected.forEach(path -> assertTrue(results.contains(path)));
     }
 

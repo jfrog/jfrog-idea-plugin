@@ -138,7 +138,12 @@ public class GradleScanManager extends ScanManager {
             String version = Objects.toString(module.getData().getVersion(), "");
             String gav = groupId + ":" + artifactId + ":" + version;
             ScanTreeNode scanTreeNode = new ScanTreeNode(artifactId, true);
-            scanTreeNode.setGeneralInfo(new GeneralInfo().componentId(gav).pkgType("gradle"));
+            scanTreeNode.setGeneralInfo(new GeneralInfo()
+                    .componentId(gav)
+                    .pkgType("gradle")
+                    .groupId(groupId)
+                    .artifactId(artifactId)
+                    .version(version));
             modules.put(module.getData().getId(), scanTreeNode);
         });
     }

@@ -54,7 +54,7 @@ public class DetailsViewFactory extends JBPanel {
         gridPanel.setBackground(UIUtil.getTableBackground());
         GeneralInfo generalInfo = node.getGeneralInfo();
         String pkgType = StringUtils.capitalize(generalInfo.pkgType);
-        if (StringUtils.isBlank(pkgType)) { //todo some bug here with war package
+        if (StringUtils.isBlank(pkgType)) {
             // No package type
             addJtext(gridPanel, 0, "Group:", generalInfo.getGroupId());
             addJtext(gridPanel, 1, "Artifact:", generalInfo.getArtifactId());

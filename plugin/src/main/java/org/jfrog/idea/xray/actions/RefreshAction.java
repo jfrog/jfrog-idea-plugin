@@ -9,7 +9,6 @@ import org.jfrog.idea.Events;
 import org.jfrog.idea.xray.ScanManagersFactory;
 import org.jfrog.idea.xray.scan.ScanManager;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -22,14 +21,14 @@ public class RefreshAction extends AnAction {
         if (e.getProject() != null) {
             // Check if the project was supported
             Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(e.getProject());
-            boolean isScannersExists = CollectionUtils.isNotEmpty(scanManagers);
+            boolean areScannersExistsBeforeRefresh = CollectionUtils.isNotEmpty(scanManagers);
             ScanManagersFactory.refreshScanManagers(e.getProject());
             scanManagers = ScanManagersFactory.getScanManagers(e.getProject());
             if (CollectionUtils.isEmpty(scanManagers)) {
                 return;
             }
             // Case project was not supported or did not initialized
-            if (!isScannersExists) {
+            if (!areScannersExistsBeforeRefresh) {
                 MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
                 messageBus.syncPublisher(Events.ON_IDEA_FRAMEWORK_CHANGE).update();
             }

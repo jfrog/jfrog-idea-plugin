@@ -24,16 +24,12 @@ public class ScanManagersFactory {
     private static final Logger logger = Logger.getInstance(ScanManagersFactory.class);
 
     public ScanManagersFactory(Project project) {
-        initScanManagers(project);
-    }
-
-    public void initScanManagers(Project project) {
         scanManagers = new HashSet<>();
         setScanManagers(project);
     }
 
     private void setScanManagers(Project project) {
-        // create the proper scan manager according to the project type.
+        // Create the proper scan managers according to the project types.
         if (MavenScanManager.isApplicable(project)) {
             scanManagers.add(new MavenScanManager(project));
         } else {
@@ -50,21 +46,24 @@ public class ScanManagersFactory {
     }
 
     private void addNpmScannerIfNeeded(Project project) {
-        Set<Path> projectPaths = new HashSet<>();
-        projectPaths.add(Paths.get(ScanManager.getProjectBasePath(project)));
-        scanManagers.forEach(scanManager -> projectPaths.addAll(scanManager.getProjectPaths()));
-        Set<Path> finalProjectPaths = Utils.filterProjectPaths(projectPaths);
+        Set<Path> projectPaths = getProjectPaths(project);
         Set<String> applicationsDirs;
         try {
-            applicationsDirs = NpmScanManager.findApplicationDirs(finalProjectPaths);
+            applicationsDirs = NpmScanManager.findApplicationDirs(projectPaths);
         } catch (IOException e) {
             Utils.log(logger, "JFrog Xray npm module scan failed", Arrays.toString(e.getStackTrace()), NotificationType.ERROR);
             return;
         }
         if (NpmScanManager.isApplicable(applicationsDirs)) {
-            NpmScanManager npmScanManager = new NpmScanManager(project, applicationsDirs);
-            scanManagers.add(npmScanManager);
+            scanManagers.add(new NpmScanManager(project, applicationsDirs));
         }
+    }
+
+    private Set<Path> getProjectPaths(Project project) {
+        Set<Path> projectPaths = new HashSet<>();
+        projectPaths.add(Paths.get(ScanManager.getProjectBasePath(project)));
+        scanManagers.forEach(scanManager -> projectPaths.addAll(scanManager.getProjectPaths()));
+        return Utils.filterProjectPaths(projectPaths);
     }
 
     public static Set<ScanManager> getScanManagers(@NotNull Project project) {
