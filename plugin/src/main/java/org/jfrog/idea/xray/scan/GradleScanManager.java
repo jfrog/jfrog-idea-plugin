@@ -2,6 +2,7 @@ package org.jfrog.idea.xray.scan;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.ProjectKeys;
@@ -28,6 +29,7 @@ import org.jetbrains.plugins.gradle.settings.GradleSettings;
 import org.jetbrains.plugins.gradle.util.GradleConstants;
 import org.jfrog.idea.xray.ScanTreeNode;
 import org.jfrog.idea.xray.persistency.types.GeneralInfo;
+import org.jfrog.idea.xray.utils.Utils;
 
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
@@ -61,15 +63,17 @@ public class GradleScanManager extends ScanManager {
 
     public Set<Path> getProjectPaths() {
         Set<Path> paths = super.getProjectPaths();
-        GradleSettings
-                .getInstance(project)
-                .getState()
-                .getLinkedExternalProjectsSettings()
-                .stream()
-                .map(ExternalProjectSettings::getModules)
-                .forEach(module -> paths.addAll(module.stream()
-                      .map(Paths::get)
-                      .collect(Collectors.toSet())));
+        GradleSettings.MyState gradleState = GradleSettings.getInstance(project).getState();
+        if (gradleState != null) {
+            gradleState.getLinkedExternalProjectsSettings()
+                    .stream()
+                    .map(ExternalProjectSettings::getModules)
+                    .forEach(module -> paths.addAll(module.stream()
+                            .map(Paths::get)
+                            .collect(Collectors.toSet())));
+        } else {
+            Utils.log(logger, "Gradle state is null", "", NotificationType.WARNING);
+        }
         return paths;
     }
 
