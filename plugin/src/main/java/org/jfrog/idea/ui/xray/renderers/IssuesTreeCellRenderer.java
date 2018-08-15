@@ -17,26 +17,30 @@ import static com.intellij.util.ui.tree.WideSelectionTreeUI.TREE_TABLE_TREE_KEY;
  * Created by Yahav Itzhak on 22 Nov 2017.
  */
 public class IssuesTreeCellRenderer extends JBDefaultTreeCellRenderer {
-    private static int originalFontSize;
+    private static Font regularFont, moduleFont;
+    private static JBTable emptyTable = new JBTable();
 
     @Override
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
         DefaultTreeCellRenderer cellRenderer = (JBDefaultTreeCellRenderer) super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-        if (originalFontSize == 0) {
-            originalFontSize = cellRenderer.getFont().getSize();
+        ScanTreeNode scanTreeNode = (ScanTreeNode) value;
+        if (regularFont == null) {
+            setFonts(cellRenderer);
         }
-        tree.putClientProperty(TREE_TABLE_TREE_KEY, new JBTable()); // Avoid setting TreeUnfocusedSelectionBackground
+        tree.putClientProperty(TREE_TABLE_TREE_KEY, emptyTable); // Avoid setting TreeUnfocusedSelectionBackground
 
         // Set icon
-        Issue topIssue = ((ScanTreeNode) value).getTopIssue();
+        Issue topIssue = scanTreeNode.getTopIssue();
         cellRenderer.setIcon(IconUtils.load(StringUtils.lowerCase(topIssue.getSeverity().toString())));
 
-        Font font = cellRenderer.getFont();
-        if (((ScanTreeNode) value).isModule()) {
-            cellRenderer.setFont(new Font(font.getName(), Font.BOLD, originalFontSize + 1));
-            return cellRenderer;
-        }
-        cellRenderer.setFont(new Font(font.getName(), Font.PLAIN, originalFontSize));
+        // Set font
+        cellRenderer.setFont(scanTreeNode.isModule() ? moduleFont : regularFont);
         return cellRenderer;
+    }
+
+    private void setFonts(DefaultTreeCellRenderer cellRenderer) {
+        Font font = cellRenderer.getFont();
+        regularFont = new Font(font.getName(), Font.PLAIN, font.getSize());
+        moduleFont = new Font(font.getName(), Font.BOLD, font.getSize() + 1);
     }
 }
