@@ -26,7 +26,10 @@ import javax.swing.tree.TreeModel;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Yahav Itzhak on 13 Dec 2017.
@@ -37,9 +40,6 @@ public class NpmScanManager extends ScanManager {
     ScanTreeNode rootNode = new ScanTreeNode(ROOT_NODE_HEADER);
     private NpmDriver npmDriver;
     private Set<String> applicationsDirs;
-
-    public NpmScanManager() {
-    }
 
     public NpmScanManager(Project project, Set<String> applicationsDirs) {
         super(project);
@@ -75,7 +75,7 @@ public class NpmScanManager extends ScanManager {
                 String packageName = getPackageName(jsonNode, appDir);
                 if (jsonRoot.get("problems") != null) {
                     packageName += " (Missing Information)";
-                    Utils.log(logger, "JFrog Xray - npm ls command at" + appDir + "result had errors:", "\n" + jsonRoot.get("problems").toString(), NotificationType.ERROR);
+                    Utils.log("JFrog Xray - npm ls command at" + appDir + "result had errors:", "\n" + jsonRoot.get("problems").toString(), NotificationType.ERROR);
                 }
                 jsonNode = jsonRoot.get("version");
                 String packageVersion = jsonNode != null ? jsonNode.asText() : "N/A";
@@ -97,7 +97,7 @@ public class NpmScanManager extends ScanManager {
             }
             cbk.onSuccess(null);
         } catch (ProcessCanceledException e) {
-            Utils.notify(logger, "JFrog Xray", "Xray scan was canceled", NotificationType.INFORMATION);
+            Utils.notify("JFrog Xray", "Xray scan was canceled", NotificationType.INFORMATION);
         } catch (Exception e) {
             cbk.onFailure(e.getMessage(), Arrays.toString(e.getStackTrace()));
         }

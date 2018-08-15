@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.idea.xray.scan.GradleScanManager;
@@ -25,7 +24,6 @@ import java.util.Set;
  */
 public class ScanManagersFactory {
     private Map<Class, ScanManager> scanManagers = Maps.newHashMap();
-    private static final Logger logger = Logger.getInstance(ScanManagersFactory.class);
 
     public ScanManagersFactory(Project project) {
         setScanManagers(project);
@@ -59,7 +57,7 @@ public class ScanManagersFactory {
         try {
             applicationsDirs = NpmScanManager.findApplicationDirs(projectPaths);
         } catch (IOException e) {
-            Utils.log(logger, "JFrog Xray npm module scan failed", Arrays.toString(e.getStackTrace()), NotificationType.ERROR);
+            Utils.log("JFrog Xray npm module scan failed", Arrays.toString(e.getStackTrace()), NotificationType.ERROR);
         }
         return applicationsDirs;
     }

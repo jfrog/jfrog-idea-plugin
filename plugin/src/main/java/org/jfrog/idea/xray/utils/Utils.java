@@ -1,7 +1,6 @@
 package org.jfrog.idea.xray.utils;
 
 import com.intellij.notification.*;
-import com.intellij.openapi.diagnostic.Logger;
 import com.jfrog.xray.client.services.system.Version;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -32,20 +31,20 @@ public class Utils {
         return version.isAtLeast(MINIMAL_XRAY_VERSION_SUPPORTED);
     }
 
-    public static void notify(Logger logger, String title, String details, NotificationType level) {
+    public static void notify(String title, String details, NotificationType level) {
         popupBalloon(title, details, level);
-        log(logger, title, details, level);
+        log(title, details, level);
     }
 
-    public static void notify(Logger logger, String title, Exception exception, NotificationType level) {
+    public static void notify(String title, Exception exception, NotificationType level) {
         popupBalloon(title, exception.getMessage(), level);
         if (StringUtils.isNotBlank(exception.getMessage())) {
             title = exception.getMessage();
         }
-        log(logger, title, Arrays.toString(exception.getStackTrace()), level);
+        log(title, Arrays.toString(exception.getStackTrace()), level);
     }
 
-    public static void log(Logger logger, String title, String details, NotificationType level) {
+    public static void log(String title, String details, NotificationType level) {
         if (StringUtils.isBlank(details)) {
             details = title;
         }

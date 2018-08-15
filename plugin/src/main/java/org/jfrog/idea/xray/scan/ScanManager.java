@@ -3,7 +3,6 @@ package org.jfrog.idea.xray.scan;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.intellij.notification.NotificationType;
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
 import com.intellij.openapi.externalSystem.model.project.ProjectData;
@@ -54,13 +53,12 @@ import static org.jfrog.idea.xray.utils.Utils.MINIMAL_XRAY_VERSION_SUPPORTED;
  */
 public abstract class ScanManager {
 
-    public static final String ROOT_NODE_HEADER = "All components";
+    static final String ROOT_NODE_HEADER = "All components";
     static final String GAV_PREFIX = "gav://";
     private final static int NUMBER_OF_ARTIFACTS_BULK_SCAN = 100;
 
     Project project;
     private TreeModel scanResults;
-    static final Logger logger = Logger.getInstance(ScanManager.class);
 
     // Lock to prevent multiple simultaneous scans
     private AtomicBoolean scanInProgress = new AtomicBoolean(false);
@@ -124,13 +122,13 @@ public abstract class ScanManager {
     private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies) {
         // Don't scan if Xray is not configured
         if (!GlobalSettings.getInstance().isCredentialsSet()) {
-            Utils.notify(logger, "JFrog Xray scan failed", "Xray server is not configured.", NotificationType.ERROR);
+            Utils.notify("JFrog Xray scan failed", "Xray server is not configured.", NotificationType.ERROR);
             return;
         }
         // Prevent multiple simultaneous scans
         if (!scanInProgress.compareAndSet(false, true)) {
             if (!quickScan) {
-                Utils.notify(logger, "JFrog Xray", "Scan already in progress.", NotificationType.INFORMATION);
+                Utils.notify("JFrog Xray", "Scan already in progress.", NotificationType.INFORMATION);
             }
             return;
         }
@@ -187,7 +185,7 @@ public abstract class ScanManager {
                     MessageBus messageBus = project.getMessageBus();
                     messageBus.syncPublisher(Events.ON_SCAN_COMPONENTS_CHANGE).update();
                 } catch (Exception e) {
-                    Utils.notify(logger, "JFrog Xray scan failed", e, NotificationType.ERROR);
+                    Utils.notify("JFrog Xray scan failed", e, NotificationType.ERROR);
                 }
             }
 
@@ -201,7 +199,7 @@ public abstract class ScanManager {
                 } else {
                     details = errorMessage;
                 }
-                Utils.notify(logger, title, details, NotificationType.ERROR);
+                Utils.notify(title, details, NotificationType.ERROR);
             }
         };
     }
@@ -329,9 +327,9 @@ public abstract class ScanManager {
             scanComponents(xray, partialComponents);
             indicator.setFraction(1);
         } catch (ProcessCanceledException e) {
-            Utils.notify(logger, "JFrog Xray", "Xray scan was canceled", NotificationType.INFORMATION);
+            Utils.notify("JFrog Xray", "Xray scan was canceled", NotificationType.INFORMATION);
         } catch (IOException e) {
-            Utils.notify(logger, "JFrog Xray scan failed", e, NotificationType.ERROR);
+            Utils.notify("JFrog Xray scan failed", e, NotificationType.ERROR);
         }
     }
 
@@ -340,9 +338,9 @@ public abstract class ScanManager {
             if (Utils.isXrayVersionSupported(xray.system().version())) {
                 return true;
             }
-            Utils.notify(logger, "Unsupported JFrog Xray version", "Required JFrog Xray version " + MINIMAL_XRAY_VERSION_SUPPORTED + " and above", NotificationType.ERROR);
+            Utils.notify("Unsupported JFrog Xray version", "Required JFrog Xray version " + MINIMAL_XRAY_VERSION_SUPPORTED + " and above", NotificationType.ERROR);
         } catch (IOException e) {
-            Utils.notify(logger, "JFrog Xray scan failed", e, NotificationType.ERROR);
+            Utils.notify("JFrog Xray scan failed", e, NotificationType.ERROR);
         }
         return false;
     }

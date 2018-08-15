@@ -72,7 +72,7 @@ public class GradleScanManager extends ScanManager {
                             .map(Paths::get)
                             .collect(Collectors.toSet())));
         } else {
-            Utils.log(logger, "Gradle state is null", "", NotificationType.WARNING);
+            Utils.log("Gradle state is null", "", NotificationType.WARNING);
         }
         return paths;
     }
@@ -186,7 +186,7 @@ public class GradleScanManager extends ScanManager {
         }
         if (colonCount != 2) {
             if (StringUtils.isNotBlank(componentId)) {
-                logger.warn("Bad component ID structure. Should be <GroupID>:<ArtifactID>:<Version>, got '" + componentId + "'");
+                Utils.log("Bad component ID structure", "Should be <GroupID>:<ArtifactID>:<Version>, got '" + componentId + "'", NotificationType.WARNING);
             }
             return;
         }
