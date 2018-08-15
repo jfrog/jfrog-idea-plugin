@@ -24,10 +24,8 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.nio.file.Paths;
+import java.util.*;
 
 /**
  * Created by Yahav Itzhak on 13 Dec 2017.
@@ -72,12 +70,14 @@ public class NpmScanManager extends ScanManager {
             for (String appDir : applicationsDirs) {
                 checkCanceled();
                 JsonNode jsonRoot = npmDriver.list(appDir);
-                String packageName = jsonRoot.get("name").asText();
+                JsonNode jsonNode = jsonRoot.get("name");
+                String packageName = getPackageName(jsonNode, appDir);
                 if (jsonRoot.get("problems") != null) {
                     packageName += " (Missing Information)";
-                    Utils.log(logger, "JFrog Xray - npm ls command result had errors", jsonRoot.get("problems").toString(), NotificationType.ERROR);
+                    Utils.log(logger, "JFrog Xray - npm ls command at" + appDir + "result had errors:", "\n" + jsonRoot.get("problems").toString(), NotificationType.ERROR);
                 }
-                String packageVersion = jsonRoot.get("version").asText();
+                jsonNode = jsonRoot.get("version");
+                String packageVersion = jsonNode != null ? jsonNode.asText() : "N/A";
                 ScanTreeNode module = new ScanTreeNode(packageName, true);
                 module.setGeneralInfo(new GeneralInfo().componentId(packageName + ":" + packageVersion).pkgType("npm").path(appDir));
                 rootNode.add(module);
@@ -93,8 +93,19 @@ public class NpmScanManager extends ScanManager {
         } catch (ProcessCanceledException e) {
             Utils.notify(logger, "JFrog Xray", "Xray scan was canceled", NotificationType.INFORMATION);
         } catch (Exception e) {
-            cbk.onFailure(e.getMessage(), e.getCause().getMessage());
+            cbk.onFailure(e.getMessage(), Arrays.toString(e.getStackTrace()));
         }
+    }
+
+    private String getPackageName(JsonNode jsonNode, String appDir) {
+        if (jsonNode != null) {
+            return jsonNode.asText();
+        }
+        Path appPath = Paths.get(appDir);
+        if (appPath.getFileName() != null) {
+            return appPath.getFileName().getFileName().toString();
+        }
+        return "N/A";
     }
 
     @Override

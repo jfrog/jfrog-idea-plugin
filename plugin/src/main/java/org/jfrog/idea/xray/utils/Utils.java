@@ -39,20 +39,13 @@ public class Utils {
 
     public static void notify(Logger logger, String title, Exception exception, NotificationType level) {
         popupBalloon(title, exception.getMessage(), level);
-        log(logger, exception.getMessage(), Arrays.toString(exception.getStackTrace()), level);
+        if (StringUtils.isNotBlank(exception.getMessage())) {
+            title = exception.getMessage();
+        }
+        log(logger, title, Arrays.toString(exception.getStackTrace()), level);
     }
 
     public static void log(Logger logger, String title, String details, NotificationType level) {
-//        switch (level) { // todo test logs
-//            case ERROR:
-//                logger.error(title, details);
-//                break;
-//            case WARNING:
-//                logger.warn(title + "\n" + details);
-//                break;
-//            default:
-//                logger.info(title + "\n" + details);
-//        }
         if (StringUtils.isBlank(details)) {
             details = title;
         }
@@ -155,33 +148,34 @@ public class Utils {
     }
 
     /**
-     *
-     * @param projectPaths
-     * @return
+     * Returns Set of Paths cleaned of subdirectories.
+     * For example the set ["/a", "/b/c", "/a/d"] will become ["/a", "/b/c"]
+     * @param projectPaths Paths to filter
+     * @return Set of Paths cleaned of subdirectories.
      */
     public static Set<Path> filterProjectPaths(Set<Path> projectPaths) {
         Set<Path> finalPaths = new HashSet<>();
         Comparator<Path> compByPathLength = Comparator.comparingInt(pathA -> pathA.toString().length());
-        // Sort paths by length
+        // Create a sorted by length list of paths
         List<Path> sortedList = projectPaths.stream().sorted(compByPathLength).collect(Collectors.toList());
-        projectPaths.forEach(path -> {
+        projectPaths.forEach(pathToExam -> {
                     Iterator iterator = sortedList.iterator();
                     boolean isARootPath = true;
-                    // Iterate over the sorted by length list, todo add documentation
+                    // Iterate over the sorted by length list.
                     while (iterator.hasNext()) {
                         Path shorterPath = (Path) iterator.next();
-                        // Path is shorter than the shortPath therefore all the next paths will not patch
-                        if (path.toString().length() <= shorterPath.toString().length()) {
+                        // PathToExam is shorter or equals to the shortPath therefore all the next paths can't contain the pathToExam
+                        if (pathToExam.toString().length() <= shorterPath.toString().length()) {
                             break;
                         }
-                        // The path is subPath and we should not add it to the list
-                        if (path.startsWith(shorterPath)) {
+                        // The pathToExam is subPath and we should not add it to the list
+                        if (pathToExam.startsWith(shorterPath)) {
                             isARootPath = false;
                             break;
                         }
                     }
                     if (isARootPath) {
-                        finalPaths.add(path);
+                        finalPaths.add(pathToExam);
                     }
                 }
 

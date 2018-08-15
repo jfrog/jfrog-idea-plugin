@@ -44,7 +44,7 @@ public class DetailsViewFactory extends JBPanel {
         replaceAndUpdateUI(panel, gridPanel, BorderLayout.NORTH);
     }
 
-    private static JPanel createCommonGridPanel(JPanel panel, ScanTreeNode node) { // todo continue from here 
+    private static JPanel createCommonGridPanel(JPanel panel, ScanTreeNode node) {
         if (node == null || node.getGeneralInfo() == null) {
             replaceAndUpdateUI(panel, createDisabledTextLabel("Component information is not available"),
                     BorderLayout.CENTER);
