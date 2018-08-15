@@ -23,7 +23,7 @@ import static org.testng.Assert.fail;
 /**
  * Created by Yahav Itzhak on 25 Dec 2017.
  */
-public class NpmProjectImpl implements Project{
+public class NpmProjectImpl implements Project {
 
     private File PROJECT_PATH = Paths.get(".").toAbsolutePath().normalize().resolve(Paths.get("src", "test", "resources", "org", "jfrog", "idea", "xray", "scan", "test")).toFile();
     private File bashPath;
