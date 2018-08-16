@@ -30,7 +30,7 @@ public class NpmProjectImpl implements Project {
 
     public NpmProjectImpl() {
         try {
-            bashPath = Files.createTempDirectory("NpmScanManagerTestProject").toFile();
+            bashPath = Files.createTempDirectory("NpmScanManagerTest Project").toFile();
             FileUtils.copyDirectory(PROJECT_PATH, bashPath);
         } catch (IOException e) {
             fail(e.getMessage());
