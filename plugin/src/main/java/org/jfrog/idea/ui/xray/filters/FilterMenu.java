@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBPopupMenu;
 import org.jetbrains.annotations.NotNull;
+import org.jfrog.idea.xray.persistency.types.License;
 
 import java.util.Comparator;
 import java.util.List;
@@ -45,8 +46,9 @@ public class FilterMenu<FilterType> extends JBPopupMenu {
     private void addCheckboxes(boolean putUnknownLast) {
         add(selectAllCheckbox);
         if (putUnknownLast) {
-            checkBoxMenuItems.stream()
-                    .sorted(Comparator.comparing(item -> "Unknown".equals(item.getText()) ? 1 : -1))
+            checkBoxMenuItems
+                    .stream()
+                    .sorted(Comparator.comparing(item -> License.UNKNOWN_LICENCE_NAME.equals(item.getText()) ? 1 : -1))
                     .forEach(this::add);
         } else {
             checkBoxMenuItems.forEach(this::add);

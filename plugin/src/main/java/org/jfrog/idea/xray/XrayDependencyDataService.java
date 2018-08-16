@@ -14,6 +14,7 @@ import com.intellij.openapi.externalSystem.util.Order;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.messages.MessageBus;
+import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.gradle.util.GradleConstants;
@@ -22,6 +23,7 @@ import org.jfrog.idea.configuration.GlobalSettings;
 import org.jfrog.idea.xray.scan.ScanManager;
 
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * Created by Yahav Itzhak on 9 Nov 2017.
@@ -37,9 +39,10 @@ public class XrayDependencyDataService extends AbstractProjectDataService<Librar
 
     /**
      * This function is called after change in the build.gradle file or refresh gradle dependencies call.
-     * @param toImport the project dependencies
-     * @param projectData the project data
-     * @param project the current project
+     *
+     * @param toImport       the project dependencies
+     * @param projectData    the project data
+     * @param project        the current project
      * @param modelsProvider contains the project modules
      */
     @Override
@@ -51,19 +54,21 @@ public class XrayDependencyDataService extends AbstractProjectDataService<Librar
             return;
         }
 
-        ScanManager scanManager = ScanManagerFactory.getScanManager(project);
-        if (scanManager == null) {
-            ScanManagerFactory scanManagerFactory = ServiceManager.getService(project, ScanManagerFactory.class);
-            scanManagerFactory.initScanManager(project);
-            scanManager = ScanManagerFactory.getScanManager(project);
-            if (scanManager == null) {
-                return;
-            }
+        // Before we refresh the scanners, let's check if the project is supported.
+        Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(project);
+        boolean scannersExistBeforeRefresh = CollectionUtils.isNotEmpty(scanManagers);
+        ScanManagersFactory.refreshScanManagers(project);
+        scanManagers = ScanManagersFactory.getScanManagers(project);
+        if (CollectionUtils.isEmpty(scanManagers)) {
+            return;
+        }
+        // The project was not supported before the refresh or it hasn't been initialised.
+        if (!scannersExistBeforeRefresh) {
             MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
             messageBus.syncPublisher(Events.ON_IDEA_FRAMEWORK_CHANGE).update();
         }
         if (GlobalSettings.getInstance().isCredentialsSet()) {
-            scanManager.asyncScanAndUpdateResults(true, toImport);
+            scanManagers.forEach(scanManager -> scanManager.asyncScanAndUpdateResults(true, toImport));
         }
     }
 }

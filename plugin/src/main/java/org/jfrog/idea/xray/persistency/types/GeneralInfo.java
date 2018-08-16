@@ -18,6 +18,9 @@ public class GeneralInfo implements Serializable {
     public String name = "";
     public String path = "";
     public String pkgType = "";
+    public String groupId = "";
+    public String artifactId = "";
+    public String version = "";
     public String sha256 = "";
 
     public GeneralInfo() {
@@ -32,10 +35,16 @@ public class GeneralInfo implements Serializable {
     }
 
     public String getGroupId() {
+        if (StringUtils.isNotBlank(groupId)) {
+            return groupId;
+        }
         return isValid() ? componentId.substring(0, componentId.indexOf(":")) : "";
     }
 
     public String getArtifactId() {
+        if (StringUtils.isNotBlank(artifactId)) {
+            return artifactId;
+        }
         if (!isValid()) {
             return "";
         }
@@ -47,7 +56,50 @@ public class GeneralInfo implements Serializable {
     }
 
     public String getVersion() {
+        if (StringUtils.isNotBlank(version)) {
+            return version;
+        }
         return isValid() ? componentId.substring(componentId.lastIndexOf(":") + 1) : "";
+    }
+
+    public GeneralInfo componentId(String componentId) {
+        this.componentId = componentId;
+        return this;
+    }
+
+    public GeneralInfo name(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public GeneralInfo path(String path) {
+        this.path = path;
+        return this;
+    }
+
+    public GeneralInfo groupId(String groupId) {
+        this.groupId = groupId;
+        return this;
+    }
+
+    public GeneralInfo artifactId(String artifactId) {
+        this.artifactId = artifactId;
+        return this;
+    }
+
+    public GeneralInfo version(String version) {
+        this.version = version;
+        return this;
+    }
+
+    public GeneralInfo pkgType(String pkgType) {
+        this.pkgType = pkgType;
+        return this;
+    }
+
+    public GeneralInfo sha256(String sha256) {
+        this.sha256 = sha256;
+        return this;
     }
 
     private boolean isValid() {

@@ -2,6 +2,7 @@ package org.jfrog.idea.ui.xray;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.application.ApplicationManager;
@@ -19,6 +20,7 @@ import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.ui.UIUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.idea.Events;
 import org.jfrog.idea.configuration.GlobalSettings;
@@ -33,8 +35,9 @@ import org.jfrog.idea.ui.xray.listeners.IssuesTreeExpansionListener;
 import org.jfrog.idea.ui.xray.models.IssuesTableModel;
 import org.jfrog.idea.ui.xray.renderers.IssuesTreeCellRenderer;
 import org.jfrog.idea.ui.xray.renderers.LicensesTreeCellRenderer;
-import org.jfrog.idea.xray.ScanManagerFactory;
+import org.jfrog.idea.xray.ScanManagersFactory;
 import org.jfrog.idea.xray.ScanTreeNode;
+import org.jfrog.idea.xray.persistency.types.Issue;
 import org.jfrog.idea.xray.scan.ScanManager;
 
 import javax.swing.*;
@@ -47,6 +50,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -103,9 +107,9 @@ public class XrayToolWindow implements Disposable {
         licenseFilterMenu.setLicenses();
         TreeModel issuesTreeModel = new DefaultTreeModel(new ScanTreeNode("SeveritiesTree"));
         TreeModel licensesTreeModel = new DefaultTreeModel(new ScanTreeNode("LicensesTree"));
-        ScanManager scanManager = ScanManagerFactory.getScanManager(project);
-        if (scanManager != null) {
-            scanManager.filterAndSort(issuesTreeModel, licensesTreeModel);
+        Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(project);
+        if (CollectionUtils.isNotEmpty(scanManagers)) {
+            scanManagers.forEach(scanManager -> scanManager.filterAndSort(issuesTreeModel, licensesTreeModel, scanManagers.size() == 1));
         }
 
         ScanTreeNode root = (ScanTreeNode) issuesTreeModel.getRoot();
@@ -278,7 +282,7 @@ public class XrayToolWindow implements Disposable {
         issuesTreeExpansionListener = new IssuesTreeExpansionListener(issuesComponentsTree, issuesCountPanel, issuesCountPanels);
 
         JBPanel treePanel = new JBPanel(new BorderLayout()).withBackground(UIUtil.getTableBackground());
-        TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(issuesComponentsTree);
+        TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(issuesComponentsTree, this::getPathSearchString, true);
         treePanel.add(treeSpeedSearch.getComponent(), BorderLayout.WEST);
         treePanel.add(issuesCountPanel, BorderLayout.CENTER);
         JScrollPane treeScrollPane = ScrollPaneFactory.createScrollPane(treePanel);
@@ -296,11 +300,15 @@ public class XrayToolWindow implements Disposable {
         licensesComponentsTree.expandRow(0);
         licensesComponentsTree.setRootVisible(false);
         licensesComponentsTree.setCellRenderer(new LicensesTreeCellRenderer());
-        TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(licensesComponentsTree);
+        TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(licensesComponentsTree, this::getPathSearchString, true);
         JScrollPane treeScrollPane = ScrollPaneFactory.createScrollPane(treeSpeedSearch.getComponent());
         treeScrollPane.getVerticalScrollBar().setUnitIncrement(SCROLL_BAR_SCROLLING_UNITS);
         return new TitledPane(JSplitPane.VERTICAL_SPLIT, TITLE_LABEL_SIZE, componentsTreePanel, treeScrollPane);
+    }
 
+    private String getPathSearchString(TreePath path) {
+        ScanTreeNode node = (ScanTreeNode) path.getLastPathComponent();
+        return node == null ? "" : node.toString();
     }
 
     private JComponent createComponentsIssueDetailView() {
@@ -336,7 +344,10 @@ public class XrayToolWindow implements Disposable {
             }
         }
 
-        TableModel model = ScanManagerFactory.getScanManager(project).getFilteredScanIssues(selectedNodes);
+        Set<Issue> issueSet = Sets.newHashSet();
+        ScanManagersFactory.getScanManagers(project).forEach(scanManager ->
+                issueSet.addAll(scanManager.getFilteredScanIssues(selectedNodes)));
+        TableModel model = new IssuesTableModel(issueSet);
         TableRowSorter<TableModel> sorter = new TableRowSorter<>(model);
         issuesTable.setRowSorter(sorter);
         issuesTable.setModel(model);
@@ -361,6 +372,5 @@ public class XrayToolWindow implements Disposable {
 
     @Override
     public void dispose() {
-
     }
 }

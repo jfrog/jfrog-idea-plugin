@@ -1,5 +1,7 @@
 package org.jfrog.idea.xray;
 
+import com.google.common.collect.Sets;
+import org.apache.commons.lang.StringUtils;
 import org.jfrog.idea.xray.persistency.types.GeneralInfo;
 import org.jfrog.idea.xray.persistency.types.Issue;
 import org.jfrog.idea.xray.persistency.types.License;
@@ -19,9 +21,15 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
     private Set<License> licenses = new HashSet<>();
     private GeneralInfo generalInfo;
     private Issue topIssue = new Issue();
+    private boolean isModule;
 
     public ScanTreeNode(Object userObject) {
         super(userObject);
+    }
+
+    public ScanTreeNode(Object userObject, boolean isModule) {
+        super(userObject);
+        this.isModule = isModule;
     }
 
     public void setIssues(Set<Issue> issues) {
@@ -54,6 +62,9 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
      * @return current node's licenses
      */
     public Set<License> getLicenses() {
+        if (licenses == null) {
+            Sets.newHashSet(new License());
+        }
         return licenses;
     }
 
@@ -79,10 +90,18 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
     }
 
     /**
+     * @return true if this node is a module
+     */
+    public boolean isModule() {
+        return this.isModule;
+    }
+
+    /**
      * 1. Populate current node's issues components
      * 2. Populate current node and subtree's issues
      * 3. Populate current node and subtree's top issue
      * 4. Sort the tree
+     *
      * @return all issues of the current node and it's ancestors
      */
     public Set<Issue> processTreeIssues() {
@@ -101,8 +120,10 @@ public class ScanTreeNode extends DefaultMutableTreeNode {
         getChildren().sort(Comparator
                 .comparing(ScanTreeNode::getTopIssue, Comparator.comparing(Issue::getSeverity))
                 .thenComparing(ScanTreeNode::getIssueCount)
+                .thenComparing(ScanTreeNode::isModule)
                 .thenComparing(ScanTreeNode::getChildCount)
-                .reversed());
+                .reversed()
+                .thenComparing(ScanTreeNode::toString));
     }
 
     private void setTopIssue() {

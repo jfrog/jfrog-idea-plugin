@@ -5,21 +5,24 @@ import com.intellij.openapi.externalSystem.model.project.ProjectData;
 import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefreshCallback;
 import com.intellij.openapi.project.Project;
 import com.jfrog.xray.client.services.summary.Components;
-import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeTest;
+import org.jfrog.idea.xray.ScanTreeNode;
+import org.jfrog.idea.xray.utils.npm.NpmDriver;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
+import org.testng.collections.Sets;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Set;
 
 import static org.jfrog.idea.xray.scan.NpmScanManager.NPM_PREFIX;
+import static org.jfrog.idea.xray.scan.NpmScanManager.findApplicationDirs;
 import static org.jfrog.idea.xray.scan.ScanManager.getProjectBasePath;
 import static org.testng.Assert.*;
 
@@ -29,25 +32,45 @@ import static org.testng.Assert.*;
 public class NpmScanManagerTests {
 
     private Project project;
-    private NpmScanManager scanManager;
+    private static final String FIRST_PACKAGE = "package-name1";
+    private static final String SECOND_PACKAGE = "package-name2";
     private static final String DEBUG_COMPONENT_ID = "debug:3.1.0";
     private static final String SEND_COMPONENT_ID = "send:0.1.0";
     private static final List<String> DEBUG_COMPONENTS_IDS = Lists.newArrayList("ms:2.0.0");
     private static final List<String> SEND_COMPONENTS_IDS = Lists.newArrayList("debug:3.1.0", "fresh:0.1.0", "mime:1.2.6", "range-parser:0.0.4");
 
-    @BeforeTest
-    public void initProject() {
+    @BeforeMethod
+    public void init() {
         project = new NpmProjectImpl();
+        assertNotNull(project.getBasePath());
+        NpmDriver npmDriver = new NpmDriver();
         try {
-            scanManager = NpmScanManager.CreateNpmScanManager(project);
+            npmDriver.install(project.getBasePath());
+            npmDriver.install(Paths.get(project.getBasePath(), "a").toString());
         } catch (IOException e) {
-            fail("Fail to create NpmScanManager", e);
+            fail(e.getMessage());
         }
+    }
+
+    @AfterMethod
+    public void terminate() {
+        project.dispose();
     }
 
     @Test
     public void testIsApplicable() {
-        assertTrue(NpmScanManager.isApplicable(project));
+        Set<String> applicationDirs = Sets.newHashSet();
+        Set<Path> applicationPaths = Sets.newHashSet();
+        String basePath = getProjectBasePath(project);
+        applicationPaths.add(Paths.get(basePath));
+        try {
+            applicationDirs = findApplicationDirs(applicationPaths);
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+        assertTrue(applicationDirs.contains(basePath));
+        assertTrue(applicationDirs.contains(Paths.get(basePath, "a").toString()));
+        assertTrue(NpmScanManager.isApplicable(applicationDirs));
     }
 
     /**
@@ -57,30 +80,35 @@ public class NpmScanManagerTests {
      * 'send:0.1.0' - Contains 'debug:3.1.0', 'fresh:0.1.0', 'mime:1.2.6' and 'range-parser:0.0.4'
      * The test verify that the ScanTreeNode built as required with these components.
      */
-    @Test(dependsOnMethods = {"testIsApplicable"})
+    @Test
     public void testRefreshDependencies() {
+        NpmScanManager scanManager = createNpmScanManager();
+        assertNotNull(scanManager);
         scanManager.refreshDependencies(getRefreshDependenciesCbk(), null);
-        assertEquals(2, scanManager.rootNode.getChildCount());
+        assertEquals(scanManager.rootNode.getChildCount(), 2);
         scanManager.rootNode.getChildren().forEach(child -> {
-            String childComponent = child.getUserObject().toString();
-            assertNotNull(childComponent);
-            switch (childComponent) {
-                case DEBUG_COMPONENT_ID:
-                    assertEquals(DEBUG_COMPONENTS_IDS.size(), child.getChildCount());
-                    child.getChildren().forEach(debugChild -> {
+            assertEquals(child.getChildCount(), 1);
+            String packageName = child.getUserObject().toString();
+            assertNotNull(packageName);
+            ScanTreeNode dependency = child.getChildren().get(0);
+            switch (packageName) {
+                case FIRST_PACKAGE:
+                    assertEquals(DEBUG_COMPONENTS_IDS.size(), dependency.getChildCount());
+                    dependency.getChildren().forEach(debugChild -> {
                         String debugChildComponent = debugChild.getUserObject().toString();
                         assertTrue(DEBUG_COMPONENTS_IDS.contains(debugChildComponent));
                     });
                     break;
-                case SEND_COMPONENT_ID:
-                    assertEquals(SEND_COMPONENTS_IDS.size(), child.getChildCount());
-                    child.getChildren().forEach(sendChild -> {
+
+                case SECOND_PACKAGE:
+                    assertEquals(SEND_COMPONENTS_IDS.size(), dependency.getChildCount());
+                    dependency.getChildren().forEach(sendChild -> {
                         String sendChildComponent = sendChild.getUserObject().toString();
                         assertTrue(SEND_COMPONENTS_IDS.contains(sendChildComponent));
                     });
                     break;
                 default:
-                    fail("Wrong child " + childComponent);
+                    fail("Wrong child " + packageName);
                     break;
             }
         });
@@ -89,10 +117,13 @@ public class NpmScanManagerTests {
     /**
      * Test the components status before the Xray scan
      */
-    @Test(dependsOnMethods = {"testRefreshDependencies"})
+    @Test
     public void testCollectComponentsToScan() {
+        NpmScanManager scanManager = createNpmScanManager();
+        assertNotNull(scanManager);
+        scanManager.refreshDependencies(getRefreshDependenciesCbk(), null);
         Components components = scanManager.collectComponentsToScan(null);
-        assertEquals(6, components.getComponentDetails().size());
+        assertEquals(components.getComponentDetails().size(), 6);
         components.getComponentDetails().forEach(componentDetail -> {
             String componentId = componentDetail.getComponentId();
             assertTrue(componentId.startsWith(NPM_PREFIX));
@@ -118,15 +149,15 @@ public class NpmScanManagerTests {
         };
     }
 
-    @AfterClass
-    public void cleanProject() {
+    private NpmScanManager createNpmScanManager() {
+        Set<Path> applicationDirs = Sets.newHashSet();
+        String appDir = getProjectBasePath(project);
+        applicationDirs.add(Paths.get(appDir));
         try {
-            Path installationDirectory = Paths.get(getProjectBasePath(project), ".idea");
-            if (Files.exists(installationDirectory)) {
-                FileUtils.forceDelete(installationDirectory.toFile());
-            }
+            return NpmScanManager.CreateNpmScanManager(project, findApplicationDirs(applicationDirs));
         } catch (IOException e) {
-            // Ignore
+            fail(e.getMessage());
         }
+        return null;
     }
 }

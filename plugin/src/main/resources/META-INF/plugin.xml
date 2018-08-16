@@ -35,7 +35,7 @@
                                  instance="org.jfrog.idea.ui.configuration.XrayGlobalConfiguration"/>
         <externalProjectDataService implementation="org.jfrog.idea.xray.XrayDependencyDataService"/>
         <projectService serviceImplementation="org.jfrog.idea.xray.XrayDependencyDataService"/>
-        <projectService serviceImplementation="org.jfrog.idea.xray.ScanManagerFactory"/>
+        <projectService serviceImplementation="org.jfrog.idea.xray.ScanManagersFactory"/>
         <projectService serviceInterface="org.jfrog.idea.ui.xray.XrayToolWindow"
                         serviceImplementation="org.jfrog.idea.ui.xray.XrayToolWindow"/>
         <projectService serviceImplementation="org.jfrog.idea.xray.persistency.ScanCache"/>

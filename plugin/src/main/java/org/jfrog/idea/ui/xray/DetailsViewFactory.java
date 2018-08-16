@@ -8,6 +8,7 @@ import com.intellij.util.ui.UIUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.idea.xray.ScanTreeNode;
+import org.jfrog.idea.xray.persistency.types.GeneralInfo;
 import org.jfrog.idea.xray.persistency.types.Issue;
 import org.jfrog.idea.xray.persistency.types.License;
 
@@ -51,30 +52,34 @@ public class DetailsViewFactory extends JBPanel {
         }
         JPanel gridPanel = new JBPanel(new GridBagLayout());
         gridPanel.setBackground(UIUtil.getTableBackground());
-        String pkgType = StringUtils.capitalize(node.getGeneralInfo().pkgType);
+        GeneralInfo generalInfo = node.getGeneralInfo();
+        String pkgType = StringUtils.capitalize(generalInfo.pkgType);
         if (StringUtils.isBlank(pkgType)) {
             // No package type
-            addJtext(gridPanel, 0, "Group:", node.getGeneralInfo().getGroupId());
-            addJtext(gridPanel, 1, "Artifact:", node.getGeneralInfo().getArtifactId());
-            addJtext(gridPanel, 2, "Version:", node.getGeneralInfo().getVersion());
+            addJtext(gridPanel, 0, "Group:", generalInfo.getGroupId());
+            addJtext(gridPanel, 1, "Artifact:", generalInfo.getArtifactId());
+            addJtext(gridPanel, 2, "Version:", generalInfo.getVersion());
         } else if (pkgType.equals("Npm")) {
             // Npm
-            addJtext(gridPanel, 0, "Package:", node.getGeneralInfo().getGroupId());
-            addJtext(gridPanel, 1, "Version:", node.getGeneralInfo().getVersion());
+            addJtext(gridPanel, 0, "Package:", generalInfo.getGroupId());
+            addJtext(gridPanel, 1, "Version:", generalInfo.getVersion());
             addJtext(gridPanel, 2, "Type:", pkgType);
+            if (StringUtils.isNotBlank(generalInfo.path)) {
+                addJtext(gridPanel, 3, "Path:", generalInfo.path);
+            }
         } else {
             // Maven/Gradle
-            addJtext(gridPanel, 0, "Group:", node.getGeneralInfo().getGroupId());
-            addJtext(gridPanel, 1, "Artifact:", node.getGeneralInfo().getArtifactId());
-            addJtext(gridPanel, 2, "Version:", node.getGeneralInfo().getVersion());
-            addJtext(gridPanel, 3, "Type:", StringUtils.capitalize(node.getGeneralInfo().pkgType));
+            addJtext(gridPanel, 0, "Group:", generalInfo.getGroupId());
+            addJtext(gridPanel, 1, "Artifact:", generalInfo.getArtifactId());
+            addJtext(gridPanel, 2, "Version:", generalInfo.getVersion());
+            addJtext(gridPanel, 3, "Type:", pkgType);
         }
         addLicenses(gridPanel, node.getLicenses());
         return gridPanel;
     }
 
     private static void addLicenses(JPanel panel, Set<License> licenses) {
-        if (licenses == null) {
+        if (licenses.isEmpty()) {
             return;
         }
         JPanel licensesPanel = new JBPanel(new HorizontalLayout(1));
@@ -109,7 +114,7 @@ public class DetailsViewFactory extends JBPanel {
     }
 
     private static String createLicenseString(License license) {
-        if (license.fullName.equals("Unknown license")) {
+        if (StringUtils.isBlank(license.fullName) || StringUtils.isBlank(license.name) || license.fullName.equals(License.UNKNOWN_LICENCE_FULL_NAME)) {
             return license.name;
         }
         return license.fullName + " (" + license.name + ")";

@@ -1,7 +1,6 @@
 package org.jfrog.idea.xray.utils;
 
 import com.intellij.notification.*;
-import com.intellij.openapi.diagnostic.Logger;
 import com.jfrog.xray.client.services.system.Version;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -12,10 +11,11 @@ import javax.swing.event.TreeExpansionListener;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by romang on 5/8/17.
@@ -31,27 +31,20 @@ public class Utils {
         return version.isAtLeast(MINIMAL_XRAY_VERSION_SUPPORTED);
     }
 
-    public static void notify(Logger logger, String title, String details, NotificationType level) {
+    public static void notify(String title, String details, NotificationType level) {
         popupBalloon(title, details, level);
-        log(logger, title, details, level);
+        log(title, details, level);
     }
 
-    public static void notify(Logger logger, String title, Exception exception, NotificationType level) {
+    public static void notify(String title, Exception exception, NotificationType level) {
         popupBalloon(title, exception.getMessage(), level);
-        log(logger, exception.getMessage(), Arrays.toString(exception.getStackTrace()), level);
+        if (StringUtils.isNotBlank(exception.getMessage())) {
+            title = exception.getMessage();
+        }
+        log(title, Arrays.toString(exception.getStackTrace()), level);
     }
 
-    public static void log(Logger logger, String title, String details, NotificationType level) {
-        switch (level) {
-            case ERROR:
-                logger.error(title, details);
-                break;
-            case WARNING:
-                logger.warn(title + "\n" + details);
-                break;
-            default:
-                logger.info(title + "\n" + details);
-        }
+    public static void log(String title, String details, NotificationType level) {
         if (StringUtils.isBlank(details)) {
             details = title;
         }
@@ -122,10 +115,10 @@ public class Utils {
     public static Process exeCommand(List<String> args) throws IOException {
         String strArgs = String.join(" ", args);
         if (isWindows()) {
-            return Runtime.getRuntime().exec(new String[]{"cmd", "/c" ,strArgs});
+            return Runtime.getRuntime().exec(new String[]{"cmd", "/c", strArgs});
         }
         if (isMac()) {
-            return Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c" ,strArgs}, new String[]{"PATH=$PATH:/usr/local/bin"});
+            return Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", strArgs}, new String[]{"PATH=$PATH:/usr/local/bin"});
         }
         // Linux
         return Runtime.getRuntime().exec(args.toArray(new String[0]));
@@ -135,7 +128,7 @@ public class Utils {
         if (stream == null) {
             return "";
         }
-        try (StringWriter writer = new StringWriter()){
+        try (StringWriter writer = new StringWriter()) {
             IOUtils.copy(stream, writer, "UTF-8");
             return writer.toString();
         }
@@ -151,5 +144,42 @@ public class Utils {
             }
         }
         return null;
+    }
+
+    /**
+     * Returns Set of Paths cleaned of subdirectories.
+     * For example the set ["/a", "/b/c", "/a/d"] will become ["/a", "/b/c"]
+     *
+     * @param projectPaths Paths to filter
+     * @return Set of Paths cleaned of subdirectories.
+     */
+    public static Set<Path> filterProjectPaths(Set<Path> projectPaths) {
+        Set<Path> finalPaths = new HashSet<>();
+        // Create a sorted by length list of paths
+        List<Path> sortedList = projectPaths.stream()
+                .map(Path::toAbsolutePath)
+                .map(Path::normalize)
+                .sorted(Comparator.comparingInt(Path::getNameCount))
+                .collect(Collectors.toList());
+        sortedList.forEach(currentPath -> {
+                    boolean isRootPath = true;
+                    // Iterate over the sorted by directories count length list.
+                    for (Path shorterPath : sortedList) {
+                        // CurrentPath is shorter or equals to the shortPath therefore all the next paths can't contain the currentPath
+                        if (currentPath.getNameCount() <= shorterPath.getNameCount()) {
+                            break;
+                        }
+                        // The currentPath is subPath and we should not add it to the list
+                        if (currentPath.startsWith(shorterPath)) {
+                            isRootPath = false;
+                            break;
+                        }
+                    }
+                    if (isRootPath) {
+                        finalPaths.add(currentPath);
+                    }
+                }
+        );
+        return finalPaths;
     }
 }

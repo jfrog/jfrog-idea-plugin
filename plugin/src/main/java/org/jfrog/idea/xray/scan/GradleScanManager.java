@@ -1,16 +1,20 @@
 package org.jfrog.idea.xray.scan;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.ProjectKeys;
 import com.intellij.openapi.externalSystem.model.project.AbstractDependencyData;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
+import com.intellij.openapi.externalSystem.model.project.ModuleData;
 import com.intellij.openapi.externalSystem.model.project.ProjectData;
 import com.intellij.openapi.externalSystem.model.task.ExternalSystemTaskType;
 import com.intellij.openapi.externalSystem.service.execution.ProgressExecutionMode;
 import com.intellij.openapi.externalSystem.service.internal.ExternalSystemProcessingManager;
 import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefreshCallback;
+import com.intellij.openapi.externalSystem.settings.ExternalProjectSettings;
 import com.intellij.openapi.externalSystem.util.ExternalSystemApiUtil;
 import com.intellij.openapi.externalSystem.util.ExternalSystemUtil;
 import com.intellij.openapi.project.Project;
@@ -18,24 +22,33 @@ import com.jfrog.xray.client.impl.ComponentsFactory;
 import com.jfrog.xray.client.impl.services.summary.ComponentDetailImpl;
 import com.jfrog.xray.client.services.summary.Components;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.gradle.settings.GradleSettings;
 import org.jetbrains.plugins.gradle.util.GradleConstants;
 import org.jfrog.idea.xray.ScanTreeNode;
+import org.jfrog.idea.xray.persistency.types.GeneralInfo;
+import org.jfrog.idea.xray.utils.Utils;
 
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Created by Yahav Itzhak on 9 Nov 2017.
  */
 public class GradleScanManager extends ScanManager {
 
+    private Map<String, ScanTreeNode> modules;
     private Collection<DataNode<LibraryDependencyData>> libraryDependencies;
     private ScanTreeNode rootNode = new ScanTreeNode(ScanManager.ROOT_NODE_HEADER);
 
@@ -46,6 +59,28 @@ public class GradleScanManager extends ScanManager {
     public static boolean isApplicable(@NotNull Project project) {
         GradleSettings.MyState state = GradleSettings.getInstance(project).getState();
         return state != null && !state.getLinkedExternalProjectsSettings().isEmpty();
+    }
+
+    /**
+     * Returns all project modules locations as Paths.
+     * Other scanners such as npm will use this paths in order to find modules.
+     *
+     * @return all project modules locations as Paths
+     */
+    public Set<Path> getProjectPaths() {
+        Set<Path> paths = super.getProjectPaths();
+        GradleSettings.MyState gradleState = GradleSettings.getInstance(project).getState();
+        if (gradleState != null) {
+            gradleState.getLinkedExternalProjectsSettings()
+                    .stream()
+                    .map(ExternalProjectSettings::getModules)
+                    .forEach(module -> paths.addAll(module.stream()
+                            .map(Paths::get)
+                            .collect(Collectors.toSet())));
+        } else {
+            Utils.log("Gradle state is null", "", NotificationType.WARNING);
+        }
+        return paths;
     }
 
     @Override
@@ -72,13 +107,15 @@ public class GradleScanManager extends ScanManager {
     protected Components collectComponentsToScan(@Nullable DataNode<ProjectData> externalProject) {
         Components components = ComponentsFactory.create();
         rootNode = new ScanTreeNode(ScanManager.ROOT_NODE_HEADER);
-        if (libraryDependencies == null) {
-            libraryDependencies = ExternalSystemApiUtil.findAllRecursively(externalProject, ProjectKeys.LIBRARY_DEPENDENCY);
-        }
-        libraryDependencies.stream()
+        collectDependenciesIfMissing(externalProject);
+        libraryDependencies.parallelStream()
+                .filter(GradleScanManager::isLibraryDependency)
                 .filter(GradleScanManager::isRootDependency)
-                .filter(distinctByName(dataNode -> dataNode.getData().getExternalName()))
-                .forEach(dataNode -> populateDependenciesTree(rootNode, dataNode));
+                .map(dataNode -> Pair.of(getModuleId(dataNode), dataNode))
+                .filter(distinctByName(pair -> pair.getLeft() + getDependencyName(pair.getRight())))
+                .filter(pair -> modules.containsKey(pair.getLeft()))
+                .forEach(pair -> populateDependenciesTree(modules.get(pair.getLeft()), pair.getRight()));
+        modules.values().forEach(module -> rootNode.add(module));
         addAllArtifacts(components, rootNode, GAV_PREFIX);
         return components;
     }
@@ -89,6 +126,42 @@ public class GradleScanManager extends ScanManager {
         return new DefaultTreeModel(rootNode, false);
     }
 
+    private void collectDependenciesIfMissing(DataNode<ProjectData> externalProject) {
+        if (libraryDependencies == null) {
+            collectModuleDependencies(externalProject);
+            collectLibraryDependencies(externalProject);
+        } else {
+            modules.values().forEach(child -> child.getChildren().clear());
+        }
+    }
+
+    private void collectModuleDependencies(DataNode<ProjectData> externalProject) {
+        Collection<DataNode<ModuleData>> moduleDependencies = ExternalSystemApiUtil.findAllRecursively(externalProject, ProjectKeys.MODULE);
+        modules = Maps.newHashMap();
+        moduleDependencies.forEach(module -> {
+            String groupId = Objects.toString(module.getData().getGroup(), "");
+            String artifactId = StringUtils.removeStart(module.getData().getId(), ":");
+            String version = Objects.toString(module.getData().getVersion(), "");
+            String gav = groupId + ":" + artifactId + ":" + version;
+            ScanTreeNode scanTreeNode = new ScanTreeNode(artifactId, true);
+            scanTreeNode.setGeneralInfo(new GeneralInfo()
+                    .componentId(gav)
+                    .pkgType("gradle")
+                    .groupId(groupId)
+                    .artifactId(artifactId)
+                    .version(version));
+            modules.put(module.getData().getId(), scanTreeNode);
+        });
+    }
+
+    private void collectLibraryDependencies(DataNode<ProjectData> externalProject) {
+        libraryDependencies = ExternalSystemApiUtil.findAllRecursively(externalProject, ProjectKeys.LIBRARY_DEPENDENCY);
+    }
+
+    private static boolean isLibraryDependency(DataNode<LibraryDependencyData> dataNode) {
+        return ProjectKeys.LIBRARY_DEPENDENCY.equals(dataNode.getKey());
+    }
+
     private static boolean isRootDependency(DataNode<LibraryDependencyData> dataNode) {
         return dataNode.getParent() == null || !ProjectKeys.LIBRARY_DEPENDENCY.equals(dataNode.getParent().getKey());
     }
@@ -96,6 +169,14 @@ public class GradleScanManager extends ScanManager {
     private static <T> Predicate<T> distinctByName(Function<? super T, ?> getNameFunc) {
         Set<Object> seen = Sets.newHashSet();
         return t -> seen.add(getNameFunc.apply(t));
+    }
+
+    private static String getModuleId(DataNode<LibraryDependencyData> dataNode) {
+        return dataNode.getDataNode(ProjectKeys.MODULE).getData().getId();
+    }
+
+    private String getDependencyName(DataNode<LibraryDependencyData> dataNode) {
+        return dataNode.getData().getExternalName();
     }
 
     private void populateDependenciesTree(ScanTreeNode scanTreeNode, DataNode<? extends AbstractDependencyData> dataNode) {
@@ -111,7 +192,7 @@ public class GradleScanManager extends ScanManager {
         }
         if (colonCount != 2) {
             if (StringUtils.isNotBlank(componentId)) {
-                logger.warn("Bad component ID structure. Should be <GroupID>:<ArtifactID>:<Version>, got '" + componentId + "'");
+                Utils.log("Bad component ID structure", "Should be <GroupID>:<ArtifactID>:<Version>, got '" + componentId + "'", NotificationType.WARNING);
             }
             return;
         }

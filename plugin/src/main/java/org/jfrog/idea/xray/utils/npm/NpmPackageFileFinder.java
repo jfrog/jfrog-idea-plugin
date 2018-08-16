@@ -1,7 +1,6 @@
 package org.jfrog.idea.xray.utils.npm;
 
 import com.google.common.collect.Lists;
-import com.intellij.openapi.diagnostic.Logger;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -10,21 +9,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
-
-import static org.jfrog.idea.xray.scan.NpmScanManager.INSTALLATION_DIR;
+import java.util.Set;
 
 /**
  * Created by Yahav Itzhak on 17 Dec 2017.
  */
 public class NpmPackageFileFinder implements FileVisitor<Path> {
 
-    private static final List<String> EXCLUDED_DIRS = Lists.newArrayList("node_modules", INSTALLATION_DIR);
-    private Path projectPath;
+    private static final List<String> EXCLUDED_DIRS = Lists.newArrayList("node_modules", ".idea");
+    private Set<Path> projectPaths;
     private List<String> applicationPaths = Lists.newArrayList();
-    static final Logger logger = Logger.getInstance(NpmPackageFileFinder.class);
 
-    public NpmPackageFileFinder(Path projectPath) {
-        this.projectPath = projectPath;
+    public NpmPackageFileFinder(Set<Path> projectPaths) {
+        this.projectPaths = projectPaths;
     }
 
     /**
@@ -32,7 +29,9 @@ public class NpmPackageFileFinder implements FileVisitor<Path> {
      * @return List of package.json's parent directories.
      */
     public List<String> getPackageFilePairs() throws IOException {
-        Files.walkFileTree(projectPath, this);
+        for (Path projectPath : projectPaths) {
+            Files.walkFileTree(projectPath, this);
+        }
         return applicationPaths;
     }
 
@@ -44,9 +43,6 @@ public class NpmPackageFileFinder implements FileVisitor<Path> {
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
         String fileName = file.getFileName().toString();
-        if (isYarn(fileName)) {
-            throw new IOException("Yarn is not supported");
-        }
         if (isPackageFile(fileName)) {
             applicationPaths.add(file.getParent().toString());
         }
@@ -62,10 +58,6 @@ public class NpmPackageFileFinder implements FileVisitor<Path> {
     public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
         // Skip sub directories without permissions
         return exc == null ? FileVisitResult.CONTINUE : FileVisitResult.SKIP_SUBTREE;
-    }
-
-    private static boolean isYarn(String fileName) {
-        return "yarn.lock".equals(fileName);
     }
 
     private static boolean isPackageFile(String fileName) {
