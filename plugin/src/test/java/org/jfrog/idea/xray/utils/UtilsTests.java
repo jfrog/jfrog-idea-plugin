@@ -24,7 +24,7 @@ public class UtilsTests extends ScanTreeNodeBase {
     @DataProvider(name = "Paths")
     public static Object[][] testPreferredDeployingCredentials() {
         return new Object[][]{
-                {Sets.newHashSet((Object) Paths.get("/a")), Sets.newHashSet((Object) Paths.get("/a"))},
+                {Sets.newHashSet((Object) Paths.get("C:\\")), Sets.newHashSet((Object) Paths.get("C:\\"))},
 
 //                {Sets.newHashSet(Paths.get("/a"), Paths.get("/b"), Paths.get("/c")),
 //                        Sets.newHashSet(Paths.get("/a"), Paths.get("/b"), Paths.get("/c"))},
