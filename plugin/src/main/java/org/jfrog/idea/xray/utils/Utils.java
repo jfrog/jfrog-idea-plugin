@@ -115,13 +115,13 @@ public class Utils {
     public static Process exeCommand(File execDir, List<String> args) throws IOException {
         String strArgs = String.join(" ", args);
         if (isWindows()) {
-            return Runtime.getRuntime().exec(new String[]{"cmd", "/c", strArgs}, new String[]{}, execDir);
+            return Runtime.getRuntime().exec(new String[]{"cmd", "/c", strArgs}, null, execDir);
         }
         if (isMac()) {
             return Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", strArgs}, new String[]{"PATH=$PATH:/usr/local/bin"}, execDir);
         }
         // Linux
-        return Runtime.getRuntime().exec(args.toArray(new String[0]), new String[]{"PATH=$PATH:/usr/local/bin"}, execDir);
+        return Runtime.getRuntime().exec(args.toArray(new String[0]), null, execDir);
     }
 
     public static String readStream(InputStream stream) throws IOException {
