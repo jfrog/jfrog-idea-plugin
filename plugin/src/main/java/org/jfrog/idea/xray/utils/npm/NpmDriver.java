@@ -50,7 +50,7 @@ public class NpmDriver {
     }
 
     public void install(String appDir) throws IOException {
-        List<String> args = Lists.newArrayList("install", "--only=production", "\"" + appDir + "\"", "--prefix", "\"" + appDir + "\"");
+        List<String> args = Lists.newArrayList("install", "--only=production", appDir, "--prefix", appDir);
         try {
             NpmCommandRes npmCommandRes = exeNpmCommand(args);
             if (!npmCommandRes.isOk()) {
@@ -62,7 +62,7 @@ public class NpmDriver {
     }
 
     public JsonNode list(String appDir) throws IOException {
-        List<String> args = Lists.newArrayList("ls", "--prefix", "\"" + appDir + "\"", "--json");
+        List<String> args = Lists.newArrayList("ls", "--prefix", Utils.escapeSpaces(appDir), "--json");
         try {
             NpmCommandRes npmCommandRes = exeNpmCommand(args);
             return jsonReader.readTree(npmCommandRes.res);
