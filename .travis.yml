@@ -2,6 +2,8 @@ os:
   - osx
   - linux
 language: java
+jdk:
+  - oraclejdk8
 addons:
   apt:
     packages:
