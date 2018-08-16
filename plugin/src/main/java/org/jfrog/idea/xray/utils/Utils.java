@@ -112,16 +112,16 @@ public class Utils {
         return System.getProperty("os.name").toLowerCase().contains("mac");
     }
 
-    public static Process exeCommand(List<String> args) throws IOException {
+    public static Process exeCommand(File execDir, List<String> args) throws IOException {
         String strArgs = String.join(" ", args);
         if (isWindows()) {
-            return Runtime.getRuntime().exec(new String[]{"cmd", "/c", strArgs});
+            return Runtime.getRuntime().exec(new String[]{"cmd", "/c", strArgs}, new String[]{}, execDir);
         }
         if (isMac()) {
-            return Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", strArgs}, new String[]{"PATH=$PATH:/usr/local/bin"});
+            return Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", strArgs}, new String[]{"PATH=$PATH:/usr/local/bin"}, execDir);
         }
         // Linux
-        return Runtime.getRuntime().exec(args.toArray(new String[0]));
+        return Runtime.getRuntime().exec(args.toArray(new String[0]), new String[]{"PATH=$PATH:/usr/local/bin"}, execDir);
     }
 
     public static String readStream(InputStream stream) throws IOException {
