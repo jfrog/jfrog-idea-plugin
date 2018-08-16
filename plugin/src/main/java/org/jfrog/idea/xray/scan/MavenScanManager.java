@@ -49,7 +49,7 @@ public class MavenScanManager extends ScanManager {
      */
     public Set<Path> getProjectPaths() {
         Set<Path> paths = super.getProjectPaths();
-        MavenProjectsManager.getInstance(project).getProjects().forEach(mavenProject -> paths.add(Paths.get(mavenProject.getDirectory()).toAbsolutePath()));
+        MavenProjectsManager.getInstance(project).getProjects().forEach(mavenProject -> paths.add(Paths.get(mavenProject.getDirectory())));
         return paths;
     }
 

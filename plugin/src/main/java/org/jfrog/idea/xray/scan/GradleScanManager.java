@@ -76,7 +76,6 @@ public class GradleScanManager extends ScanManager {
                     .map(ExternalProjectSettings::getModules)
                     .forEach(module -> paths.addAll(module.stream()
                             .map(Paths::get)
-                            .map(Path::toAbsolutePath)
                             .collect(Collectors.toSet())));
         } else {
             Utils.log("Gradle state is null", "", NotificationType.WARNING);

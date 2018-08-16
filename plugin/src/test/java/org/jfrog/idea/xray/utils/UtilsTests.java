@@ -24,8 +24,8 @@ public class UtilsTests extends ScanTreeNodeBase {
     @DataProvider(name = "Paths")
     public static Object[][] testPreferredDeployingCredentials() {
         return new Object[][]{
-                {Sets.newHashSet(Paths.get("/a")),
-                        Sets.newHashSet(Paths.get("/a"))},
+                {Sets.newHashSet((Object) Paths.get("/a")),
+                        Sets.newHashSet((Object) Paths.get("/a"))},
 
                 {Sets.newHashSet(Paths.get("/a"), Paths.get("/b"), Paths.get("/c")),
                         Sets.newHashSet(Paths.get("/a"), Paths.get("/b"), Paths.get("/c"))},
@@ -37,10 +37,16 @@ public class UtilsTests extends ScanTreeNodeBase {
                         Sets.newHashSet(Paths.get("/a"), Paths.get("/c/b"))},
 
                 {Sets.newHashSet(Paths.get("/a"), Paths.get("/a/a"), Paths.get("/a/b")),
-                        Sets.newHashSet((Object)Paths.get("/a"))},
+                        Sets.newHashSet((Object) Paths.get("/a"))},
 
                 {Sets.newHashSet(Paths.get("/a"), Paths.get("/a/a/"), Paths.get("/c/b"), Paths.get("/c/b/fff"), Paths.get("/c/f/fff")),
                         Sets.newHashSet(Paths.get("/a"), Paths.get("/c/b"), Paths.get("/c/f/fff"))},
+
+                {Sets.newHashSet(Paths.get("/a"), Paths.get("/a/a/"), Paths.get("/c/b"), Paths.get("/c/b/../b/../b/fff"), Paths.get("/c/f/fff")),
+                        Sets.newHashSet(Paths.get("/a"), Paths.get("/c/b"), Paths.get("/c/f/fff"))},
+
+                {Sets.newHashSet(Paths.get("/a"), Paths.get("/a/a/"), Paths.get("/c/b/.."), Paths.get("/c/b/../b/../b/fff"), Paths.get("/c/f/fff")),
+                        Sets.newHashSet(Paths.get("/a"), Paths.get("/c"))},
         };
     }
 }

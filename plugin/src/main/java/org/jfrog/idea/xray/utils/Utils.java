@@ -155,17 +155,18 @@ public class Utils {
      */
     public static Set<Path> filterProjectPaths(Set<Path> projectPaths) {
         Set<Path> finalPaths = new HashSet<>();
-        Comparator<Path> compByPathLength = Comparator.comparingInt(pathA -> pathA.toString().length());
         // Create a sorted by length list of paths
-        List<Path> sortedList = projectPaths.stream().sorted(compByPathLength).collect(Collectors.toList());
-        projectPaths.forEach(currentPath -> {
-            Iterator<Path> iterator = sortedList.iterator();
+        List<Path> sortedList = projectPaths.stream()
+                .map(Path::toAbsolutePath)
+                .map(Path::normalize)
+                .sorted(Comparator.comparingInt(Path::getNameCount))
+                .collect(Collectors.toList());
+        sortedList.forEach(currentPath -> {
                     boolean isRootPath = true;
-                    // Iterate over the sorted by length list.
-                    while (iterator.hasNext()) {
-                        Path shorterPath = iterator.next();
+                    // Iterate over the sorted by directories count length list.
+                    for (Path shorterPath : sortedList) {
                         // CurrentPath is shorter or equals to the shortPath therefore all the next paths can't contain the currentPath
-                        if (currentPath.toString().length() <= shorterPath.toString().length()) {
+                        if (currentPath.getNameCount() <= shorterPath.getNameCount()) {
                             break;
                         }
                         // The currentPath is subPath and we should not add it to the list
