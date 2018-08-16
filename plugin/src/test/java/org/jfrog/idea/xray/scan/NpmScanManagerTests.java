@@ -9,8 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfrog.idea.xray.ScanTreeNode;
 import org.jfrog.idea.xray.utils.npm.NpmDriver;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 import org.testng.collections.Sets;
@@ -39,7 +39,7 @@ public class NpmScanManagerTests {
     private static final List<String> DEBUG_COMPONENTS_IDS = Lists.newArrayList("ms:2.0.0");
     private static final List<String> SEND_COMPONENTS_IDS = Lists.newArrayList("debug:3.1.0", "fresh:0.1.0", "mime:1.2.6", "range-parser:0.0.4");
 
-    @BeforeTest
+    @BeforeMethod
     public void init() {
         project = new NpmProjectImpl();
         assertNotNull(project.getBasePath());
@@ -52,7 +52,7 @@ public class NpmScanManagerTests {
         }
     }
 
-    @AfterTest
+    @AfterMethod
     public void terminate() {
         project.dispose();
     }
