@@ -19,7 +19,7 @@ test_script:
 - sh: if [[ "$APPVEYOR_REPO_BRANCH" = "master" && -z "$APPVEYOR_PULL_REQUEST_TITLE" ]]; then
         xray/gradlew test -p xray;
       fi
-- ps: if (Test-Path $env:APPVEYOR_REPO_BRANCH -eq "master" -And -Not $env:APPVEYOR_PULL_REQUEST_TITLE)
+- ps: if ($env:APPVEYOR_REPO_BRANCH -eq "master" -And -Not $env:APPVEYOR_PULL_REQUEST_TITLE)
        {
          xray/gradlew test -p xray;
        }
