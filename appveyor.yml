@@ -4,6 +4,7 @@ image:
 
 stack: node 8, jdk 8
 environment:
+  APPVEYOR_YML_DISABLE_PS_LINUX: true
   nodejs_version: "8"
   matrix:
   - JAVA_HOME: C:\Program Files\Java\jdk1.8.0
@@ -18,7 +19,7 @@ test_script:
 - sh: if [[ "$APPVEYOR_REPO_BRANCH" = "master" && -z "$APPVEYOR_PULL_REQUEST_TITLE" ]]; then
         xray/gradlew test -p xray;
       fi
-- ps: if (Test-Path $env:APPVEYOR_REPO_BRANCH -eq "master") -And (-Not $env:APPVEYOR_PULL_REQUEST_TITLE)
+- ps: if (Test-Path $env:APPVEYOR_REPO_BRANCH -eq "master" -And -Not $env:APPVEYOR_PULL_REQUEST_TITLE)
        {
          xray/gradlew test -p xray;
        }
