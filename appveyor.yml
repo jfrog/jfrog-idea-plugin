@@ -15,7 +15,7 @@ environment:
     secure: qTZFY5+wGrRnuM9xtfywLaz+nrAuIAxsH/g4MwVCO0hk3d1iPxfaEM7omsWW3szr6u42/ZOg62/7JDoXHWana7MZu3Cmy8dLD9ki7eIFHk4=
 
 test_script:
-- sh: if [[ "APPVEYOR_REPO_BRANCH" = "master" && -z "APPVEYOR_PULL_REQUEST_TITLE" = "false" ]]; then
+- sh: if [[ "APPVEYOR_REPO_BRANCH" = "master" && -z "APPVEYOR_PULL_REQUEST_TITLE" ]]; then
         xray/gradlew test -p xray;
       fi
 
