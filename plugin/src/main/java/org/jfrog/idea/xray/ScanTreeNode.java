@@ -1,7 +1,6 @@
 package org.jfrog.idea.xray;
 
 import com.google.common.collect.Sets;
-import org.apache.commons.lang.StringUtils;
 import org.jfrog.idea.xray.persistency.types.GeneralInfo;
 import org.jfrog.idea.xray.persistency.types.Issue;
 import org.jfrog.idea.xray.persistency.types.License;
