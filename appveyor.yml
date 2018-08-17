@@ -15,9 +15,14 @@ environment:
     secure: qTZFY5+wGrRnuM9xtfywLaz+nrAuIAxsH/g4MwVCO0hk3d1iPxfaEM7omsWW3szr6u42/ZOg62/7JDoXHWana7MZu3Cmy8dLD9ki7eIFHk4=
 
 test_script:
-- branches:
-  only master:
-  - xray/gradlew test -p xray
+- sh: if [[ "APPVEYOR_REPO_BRANCH" = "master" && -z "APPVEYOR_PULL_REQUEST_TITLE" ]]; then
+        xray/gradlew test -p xray;
+      fi
+
+  psh: if (Test-Path env:APPVEYOR_PULL_REQUEST_NUMBER) -And (-Not $env:APPVEYOR_PULL_REQUEST_TITLE)
+       {
+         xray/gradlew test -p xray;
+       }
 - xray/gradlew clean install -p xray
 - plugin/gradlew test -p plugin
 
