@@ -9,12 +9,7 @@ addons:
   apt:
     packages:
     - npm
-jobs:
-  include:
-  - stage: Test Xray client
-    if: branch = master
-    script: xray/gradlew test -p xray
-  - stage: Install Xray client
-    script: xray/gradlew clean install -p xray
-  - stage: Test Idea plugin
-    script: plugin/gradlew test -p plugin
+script:
+  - test $TRAVIS_BRANCH = "master" && xray/gradlew test -p xray
+  - xray/gradlew clean install -p xray
+  - plugin/gradlew test -p plugin
