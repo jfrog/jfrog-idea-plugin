@@ -11,7 +11,7 @@ addons:
     - npm
 script:
   - if [[ "$TRAVIS_BRANCH" = "master" ]]; then
-      xray/gradlew test -p xray
+      xray/gradlew test -p xray;
     fi
   - xray/gradlew clean install -p xray
   - plugin/gradlew test -p plugin
