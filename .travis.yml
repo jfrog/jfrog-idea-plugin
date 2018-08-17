@@ -10,6 +10,8 @@ addons:
     packages:
     - npm
 script:
-  - xray/gradlew test -p xray
+  - if [[ "$TRAVIS_BRANCH" = "master" && "$TRAVIS_PULL_REQUEST" = "false" ]]; then
+      xray/gradlew test -p xray;
+    fi
   - xray/gradlew clean install -p xray
   - plugin/gradlew test -p plugin

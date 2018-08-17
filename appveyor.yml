@@ -15,7 +15,9 @@ environment:
     secure: qTZFY5+wGrRnuM9xtfywLaz+nrAuIAxsH/g4MwVCO0hk3d1iPxfaEM7omsWW3szr6u42/ZOg62/7JDoXHWana7MZu3Cmy8dLD9ki7eIFHk4=
 
 test_script:
-- xray/gradlew test -p xray
+- branches:
+  only master:
+  - xray/gradlew test -p xray
 - xray/gradlew clean install -p xray
 - plugin/gradlew test -p plugin
 
