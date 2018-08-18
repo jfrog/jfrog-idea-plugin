@@ -6,7 +6,6 @@ stack: node 8, jdk 8
 environment:
   APPVEYOR_YML_DISABLE_PS_LINUX: true
   nodejs_version: "8"
-  matrix:
   CLIENTTESTS_XRAY_URL:
     secure: 0OkcNv/5VWzZj2brUuQE6s3pI40AmtThfrmg/w+PxP0=
   CLIENTTESTS_XRAY_USERNAME:
