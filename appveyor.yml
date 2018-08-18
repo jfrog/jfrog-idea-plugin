@@ -19,7 +19,7 @@ test_script:
 - sh: if [[ "$APPVEYOR_REPO_BRANCH" = "master" && -z "$APPVEYOR_PULL_REQUEST_TITLE" ]]; then
         xray/gradlew test -p xray;
       fi
-- cmd: if (%APPVEYOR_REPO_BRANCH% EQU "master" AND NOT DEFINED %APPVEYOR_PULL_REQUEST_TITLE%) (
+- cmd: IF "%APPVEYOR_REPO_BRANCH%" == "master" IF NOT DEFINED "%APPVEYOR_PULL_REQUEST_TITLE%" (
          xray\\gradlew.bat test -p xray
       )
 - xray/gradlew clean install -p xray
