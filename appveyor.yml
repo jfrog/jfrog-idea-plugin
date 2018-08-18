@@ -21,7 +21,7 @@ test_script:
       fi
 - ps: if ($env:APPVEYOR_REPO_BRANCH -eq "master" -And -Not $env:APPVEYOR_PULL_REQUEST_TITLE)
        {
-         xray\\gradlew.bat test -p xray;
+         xray\\gradlew test -p xray;
        }
 - xray/gradlew clean install -p xray
 - plugin/gradlew test -p plugin
