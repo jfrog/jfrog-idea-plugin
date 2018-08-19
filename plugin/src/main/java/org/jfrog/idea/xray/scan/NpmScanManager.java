@@ -76,7 +76,7 @@ public class NpmScanManager extends ScanManager {
                 String packageName = getPackageName(jsonNode, appDir);
                 if (jsonNode == null) {
                     packageName += " (Not installed)";
-                    Utils.log("JFrog Xray - Failed while running npm ls command at " + appDir, NotificationType.ERROR);
+                    Utils.log("JFrog Xray - Failed while running npm ls command at " + appDir, "", NotificationType.ERROR);
                 } else if (jsonRoot.get("problems") != null) {
                     packageName += " (Not installed)";
                     Utils.log("JFrog Xray - npm ls command at" + appDir + "result had errors:", "\n" + jsonRoot.get("problems").toString(), NotificationType.ERROR);

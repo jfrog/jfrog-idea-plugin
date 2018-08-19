@@ -48,6 +48,7 @@ public class NpmDriver {
             } else {
                 npmCommandRes.err = String.format("Process execution %s timed out.", String.join(" ", args));
             }
+            npmCommandRes.exitValue = process.exitValue();
 
             return npmCommandRes;
         } finally {
@@ -98,7 +99,7 @@ public class NpmDriver {
                 throw new IOException(npmCommandRes.err);
             }
         } catch (IOException|InterruptedException e) {
-            throw new IOException("'npm install' failed", e);
+            throw new IOException("'npm install' failed: " + e.getMessage(), e);
         }
     }
 
@@ -116,9 +117,10 @@ public class NpmDriver {
     private static class NpmCommandRes {
         String res = "{}";
         String err;
+        int exitValue;
 
         private boolean isOk() {
-            return StringUtils.isBlank(err);
+            return exitValue == 0;
         }
     }
 }
