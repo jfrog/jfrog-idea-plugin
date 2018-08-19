@@ -19,7 +19,7 @@ public class UtilsTests extends ScanTreeNodeBase {
 
     @BeforeTest
     public void init() {
-        if (System.getProperty("os.name", "generic").toLowerCase().contains("win")) {
+        if (Utils.isWindows()) {
             rootFolderA = "C:\\";
             rootFolderB = "D:\\";
             rootFolderC = "E:\\";
@@ -32,8 +32,6 @@ public class UtilsTests extends ScanTreeNodeBase {
 
     @Test(dataProvider = "Paths")
     public void testFilterProjectPaths(Set<Path> given, Set<Path> expected) {
-        System.out.println(System.getProperty("os.name", "generic"));
-        System.out.println("rootFolderA: " + rootFolderA);
         Set<Path> results = Utils.filterProjectPaths(given);
         assertEquals(expected.size(), results.size());
         expected.forEach(path -> assertTrue(results.contains(path)));

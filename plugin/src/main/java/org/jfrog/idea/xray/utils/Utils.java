@@ -104,7 +104,7 @@ public class Utils {
         }
     }
 
-    private static boolean isWindows() {
+    static boolean isWindows() {
         return System.getProperty("os.name").toLowerCase().contains("win");
     }
 
@@ -181,14 +181,5 @@ public class Utils {
                 }
         );
         return finalPaths;
-    }
-
-    /**
-     * Escape spaces in strings. /first/sec ond/third -> /first/sec\ ond/third.
-     * @param str - The string to escape
-     * @return Escaped string
-     */
-    public static String escapeSpaces(String str) {
-        return str.replaceAll(" ", "\\\\ ");
     }
 }
