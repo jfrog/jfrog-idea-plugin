@@ -76,10 +76,10 @@ public class NpmScanManager extends ScanManager {
                 String packageName = getPackageName(jsonNode, appDir);
                 if (jsonNode == null) {
                     packageName += " (Not installed)";
-                    Utils.log("JFrog Xray - Failed while running npm ls command at " + appDir, "", NotificationType.ERROR);
+                    Utils.log("JFrog Xray - Failed while running npm ls command at " + appDir, "\n", NotificationType.ERROR);
                 } else if (jsonRoot.get("problems") != null) {
                     packageName += " (Not installed)";
-                    Utils.log("JFrog Xray - npm ls command at" + appDir + "result had errors:", "\n" + jsonRoot.get("problems").toString(), NotificationType.ERROR);
+                    Utils.log("JFrog Xray - npm ls command at " + appDir + " result had errors:", "\n" + jsonRoot.get("problems").toString(), NotificationType.ERROR);
                 }
                 jsonNode = jsonRoot.get("version");
                 String packageVersion = jsonNode != null ? jsonNode.asText() : "N/A";
@@ -103,7 +103,7 @@ public class NpmScanManager extends ScanManager {
         } catch (ProcessCanceledException e) {
             Utils.notify("JFrog Xray", "Xray scan was canceled", NotificationType.INFORMATION);
         } catch (Exception e) {
-            cbk.onFailure(e.getMessage(), Arrays.toString(e.getStackTrace()));
+            cbk.onFailure(e.getMessage() == null ? e.toString() : e.getMessage(), Arrays.toString(e.getStackTrace()));
         }
     }
 

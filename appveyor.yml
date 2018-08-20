@@ -22,8 +22,10 @@ test_script:
 - cmd: IF "%APPVEYOR_REPO_BRANCH%" == "master" IF "%APPVEYOR_PULL_REQUEST_TITLE%" == "" (
          xray\\gradlew.bat test -p xray
        )
-- xray/gradlew clean install -p xray
-- plugin/gradlew test -p plugin
+- sh: xray/gradlew clean install -p xray
+- cmd: xray\\gradlew.bat clean install -p xray
+- sh: plugin/gradlew test -p plugin
+- cmd: xray\\gradlew.bat test -p plugin
 
 # Don't actually build.
 build: off

@@ -124,16 +124,6 @@ public class Utils {
         return Runtime.getRuntime().exec(args.toArray(new String[0]), null, execDir);
     }
 
-    public static String readStream(InputStream stream) throws IOException {
-        if (stream == null) {
-            return "";
-        }
-        try (StringWriter writer = new StringWriter()) {
-            IOUtils.copy(stream, writer, "UTF-8");
-            return writer.toString();
-        }
-    }
-
     public static TreeExpansionListener getIssuesTreeExpansionListener(TreeExpansionListener[] treeExpansionListeners) {
         if (treeExpansionListeners == null) {
             return null;

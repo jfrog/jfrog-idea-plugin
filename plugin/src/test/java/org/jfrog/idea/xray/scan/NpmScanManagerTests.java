@@ -1,9 +1,13 @@
 package org.jfrog.idea.xray.scan;
 
+import com.intellij.mock.MockApplication;
+import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.ProjectData;
 import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefreshCallback;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Disposer;
 import com.jfrog.xray.client.services.summary.Components;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,6 +45,8 @@ public class NpmScanManagerTests {
 
     @BeforeMethod
     public void init() {
+        Disposable disposable = Disposer.newDisposable("NpmScanManagerTests");
+        ApplicationManager.setApplication(new MockApplication(disposable), disposable);
         project = new NpmProjectImpl();
         assertNotNull(project.getBasePath());
         NpmDriver npmDriver = new NpmDriver();
