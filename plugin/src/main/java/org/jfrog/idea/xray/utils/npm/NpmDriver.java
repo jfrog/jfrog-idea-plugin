@@ -43,8 +43,8 @@ public class NpmDriver {
     private static NpmCommandRes exeNpmCommand(File execDir, List<String> args) throws InterruptedException, IOException {
         args.add(0, "npm");
         Process process = null;
+        ExecutorService service = Executors.newFixedThreadPool(2);
         try {
-            ExecutorService service = Executors.newFixedThreadPool(2);
             NpmCommandRes npmCommandRes = new NpmCommandRes();
             process = Utils.exeCommand(execDir, args);
             StreamReader inputStreamReader = new StreamReader(process.getInputStream());
@@ -52,7 +52,7 @@ public class NpmDriver {
             service.submit(inputStreamReader);
             service.submit(errorStreamReader);
             if (process.waitFor(30, TimeUnit.SECONDS)) {
-                service.awaitTermination(10, TimeUnit.SECONDS);
+                service.shutdownNow();
                 npmCommandRes.res = inputStreamReader.getOutput();
                 npmCommandRes.err = errorStreamReader.getOutput();
             } else {
