@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.collect.Lists;
 import com.intellij.openapi.util.io.StreamUtil;
+import org.apache.commons.lang.StringUtils;
 import org.jfrog.idea.xray.utils.StreamReader;
 import org.jfrog.idea.xray.utils.Utils;
 
@@ -52,7 +53,8 @@ public class NpmDriver {
             service.submit(inputStreamReader);
             service.submit(errorStreamReader);
             if (process.waitFor(30, TimeUnit.SECONDS)) {
-                service.shutdownNow();
+                service.shutdown();
+                service.awaitTermination(10, TimeUnit.SECONDS);
                 npmCommandRes.res = inputStreamReader.getOutput();
                 npmCommandRes.err = errorStreamReader.getOutput();
             } else {
@@ -63,6 +65,7 @@ public class NpmDriver {
             return npmCommandRes;
         } finally {
             closeStreams(process);
+            service.shutdownNow();
         }
     }
 
@@ -102,14 +105,15 @@ public class NpmDriver {
         List<String> args = Lists.newArrayList("ls", "--json");
         try {
             NpmCommandRes npmCommandRes = exeNpmCommand(execDir, args);
-            return jsonReader.readTree(npmCommandRes.res);
+            String res = StringUtils.isBlank(npmCommandRes.res) ? "{}" : npmCommandRes.res;
+            return jsonReader.readTree(res);
         } catch (IOException | InterruptedException e) {
             throw new IOException("'npm ls' failed", e);
         }
     }
 
     private static class NpmCommandRes {
-        String res = "{}";
+        String res;
         String err;
         int exitValue;
 
