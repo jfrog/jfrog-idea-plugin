@@ -7,9 +7,9 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.idea.xray.utils.Utils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.jfrog.idea.xray.utils.Utils.readStream;
 
@@ -42,18 +42,42 @@ public class NpmDriver {
         try {
             NpmCommandRes npmCommandRes = new NpmCommandRes();
             process = Utils.exeCommand(execDir, args);
-            npmCommandRes.res = readStream(process.getInputStream());
-            if (process.waitFor() != 0) {
+            if (process.waitFor(30, TimeUnit.SECONDS)) {
+                npmCommandRes.res = readStream(process.getInputStream());
                 npmCommandRes.err = readStream(process.getErrorStream());
+            } else {
+                npmCommandRes.err = String.format("Process execution %s timed out.", String.join(" ", args));
             }
+            npmCommandRes.exitValue = process.exitValue();
+
             return npmCommandRes;
         } finally {
-            if (process != null) {
+            closeStreams(process);
+        }
+    }
+
+    private static void closeStreams(Process process) throws IOException {
+        if (process != null) {
+            if (process.getInputStream() != null) {
                 process.getInputStream().close();
-                process.getErrorStream().close();
+            }
+            if (process.getOutputStream() != null) {
                 process.getOutputStream().close();
             }
+            if (process.getErrorStream() != null) {
+                process.getErrorStream().close();
+            }
         }
+    }
+
+    private static String readStream(InputStream in) throws IOException {
+        BufferedReader input = new BufferedReader(new InputStreamReader(in));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = input.readLine()) != null) {
+            sb.append(line);
+        }
+        return sb.toString();
     }
 
     public static boolean isNpmInstalled() {
@@ -75,7 +99,7 @@ public class NpmDriver {
                 throw new IOException(npmCommandRes.err);
             }
         } catch (IOException|InterruptedException e) {
-            throw new IOException("'npm install' failed", e);
+            throw new IOException("'npm install' failed: " + e.getMessage(), e);
         }
     }
 
@@ -91,11 +115,12 @@ public class NpmDriver {
     }
 
     private static class NpmCommandRes {
-        String res;
+        String res = "{}";
         String err;
+        int exitValue;
 
         private boolean isOk() {
-            return StringUtils.isBlank(err);
+            return exitValue == 0;
         }
     }
 }
