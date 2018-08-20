@@ -5,10 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.collect.Lists;
 import com.intellij.openapi.util.io.StreamUtil;
+import org.jfrog.idea.xray.utils.StreamReader;
 import org.jfrog.idea.xray.utils.Utils;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -40,11 +44,17 @@ public class NpmDriver {
         args.add(0, "npm");
         Process process = null;
         try {
+            ExecutorService service = Executors.newFixedThreadPool(2);
             NpmCommandRes npmCommandRes = new NpmCommandRes();
             process = Utils.exeCommand(execDir, args);
+            StreamReader inputStreamReader = new StreamReader(process.getInputStream());
+            StreamReader errorStreamReader = new StreamReader(process.getErrorStream());
+            service.submit(inputStreamReader);
+            service.submit(errorStreamReader);
             if (process.waitFor(30, TimeUnit.SECONDS)) {
-                npmCommandRes.res = readStream(process.getInputStream());
-                npmCommandRes.err = readStream(process.getErrorStream());
+                service.awaitTermination(10, TimeUnit.SECONDS);
+                npmCommandRes.res = inputStreamReader.getOutput();
+                npmCommandRes.err = errorStreamReader.getOutput();
             } else {
                 npmCommandRes.err = String.format("Process execution %s timed out.", String.join(" ", args));
             }
@@ -62,18 +72,6 @@ public class NpmDriver {
             StreamUtil.closeStream(process.getOutputStream());
             StreamUtil.closeStream(process.getErrorStream());
         }
-    }
-
-    private static String readStream(InputStream in) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        try (Reader reader = new InputStreamReader(in);
-             BufferedReader bufferedReader = new BufferedReader(reader)) {
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                sb.append(line);
-            }
-        }
-        return sb.toString();
     }
 
     public static boolean isNpmInstalled() {
