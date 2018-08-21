@@ -9,11 +9,11 @@ environment:
   matrix:
   - JAVA_HOME: C:\Program Files\Java\jdk1.8.0
   CLIENTTESTS_XRAY_URL:
-    secure: 0OkcNv/5VWzZj2brUuQE6s3pI40AmtThfrmg/w+PxP0=
+    secure: qgCv/IbOkjDfFcgdtMdM46XkDrFdjNKPvqMsCKRk4Ko=
   CLIENTTESTS_XRAY_USERNAME:
-    secure: b79qvuMVVlqhdsKoJC046g==
+    secure: qr5vtfCwBPUAQyCqU2/0tQ==
   CLIENTTESTS_XRAY_PASSWORD:
-    secure: qTZFY5+wGrRnuM9xtfywLaz+nrAuIAxsH/g4MwVCO0hk3d1iPxfaEM7omsWW3szr6u42/ZOg62/7JDoXHWana7MZu3Cmy8dLD9ki7eIFHk4=
+    secure: um65vfntLOx1gsOA4oo1Bg4/aEVR7JdNTJSZc8/jPl3h0b5mN1TBpKsHUywfx31tqGR9nwwb32zT4QQG/Jhjyhe+M+loJtN8hqlby+iefnk=
 
 test_script:
 - sh: if [[ "$APPVEYOR_REPO_BRANCH" = "master" && -z "$APPVEYOR_PULL_REQUEST_TITLE" ]]; then
