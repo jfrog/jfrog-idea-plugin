@@ -1,4 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/gaealctljsu6o8m9?svg=true)](https://ci.appveyor.com/project/yahavi/jfrog-idea-plugin-ex7t3) [![Build Status](https://travis-ci.org/jfrog/jfrog-idea-plugin.svg?branch=master)](https://travis-ci.org/jfrog/jfrog-idea-plugin)
+[![Build status](https://ci.appveyor.com/api/projects/status/vypm9uua3vf3plan?svg=true)](https://ci.appveyor.com/project/jfrog-ecosystem/jfrog-idea-plugin) [![Build Status](https://travis-ci.org/jfrog/jfrog-idea-plugin.svg?branch=master)](https://travis-ci.org/jfrog/jfrog-idea-plugin)
 # JFrog Idea Plugin 
 
 JFrog IntelliJ IDEA plugin adds JFrog Xray scanning of Maven, Gradle and Npm project dependencies to your IntelliJ IDEA.
