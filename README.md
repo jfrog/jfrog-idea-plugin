@@ -46,3 +46,5 @@ To learn how to use JFrog IntelliJ IDEA plugin, please visit the [JFrog IntelliJ
 
 # Release Notes
 The release are available on [Bintray](https://bintray.com/jfrog/jfrog-jars/jfrog-idea-plugin#release).
+
+ 
