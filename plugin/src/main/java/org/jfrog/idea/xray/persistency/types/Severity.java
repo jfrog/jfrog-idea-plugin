@@ -9,10 +9,14 @@ public enum Severity {
     Unknown("Unknown", 2),
     Information("Information", 3),
     Low("Low", 4),
-    Minor("Low", 4),
     Medium("Medium", 5),
-    Major("Medium", 5),
     High("High", 6),
+
+    @Deprecated
+    Minor("Low", 4),
+    @Deprecated
+    Major("Medium", 5),
+    @Deprecated
     Critical("High", 6);
 
     private String severityName;
