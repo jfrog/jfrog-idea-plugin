@@ -65,19 +65,19 @@ public class ScanTreeNodeTests extends ScanTreeNodeBase {
 
     @Test(dependsOnMethods = {"testTwoNodes"})
     public void testFourNodes() {
-        // Populate node three with one minor issue
-        Issue threeIssue = createIssue(Severity.Minor);
+        // Populate node three with one Low issue
+        Issue threeIssue = createIssue(Severity.Low);
         three.setIssues(Sets.newHashSet(threeIssue));
         three.setLicenses(Sets.newHashSet());
         three.processTreeIssues();
 
         // Assert the tree has 3 issues
-        assertEquals(Severity.Minor, three.getTopIssue().severity);
+        assertEquals(Severity.Low, three.getTopIssue().severity);
         assertEquals("3", three.getTopIssue().component);
 
-        // Populate node four with minor and major issues
-        Issue fourFirstIssue = createIssue(Severity.Major);
-        Issue fourSecondIssue = createIssue(Severity.Minor);
+        // Populate node four with Low and Medium issues
+        Issue fourFirstIssue = createIssue(Severity.Medium);
+        Issue fourSecondIssue = createIssue(Severity.Low);
         four.setIssues(Sets.newHashSet(fourFirstIssue, fourSecondIssue));
 
         // Assert the tree has 5 issues
@@ -90,16 +90,16 @@ public class ScanTreeNodeTests extends ScanTreeNodeBase {
     public void testFiveNodes() {
         // Populate node five with 6 issues
         five.setIssues(Sets.newHashSet(createIssue(Severity.Normal),
-                createIssue(Severity.Minor),
-                createIssue(Severity.Minor),
+                createIssue(Severity.Low),
+                createIssue(Severity.Low),
                 createIssue(Severity.Unknown),
-                createIssue(Severity.Critical),
-                createIssue(Severity.Major)));
+                createIssue(Severity.Low),
+                createIssue(Severity.High)));
 
         // Assert that all issues are in the tree
         Set<Issue> rootIssues = root.processTreeIssues();
         assertEquals(11, rootIssues.size());
-        assertEquals(Severity.Critical, root.getTopIssue().severity);
+        assertEquals(Severity.High, root.getTopIssue().severity);
         assertEquals("5", root.getTopIssue().component);
         assertEquals("", one.getTopIssue().component);
         assertEquals("5", two.getTopIssue().component);
