@@ -14,8 +14,6 @@ public class Issue implements Comparable<Issue> {
     public String description;
     public String issueType = "N/A";
     public String provider;
-    @Deprecated
-    public String sevirity;
     public Severity severity = Severity.Normal;
     public String summary;
     public String component = "";
@@ -28,15 +26,11 @@ public class Issue implements Comparable<Issue> {
         description = issue.getDescription();
         issueType = issue.getIssueType();
         provider = issue.getProvider();
-        severity = Severity.valueOf(issue.getSeverity());
+        severity = Severity.fromString(issue.getSeverity());
         summary = issue.getSummary();
     }
 
     public Severity getSeverity() {
-        if (this.sevirity != null) {
-            this.severity = Severity.valueOf(sevirity);
-            this.sevirity = null;
-        }
         return this.severity;
     }
 
@@ -49,11 +43,11 @@ public class Issue implements Comparable<Issue> {
     }
 
     public boolean isTopSeverity() {
-        return getSeverity() == Severity.Critical;
+        return getSeverity() == Severity.High;
     }
 
     public boolean isHigherSeverityThan(@NotNull Issue o) {
-        return getSeverity().compareTo(o.getSeverity()) > 0;
+        return getSeverity().isHigherThan(o.getSeverity());
     }
 
     @Override

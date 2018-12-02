@@ -48,8 +48,8 @@ public class FiltersTests extends ScanTreeNodeBase {
         assertEquals(0, root.getIssueCount());
         assertEquals(0, rootIssues.size());
 
-        // Insert 'Minor' issue and 'MIT' license to node 1.
-        one.setIssues(Sets.newHashSet(createIssue(Severity.Minor)));
+        // Insert 'Low' issue and 'MIT' license to node 1.
+        one.setIssues(Sets.newHashSet(createIssue(Severity.Low)));
         one.setLicenses(Sets.newHashSet(createLicense("MIT")));
 
         filterManager.applyFilters(root, issuesFilteredRoot, licenseFilteredRoot);
@@ -70,13 +70,13 @@ public class FiltersTests extends ScanTreeNodeBase {
 
     @Test(dependsOnMethods = {"testNoFilter"})
     public void testOneIssueFilter() {
-        // Filter 'Minor' issues
-        severitiesFilters.replace(Severity.Minor, false);
+        // Filter 'Low' issues
+        severitiesFilters.replace(Severity.Low, false);
         ScanTreeNode issuesFilteredRoot = new ScanTreeNode("0");
         ScanTreeNode licenseFilteredRoot = new ScanTreeNode("0");
         filterManager.applyFilters(root, issuesFilteredRoot, licenseFilteredRoot);
 
-        // Assert that the 'Minor' issue from 'testNoFilter' had been filtered
+        // Assert that the 'Low' issue from 'testNoFilter' had been filtered
         Set<Issue> rootIssues = issuesFilteredRoot.processTreeIssues();
         assertEquals(0, issuesFilteredRoot.getIssueCount());
         assertEquals(0, rootIssues.size());
@@ -90,31 +90,31 @@ public class FiltersTests extends ScanTreeNodeBase {
 
     @Test(dependsOnMethods = {"testOneIssueFilter"})
     public void testManyIssueFilters() {
-        // Filter 'Minor' and 'Major' issues
-        severitiesFilters.replace(Severity.Major, false);
+        // Filter 'Low' and 'Medium' issues
+        severitiesFilters.replace(Severity.Medium, false);
         ScanTreeNode issuesFilteredRoot = new ScanTreeNode("0");
         ScanTreeNode licenseFilteredRoot = new ScanTreeNode("0");
 
         // Insert some issues
-        two.setIssues(Sets.newHashSet(createIssue(Severity.Major), createIssue(Severity.Critical)));
+        two.setIssues(Sets.newHashSet(createIssue(Severity.Medium), createIssue(Severity.High)));
         four.setIssues(Sets.newHashSet(createIssue(Severity.Unknown)));
-        five.setIssues(Sets.newHashSet(createIssue(Severity.Minor)));
+        five.setIssues(Sets.newHashSet(createIssue(Severity.Low)));
         filterManager.applyFilters(root, issuesFilteredRoot, licenseFilteredRoot);
 
-        // Assert that the issues filtered tree have 2 issues (1 critical and 1 unknown)
+        // Assert that the issues filtered tree have 2 issues (1 'High' and 1 'Unknown')
         Set<Issue> rootIssues = issuesFilteredRoot.processTreeIssues();
         assertEquals(2, issuesFilteredRoot.getIssueCount());
         assertEquals(2, rootIssues.size());
         rootIssues.forEach(issue -> {
             switch (issue.getComponent()) {
                 case "2":
-                    assertEquals(Severity.Critical, issue.getSeverity());
+                    assertEquals(Severity.High, issue.getSeverity());
                     break;
                 case "4":
                     assertEquals(Severity.Unknown, issue.getSeverity());
                     break;
                 default:
-                    fail("issues filtered tree should have only 1 critical issue and 1 unknown issue");
+                    fail("issues filtered tree should have only 1 High issue and 1 Unknown issue");
                     break;
             }
         });
