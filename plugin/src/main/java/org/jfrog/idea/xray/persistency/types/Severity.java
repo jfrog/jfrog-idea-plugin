@@ -1,5 +1,9 @@
 package org.jfrog.idea.xray.persistency.types;
 
+import com.google.common.collect.Sets;
+
+import java.util.Set;
+
 /**
  * Created by romang on 4/16/17.
  */
@@ -26,6 +30,7 @@ public enum Severity {
     Major("Medium", 5),
     Critical("High", 6);
 
+    public static final Set<Severity> NEW_SEVERITIES = Sets.newHashSet(Normal, Pending, Unknown, Information, Low, Medium, High);
     private String severityName;
     private int ordinal;
 
@@ -47,7 +52,7 @@ public enum Severity {
     }
 
     public static Severity fromString(String inputSeverity) {
-        for (Severity severity : Severity.values()) {
+        for (Severity severity : NEW_SEVERITIES) {
             if (severity.getSeverityName().equals(inputSeverity)) {
                 return severity;
             }

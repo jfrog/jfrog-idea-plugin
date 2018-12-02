@@ -34,7 +34,8 @@ public class FilterManager {
     }
 
     private boolean isSeveritySelected(Issue issue) {
-        return selectedSeverities.get(issue.getSeverity());
+        Severity severity = issue.getSeverity();
+        return severity != null && selectedSeverities.get(severity);
     }
 
     private boolean isSeveritySelected(ScanTreeNode node) {
