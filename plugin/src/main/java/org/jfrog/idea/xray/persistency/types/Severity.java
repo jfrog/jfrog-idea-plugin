@@ -4,6 +4,11 @@ package org.jfrog.idea.xray.persistency.types;
  * Created by romang on 4/16/17.
  */
 public enum Severity {
+    /**
+     * New severities.
+     *
+     * @since Xray 2.5
+     */
     Normal("Scanned - No Issues", 0),
     Pending("Pending Scan", 1),
     Unknown("Unknown", 2),
@@ -12,11 +17,13 @@ public enum Severity {
     Medium("Medium", 5),
     High("High", 6),
 
-    @Deprecated
+    /**
+     * Old severities.
+     *
+     * @deprecated since Xray 2.5
+     */
     Minor("Low", 4),
-    @Deprecated
     Major("Medium", 5),
-    @Deprecated
     Critical("High", 6);
 
     private String severityName;
