@@ -26,11 +26,7 @@ public class RefreshAction extends AnAction {
         // Before we refresh the scanners, let's check if the project is supported.
         Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers();
         boolean scannersExistBeforeRefresh = CollectionUtils.isNotEmpty(scanManagers);
-        try {
-            ScanManagersFactory.getInstance().startScan(false);
-        } catch (IOException ex) {
-            Logger.getInstance().error("Failed to refresh dependencies", ex);
-        }
+        ScanManagersFactory.getInstance().startScan(false);
         scanManagers = ScanManagersFactory.getScanManagers();
         if (CollectionUtils.isEmpty(scanManagers)) {
             return;

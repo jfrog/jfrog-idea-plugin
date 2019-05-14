@@ -7,8 +7,6 @@ import com.jfrog.ide.idea.ui.renderers.LicensesTreeCellRenderer;
 import com.jfrog.ide.idea.utils.ProjectsMap;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 
-import javax.swing.*;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 
 /**
@@ -52,7 +50,6 @@ public class LicensesTree extends BaseTree {
         DependenciesTree filteredRoot = (DependenciesTree) project.clone();
         FilterManager filterManager = FilterManager.getInstance();
         filterManager.applyFilters(project, new DependenciesTree(), filteredRoot);
-
         appendProjectToTree(filteredRoot);
     }
 

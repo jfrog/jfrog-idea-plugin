@@ -22,6 +22,8 @@ public abstract class BaseTree extends Tree {
         setRootVisible(false);
     }
 
+    public abstract void applyFilters(ProjectsMap.ProjectKey projectName);
+
     public void populateTree(TreeModel issuesTreeModel) {
         setModel(issuesTreeModel);
         validate();
@@ -36,8 +38,6 @@ public abstract class BaseTree extends Tree {
     public void addScanResults(String projectName, DependenciesTree dependenciesTree) {
         projects.put(projectName, dependenciesTree);
     }
-
-    public abstract void applyFilters(ProjectsMap.ProjectKey projectName);
 
     public void applyFiltersForAllProjects() {
         setModel(null);
@@ -55,7 +55,7 @@ public abstract class BaseTree extends Tree {
             }
 
             DependenciesTree root = (DependenciesTree) getModel().getRoot();
-            // One project in tree - Append filtered root and the old root the a new empty node.
+            // One project in tree - Append filtered root and the old root the a new empty parent node.
             if (root.getUserObject() != null) {
                 DependenciesTree newRoot = new DependenciesTree();
                 newRoot.add(root);
@@ -64,7 +64,7 @@ public abstract class BaseTree extends Tree {
                 return;
             }
 
-            // Two or more projects in tree - Append filtered root to the empty node.
+            // Two or more projects in tree - Append filtered root to the empty parent node.
             root.add(filteredRoot);
             populateTree(new DefaultTreeModel(root));
         });

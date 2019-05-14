@@ -99,6 +99,9 @@ public abstract class ScanManager extends ScanManagerBase {
         Task.Backgroundable scanAndUpdateTask = new Task.Backgroundable(project, "Xray: Scanning for Vulnerabilities...") {
             @Override
             public void run(@NotNull com.intellij.openapi.progress.ProgressIndicator indicator) {
+                if (project.isDisposed()) {
+                    return;
+                }
                 scanAndUpdate(quickScan, new ProgressIndicatorImpl(indicator), libraryDependencies);
                 indicator.finishNonCancelableSection();
             }

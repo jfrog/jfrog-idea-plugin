@@ -32,7 +32,6 @@ import org.jfrog.build.extractor.scan.Issue;
 import javax.swing.*;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.util.ArrayList;
@@ -49,14 +48,12 @@ public class IssuesTab {
     private final Project project;
 
     private Map<TreePath, JPanel> issuesCountPanels = Maps.newHashMap();
-    private OnePixelSplitter issuesRightHorizontalSplit;
     private IssuesTree issuesTree = IssuesTree.getInstance();
+    private OnePixelSplitter issuesRightHorizontalSplit;
     private JScrollPane issuesDetailsScroll;
     private JPanel issuesDetailsPanel;
-    private JPanel issuesCountPanel;
     private JComponent issuesPanel;
     private JBTable issuesTable;
-    private JLabel issuesCount;
 
     public IssuesTab(Project project) {
         this.project = project;
@@ -86,7 +83,7 @@ public class IssuesTab {
     }
 
     private JComponent createIssuesComponentsTreeView() {
-        issuesCount = new JBLabel("Issues (0) ");
+        JLabel issuesCount = new JBLabel("Issues (0) ");
 
         JPanel componentsTreePanel = new JBPanel(new BorderLayout()).withBackground(UIUtil.getTableBackground());
         JLabel componentsTreeTitle = new JBLabel(" Components Tree");
@@ -94,9 +91,10 @@ public class IssuesTab {
         componentsTreePanel.add(componentsTreeTitle, BorderLayout.LINE_START);
         componentsTreePanel.add(issuesCount, BorderLayout.LINE_END);
 
-        issuesCountPanel = new JBPanel().withBackground(UIUtil.getTableBackground());
+        JPanel issuesCountPanel = new JBPanel().withBackground(UIUtil.getTableBackground());
         issuesCountPanel.setLayout(new BoxLayout(issuesCountPanel, BoxLayout.Y_AXIS));
         issuesTree.createExpansionListener(issuesCountPanel, issuesCountPanels);
+        issuesTree.setIssuesCountLabel(issuesCount);
 
         JBPanel treePanel = new JBPanel(new BorderLayout()).withBackground(UIUtil.getTableBackground());
         TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(issuesTree, ComponentUtils::getPathSearchString, true);
@@ -132,7 +130,7 @@ public class IssuesTab {
         return new TitledPane(JSplitPane.VERTICAL_SPLIT, TITLE_LABEL_SIZE, title, issuesDetailsScroll);
     }
 
-    public void updateIssuesTable() {
+    private void updateIssuesTable() {
         java.util.List<DependenciesTree> selectedNodes = Lists.newArrayList((DependenciesTree) issuesTree.getModel().getRoot());
         if (issuesTree.getSelectionPaths() != null) {
             selectedNodes.clear();
@@ -168,13 +166,6 @@ public class IssuesTab {
         issuesTable.getColumnModel().getColumn(IssuesTableModel.IssueColumn.COMPONENT.ordinal()).setPreferredWidth((int) (tableWidth * 0.4));
     }
 
-    public void populateTree() {
-        issuesTree.populateTree(issuesTree.getModel());
-//        DependenciesTree root = (DependenciesTree) issuesTreeModel.getRoot();
-//        issuesCount.setText("Issues (" + root.getIssueCount() + ") ");
-//        issuesTree.populateTree(issuesTreeModel);
-    }
-
     public void onConfigurationChange() {
         issuesRightHorizontalSplit.setFirstComponent(createComponentsDetailsView(true));
         issuesPanel.validate();
@@ -191,10 +182,12 @@ public class IssuesTab {
                 return;
             }
             // Color the issues count panel
-//            for (TreePath path : e.getPaths()) {
-//                JPanel issueCountPanel = issuesCountPanels.get(path);
-//                issueCountPanel.setBackground(e.isAddedPath(path) ? UIUtil.getTreeSelectionBackground() : UIUtil.getTableBackground());
-//            }
+            for (TreePath path : e.getPaths()) {
+                JPanel issueCountPanel = issuesCountPanels.get(path);
+                if (issueCountPanel != null) {
+                    issueCountPanel.setBackground(e.isAddedPath(path) ? UIUtil.getTreeSelectionBackground() : UIUtil.getTableBackground());
+                }
+            }
             DetailsViewFactory.createIssuesDetailsView(issuesDetailsPanel, (DependenciesTree) e.getNewLeadSelectionPath().getLastPathComponent());
             // Scroll back to the beginning of the scrollable panel
             SwingUtilities.invokeLater(() -> issuesDetailsScroll.getViewport().setViewPosition(new Point()));

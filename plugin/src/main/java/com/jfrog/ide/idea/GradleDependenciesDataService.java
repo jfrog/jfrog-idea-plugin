@@ -30,7 +30,7 @@ import java.util.Set;
  * Created by Yahav Itzhak on 9 Nov 2017.
  */
 @Order(ExternalSystemConstants.UNORDERED)
-public class XrayDependencyDataService extends AbstractProjectDataService<LibraryDependencyData, Module> {
+public class GradleDependenciesDataService extends AbstractProjectDataService<LibraryDependencyData, Module> {
 
     @NotNull
     @Override
@@ -58,11 +58,7 @@ public class XrayDependencyDataService extends AbstractProjectDataService<Librar
         // Before we refresh the scanners, let's check if the project is supported.
         Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers();
         boolean scannersExistBeforeRefresh = CollectionUtils.isNotEmpty(scanManagers);
-        try {
-            ScanManagersFactory.getInstance().startScan(false);
-        } catch (IOException e) {
-            Logger.getInstance().error("Failed to refresh Gradle dependencies", e);
-        }
+        ScanManagersFactory.getInstance().startScan(false);
         scanManagers = ScanManagersFactory.getScanManagers();
         if (CollectionUtils.isEmpty(scanManagers)) {
             return;

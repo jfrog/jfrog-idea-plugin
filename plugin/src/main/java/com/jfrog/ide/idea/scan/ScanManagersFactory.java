@@ -13,11 +13,9 @@ import org.apache.commons.lang.ArrayUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.jfrog.ide.common.utils.Utils.findPackageJsonDirs;
 
@@ -40,12 +38,16 @@ public class ScanManagersFactory {
         return Sets.newHashSet(scanManagersFactory.scanManagers);
     }
 
-    public void startScan(boolean quickScan) throws IOException {
+    public void startScan(boolean quickScan) {
         if (isScanInProgress()) {
             Logger.getInstance().info("Previous scan still running...");
             return;
         }
-        refreshScanManagers();
+        try {
+            refreshScanManagers();
+        } catch (IOException e) {
+            Logger.getInstance().error("", e);
+        }
         IssuesTree issuesTree = IssuesTree.getInstance();
         LicensesTree licensesTree = LicensesTree.getInstance();
         if (issuesTree == null || licensesTree == null) {
@@ -57,7 +59,7 @@ public class ScanManagersFactory {
         }
     }
 
-    private void refreshScanManagers() throws IOException {
+    public void refreshScanManagers() throws IOException {
         scanManagers = Lists.newArrayList();
         Project[] projects = ProjectManager.getInstance().getOpenProjects();
         if (ArrayUtils.isEmpty(projects)) {

@@ -8,7 +8,6 @@ import com.jfrog.ide.idea.utils.ProjectsMap;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 
 import javax.swing.*;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.util.Map;
@@ -21,6 +20,7 @@ public class IssuesTree extends BaseTree {
     private static IssuesTree instance;
 
     private IssuesTreeExpansionListener issuesTreeExpansionListener;
+    private JLabel issuesCount;
 
     public static IssuesTree getInstance() {
         if (instance == null) {
@@ -34,6 +34,10 @@ public class IssuesTree extends BaseTree {
         setCellRenderer(new IssuesTreeCellRenderer());
     }
 
+    void setIssuesCountLabel(JLabel issuesCount) {
+        this.issuesCount = issuesCount;
+    }
+
     void createExpansionListener(JPanel issuesCountPanel, Map<TreePath, JPanel> issuesCountPanels) {
         issuesTreeExpansionListener = new IssuesTreeExpansionListener(this, issuesCountPanel, issuesCountPanels);
     }
@@ -44,7 +48,7 @@ public class IssuesTree extends BaseTree {
 
     public void populateTree(TreeModel issuesTreeModel) {
         super.populateTree(issuesTreeModel);
-//        issuesTreeExpansionListener.setIssuesCountPanel();
+        issuesTreeExpansionListener.setIssuesCountPanel();
     }
 
     @Override
@@ -58,11 +62,18 @@ public class IssuesTree extends BaseTree {
         FilterManager filterManager = FilterManager.getInstance();
         filterManager.applyFilters(project, filteredRoot, new DependenciesTree());
         filteredRoot.setIssues(filteredRoot.processTreeIssues());
-
         appendProjectToTree(filteredRoot);
-
-//        long totalIssues = root.getChildren().stream().mapToInt(DependenciesTree::getIssueCount).sum();
+        calculateIssuesCount();
     }
 
-
+    private void calculateIssuesCount() {
+        SwingUtilities.invokeLater(() -> {
+            DependenciesTree root = (DependenciesTree) getModel().getRoot();
+            int sum = 0;
+            for (DependenciesTree child : root.getChildren()) {
+                sum += child.getIssueCount();
+            }
+            issuesCount.setText("Issues (" + sum + ") ");
+        });
+    }
 }
