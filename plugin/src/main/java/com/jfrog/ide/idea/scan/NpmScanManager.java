@@ -7,10 +7,10 @@ import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefres
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.common.npm.NpmTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Collection;
 
 /**
@@ -20,10 +20,10 @@ public class NpmScanManager extends ScanManager {
 
     private NpmTreeBuilder npmTreeBuilder;
 
-    public NpmScanManager(Project project) throws IOException {
+    NpmScanManager(Project project) throws IOException {
         super(project, ComponentPrefix.NPM);
         getLog().info("Found npm project: " + getProjectName());
-        npmTreeBuilder = new NpmTreeBuilder(Paths.get(getProjectBasePath(project)));
+        npmTreeBuilder = new NpmTreeBuilder(Utils.getProjectBasePath(project));
     }
 
     @Override

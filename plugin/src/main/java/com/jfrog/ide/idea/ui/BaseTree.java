@@ -4,7 +4,10 @@ import com.intellij.ui.treeStructure.Tree;
 import com.jfrog.ide.idea.utils.ProjectsMap;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 
+import javax.swing.*;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
+import java.util.Map;
 
 /**
  * @author yahavi
@@ -27,7 +30,7 @@ public abstract class BaseTree extends Tree {
 
     public void reset() {
         projects = new ProjectsMap();
-        removeAll();
+        setModel(null);
     }
 
     public void addScanResults(String projectName, DependenciesTree dependenciesTree) {
@@ -35,4 +38,35 @@ public abstract class BaseTree extends Tree {
     }
 
     public abstract void applyFilters(ProjectsMap.ProjectKey projectName);
+
+    public void applyFiltersForAllProjects() {
+        setModel(null);
+        for (Map.Entry<ProjectsMap.ProjectKey, DependenciesTree> entry : projects.entrySet()) {
+            applyFilters(entry.getKey());
+        }
+    }
+
+    protected void appendProjectToTree(DependenciesTree filteredRoot) {
+        SwingUtilities.invokeLater(() -> {
+            // No projects in tree - Add filtered root as a single project and show only its children.
+            if (getModel() == null) {
+                populateTree(new DefaultTreeModel(filteredRoot));
+                return;
+            }
+
+            DependenciesTree root = (DependenciesTree) getModel().getRoot();
+            // One project in tree - Append filtered root and the old root the a new empty node.
+            if (root.getUserObject() != null) {
+                DependenciesTree newRoot = new DependenciesTree();
+                newRoot.add(root);
+                newRoot.add(filteredRoot);
+                populateTree(new DefaultTreeModel(newRoot));
+                return;
+            }
+
+            // Two or more projects in tree - Append filtered root to the empty node.
+            root.add(filteredRoot);
+            populateTree(new DefaultTreeModel(root));
+        });
+    }
 }

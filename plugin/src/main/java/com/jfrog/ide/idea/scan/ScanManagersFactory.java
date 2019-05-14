@@ -7,14 +7,17 @@ import com.intellij.openapi.project.ProjectManager;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.ui.issues.IssuesTree;
 import com.jfrog.ide.idea.ui.licenses.LicensesTree;
+import com.jfrog.ide.idea.utils.Utils;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.jfrog.ide.common.utils.Utils.findPackageJsonDirs;
 
@@ -60,7 +63,8 @@ public class ScanManagersFactory {
         if (ArrayUtils.isEmpty(projects)) {
             return;
         }
-        Set<Path> paths = Sets.newHashSet();
+
+        final Set<Path> paths = Sets.newHashSet();
         for (Project project : projects) {
             if (MavenScanManager.isApplicable(project)) {
                 scanManagers.add(new MavenScanManager(project));
@@ -69,8 +73,9 @@ public class ScanManagersFactory {
             if (GradleScanManager.isApplicable(project)) {
                 scanManagers.add(new GradleScanManager(project));
             }
-            paths.add(Paths.get(project.getBasePath()));
+            paths.add(Utils.getProjectBasePath(project));
         }
+        scanManagers.stream().map(ScanManager::getProjectPaths).flatMap(Collection::stream).forEach(paths::add);
         Set<String> packageJsonDirs = findPackageJsonDirs(paths);
         for (String dir : packageJsonDirs) {
             Project npmProject = ProjectManager.getInstance().createProject(dir, dir);
@@ -81,12 +86,9 @@ public class ScanManagersFactory {
     private boolean isScanInProgress() {
         return scanManagers.stream().anyMatch(ScanManager::isScanInProgress);
     }
-
-
+    
     private void resetViews(IssuesTree issuesTree, LicensesTree licensesTree) {
         issuesTree.reset();
         licensesTree.reset();
     }
-
-
 }

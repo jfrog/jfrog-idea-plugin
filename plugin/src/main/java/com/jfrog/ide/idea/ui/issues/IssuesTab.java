@@ -168,10 +168,11 @@ public class IssuesTab {
         issuesTable.getColumnModel().getColumn(IssuesTableModel.IssueColumn.COMPONENT.ordinal()).setPreferredWidth((int) (tableWidth * 0.4));
     }
 
-    public void populateTree(TreeModel issuesTreeModel) {
-        DependenciesTree root = (DependenciesTree) issuesTreeModel.getRoot();
-        issuesCount.setText("Issues (" + root.getIssueCount() + ") ");
-        issuesTree.populateTree(issuesTreeModel);
+    public void populateTree() {
+        issuesTree.populateTree(issuesTree.getModel());
+//        DependenciesTree root = (DependenciesTree) issuesTreeModel.getRoot();
+//        issuesCount.setText("Issues (" + root.getIssueCount() + ") ");
+//        issuesTree.populateTree(issuesTreeModel);
     }
 
     public void onConfigurationChange() {

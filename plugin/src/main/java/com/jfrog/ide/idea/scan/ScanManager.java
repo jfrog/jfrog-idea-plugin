@@ -1,5 +1,6 @@
 package com.jfrog.ide.idea.scan;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
 import com.intellij.openapi.externalSystem.model.project.ProjectData;
@@ -19,6 +20,7 @@ import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
 import com.jfrog.ide.idea.ui.issues.IssuesTree;
 import com.jfrog.ide.idea.ui.licenses.LicensesTree;
 import com.jfrog.ide.idea.utils.ProjectsMap;
+import com.jfrog.ide.idea.utils.Utils;
 import com.jfrog.xray.client.services.summary.Components;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -48,7 +50,7 @@ public abstract class ScanManager extends ScanManagerBase {
     // Lock to prevent multiple simultaneous scans
     private AtomicBoolean scanInProgress = new AtomicBoolean(false);
 
-    public ScanManager(Project project, ComponentPrefix prefix) throws IOException {
+    ScanManager(@NotNull Project project, ComponentPrefix prefix) throws IOException {
         super(HOME_PATH.resolve("cache"), project.getName(), Logger.getInstance(), GlobalSettings.getInstance().getXrayConfig(), prefix);
         this.project = project;
         Files.createDirectories(HOME_PATH);
@@ -118,7 +120,7 @@ public abstract class ScanManager extends ScanManagerBase {
      */
     public Set<Path> getProjectPaths() {
         Set<Path> paths = new HashSet<>();
-        paths.add(Paths.get(getProjectBasePath(project)));
+        paths.add(Utils.getProjectBasePath(project));
         return paths;
     }
 
@@ -138,8 +140,6 @@ public abstract class ScanManager extends ScanManagerBase {
                     scanAndCacheArtifacts(indicator, quickScan);
                     addXrayInfoToTree(getScanResults());
                     setScanResults();
-                    MessageBus messageBus = project.getMessageBus();
-                    messageBus.syncPublisher(Events.ON_SCAN_COMPONENTS_CHANGE).update();
                 } catch (Exception e) {
                     getLog().error("", e);
                 }
@@ -153,15 +153,13 @@ public abstract class ScanManager extends ScanManagerBase {
     }
 
     private void registerOnChangeHandlers() {
-        MessageBusConnection busConnection = project.getMessageBus().connect(project);
+        MessageBusConnection busConnection = ApplicationManager.getApplication().getMessageBus().connect();
         busConnection.subscribe(Events.ON_SCAN_FILTER_CHANGE, () -> {
-            MessageBus messageBus = project.getMessageBus();
+            MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
             messageBus.syncPublisher(Events.ON_SCAN_COMPONENTS_CHANGE).update();
             messageBus.syncPublisher(Events.ON_SCAN_ISSUES_CHANGE).update();
         });
-
-        busConnection.subscribe(Events.ON_CONFIGURATION_DETAILS_CHANGE,
-                () -> asyncScanAndUpdateResults(true));
+        busConnection.subscribe(Events.ON_CONFIGURATION_DETAILS_CHANGE, () -> asyncScanAndUpdateResults(true));
     }
 
     /**
@@ -185,7 +183,7 @@ public abstract class ScanManager extends ScanManagerBase {
     /**
      * filter scan components tree model according to the user filters and sort the issues tree.
      */
-    public void setScanResults() {
+    private void setScanResults() {
         DependenciesTree scanResults = getScanResults();
         if (scanResults == null) {
             return;
@@ -205,10 +203,6 @@ public abstract class ScanManager extends ScanManagerBase {
         licensesTree.applyFilters(projectKey);
     }
 
-    static String getProjectBasePath(Project project) {
-        return project.getBasePath() != null ? project.getBasePath() : "./";
-    }
-
     @Override
     protected void checkCanceled() {
         if (project.isOpen()) {
@@ -218,7 +212,7 @@ public abstract class ScanManager extends ScanManagerBase {
         }
     }
 
-    public boolean isScanInProgress() {
+    boolean isScanInProgress() {
         return this.scanInProgress.get();
     }
 }

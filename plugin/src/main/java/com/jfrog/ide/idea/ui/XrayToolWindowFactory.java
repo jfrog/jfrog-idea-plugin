@@ -6,14 +6,15 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
-import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import com.jfrog.ide.idea.scan.ScanManager;
+import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
 public class XrayToolWindowFactory implements ToolWindowFactory {
+
     @Override
     public void createToolWindowContent(@NotNull final Project project, @NotNull final ToolWindow toolWindow) {
         Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers();

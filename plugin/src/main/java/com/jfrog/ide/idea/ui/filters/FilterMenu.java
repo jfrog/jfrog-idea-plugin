@@ -1,6 +1,5 @@
 package com.jfrog.ide.idea.ui.filters;
 
-import com.google.common.collect.Lists;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBPopupMenu;
 import org.jetbrains.annotations.NotNull;
@@ -9,6 +8,7 @@ import org.jfrog.build.extractor.scan.License;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by Yahav Itzhak on 22 Nov 2017.
@@ -16,7 +16,7 @@ import java.util.Map;
 public class FilterMenu<FilterType> extends JBPopupMenu {
     protected Project project;
     private SelectAllCheckbox<FilterType> selectAllCheckbox = new SelectAllCheckbox<>();
-    private List<SelectionCheckbox> checkBoxMenuItems = Lists.newArrayList();
+    private List<SelectionCheckbox> checkBoxMenuItems = new CopyOnWriteArrayList<>();
 
     FilterMenu(@NotNull Project project) {
         this.project = project;
@@ -40,8 +40,8 @@ public class FilterMenu<FilterType> extends JBPopupMenu {
     }
 
     private void setListeners(Map<FilterType, Boolean> selectionMap) {
-        selectionMap.forEach((key, value) -> checkBoxMenuItems.add(new SelectionCheckbox<>(project, selectionMap, key)));
-        selectAllCheckbox.setListeners(project, selectionMap, checkBoxMenuItems);
+        selectionMap.forEach((key, value) -> checkBoxMenuItems.add(new SelectionCheckbox<>(selectionMap, key)));
+        selectAllCheckbox.setListeners(selectionMap, checkBoxMenuItems);
     }
 
     private void addCheckboxes(boolean putUnknownLast) {

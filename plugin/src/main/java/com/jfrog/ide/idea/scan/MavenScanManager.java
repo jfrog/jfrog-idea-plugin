@@ -8,11 +8,8 @@ import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefres
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.jfrog.ide.common.scan.ComponentPrefix;
-import com.jfrog.xray.client.impl.ComponentsFactory;
-import com.jfrog.xray.client.services.summary.Components;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.idea.maven.model.MavenArtifact;
 import org.jetbrains.idea.maven.model.MavenArtifactNode;
 import org.jetbrains.idea.maven.project.MavenProject;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
@@ -32,12 +29,12 @@ import java.util.Set;
  */
 public class MavenScanManager extends ScanManager {
 
-    public MavenScanManager(Project project) throws IOException {
+    MavenScanManager(Project project) throws IOException {
         super(project, ComponentPrefix.GAV);
         MavenProjectsManager.getInstance(project).addManagerListener(new MavenProjectsListener());
     }
 
-    public static boolean isApplicable(@NotNull Project project) {
+    static boolean isApplicable(@NotNull Project project) {
         return MavenProjectsManager.getInstance(project).hasProjects();
     }
 
@@ -60,38 +57,21 @@ public class MavenScanManager extends ScanManager {
 
     @Override
     protected void buildTree(@Nullable DataNode<ProjectData> externalProject) {
-        Components components = ComponentsFactory.create();
+        DependenciesTree rootNode = new DependenciesTree(project.getName());
         // This set is used to make sure the artifacts added are unique
         Set<String> added = Sets.newHashSet();
-        MavenProjectsManager.getInstance(project).getProjects().forEach(mavenProject ->
-                mavenProject.getDependencyTree()
-                        .stream()
-                        .filter(mavenArtifactNode ->
-                                added.add(mavenArtifactNode.getArtifact().getDisplayStringForLibraryName()))
-                        .forEach(mavenArtifactNode -> {
-                            addArtifact(components, mavenArtifactNode.getArtifact());
-                            mavenArtifactNode.getDependencies().forEach(artifactNode ->
-                                    addArtifact(components, artifactNode.getArtifact()));
-                        }));
+        // Any parent pom will appear in the dependencies tree. We want to display it as a module instead.
+        Set<String> projects = Sets.newHashSet();
+        MavenProjectsManager.getInstance(project).getProjects().forEach(project -> projects.add(project.getMavenId().getKey()));
+        MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject ->
+                populateMavenModule(rootNode, rootMavenProject, added, projects));
+        rootNode.setGeneralInfo(new GeneralInfo());
+        if (rootNode.getChildren().size() == 1) {
+            setScanResults((DependenciesTree) rootNode.getChildAt(0));
+        } else {
+            setScanResults(rootNode);
+        }
     }
-
-    private void addArtifact(Components components, MavenArtifact artifact) {
-//        components.addComponent(GAV_PREFIX + artifact.getDisplayStringForLibraryName(), getArtifactChecksum(artifact));
-    }
-
-//    @Override
-//    protected TreeModel addXrayInfoToTree(TreeModel currentScanResults) {
-//        ScanTreeNode rootNode = new ScanTreeNode(ROOT_NODE_HEADER);
-//        TreeModel issuesTree = new DefaultTreeModel(rootNode);
-//        // This set is used to make sure the artifacts added are unique
-//        Set<String> added = Sets.newHashSet();
-//        // Any parent pom will appear in the dependencies tree. We want to display it as a module instead.
-//        Set<String> projects = Sets.newHashSet();
-//        MavenProjectsManager.getInstance(project).getProjects().forEach(project -> projects.add(project.getMavenId().getKey()));
-//        MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject ->
-//                populateMavenModule(rootNode, rootMavenProject, added, projects));
-//        return issuesTree;
-//    }
 
     private void addSubmodules(DependenciesTree mavenNode, MavenProject mavenProject, Set<String> added, Set<String> projectsIds) {
         mavenProject.getExistingModuleFiles()
@@ -149,18 +129,6 @@ public class MavenScanManager extends ScanManager {
         mavenArtifactNode.getDependencies()
                 .forEach(childrenArtifactNode -> updateChildrenNodes(currentNode, childrenArtifactNode));
         parentNode.add(currentNode);
-    }
-
-    // Currently, this method always return an empty string, since the checksum is not sent to Xray.
-    private String getArtifactChecksum(MavenArtifact artifact) {
-        /*
-        try {
-            return calculateSha1(artifact.getFile());
-        } catch (Exception e) {
-            // Do nothing
-        }
-        */
-        return "";
     }
 
     /**

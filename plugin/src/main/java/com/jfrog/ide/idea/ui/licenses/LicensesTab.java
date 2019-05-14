@@ -8,19 +8,17 @@ import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.TreeSpeedSearch;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
-import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
-import com.jfrog.ide.idea.ui.components.FilterButton;
-import com.jfrog.ide.idea.ui.components.TitledPane;
-import com.jfrog.ide.idea.ui.utils.ComponentUtils;
-import org.jfrog.build.extractor.scan.DependenciesTree;
 import com.jfrog.ide.idea.ui.DetailsViewFactory;
 import com.jfrog.ide.idea.ui.XrayToolWindow;
+import com.jfrog.ide.idea.ui.components.FilterButton;
+import com.jfrog.ide.idea.ui.components.TitledPane;
 import com.jfrog.ide.idea.ui.filters.LicenseFilterMenu;
+import com.jfrog.ide.idea.ui.utils.ComponentUtils;
+import org.jfrog.build.extractor.scan.DependenciesTree;
 
 import javax.swing.*;
-import javax.swing.tree.TreeModel;
 import java.awt.*;
 
 /**
@@ -48,6 +46,7 @@ public class LicensesTab {
         SimpleToolWindowPanel filterPanel = new SimpleToolWindowPanel(false);
         filterPanel.setToolbar(toolbar.getComponent());
         filterPanel.setContent(licensesFilterButton);
+        licensesTree.setLicenseFilterMenu(licenseFilterMenu);
 
         JPanel licenseTab = new JBPanel(new BorderLayout());
         licensesCentralVerticalSplit = new OnePixelSplitter(false, 0.3f);
@@ -87,13 +86,15 @@ public class LicensesTab {
         return new TitledPane(JSplitPane.VERTICAL_SPLIT, XrayToolWindow.TITLE_LABEL_SIZE, componentsTreePanel, treeScrollPane);
     }
 
-    public void populateTrees(TreeModel licensesTreeModel) {
-        licenseFilterMenu.setLicenses();
-        licensesTree.populateTree(licensesTreeModel);
-    }
-
     public void onConfigurationChange() {
         licensesCentralVerticalSplit.setSecondComponent(createLicenseDetailsView(true));
+    }
+
+    public void populateTree() {
+        licensesTree.populateTree(licensesTree.getModel());
+//        DependenciesTree root = (DependenciesTree) issuesTreeModel.getRoot();
+//        issuesCount.setText("Issues (" + root.getIssueCount() + ") ");
+//        issuesTree.populateTree(issuesTreeModel);
     }
 
     public void registerListeners() {
