@@ -26,34 +26,32 @@
 
     <application-components>
         <component>
-            <implementation-class>org.jfrog.idea.configuration.GlobalSettings</implementation-class>
+            <implementation-class>com.jfrog.ide.idea.configuration.GlobalSettings</implementation-class>
         </component>
     </application-components>
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable id="JFrog" displayName="JFrog Xray Configuration"
-                                 instance="org.jfrog.idea.ui.configuration.XrayGlobalConfiguration"/>
-        <externalProjectDataService implementation="org.jfrog.idea.xray.XrayDependencyDataService"/>
-        <projectService serviceImplementation="org.jfrog.idea.xray.XrayDependencyDataService"/>
-        <projectService serviceImplementation="org.jfrog.idea.xray.ScanManagersFactory"/>
-        <projectService serviceInterface="org.jfrog.idea.ui.xray.XrayToolWindow"
-                        serviceImplementation="org.jfrog.idea.ui.xray.XrayToolWindow"/>
-        <projectService serviceImplementation="org.jfrog.idea.xray.persistency.ScanCache"/>
-        <projectService serviceImplementation="org.jfrog.idea.xray.FilterManager"/>
+                                 instance="com.jfrog.ide.idea.ui.configuration.XrayGlobalConfiguration"/>
+        <externalProjectDataService implementation="com.jfrog.ide.idea.XrayDependencyDataService"/>
+        <applicationService serviceImplementation="com.jfrog.ide.idea.scan.ScanManagersFactory"/>
+        <projectService serviceImplementation="com.jfrog.ide.idea.XrayDependencyDataService"/>
+        <projectService serviceInterface="com.jfrog.ide.idea.ui.XrayToolWindow"
+                        serviceImplementation="com.jfrog.ide.idea.ui.XrayToolWindow"/>
         <toolWindow id="JFrog" anchor="bottom" icon="/icons/jfrog_icon.png"
-                    factoryClass="org.jfrog.idea.ui.xray.XrayToolWindowFactory" canCloseContents="true"/>
+                    factoryClass="com.jfrog.ide.idea.ui.XrayToolWindowFactory" canCloseContents="false"/>
     </extensions>
 
     <actions>
         <action id="Xray.Refresh"
-                class="org.jfrog.idea.xray.actions.RefreshAction"
+                class="com.jfrog.ide.idea.actions.RefreshAction"
                 text="Refresh scan"
                 description="Force Xray scan"
                 icon="AllIcons.Actions.Refresh"/>
         <action id="Xray.CollapseAll"
-                class="org.jfrog.idea.xray.actions.CollapseAllAction"/>
+                class="com.jfrog.ide.idea.actions.CollapseAllAction"/>
         <action id="Xray.ExpandAll"
-                class="org.jfrog.idea.xray.actions.ExpandAllAction"/>
+                class="com.jfrog.ide.idea.actions.ExpandAllAction"/>
     </actions>
 
 </idea-plugin>
