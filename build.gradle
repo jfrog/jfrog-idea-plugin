@@ -1,0 +1,57 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+}
+
+plugins {
+    id "org.jetbrains.intellij" version "0.4.8"
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+apply plugin: 'idea'
+apply plugin: 'org.jetbrains.intellij'
+apply plugin: 'java'
+
+intellij {
+    version 'IC-2016.2'
+    plugins 'gradle', 'maven'
+    pluginName 'JFrog'
+    updateSinceUntilBuild = false
+}
+
+repositories {
+    jcenter()
+    mavenLocal()
+}
+
+dependencies {
+    compile group: 'com.jfrog.ide', name: 'ide-plugins-common', version: '1.0.x-SNAPSHOT'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
+    compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.3'
+    compile group: 'com.google.guava', name: 'guava', version: '27.1-jre'
+    testCompile group: 'org.testng', name: 'testng', version: '6.14.3'
+}
+
+test {
+    useTestNG()
+    testLogging {
+        exceptionFormat "full"
+        events "started", "passed", "skipped", "failed", "standardOut", "standardError"
+        minGranularity 0
+    }
+    if (project.hasProperty('excludeTests')) {
+        exclude project.property('excludeTests')
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Version': currentVersion
+    }
+}
+
+group 'com.jfrog.ide.idea'
+version currentVersion // Plugin version

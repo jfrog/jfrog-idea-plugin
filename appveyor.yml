@@ -8,24 +8,10 @@ environment:
   nodejs_version: "8"
   matrix:
   - JAVA_HOME: C:\Program Files\Java\jdk1.8.0
-  CLIENTTESTS_XRAY_URL:
-    secure: qgCv/IbOkjDfFcgdtMdM46XkDrFdjNKPvqMsCKRk4Ko=
-  CLIENTTESTS_XRAY_USERNAME:
-    secure: qr5vtfCwBPUAQyCqU2/0tQ==
-  CLIENTTESTS_XRAY_PASSWORD:
-    secure: um65vfntLOx1gsOA4oo1Bg4/aEVR7JdNTJSZc8/jPl3h0b5mN1TBpKsHUywfx31tqGR9nwwb32zT4QQG/Jhjyhe+M+loJtN8hqlby+iefnk=
 
 test_script:
-- sh: if [[ "$APPVEYOR_REPO_BRANCH" = "master" && -z "$APPVEYOR_PULL_REQUEST_TITLE" ]]; then
-        xray/gradlew test -p xray;
-      fi
-- cmd: IF "%APPVEYOR_REPO_BRANCH%" == "master" IF "%APPVEYOR_PULL_REQUEST_TITLE%" == "" (
-         xray\\gradlew.bat test -p xray
-       )
-- sh: xray/gradlew clean install -p xray
-- cmd: xray\\gradlew.bat clean install -p xray
-- sh: plugin/gradlew test -p plugin
-- cmd: xray\\gradlew.bat test -p plugin
+- sh: gradlew build
+- cmd: gradlew.bat build
 
 # Don't actually build.
 build: off
