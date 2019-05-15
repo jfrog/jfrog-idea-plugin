@@ -38,14 +38,12 @@ public class Logger implements Log {
     @Override
     public void info(String message) {
         NotificationType notificationType = NotificationType.INFORMATION;
-        popupBalloon(INFORMATION_TITLE, message, notificationType);
         log(INFORMATION_TITLE, message, notificationType);
     }
 
     @Override
     public void warn(String message) {
         NotificationType notificationType = NotificationType.WARNING;
-        popupBalloon(INFORMATION_TITLE, message, notificationType);
         log(INFORMATION_TITLE, message, notificationType);
     }
 
@@ -71,7 +69,7 @@ public class Logger implements Log {
         Notifications.Bus.notify(EVENT_LOG_NOTIFIER.createNotification(title, prependPrefix(details, notificationType), notificationType, null));
     }
 
-    private static void popupBalloon(String title, String content, NotificationType notificationType) {
+    public static void popupBalloon(String title, String content, NotificationType notificationType) {
         if (lastNotification != null) {
             lastNotification.hideBalloon();
         }

@@ -1,6 +1,5 @@
 package com.jfrog.ide.idea;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.Key;
 import com.intellij.openapi.externalSystem.model.ProjectKeys;
@@ -12,19 +11,13 @@ import com.intellij.openapi.externalSystem.util.ExternalSystemConstants;
 import com.intellij.openapi.externalSystem.util.Order;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
-import com.intellij.util.messages.MessageBus;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
-import com.jfrog.ide.idea.log.Logger;
-import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
-import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.gradle.util.GradleConstants;
 
-import java.io.IOException;
 import java.util.Collection;
-import java.util.Set;
 
 /**
  * Created by Yahav Itzhak on 9 Nov 2017.
@@ -55,21 +48,8 @@ public class GradleDependenciesDataService extends AbstractProjectDataService<Li
             return;
         }
 
-        // Before we refresh the scanners, let's check if the project is supported.
-        Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers();
-        boolean scannersExistBeforeRefresh = CollectionUtils.isNotEmpty(scanManagers);
-        ScanManagersFactory.getInstance().startScan(false);
-        scanManagers = ScanManagersFactory.getScanManagers();
-        if (CollectionUtils.isEmpty(scanManagers)) {
-            return;
-        }
-        // The project was not supported before the refresh or it hasn't been initialised.
-        if (!scannersExistBeforeRefresh) {
-            MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
-            messageBus.syncPublisher(Events.ON_IDEA_FRAMEWORK_CHANGE).update();
-        }
         if (GlobalSettings.getInstance().isCredentialsSet()) {
-            scanManagers.forEach(scanManager -> scanManager.asyncScanAndUpdateResults(true, toImport));
+            ScanManagersFactory.getInstance().startScan(true, toImport);
         }
     }
 }

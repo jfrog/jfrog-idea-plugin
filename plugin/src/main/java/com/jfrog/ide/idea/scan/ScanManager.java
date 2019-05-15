@@ -44,13 +44,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class ScanManager extends ScanManagerBase {
 
     private static final Path HOME_PATH = Paths.get(System.getProperty("user.home"), ".jfrog-idea-plugin");
-    static final String ROOT_NODE_HEADER = "All components";
     Project project;
 
     // Lock to prevent multiple simultaneous scans
     private AtomicBoolean scanInProgress = new AtomicBoolean(false);
 
-    ScanManager(@NotNull Project project, ComponentPrefix prefix) throws IOException {
+    public ScanManager(@NotNull Project project, ComponentPrefix prefix) throws IOException {
         super(HOME_PATH.resolve("cache"), project.getName(), Logger.getInstance(), GlobalSettings.getInstance().getXrayConfig(), prefix);
         this.project = project;
         Files.createDirectories(HOME_PATH);

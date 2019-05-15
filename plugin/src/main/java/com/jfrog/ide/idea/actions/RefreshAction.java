@@ -5,12 +5,10 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.util.messages.MessageBus;
 import com.jfrog.ide.idea.Events;
-import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import org.apache.commons.collections4.CollectionUtils;
 
-import java.io.IOException;
 import java.util.Set;
 
 /**
@@ -26,7 +24,7 @@ public class RefreshAction extends AnAction {
         // Before we refresh the scanners, let's check if the project is supported.
         Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers();
         boolean scannersExistBeforeRefresh = CollectionUtils.isNotEmpty(scanManagers);
-        ScanManagersFactory.getInstance().startScan(false);
+        ScanManagersFactory.getInstance().startScan(false, null);
         scanManagers = ScanManagersFactory.getScanManagers();
         if (CollectionUtils.isEmpty(scanManagers)) {
             return;

@@ -48,13 +48,13 @@ public class GradleScanManager extends ScanManager {
 
     private Map<String, DependenciesTree> modules;
     private Collection<DataNode<LibraryDependencyData>> libraryDependencies;
-    private DependenciesTree rootNode = new DependenciesTree(ScanManager.ROOT_NODE_HEADER);
+    private ModuleData parentModule;
 
-    public GradleScanManager(Project project) throws IOException {
+    GradleScanManager(Project project) throws IOException {
         super(project, ComponentPrefix.GAV);
     }
 
-    public static boolean isApplicable(@NotNull Project project) {
+    static boolean isApplicable(@NotNull Project project) {
         GradleSettings.MyState state = GradleSettings.getInstance(project).getState();
         return state != null && !state.getLinkedExternalProjectsSettings().isEmpty();
     }
@@ -103,8 +103,7 @@ public class GradleScanManager extends ScanManager {
 
     @Override
     protected void buildTree(@Nullable DataNode<ProjectData> externalProject) {
-//        Components components = ComponentsFactory.create();
-        rootNode = new DependenciesTree(ScanManager.ROOT_NODE_HEADER);
+        DependenciesTree rootNode = new DependenciesTree(project.getName());
         collectDependenciesIfMissing(externalProject);
         libraryDependencies.parallelStream()
                 .filter(GradleScanManager::isLibraryDependency)
@@ -113,18 +112,30 @@ public class GradleScanManager extends ScanManager {
                 .filter(distinctByName(pair -> pair.getLeft() + getDependencyName(pair.getRight())))
                 .filter(pair -> modules.containsKey(pair.getLeft()))
                 .forEach(pair -> populateDependenciesTree(modules.get(pair.getLeft()), pair.getRight()));
-        modules.values().forEach(module -> rootNode.add(module));
-//        addAllArtifacts(components, rootNode, GAV_PREFIX);
-//        return components;
+        modules.values().forEach(rootNode::add);
+
+        GeneralInfo generalInfo = new GeneralInfo();
+        generalInfo.groupId(parentModule.getGroup()).artifactId(parentModule.getId()).version(parentModule.getVersion());
+        rootNode.setGeneralInfo(generalInfo);
+        if (rootNode.getChildren().size() == 1) {
+            setScanResults((DependenciesTree) rootNode.getChildAt(0));
+        } else {
+            setScanResults(rootNode);
+        }
     }
 
     private void collectDependenciesIfMissing(DataNode<ProjectData> externalProject) {
         if (libraryDependencies == null) {
             collectModuleDependencies(externalProject);
             collectLibraryDependencies(externalProject);
+            collectParentModule(externalProject);
         } else {
             modules.values().forEach(child -> child.getChildren().clear());
         }
+    }
+
+    private void collectParentModule(DataNode<ProjectData> externalProject) {
+        parentModule = ExternalSystemApiUtil.find(externalProject, ProjectKeys.MODULE).getData();
     }
 
     private void collectModuleDependencies(DataNode<ProjectData> externalProject) {
@@ -189,25 +200,11 @@ public class GradleScanManager extends ScanManager {
             return;
         }
 
-        ComponentDetailImpl scanComponent = new ComponentDetailImpl(componentId, getArtifactChecksum(dataNode));
+        ComponentDetailImpl scanComponent = new ComponentDetailImpl(componentId, "");
         DependenciesTree treeNode = new DependenciesTree(scanComponent);
         for (DataNode child : dataNode.getChildren()) {
             populateDependenciesTree(treeNode, child);
         }
         dependenciesTree.add(treeNode);
-    }
-
-    // Currently, this method always return an empty string, since the checksum is not sent to Xray.
-    private String getArtifactChecksum(DataNode<? extends AbstractDependencyData> node) {
-        /*
-        try {
-            Set<String> dependencyPaths = node.getData().getTarget().getPaths(LibraryPathType.BINARY);
-            File file = new File((String)dependencyPaths.toArray()[0]);
-            return calculateSha1(file);
-        } catch (Exception e) {
-            // Do nothing
-        }
-        */
-        return "";
     }
 }
