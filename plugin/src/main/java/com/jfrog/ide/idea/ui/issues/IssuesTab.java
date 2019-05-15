@@ -19,7 +19,6 @@ import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.idea.Events;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
-import com.jfrog.ide.idea.ui.DetailsViewFactory;
 import com.jfrog.ide.idea.ui.components.FilterButton;
 import com.jfrog.ide.idea.ui.components.IssuesTable;
 import com.jfrog.ide.idea.ui.components.TitledPane;
@@ -188,7 +187,7 @@ public class IssuesTab {
                     issueCountPanel.setBackground(e.isAddedPath(path) ? UIUtil.getTreeSelectionBackground() : UIUtil.getTableBackground());
                 }
             }
-            DetailsViewFactory.createIssuesDetailsView(issuesDetailsPanel, (DependenciesTree) e.getNewLeadSelectionPath().getLastPathComponent());
+            ComponentIssueDetails.createIssuesDetailsView(issuesDetailsPanel, (DependenciesTree) e.getNewLeadSelectionPath().getLastPathComponent());
             // Scroll back to the beginning of the scrollable panel
             SwingUtilities.invokeLater(() -> issuesDetailsScroll.getViewport().setViewPosition(new Point()));
         });

@@ -10,7 +10,6 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
-import com.jfrog.ide.idea.ui.DetailsViewFactory;
 import com.jfrog.ide.idea.ui.XrayToolWindow;
 import com.jfrog.ide.idea.ui.components.FilterButton;
 import com.jfrog.ide.idea.ui.components.TitledPane;
@@ -30,7 +29,6 @@ public class LicensesTab {
 
     private LicensesTree licensesTree = LicensesTree.getInstance();
     private OnePixelSplitter licensesCentralVerticalSplit;
-    private LicenseFilterMenu licenseFilterMenu;
     private JScrollPane licensesDetailsScroll;
     private JPanel licensesDetailsPanel;
 
@@ -40,7 +38,7 @@ public class LicensesTab {
 
     public JPanel createLicenseInfoTab(boolean supported) {
         ActionToolbar toolbar = ComponentUtils.createActionToolbar(licensesTree);
-        licenseFilterMenu = new LicenseFilterMenu(project);
+        LicenseFilterMenu licenseFilterMenu = new LicenseFilterMenu(project);
         FilterButton licensesFilterButton = new FilterButton(licenseFilterMenu, "License", "Select licenses to show");
         licensesFilterButton.setAlignmentX(Component.LEFT_ALIGNMENT);
         SimpleToolWindowPanel filterPanel = new SimpleToolWindowPanel(false);
@@ -90,20 +88,14 @@ public class LicensesTab {
         licensesCentralVerticalSplit.setSecondComponent(createLicenseDetailsView(true));
     }
 
-    public void populateTree() {
-        licensesTree.populateTree(licensesTree.getModel());
-//        DependenciesTree root = (DependenciesTree) issuesTreeModel.getRoot();
-//        issuesCount.setText("Issues (" + root.getIssueCount() + ") ");
-//        issuesTree.populateTree(issuesTreeModel);
-    }
-
     public void registerListeners() {
         // License component selection listener
         licensesTree.addTreeSelectionListener(e -> {
             if (e == null || e.getNewLeadSelectionPath() == null) {
                 return;
             }
-            DetailsViewFactory.createLicenseDetailsView(licensesDetailsPanel, (DependenciesTree) e.getNewLeadSelectionPath().getLastPathComponent());
+            ComponentLicenseDetails.createLicenseDetailsView(licensesDetailsPanel, (DependenciesTree) e.getNewLeadSelectionPath().getLastPathComponent());
+
             // Scroll back to the beginning of the scrollable panel
             SwingUtilities.invokeLater(() -> licensesDetailsScroll.getViewport().setViewPosition(new Point()));
         });
