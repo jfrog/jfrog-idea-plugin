@@ -1,8 +1,8 @@
 package com.jfrog.ide.idea.log;
 
 import com.intellij.notification.*;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.plexus.util.ExceptionUtils;
 import org.jfrog.build.api.util.Log;
 
