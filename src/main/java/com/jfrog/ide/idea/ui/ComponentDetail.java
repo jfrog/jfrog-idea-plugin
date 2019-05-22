@@ -47,6 +47,9 @@ public class ComponentDetail extends JPanel {
             addText(1, "Artifact:", generalInfo.getArtifactId());
             addText(2, "Version:", generalInfo.getVersion());
             addText(3, "Type:", pkgType);
+            if (StringUtils.isNotBlank(generalInfo.getPath())) {
+                addText(4, "Path:", generalInfo.getPath());
+            }
         }
         addLicenses(node.getLicenses());
     }

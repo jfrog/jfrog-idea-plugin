@@ -2,7 +2,6 @@ package com.jfrog.ide.idea.ui.issues;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
@@ -13,30 +12,24 @@ import com.intellij.ui.SideBorder;
 import com.intellij.ui.TreeSpeedSearch;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
-import com.intellij.ui.table.JBTable;
 import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.idea.Events;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import com.jfrog.ide.idea.ui.components.FilterButton;
-import com.jfrog.ide.idea.ui.components.IssuesTable;
 import com.jfrog.ide.idea.ui.components.TitledPane;
 import com.jfrog.ide.idea.ui.filters.IssueFilterMenu;
-import com.jfrog.ide.idea.ui.models.IssuesTableModel;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 import org.jfrog.build.extractor.scan.Issue;
 
 import javax.swing.*;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.jfrog.ide.idea.ui.XrayToolWindow.*;
 
@@ -49,10 +42,10 @@ public class IssuesTab {
     private Map<TreePath, JPanel> issuesCountPanels = Maps.newHashMap();
     private IssuesTree issuesTree = IssuesTree.getInstance();
     private OnePixelSplitter issuesRightHorizontalSplit;
+    private ComponentIssuesTable issuesTable;
     private JScrollPane issuesDetailsScroll;
     private JPanel issuesDetailsPanel;
     private JComponent issuesPanel;
-    private JBTable issuesTable;
 
     public IssuesTab(Project project) {
         this.project = project;
@@ -71,7 +64,7 @@ public class IssuesTab {
         issuesRightHorizontalSplit.setFirstComponent(createComponentsDetailsView(supported));
         issuesRightHorizontalSplit.setSecondComponent(issuesPanel);
 
-        OnePixelSplitter centralVerticalSplit = new OnePixelSplitter(false, 0.33f);
+        OnePixelSplitter centralVerticalSplit = new OnePixelSplitter(false, 0.20f);
         centralVerticalSplit.setFirstComponent(createIssuesComponentsTreeView());
         centralVerticalSplit.setSecondComponent(issuesRightHorizontalSplit);
         OnePixelSplitter issuesViewTab = new OnePixelSplitter(true, 0f);
@@ -105,7 +98,7 @@ public class IssuesTab {
     }
 
     private JComponent createComponentsIssueDetailView() {
-        issuesTable = new IssuesTable();
+        issuesTable = new ComponentIssuesTable();
         JScrollPane tableScroll = ScrollPaneFactory.createScrollPane(issuesTable, SideBorder.ALL);
         tableScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         JLabel title = new JBLabel(" Component Issues Details");
@@ -130,39 +123,24 @@ public class IssuesTab {
     }
 
     private void updateIssuesTable() {
-        java.util.List<DependenciesTree> selectedNodes = Lists.newArrayList((DependenciesTree) issuesTree.getModel().getRoot());
-        if (issuesTree.getSelectionPaths() != null) {
-            selectedNodes.clear();
-            TreePath[] selectedTreeNodes = issuesTree.getSelectionPaths();
-            for (TreePath treePath : selectedTreeNodes) {
-                selectedNodes.add((DependenciesTree) treePath.getLastPathComponent());
-            }
-        }
-
-        Set<Issue> issueSet = Sets.newHashSet();
-        ScanManagersFactory.getScanManagers().forEach(scanManager ->
-                issueSet.addAll(scanManager.getFilteredScanIssues(selectedNodes)));
-        TableModel model = new IssuesTableModel(issueSet);
-        TableRowSorter<TableModel> sorter = new TableRowSorter<>(model);
-        issuesTable.setRowSorter(sorter);
-        issuesTable.setModel(model);
-
-        List<RowSorter.SortKey> sortKeys = new ArrayList<>();
-        sortKeys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
-        sorter.setSortKeys(sortKeys);
-        sorter.sort();
-
-        resizeTableColumns();
-        issuesTable.validate();
-        issuesTable.repaint();
+        List<DependenciesTree> selectedNodes = getSelectedNodes();
+        Set<Issue> issueSet = ScanManagersFactory.getScanManagers()
+                .stream()
+                .map(scanManager -> scanManager.getFilteredScanIssues(selectedNodes))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+        issuesTable.updateIssuesTable(issueSet);
     }
 
-    private void resizeTableColumns() {
-        int tableWidth = issuesTable.getParent().getWidth();
-        tableWidth -= (issuesTable.getColumnModel().getColumn(IssuesTableModel.IssueColumn.SEVERITY.ordinal()).getWidth());
-        tableWidth -= (issuesTable.getColumnModel().getColumn(IssuesTableModel.IssueColumn.ISSUE_TYPE.ordinal()).getWidth());
-        issuesTable.getColumnModel().getColumn(IssuesTableModel.IssueColumn.SUMMARY.ordinal()).setPreferredWidth((int) (tableWidth * 0.6));
-        issuesTable.getColumnModel().getColumn(IssuesTableModel.IssueColumn.COMPONENT.ordinal()).setPreferredWidth((int) (tableWidth * 0.4));
+    private List<DependenciesTree> getSelectedNodes() {
+        // If no node selected - Return the root
+        if (issuesTree.getSelectionPaths() == null) {
+            return Lists.newArrayList((DependenciesTree) issuesTree.getModel().getRoot());
+        }
+        return Arrays.stream(issuesTree.getSelectionPaths())
+                .map(TreePath::getLastPathComponent)
+                .map(obj -> (DependenciesTree) obj)
+                .collect(Collectors.toList());
     }
 
     public void onConfigurationChange() {

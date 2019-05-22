@@ -1,11 +1,13 @@
 package com.jfrog.ide.idea.ui.models;
 
 import com.google.common.collect.Sets;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.Issue;
 
 import javax.swing.table.AbstractTableModel;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -27,12 +29,15 @@ public class IssuesTableModel extends AbstractTableModel {
         SEVERITY("Severity"),
         SUMMARY("Summary"),
         ISSUE_TYPE("Issue Type"),
-        COMPONENT("Component");
+        COMPONENT("Component"),
+        FIXED_VERSIONS("Fixed Versions");
 
         private String name;
+
         IssueColumn(String name) {
             this.name = name;
         }
+
         public String getName() {
             return this.name;
         }
@@ -58,10 +63,17 @@ public class IssuesTableModel extends AbstractTableModel {
         IssueColumn issueColumn = IssueColumn.valueOf(IssueColumn.values()[col].toString());
         Issue issue = (Issue) issues.toArray()[row];
         switch (issueColumn) {
-            case SEVERITY: return issue.getSeverity();
-            case SUMMARY: return issue.getSummary();
-            case ISSUE_TYPE: return StringUtils.capitalize(issue.getIssueType());
-            case COMPONENT: return issue.getComponent();
+            case SEVERITY:
+                return issue.getSeverity();
+            case SUMMARY:
+                return issue.getSummary();
+            case ISSUE_TYPE:
+                return StringUtils.capitalize(issue.getIssueType());
+            case COMPONENT:
+                return issue.getComponent();
+            case FIXED_VERSIONS:
+                List<String> fixedVersions = ListUtils.emptyIfNull(issue.getFixedVersions());
+                return StringUtils.defaultIfEmpty(String.join(", ", fixedVersions), "[]");
         }
         return "N/A";
     }

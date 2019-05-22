@@ -8,6 +8,7 @@ import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefres
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.idea.maven.model.MavenArtifactNode;
@@ -65,7 +66,8 @@ public class MavenScanManager extends ScanManager {
         MavenProjectsManager.getInstance(project).getProjects().forEach(project -> projects.add(project.getMavenId().getKey()));
         MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject ->
                 populateMavenModule(rootNode, rootMavenProject, added, projects));
-        rootNode.setGeneralInfo(new GeneralInfo());
+        GeneralInfo generalInfo = new GeneralInfo(project.getName(), project.getName(), Utils.getProjectBasePath(project).toString(), "maven");
+        rootNode.setGeneralInfo(generalInfo);
         if (rootNode.getChildren().size() == 1) {
             setScanResults((DependenciesTree) rootNode.getChildAt(0));
         } else {
