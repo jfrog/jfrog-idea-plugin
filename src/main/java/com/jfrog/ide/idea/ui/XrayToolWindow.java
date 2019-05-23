@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 
 /**
- * Created by romang on 3/7/17.
+ * Created by yahavi
  */
 public class XrayToolWindow {
 

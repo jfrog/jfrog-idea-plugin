@@ -26,6 +26,9 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 
+/**
+ * @author yahavi
+ */
 @State(name = "GlobalSettings", storages = {@Storage("jfrogConfig.xml")})
 public final class GlobalSettings extends ApplicationComponent.Adapter implements PersistentStateComponent<GlobalSettings> {
 
@@ -53,7 +56,7 @@ public final class GlobalSettings extends ApplicationComponent.Adapter implement
         this.xrayConfig = xrayConfig;
     }
 
-    public boolean isCredentialsSet() {
+    public boolean areCredentialsSet() {
         return xrayConfig != null && !xrayConfig.isEmpty();
     }
 }

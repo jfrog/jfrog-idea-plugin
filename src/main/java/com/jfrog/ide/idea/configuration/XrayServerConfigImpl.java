@@ -32,6 +32,9 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
+/**
+ * @author yahavi
+ */
 @Immutable
 public class XrayServerConfigImpl implements XrayServerConfig {
     @OptionTag

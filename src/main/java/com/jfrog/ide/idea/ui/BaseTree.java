@@ -1,7 +1,7 @@
 package com.jfrog.ide.idea.ui;
 
 import com.intellij.ui.treeStructure.Tree;
-import com.jfrog.ide.idea.utils.ProjectsMap;
+import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 

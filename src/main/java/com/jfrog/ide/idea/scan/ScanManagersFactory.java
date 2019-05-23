@@ -25,7 +25,7 @@ import java.util.Set;
 import static com.jfrog.ide.common.utils.Utils.findPackageJsonDirs;
 
 /**
- * Created by romang on 3/2/17.
+ * Created by yahavi
  */
 public class ScanManagersFactory {
 
@@ -43,43 +43,48 @@ public class ScanManagersFactory {
         return Sets.newHashSet(scanManagersFactory.scanManagers.values());
     }
 
+    /**
+     * Start an Xray scan for all projects.
+     * @param quickScan - True to allow usage of the scan cache.
+     * @param libraryDependencies - Dependencies to use in Gradle scans.
+     * @param modelsProvider - Modules to use in Gradle scans.
+     */
     public void startScan(boolean quickScan, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies, @Nullable IdeModifiableModelsProvider modelsProvider) {
         if (isScanInProgress()) {
             Logger.getInstance().info("Previous scan still running...");
             return;
         }
-        if (!GlobalSettings.getInstance().isCredentialsSet()) {
+        if (!GlobalSettings.getInstance().areCredentialsSet()) {
             Logger.getInstance().error("Xray server is not configured.");
             return;
         }
         try {
-            refreshScanManagers();
+            IssuesTree issuesTree = IssuesTree.getInstance();
+            LicensesTree licensesTree = LicensesTree.getInstance();
+            if (issuesTree == null || licensesTree == null) {
+                return;
+            }
+            createScanManagers();
+            resetViews(issuesTree, licensesTree);
+            for (ScanManager scanManager : scanManagers.values()) {
+                scanManager.asyncScanAndUpdateResults(quickScan, libraryDependencies, modelsProvider);
+            }
         } catch (IOException e) {
             Logger.getInstance().error("", e);
-        }
-        IssuesTree issuesTree = IssuesTree.getInstance();
-        LicensesTree licensesTree = LicensesTree.getInstance();
-        if (issuesTree == null || licensesTree == null) {
-            return;
-        }
-        resetViews(issuesTree, licensesTree);
-        for (ScanManager scanManager : scanManagers.values()) {
-            scanManager.asyncScanAndUpdateResults(quickScan, libraryDependencies, modelsProvider);
         }
     }
 
     public void tryAsyncScanAndUpdateProject(Project project, Collection<DataNode<LibraryDependencyData>> libraryDependencies, IdeModifiableModelsProvider modelsProvider) {
-        for (ScanManager scanManager : scanManagers.values()) {
-            if (scanManager.getProjectName().equals(project.getName())) {
-                scanManager.asyncScanAndUpdateResults(true, libraryDependencies, modelsProvider);
-                return;
-            }
+        ScanManager scanManager = scanManagers.get(Utils.getProjectIdentifier(project));
+        if (scanManager != null) {
+            scanManager.asyncScanAndUpdateResults(true, libraryDependencies, modelsProvider);
+            return;
         }
         Logger.getInstance().warn("Gradle project " + project.getName() + " not found in scan mangers list. Starting a full scan.");
         startScan(true, libraryDependencies, modelsProvider);
     }
 
-    public void refreshScanManagers() throws IOException {
+    public void createScanManagers() throws IOException {
         Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
         Project[] projects = ProjectManager.getInstance().getOpenProjects();
         if (ArrayUtils.isEmpty(projects)) {
@@ -101,6 +106,11 @@ public class ScanManagersFactory {
             }
             paths.add(Utils.getProjectBasePath(project));
         }
+        createNpmScanManagers(scanManagers, paths);
+        this.scanManagers = scanManagers;
+    }
+
+    private void createNpmScanManagers(Map<Integer, ScanManager> scanManagers, Set<Path> paths) throws IOException {
         scanManagers.values().stream().map(ScanManager::getProjectPaths).flatMap(Collection::stream).forEach(paths::add);
         Set<String> packageJsonDirs = findPackageJsonDirs(paths);
         for (String dir : packageJsonDirs) {
@@ -113,7 +123,6 @@ public class ScanManagersFactory {
                 scanManagers.put(projectHash, new NpmScanManager(npmProject));
             }
         }
-        this.scanManagers = scanManagers;
     }
 
     private boolean isScanInProgress() {

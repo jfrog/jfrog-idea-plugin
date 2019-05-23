@@ -1,10 +1,10 @@
 package com.jfrog.ide.idea.ui.licenses;
 
 import com.jfrog.ide.common.filter.FilterManager;
+import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.ui.BaseTree;
 import com.jfrog.ide.idea.ui.filters.LicenseFilterMenu;
 import com.jfrog.ide.idea.ui.renderers.LicensesTreeCellRenderer;
-import com.jfrog.ide.idea.utils.ProjectsMap;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 
 import javax.swing.tree.TreeModel;

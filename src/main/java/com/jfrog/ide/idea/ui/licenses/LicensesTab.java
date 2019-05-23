@@ -49,7 +49,7 @@ public class LicensesTab {
     }
 
     private JComponent createLicenseDetailsView(boolean supported) {
-        if (!GlobalSettings.getInstance().isCredentialsSet()) {
+        if (!GlobalSettings.getInstance().areCredentialsSet()) {
             return ComponentUtils.createNoCredentialsView();
         }
         if (!supported) {

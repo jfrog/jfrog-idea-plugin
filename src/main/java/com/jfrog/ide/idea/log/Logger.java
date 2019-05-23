@@ -50,14 +50,14 @@ public class Logger implements Log {
     @Override
     public void error(String message) {
         NotificationType notificationType = NotificationType.ERROR;
-        popupBalloon(ERROR_TITLE, message, notificationType);
+        popupBalloon(message, notificationType);
         log(ERROR_TITLE, message, notificationType);
     }
 
     @Override
     public void error(String message, Throwable t) {
         NotificationType notificationType = NotificationType.ERROR;
-        popupBalloon(ERROR_TITLE, message, notificationType);
+        popupBalloon(message, notificationType);
         String title = StringUtils.defaultIfBlank(t.getMessage(), ERROR_TITLE);
         log(title, message + System.lineSeparator() + ExceptionUtils.getStackTrace(t), notificationType);
     }
@@ -69,14 +69,14 @@ public class Logger implements Log {
         Notifications.Bus.notify(EVENT_LOG_NOTIFIER.createNotification(title, prependPrefix(details, notificationType), notificationType, null));
     }
 
-    public static void popupBalloon(String title, String content, NotificationType notificationType) {
+    private static void popupBalloon(String content, NotificationType notificationType) {
         if (lastNotification != null) {
             lastNotification.hideBalloon();
         }
         if (StringUtils.isBlank(content)) {
-            content = title;
+            content = ERROR_TITLE;
         }
-        Notification notification = BALLOON_NOTIFIER.createNotification(title, content, notificationType, null);
+        Notification notification = BALLOON_NOTIFIER.createNotification(ERROR_TITLE, content, notificationType, null);
         lastNotification = notification;
         Notifications.Bus.notify(notification);
     }

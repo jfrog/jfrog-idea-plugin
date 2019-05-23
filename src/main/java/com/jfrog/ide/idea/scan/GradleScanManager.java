@@ -45,8 +45,8 @@ import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
  */
 public class GradleScanManager extends ScanManager {
 
-    private Map<String, DependenciesTree> modules = Maps.newHashMap();
     private Collection<DataNode<LibraryDependencyData>> libraryDependencies;
+    private Map<String, DependenciesTree> modules = Maps.newHashMap();
 
     GradleScanManager(Project project) throws IOException {
         super(project, ComponentPrefix.GAV);
@@ -131,6 +131,11 @@ public class GradleScanManager extends ScanManager {
         }
     }
 
+    /**
+     * Collect Gradle modules dependencies. Used in user click on the refresh button.
+     *
+     * @param externalProject - The Gradle root node
+     */
     private void collectModuleDependencies(DataNode<ProjectData> externalProject) {
         Collection<DataNode<ModuleData>> moduleDependencies = ExternalSystemApiUtil.findAllRecursively(externalProject, ProjectKeys.MODULE);
         modules = Maps.newHashMap();
@@ -138,26 +143,20 @@ public class GradleScanManager extends ScanManager {
             String groupId = Objects.toString(module.getData().getGroup(), "");
             String artifactId = StringUtils.removeStart(module.getData().getId(), ":");
             String version = Objects.toString(module.getData().getVersion(), "");
-            String gav = groupId + ":" + artifactId + ":" + version;
             DependenciesTree scanTreeNode = new DependenciesTree(artifactId);
-            scanTreeNode.setGeneralInfo(new GeneralInfo()
-                    .componentId(gav)
-                    .pkgType("gradle")
-                    .groupId(groupId)
-                    .artifactId(artifactId)
-                    .version(version));
-            modules.put(module.getData().getId(), scanTreeNode);
+            scanTreeNode.setGeneralInfo(new GeneralInfo().pkgType("gradle").groupId(groupId).artifactId(artifactId).version(version));
+            modules.put(StringUtils.removeStart(module.getData().getId(), ":"), scanTreeNode);
         });
     }
 
+    /**
+     * Collect Gradle modules dependencies. Used after Gradle collect dependencies.
+     *
+     * @param modelsProvider - The gradle models from {@link com.jfrog.ide.idea.GradleDependenciesDataService}
+     */
     private void collectModuleDependencies(IdeModifiableModelsProvider modelsProvider) {
         modules = Maps.newHashMap();
         Arrays.stream(modelsProvider.getModules()).forEach(module -> {
-
-//            String groupId = Objects.toString(module.getData().getGroup(), "");
-//            String artifactId = StringUtils.removeStart(module.getData().getId(), ":");
-//            String version = Objects.toString(module.getData().getVersion(), "");
-//            String gav = groupId + ":" + artifactId + ":" + version;
             DependenciesTree scanTreeNode = new DependenciesTree(module.getName());
             scanTreeNode.setGeneralInfo(new GeneralInfo()
                     .pkgType("gradle")

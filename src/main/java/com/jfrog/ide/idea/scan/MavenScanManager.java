@@ -13,9 +13,9 @@ import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.idea.maven.model.MavenArtifactNode;
+import org.jetbrains.idea.maven.model.MavenId;
 import org.jetbrains.idea.maven.project.MavenProject;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
-import org.jfrog.build.extractor.scan.Artifact;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 
@@ -25,6 +25,7 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by romang on 3/2/17.
@@ -47,9 +48,10 @@ public class MavenScanManager extends ScanManager {
      * @return all project modules locations as Paths
      */
     public Set<Path> getProjectPaths() {
-        Set<Path> paths = super.getProjectPaths();
-        MavenProjectsManager.getInstance(project).getProjects().forEach(mavenProject -> paths.add(Paths.get(mavenProject.getDirectory())));
-        return paths;
+        return MavenProjectsManager.getInstance(project).getProjects().stream()
+                .map(MavenProject::getDirectory)
+                .map(Paths::get)
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -65,9 +67,8 @@ public class MavenScanManager extends ScanManager {
         // Any parent pom will appear in the dependencies tree. We want to display it as a module instead.
         Set<String> projects = Sets.newHashSet();
         MavenProjectsManager.getInstance(project).getProjects().forEach(project -> projects.add(project.getMavenId().getKey()));
-        MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject ->
-                populateMavenModule(rootNode, rootMavenProject, added, projects));
-        GeneralInfo generalInfo = new GeneralInfo(project.getName(), project.getName(), Utils.getProjectBasePath(project).toString(), "maven");
+        MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject -> populateMavenModule(rootNode, rootMavenProject, added, projects));
+        GeneralInfo generalInfo = new GeneralInfo().artifactId(project.getName()).path(Utils.getProjectBasePath(project).toString()).pkgType("maven");
         rootNode.setGeneralInfo(generalInfo);
         if (rootNode.getChildren().size() == 1) {
             setScanResults((DependenciesTree) rootNode.getChildAt(0));
@@ -77,18 +78,17 @@ public class MavenScanManager extends ScanManager {
     }
 
     private void addSubmodules(DependenciesTree mavenNode, MavenProject mavenProject, Set<String> added, Set<String> projectsIds) {
-        mavenProject.getExistingModuleFiles()
-                .forEach(virtualFile -> {
-                            MavenProject mavenModule = getModuleByVirtualFile(virtualFile);
-                            if (mavenModule != null) {
-                                populateMavenModule(mavenNode, mavenModule, added, projectsIds);
-                            }
-                        }
-                );
+        mavenProject.getExistingModuleFiles().forEach(virtualFile -> {
+                    MavenProject mavenModule = getModuleByVirtualFile(virtualFile);
+                    if (mavenModule != null) {
+                        populateMavenModule(mavenNode, mavenModule, added, projectsIds);
+                    }
+                }
+        );
     }
 
     private void populateMavenModule(DependenciesTree rootNode, MavenProject rootMavenProject, Set<String> added, Set<String> projects) {
-        DependenciesTree mavenNode = populateScanTreeNode(rootMavenProject);
+        DependenciesTree mavenNode = populateMavenModuleNode(rootMavenProject);
         rootNode.add(mavenNode);
         addMavenProjectDependencies(mavenNode, rootMavenProject, added, projects);
         addSubmodules(mavenNode, rootMavenProject, added, projects);
@@ -111,18 +111,16 @@ public class MavenScanManager extends ScanManager {
     }
 
     /**
-     * Populate root modules ScanTreeNode with issues, licenses and general info from the scan cache.
+     * Populate Maven module node.
      */
-    private DependenciesTree populateScanTreeNode(MavenProject mavenProject) {
+    private DependenciesTree populateMavenModuleNode(MavenProject mavenProject) {
         DependenciesTree node = new DependenciesTree(mavenProject.getMavenId().getArtifactId());
+        MavenId mavenId = mavenProject.getMavenId();
         node.setGeneralInfo(new GeneralInfo()
-                .componentId(mavenProject.getMavenId().toString())
+                .groupId(mavenId.getGroupId())
+                .artifactId(mavenId.getArtifactId())
+                .version(mavenId.getVersion())
                 .pkgType("maven"));
-        Artifact scanArtifact = getArtifactSummary(mavenProject.getMavenId().getArtifactId());
-        if (scanArtifact != null) {
-            node.setLicenses(Sets.newHashSet(scanArtifact.getLicenses()));
-            return node;
-        }
         return node;
     }
 

@@ -28,6 +28,7 @@ import java.util.List;
  * Created by romang on 5/7/17.
  */
 public class ComponentUtils {
+
     public static JTextArea createJTextArea(String text, boolean lineWrap) {
         JTextArea jTextArea = new JTextArea(text);
         jTextArea.setOpaque(true);

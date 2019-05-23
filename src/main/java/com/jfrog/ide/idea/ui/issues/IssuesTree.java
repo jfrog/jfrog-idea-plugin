@@ -1,16 +1,17 @@
 package com.jfrog.ide.idea.ui.issues;
 
 import com.jfrog.ide.common.filter.FilterManager;
+import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.ui.BaseTree;
 import com.jfrog.ide.idea.ui.listeners.IssuesTreeExpansionListener;
 import com.jfrog.ide.idea.ui.renderers.IssuesTreeCellRenderer;
-import com.jfrog.ide.idea.utils.ProjectsMap;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 
 import javax.swing.*;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 /**
  * @author yahavi
@@ -69,7 +70,11 @@ public class IssuesTree extends BaseTree {
     private void calculateIssuesCount() {
         SwingUtilities.invokeLater(() -> {
             DependenciesTree root = (DependenciesTree) getModel().getRoot();
-            int sum = root.getChildren().stream().mapToInt(DependenciesTree::getIssueCount).sum();
+            int sum = root.getChildren().stream()
+                    .map(DependenciesTree::getIssues)
+                    .distinct()
+                    .flatMapToInt(issues -> IntStream.of(issues.size()))
+                    .sum();
             issuesCount.setText("Issues (" + sum + ") ");
         });
     }

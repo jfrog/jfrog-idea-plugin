@@ -48,7 +48,7 @@ public class GradleDependenciesDataService extends AbstractProjectDataService<Li
             return;
         }
 
-        if (GlobalSettings.getInstance().isCredentialsSet()) {
+        if (GlobalSettings.getInstance().areCredentialsSet()) {
             ScanManagersFactory.getInstance().tryAsyncScanAndUpdateProject(project, toImport, modelsProvider);
         }
     }

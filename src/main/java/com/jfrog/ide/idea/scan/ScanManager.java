@@ -7,6 +7,7 @@ import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
 import com.intellij.openapi.externalSystem.model.project.ProjectData;
 import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefreshCallback;
 import com.intellij.openapi.externalSystem.service.project.IdeModifiableModelsProvider;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
@@ -14,13 +15,13 @@ import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanManagerBase;
+import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.Events;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
 import com.jfrog.ide.idea.ui.issues.IssuesTree;
 import com.jfrog.ide.idea.ui.licenses.LicensesTree;
-import com.jfrog.ide.idea.utils.ProjectsMap;
 import com.jfrog.ide.idea.utils.Utils;
 import com.jfrog.xray.client.services.summary.Components;
 import org.apache.commons.lang.StringUtils;
@@ -35,7 +36,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -73,7 +73,7 @@ public abstract class ScanManager extends ScanManagerBase {
      */
     private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies, @Nullable IdeModifiableModelsProvider modelsProvider) {
         // Don't scan if Xray is not configured
-        if (!GlobalSettings.getInstance().isCredentialsSet()) {
+        if (!GlobalSettings.getInstance().areCredentialsSet()) {
             getLog().error("Xray server is not configured.");
             return;
         }
@@ -122,9 +122,7 @@ public abstract class ScanManager extends ScanManagerBase {
      * @return all project modules locations as Paths
      */
     public Set<Path> getProjectPaths() {
-        Set<Path> paths = new HashSet<>();
-        paths.add(Utils.getProjectBasePath(project));
-        return paths;
+        return Sets.newHashSet(Utils.getProjectBasePath(project));
     }
 
     /**
@@ -143,6 +141,8 @@ public abstract class ScanManager extends ScanManagerBase {
                     scanAndCacheArtifacts(indicator, quickScan);
                     addXrayInfoToTree(getScanResults());
                     setScanResults();
+                } catch (ProcessCanceledException e) {
+                    getLog().info("Xray scan was canceled");
                 } catch (Exception e) {
                     getLog().error("", e);
                 }

@@ -23,7 +23,7 @@ class SelectionCheckbox<FilterType> extends MenuCheckbox {
         });
     }
 
-    public void removeItemListeners() {
+    void removeItemListeners() {
         for (ItemListener itemListener : getItemListeners()) {
             removeItemListener(itemListener);
         }

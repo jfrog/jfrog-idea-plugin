@@ -22,35 +22,24 @@ import java.util.Set;
  */
 public class ComponentDetail extends JPanel {
 
-    public ComponentDetail(DependenciesTree node) {
+    private int lastTextPosition = 0;
 
+    public ComponentDetail(DependenciesTree node) {
         setLayout(new GridBagLayout());
         setBackground(UIUtil.getTableBackground());
         GeneralInfo generalInfo = node.getGeneralInfo();
         String pkgType = StringUtils.capitalize(generalInfo.getPkgType());
-        if (StringUtils.isBlank(pkgType)) {
-            // No package type
-            addText(0, "Group:", generalInfo.getGroupId());
-            addText(1, "Artifact:", generalInfo.getArtifactId());
-            addText(2, "Version:", generalInfo.getVersion());
-        } else if (pkgType.equals("Npm")) {
+        if (StringUtils.equals(pkgType, "Npm")) {
             // Npm
-            addText(0, "Package:", generalInfo.getGroupId());
-            addText(1, "Version:", generalInfo.getVersion());
-            addText(2, "Type:", pkgType);
-            if (StringUtils.isNotBlank(generalInfo.getPath())) {
-                addText(3, "Path:", generalInfo.getPath());
-            }
+            addText("Package:", generalInfo.getGroupId());
         } else {
             // Maven/Gradle
-            addText(0, "Group:", generalInfo.getGroupId());
-            addText(1, "Artifact:", generalInfo.getArtifactId());
-            addText(2, "Version:", generalInfo.getVersion());
-            addText(3, "Type:", pkgType);
-            if (StringUtils.isNotBlank(generalInfo.getPath())) {
-                addText(4, "Path:", generalInfo.getPath());
-            }
+            addText("Group:", generalInfo.getGroupId());
+            addText("Artifact:", generalInfo.getArtifactId());
         }
+        addText("Version:", generalInfo.getVersion());
+        addText("Type:", pkgType);
+        addText("Path:", generalInfo.getPath());
         addLicenses(node.getLicenses());
     }
 
@@ -73,7 +62,7 @@ public class ComponentDetail extends JPanel {
         JLabel headerLabel = createHeaderLabel("Licenses:");
         GridBagConstraints gridBagConstraints = createGridBagConstraints();
 
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = lastTextPosition++;
         add(headerLabel, gridBagConstraints);
 
         gridBagConstraints.gridx = 1;
@@ -81,11 +70,14 @@ public class ComponentDetail extends JPanel {
         add(licensesPanel, gridBagConstraints);
     }
 
-    protected void addText(int place, String header, String text) {
+    protected void addText(String header, String text) {
+        if (StringUtils.isBlank(text)) {
+            return;
+        }
         JLabel headerLabel = createHeaderLabel(header);
         GridBagConstraints gridBagConstraints = createGridBagConstraints();
 
-        gridBagConstraints.gridy = place;
+        gridBagConstraints.gridy = lastTextPosition++;
         add(headerLabel, gridBagConstraints);
 
         gridBagConstraints.gridx = 1;

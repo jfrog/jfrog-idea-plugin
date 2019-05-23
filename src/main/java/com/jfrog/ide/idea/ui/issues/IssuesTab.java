@@ -101,7 +101,7 @@ public class IssuesTab {
     }
 
     private JComponent createComponentsDetailsView(boolean supported) {
-        if (!GlobalSettings.getInstance().isCredentialsSet()) {
+        if (!GlobalSettings.getInstance().areCredentialsSet()) {
             return ComponentUtils.createNoCredentialsView();
         }
         if (!supported) {
