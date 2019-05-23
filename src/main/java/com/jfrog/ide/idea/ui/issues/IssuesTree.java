@@ -69,10 +69,7 @@ public class IssuesTree extends BaseTree {
     private void calculateIssuesCount() {
         SwingUtilities.invokeLater(() -> {
             DependenciesTree root = (DependenciesTree) getModel().getRoot();
-            int sum = 0;
-            for (DependenciesTree child : root.getChildren()) {
-                sum += child.getIssueCount();
-            }
+            int sum = root.getChildren().stream().mapToInt(DependenciesTree::getIssueCount).sum();
             issuesCount.setText("Issues (" + sum + ") ");
         });
     }

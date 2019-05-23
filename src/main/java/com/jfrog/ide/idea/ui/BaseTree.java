@@ -41,7 +41,7 @@ public abstract class BaseTree extends Tree {
         projects.put(projectName, dependenciesTree);
     }
 
-    void applyFiltersForAllProjects() {
+    public void applyFiltersForAllProjects() {
         setModel(null);
         for (Map.Entry<ProjectsMap.ProjectKey, DependenciesTree> entry : projects.entrySet()) {
             applyFilters(entry.getKey());

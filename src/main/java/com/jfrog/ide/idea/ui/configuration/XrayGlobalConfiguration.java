@@ -130,6 +130,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
         }
     }
 
+    @SuppressWarnings("BoundFieldAssignment")
     private void createUIComponents() {
         xrayConfig = GlobalSettings.getInstance().getXrayConfig();
         url = new JBTextField();

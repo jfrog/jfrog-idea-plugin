@@ -1,5 +1,6 @@
 package com.jfrog.ide.idea.scan;
 
+import com.google.common.collect.Sets;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
@@ -162,14 +163,14 @@ public abstract class ScanManager extends ScanManagerBase {
             messageBus.syncPublisher(Events.ON_SCAN_COMPONENTS_CHANGE).update();
             messageBus.syncPublisher(Events.ON_SCAN_ISSUES_CHANGE).update();
         });
-        busConnection.subscribe(Events.ON_CONFIGURATION_DETAILS_CHANGE, () -> asyncScanAndUpdateResults());
+        busConnection.subscribe(Events.ON_CONFIGURATION_DETAILS_CHANGE, this::asyncScanAndUpdateResults);
     }
 
     /**
      * @return all licenses available from the current scan results.
      */
     public Set<License> getAllLicenses() {
-        Set<License> allLicenses = new HashSet<>();
+        Set<License> allLicenses = Sets.newHashSet();
         if (getScanResults() == null) {
             return allLicenses;
         }

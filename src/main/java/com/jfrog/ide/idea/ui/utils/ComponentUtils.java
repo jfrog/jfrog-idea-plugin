@@ -89,20 +89,15 @@ public class ComponentUtils {
         HyperlinkLabel link = new HyperlinkLabel();
         link.setHyperlinkText("To start using the JFrog Plugin, please ", "configure", " your JFrog Xray details.");
         link.addHyperlinkListener(e -> ShowSettingsUtil.getInstance().showSettingsDialog(project, XrayGlobalConfiguration.class));
-
-        JBPanel panel = new JBPanel(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.BOTH;
-        c.anchor = GridBagConstraints.CENTER;
-        panel.add(link, c);
-        panel.setBackground(UIUtil.getTableBackground());
-        return panel;
+        return createUnsupportedPanel(link);
     }
 
     public static JPanel createUnsupportedView() {
-        JLabel label = new JBLabel();
-        label.setText("Unsupported project type, currently only Maven, Gradle and npm projects are supported.");
+        JLabel label = new JBLabel("Unsupported project type, currently only Maven, Gradle and npm projects are supported.");
+        return createUnsupportedPanel(label);
+    }
 
+    private static JPanel createUnsupportedPanel(Component label) {
         JBPanel panel = new JBPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.BOTH;

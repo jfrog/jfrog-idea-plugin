@@ -13,12 +13,14 @@ import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.ui.issues.IssuesTree;
 import com.jfrog.ide.idea.ui.licenses.LicensesTree;
 import com.jfrog.ide.idea.utils.Utils;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,7 +31,7 @@ import static com.jfrog.ide.common.utils.Utils.findPackageJsonDirs;
  */
 public class ScanManagersFactory {
 
-    private Map<String, ScanManager> scanManagers = Maps.newHashMap();
+    private Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
 
     public static ScanManagersFactory getInstance() {
         return ServiceManager.getService(ScanManagersFactory.class);
@@ -80,14 +82,14 @@ public class ScanManagersFactory {
     }
 
     public void refreshScanManagers() throws IOException {
-        Map<String, ScanManager> scanManagers = Maps.newHashMap();
+        Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
         Project[] projects = ProjectManager.getInstance().getOpenProjects();
         if (ArrayUtils.isEmpty(projects)) {
             return;
         }
         final Set<Path> paths = Sets.newHashSet();
         for (Project project : projects) {
-            String projectHash = project.getLocationHash();
+            int projectHash = Utils.getProjectIdentifier(project);
             ScanManager scanManager = this.scanManagers.get(projectHash);
             if (scanManager != null) {
                 scanManagers.put(projectHash, scanManager);
@@ -104,8 +106,14 @@ public class ScanManagersFactory {
         scanManagers.values().stream().map(ScanManager::getProjectPaths).flatMap(Collection::stream).forEach(paths::add);
         Set<String> packageJsonDirs = findPackageJsonDirs(paths);
         for (String dir : packageJsonDirs) {
-            Project npmProject = ProjectManager.getInstance().createProject(dir, dir);
-            scanManagers.put(npmProject.getLocationHash(), new NpmScanManager(npmProject));
+            int projectHash = Utils.getProjectIdentifier(dir, dir);
+            ScanManager scanManager = this.scanManagers.get(projectHash);
+            if (scanManager != null) {
+                scanManagers.put(projectHash, scanManager);
+            } else {
+                Project npmProject = ProjectManager.getInstance().createProject(dir, dir);
+                scanManagers.put(projectHash, new NpmScanManager(npmProject));
+            }
         }
         this.scanManagers = scanManagers;
     }

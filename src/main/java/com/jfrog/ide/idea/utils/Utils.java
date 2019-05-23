@@ -1,5 +1,6 @@
 package com.jfrog.ide.idea.utils;
 
+import com.google.common.base.Objects;
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.idea.ui.listeners.IssuesTreeExpansionListener;
 import org.apache.commons.lang.StringUtils;
@@ -37,4 +38,13 @@ public class Utils {
         return StringUtils.equals(lhsGeneralInfo.getName(), rhsGeneralInfo.getName()) &&
                 StringUtils.equals(lhsGeneralInfo.getPath(), rhsGeneralInfo.getPath());
     }
+
+    public static int getProjectIdentifier(String name, String path) {
+        return Objects.hashCode(name, path);
+    }
+
+    public static int getProjectIdentifier(Project project) {
+        return getProjectIdentifier(project.getName(), project.getBasePath());
+    }
+
 }

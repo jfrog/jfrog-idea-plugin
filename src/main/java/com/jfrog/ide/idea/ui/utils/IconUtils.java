@@ -15,13 +15,12 @@ public class IconUtils {
     private static final Map<String, Icon> icons = Maps.newHashMap();
 
     public static Icon load(String icon) {
-        if (icons.containsKey(icon)) {
-            return icons.get(icon);
-        }
-        try {
-            icons.put(icon, IconLoader.findIcon("/icons/" + icon.toLowerCase() + ".png"));
-        } catch (Exception e) {
-            icons.put(icon, defaultIcon);
+        if (!icons.containsKey(icon)) {
+            try {
+                icons.put(icon, IconLoader.findIcon("/icons/" + icon.toLowerCase() + ".png"));
+            } catch (Exception e) {
+                return defaultIcon;
+            }
         }
         return icons.get(icon);
     }
