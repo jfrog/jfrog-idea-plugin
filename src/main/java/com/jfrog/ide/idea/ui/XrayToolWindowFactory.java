@@ -24,7 +24,7 @@ public class XrayToolWindowFactory implements ToolWindowFactory {
         boolean isSupported = CollectionUtils.isNotEmpty(ScanManagersFactory.getScanManagers());
         DumbService.getInstance(project).runWhenSmart(() -> {
             ServiceManager.getService(project, XrayToolWindow.class).initToolWindow(toolWindow, isSupported);
-            scanManagersFactory.startScan(true, null);
+            scanManagersFactory.startScan(true, null, null);
         });
     }
 }

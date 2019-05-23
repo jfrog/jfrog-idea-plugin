@@ -2,6 +2,9 @@ package com.jfrog.ide.idea.utils;
 
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.idea.ui.listeners.IssuesTreeExpansionListener;
+import org.apache.commons.lang.StringUtils;
+import org.jfrog.build.extractor.scan.DependenciesTree;
+import org.jfrog.build.extractor.scan.GeneralInfo;
 
 import javax.swing.event.TreeExpansionListener;
 import java.nio.file.Path;
@@ -26,5 +29,12 @@ public class Utils {
 
     public static Path getProjectBasePath(Project project) {
         return project.getBasePath() != null ? Paths.get(project.getBasePath()) : Paths.get(".");
+    }
+
+    public static boolean areRootNodesEqual(DependenciesTree lhs, DependenciesTree rhs) {
+        GeneralInfo lhsGeneralInfo = lhs.getGeneralInfo();
+        GeneralInfo rhsGeneralInfo = rhs.getGeneralInfo();
+        return StringUtils.equals(lhsGeneralInfo.getName(), rhsGeneralInfo.getName()) &&
+                StringUtils.equals(lhsGeneralInfo.getPath(), rhsGeneralInfo.getPath());
     }
 }

@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
+import com.intellij.openapi.externalSystem.service.project.IdeModifiableModelsProvider;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
@@ -42,7 +43,7 @@ public class ScanManagersFactory {
         return Sets.newHashSet(scanManagersFactory.scanManagers.values());
     }
 
-    public void startScan(boolean quickScan, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies) {
+    public void startScan(boolean quickScan, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies, @Nullable IdeModifiableModelsProvider modelsProvider) {
         if (isScanInProgress()) {
             Logger.getInstance().info("Previous scan still running...");
             return;
@@ -63,8 +64,19 @@ public class ScanManagersFactory {
         }
         resetViews(issuesTree, licensesTree);
         for (ScanManager scanManager : scanManagers.values()) {
-            scanManager.asyncScanAndUpdateResults(quickScan, libraryDependencies);
+            scanManager.asyncScanAndUpdateResults(quickScan, libraryDependencies, modelsProvider);
         }
+    }
+
+    public void tryAsyncScanAndUpdateProject(Project project, Collection<DataNode<LibraryDependencyData>> libraryDependencies, IdeModifiableModelsProvider modelsProvider) {
+        for (ScanManager scanManager : scanManagers.values()) {
+            if (scanManager.getProjectName().equals(project.getName())) {
+                scanManager.asyncScanAndUpdateResults(true, libraryDependencies, modelsProvider);
+                return;
+            }
+        }
+        Logger.getInstance().warn("Gradle project " + project.getName() + " not found in scan mangers list. Starting a full scan.");
+        startScan(true, libraryDependencies, modelsProvider);
     }
 
     public void refreshScanManagers() throws IOException {

@@ -5,6 +5,7 @@ import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
 import com.intellij.openapi.externalSystem.model.project.ProjectData;
 import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefreshCallback;
+import com.intellij.openapi.externalSystem.service.project.IdeModifiableModelsProvider;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
@@ -49,7 +50,7 @@ public abstract class ScanManager extends ScanManagerBase {
     // Lock to prevent multiple simultaneous scans
     private AtomicBoolean scanInProgress = new AtomicBoolean(false);
 
-    public ScanManager(@NotNull Project project, ComponentPrefix prefix) throws IOException {
+    ScanManager(@NotNull Project project, ComponentPrefix prefix) throws IOException {
         super(HOME_PATH.resolve("cache"), project.getName(), Logger.getInstance(), GlobalSettings.getInstance().getXrayConfig(), prefix);
         this.project = project;
         Files.createDirectories(HOME_PATH);
@@ -59,7 +60,7 @@ public abstract class ScanManager extends ScanManagerBase {
     /**
      * Refresh project dependencies.
      */
-    protected abstract void refreshDependencies(ExternalProjectRefreshCallback cbk, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies);
+    protected abstract void refreshDependencies(ExternalProjectRefreshCallback cbk, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies, @Nullable IdeModifiableModelsProvider modelsProvider);
 
     /**
      * Collect and return {@link Components} to be scanned by JFrog Xray.
@@ -70,7 +71,7 @@ public abstract class ScanManager extends ScanManagerBase {
     /**
      * Scan and update dependency components.
      */
-    private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies) {
+    private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies, @Nullable IdeModifiableModelsProvider modelsProvider) {
         // Don't scan if Xray is not configured
         if (!GlobalSettings.getInstance().isCredentialsSet()) {
             getLog().error("Xray server is not configured.");
@@ -85,7 +86,7 @@ public abstract class ScanManager extends ScanManagerBase {
         }
         try {
             // Refresh dependencies -> Collect -> Scan and store to cache -> Update view
-            refreshDependencies(getRefreshDependenciesCbk(quickScan, indicator), libraryDependencies);
+            refreshDependencies(getRefreshDependenciesCbk(quickScan, indicator), libraryDependencies, modelsProvider);
         } finally {
             scanInProgress.set(false);
         }
@@ -94,14 +95,14 @@ public abstract class ScanManager extends ScanManagerBase {
     /**
      * Launch async dependency scan.
      */
-    public void asyncScanAndUpdateResults(boolean quickScan, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies) {
+    void asyncScanAndUpdateResults(boolean quickScan, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies, @Nullable IdeModifiableModelsProvider modelsProvider) {
         Task.Backgroundable scanAndUpdateTask = new Task.Backgroundable(project, "Xray: Scanning for Vulnerabilities...") {
             @Override
             public void run(@NotNull com.intellij.openapi.progress.ProgressIndicator indicator) {
                 if (project.isDisposed()) {
                     return;
                 }
-                scanAndUpdate(quickScan, new ProgressIndicatorImpl(indicator), libraryDependencies);
+                scanAndUpdate(quickScan, new ProgressIndicatorImpl(indicator), libraryDependencies, modelsProvider);
                 indicator.finishNonCancelableSection();
             }
         };
@@ -129,8 +130,8 @@ public abstract class ScanManager extends ScanManagerBase {
     /**
      * Launch async dependency scan.
      */
-    public void asyncScanAndUpdateResults(boolean quickScan) {
-        asyncScanAndUpdateResults(quickScan, null);
+    void asyncScanAndUpdateResults() {
+        asyncScanAndUpdateResults(true, null, null);
     }
 
     private ExternalProjectRefreshCallback getRefreshDependenciesCbk(boolean quickScan, ProgressIndicator indicator) {
@@ -161,7 +162,7 @@ public abstract class ScanManager extends ScanManagerBase {
             messageBus.syncPublisher(Events.ON_SCAN_COMPONENTS_CHANGE).update();
             messageBus.syncPublisher(Events.ON_SCAN_ISSUES_CHANGE).update();
         });
-        busConnection.subscribe(Events.ON_CONFIGURATION_DETAILS_CHANGE, () -> asyncScanAndUpdateResults(true));
+        busConnection.subscribe(Events.ON_CONFIGURATION_DETAILS_CHANGE, () -> asyncScanAndUpdateResults());
     }
 
     /**

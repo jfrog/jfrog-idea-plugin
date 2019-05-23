@@ -24,7 +24,7 @@ public class RefreshAction extends AnAction {
         // Before we refresh the scanners, let's check if the project is supported.
         Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers();
         boolean scannersExistBeforeRefresh = CollectionUtils.isNotEmpty(scanManagers);
-        ScanManagersFactory.getInstance().startScan(false, null);
+        ScanManagersFactory.getInstance().startScan(false, null, null);
         scanManagers = ScanManagersFactory.getScanManagers();
         if (CollectionUtils.isEmpty(scanManagers)) {
             return;
