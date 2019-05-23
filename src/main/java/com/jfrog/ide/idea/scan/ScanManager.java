@@ -10,7 +10,6 @@ import com.intellij.openapi.externalSystem.service.project.IdeModifiableModelsPr
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.scan.ComponentPrefix;
@@ -158,11 +157,6 @@ public abstract class ScanManager extends ScanManagerBase {
 
     private void registerOnChangeHandlers() {
         MessageBusConnection busConnection = ApplicationManager.getApplication().getMessageBus().connect();
-        busConnection.subscribe(Events.ON_SCAN_FILTER_CHANGE, () -> {
-            MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
-            messageBus.syncPublisher(Events.ON_SCAN_COMPONENTS_CHANGE).update();
-            messageBus.syncPublisher(Events.ON_SCAN_ISSUES_CHANGE).update();
-        });
         busConnection.subscribe(Events.ON_CONFIGURATION_DETAILS_CHANGE, this::asyncScanAndUpdateResults);
     }
 

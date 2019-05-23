@@ -1,11 +1,11 @@
 package com.jfrog.ide.idea.ui;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.content.ContentManager;
+import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.idea.Events;
 import com.jfrog.ide.idea.ui.issues.IssuesTab;
@@ -27,9 +27,9 @@ public class XrayToolWindow {
     private LicensesTab licensesTab;
     private IssuesTab issuesTab;
 
-    XrayToolWindow(@NotNull Project project) {
-        this.licensesTab = new LicensesTab(project);
-        this.issuesTab = new IssuesTab(project);
+    XrayToolWindow() {
+        this.licensesTab = new LicensesTab();
+        this.issuesTab = new IssuesTab();
     }
 
     void initToolWindow(@NotNull ToolWindow toolWindow, boolean supported) {
@@ -68,6 +68,12 @@ public class XrayToolWindow {
 
         busConnection.subscribe(Events.ON_SCAN_COMPONENTS_CHANGE, ()
                 -> ApplicationManager.getApplication().invokeLater(this::applyFilters));
+
+        busConnection.subscribe(Events.ON_SCAN_FILTER_CHANGE, () -> {
+            MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
+            messageBus.syncPublisher(Events.ON_SCAN_COMPONENTS_CHANGE).update();
+            messageBus.syncPublisher(Events.ON_SCAN_ISSUES_CHANGE).update();
+        });
 
         // Issues tab listeners
         issuesTab.registerListeners(busConnection);

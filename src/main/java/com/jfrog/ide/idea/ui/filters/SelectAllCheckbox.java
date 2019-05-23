@@ -1,11 +1,10 @@
 package com.jfrog.ide.idea.ui.filters;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBCheckBoxMenuItem;
 import com.intellij.util.messages.MessageBus;
-import org.jetbrains.annotations.NotNull;
 import com.jfrog.ide.idea.Events;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.event.ItemListener;
 import java.util.List;
@@ -27,7 +26,9 @@ class SelectAllCheckbox<FilterType> extends MenuCheckbox {
 
             for (JBCheckBoxMenuItem i : checkBoxMenuItems) {
                 if (i.isSelected() != isSelected()) {
+                    i.setEnabled(false);
                     i.doClick(0);
+                    i.setEnabled(true);
                 }
             }
             MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();

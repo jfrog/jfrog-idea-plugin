@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.ui.OnePixelSplitter;
 import com.intellij.ui.ScrollPaneFactory;
@@ -37,7 +36,6 @@ import static com.jfrog.ide.idea.ui.XrayToolWindow.*;
  * @author yahavi
  */
 public class IssuesTab {
-    private final Project project;
 
     private Map<TreePath, JPanel> issuesCountPanels = Maps.newHashMap();
     private IssuesTree issuesTree = IssuesTree.getInstance();
@@ -47,13 +45,9 @@ public class IssuesTab {
     private JPanel issuesDetailsPanel;
     private JComponent issuesPanel;
 
-    public IssuesTab(Project project) {
-        this.project = project;
-    }
-
     public JPanel createIssuesViewTab(boolean supported) {
         ActionToolbar toolbar = ComponentUtils.createActionToolbar(issuesTree);
-        IssueFilterMenu issueFilterMenu = new IssueFilterMenu(project);
+        IssueFilterMenu issueFilterMenu = new IssueFilterMenu();
         JPanel filterButton = new FilterButton(issueFilterMenu, "Severity", "Select severities to show");
         SimpleToolWindowPanel filterPanel = new SimpleToolWindowPanel(false);
         filterPanel.setToolbar(toolbar.getComponent());
@@ -108,7 +102,7 @@ public class IssuesTab {
 
     private JComponent createComponentsDetailsView(boolean supported) {
         if (!GlobalSettings.getInstance().isCredentialsSet()) {
-            return ComponentUtils.createNoCredentialsView(project);
+            return ComponentUtils.createNoCredentialsView();
         }
         if (!supported) {
             return ComponentUtils.createUnsupportedView();

@@ -85,10 +85,10 @@ public class ComponentUtils {
         return ActionManager.getInstance().createActionToolbar(ActionPlaces.CHANGES_VIEW_TOOLBAR, defaultActionGroup, true);
     }
 
-    public static JComponent createNoCredentialsView(Project project) {
+    public static JComponent createNoCredentialsView() {
         HyperlinkLabel link = new HyperlinkLabel();
         link.setHyperlinkText("To start using the JFrog Plugin, please ", "configure", " your JFrog Xray details.");
-        link.addHyperlinkListener(e -> ShowSettingsUtil.getInstance().showSettingsDialog(project, XrayGlobalConfiguration.class));
+        link.addHyperlinkListener(e -> ShowSettingsUtil.getInstance().showSettingsDialog(null, XrayGlobalConfiguration.class));
         return createUnsupportedPanel(link);
     }
 

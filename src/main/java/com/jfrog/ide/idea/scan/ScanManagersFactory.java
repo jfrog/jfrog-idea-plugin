@@ -13,14 +13,12 @@ import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.ui.issues.IssuesTree;
 import com.jfrog.ide.idea.ui.licenses.LicensesTree;
 import com.jfrog.ide.idea.utils.Utils;
-import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 

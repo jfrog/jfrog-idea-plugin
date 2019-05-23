@@ -1,11 +1,9 @@
 package com.jfrog.ide.idea.ui.filters;
 
-import com.intellij.openapi.project.Project;
 import com.jfrog.ide.common.filter.FilterManager;
-import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import com.jfrog.ide.idea.scan.ScanManager;
+import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import org.apache.commons.collections4.CollectionUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.License;
 
 import java.util.Map;
@@ -15,9 +13,6 @@ import java.util.Set;
  * Created by Yahav Itzhak on 23 Nov 2017.
  */
 public class LicenseFilterMenu extends FilterMenu<License> {
-    public LicenseFilterMenu(@NotNull Project project) {
-        super(project);
-    }
 
     public void setLicenses() {
         Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers();

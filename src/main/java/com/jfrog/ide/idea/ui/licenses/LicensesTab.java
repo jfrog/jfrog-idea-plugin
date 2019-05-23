@@ -1,7 +1,6 @@
 package com.jfrog.ide.idea.ui.licenses;
 
 import com.intellij.openapi.actionSystem.ActionToolbar;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.ui.OnePixelSplitter;
 import com.intellij.ui.ScrollPaneFactory;
@@ -25,20 +24,14 @@ import java.awt.*;
  */
 public class LicensesTab {
 
-    private final Project project;
-
     private LicensesTree licensesTree = LicensesTree.getInstance();
     private OnePixelSplitter licensesCentralVerticalSplit;
     private JScrollPane licensesDetailsScroll;
     private JPanel licensesDetailsPanel;
 
-    public LicensesTab(Project project) {
-        this.project = project;
-    }
-
     public JPanel createLicenseInfoTab(boolean supported) {
         ActionToolbar toolbar = ComponentUtils.createActionToolbar(licensesTree);
-        LicenseFilterMenu licenseFilterMenu = new LicenseFilterMenu(project);
+        LicenseFilterMenu licenseFilterMenu = new LicenseFilterMenu();
         FilterButton licensesFilterButton = new FilterButton(licenseFilterMenu, "License", "Select licenses to show");
         licensesFilterButton.setAlignmentX(Component.LEFT_ALIGNMENT);
         SimpleToolWindowPanel filterPanel = new SimpleToolWindowPanel(false);
@@ -57,7 +50,7 @@ public class LicensesTab {
 
     private JComponent createLicenseDetailsView(boolean supported) {
         if (!GlobalSettings.getInstance().isCredentialsSet()) {
-            return ComponentUtils.createNoCredentialsView(project);
+            return ComponentUtils.createNoCredentialsView();
         }
         if (!supported) {
             return ComponentUtils.createUnsupportedView();
