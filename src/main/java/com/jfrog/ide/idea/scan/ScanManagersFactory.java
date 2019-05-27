@@ -2,6 +2,8 @@ package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
@@ -45,9 +47,10 @@ public class ScanManagersFactory {
 
     /**
      * Start an Xray scan for all projects.
-     * @param quickScan - True to allow usage of the scan cache.
+     *
+     * @param quickScan           - True to allow usage of the scan cache.
      * @param libraryDependencies - Dependencies to use in Gradle scans.
-     * @param modelsProvider - Modules to use in Gradle scans.
+     * @param modelsProvider      - Modules to use in Gradle scans.
      */
     public void startScan(boolean quickScan, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies, @Nullable IdeModifiableModelsProvider modelsProvider) {
         if (isScanInProgress()) {
@@ -69,7 +72,7 @@ public class ScanManagersFactory {
             for (ScanManager scanManager : scanManagers.values()) {
                 scanManager.asyncScanAndUpdateResults(quickScan, libraryDependencies, modelsProvider);
             }
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException e) {
             Logger.getInstance().error("", e);
         }
     }
@@ -119,8 +122,14 @@ public class ScanManagersFactory {
             if (scanManager != null) {
                 scanManagers.put(projectHash, scanManager);
             } else {
-                Project npmProject = ProjectManager.getInstance().createProject(dir, dir);
-                scanManagers.put(projectHash, new NpmScanManager(npmProject));
+                ApplicationManager.getApplication().invokeAndWait((() -> {
+                    try {
+                        Project npmProject = ProjectManager.getInstance().createProject(dir, dir);
+                        scanManagers.put(projectHash, new NpmScanManager(npmProject));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }), ModalityState.NON_MODAL);
             }
         }
     }

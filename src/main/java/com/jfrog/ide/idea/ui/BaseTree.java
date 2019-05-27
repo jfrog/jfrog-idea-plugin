@@ -1,11 +1,11 @@
 package com.jfrog.ide.idea.ui;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.treeStructure.Tree;
 import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 
-import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import java.util.Map;
@@ -49,7 +49,7 @@ public abstract class BaseTree extends Tree {
     }
 
     protected void appendProjectToTree(DependenciesTree filteredRoot) {
-        SwingUtilities.invokeLater(() -> {
+        ApplicationManager.getApplication().invokeLater(() -> {
             // No projects in tree - Add filtered root as a single project and show only its children.
             if (getModel() == null) {
                 populateTree(new DefaultTreeModel(filteredRoot));

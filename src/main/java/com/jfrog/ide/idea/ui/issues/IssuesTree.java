@@ -1,5 +1,6 @@
 package com.jfrog.ide.idea.ui.issues;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.jfrog.ide.common.filter.FilterManager;
 import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.ui.BaseTree;
@@ -68,7 +69,7 @@ public class IssuesTree extends BaseTree {
     }
 
     private void calculateIssuesCount() {
-        SwingUtilities.invokeLater(() -> {
+        ApplicationManager.getApplication().invokeLater(() -> {
             DependenciesTree root = (DependenciesTree) getModel().getRoot();
             int sum = root.getChildren().stream()
                     .map(DependenciesTree::getIssues)

@@ -1,6 +1,7 @@
 package com.jfrog.ide.idea.ui.licenses;
 
 import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.ui.OnePixelSplitter;
 import com.intellij.ui.ScrollPaneFactory;
@@ -90,7 +91,7 @@ public class LicensesTab {
             ComponentLicenseDetails.createLicenseDetailsView(licensesDetailsPanel, (DependenciesTree) e.getNewLeadSelectionPath().getLastPathComponent());
 
             // Scroll back to the beginning of the scrollable panel
-            SwingUtilities.invokeLater(() -> licensesDetailsScroll.getViewport().setViewPosition(new Point()));
+            ApplicationManager.getApplication().invokeLater(() -> licensesDetailsScroll.getViewport().setViewPosition(new Point()));
         });
     }
 }

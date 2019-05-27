@@ -111,7 +111,7 @@ public abstract class ScanManager extends ScanManagerBase {
             ProgressManager.getInstance().run(scanAndUpdateTask);
         } else {
             // Run the scan task when the thread is in the foreground.
-            SwingUtilities.invokeLater(() -> ProgressManager.getInstance().run(scanAndUpdateTask));
+            ApplicationManager.getApplication().invokeLater(() -> ProgressManager.getInstance().run(scanAndUpdateTask));
         }
     }
 
