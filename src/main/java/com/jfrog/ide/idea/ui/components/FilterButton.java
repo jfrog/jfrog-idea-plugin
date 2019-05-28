@@ -36,7 +36,6 @@ public class FilterButton extends JPanel {
         JLabel arrow = new JBLabel(AllIcons.Ide.Statusbar_arrows);
         setToolTipText(toolTip);
         setDefaultForeground();
-        setFocusable(true);
         setBorder(createUnfocusedBorder());
 
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));

@@ -1,8 +1,6 @@
 package com.jfrog.ide.idea.ui.licenses;
 
-import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.ui.OnePixelSplitter;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.TreeSpeedSearch;
@@ -31,21 +29,20 @@ public class LicensesTab {
     private JPanel licensesDetailsPanel;
 
     public JPanel createLicenseInfoTab(boolean supported) {
-        ActionToolbar toolbar = ComponentUtils.createActionToolbar(licensesTree);
         LicenseFilterMenu licenseFilterMenu = new LicenseFilterMenu();
-        FilterButton licensesFilterButton = new FilterButton(licenseFilterMenu, "License", "Select licenses to show");
-        licensesFilterButton.setAlignmentX(Component.LEFT_ALIGNMENT);
-        SimpleToolWindowPanel filterPanel = new SimpleToolWindowPanel(false);
-        filterPanel.setToolbar(toolbar.getComponent());
-        filterPanel.setContent(licensesFilterButton);
+        JPanel licensesFilterButton = new FilterButton(licenseFilterMenu, "License", "Select licenses to show");
+        JPanel toolbar = ComponentUtils.createActionToolbar("Licenses toolbar", licensesFilterButton, licensesTree);
+
         licensesTree.setLicenseFilterMenu(licenseFilterMenu);
 
-        JPanel licenseTab = new JBPanel(new BorderLayout());
         licensesCentralVerticalSplit = new OnePixelSplitter(false, 0.3f);
         licensesCentralVerticalSplit.setFirstComponent(createLicensesComponentsTreeView());
         licensesCentralVerticalSplit.setSecondComponent(createLicenseDetailsView(supported));
-        licenseTab.add(filterPanel, BorderLayout.NORTH);
-        licenseTab.add(licensesCentralVerticalSplit, BorderLayout.CENTER);
+
+        OnePixelSplitter licenseTab = new OnePixelSplitter(true, 0f);
+        licenseTab.setResizeEnabled(false);
+        licenseTab.setFirstComponent(toolbar);
+        licenseTab.setSecondComponent(licensesCentralVerticalSplit);
         return licenseTab;
     }
 

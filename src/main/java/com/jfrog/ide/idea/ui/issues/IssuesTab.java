@@ -2,7 +2,6 @@ package com.jfrog.ide.idea.ui.issues;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.ui.OnePixelSplitter;
@@ -46,12 +45,9 @@ public class IssuesTab {
     private JComponent issuesPanel;
 
     public JPanel createIssuesViewTab(boolean supported) {
-        ActionToolbar toolbar = ComponentUtils.createActionToolbar(issuesTree);
         IssueFilterMenu issueFilterMenu = new IssueFilterMenu();
-        JPanel filterButton = new FilterButton(issueFilterMenu, "Severity", "Select severities to show");
-        SimpleToolWindowPanel filterPanel = new SimpleToolWindowPanel(false);
-        filterPanel.setToolbar(toolbar.getComponent());
-        filterPanel.setContent(filterButton);
+        JPanel issuesFilterButton = new FilterButton(issueFilterMenu, "Severity", "Select severities to show");
+        JPanel toolbar = ComponentUtils.createActionToolbar("Severities toolbar", issuesFilterButton, issuesTree);
 
         issuesPanel = createComponentsIssueDetailView();
         issuesRightHorizontalSplit = new OnePixelSplitter(true, 0.55f);
@@ -61,10 +57,10 @@ public class IssuesTab {
         OnePixelSplitter centralVerticalSplit = new OnePixelSplitter(false, 0.20f);
         centralVerticalSplit.setFirstComponent(createIssuesComponentsTreeView());
         centralVerticalSplit.setSecondComponent(issuesRightHorizontalSplit);
-        OnePixelSplitter issuesViewTab = new OnePixelSplitter(true, 0f);
-        issuesViewTab.setResizeEnabled(false);
-        issuesViewTab.setFirstComponent(filterPanel);
-        issuesViewTab.setSecondComponent(centralVerticalSplit);
+
+        SimpleToolWindowPanel issuesViewTab = new SimpleToolWindowPanel(true);
+        issuesViewTab.setToolbar(toolbar);
+        issuesViewTab.setContent(centralVerticalSplit);
         return issuesViewTab;
     }
 
@@ -159,7 +155,7 @@ public class IssuesTab {
             for (TreePath path : e.getPaths()) {
                 JPanel issueCountPanel = issuesCountPanels.get(path);
                 if (issueCountPanel != null) {
-                    issueCountPanel.setBackground(e.isAddedPath(path) ? UIUtil.getTreeSelectionBackground() : UIUtil.getTableBackground());
+                    issueCountPanel.setBackground(e.isAddedPath(path) ? UIUtil.getTreeSelectionBackground(true) : UIUtil.getTableBackground());
                 }
             }
             ComponentIssueDetails.createIssuesDetailsView(issuesDetailsPanel, (DependenciesTree) e.getNewLeadSelectionPath().getLastPathComponent());
