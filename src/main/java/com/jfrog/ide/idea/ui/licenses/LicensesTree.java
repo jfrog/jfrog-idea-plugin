@@ -4,7 +4,6 @@ import com.jfrog.ide.common.filter.FilterManager;
 import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.ui.BaseTree;
 import com.jfrog.ide.idea.ui.filters.LicenseFilterMenu;
-import com.jfrog.ide.idea.ui.renderers.LicensesTreeCellRenderer;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 
 import javax.swing.tree.TreeModel;

@@ -2,14 +2,13 @@ package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
 import com.intellij.openapi.externalSystem.service.project.IdeModifiableModelsProvider;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
+import com.jfrog.ide.idea.NpmProject;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.ui.issues.IssuesTree;
@@ -122,14 +121,7 @@ public class ScanManagersFactory {
             if (scanManager != null) {
                 scanManagers.put(projectHash, scanManager);
             } else {
-                ApplicationManager.getApplication().invokeAndWait((() -> {
-                    try {
-                        Project npmProject = ProjectManager.getInstance().createProject(dir, dir);
-                        scanManagers.put(projectHash, new NpmScanManager(npmProject));
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }), ModalityState.NON_MODAL);
+                scanManagers.put(projectHash, new NpmScanManager(new NpmProject(dir)));
             }
         }
     }

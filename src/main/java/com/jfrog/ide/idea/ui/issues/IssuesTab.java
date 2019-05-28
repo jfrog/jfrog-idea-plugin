@@ -127,6 +127,9 @@ public class IssuesTab {
     }
 
     private List<DependenciesTree> getSelectedNodes() {
+        if (issuesTree.getModel() == null) {
+            return Lists.newArrayList();
+        }
         // If no node selected - Return the root
         if (issuesTree.getSelectionPaths() == null) {
             return Lists.newArrayList((DependenciesTree) issuesTree.getModel().getRoot());

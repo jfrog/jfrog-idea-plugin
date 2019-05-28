@@ -96,7 +96,7 @@ public abstract class ScanManager extends ScanManagerBase {
      * Launch async dependency scan.
      */
     void asyncScanAndUpdateResults(boolean quickScan, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies, @Nullable IdeModifiableModelsProvider modelsProvider) {
-        Task.Backgroundable scanAndUpdateTask = new Task.Backgroundable(project, "Xray: Scanning for Vulnerabilities...") {
+        Task.Backgroundable scanAndUpdateTask = new Task.Backgroundable(null, "Xray: Scanning for Vulnerabilities...") {
             @Override
             public void run(@NotNull com.intellij.openapi.progress.ProgressIndicator indicator) {
                 if (project.isDisposed()) {

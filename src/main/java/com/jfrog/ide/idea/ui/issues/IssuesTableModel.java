@@ -1,4 +1,4 @@
-package com.jfrog.ide.idea.ui.models;
+package com.jfrog.ide.idea.ui.issues;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.collections4.ListUtils;
@@ -17,11 +17,11 @@ public class IssuesTableModel extends AbstractTableModel {
 
     private Set<Issue> issues;
 
-    public IssuesTableModel() {
+    IssuesTableModel() {
         this(Sets.newHashSet());
     }
 
-    public IssuesTableModel(@NotNull Set<Issue> issues) {
+    IssuesTableModel(@NotNull Set<Issue> issues) {
         this.issues = issues;
     }
 

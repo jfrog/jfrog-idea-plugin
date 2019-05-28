@@ -2,8 +2,6 @@ package com.jfrog.ide.idea.ui.issues;
 
 import com.google.common.collect.Lists;
 import com.intellij.ui.table.JBTable;
-import com.jfrog.ide.idea.ui.models.IssuesTableModel;
-import com.jfrog.ide.idea.ui.renderers.IssuesTableCellRenderer;
 import org.jfrog.build.extractor.scan.Issue;
 import org.jfrog.build.extractor.scan.Severity;
 
@@ -15,7 +13,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
-import static com.jfrog.ide.idea.ui.models.IssuesTableModel.IssueColumn.*;
+import static com.jfrog.ide.idea.ui.issues.IssuesTableModel.IssueColumn.*;
 
 /**
  * @author yahavi

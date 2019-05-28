@@ -6,16 +6,15 @@ import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.options.ShowSettingsUtil;
-import com.intellij.openapi.project.Project;
 import com.intellij.ui.HyperlinkLabel;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.ui.JBDimension;
 import com.intellij.util.ui.UIUtil;
-import com.jfrog.ide.idea.ui.configuration.XrayGlobalConfiguration;
 import com.jfrog.ide.idea.actions.CollapseAllAction;
 import com.jfrog.ide.idea.actions.ExpandAllAction;
+import com.jfrog.ide.idea.ui.configuration.XrayGlobalConfiguration;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 
 import javax.swing.*;

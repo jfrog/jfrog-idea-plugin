@@ -1,7 +1,6 @@
-package com.jfrog.ide.idea.ui.renderers;
+package com.jfrog.ide.idea.ui.issues;
 
 import com.jfrog.ide.idea.ui.utils.IconUtils;
-import com.jfrog.ide.idea.ui.models.IssuesTableModel;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;

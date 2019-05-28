@@ -1,4 +1,4 @@
-package com.jfrog.ide.idea.ui.renderers;
+package com.jfrog.ide.idea.ui.issues;
 
 import com.intellij.ui.JBDefaultTreeCellRenderer;
 import com.intellij.ui.table.JBTable;

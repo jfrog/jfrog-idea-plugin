@@ -5,7 +5,6 @@ import com.jfrog.ide.common.filter.FilterManager;
 import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.ui.BaseTree;
 import com.jfrog.ide.idea.ui.listeners.IssuesTreeExpansionListener;
-import com.jfrog.ide.idea.ui.renderers.IssuesTreeCellRenderer;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 
 import javax.swing.*;
