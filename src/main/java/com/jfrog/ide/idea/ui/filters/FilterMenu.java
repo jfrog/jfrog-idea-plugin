@@ -1,29 +1,38 @@
 package com.jfrog.ide.idea.ui.filters;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBPopupMenu;
+import com.intellij.util.messages.Topic;
+import com.jfrog.ide.idea.Events;
+import org.apache.commons.compress.utils.Lists;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.License;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by Yahav Itzhak on 22 Nov 2017.
  */
-public class FilterMenu<FilterType> extends JBPopupMenu {
+public abstract class FilterMenu<FilterType> extends JBPopupMenu {
+
     private SelectAllCheckbox<FilterType> selectAllCheckbox = new SelectAllCheckbox<>();
-    private List<SelectionCheckbox> checkBoxMenuItems = new CopyOnWriteArrayList<>();
+    private List<SelectionCheckbox> checkBoxMenuItems = Lists.newArrayList();
+    Project mainProject;
+
+    FilterMenu(@NotNull Project mainProject) {
+        this.mainProject = mainProject;
+    }
 
     /**
      * Add all menu's components in 3 steps: Clean, set listeners and add the required components.
      *
      * @param selectionMap map between FilterType and boolean that represents whether the filter is checked or not
      */
-    void addComponents(@NotNull Map<FilterType, Boolean> selectionMap, boolean putUnknownLast) {
+    void addComponents(@NotNull Map<FilterType, Boolean> selectionMap, boolean putUnknownLast, Topic<Events> event) {
         removeOldComponents();
-        setListeners(selectionMap);
+        setListeners(selectionMap, event);
         addCheckboxes(putUnknownLast);
     }
 
@@ -33,9 +42,9 @@ public class FilterMenu<FilterType> extends JBPopupMenu {
         removeAll();
     }
 
-    private void setListeners(Map<FilterType, Boolean> selectionMap) {
-        selectionMap.keySet().forEach(key -> checkBoxMenuItems.add(new SelectionCheckbox<>(selectionMap, key)));
-        selectAllCheckbox.setListeners(selectionMap, checkBoxMenuItems);
+    private void setListeners(Map<FilterType, Boolean> selectionMap, Topic<Events> event) {
+        selectionMap.keySet().forEach(key -> checkBoxMenuItems.add(new SelectionCheckbox<>(selectionMap, key, event)));
+        selectAllCheckbox.setListeners(selectionMap, checkBoxMenuItems, event);
     }
 
     private void addCheckboxes(boolean putUnknownLast) {

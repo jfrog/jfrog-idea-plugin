@@ -49,7 +49,7 @@ public class GradleDependenciesDataService extends AbstractProjectDataService<Li
         }
 
         if (GlobalSettings.getInstance().areCredentialsSet()) {
-            ScanManagersFactory.getInstance().tryScanSingleProject(project, toImport, modelsProvider);
+            ScanManagersFactory.getInstance(project).tryScanSingleProject(project, toImport, modelsProvider);
         }
     }
 }

@@ -17,16 +17,16 @@ import java.io.IOException;
 public class JFrogToolWindowFactory implements ToolWindowFactory {
 
     @Override
-    public void createToolWindowContent(@NotNull final Project project, @NotNull final ToolWindow toolWindow) {
-        ScanManagersFactory scanManagersFactory = ScanManagersFactory.getInstance();
+    public void createToolWindowContent(@NotNull final Project mainProject, @NotNull final ToolWindow toolWindow) {
+        ScanManagersFactory scanManagersFactory = ScanManagersFactory.getInstance(mainProject);
         try {
             scanManagersFactory.refreshScanManagers();
         } catch (IOException e) {
             // Ignore
         }
-        boolean isSupported = CollectionUtils.isNotEmpty(ScanManagersFactory.getScanManagers());
-        DumbService.getInstance(project).runWhenSmart(() -> {
-            ServiceManager.getService(JFrogToolWindow.class).initToolWindow(toolWindow, isSupported);
+        boolean isSupported = CollectionUtils.isNotEmpty(ScanManagersFactory.getScanManagers(mainProject));
+        DumbService.getInstance(mainProject).runWhenSmart(() -> {
+            ServiceManager.getService(mainProject, JFrogToolWindow.class).initToolWindow(toolWindow, mainProject, isSupported);
             scanManagersFactory.startScan(true, null, null);
         });
     }

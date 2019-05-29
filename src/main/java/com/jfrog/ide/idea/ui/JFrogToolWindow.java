@@ -1,11 +1,11 @@
 package com.jfrog.ide.idea.ui;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.content.ContentManager;
-import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.idea.Events;
 import com.jfrog.ide.idea.ui.issues.IssuesTab;
@@ -32,16 +32,16 @@ public class JFrogToolWindow {
         this.issuesTab = new IssuesTab();
     }
 
-    void initToolWindow(@NotNull ToolWindow toolWindow, boolean supported) {
+    void initToolWindow(@NotNull ToolWindow toolWindow, @NotNull Project mainProject, boolean supported) {
         ContentManager contentManager = toolWindow.getContentManager();
-        addContent(contentManager, supported);
-        registerListeners();
+        addContent(contentManager, mainProject, supported);
+        registerListeners(mainProject);
     }
 
-    private void addContent(ContentManager contentManager, boolean supported) {
+    private void addContent(ContentManager contentManager, @NotNull Project project, boolean supported) {
         ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
-        Content issuesContent = contentFactory.createContent(issuesTab.createIssuesViewTab(supported), "Issues", false);
-        Content licenseContent = contentFactory.createContent(licensesTab.createLicenseInfoTab(supported), "Licenses Info", false);
+        Content issuesContent = contentFactory.createContent(issuesTab.createIssuesViewTab(project, supported), "Issues", false);
+        Content licenseContent = contentFactory.createContent(licensesTab.createLicenseInfoTab(project, supported), "Licenses Info", false);
         contentManager.addContent(issuesContent);
         contentManager.addContent(licenseContent);
     }
@@ -53,27 +53,21 @@ public class JFrogToolWindow {
         });
     }
 
-    private void applyFilters() {
-        IssuesTree.getInstance().applyFiltersForAllProjects();
-        LicensesTree.getInstance().applyFiltersForAllProjects();
-    }
-
-    private void registerListeners() {
+    private void registerListeners(@NotNull Project mainProject) {
         MessageBusConnection busConnection = ApplicationManager.getApplication().getMessageBus().connect();
         // Xray credentials were set listener
         busConnection.subscribe(Events.ON_CONFIGURATION_DETAILS_CHANGE, createOnConfigurationChangeHandler());
 
-        busConnection.subscribe(Events.ON_SCAN_COMPONENTS_CHANGE, ()
-                -> ApplicationManager.getApplication().invokeLater(this::applyFilters));
+        busConnection.subscribe(Events.ON_SCAN_ISSUES_CHANGE, () -> ApplicationManager.getApplication().invokeLater(() -> {
+            IssuesTree.getInstance(mainProject).applyFiltersForAllProjects();
+            issuesTab.updateIssuesTable();
+        }));
 
-        busConnection.subscribe(Events.ON_SCAN_FILTER_CHANGE, () -> {
-            MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
-            messageBus.syncPublisher(Events.ON_SCAN_COMPONENTS_CHANGE).update();
-            messageBus.syncPublisher(Events.ON_SCAN_ISSUES_CHANGE).update();
-        });
+        busConnection.subscribe(Events.ON_SCAN_LICENSES_CHANGE, ()
+                -> ApplicationManager.getApplication().invokeLater(() -> LicensesTree.getInstance(mainProject).applyFiltersForAllProjects()));
 
         // Issues tab listeners
-        issuesTab.registerListeners(busConnection);
+        issuesTab.registerListeners();
 
         // Licenses tab listeners
         licensesTab.registerListeners();

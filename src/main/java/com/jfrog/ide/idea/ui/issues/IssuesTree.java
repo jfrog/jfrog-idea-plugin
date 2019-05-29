@@ -1,10 +1,14 @@
 package com.jfrog.ide.idea.ui.issues;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.project.Project;
 import com.jfrog.ide.common.filter.FilterManager;
 import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.ui.BaseTree;
+import com.jfrog.ide.idea.ui.filters.FilterManagerService;
 import com.jfrog.ide.idea.ui.listeners.IssuesTreeExpansionListener;
+import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 
 import javax.swing.*;
@@ -18,21 +22,16 @@ import java.util.stream.IntStream;
  */
 public class IssuesTree extends BaseTree {
 
-    private static IssuesTree instance;
-
     private IssuesTreeExpansionListener issuesTreeExpansionListener;
     private JPanel issuesCountPanel;
     private JLabel issuesCount;
 
-    public static IssuesTree getInstance() {
-        if (instance == null) {
-            instance = new IssuesTree();
-        }
-        return instance;
+    public static IssuesTree getInstance(@NotNull Project project) {
+        return ServiceManager.getService(project, IssuesTree.class);
     }
 
-    private IssuesTree() {
-        super();
+    private IssuesTree(@NotNull Project mainProject) {
+        super(mainProject);
         setCellRenderer(new IssuesTreeCellRenderer());
     }
 
@@ -42,7 +41,7 @@ public class IssuesTree extends BaseTree {
 
     void createExpansionListener(JPanel issuesCountPanel, Map<TreePath, JPanel> issuesCountPanels) {
         this.issuesCountPanel = issuesCountPanel;
-        issuesTreeExpansionListener = new IssuesTreeExpansionListener(this, issuesCountPanel, issuesCountPanels);
+        this.issuesTreeExpansionListener = new IssuesTreeExpansionListener(this, issuesCountPanel, issuesCountPanels);
     }
 
     void addTreeExpansionListener() {
@@ -62,7 +61,7 @@ public class IssuesTree extends BaseTree {
         }
         DependenciesTree filteredRoot = (DependenciesTree) project.clone();
         filteredRoot.getIssues().clear();
-        FilterManager filterManager = FilterManager.getInstance();
+        FilterManager filterManager = FilterManagerService.getInstance(mainProject);
         filterManager.applyFilters(project, filteredRoot, new DependenciesTree());
         filteredRoot.setIssues(filteredRoot.processTreeIssues());
         appendProjectToTree(filteredRoot);

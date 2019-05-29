@@ -49,7 +49,7 @@ public class GradleScanManager extends ScanManager {
     private Map<String, DependenciesTree> modules = Maps.newHashMap();
 
     GradleScanManager(Project project) throws IOException {
-        super(project, ComponentPrefix.GAV);
+        super(project, project, ComponentPrefix.GAV);
     }
 
     static boolean isApplicable(@NotNull Project project) {

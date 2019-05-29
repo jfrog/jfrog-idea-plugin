@@ -21,8 +21,8 @@ public class NpmScanManager extends ScanManager {
 
     private NpmTreeBuilder npmTreeBuilder;
 
-    NpmScanManager(Project project) throws IOException {
-        super(project, ComponentPrefix.NPM);
+    NpmScanManager(Project mainProject, Project project) throws IOException {
+        super(mainProject, project, ComponentPrefix.NPM);
         getLog().info("Found npm project: " + getProjectName());
         npmTreeBuilder = new NpmTreeBuilder(Utils.getProjectBasePath(project));
     }

@@ -6,15 +6,15 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
 import com.intellij.openapi.externalSystem.service.project.IdeModifiableModelsProvider;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import com.jfrog.ide.idea.NpmProject;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.ui.issues.IssuesTree;
 import com.jfrog.ide.idea.ui.licenses.LicensesTree;
 import com.jfrog.ide.idea.utils.Utils;
-import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -31,16 +31,18 @@ import static com.jfrog.ide.common.utils.Utils.findPackageJsonDirs;
 public class ScanManagersFactory {
 
     private Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
+    private Project mainProject;
 
-    public static ScanManagersFactory getInstance() {
-        return ServiceManager.getService(ScanManagersFactory.class);
+    public static ScanManagersFactory getInstance(@NotNull Project project) {
+        return ServiceManager.getService(project, ScanManagersFactory.class);
     }
 
-    private ScanManagersFactory() {
+    private ScanManagersFactory(@NotNull Project project) {
+        this.mainProject = project;
     }
 
-    public static Set<ScanManager> getScanManagers() {
-        ScanManagersFactory scanManagersFactory = ServiceManager.getService(ScanManagersFactory.class);
+    public static Set<ScanManager> getScanManagers(@NotNull Project project) {
+        ScanManagersFactory scanManagersFactory = getInstance(project);
         return Sets.newHashSet(scanManagersFactory.scanManagers.values());
     }
 
@@ -52,17 +54,20 @@ public class ScanManagersFactory {
      * @param modelsProvider      - Modules to use in Gradle scans.
      */
     public void startScan(boolean quickScan, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies, @Nullable IdeModifiableModelsProvider modelsProvider) {
+        if (DumbService.isDumb(mainProject)) {
+            return;
+        }
         if (isScanInProgress()) {
-            Logger.getInstance().info("Previous scan still running...");
+            Logger.getInstance(mainProject).info("Previous scan still running...");
             return;
         }
         if (!GlobalSettings.getInstance().areCredentialsSet()) {
-            Logger.getInstance().error("Xray server is not configured.");
+            Logger.getInstance(mainProject).error("Xray server is not configured.");
             return;
         }
         try {
-            IssuesTree issuesTree = IssuesTree.getInstance();
-            LicensesTree licensesTree = LicensesTree.getInstance();
+            IssuesTree issuesTree = IssuesTree.getInstance(mainProject);
+            LicensesTree licensesTree = LicensesTree.getInstance(mainProject);
             if (issuesTree == null || licensesTree == null) {
                 return;
             }
@@ -72,7 +77,7 @@ public class ScanManagersFactory {
                 scanManager.asyncScanAndUpdateResults(quickScan, libraryDependencies, modelsProvider);
             }
         } catch (IOException | RuntimeException e) {
-            Logger.getInstance().error("", e);
+            Logger.getInstance(mainProject).error("", e);
         }
     }
 
@@ -99,26 +104,20 @@ public class ScanManagersFactory {
      */
     public void refreshScanManagers() throws IOException {
         Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
-        Project[] projects = ProjectManager.getInstance().getOpenProjects();
-        if (ArrayUtils.isEmpty(projects)) {
-            return;
-        }
         final Set<Path> paths = Sets.newHashSet();
-        for (Project project : projects) {
-            int projectHash = Utils.getProjectIdentifier(project);
-            ScanManager scanManager = this.scanManagers.get(projectHash);
-            if (scanManager != null) {
-                scanManagers.put(projectHash, scanManager);
-            } else {
-                if (MavenScanManager.isApplicable(project)) {
-                    scanManagers.put(projectHash, new MavenScanManager(project));
-                }
-                if (GradleScanManager.isApplicable(project)) {
-                    scanManagers.put(projectHash, new GradleScanManager(project));
-                }
+        int projectHash = Utils.getProjectIdentifier(mainProject);
+        ScanManager scanManager = this.scanManagers.get(projectHash);
+        if (scanManager != null) {
+            scanManagers.put(projectHash, scanManager);
+        } else {
+            if (MavenScanManager.isApplicable(mainProject)) {
+                scanManagers.put(projectHash, new MavenScanManager(mainProject));
             }
-            paths.add(Utils.getProjectBasePath(project));
+            if (GradleScanManager.isApplicable(mainProject)) {
+                scanManagers.put(projectHash, new GradleScanManager(mainProject));
+            }
         }
+        paths.add(Utils.getProjectBasePath(mainProject));
         createNpmScanManagers(scanManagers, paths);
         this.scanManagers = scanManagers;
     }
@@ -132,7 +131,7 @@ public class ScanManagersFactory {
             if (scanManager != null) {
                 scanManagers.put(projectHash, scanManager);
             } else {
-                scanManagers.put(projectHash, new NpmScanManager(new NpmProject(dir)));
+                scanManagers.put(projectHash, new NpmScanManager(mainProject, new NpmProject(dir)));
             }
         }
     }

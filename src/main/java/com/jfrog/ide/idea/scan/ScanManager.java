@@ -10,6 +10,7 @@ import com.intellij.openapi.externalSystem.service.project.IdeModifiableModelsPr
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.log.ProgressIndicator;
@@ -20,6 +21,7 @@ import com.jfrog.ide.idea.Events;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
+import com.jfrog.ide.idea.ui.filters.FilterManagerService;
 import com.jfrog.ide.idea.ui.issues.IssuesTree;
 import com.jfrog.ide.idea.ui.licenses.LicensesTree;
 import com.jfrog.ide.idea.utils.Utils;
@@ -45,13 +47,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class ScanManager extends ScanManagerBase {
 
     private static final Path HOME_PATH = Paths.get(System.getProperty("user.home"), ".jfrog-idea-plugin");
+    private Project mainProject;
     Project project;
 
     // Lock to prevent multiple simultaneous scans
     private AtomicBoolean scanInProgress = new AtomicBoolean(false);
 
-    ScanManager(@NotNull Project project, ComponentPrefix prefix) throws IOException {
-        super(HOME_PATH.resolve("cache"), project.getName(), Logger.getInstance(), GlobalSettings.getInstance().getXrayConfig(), prefix);
+    ScanManager(@NotNull Project mainProject, @NotNull Project project, ComponentPrefix prefix) throws IOException {
+        super(HOME_PATH.resolve("cache"), project.getName(), Logger.getInstance(mainProject), GlobalSettings.getInstance().getXrayConfig(), prefix);
+        this.mainProject = mainProject;
         this.project = project;
         Files.createDirectories(HOME_PATH);
         registerOnChangeHandlers();
@@ -96,6 +100,9 @@ public abstract class ScanManager extends ScanManagerBase {
      * Launch async dependency scan.
      */
     void asyncScanAndUpdateResults(boolean quickScan, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies, @Nullable IdeModifiableModelsProvider modelsProvider) {
+        if (DumbService.isDumb(mainProject)) {
+            return;
+        }
         Task.Backgroundable scanAndUpdateTask = new Task.Backgroundable(null, "Xray: Scanning for Vulnerabilities...") {
             @Override
             public void run(@NotNull com.intellij.openapi.progress.ProgressIndicator indicator) {
@@ -187,16 +194,16 @@ public abstract class ScanManager extends ScanManagerBase {
             return;
         }
         if (!scanResults.isLeaf()) {
-            addFilterMangerLicenses();
+            addFilterMangerLicenses(FilterManagerService.getInstance(mainProject));
         }
         ProjectsMap.ProjectKey projectKey = ProjectsMap.createKey(getProjectName(),
                 scanResults.getGeneralInfo());
 
-        IssuesTree issuesTree = IssuesTree.getInstance();
+        IssuesTree issuesTree = IssuesTree.getInstance(mainProject);
         issuesTree.addScanResults(getProjectName(), scanResults);
         issuesTree.applyFilters(projectKey);
 
-        LicensesTree licensesTree = LicensesTree.getInstance();
+        LicensesTree licensesTree = LicensesTree.getInstance(mainProject);
         licensesTree.addScanResults(getProjectName(), scanResults);
         licensesTree.applyFilters(projectKey);
     }

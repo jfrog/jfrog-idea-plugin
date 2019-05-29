@@ -7,8 +7,7 @@ import com.intellij.util.messages.Topic;
  */
 public interface Events {
     Topic<Events> ON_CONFIGURATION_DETAILS_CHANGE = Topic.create("Configuration details changed", Events.class);
-    Topic<Events> ON_SCAN_COMPONENTS_CHANGE = Topic.create("Component view changed", Events.class);
-    Topic<Events> ON_SCAN_FILTER_CHANGE = Topic.create("Scan filter changed", Events.class);
+    Topic<Events> ON_SCAN_LICENSES_CHANGE = Topic.create("Scan licenses changed", Events.class);
     Topic<Events> ON_SCAN_ISSUES_CHANGE = Topic.create("Scan issues changed", Events.class);
 
     /**

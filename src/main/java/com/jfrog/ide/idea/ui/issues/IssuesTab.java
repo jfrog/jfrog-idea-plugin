@@ -3,6 +3,7 @@ package com.jfrog.ide.idea.ui.issues;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.ui.OnePixelSplitter;
 import com.intellij.ui.ScrollPaneFactory;
@@ -10,15 +11,15 @@ import com.intellij.ui.SideBorder;
 import com.intellij.ui.TreeSpeedSearch;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
-import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.ui.UIUtil;
-import com.jfrog.ide.idea.Events;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import com.jfrog.ide.idea.ui.components.FilterButton;
 import com.jfrog.ide.idea.ui.components.TitledPane;
+import com.jfrog.ide.idea.ui.filters.FilterManagerService;
 import com.jfrog.ide.idea.ui.filters.IssueFilterMenu;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 import org.jfrog.build.extractor.scan.Issue;
 
@@ -37,15 +38,18 @@ import static com.jfrog.ide.idea.ui.JFrogToolWindow.*;
 public class IssuesTab {
 
     private Map<TreePath, JPanel> issuesCountPanels = Maps.newHashMap();
-    private IssuesTree issuesTree = IssuesTree.getInstance();
+    private IssuesTree issuesTree;
     private OnePixelSplitter issuesRightHorizontalSplit;
     private ComponentIssuesTable issuesTable;
     private JScrollPane issuesDetailsScroll;
     private JPanel issuesDetailsPanel;
     private JComponent issuesPanel;
+    private Project mainProject;
 
-    public JPanel createIssuesViewTab(boolean supported) {
-        IssueFilterMenu issueFilterMenu = new IssueFilterMenu();
+    public JPanel createIssuesViewTab(@NotNull Project mainProject, boolean supported) {
+        this.mainProject = mainProject;
+        this.issuesTree = IssuesTree.getInstance(mainProject);
+        IssueFilterMenu issueFilterMenu = new IssueFilterMenu(mainProject);
         JPanel issuesFilterButton = new FilterButton(issueFilterMenu, "Severity", "Select severities to show");
         JPanel toolbar = ComponentUtils.createActionToolbar("Severities toolbar", issuesFilterButton, issuesTree);
 
@@ -112,11 +116,11 @@ public class IssuesTab {
         return new TitledPane(JSplitPane.VERTICAL_SPLIT, TITLE_LABEL_SIZE, title, issuesDetailsScroll);
     }
 
-    private void updateIssuesTable() {
+    public void updateIssuesTable() {
         List<DependenciesTree> selectedNodes = getSelectedNodes();
-        Set<Issue> issueSet = ScanManagersFactory.getScanManagers()
+        Set<Issue> issueSet = ScanManagersFactory.getScanManagers(mainProject)
                 .stream()
-                .map(scanManager -> scanManager.getFilteredScanIssues(selectedNodes))
+                .map(scanManager -> scanManager.getFilteredScanIssues(FilterManagerService.getInstance(mainProject), selectedNodes))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
         issuesTable.updateIssuesTable(issueSet);
@@ -142,7 +146,7 @@ public class IssuesTab {
         issuesPanel.repaint();
     }
 
-    public void registerListeners(MessageBusConnection busConnection) {
+    public void registerListeners() {
         issuesTree.addTreeExpansionListener();
 
         // Issues component selection listener
@@ -162,9 +166,5 @@ public class IssuesTab {
             // Scroll back to the beginning of the scrollable panel
             ApplicationManager.getApplication().invokeLater(() -> issuesDetailsScroll.getViewport().setViewPosition(new Point()));
         });
-
-        // Issues table listener
-        busConnection.subscribe(Events.ON_SCAN_ISSUES_CHANGE, () -> ApplicationManager.getApplication().invokeLater(this::updateIssuesTable));
-
     }
 }

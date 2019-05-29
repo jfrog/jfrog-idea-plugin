@@ -1,9 +1,12 @@
 package com.jfrog.ide.idea.log;
 
 import com.intellij.notification.*;
+import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.project.Project;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.plexus.util.ExceptionUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.util.Log;
 
 /**
@@ -14,17 +17,16 @@ public class Logger implements Log {
 
     private static final NotificationGroup EVENT_LOG_NOTIFIER = new NotificationGroup("JFROG_LOG", NotificationDisplayType.NONE, true);
     private static final NotificationGroup BALLOON_NOTIFIER = new NotificationGroup("JFROG_BALLOON", NotificationDisplayType.BALLOON, false);
-    private static Logger instance = new Logger();
     private static Notification lastNotification;
 
     private static final String INFORMATION_TITLE = "JFrog Xray";
     private static final String ERROR_TITLE = "JFrog Xray scan failed";
 
-    private Logger() {
+    public static Logger getInstance(@NotNull Project project) {
+        return ServiceManager.getService(project, Logger.class);
     }
 
-    public static Logger getInstance() {
-        return instance;
+    private Logger() {
     }
 
     @Override

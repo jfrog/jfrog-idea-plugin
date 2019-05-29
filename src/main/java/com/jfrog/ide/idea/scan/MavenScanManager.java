@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class MavenScanManager extends ScanManager {
 
     MavenScanManager(Project project) throws IOException {
-        super(project, ComponentPrefix.GAV);
+        super(project, project, ComponentPrefix.GAV);
         MavenProjectsManager.getInstance(project).addManagerListener(new MavenProjectsListener());
     }
 

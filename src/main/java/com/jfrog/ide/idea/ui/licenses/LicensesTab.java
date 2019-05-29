@@ -1,6 +1,7 @@
 package com.jfrog.ide.idea.ui.licenses;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.ui.OnePixelSplitter;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.TreeSpeedSearch;
@@ -13,6 +14,7 @@ import com.jfrog.ide.idea.ui.components.FilterButton;
 import com.jfrog.ide.idea.ui.components.TitledPane;
 import com.jfrog.ide.idea.ui.filters.LicenseFilterMenu;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 
 import javax.swing.*;
@@ -23,13 +25,14 @@ import java.awt.*;
  */
 public class LicensesTab {
 
-    private LicensesTree licensesTree = LicensesTree.getInstance();
+    private LicensesTree licensesTree;
     private OnePixelSplitter licensesCentralVerticalSplit;
     private JScrollPane licensesDetailsScroll;
     private JPanel licensesDetailsPanel;
 
-    public JPanel createLicenseInfoTab(boolean supported) {
-        LicenseFilterMenu licenseFilterMenu = new LicenseFilterMenu();
+    public JPanel createLicenseInfoTab(@NotNull Project project, boolean supported) {
+        this.licensesTree = LicensesTree.getInstance(project);
+        LicenseFilterMenu licenseFilterMenu = new LicenseFilterMenu(project);
         JPanel licensesFilterButton = new FilterButton(licenseFilterMenu, "License", "Select licenses to show");
         JPanel toolbar = ComponentUtils.createActionToolbar("Licenses toolbar", licensesFilterButton, licensesTree);
 

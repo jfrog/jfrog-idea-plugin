@@ -13,7 +13,7 @@ import static com.intellij.util.ui.tree.WideSelectionTreeUI.TREE_TABLE_TREE_KEY;
  * Created by Yahav Itzhak on 6 Dec 2017.
  */
 public class LicensesTreeCellRenderer extends JBDefaultTreeCellRenderer {
-    private static JBTable emptyTable = new JBTable();
+    private static final JBTable emptyTable = new JBTable();
 
     @Override
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
