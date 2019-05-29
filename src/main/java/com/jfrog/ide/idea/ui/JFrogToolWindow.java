@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Created by yahavi
  */
-public class XrayToolWindow {
+public class JFrogToolWindow {
 
     public static final float TITLE_FONT_SIZE = 15f;
     public static final int TITLE_LABEL_SIZE = (int) TITLE_FONT_SIZE + 10;
@@ -27,7 +27,7 @@ public class XrayToolWindow {
     private LicensesTab licensesTab;
     private IssuesTab issuesTab;
 
-    XrayToolWindow() {
+    JFrogToolWindow() {
         this.licensesTab = new LicensesTab();
         this.issuesTab = new IssuesTab();
     }
@@ -62,9 +62,6 @@ public class XrayToolWindow {
         MessageBusConnection busConnection = ApplicationManager.getApplication().getMessageBus().connect();
         // Xray credentials were set listener
         busConnection.subscribe(Events.ON_CONFIGURATION_DETAILS_CHANGE, createOnConfigurationChangeHandler());
-
-        // Idea framework change listener
-        busConnection.subscribe(Events.ON_IDEA_FRAMEWORK_CHANGE, createOnConfigurationChangeHandler());
 
         busConnection.subscribe(Events.ON_SCAN_COMPONENTS_CHANGE, ()
                 -> ApplicationManager.getApplication().invokeLater(this::applyFilters));

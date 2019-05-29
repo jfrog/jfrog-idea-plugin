@@ -8,7 +8,7 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
-import com.jfrog.ide.idea.ui.XrayToolWindow;
+import com.jfrog.ide.idea.ui.JFrogToolWindow;
 import com.jfrog.ide.idea.ui.components.FilterButton;
 import com.jfrog.ide.idea.ui.components.TitledPane;
 import com.jfrog.ide.idea.ui.filters.LicenseFilterMenu;
@@ -54,25 +54,25 @@ public class LicensesTab {
             return ComponentUtils.createUnsupportedView();
         }
         JLabel title = new JBLabel(" Details");
-        title.setFont(title.getFont().deriveFont(XrayToolWindow.TITLE_FONT_SIZE));
+        title.setFont(title.getFont().deriveFont(JFrogToolWindow.TITLE_FONT_SIZE));
 
         licensesDetailsPanel = new JBPanel(new BorderLayout()).withBackground(UIUtil.getTableBackground());
         licensesDetailsPanel.add(ComponentUtils.createDisabledTextLabel("Select component or issue for more details"), BorderLayout.CENTER);
         licensesDetailsScroll = ScrollPaneFactory.createScrollPane(licensesDetailsPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        return new TitledPane(JSplitPane.VERTICAL_SPLIT, XrayToolWindow.TITLE_LABEL_SIZE, title, licensesDetailsScroll);
+        return new TitledPane(JSplitPane.VERTICAL_SPLIT, JFrogToolWindow.TITLE_LABEL_SIZE, title, licensesDetailsScroll);
     }
 
     private JComponent createLicensesComponentsTreeView() {
         JPanel componentsTreePanel = new JBPanel(new BorderLayout());
         componentsTreePanel.setBackground(UIUtil.getTableBackground());
         JLabel componentsTreeTitle = new JBLabel(" Components Tree");
-        componentsTreeTitle.setFont(componentsTreeTitle.getFont().deriveFont(XrayToolWindow.TITLE_FONT_SIZE));
+        componentsTreeTitle.setFont(componentsTreeTitle.getFont().deriveFont(JFrogToolWindow.TITLE_FONT_SIZE));
         componentsTreePanel.add(componentsTreeTitle, BorderLayout.WEST);
 
         TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(licensesTree, ComponentUtils::getPathSearchString, true);
         JScrollPane treeScrollPane = ScrollPaneFactory.createScrollPane(treeSpeedSearch.getComponent());
-        treeScrollPane.getVerticalScrollBar().setUnitIncrement(XrayToolWindow.SCROLL_BAR_SCROLLING_UNITS);
-        return new TitledPane(JSplitPane.VERTICAL_SPLIT, XrayToolWindow.TITLE_LABEL_SIZE, componentsTreePanel, treeScrollPane);
+        treeScrollPane.getVerticalScrollBar().setUnitIncrement(JFrogToolWindow.SCROLL_BAR_SCROLLING_UNITS);
+        return new TitledPane(JSplitPane.VERTICAL_SPLIT, JFrogToolWindow.TITLE_LABEL_SIZE, componentsTreePanel, treeScrollPane);
     }
 
     public void onConfigurationChange() {

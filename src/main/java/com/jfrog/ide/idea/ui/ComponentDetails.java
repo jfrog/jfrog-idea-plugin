@@ -20,11 +20,11 @@ import java.util.Set;
 /**
  * @author yahavi
  */
-public class ComponentDetail extends JPanel {
+public class ComponentDetails extends JPanel {
 
     private int lastTextPosition = 0;
 
-    public ComponentDetail(DependenciesTree node) {
+    public ComponentDetails(DependenciesTree node) {
         setLayout(new GridBagLayout());
         setBackground(UIUtil.getTableBackground());
         GeneralInfo generalInfo = node.getGeneralInfo();
@@ -102,7 +102,6 @@ public class ComponentDetail extends JPanel {
         return gridBagConstraints;
     }
 
-
     protected static void replaceAndUpdateUI(JPanel panel, JComponent component, Object constraint) {
         panel.removeAll();
         panel.add(component, constraint);
@@ -113,5 +112,4 @@ public class ComponentDetail extends JPanel {
     protected static void createComponentInfoNotAvailablePanel(JPanel panel) {
         replaceAndUpdateUI(panel, ComponentUtils.createDisabledTextLabel("Component information is not available"), BorderLayout.CENTER);
     }
-
 }

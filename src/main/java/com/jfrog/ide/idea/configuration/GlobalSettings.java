@@ -49,7 +49,7 @@ public final class GlobalSettings extends ApplicationComponent.Adapter implement
     }
 
     public XrayServerConfigImpl getXrayConfig() {
-        return xrayConfig;
+        return this.xrayConfig;
     }
 
     public void setXrayConfig(XrayServerConfigImpl xrayConfig) {

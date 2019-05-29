@@ -21,6 +21,7 @@ public class IssuesTree extends BaseTree {
     private static IssuesTree instance;
 
     private IssuesTreeExpansionListener issuesTreeExpansionListener;
+    private JPanel issuesCountPanel;
     private JLabel issuesCount;
 
     public static IssuesTree getInstance() {
@@ -40,6 +41,7 @@ public class IssuesTree extends BaseTree {
     }
 
     void createExpansionListener(JPanel issuesCountPanel, Map<TreePath, JPanel> issuesCountPanels) {
+        this.issuesCountPanel = issuesCountPanel;
         issuesTreeExpansionListener = new IssuesTreeExpansionListener(this, issuesCountPanel, issuesCountPanels);
     }
 
@@ -65,6 +67,13 @@ public class IssuesTree extends BaseTree {
         filteredRoot.setIssues(filteredRoot.processTreeIssues());
         appendProjectToTree(filteredRoot);
         calculateIssuesCount();
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+        issuesCount.setText("Issues (0) ");
+        issuesCountPanel.removeAll();
     }
 
     private void calculateIssuesCount() {

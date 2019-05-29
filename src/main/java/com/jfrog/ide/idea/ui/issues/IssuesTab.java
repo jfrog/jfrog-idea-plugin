@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.jfrog.ide.idea.ui.XrayToolWindow.*;
+import static com.jfrog.ide.idea.ui.JFrogToolWindow.*;
 
 /**
  * @author yahavi

@@ -1,6 +1,6 @@
 package com.jfrog.ide.idea.ui.issues;
 
-import com.jfrog.ide.idea.ui.ComponentDetail;
+import com.jfrog.ide.idea.ui.ComponentDetails;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 import org.jfrog.build.extractor.scan.Issue;
@@ -11,7 +11,7 @@ import java.awt.*;
 /**
  * @author yahavi
  */
-class ComponentIssueDetails extends ComponentDetail {
+class ComponentIssueDetails extends ComponentDetails {
 
     private ComponentIssueDetails(DependenciesTree node) {
         super(node);

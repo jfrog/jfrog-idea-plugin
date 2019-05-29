@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import org.picocontainer.PicoContainer;
 
 /**
- * Dummy project to use for npm scan managers.
+ * Unlike maven or gradle, for npm, there there's no real project in IntelliJ. We therefore use this project.
  *
  * @author yahavi
  */

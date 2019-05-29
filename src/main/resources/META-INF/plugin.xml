@@ -29,9 +29,9 @@
                                  instance="com.jfrog.ide.idea.ui.configuration.XrayGlobalConfiguration"/>
         <externalProjectDataService implementation="com.jfrog.ide.idea.GradleDependenciesDataService"/>
         <applicationService serviceImplementation="com.jfrog.ide.idea.scan.ScanManagersFactory"/>
-        <applicationService serviceImplementation="com.jfrog.ide.idea.ui.XrayToolWindow"/>
+        <applicationService serviceImplementation="com.jfrog.ide.idea.ui.JFrogToolWindow"/>
         <toolWindow id="JFrog" anchor="bottom" icon="/icons/jfrog_icon.png"
-                    factoryClass="com.jfrog.ide.idea.ui.XrayToolWindowFactory" canCloseContents="false"/>
+                    factoryClass="com.jfrog.ide.idea.ui.JFrogToolWindowFactory" canCloseContents="false"/>
     </extensions>
 
     <actions>

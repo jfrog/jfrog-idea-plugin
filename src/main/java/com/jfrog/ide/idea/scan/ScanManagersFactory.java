@@ -66,7 +66,7 @@ public class ScanManagersFactory {
             if (issuesTree == null || licensesTree == null) {
                 return;
             }
-            createScanManagers();
+            refreshScanManagers();
             resetViews(issuesTree, licensesTree);
             for (ScanManager scanManager : scanManagers.values()) {
                 scanManager.asyncScanAndUpdateResults(quickScan, libraryDependencies, modelsProvider);
@@ -76,17 +76,28 @@ public class ScanManagersFactory {
         }
     }
 
-    public void tryAsyncScanAndUpdateProject(Project project, Collection<DataNode<LibraryDependencyData>> libraryDependencies, IdeModifiableModelsProvider modelsProvider) {
+    /**
+     * Start an Xray scan after Gradle dependencies import.
+     * For known Gradle projects - Start scan only for the project.
+     * For new Gradle projects - Start a full scan.
+     *
+     * @param project             - The Gradle project
+     * @param libraryDependencies - Gradle's dependencies
+     * @param modelsProvider      - Gradle's modules
+     */
+    public void tryScanSingleProject(Project project, Collection<DataNode<LibraryDependencyData>> libraryDependencies, IdeModifiableModelsProvider modelsProvider) {
         ScanManager scanManager = scanManagers.get(Utils.getProjectIdentifier(project));
-        if (scanManager != null) {
+        if (scanManager != null) { // If Gradle project already exists
             scanManager.asyncScanAndUpdateResults(true, libraryDependencies, modelsProvider);
             return;
         }
-        Logger.getInstance().warn("Gradle project " + project.getName() + " not found in scan mangers list. Starting a full scan.");
-        startScan(true, libraryDependencies, modelsProvider);
+        startScan(true, libraryDependencies, modelsProvider); // New Gradle project
     }
 
-    public void createScanManagers() throws IOException {
+    /**
+     * Scan for Maven, Gradle and Npm projects. Create new ScanManagers and delete unnecessary ones.
+     */
+    public void refreshScanManagers() throws IOException {
         Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
         Project[] projects = ProjectManager.getInstance().getOpenProjects();
         if (ArrayUtils.isEmpty(projects)) {

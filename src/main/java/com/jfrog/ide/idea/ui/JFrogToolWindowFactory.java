@@ -14,19 +14,19 @@ import java.io.IOException;
 /**
  * @author yahavi
  */
-public class XrayToolWindowFactory implements ToolWindowFactory {
+public class JFrogToolWindowFactory implements ToolWindowFactory {
 
     @Override
     public void createToolWindowContent(@NotNull final Project project, @NotNull final ToolWindow toolWindow) {
         ScanManagersFactory scanManagersFactory = ScanManagersFactory.getInstance();
         try {
-            scanManagersFactory.createScanManagers();
+            scanManagersFactory.refreshScanManagers();
         } catch (IOException e) {
             // Ignore
         }
         boolean isSupported = CollectionUtils.isNotEmpty(ScanManagersFactory.getScanManagers());
         DumbService.getInstance(project).runWhenSmart(() -> {
-            ServiceManager.getService(XrayToolWindow.class).initToolWindow(toolWindow, isSupported);
+            ServiceManager.getService(JFrogToolWindow.class).initToolWindow(toolWindow, isSupported);
             scanManagersFactory.startScan(true, null, null);
         });
     }

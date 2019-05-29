@@ -14,8 +14,8 @@ public class Logger implements Log {
 
     private static final NotificationGroup EVENT_LOG_NOTIFIER = new NotificationGroup("JFROG_LOG", NotificationDisplayType.NONE, true);
     private static final NotificationGroup BALLOON_NOTIFIER = new NotificationGroup("JFROG_BALLOON", NotificationDisplayType.BALLOON, false);
+    private static Logger instance = new Logger();
     private static Notification lastNotification;
-    private static Logger instance;
 
     private static final String INFORMATION_TITLE = "JFrog Xray";
     private static final String ERROR_TITLE = "JFrog Xray scan failed";
@@ -24,9 +24,6 @@ public class Logger implements Log {
     }
 
     public static Logger getInstance() {
-        if (instance == null) {
-            instance = new Logger();
-        }
         return instance;
     }
 
