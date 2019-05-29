@@ -69,8 +69,18 @@ public class IssuesTree extends BaseTree {
     }
 
     @Override
+    public void applyFiltersForAllProjects() {
+        resetIssuesCountPanels();
+        super.applyFiltersForAllProjects();
+    }
+
+    @Override
     public void reset() {
         super.reset();
+        resetIssuesCountPanels();
+    }
+
+    private void resetIssuesCountPanels() {
         issuesCount.setText("Issues (0) ");
         issuesCountPanel.removeAll();
     }
