@@ -22,15 +22,18 @@ package com.jfrog.ide.idea.configuration;
 import com.google.common.base.Objects;
 import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.PasswordUtil;
-import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.util.net.HttpConfigurable;
 import com.intellij.util.xmlb.annotations.OptionTag;
 import com.intellij.util.xmlb.annotations.Tag;
 import com.jfrog.ide.common.configuration.XrayServerConfig;
 import org.apache.commons.lang.StringUtils;
+import org.jfrog.client.http.model.ProxyConfig;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+
+import static org.apache.commons.lang3.StringUtils.trim;
 
 /**
  * @author yahavi
@@ -79,12 +82,12 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     @Override
     @CheckForNull
     public String getUsername() {
-        return StringUtil.trim(username);
+        return trim(username);
     }
 
     @Override
     public String getUrl() {
-        return StringUtil.trim(url);
+        return trim(url);
     }
 
     @Override
@@ -98,6 +101,22 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    @Override
+    public ProxyConfig getProxyConfig() {
+        HttpConfigurable httpConfigurable = HttpConfigurable.getInstance();
+        if (!httpConfigurable.isHttpProxyEnabledForUrl(getUrl())){
+            return null;
+        }
+        ProxyConfig proxyConfig = new ProxyConfig();
+        proxyConfig.setHost(trim(httpConfigurable.PROXY_HOST));
+        proxyConfig.setPort(httpConfigurable.PROXY_PORT);
+        if (httpConfigurable.PROXY_AUTHENTICATION) {
+            proxyConfig.setUsername(trim(httpConfigurable.getProxyLogin()));
+            proxyConfig.setPassword(httpConfigurable.getPlainProxyPassword());
+        }
+        return proxyConfig;
     }
 
     @Override
