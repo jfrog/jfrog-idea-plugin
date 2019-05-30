@@ -53,6 +53,12 @@ public abstract class ScanManager extends ScanManagerBase {
     // Lock to prevent multiple simultaneous scans
     private AtomicBoolean scanInProgress = new AtomicBoolean(false);
 
+    /**
+     * @param mainProject - Currently opened IntelliJ project. We'll use this project to retrieve project based services
+     *                    like {@link FilterManagerService}, {@link LicensesTree} and {@link IssuesTree}.
+     * @param project     - Current working project.
+     * @param prefix      - Components prefix for xray scan, e.g. gav:// or npm://.
+     */
     ScanManager(@NotNull Project mainProject, @NotNull Project project, ComponentPrefix prefix) throws IOException {
         super(HOME_PATH.resolve("cache"), project.getName(), Logger.getInstance(mainProject), GlobalSettings.getInstance().getXrayConfig(), prefix);
         this.mainProject = mainProject;
@@ -100,7 +106,7 @@ public abstract class ScanManager extends ScanManagerBase {
      * Launch async dependency scan.
      */
     void asyncScanAndUpdateResults(boolean quickScan, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies, @Nullable IdeModifiableModelsProvider modelsProvider) {
-        if (DumbService.isDumb(mainProject)) {
+        if (DumbService.isDumb(mainProject)) { // If intellij is still indexing the project
             return;
         }
         Task.Backgroundable scanAndUpdateTask = new Task.Backgroundable(null, "Xray: Scanning for Vulnerabilities...") {

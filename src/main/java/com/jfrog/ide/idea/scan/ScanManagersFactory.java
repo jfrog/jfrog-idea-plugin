@@ -54,7 +54,7 @@ public class ScanManagersFactory {
      * @param modelsProvider      - Modules to use in Gradle scans.
      */
     public void startScan(boolean quickScan, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies, @Nullable IdeModifiableModelsProvider modelsProvider) {
-        if (DumbService.isDumb(mainProject)) {
+        if (DumbService.isDumb(mainProject)) { // If intellij is still indexing the project
             return;
         }
         if (isScanInProgress()) {
