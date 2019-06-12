@@ -4,7 +4,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.components.JBCheckBoxMenuItem;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.Topic;
-import com.jfrog.ide.idea.Events;
+import com.jfrog.ide.idea.events.Events;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.event.ItemListener;

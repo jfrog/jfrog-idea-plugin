@@ -12,13 +12,15 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
+import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanManagerBase;
 import com.jfrog.ide.common.utils.ProjectsMap;
-import com.jfrog.ide.idea.Events;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
+import com.jfrog.ide.idea.events.Events;
+import com.jfrog.ide.idea.events.ProjectEvents;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
 import com.jfrog.ide.idea.ui.filters.FilterManagerService;
@@ -204,14 +206,15 @@ public abstract class ScanManager extends ScanManagerBase {
         }
         ProjectsMap.ProjectKey projectKey = ProjectsMap.createKey(getProjectName(),
                 scanResults.getGeneralInfo());
+        MessageBus projectMessageBus = mainProject.getMessageBus();
 
         IssuesTree issuesTree = IssuesTree.getInstance(mainProject);
         issuesTree.addScanResults(getProjectName(), scanResults);
-        issuesTree.applyFilters(projectKey);
+        projectMessageBus.syncPublisher(ProjectEvents.ON_SCAN_PROJECT_ISSUES_CHANGE).update(projectKey);
 
         LicensesTree licensesTree = LicensesTree.getInstance(mainProject);
         licensesTree.addScanResults(getProjectName(), scanResults);
-        licensesTree.applyFilters(projectKey);
+        projectMessageBus.syncPublisher(ProjectEvents.ON_SCAN_PROJECT_LICENSES_CHANGE).update(projectKey);
     }
 
     @Override

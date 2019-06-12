@@ -3,7 +3,7 @@ package com.jfrog.ide.idea.ui.filters;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBPopupMenu;
 import com.intellij.util.messages.Topic;
-import com.jfrog.ide.idea.Events;
+import com.jfrog.ide.idea.events.Events;
 import org.apache.commons.compress.utils.Lists;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.License;
