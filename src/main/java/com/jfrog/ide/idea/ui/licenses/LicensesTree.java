@@ -10,8 +10,6 @@ import com.jfrog.ide.idea.ui.filters.LicenseFilterMenu;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 
-import javax.swing.tree.TreeModel;
-
 /**
  * @author yahavi
  */
@@ -28,8 +26,8 @@ public class LicensesTree extends BaseTree {
         setCellRenderer(new LicensesTreeCellRenderer());
     }
 
-    public void populateTree(TreeModel licensesTreeModel) {
-        super.populateTree(licensesTreeModel);
+    public void populateTree(DependenciesTree root) {
+        super.populateTree(root);
         if (licenseFilterMenu != null) {
             licenseFilterMenu.setLicenses();
         }
@@ -48,7 +46,7 @@ public class LicensesTree extends BaseTree {
         DependenciesTree filteredRoot = (DependenciesTree) dependenciesTree.clone();
         FilterManager filterManager = FilterManagerService.getInstance(mainProject);
         filterManager.applyFilters(dependenciesTree, new DependenciesTree(), filteredRoot);
-        appendProjectToTree(filteredRoot);
+        appendProjectWhenReady(filteredRoot);
     }
 
 }
