@@ -23,7 +23,7 @@ public abstract class BaseTree extends Tree {
     protected Project mainProject;
 
     public BaseTree(@NotNull Project mainProject) {
-        super(new DependenciesTree(null));
+        super((TreeModel) null);
         this.mainProject = mainProject;
         expandRow(0);
         setRootVisible(false);
@@ -33,8 +33,8 @@ public abstract class BaseTree extends Tree {
 
     public abstract void applyFilters(ProjectsMap.ProjectKey projectName);
 
-    public void populateTree(TreeModel issuesTreeModel) {
-        setModel(issuesTreeModel);
+    public void populateTree(DependenciesTree root) {
+        setModel(new DefaultTreeModel(root));
         validate();
         repaint();
     }
@@ -55,31 +55,33 @@ public abstract class BaseTree extends Tree {
         }
     }
 
-    protected void appendProjectToTree(DependenciesTree filteredRoot) {
-        ApplicationManager.getApplication().invokeLater(() -> {
-            // No projects in tree - Add filtered root as a single project and show only its children.
-            if (getModel() == null) {
-                populateTree(new DefaultTreeModel(filteredRoot));
-                return;
-            }
+    protected void appendProjectWhenReady(DependenciesTree filteredRoot) {
+        ApplicationManager.getApplication().invokeLater(() -> appendProject(filteredRoot));
+    }
 
-            DependenciesTree root = (DependenciesTree) getModel().getRoot();
-            // One project in tree - Append filtered root and the old root the a new empty parent node.
-            if (root.getUserObject() != null) {
-                DependenciesTree newRoot = filteredRoot;
-                if (!Utils.areRootNodesEqual(root, filteredRoot)) {
-                    newRoot = new DependenciesTree();
-                    newRoot.add(root);
-                    newRoot.add(filteredRoot);
-                }
-                populateTree(new DefaultTreeModel(newRoot));
-                return;
-            }
+    void appendProject(DependenciesTree filteredRoot) {
+        // No projects in tree - Add filtered root as a single project and show only its children.
+        if (getModel() == null) {
+            populateTree(filteredRoot);
+            return;
+        }
 
-            // Two or more projects in tree - Append filtered root to the empty parent node.
-            addOrReplace(root, filteredRoot);
-            populateTree(new DefaultTreeModel(root));
-        });
+        DependenciesTree root = (DependenciesTree) getModel().getRoot();
+        // One project in tree - Append filtered root and the old root the a new empty parent node.
+        if (root.getUserObject() != null) {
+            DependenciesTree newRoot = filteredRoot;
+            if (!Utils.areRootNodesEqual(root, filteredRoot)) {
+                newRoot = new DependenciesTree();
+                newRoot.add(root);
+                newRoot.add(filteredRoot);
+            }
+            populateTree(newRoot);
+            return;
+        }
+
+        // Two or more projects in tree - Append filtered root to the empty parent node.
+        addOrReplace(root, filteredRoot);
+        populateTree(root);
     }
 
     private int searchNode(DependenciesTree root, DependenciesTree filteredRoot) {
@@ -97,7 +99,8 @@ public abstract class BaseTree extends Tree {
         if (childIndex < 0) {
             root.add(filteredRoot);
         } else {
-            root.getChildren().set(childIndex, filteredRoot);
+            root.remove(childIndex);
+            root.add(filteredRoot);
         }
     }
 }

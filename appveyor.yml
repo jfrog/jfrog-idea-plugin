@@ -10,8 +10,8 @@ environment:
   - JAVA_HOME: C:\Program Files\Java\jdk1.8.0
 
 test_script:
-- sh: gradlew build
-- cmd: gradlew.bat build
+- sh: gradlew clean test
+- cmd: gradlew.bat clean test
 
 # Don't actually build.
 build: off

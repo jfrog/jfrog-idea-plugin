@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 
 import javax.swing.*;
-import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -50,8 +49,8 @@ public class IssuesTree extends BaseTree {
         addTreeExpansionListener(issuesTreeExpansionListener);
     }
 
-    public void populateTree(TreeModel issuesTreeModel) {
-        super.populateTree(issuesTreeModel);
+    public void populateTree(DependenciesTree root) {
+        super.populateTree(root);
         issuesTreeExpansionListener.setIssuesCountPanel();
     }
 
@@ -71,7 +70,7 @@ public class IssuesTree extends BaseTree {
         FilterManager filterManager = FilterManagerService.getInstance(mainProject);
         filterManager.applyFilters(project, filteredRoot, new DependenciesTree());
         filteredRoot.setIssues(filteredRoot.processTreeIssues());
-        appendProjectToTree(filteredRoot);
+        appendProjectWhenReady(filteredRoot);
         calculateIssuesCount();
     }
 
