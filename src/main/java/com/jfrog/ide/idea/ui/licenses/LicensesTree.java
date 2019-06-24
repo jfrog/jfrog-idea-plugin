@@ -2,8 +2,10 @@ package com.jfrog.ide.idea.ui.licenses;
 
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.filter.FilterManager;
 import com.jfrog.ide.common.utils.ProjectsMap;
+import com.jfrog.ide.idea.events.ProjectEvents;
 import com.jfrog.ide.idea.ui.BaseTree;
 import com.jfrog.ide.idea.ui.filters.FilterManagerService;
 import com.jfrog.ide.idea.ui.filters.LicenseFilterMenu;
@@ -35,6 +37,11 @@ public class LicensesTree extends BaseTree {
 
     void setLicenseFilterMenu(LicenseFilterMenu licenseFilterMenu) {
         this.licenseFilterMenu = licenseFilterMenu;
+    }
+
+    @Override
+    public void addOnProjectChangeListener(MessageBusConnection busConnection) {
+        busConnection.subscribe(ProjectEvents.ON_SCAN_PROJECT_LICENSES_CHANGE, this::applyFilters);
     }
 
     @Override

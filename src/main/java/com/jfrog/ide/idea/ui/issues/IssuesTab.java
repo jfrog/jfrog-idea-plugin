@@ -38,12 +38,12 @@ import static com.jfrog.ide.idea.ui.JFrogToolWindow.*;
 public class IssuesTab {
 
     private Map<TreePath, JPanel> issuesCountPanels = Maps.newHashMap();
-    private IssuesTree issuesTree;
     private OnePixelSplitter issuesRightHorizontalSplit;
     private ComponentIssuesTable issuesTable;
     private JScrollPane issuesDetailsScroll;
     private JPanel issuesDetailsPanel;
     private JComponent issuesPanel;
+    private IssuesTree issuesTree;
     private Project mainProject;
 
     public JPanel createIssuesViewTab(@NotNull Project mainProject, boolean supported) {
@@ -166,5 +166,7 @@ public class IssuesTab {
             // Scroll back to the beginning of the scrollable panel
             ApplicationManager.getApplication().invokeLater(() -> issuesDetailsScroll.getViewport().setViewPosition(new Point()));
         });
+
+        issuesTree.addOnProjectChangeListener(mainProject.getMessageBus().connect());
     }
 }

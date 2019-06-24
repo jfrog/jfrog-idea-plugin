@@ -6,9 +6,9 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.messages.MessageBus;
-import com.jfrog.ide.idea.Events;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.XrayServerConfigImpl;
+import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.impl.XrayClient;
 import com.jfrog.xray.client.services.system.Version;
@@ -100,7 +100,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
         GlobalSettings globalSettings = GlobalSettings.getInstance();
         globalSettings.setXrayConfig(xrayConfig);
         MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
-        messageBus.syncPublisher(Events.ON_CONFIGURATION_DETAILS_CHANGE).update();
+        messageBus.syncPublisher(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE).update();
         connectionResults.setText("");
     }
 
