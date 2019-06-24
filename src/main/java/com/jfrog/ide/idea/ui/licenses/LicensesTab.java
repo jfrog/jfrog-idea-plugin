@@ -25,14 +25,16 @@ import java.awt.*;
  */
 public class LicensesTab {
 
-    private LicensesTree licensesTree;
     private OnePixelSplitter licensesCentralVerticalSplit;
     private JScrollPane licensesDetailsScroll;
     private JPanel licensesDetailsPanel;
+    private LicensesTree licensesTree;
+    private Project mainProject;
 
-    public JPanel createLicenseInfoTab(@NotNull Project project, boolean supported) {
-        this.licensesTree = LicensesTree.getInstance(project);
-        LicenseFilterMenu licenseFilterMenu = new LicenseFilterMenu(project);
+    public JPanel createLicenseInfoTab(@NotNull Project mainProject, boolean supported) {
+        this.mainProject = mainProject;
+        this.licensesTree = LicensesTree.getInstance(mainProject);
+        LicenseFilterMenu licenseFilterMenu = new LicenseFilterMenu(mainProject);
         JPanel licensesFilterButton = new FilterButton(licenseFilterMenu, "License", "Select licenses to show");
         JPanel toolbar = ComponentUtils.createActionToolbar("Licenses toolbar", licensesFilterButton, licensesTree);
 
@@ -93,5 +95,7 @@ public class LicensesTab {
             // Scroll back to the beginning of the scrollable panel
             ApplicationManager.getApplication().invokeLater(() -> licensesDetailsScroll.getViewport().setViewPosition(new Point()));
         });
+
+        licensesTree.addOnProjectChangeListener(mainProject.getMessageBus().connect());
     }
 }

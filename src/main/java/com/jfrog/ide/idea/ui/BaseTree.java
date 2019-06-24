@@ -3,6 +3,7 @@ package com.jfrog.ide.idea.ui;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.treeStructure.Tree;
+import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
@@ -27,6 +28,8 @@ public abstract class BaseTree extends Tree {
         expandRow(0);
         setRootVisible(false);
     }
+
+    protected abstract void addOnProjectChangeListener(MessageBusConnection busConnection);
 
     public abstract void applyFilters(ProjectsMap.ProjectKey projectName);
 

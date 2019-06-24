@@ -7,7 +7,7 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.content.ContentManager;
 import com.intellij.util.messages.MessageBusConnection;
-import com.jfrog.ide.idea.Events;
+import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.ui.issues.IssuesTab;
 import com.jfrog.ide.idea.ui.issues.IssuesTree;
 import com.jfrog.ide.idea.ui.licenses.LicensesTab;
@@ -46,25 +46,26 @@ public class JFrogToolWindow {
         contentManager.addContent(licenseContent);
     }
 
-    private Events createOnConfigurationChangeHandler() {
-        return () -> ApplicationManager.getApplication().invokeLater(() -> {
+    private void createOnConfigurationChangeHandler() {
+        ApplicationManager.getApplication().invokeLater(() -> {
             issuesTab.onConfigurationChange();
             licensesTab.onConfigurationChange();
         });
     }
 
     private void registerListeners(@NotNull Project mainProject) {
-        MessageBusConnection busConnection = ApplicationManager.getApplication().getMessageBus().connect();
+        MessageBusConnection applicationBusConnection = ApplicationManager.getApplication().getMessageBus().connect();
         // Xray credentials were set listener
-        busConnection.subscribe(Events.ON_CONFIGURATION_DETAILS_CHANGE, createOnConfigurationChangeHandler());
+        applicationBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, this::createOnConfigurationChangeHandler);
 
-        busConnection.subscribe(Events.ON_SCAN_ISSUES_CHANGE, () -> ApplicationManager.getApplication().invokeLater(() -> {
+        MessageBusConnection projectBusConnection = mainProject.getMessageBus().connect();
+        projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_FILTER_ISSUES_CHANGE, () -> ApplicationManager.getApplication().invokeLater(() -> {
             IssuesTree.getInstance(mainProject).applyFiltersForAllProjects();
             issuesTab.updateIssuesTable();
         }));
 
-        busConnection.subscribe(Events.ON_SCAN_LICENSES_CHANGE, ()
-                -> ApplicationManager.getApplication().invokeLater(() -> LicensesTree.getInstance(mainProject).applyFiltersForAllProjects()));
+        projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_FILTER_LICENSES_CHANGE, () -> ApplicationManager.getApplication().invokeLater(() ->
+                LicensesTree.getInstance(mainProject).applyFiltersForAllProjects()));
 
         // Issues tab listeners
         issuesTab.registerListeners();

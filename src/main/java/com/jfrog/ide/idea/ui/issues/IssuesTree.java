@@ -3,8 +3,10 @@ package com.jfrog.ide.idea.ui.issues;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.filter.FilterManager;
 import com.jfrog.ide.common.utils.ProjectsMap;
+import com.jfrog.ide.idea.events.ProjectEvents;
 import com.jfrog.ide.idea.ui.BaseTree;
 import com.jfrog.ide.idea.ui.filters.FilterManagerService;
 import com.jfrog.ide.idea.ui.listeners.IssuesTreeExpansionListener;
@@ -54,6 +56,11 @@ public class IssuesTree extends BaseTree {
     }
 
     @Override
+    public void addOnProjectChangeListener(MessageBusConnection busConnection) {
+        busConnection.subscribe(ProjectEvents.ON_SCAN_PROJECT_ISSUES_CHANGE, this::applyFilters);
+    }
+
+    @Override
     public void applyFilters(ProjectsMap.ProjectKey projectKey) {
         DependenciesTree project = projects.get(projectKey);
         if (project == null) {
@@ -81,8 +88,10 @@ public class IssuesTree extends BaseTree {
     }
 
     private void resetIssuesCountPanels() {
-        issuesCount.setText("Issues (0) ");
-        issuesCountPanel.removeAll();
+        if (issuesCount != null && issuesCountPanel != null) {
+            issuesCount.setText("Issues (0) ");
+            issuesCountPanel.removeAll();
+        }
     }
 
     private void calculateIssuesCount() {
