@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
  */
 public class BaseTreeTest {
 
+    private static final DependenciesTree[] EMPTY_TREE_NODE = new DependenciesTree[0];
     private BaseTree baseTree;
     private DependenciesTree dependenciesTreeA;
     private DependenciesTree dependenciesTreeB;
@@ -45,12 +46,14 @@ public class BaseTreeTest {
         baseTree.appendProject(dependenciesTreeA);
         baseTree.appendProject(dependenciesTreeB);
         DependenciesTree root = (DependenciesTree) baseTree.getModel().getRoot();
+        // If we have more the one project, the root node isn't a DependenciesTree node. It shouldn't contain a user object.
         Assert.assertNull(root.getUserObject());
-        DependenciesTree[] actual = root.getChildren().toArray(new DependenciesTree[0]);
+        DependenciesTree[] actual = root.getChildren().toArray(EMPTY_TREE_NODE);
         DependenciesTree[] expected = {dependenciesTreeA, dependenciesTreeB};
+        // Check root node's children
         Assert.assertEqualsNoOrder(actual, expected);
 
-        // Reset tree
+        // Reset tree and try again
         baseTree.reset();
         Assert.assertNull(baseTree.getModel());
 
@@ -58,8 +61,10 @@ public class BaseTreeTest {
         baseTree.appendProject(dependenciesTreeA);
         baseTree.appendProject(dependenciesTreeB);
         root = (DependenciesTree) baseTree.getModel().getRoot();
+        // If we have more the one project, the root node isn't a DependenciesTree node. It shouldn't contain a user object.
         Assert.assertNull(root.getUserObject());
         actual = root.getChildren().toArray(new DependenciesTree[0]);
+        // Check root node's children
         Assert.assertEqualsNoOrder(actual, expected);
     }
 
@@ -70,12 +75,14 @@ public class BaseTreeTest {
         baseTree.appendProject(dependenciesTreeB);
         baseTree.appendProject(dependenciesTreeC);
         DependenciesTree root = (DependenciesTree) baseTree.getModel().getRoot();
+        // If we have more the one project, the root node isn't a DependenciesTree node. It shouldn't contain a user object.
         Assert.assertNull(root.getUserObject());
-        DependenciesTree[] actual = root.getChildren().toArray(new DependenciesTree[0]);
+        DependenciesTree[] actual = root.getChildren().toArray(EMPTY_TREE_NODE);
         DependenciesTree[] expected = {dependenciesTreeA, dependenciesTreeB, dependenciesTreeC};
+        // Check root node's children
         Assert.assertEqualsNoOrder(actual, expected);
 
-        // Reset tree
+        // Reset tree and try again
         baseTree.reset();
         Assert.assertNull(baseTree.getModel());
 
@@ -84,8 +91,10 @@ public class BaseTreeTest {
         baseTree.appendProject(dependenciesTreeB);
         baseTree.appendProject(dependenciesTreeC);
         root = (DependenciesTree) baseTree.getModel().getRoot();
+        // If we have more the one project, the root node isn't a DependenciesTree node. It shouldn't contain a user object.
         Assert.assertNull(root.getUserObject());
-        actual = root.getChildren().toArray(new DependenciesTree[0]);
+        actual = root.getChildren().toArray(EMPTY_TREE_NODE);
+        // Check root node's children
         Assert.assertEqualsNoOrder(actual, expected);
     }
 
