@@ -1,7 +1,7 @@
 package com.jfrog.ide.idea.ui.filters;
 
 import com.intellij.openapi.project.Project;
-import com.jfrog.ide.idea.events.Events;
+import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import org.apache.commons.collections4.CollectionUtils;
@@ -31,6 +31,6 @@ public class LicenseFilterMenu extends FilterMenu<License> {
                         .stream()
                         .filter(license -> !selectedLicenses.containsKey(license))
                         .forEach(license -> selectedLicenses.put(license, true)));
-        addComponents(selectedLicenses, true, Events.ON_SCAN_FILTER_LICENSES_CHANGE);
+        addComponents(selectedLicenses, true, ApplicationEvents.ON_SCAN_FILTER_LICENSES_CHANGE);
     }
 }

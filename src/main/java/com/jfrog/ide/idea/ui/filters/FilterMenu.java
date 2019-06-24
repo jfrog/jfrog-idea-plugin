@@ -3,7 +3,7 @@ package com.jfrog.ide.idea.ui.filters;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBPopupMenu;
 import com.intellij.util.messages.Topic;
-import com.jfrog.ide.idea.events.Events;
+import com.jfrog.ide.idea.events.ApplicationEvents;
 import org.apache.commons.compress.utils.Lists;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.License;
@@ -30,7 +30,7 @@ public abstract class FilterMenu<FilterType> extends JBPopupMenu {
      *
      * @param selectionMap map between FilterType and boolean that represents whether the filter is checked or not
      */
-    void addComponents(@NotNull Map<FilterType, Boolean> selectionMap, boolean putUnknownLast, Topic<Events> event) {
+    void addComponents(@NotNull Map<FilterType, Boolean> selectionMap, boolean putUnknownLast, Topic<ApplicationEvents> event) {
         removeOldComponents();
         setListeners(selectionMap, event);
         addCheckboxes(putUnknownLast);
@@ -42,7 +42,7 @@ public abstract class FilterMenu<FilterType> extends JBPopupMenu {
         removeAll();
     }
 
-    private void setListeners(Map<FilterType, Boolean> selectionMap, Topic<Events> event) {
+    private void setListeners(Map<FilterType, Boolean> selectionMap, Topic<ApplicationEvents> event) {
         selectionMap.keySet().forEach(key -> checkBoxMenuItems.add(new SelectionCheckbox<>(selectionMap, key, event)));
         selectAllCheckbox.setListeners(selectionMap, checkBoxMenuItems, event);
     }

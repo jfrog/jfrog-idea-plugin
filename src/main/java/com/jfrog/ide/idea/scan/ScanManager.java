@@ -19,7 +19,7 @@ import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanManagerBase;
 import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
-import com.jfrog.ide.idea.events.Events;
+import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.events.ProjectEvents;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
@@ -172,7 +172,7 @@ public abstract class ScanManager extends ScanManagerBase {
 
     private void registerOnChangeHandlers() {
         MessageBusConnection busConnection = ApplicationManager.getApplication().getMessageBus().connect();
-        busConnection.subscribe(Events.ON_CONFIGURATION_DETAILS_CHANGE, this::asyncScanAndUpdateResults);
+        busConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, this::asyncScanAndUpdateResults);
     }
 
     /**

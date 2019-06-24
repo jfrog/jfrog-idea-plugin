@@ -7,7 +7,7 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.content.ContentManager;
 import com.intellij.util.messages.MessageBusConnection;
-import com.jfrog.ide.idea.events.Events;
+import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.ui.issues.IssuesTab;
 import com.jfrog.ide.idea.ui.issues.IssuesTree;
 import com.jfrog.ide.idea.ui.licenses.LicensesTab;
@@ -56,15 +56,15 @@ public class JFrogToolWindow {
     private void registerListeners(@NotNull Project mainProject) {
         MessageBusConnection applicationBusConnection = ApplicationManager.getApplication().getMessageBus().connect();
         // Xray credentials were set listener
-        applicationBusConnection.subscribe(Events.ON_CONFIGURATION_DETAILS_CHANGE, this::createOnConfigurationChangeHandler);
+        applicationBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, this::createOnConfigurationChangeHandler);
 
         MessageBusConnection projectBusConnection = mainProject.getMessageBus().connect();
-        projectBusConnection.subscribe(Events.ON_SCAN_FILTER_ISSUES_CHANGE, () -> ApplicationManager.getApplication().invokeLater(() -> {
+        projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_FILTER_ISSUES_CHANGE, () -> ApplicationManager.getApplication().invokeLater(() -> {
             IssuesTree.getInstance(mainProject).applyFiltersForAllProjects();
             issuesTab.updateIssuesTable();
         }));
 
-        projectBusConnection.subscribe(Events.ON_SCAN_FILTER_LICENSES_CHANGE, () -> ApplicationManager.getApplication().invokeLater(() ->
+        projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_FILTER_LICENSES_CHANGE, () -> ApplicationManager.getApplication().invokeLater(() ->
                 LicensesTree.getInstance(mainProject).applyFiltersForAllProjects()));
 
         // Issues tab listeners

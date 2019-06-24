@@ -4,7 +4,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.components.JBCheckBoxMenuItem;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.Topic;
-import com.jfrog.ide.idea.events.Events;
+import com.jfrog.ide.idea.events.ApplicationEvents;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.event.ItemListener;
@@ -20,7 +20,7 @@ class SelectAllCheckbox<FilterType> extends MenuCheckbox {
         setSelected(true);
     }
 
-    void setListeners(@NotNull Map<FilterType, Boolean> selectionMap, @NotNull List<SelectionCheckbox> checkBoxMenuItems, Topic<Events> event) {
+    void setListeners(@NotNull Map<FilterType, Boolean> selectionMap, @NotNull List<SelectionCheckbox> checkBoxMenuItems, Topic<ApplicationEvents> event) {
         removeListeners();
         addItemListener(e -> {
             selectionMap.entrySet().forEach(booleanEntry -> booleanEntry.setValue(isSelected()));
