@@ -4,12 +4,15 @@
     <vendor email="https://www.jfrog.com/support-service" url="https://www.jfrog.com">JFrog</vendor>
 
     <description><![CDATA[
-      JFrog Intellij Idea plugin
+      The JFrog IntelliJ IDEA plugin adds JFrog Xray scanning of Maven, Gradle, and npm project dependencies to your IntelliJ IDEA. It allows developers to view panels displaying vulnerability information about the components and their dependencies directly in their IntelliJ IDEA.
     ]]></description>
 
-    <change-notes><![CDATA[
-      Add fixed versions to issues.
-    ]]>
+    <change-notes>
+        <![CDATA[
+          <li> Added "Fixed Versions" for issues.</li>
+          <li> Support configuring an HTTP Proxy.</li>
+          <li> Bug fixes.</li>
+        ]]>
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
