@@ -47,9 +47,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     @Tag
     private String password;
 
-    @SuppressWarnings("unused")
-    private XrayServerConfigImpl() {
-        // necessary for XML deserialization
+    XrayServerConfigImpl() {
     }
 
     private XrayServerConfigImpl(Builder builder) {
@@ -64,10 +62,10 @@ public class XrayServerConfigImpl implements XrayServerConfig {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof XrayServerConfigImpl)) {
+        if (!(o instanceof XrayServerConfig)) {
             return false;
         }
-        XrayServerConfigImpl other = (XrayServerConfigImpl) o;
+        XrayServerConfig other = (XrayServerConfig) o;
 
         return Comparing.equal(getUrl(), other.getUrl()) &&
                 Comparing.equal(getPassword(), other.getPassword()) &&
@@ -101,6 +99,18 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    void setUrl(String url) {
+        this.url = url;
+    }
+
+    void setUsername(String username) {
+        this.username = username;
+    }
+
+    void setPassword(String password) {
+        this.password = PasswordUtil.encodePassword(password);
     }
 
     @Override

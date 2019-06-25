@@ -32,7 +32,7 @@ import com.intellij.util.xmlb.XmlSerializerUtil;
 @State(name = "GlobalSettings", storages = {@Storage("jfrogConfig.xml")})
 public final class GlobalSettings extends ApplicationComponent.Adapter implements PersistentStateComponent<GlobalSettings> {
 
-    private XrayServerConfigImpl xrayConfig;
+    private XrayServerConfigImpl xrayConfig = new XrayServerConfigImpl();
 
     public static GlobalSettings getInstance() {
         return ApplicationManager.getApplication().getComponent(GlobalSettings.class);
@@ -53,7 +53,9 @@ public final class GlobalSettings extends ApplicationComponent.Adapter implement
     }
 
     public void setXrayConfig(XrayServerConfigImpl xrayConfig) {
-        this.xrayConfig = xrayConfig;
+        this.xrayConfig.setUrl(xrayConfig.getUrl());
+        this.xrayConfig.setUsername(xrayConfig.getUsername());
+        this.xrayConfig.setPassword(xrayConfig.getPassword());
     }
 
     public boolean areCredentialsSet() {
