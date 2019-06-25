@@ -6,4 +6,4 @@ language: java
 jdk:
   - oraclejdk8
 script:
-  - gradlew clean test
+  - ./gradlew clean test
