@@ -53,5 +53,5 @@ jar {
     }
 }
 
-group 'com.jfrog.ide.idea'
+group 'com.jfrog.ide'
 version currentVersion // Plugin version
