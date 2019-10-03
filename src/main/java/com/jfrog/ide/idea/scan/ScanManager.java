@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class ScanManager extends ScanManagerBase {
 
     private static final Path HOME_PATH = Paths.get(System.getProperty("user.home"), ".jfrog-idea-plugin");
-    private Project mainProject;
+    Project mainProject;
     Project project;
 
     // Lock to prevent multiple simultaneous scans

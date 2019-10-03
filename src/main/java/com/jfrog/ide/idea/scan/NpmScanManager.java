@@ -1,5 +1,6 @@
 package com.jfrog.ide.idea.scan;
 
+import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
 import com.intellij.openapi.externalSystem.model.project.ProjectData;
@@ -13,9 +14,12 @@ import com.jfrog.ide.idea.ui.filters.FilterManagerService;
 import com.jfrog.ide.idea.ui.issues.IssuesTree;
 import com.jfrog.ide.idea.ui.licenses.LicensesTree;
 import com.jfrog.ide.idea.utils.Utils;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 
 /**
@@ -23,7 +27,7 @@ import java.util.Collection;
  */
 public class NpmScanManager extends ScanManager {
 
-    private NpmTreeBuilder npmTreeBuilder;
+    private Path projectBasePath;
 
     /**
      * @param mainProject - Currently opened IntelliJ project. We'll use this project to retrieve project based services
@@ -33,7 +37,7 @@ public class NpmScanManager extends ScanManager {
     NpmScanManager(Project mainProject, Project project) throws IOException {
         super(mainProject, project, ComponentPrefix.NPM);
         getLog().info("Found npm project: " + getProjectName());
-        npmTreeBuilder = new NpmTreeBuilder(Utils.getProjectBasePath(project));
+        projectBasePath = Utils.getProjectBasePath(project);
     }
 
     @Override
@@ -43,6 +47,13 @@ public class NpmScanManager extends ScanManager {
 
     @Override
     protected void buildTree(@Nullable DataNode<ProjectData> externalProject) throws IOException {
+        String npmExecutablePath = "";
+        String nodeJsInterpreterPath = PropertiesComponent.getInstance(mainProject).getValue("nodejs_interpreter_path");
+        if (StringUtils.isNotBlank(nodeJsInterpreterPath)) {
+            Path nodeJsPath = Paths.get(nodeJsInterpreterPath);
+            npmExecutablePath = nodeJsPath.resolveSibling("npm").toAbsolutePath().toString();
+        }
+        NpmTreeBuilder npmTreeBuilder = new NpmTreeBuilder(projectBasePath, npmExecutablePath);
         setScanResults(npmTreeBuilder.buildTree(getLog()));
     }
 
