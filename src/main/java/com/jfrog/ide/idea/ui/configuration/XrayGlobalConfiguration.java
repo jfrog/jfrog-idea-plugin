@@ -43,7 +43,8 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
                 config.validate();
                 config.repaint();
                 // use as a workaround to version not being username password validated
-                Xray xrayClient = XrayClient.create(StringUtil.trim(url.getText()), StringUtil.trim(username.getText()), String.valueOf(password.getPassword()), USER_AGENT, xrayConfig.getProxyConfig());
+                String urlStr = StringUtil.trim(url.getText());
+                Xray xrayClient = XrayClient.create(urlStr, StringUtil.trim(username.getText()), String.valueOf(password.getPassword()), USER_AGENT,  false, xrayConfig.getProxyConfForTargetUrl(urlStr));
                 Version xrayVersion = xrayClient.system().version();
 
                 // Check version
