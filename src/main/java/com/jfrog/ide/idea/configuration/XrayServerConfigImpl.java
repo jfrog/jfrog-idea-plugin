@@ -114,9 +114,9 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     }
 
     @Override
-    public ProxyConfig getProxyConfig() {
+    public ProxyConfig getProxyConfForTargetUrl(String xrayUrl) {
         HttpConfigurable httpConfigurable = HttpConfigurable.getInstance();
-        if (!httpConfigurable.isHttpProxyEnabledForUrl(getUrl())){
+        if (!httpConfigurable.isHttpProxyEnabledForUrl(xrayUrl)){
             return null;
         }
         ProxyConfig proxyConfig = new ProxyConfig();
