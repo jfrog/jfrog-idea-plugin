@@ -6,6 +6,7 @@ import com.intellij.openapi.externalSystem.model.project.ProjectData;
 import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefreshCallback;
 import com.intellij.openapi.externalSystem.service.project.IdeModifiableModelsProvider;
 import com.intellij.openapi.project.Project;
+import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.npm.NpmTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.idea.NpmProject;
@@ -33,7 +34,7 @@ public class NpmScanManager extends ScanManager {
     NpmScanManager(Project mainProject, Project project) throws IOException {
         super(mainProject, project, ComponentPrefix.NPM);
         getLog().info("Found npm project: " + getProjectName());
-        npmTreeBuilder = new NpmTreeBuilder(Utils.getProjectBasePath(project));
+        npmTreeBuilder = new NpmTreeBuilder(Utils.getProjectBasePath(project), EnvironmentUtil.getEnvironmentMap());
     }
 
     @Override
