@@ -9,9 +9,7 @@
 
     <change-notes>
         <![CDATA[
-          <li> Added "Fixed Versions" for issues.</li>
-          <li> Support configuring an HTTP Proxy.</li>
-          <li> Bug fixes.</li>
+          <li> The plugin cannot find the NPM executable in some cases.</li>
         ]]>
     </change-notes>
 
