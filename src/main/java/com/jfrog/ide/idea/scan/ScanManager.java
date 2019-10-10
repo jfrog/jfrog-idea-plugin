@@ -202,7 +202,7 @@ public abstract class ScanManager extends ScanManagerBase {
             return;
         }
         if (!scanResults.isLeaf()) {
-            addFilterMangerLicenses(FilterManagerService.getInstance(mainProject));
+            addFilterManagerLicenses(FilterManagerService.getInstance(mainProject));
         }
         ProjectsMap.ProjectKey projectKey = ProjectsMap.createKey(getProjectName(),
                 scanResults.getGeneralInfo());
