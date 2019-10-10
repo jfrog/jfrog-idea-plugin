@@ -28,7 +28,7 @@ repositories {
 }
 
 dependencies {
-    compile group: 'com.jfrog.ide', name: 'ide-plugins-common', version: '1.1.x-SNAPSHOT'
+    compile group: 'com.jfrog.ide', name: 'ide-plugins-common', version: '1.1.2'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
     compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.3'
     compile group: 'com.google.guava', name: 'guava', version: '27.1-jre'
