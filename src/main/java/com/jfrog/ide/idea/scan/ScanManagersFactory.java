@@ -131,7 +131,7 @@ public class ScanManagersFactory {
             if (scanManager != null) {
                 scanManagers.put(projectHash, scanManager);
             } else {
-                scanManagers.put(projectHash, new NpmScanManager(mainProject, new NpmProject(dir)));
+                scanManagers.put(projectHash, new NpmScanManager(mainProject, new NpmProject(mainProject.getBaseDir(), dir)));
             }
         }
     }

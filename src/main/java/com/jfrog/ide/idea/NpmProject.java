@@ -11,6 +11,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.picocontainer.PicoContainer;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 /**
  * Unlike maven or gradle, for npm, there there's no real project in IntelliJ. We therefore use this project.
  *
@@ -19,16 +22,23 @@ import org.picocontainer.PicoContainer;
 @SuppressWarnings("ConstantConditions")
 public class NpmProject implements Project {
 
-    private String bashPath;
+    private String basePath;
+    private VirtualFile virtualFile;
 
-    public NpmProject(String bashPath) {
-        this.bashPath = bashPath;
+    public NpmProject(String basePath) {
+        this.basePath = basePath;
+    }
+
+    public NpmProject(VirtualFile baseDir, String basePath) {
+        this(basePath);
+        Path packageJsonPath = Paths.get(baseDir.getPath()).relativize(Paths.get(basePath, "package.json"));
+        this.virtualFile = baseDir.findFileByRelativePath(packageJsonPath.toString());
     }
 
     @NotNull
     @Override
     public String getName() {
-        return bashPath;
+        return basePath;
     }
 
     @Override
@@ -39,13 +49,13 @@ public class NpmProject implements Project {
     @Nullable
     @Override
     public String getBasePath() {
-        return bashPath;
+        return basePath;
     }
 
     @Nullable
     @Override
     public VirtualFile getProjectFile() {
-        return null;
+        return virtualFile;
     }
 
     @Nullable

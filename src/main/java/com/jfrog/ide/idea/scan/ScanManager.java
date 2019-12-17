@@ -229,4 +229,9 @@ public abstract class ScanManager extends ScanManagerBase {
     boolean isScanInProgress() {
         return this.scanInProgress.get();
     }
+
+    public String getProjectPath() {
+        return project.getBasePath();
+    }
+
 }
