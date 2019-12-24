@@ -104,14 +104,12 @@ public class IssuesTab {
         if (!GlobalSettings.getInstance().areCredentialsSet()) {
             return ComponentUtils.createNoCredentialsView();
         }
-        if (!supported) {
-            return ComponentUtils.createUnsupportedView();
-        }
         JLabel title = new JBLabel(" Component Details");
         title.setFont(title.getFont().deriveFont(TITLE_FONT_SIZE));
 
         issuesDetailsPanel = new JBPanel(new BorderLayout()).withBackground(UIUtil.getTableBackground());
-        issuesDetailsPanel.add(ComponentUtils.createDisabledTextLabel("Select component or issue for more details"), BorderLayout.CENTER);
+        String panelText = supported ? ComponentUtils.SELECT_COMPONENT_TEXT : ComponentUtils.UNSUPPORTED_TEXT;
+        issuesDetailsPanel.add(ComponentUtils.createDisabledTextLabel(panelText), BorderLayout.CENTER);
         issuesDetailsScroll = ScrollPaneFactory.createScrollPane(issuesDetailsPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         return new TitledPane(JSplitPane.VERTICAL_SPLIT, TITLE_LABEL_SIZE, title, issuesDetailsScroll);
     }

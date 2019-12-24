@@ -27,6 +27,9 @@ import java.util.List;
  */
 public class ComponentUtils {
 
+    public static final String UNSUPPORTED_TEXT = "Unsupported project type, currently only Maven, Gradle and npm projects are supported.";
+    public static final String SELECT_COMPONENT_TEXT = "Select component or issue for more details.";
+
     public static JTextArea createJTextArea(String text, boolean lineWrap) {
         JTextArea jTextArea = new JTextArea(text);
         jTextArea.setOpaque(true);
@@ -94,11 +97,6 @@ public class ComponentUtils {
         link.setHyperlinkText("To start using the JFrog Plugin, please ", "configure", " your JFrog Xray details.");
         link.addHyperlinkListener(e -> ShowSettingsUtil.getInstance().showSettingsDialog(null, XrayGlobalConfiguration.class));
         return createUnsupportedPanel(link);
-    }
-
-    public static JPanel createUnsupportedView() {
-        JLabel label = new JBLabel("Unsupported project type, currently only Maven, Gradle and npm projects are supported.");
-        return createUnsupportedPanel(label);
     }
 
     private static JPanel createUnsupportedPanel(Component label) {

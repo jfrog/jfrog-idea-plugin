@@ -55,14 +55,12 @@ public class LicensesTab {
         if (!GlobalSettings.getInstance().areCredentialsSet()) {
             return ComponentUtils.createNoCredentialsView();
         }
-        if (!supported) {
-            return ComponentUtils.createUnsupportedView();
-        }
         JLabel title = new JBLabel(" Details");
         title.setFont(title.getFont().deriveFont(JFrogToolWindow.TITLE_FONT_SIZE));
 
         licensesDetailsPanel = new JBPanel(new BorderLayout()).withBackground(UIUtil.getTableBackground());
-        licensesDetailsPanel.add(ComponentUtils.createDisabledTextLabel("Select component or issue for more details"), BorderLayout.CENTER);
+        String panelText = supported ? ComponentUtils.SELECT_COMPONENT_TEXT : ComponentUtils.UNSUPPORTED_TEXT;
+        licensesDetailsPanel.add(ComponentUtils.createDisabledTextLabel(panelText), BorderLayout.CENTER);
         licensesDetailsScroll = ScrollPaneFactory.createScrollPane(licensesDetailsPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         return new TitledPane(JSplitPane.VERTICAL_SPLIT, JFrogToolWindow.TITLE_LABEL_SIZE, title, licensesDetailsScroll);
     }
