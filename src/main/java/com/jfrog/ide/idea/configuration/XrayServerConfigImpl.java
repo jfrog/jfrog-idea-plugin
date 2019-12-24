@@ -46,6 +46,8 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     private String username;
     @Tag
     private String password;
+    @Tag
+    private String exclusions;
 
     XrayServerConfigImpl() {
     }
@@ -54,6 +56,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         this.url = builder.url;
         this.username = builder.username;
         this.password = builder.password;
+        this.exclusions = builder.exclusions;
     }
 
     boolean isEmpty() {
@@ -62,14 +65,15 @@ public class XrayServerConfigImpl implements XrayServerConfig {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof XrayServerConfig)) {
+        if (!(o instanceof XrayServerConfigImpl)) {
             return false;
         }
-        XrayServerConfig other = (XrayServerConfig) o;
+        XrayServerConfigImpl other = (XrayServerConfigImpl) o;
 
         return Comparing.equal(getUrl(), other.getUrl()) &&
                 Comparing.equal(getPassword(), other.getPassword()) &&
-                Comparing.equal(getUsername(), other.getUsername());
+                Comparing.equal(getUsername(), other.getUsername()) &&
+                Comparing.equal(getExclusions(), other.getExclusions());
     }
 
     @Override
@@ -101,6 +105,10 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         }
     }
 
+    public String getExclusions() {
+        return this.exclusions;
+    }
+
     void setUrl(String url) {
         this.url = url;
     }
@@ -113,10 +121,14 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         this.password = PasswordUtil.encodePassword(password);
     }
 
+    void setExclusions(String exclusions) {
+        this.exclusions = exclusions;
+    }
+
     @Override
     public ProxyConfig getProxyConfForTargetUrl(String xrayUrl) {
         HttpConfigurable httpConfigurable = HttpConfigurable.getInstance();
-        if (!httpConfigurable.isHttpProxyEnabledForUrl(xrayUrl)){
+        if (!httpConfigurable.isHttpProxyEnabledForUrl(xrayUrl)) {
             return null;
         }
         ProxyConfig proxyConfig = new ProxyConfig();
@@ -142,6 +154,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         private String url;
         private String username;
         private String password;
+        private String exclusions;
 
         private Builder() {
             // no args
@@ -167,6 +180,11 @@ public class XrayServerConfigImpl implements XrayServerConfig {
             } else {
                 this.password = "";
             }
+            return this;
+        }
+
+        public Builder setExclusions(@Nullable String exclusions) {
+            this.exclusions = exclusions;
             return this;
         }
     }
