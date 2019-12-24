@@ -23,11 +23,16 @@ import com.google.common.base.Objects;
 import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.PasswordUtil;
 import com.intellij.util.net.HttpConfigurable;
+import com.intellij.util.net.ssl.CertificateManager;
 import com.intellij.util.xmlb.annotations.OptionTag;
 import com.intellij.util.xmlb.annotations.Tag;
 import com.jfrog.ide.common.configuration.XrayServerConfig;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.client.http.model.ProxyConfig;
+import org.jfrog.client.util.KeyStoreProvider;
+import org.jfrog.client.util.KeyStoreProviderException;
+import org.jfrog.client.util.KeyStoreProviderFactory;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
@@ -69,7 +74,8 @@ public class XrayServerConfigImpl implements XrayServerConfig {
 
         return Comparing.equal(getUrl(), other.getUrl()) &&
                 Comparing.equal(getPassword(), other.getPassword()) &&
-                Comparing.equal(getUsername(), other.getUsername());
+                Comparing.equal(getUsername(), other.getUsername()) &&
+                isNoHostVerification() == other.isNoHostVerification();
     }
 
     @Override
@@ -101,22 +107,24 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         }
     }
 
-    void setUrl(String url) {
-        this.url = url;
+    @Override
+    public boolean isNoHostVerification() {
+        return CertificateManager.getInstance().getState().ACCEPT_AUTOMATICALLY;
     }
 
-    void setUsername(String username) {
-        this.username = username;
-    }
-
-    void setPassword(String password) {
-        this.password = PasswordUtil.encodePassword(password);
+    @Override
+    public KeyStoreProvider getKeyStoreProvider() throws KeyStoreProviderException {
+        CertificateManager certificateManager = CertificateManager.getInstance();
+        if (ArrayUtils.isEmpty(certificateManager.getCustomTrustManager().getAcceptedIssuers())) {
+            return null;
+        }
+        return KeyStoreProviderFactory.getProvider(certificateManager.getCacertsPath(), certificateManager.getPassword());
     }
 
     @Override
     public ProxyConfig getProxyConfForTargetUrl(String xrayUrl) {
         HttpConfigurable httpConfigurable = HttpConfigurable.getInstance();
-        if (!httpConfigurable.isHttpProxyEnabledForUrl(xrayUrl)){
+        if (!httpConfigurable.isHttpProxyEnabledForUrl(xrayUrl)) {
             return null;
         }
         ProxyConfig proxyConfig = new ProxyConfig();
@@ -127,6 +135,18 @@ public class XrayServerConfigImpl implements XrayServerConfig {
             proxyConfig.setPassword(httpConfigurable.getPlainProxyPassword());
         }
         return proxyConfig;
+    }
+
+    void setUrl(String url) {
+        this.url = url;
+    }
+
+    void setUsername(String username) {
+        this.username = username;
+    }
+
+    void setPassword(String password) {
+        this.password = PasswordUtil.encodePassword(password);
     }
 
     @Override

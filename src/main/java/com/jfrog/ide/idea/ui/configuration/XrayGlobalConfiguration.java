@@ -15,6 +15,7 @@ import com.jfrog.xray.client.services.system.Version;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
+import org.jfrog.client.util.KeyStoreProviderException;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -43,8 +44,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
                 config.validate();
                 config.repaint();
                 // use as a workaround to version not being username password validated
-                String urlStr = StringUtil.trim(url.getText());
-                Xray xrayClient = XrayClient.create(urlStr, StringUtil.trim(username.getText()), String.valueOf(password.getPassword()), USER_AGENT,  false, xrayConfig.getProxyConfForTargetUrl(urlStr));
+                Xray xrayClient = createXrayClient();
                 Version xrayVersion = xrayClient.system().version();
 
                 // Check version
@@ -61,7 +61,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
 
                 connectionResults.setText(Results.success(xrayVersion));
 
-            } catch (IOException exception) {
+            } catch (IOException | KeyStoreProviderException exception) {
                 connectionResults.setText(Results.error(exception));
             }
         }));
@@ -139,5 +139,17 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
         password = new JBPasswordField();
 
         loadConfig();
+    }
+
+    private Xray createXrayClient() throws KeyStoreProviderException {
+        // use as a workaround to version not being username password validated
+        String urlStr = StringUtil.trim(url.getText());
+        return XrayClient.create(urlStr,
+                StringUtil.trim(username.getText()),
+                String.valueOf(password.getPassword()),
+                USER_AGENT,
+                xrayConfig.isNoHostVerification(),
+                xrayConfig.getKeyStoreProvider(),
+                xrayConfig.getProxyConfForTargetUrl(urlStr));
     }
 }
