@@ -31,6 +31,12 @@ public class LicensesTab {
     private LicensesTree licensesTree;
     private Project mainProject;
 
+    /**
+     * @param mainProject - Currently opened IntelliJ project
+     * @param supported   - True if the current opened project is supported by the plugin.
+     *                    If now, show the "Unsupported project type" message.
+     * @return the licenses view panel
+     */
     public JPanel createLicenseInfoTab(@NotNull Project mainProject, boolean supported) {
         this.mainProject = mainProject;
         this.licensesTree = LicensesTree.getInstance(mainProject);
@@ -51,22 +57,30 @@ public class LicensesTab {
         return licenseTab;
     }
 
+    /**
+     * Create the licenses details panel. That is the right licence details panel.
+     *
+     * @return the licenses details panel
+     */
     private JComponent createLicenseDetailsView(boolean supported) {
         if (!GlobalSettings.getInstance().areCredentialsSet()) {
             return ComponentUtils.createNoCredentialsView();
-        }
-        if (!supported) {
-            return ComponentUtils.createUnsupportedView();
         }
         JLabel title = new JBLabel(" Details");
         title.setFont(title.getFont().deriveFont(JFrogToolWindow.TITLE_FONT_SIZE));
 
         licensesDetailsPanel = new JBPanel(new BorderLayout()).withBackground(UIUtil.getTableBackground());
-        licensesDetailsPanel.add(ComponentUtils.createDisabledTextLabel("Select component or issue for more details"), BorderLayout.CENTER);
+        String panelText = supported ? ComponentUtils.SELECT_COMPONENT_TEXT : ComponentUtils.UNSUPPORTED_TEXT;
+        licensesDetailsPanel.add(ComponentUtils.createDisabledTextLabel(panelText), BorderLayout.CENTER);
         licensesDetailsScroll = ScrollPaneFactory.createScrollPane(licensesDetailsPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         return new TitledPane(JSplitPane.VERTICAL_SPLIT, JFrogToolWindow.TITLE_LABEL_SIZE, title, licensesDetailsScroll);
     }
 
+    /**
+     * Create the licenses tree panel.
+     *
+     * @return the licenses tree panel
+     */
     private JComponent createLicensesComponentsTreeView() {
         JPanel componentsTreePanel = new JBPanel(new BorderLayout());
         componentsTreePanel.setBackground(UIUtil.getTableBackground());
@@ -80,10 +94,16 @@ public class LicensesTab {
         return new TitledPane(JSplitPane.VERTICAL_SPLIT, JFrogToolWindow.TITLE_LABEL_SIZE, componentsTreePanel, treeScrollPane);
     }
 
+    /**
+     * Called after a change in the credentials.
+     */
     public void onConfigurationChange() {
         licensesCentralVerticalSplit.setSecondComponent(createLicenseDetailsView(true));
     }
 
+    /**
+     * Register the licenses tree listeners.
+     */
     public void registerListeners() {
         // License component selection listener
         licensesTree.addTreeSelectionListener(e -> {
