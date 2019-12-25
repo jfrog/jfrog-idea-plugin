@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 /**
  * Parent class of all inspections and annotations.
- * The inspection are the "Show in dependencies tree" action.
+ * The inspections are the "Show in dependencies tree" action.
  * The annotations are the "Top issue" and "Licenses" labels.
  *
  * @author yahavi
@@ -159,7 +159,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     }
 
     /**
-     * Get the module dependency that match to the input general info.
+     * Get the module dependency that matches to the input general info.
      *
      * @param module      - The dependencies tree module
      * @param generalInfo - The general info
@@ -179,7 +179,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     }
 
     /**
-     * Search the node of the project in the dependencies tree. If this is a single project, return the root.
+     * Search for the node of the project in the dependencies tree. If this is a single project, return the root.
      *
      * @param root    - The root of the dependencies tree
      * @param project - The project
@@ -211,7 +211,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     }
 
     /**
-     * Compare between the generated general info from the Psi element and the build info from the Dependencies tree.
+     * Compare the generated general info from the Psi element and the build info from the Dependencies tree.
      * If groupId is empty, compare only artifactId.
      *
      * @param generatedGeneralInfo - General info generated for the selected Psi element in the package descriptor

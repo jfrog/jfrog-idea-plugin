@@ -19,6 +19,7 @@
     <depends>org.jetbrains.plugins.gradle</depends>
     <depends>org.jetbrains.idea.maven</depends>
     <depends>org.intellij.groovy</depends>
+    <depends>com.intellij.modules.java</depends>
 
     <application-components>
         <component>

@@ -7,11 +7,11 @@ import com.intellij.openapi.externalSystem.settings.ExternalProjectSettings;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
-import com.intellij.psi.PsiType;
 import com.jfrog.ide.idea.scan.GradleScanManager;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import com.jfrog.ide.idea.utils.Utils;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.gradle.settings.GradleSettings;
 import org.jetbrains.plugins.groovy.lang.psi.GroovyElementVisitor;
@@ -82,12 +82,9 @@ public class GradleInspection extends AbstractInspection {
     @Override
     boolean isDependency(PsiElement element) {
         PsiElement parent = element.getParent();
-        for (int i = 0; i < 4; i++, parent = parent.getParent()) {
-            if (parent instanceof GrExpression) {
-                PsiType type = ((GrExpression) parent).getType();
-                if (type != null && "Dependency".equals(type.getPresentableText())) {
-                    return true;
-                }
+        for (int i = 0; i < 6; i++, parent = parent.getParent()) {
+            if (StringUtils.startsWith(parent.getText(), "dependencies")) {
+                return true;
             }
         }
         return false;
