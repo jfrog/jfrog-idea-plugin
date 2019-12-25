@@ -16,8 +16,8 @@ apply plugin: 'org.jetbrains.intellij'
 apply plugin: 'java'
 
 intellij {
-    version 'IC-2016.2'
-    plugins 'gradle', 'maven'
+    version 'IC-2018.1'
+    plugins 'gradle', 'maven', 'groovy'
     pluginName 'JFrog'
     updateSinceUntilBuild = false
 }
