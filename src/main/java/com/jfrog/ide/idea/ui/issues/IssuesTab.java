@@ -46,6 +46,12 @@ public class IssuesTab {
     private IssuesTree issuesTree;
     private Project mainProject;
 
+    /**
+     * @param mainProject - Currently opened IntelliJ project
+     * @param supported   - True if the current opened project is supported by the plugin.
+     *                    If now, show the "Unsupported project type" message.
+     * @return the issues view panel
+     */
     public JPanel createIssuesViewTab(@NotNull Project mainProject, boolean supported) {
         this.mainProject = mainProject;
         this.issuesTree = IssuesTree.getInstance(mainProject);
@@ -68,6 +74,11 @@ public class IssuesTab {
         return issuesViewTab;
     }
 
+    /**
+     * Create the issues tree panel.
+     *
+     * @return the issues tree panel
+     */
     private JComponent createIssuesComponentsTreeView() {
         JLabel issuesCount = new JBLabel("Issues (0) ");
 
@@ -91,6 +102,11 @@ public class IssuesTab {
         return new TitledPane(JSplitPane.VERTICAL_SPLIT, TITLE_LABEL_SIZE, componentsTreePanel, treeScrollPane);
     }
 
+    /**
+     * Create the issues details panel. That is the bottom right issues table.
+     *
+     * @return the issues details panel
+     */
     private JComponent createComponentsIssueDetailView() {
         issuesTable = new ComponentIssuesTable();
         JScrollPane tableScroll = ScrollPaneFactory.createScrollPane(issuesTable, SideBorder.ALL);
@@ -100,6 +116,13 @@ public class IssuesTab {
         return new TitledPane(JSplitPane.VERTICAL_SPLIT, TITLE_LABEL_SIZE, title, tableScroll);
     }
 
+    /**
+     * Create the component details view. That is the top right details panel.
+     *
+     * @param supported - True if the current opened project is supported by the plugin.
+     *                  If now, show the "Unsupported project type" message.
+     * @return the component details view
+     */
     private JComponent createComponentsDetailsView(boolean supported) {
         if (!GlobalSettings.getInstance().areCredentialsSet()) {
             return ComponentUtils.createNoCredentialsView();
@@ -114,6 +137,9 @@ public class IssuesTab {
         return new TitledPane(JSplitPane.VERTICAL_SPLIT, TITLE_LABEL_SIZE, title, issuesDetailsScroll);
     }
 
+    /**
+     * Update the issues table according to the user choice in the dependencies tree.
+     */
     public void updateIssuesTable() {
         List<DependenciesTree> selectedNodes = getSelectedNodes();
         Set<Issue> issueSet = ScanManagersFactory.getScanManagers(mainProject)
@@ -124,6 +150,11 @@ public class IssuesTab {
         issuesTable.updateIssuesTable(issueSet);
     }
 
+    /**
+     * Return the selected nodes in the dependencies tree.
+     *
+     * @return the selected nodes in the dependencies tree
+     */
     private List<DependenciesTree> getSelectedNodes() {
         if (issuesTree.getModel() == null) {
             return Lists.newArrayList();
@@ -138,12 +169,18 @@ public class IssuesTab {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Called after a change in the credentials.
+     */
     public void onConfigurationChange() {
         issuesRightHorizontalSplit.setFirstComponent(createComponentsDetailsView(true));
         issuesPanel.validate();
         issuesPanel.repaint();
     }
 
+    /**
+     * Register the issues tree listeners.
+     */
     public void registerListeners() {
         issuesTree.addTreeExpansionListener();
 
