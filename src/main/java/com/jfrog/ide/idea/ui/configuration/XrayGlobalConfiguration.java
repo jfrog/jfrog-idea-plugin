@@ -12,6 +12,7 @@ import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.impl.XrayClient;
 import com.jfrog.xray.client.services.system.Version;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
@@ -19,8 +20,11 @@ import org.jfrog.client.util.KeyStoreProviderException;
 
 import javax.swing.*;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.util.regex.PatternSyntaxException;
 
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.*;
+import static com.jfrog.ide.idea.configuration.XrayServerConfigImpl.DEFAULT_EXCLUSIONS;
 
 /**
  * Created by romang on 1/29/17.
@@ -33,6 +37,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
     private JButton testConnectionButton;
     private JBPasswordField password;
     private JLabel connectionResults;
+    private JBTextField excludedPaths;
     private JBTextField username;
     private JBTextField url;
     private JPanel config;
@@ -91,6 +96,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
                 .setUrl(url.getText())
                 .setUsername(username.getText())
                 .setPassword(String.valueOf(password.getPassword()))
+                .setExcludedPaths(excludedPaths.getText())
                 .build();
 
         return !xrayConfig.equals(GlobalSettings.getInstance().getXrayConfig());
@@ -115,32 +121,6 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
 
     }
 
-    private void loadConfig() {
-        url.getEmptyText().setText("Example: http://localhost:8000");
-        connectionResults.setText("");
-
-        xrayConfig = GlobalSettings.getInstance().getXrayConfig();
-        if (xrayConfig != null) {
-            url.setText(xrayConfig.getUrl());
-            username.setText(xrayConfig.getUsername());
-            password.setText(xrayConfig.getPassword());
-        } else {
-            url.setText("");
-            username.setText("");
-            password.setText("");
-        }
-    }
-
-    @SuppressWarnings("BoundFieldAssignment")
-    private void createUIComponents() {
-        xrayConfig = GlobalSettings.getInstance().getXrayConfig();
-        url = new JBTextField();
-        username = new JBTextField();
-        password = new JBPasswordField();
-
-        loadConfig();
-    }
-
     private Xray createXrayClient() throws KeyStoreProviderException {
         // use as a workaround to version not being username password validated
         String urlStr = StringUtil.trim(url.getText());
@@ -151,5 +131,59 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
                 xrayConfig.isNoHostVerification(),
                 xrayConfig.getKeyStoreProvider(),
                 xrayConfig.getProxyConfForTargetUrl(urlStr));
+    }
+
+    private void loadConfig() {
+        url.getEmptyText().setText("Example: http://localhost:8000");
+        excludedPaths.setInputVerifier(new ExclusionsVerifier());
+        connectionResults.setText("");
+
+        xrayConfig = GlobalSettings.getInstance().getXrayConfig();
+        if (xrayConfig != null) {
+            url.setText(xrayConfig.getUrl());
+            username.setText(xrayConfig.getUsername());
+            password.setText(xrayConfig.getPassword());
+            excludedPaths.setText(xrayConfig.getExcludedPaths());
+        } else {
+            url.setText("");
+            username.setText("");
+            password.setText("");
+            excludedPaths.setText(DEFAULT_EXCLUSIONS);
+        }
+    }
+
+    @SuppressWarnings("BoundFieldAssignment")
+    private void createUIComponents() {
+        xrayConfig = GlobalSettings.getInstance().getXrayConfig();
+        url = new JBTextField();
+        username = new JBTextField();
+        password = new JBPasswordField();
+        excludedPaths = new JBTextField();
+
+        loadConfig();
+    }
+
+    private class ExclusionsVerifier extends InputVerifier {
+        @Override
+        public boolean shouldYieldFocus(JComponent input) {
+            if (verify(input)) {
+                return true;
+            }
+            excludedPaths.setText(DEFAULT_EXCLUSIONS);
+            return false;
+        }
+
+        @Override
+        public boolean verify(JComponent input) {
+            if (StringUtils.isBlank(excludedPaths.getText())) {
+                return false;
+            }
+            try {
+                FileSystems.getDefault().getPathMatcher("glob:" + excludedPaths.getText());
+            } catch (PatternSyntaxException e) {
+                return false;
+            }
+            return true;
+        }
     }
 }

@@ -2,6 +2,9 @@ package com.jfrog.ide.idea.utils;
 
 import com.google.common.base.Objects;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.openapi.wm.impl.ToolWindowImpl;
 import com.jfrog.ide.idea.ui.listeners.IssuesTreeExpansionListener;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.extractor.scan.DependenciesTree;
@@ -39,6 +42,12 @@ public class Utils {
                 StringUtils.equals(lhsGeneralInfo.getPath(), rhsGeneralInfo.getPath());
     }
 
+    public static boolean gavStringEqual(GeneralInfo lhs, GeneralInfo rhs) {
+        return StringUtils.equals(lhs.getGroupId(), rhs.getGroupId()) &&
+                StringUtils.equals(lhs.getArtifactId(), rhs.getArtifactId()) &&
+                StringUtils.equals(lhs.getVersion(), rhs.getVersion());
+    }
+
     public static int getProjectIdentifier(String name, String path) {
         return Objects.hashCode(name, path);
     }
@@ -47,4 +56,8 @@ public class Utils {
         return getProjectIdentifier(project.getName(), project.getBasePath());
     }
 
+    public static void focusJFrogToolWindow(Project project) {
+        ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("JFrog");
+        ((ToolWindowImpl) toolWindow).fireActivated();
+    }
 }

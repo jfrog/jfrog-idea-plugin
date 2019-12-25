@@ -45,12 +45,16 @@ import static org.apache.commons.lang3.StringUtils.trim;
  */
 @Immutable
 public class XrayServerConfigImpl implements XrayServerConfig {
+    public static final String DEFAULT_EXCLUSIONS = "**/*{.idea,test,node_modules}*";
+
     @OptionTag
     private String url;
     @OptionTag
     private String username;
     @Tag
     private String password;
+    @Tag
+    private String excludedPaths; // Pattern of project paths to exclude from Xray scanning for npm
 
     XrayServerConfigImpl() {
     }
@@ -59,6 +63,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         this.url = builder.url;
         this.username = builder.username;
         this.password = builder.password;
+        this.excludedPaths = builder.excludedPaths;
     }
 
     boolean isEmpty() {
@@ -67,14 +72,15 @@ public class XrayServerConfigImpl implements XrayServerConfig {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof XrayServerConfig)) {
+        if (!(o instanceof XrayServerConfigImpl)) {
             return false;
         }
-        XrayServerConfig other = (XrayServerConfig) o;
+        XrayServerConfigImpl other = (XrayServerConfigImpl) o;
 
         return Comparing.equal(getUrl(), other.getUrl()) &&
                 Comparing.equal(getPassword(), other.getPassword()) &&
                 Comparing.equal(getUsername(), other.getUsername()) &&
+                Comparing.equal(getExcludedPaths(), other.getExcludedPaths()) &&
                 isNoHostVerification() == other.isNoHostVerification();
     }
 
@@ -112,6 +118,10 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         return CertificateManager.getInstance().getState().ACCEPT_AUTOMATICALLY;
     }
 
+    public String getExcludedPaths() {
+        return StringUtils.defaultIfBlank(this.excludedPaths, DEFAULT_EXCLUSIONS);
+    }
+
     @Override
     public KeyStoreProvider getKeyStoreProvider() throws KeyStoreProviderException {
         CertificateManager certificateManager = CertificateManager.getInstance();
@@ -119,6 +129,10 @@ public class XrayServerConfigImpl implements XrayServerConfig {
             return null;
         }
         return KeyStoreProviderFactory.getProvider(certificateManager.getCacertsPath(), certificateManager.getPassword());
+    }
+
+    void setExcludedPaths(String excludedPaths) {
+        this.excludedPaths = excludedPaths;
     }
 
     @Override
@@ -162,6 +176,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         private String url;
         private String username;
         private String password;
+        private String excludedPaths;
 
         private Builder() {
             // no args
@@ -187,6 +202,11 @@ public class XrayServerConfigImpl implements XrayServerConfig {
             } else {
                 this.password = "";
             }
+            return this;
+        }
+
+        public Builder setExcludedPaths(@Nullable String excludedPaths) {
+            this.excludedPaths = excludedPaths;
             return this;
         }
     }

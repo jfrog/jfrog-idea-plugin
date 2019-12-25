@@ -124,14 +124,14 @@ public class ScanManagersFactory {
 
     private void createNpmScanManagers(Map<Integer, ScanManager> scanManagers, Set<Path> paths) throws IOException {
         scanManagers.values().stream().map(ScanManager::getProjectPaths).flatMap(Collection::stream).forEach(paths::add);
-        Set<String> packageJsonDirs = findPackageJsonDirs(paths);
+        Set<String> packageJsonDirs = findPackageJsonDirs(paths, GlobalSettings.getInstance().getXrayConfig().getExcludedPaths());
         for (String dir : packageJsonDirs) {
             int projectHash = Utils.getProjectIdentifier(dir, dir);
             ScanManager scanManager = this.scanManagers.get(projectHash);
             if (scanManager != null) {
                 scanManagers.put(projectHash, scanManager);
             } else {
-                scanManagers.put(projectHash, new NpmScanManager(mainProject, new NpmProject(dir)));
+                scanManagers.put(projectHash, new NpmScanManager(mainProject, new NpmProject(mainProject.getBaseDir(), dir)));
             }
         }
     }
