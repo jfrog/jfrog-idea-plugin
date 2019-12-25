@@ -23,6 +23,7 @@ import java.nio.file.FileSystems;
 import java.util.regex.PatternSyntaxException;
 
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.*;
+import static com.jfrog.ide.idea.configuration.XrayServerConfigImpl.DEFAULT_EXCLUSIONS;
 
 /**
  * Created by romang on 1/29/17.
@@ -30,13 +31,12 @@ import static com.jfrog.ide.common.utils.XrayConnectionUtils.*;
 public class XrayGlobalConfiguration implements Configurable, Configurable.NoScroll {
 
     private static final String USER_AGENT = "jfrog-idea-plugin/" + XrayGlobalConfiguration.class.getPackage().getImplementationVersion();
-    private static final String DEFAULT_EXCLUSIONS = "**/*{.idea,test,node_modules}*";
 
     private XrayServerConfigImpl xrayConfig;
     private JButton testConnectionButton;
     private JBPasswordField password;
     private JLabel connectionResults;
-    private JBTextField exclusions;
+    private JBTextField excludedPaths;
     private JBTextField username;
     private JBTextField url;
     private JPanel config;
@@ -96,7 +96,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
                 .setUrl(url.getText())
                 .setUsername(username.getText())
                 .setPassword(String.valueOf(password.getPassword()))
-                .setExclusions(exclusions.getText())
+                .setExcludedPaths(excludedPaths.getText())
                 .build();
 
         return !xrayConfig.equals(GlobalSettings.getInstance().getXrayConfig());
@@ -123,8 +123,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
 
     private void loadConfig() {
         url.getEmptyText().setText("Example: http://localhost:8000");
-        exclusions.getEmptyText().setText("Using default: " + DEFAULT_EXCLUSIONS); // Use the default if empty
-        exclusions.setInputVerifier(new ExclusionsVerifier());
+        excludedPaths.setInputVerifier(new ExclusionsVerifier());
         connectionResults.setText("");
 
         xrayConfig = GlobalSettings.getInstance().getXrayConfig();
@@ -132,12 +131,12 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
             url.setText(xrayConfig.getUrl());
             username.setText(xrayConfig.getUsername());
             password.setText(xrayConfig.getPassword());
-            exclusions.setText(xrayConfig.getExclusions());
+            excludedPaths.setText(xrayConfig.getExcludedPaths());
         } else {
             url.setText("");
             username.setText("");
             password.setText("");
-            exclusions.setText(DEFAULT_EXCLUSIONS);
+            excludedPaths.setText(DEFAULT_EXCLUSIONS);
         }
     }
 
@@ -147,7 +146,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
         url = new JBTextField();
         username = new JBTextField();
         password = new JBPasswordField();
-        exclusions = new JBTextField();
+        excludedPaths = new JBTextField();
 
         loadConfig();
     }
@@ -158,17 +157,17 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
             if (verify(input)) {
                 return true;
             }
-            exclusions.setText(DEFAULT_EXCLUSIONS);
+            excludedPaths.setText(DEFAULT_EXCLUSIONS);
             return false;
         }
 
         @Override
         public boolean verify(JComponent input) {
-            if (StringUtils.isBlank(exclusions.getText())) {
+            if (StringUtils.isBlank(excludedPaths.getText())) {
                 return false;
             }
             try {
-                FileSystems.getDefault().getPathMatcher("glob:" + exclusions.getText());
+                FileSystems.getDefault().getPathMatcher("glob:" + excludedPaths.getText());
             } catch (PatternSyntaxException e) {
                 return false;
             }

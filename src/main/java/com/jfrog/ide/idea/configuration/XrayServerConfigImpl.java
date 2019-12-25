@@ -26,7 +26,7 @@ import com.intellij.util.net.HttpConfigurable;
 import com.intellij.util.xmlb.annotations.OptionTag;
 import com.intellij.util.xmlb.annotations.Tag;
 import com.jfrog.ide.common.configuration.XrayServerConfig;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.client.http.model.ProxyConfig;
 
 import javax.annotation.CheckForNull;
@@ -40,6 +40,8 @@ import static org.apache.commons.lang3.StringUtils.trim;
  */
 @Immutable
 public class XrayServerConfigImpl implements XrayServerConfig {
+    public static final String DEFAULT_EXCLUSIONS = "**/*{.idea,test,node_modules}*";
+
     @OptionTag
     private String url;
     @OptionTag
@@ -47,7 +49,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     @Tag
     private String password;
     @Tag
-    private String exclusions;
+    private String excludedPaths; // Pattern of project paths to exclude from Xray scanning for npm
 
     XrayServerConfigImpl() {
     }
@@ -56,7 +58,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         this.url = builder.url;
         this.username = builder.username;
         this.password = builder.password;
-        this.exclusions = builder.exclusions;
+        this.excludedPaths = builder.excludedPaths;
     }
 
     boolean isEmpty() {
@@ -73,7 +75,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         return Comparing.equal(getUrl(), other.getUrl()) &&
                 Comparing.equal(getPassword(), other.getPassword()) &&
                 Comparing.equal(getUsername(), other.getUsername()) &&
-                Comparing.equal(getExclusions(), other.getExclusions());
+                Comparing.equal(getExcludedPaths(), other.getExcludedPaths());
     }
 
     @Override
@@ -105,8 +107,8 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         }
     }
 
-    public String getExclusions() {
-        return this.exclusions;
+    public String getExcludedPaths() {
+        return StringUtils.defaultIfBlank(this.excludedPaths, DEFAULT_EXCLUSIONS);
     }
 
     void setUrl(String url) {
@@ -121,8 +123,8 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         this.password = PasswordUtil.encodePassword(password);
     }
 
-    void setExclusions(String exclusions) {
-        this.exclusions = exclusions;
+    void setExcludedPaths(String excludedPaths) {
+        this.excludedPaths = excludedPaths;
     }
 
     @Override
@@ -154,7 +156,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         private String url;
         private String username;
         private String password;
-        private String exclusions;
+        private String excludedPaths;
 
         private Builder() {
             // no args
@@ -183,8 +185,8 @@ public class XrayServerConfigImpl implements XrayServerConfig {
             return this;
         }
 
-        public Builder setExclusions(@Nullable String exclusions) {
-            this.exclusions = exclusions;
+        public Builder setExcludedPaths(@Nullable String excludedPaths) {
+            this.excludedPaths = excludedPaths;
             return this;
         }
     }

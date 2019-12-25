@@ -56,7 +56,7 @@ public final class GlobalSettings extends ApplicationComponent.Adapter implement
         this.xrayConfig.setUrl(xrayConfig.getUrl());
         this.xrayConfig.setUsername(xrayConfig.getUsername());
         this.xrayConfig.setPassword(xrayConfig.getPassword());
-        this.xrayConfig.setExclusions(xrayConfig.getExclusions());
+        this.xrayConfig.setExcludedPaths(xrayConfig.getExcludedPaths());
     }
 
     public boolean areCredentialsSet() {
