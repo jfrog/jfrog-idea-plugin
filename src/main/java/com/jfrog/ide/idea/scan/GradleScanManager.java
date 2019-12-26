@@ -17,11 +17,12 @@ import com.intellij.openapi.externalSystem.service.project.IdeModifiableModelsPr
 import com.intellij.openapi.externalSystem.settings.ExternalProjectSettings;
 import com.intellij.openapi.externalSystem.util.ExternalSystemApiUtil;
 import com.intellij.openapi.externalSystem.util.ExternalSystemUtil;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.idea.utils.Utils;
 import com.jfrog.xray.client.impl.services.summary.ComponentDetailImpl;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -156,14 +157,17 @@ public class GradleScanManager extends ScanManager {
      */
     private void collectModuleDependencies(IdeModifiableModelsProvider modelsProvider) {
         modules = Maps.newHashMap();
-        Arrays.stream(modelsProvider.getModules()).forEach(module -> {
-            DependenciesTree scanTreeNode = new DependenciesTree(module.getName());
-            scanTreeNode.setGeneralInfo(new GeneralInfo()
-                    .pkgType("gradle")
-                    .name(module.getName())
-                    .path(Utils.getProjectBasePath(project).toString()));
-            modules.put(module.getName(), scanTreeNode);
-        });
+        Arrays.stream(modelsProvider.getModules())
+                .map(Module::getName)
+                .filter(moduleName -> !StringUtils.endsWithAny(moduleName, ".main", ".test"))
+                .forEach(moduleName -> {
+                    DependenciesTree scanTreeNode = new DependenciesTree(moduleName);
+                    scanTreeNode.setGeneralInfo(new GeneralInfo()
+                            .pkgType("gradle")
+                            .name(moduleName)
+                            .path(Utils.getProjectBasePath(project).toString()));
+                    modules.put(moduleName, scanTreeNode);
+                });
     }
 
     private void collectLibraryDependencies(DataNode<ProjectData> externalProject) {
