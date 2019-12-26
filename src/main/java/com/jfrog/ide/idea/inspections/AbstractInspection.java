@@ -123,7 +123,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         }
 
         VirtualFile editorFile = element.getContainingFile().getVirtualFile();
-        if (!editorFile.getPath().endsWith(packageDescriptorName)) {
+        if (editorFile == null || editorFile.getParent() == null || !editorFile.getPath().endsWith(packageDescriptorName)) {
             return false; // File is not a package descriptor file
         }
 
