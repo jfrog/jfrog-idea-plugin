@@ -28,7 +28,7 @@ import com.intellij.util.xmlb.annotations.OptionTag;
 import com.intellij.util.xmlb.annotations.Tag;
 import com.jfrog.ide.common.configuration.XrayServerConfig;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.client.http.model.ProxyConfig;
 import org.jfrog.client.util.KeyStoreProvider;
 import org.jfrog.client.util.KeyStoreProviderException;
@@ -80,8 +80,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         return Comparing.equal(getUrl(), other.getUrl()) &&
                 Comparing.equal(getPassword(), other.getPassword()) &&
                 Comparing.equal(getUsername(), other.getUsername()) &&
-                Comparing.equal(getExcludedPaths(), other.getExcludedPaths()) &&
-                isNoHostVerification() == other.isNoHostVerification();
+                Comparing.equal(getExcludedPaths(), other.getExcludedPaths());
     }
 
     @Override
