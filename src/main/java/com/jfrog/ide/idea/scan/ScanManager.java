@@ -6,7 +6,6 @@ import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
 import com.intellij.openapi.externalSystem.model.project.ProjectData;
 import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefreshCallback;
-import com.intellij.openapi.externalSystem.service.project.IdeModifiableModelsProvider;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -72,7 +71,7 @@ public abstract class ScanManager extends ScanManagerBase {
     /**
      * Refresh project dependencies.
      */
-    protected abstract void refreshDependencies(ExternalProjectRefreshCallback cbk, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies, @Nullable IdeModifiableModelsProvider modelsProvider);
+    protected abstract void refreshDependencies(ExternalProjectRefreshCallback cbk, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies);
 
     /**
      * Collect and return {@link Components} to be scanned by JFrog Xray.
@@ -83,7 +82,7 @@ public abstract class ScanManager extends ScanManagerBase {
     /**
      * Scan and update dependency components.
      */
-    private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies, @Nullable IdeModifiableModelsProvider modelsProvider) {
+    private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies) {
         // Don't scan if Xray is not configured
         if (!GlobalSettings.getInstance().areCredentialsSet()) {
             getLog().error("Xray server is not configured.");
@@ -98,7 +97,7 @@ public abstract class ScanManager extends ScanManagerBase {
         }
         try {
             // Refresh dependencies -> Collect -> Scan and store to cache -> Update view
-            refreshDependencies(getRefreshDependenciesCbk(quickScan, indicator), libraryDependencies, modelsProvider);
+            refreshDependencies(getRefreshDependenciesCbk(quickScan, indicator), libraryDependencies);
         } finally {
             scanInProgress.set(false);
         }
@@ -107,7 +106,7 @@ public abstract class ScanManager extends ScanManagerBase {
     /**
      * Launch async dependency scan.
      */
-    void asyncScanAndUpdateResults(boolean quickScan, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies, @Nullable IdeModifiableModelsProvider modelsProvider) {
+    void asyncScanAndUpdateResults(boolean quickScan, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies) {
         if (DumbService.isDumb(mainProject)) { // If intellij is still indexing the project
             return;
         }
@@ -117,7 +116,7 @@ public abstract class ScanManager extends ScanManagerBase {
                 if (project.isDisposed()) {
                     return;
                 }
-                scanAndUpdate(quickScan, new ProgressIndicatorImpl(indicator), libraryDependencies, modelsProvider);
+                scanAndUpdate(quickScan, new ProgressIndicatorImpl(indicator), libraryDependencies);
                 indicator.finishNonCancelableSection();
             }
         };
@@ -144,7 +143,7 @@ public abstract class ScanManager extends ScanManagerBase {
      * Launch async dependency scan.
      */
     void asyncScanAndUpdateResults() {
-        asyncScanAndUpdateResults(true, null, null);
+        asyncScanAndUpdateResults(true, null);
     }
 
     private ExternalProjectRefreshCallback getRefreshDependenciesCbk(boolean quickScan, ProgressIndicator indicator) {

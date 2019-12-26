@@ -14,6 +14,6 @@ public class RefreshAction extends AnAction {
         if (e.getProject() == null) {
             return;
         }
-        ScanManagersFactory.getInstance(e.getProject()).startScan(false, null, null);
+        ScanManagersFactory.getInstance(e.getProject()).startScan(false, null);
     }
 }

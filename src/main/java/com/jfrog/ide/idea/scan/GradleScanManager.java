@@ -13,11 +13,9 @@ import com.intellij.openapi.externalSystem.model.task.ExternalSystemTaskType;
 import com.intellij.openapi.externalSystem.service.execution.ProgressExecutionMode;
 import com.intellij.openapi.externalSystem.service.internal.ExternalSystemProcessingManager;
 import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefreshCallback;
-import com.intellij.openapi.externalSystem.service.project.IdeModifiableModelsProvider;
 import com.intellij.openapi.externalSystem.settings.ExternalProjectSettings;
 import com.intellij.openapi.externalSystem.util.ExternalSystemApiUtil;
 import com.intellij.openapi.externalSystem.util.ExternalSystemUtil;
-import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.idea.utils.Utils;
@@ -34,7 +32,10 @@ import org.jfrog.build.extractor.scan.GeneralInfo;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -81,13 +82,10 @@ public class GradleScanManager extends ScanManager {
     }
 
     @Override
-    protected void refreshDependencies(ExternalProjectRefreshCallback cbk, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies, @Nullable IdeModifiableModelsProvider modelsProvider) {
-        if (libraryDependencies != null && modelsProvider != null) {
+    protected void refreshDependencies(ExternalProjectRefreshCallback cbk, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies) {
+        if (libraryDependencies != null) {
             // Change the dependencies only if there are new dependencies
             this.libraryDependencies = libraryDependencies;
-            collectModuleDependencies(modelsProvider);
-            cbk.onSuccess(null);
-            return;
         }
         if (this.libraryDependencies != null) {
             cbk.onSuccess(null);
@@ -148,26 +146,6 @@ public class GradleScanManager extends ScanManager {
             scanTreeNode.setGeneralInfo(new GeneralInfo().pkgType("gradle").groupId(groupId).artifactId(artifactId).version(version));
             modules.put(StringUtils.removeStart(module.getData().getId(), ":"), scanTreeNode);
         });
-    }
-
-    /**
-     * Collect Gradle modules dependencies. Used after Gradle collect dependencies.
-     *
-     * @param modelsProvider - The gradle models from {@link com.jfrog.ide.idea.GradleDependenciesDataService}
-     */
-    private void collectModuleDependencies(IdeModifiableModelsProvider modelsProvider) {
-        modules = Maps.newHashMap();
-        Arrays.stream(modelsProvider.getModules())
-                .map(Module::getName)
-                .filter(moduleName -> !StringUtils.endsWithAny(moduleName, ".main", ".test"))
-                .forEach(moduleName -> {
-                    DependenciesTree scanTreeNode = new DependenciesTree(moduleName);
-                    scanTreeNode.setGeneralInfo(new GeneralInfo()
-                            .pkgType("gradle")
-                            .name(moduleName)
-                            .path(Utils.getProjectBasePath(project).toString()));
-                    modules.put(moduleName, scanTreeNode);
-                });
     }
 
     private void collectLibraryDependencies(DataNode<ProjectData> externalProject) {
