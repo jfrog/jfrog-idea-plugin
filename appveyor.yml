@@ -1,17 +1,22 @@
 image:
-- Visual Studio 2017
-- Ubuntu
+  - macOS
+  - Ubuntu
+  - Visual Studio 2017
 
 stack: node 8, jdk 8
 environment:
   APPVEYOR_YML_DISABLE_PS_LINUX: true
   nodejs_version: "8"
-  matrix:
-  - JAVA_HOME: C:\Program Files\Java\jdk1.8.0
+  GRADLE_OPTS: -Dorg.gradle.daemon=false
+
+before_test:
+  - sh: curl -s "https://get.sdkman.io" | bash
+  - sh: source "$HOME/.sdkman/bin/sdkman-init.sh"
+  - sh: sdk install java 8.0.232-zulu && java -version
 
 test_script:
-- sh: ./gradlew clean test
-- cmd: gradlew.bat clean test
+  - sh: ./gradlew clean verifyPlugin test
+  - cmd: gradlew.bat clean verifyPlugin test
 
 # Don't actually build.
 build: off
