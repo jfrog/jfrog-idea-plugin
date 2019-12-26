@@ -5,7 +5,7 @@ buildscript {
 }
 
 plugins {
-    id "org.jetbrains.intellij" version "0.4.8"
+    id "org.jetbrains.intellij" version "0.4.15"
 }
 
 sourceCompatibility = 1.8
@@ -17,7 +17,7 @@ apply plugin: 'java'
 
 intellij {
     version 'IC-2018.1'
-    plugins 'gradle', 'maven', 'groovy'
+    plugins 'gradle', 'maven', 'Groovy'
     pluginName 'JFrog'
     updateSinceUntilBuild = false
 }
