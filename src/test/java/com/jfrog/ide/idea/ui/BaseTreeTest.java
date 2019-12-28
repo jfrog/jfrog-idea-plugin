@@ -1,15 +1,15 @@
 package com.jfrog.ide.idea.ui;
 
+import junit.framework.TestCase;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.Before;
 
 /**
  * @author yahavi
  */
-public class BaseTreeTest {
+public class BaseTreeTest extends TestCase {
 
     private static final DependenciesTree[] EMPTY_TREE_NODE = new DependenciesTree[0];
     private BaseTree baseTree;
@@ -17,7 +17,7 @@ public class BaseTreeTest {
     private DependenciesTree dependenciesTreeB;
     private DependenciesTree dependenciesTreeC;
 
-    @BeforeMethod
+    @Before
     public void setUp() {
         baseTree = new BaseTreeImpl();
         dependenciesTreeA = createNode("a");
@@ -25,8 +25,7 @@ public class BaseTreeTest {
         dependenciesTreeC = createNode("c");
     }
 
-    @Test
-    void oneProjectTest() {
+    public void testOneProject() {
         // Append single project and check results
         baseTree.appendProject(dependenciesTreeA);
         Assert.assertEquals(baseTree.getModel().getRoot(), dependenciesTreeA);
@@ -40,8 +39,7 @@ public class BaseTreeTest {
         Assert.assertEquals(baseTree.getModel().getRoot(), dependenciesTreeA);
     }
 
-    @Test
-    void twoProjectsTest() {
+    public void testTwoProjects() {
         // Append 2 projects and check results
         baseTree.appendProject(dependenciesTreeA);
         baseTree.appendProject(dependenciesTreeB);
@@ -51,7 +49,7 @@ public class BaseTreeTest {
         DependenciesTree[] actual = root.getChildren().toArray(EMPTY_TREE_NODE);
         DependenciesTree[] expected = {dependenciesTreeA, dependenciesTreeB};
         // Check root node's children
-        Assert.assertEqualsNoOrder(actual, expected);
+        Assert.assertArrayEquals(actual, expected);
 
         // Reset tree and try again
         baseTree.reset();
@@ -65,11 +63,10 @@ public class BaseTreeTest {
         Assert.assertNull(root.getUserObject());
         actual = root.getChildren().toArray(new DependenciesTree[0]);
         // Check root node's children
-        Assert.assertEqualsNoOrder(actual, expected);
+        Assert.assertArrayEquals(actual, expected);
     }
 
-    @Test
-    void threeProjectsTest() {
+    public void testThreeProjects() {
         // Append 3 projects and check results
         baseTree.appendProject(dependenciesTreeA);
         baseTree.appendProject(dependenciesTreeB);
@@ -80,7 +77,7 @@ public class BaseTreeTest {
         DependenciesTree[] actual = root.getChildren().toArray(EMPTY_TREE_NODE);
         DependenciesTree[] expected = {dependenciesTreeA, dependenciesTreeB, dependenciesTreeC};
         // Check root node's children
-        Assert.assertEqualsNoOrder(actual, expected);
+        Assert.assertArrayEquals(actual, expected);
 
         // Reset tree and try again
         baseTree.reset();
@@ -95,7 +92,7 @@ public class BaseTreeTest {
         Assert.assertNull(root.getUserObject());
         actual = root.getChildren().toArray(EMPTY_TREE_NODE);
         // Check root node's children
-        Assert.assertEqualsNoOrder(actual, expected);
+        Assert.assertArrayEquals(actual, expected);
     }
 
     private DependenciesTree createNode(String name) {
