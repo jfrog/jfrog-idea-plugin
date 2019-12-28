@@ -17,7 +17,7 @@ apply plugin: 'java'
 
 intellij {
     version 'IC-2018.1'
-    plugins 'gradle', 'maven', 'Groovy'
+    plugins 'gradle', 'maven', 'Groovy', 'properties'
     pluginName 'JFrog'
     updateSinceUntilBuild = false
 }

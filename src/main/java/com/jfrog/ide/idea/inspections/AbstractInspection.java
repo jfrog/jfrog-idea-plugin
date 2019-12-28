@@ -1,5 +1,6 @@
 package com.jfrog.ide.idea.inspections;
 
+import com.google.common.collect.Sets;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.lang.annotation.AnnotationHolder;
@@ -16,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 
+import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -34,6 +36,10 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
 
     AbstractInspection(String packageDescriptorName) {
         this.packageDescriptorName = packageDescriptorName;
+    }
+
+    String getPackageDescriptorName() {
+        return this.packageDescriptorName;
     }
 
     /**
@@ -208,6 +214,54 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
             return null;
         }
         return (DependenciesTree) issuesTree.getModel().getRoot();
+    }
+
+    /**
+     * Collect all modules containing the dependency stated in the general info.
+     *
+     * @param project     - The project
+     * @param modulesList - List of all relevant modules
+     * @param node        - The project node
+     * @param generalInfo - General info of the dependency
+     * @return list of all nodes of the Gradle modules
+     */
+    Set<DependenciesTree> collectModules(Project project, List<?> modulesList, DependenciesTree node, GeneralInfo generalInfo) {
+        // Single project, single module
+        if (modulesList.size() <= 1 && node.getGeneralInfo() != null) {
+            return Sets.newHashSet(node);
+        }
+
+        // Multi project
+        node = getProjectNode(node, project);
+
+        // Multi module
+        if (isModule(node, generalInfo)) {
+            return Sets.newHashSet(node);
+        }
+
+        Set<DependenciesTree> modules = Sets.newHashSet();
+        node.getChildren().forEach(child -> child.getChildren().stream()
+                .map(DependenciesTree::getGeneralInfo)
+                .filter(Objects::nonNull)
+                .filter(grandChildGeneralInfo -> compareGeneralInfos(generalInfo, grandChildGeneralInfo))
+                .findAny()
+                .ifPresent(grandChildGeneralInfo -> modules.add(child)));
+        return modules;
+    }
+
+    /**
+     * Return true iff the dependency stated in the General info is a module in the project.
+     *
+     * @param node        - The project node
+     * @param generalInfo - General info of the dependency
+     * @return true iff the dependency stated in the General info is a module in the project
+     */
+    private boolean isModule(DependenciesTree node, GeneralInfo generalInfo) {
+        return node.getChildren().stream()
+                .map(DefaultMutableTreeNode::getUserObject)
+                .filter(Objects::nonNull)
+                .map(Object::toString)
+                .anyMatch(name -> name.equals(generalInfo.getArtifactId()));
     }
 
     /**
