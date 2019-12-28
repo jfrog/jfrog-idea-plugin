@@ -6,8 +6,6 @@ import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.junit.Assert;
 
-import java.net.URL;
-
 /**
  * @author yahavi
  */
@@ -21,9 +19,7 @@ public abstract class InspectionsTest extends LightCodeInsightFixtureTestCase {
         super.setUp();
         this.inspection = inspection;
         this.psiClass = psiClass;
-        URL url = getClass().getClassLoader().getResource(inspection.getPackageDescriptorName());
-        Assert.assertNotNull(url);
-        fileDescriptor = myFixture.configureByFile(url.getFile());
+        fileDescriptor = myFixture.configureByFile("testData/" + inspection.getPackageDescriptorName());
     }
 
     PsiElement getNonLeafElement(int position) {
