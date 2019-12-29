@@ -17,9 +17,14 @@ public abstract class InspectionsTest extends LightCodeInsightFixtureTestCase {
 
     public void setUp(AbstractInspection inspection, Class<? extends PsiElement> psiClass) throws Exception {
         super.setUp();
+        this.fileDescriptor = myFixture.configureByFile(inspection.getPackageDescriptorName());
         this.inspection = inspection;
         this.psiClass = psiClass;
-        fileDescriptor = myFixture.configureByFile("testData/" + inspection.getPackageDescriptorName());
+    }
+
+    @Override
+    protected String getTestDataPath() {
+        return "src/test/resources";
     }
 
     PsiElement getNonLeafElement(int position) {

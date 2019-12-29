@@ -94,11 +94,11 @@ public class NpmInspection extends AbstractInspection {
     }
 
     /**
-     * Return true iff the dependencies tree node containing the input path.
+     * Return true if and only if the dependencies tree node containing the input path.
      *
      * @param node - The dependencies tree node
      * @param path - The path to check
-     * @return true iff the dependencies tree node containing the input path
+     * @return true if and only if the dependencies tree node containing the input path
      */
     private boolean isContainingPath(DependenciesTree node, String path) {
         GeneralInfo childGeneralInfo = node.getGeneralInfo();

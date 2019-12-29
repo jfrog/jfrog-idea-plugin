@@ -86,10 +86,10 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     abstract ScanManager getScanManager(Project project, String path);
 
     /**
-     * Return true iff the Psi element is a dependency.
+     * Return true if and only if the Psi element is a dependency.
      *
      * @param element - The Psi element in the package descriptor.
-     * @return true iff the Psi element is a dependency
+     * @return true if and only if the Psi element is a dependency
      */
     abstract boolean isDependency(PsiElement element);
 
@@ -118,7 +118,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * Determine whether to apply the inspection on the Psi element.
      *
      * @param element - The Psi element in the package descriptor
-     * @return true iff the element is a dependency and the plugin is ready to show inspection for it
+     * @return true if and only if the element is a dependency and the plugin is ready to show inspection for it
      */
     boolean isShowInspection(PsiElement element) {
         Project project = element.getProject();
@@ -250,11 +250,11 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     }
 
     /**
-     * Return true iff the dependency stated in the General info is a module in the project.
+     * Return true if and only if the dependency stated in the General info is a module in the project.
      *
      * @param node        - The project node
      * @param generalInfo - General info of the dependency
-     * @return true iff the dependency stated in the General info is a module in the project
+     * @return true if and only if the dependency stated in the General info is a module in the project
      */
     private boolean isModule(DependenciesTree node, GeneralInfo generalInfo) {
         return node.getChildren().stream()
@@ -270,7 +270,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      *
      * @param generatedGeneralInfo - General info generated for the selected Psi element in the package descriptor
      * @param generalInfo          - General info from the dependencies tree
-     * @return true iff 2 general infos considered equal
+     * @return true if and only if 2 general infos considered equal
      */
     boolean compareGeneralInfos(GeneralInfo generatedGeneralInfo, GeneralInfo generalInfo) {
         return StringUtils.equals(generatedGeneralInfo.getArtifactId(), generalInfo.getArtifactId()) &&
