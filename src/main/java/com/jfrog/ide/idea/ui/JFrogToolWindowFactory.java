@@ -27,7 +27,7 @@ public class JFrogToolWindowFactory implements ToolWindowFactory {
         boolean isSupported = CollectionUtils.isNotEmpty(ScanManagersFactory.getScanManagers(mainProject));
         DumbService.getInstance(mainProject).runWhenSmart(() -> {
             ServiceManager.getService(mainProject, JFrogToolWindow.class).initToolWindow(toolWindow, mainProject, isSupported);
-            scanManagersFactory.startScan(true, null, null);
+            scanManagersFactory.startScan(true, null);
         });
     }
 }

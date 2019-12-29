@@ -5,7 +5,6 @@ import com.google.common.collect.Sets;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
-import com.intellij.openapi.externalSystem.service.project.IdeModifiableModelsProvider;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.idea.NpmProject;
@@ -51,9 +50,8 @@ public class ScanManagersFactory {
      *
      * @param quickScan           - True to allow usage of the scan cache.
      * @param libraryDependencies - Dependencies to use in Gradle scans.
-     * @param modelsProvider      - Modules to use in Gradle scans.
      */
-    public void startScan(boolean quickScan, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies, @Nullable IdeModifiableModelsProvider modelsProvider) {
+    public void startScan(boolean quickScan, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies) {
         if (DumbService.isDumb(mainProject)) { // If intellij is still indexing the project
             return;
         }
@@ -74,7 +72,7 @@ public class ScanManagersFactory {
             refreshScanManagers();
             resetViews(issuesTree, licensesTree);
             for (ScanManager scanManager : scanManagers.values()) {
-                scanManager.asyncScanAndUpdateResults(quickScan, libraryDependencies, modelsProvider);
+                scanManager.asyncScanAndUpdateResults(quickScan, libraryDependencies);
             }
         } catch (IOException | RuntimeException e) {
             Logger.getInstance(mainProject).error("", e);
@@ -88,15 +86,14 @@ public class ScanManagersFactory {
      *
      * @param project             - The Gradle project
      * @param libraryDependencies - Gradle's dependencies
-     * @param modelsProvider      - Gradle's modules
      */
-    public void tryScanSingleProject(Project project, Collection<DataNode<LibraryDependencyData>> libraryDependencies, IdeModifiableModelsProvider modelsProvider) {
+    public void tryScanSingleProject(Project project, Collection<DataNode<LibraryDependencyData>> libraryDependencies) {
         ScanManager scanManager = scanManagers.get(Utils.getProjectIdentifier(project));
         if (scanManager != null) { // If Gradle project already exists
-            scanManager.asyncScanAndUpdateResults(true, libraryDependencies, modelsProvider);
+            scanManager.asyncScanAndUpdateResults(true, libraryDependencies);
             return;
         }
-        startScan(true, libraryDependencies, modelsProvider); // New Gradle project
+        startScan(true, libraryDependencies); // New Gradle project
     }
 
     /**
