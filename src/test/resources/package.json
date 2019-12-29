@@ -1,0 +1,11 @@
+{
+  "name": "test",
+  "version": "1.1.1",
+  "dependencies": {
+    "a": "b",
+    "c": "^d"
+  },
+  "devDependencies": {
+    "a": "b"
+  }
+}

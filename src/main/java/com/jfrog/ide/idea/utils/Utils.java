@@ -42,12 +42,6 @@ public class Utils {
                 StringUtils.equals(lhsGeneralInfo.getPath(), rhsGeneralInfo.getPath());
     }
 
-    public static boolean gavStringEqual(GeneralInfo lhs, GeneralInfo rhs) {
-        return StringUtils.equals(lhs.getGroupId(), rhs.getGroupId()) &&
-                StringUtils.equals(lhs.getArtifactId(), rhs.getArtifactId()) &&
-                StringUtils.equals(lhs.getVersion(), rhs.getVersion());
-    }
-
     public static int getProjectIdentifier(String name, String path) {
         return Objects.hashCode(name, path);
     }

@@ -1,0 +1,36 @@
+package com.jfrog.ide.idea.inspections;
+
+import com.intellij.json.psi.JsonProperty;
+
+/**
+ * @author yahavi
+ */
+public class NpmInspectionTest extends InspectionsTest {
+
+    private final Object[][] DEPENDENCIES = {
+            // offset, groupId, artifactId
+            {67, "a", "a"},
+            {82, "c", "c"},
+            {128, "a", "a"}
+    };
+
+    private final int[] NON_DEPENDENCIES_POSITIONS = {16, 36};
+
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    @Override
+    public void setUp() throws Exception {
+        super.setUp(new NpmInspection(), JsonProperty.class);
+    }
+
+    public void testDependencies() {
+        isDependencyTest(DEPENDENCIES);
+    }
+
+    public void testNonDependencies() {
+        isNonDependencyTest(NON_DEPENDENCIES_POSITIONS);
+    }
+
+    public void testCreateGeneralInfo() {
+        createGeneralInfoTest(DEPENDENCIES);
+    }
+}

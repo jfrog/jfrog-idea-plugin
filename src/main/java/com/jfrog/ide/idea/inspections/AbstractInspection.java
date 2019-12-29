@@ -1,5 +1,6 @@
 package com.jfrog.ide.idea.inspections;
 
+import com.google.common.collect.Sets;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.lang.annotation.AnnotationHolder;
@@ -16,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 
+import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -34,6 +36,10 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
 
     AbstractInspection(String packageDescriptorName) {
         this.packageDescriptorName = packageDescriptorName;
+    }
+
+    String getPackageDescriptorName() {
+        return this.packageDescriptorName;
     }
 
     /**
@@ -80,10 +86,10 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     abstract ScanManager getScanManager(Project project, String path);
 
     /**
-     * Return true iff the Psi element is a dependency.
+     * Return true if and only if the Psi element is a dependency.
      *
      * @param element - The Psi element in the package descriptor.
-     * @return true iff the Psi element is a dependency
+     * @return true if and only if the Psi element is a dependency
      */
     abstract boolean isDependency(PsiElement element);
 
@@ -112,7 +118,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * Determine whether to apply the inspection on the Psi element.
      *
      * @param element - The Psi element in the package descriptor
-     * @return true iff the element is a dependency and the plugin is ready to show inspection for it
+     * @return true if and only if the element is a dependency and the plugin is ready to show inspection for it
      */
     boolean isShowInspection(PsiElement element) {
         Project project = element.getProject();
@@ -211,12 +217,60 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     }
 
     /**
+     * Collect all modules containing the dependency stated in the general info.
+     *
+     * @param project     - The project
+     * @param modulesList - List of all relevant modules
+     * @param node        - The project node
+     * @param generalInfo - General info of the dependency
+     * @return list of all nodes of the Gradle modules
+     */
+    Set<DependenciesTree> collectModules(Project project, List<?> modulesList, DependenciesTree node, GeneralInfo generalInfo) {
+        // Single project, single module
+        if (modulesList.size() <= 1 && node.getGeneralInfo() != null) {
+            return Sets.newHashSet(node);
+        }
+
+        // Multi project
+        node = getProjectNode(node, project);
+
+        // Multi module
+        if (isModule(node, generalInfo)) {
+            return Sets.newHashSet(node);
+        }
+
+        Set<DependenciesTree> modules = Sets.newHashSet();
+        node.getChildren().forEach(child -> child.getChildren().stream()
+                .map(DependenciesTree::getGeneralInfo)
+                .filter(Objects::nonNull)
+                .filter(grandChildGeneralInfo -> compareGeneralInfos(generalInfo, grandChildGeneralInfo))
+                .findAny()
+                .ifPresent(grandChildGeneralInfo -> modules.add(child)));
+        return modules;
+    }
+
+    /**
+     * Return true if and only if the dependency stated in the General info is a module in the project.
+     *
+     * @param node        - The project node
+     * @param generalInfo - General info of the dependency
+     * @return true if and only if the dependency stated in the General info is a module in the project
+     */
+    private boolean isModule(DependenciesTree node, GeneralInfo generalInfo) {
+        return node.getChildren().stream()
+                .map(DefaultMutableTreeNode::getUserObject)
+                .filter(Objects::nonNull)
+                .map(Object::toString)
+                .anyMatch(name -> name.equals(generalInfo.getArtifactId()));
+    }
+
+    /**
      * Compare the generated general info from the Psi element and the build info from the Dependencies tree.
      * If groupId is empty, compare only artifactId.
      *
      * @param generatedGeneralInfo - General info generated for the selected Psi element in the package descriptor
      * @param generalInfo          - General info from the dependencies tree
-     * @return true iff 2 general infos considered equal
+     * @return true if and only if 2 general infos considered equal
      */
     boolean compareGeneralInfos(GeneralInfo generatedGeneralInfo, GeneralInfo generalInfo) {
         return StringUtils.equals(generatedGeneralInfo.getArtifactId(), generalInfo.getArtifactId()) &&
