@@ -9,9 +9,9 @@
 
     <change-notes>
         <![CDATA[
-          <li> Add 'Show in dependencies tree' button in the package descriptors.</li>
-          <li> Show license and top issue severity information when hovering above a dependency in the package descriptor.</li>
-          <li> Read certificates from Idea certificates manager.</li>
+          <li> Add 'Show in dependencies tree' button in the editor, while clicking on a dependency.</li>
+          <li> Show license and top issue severity information when hovering above a dependency.</li>
+          <li> Read certificates from IDEA certificates manager.</li>
           <li> New icons.</li>
           <li> Allow filtering npm projects from Xray scanning. Filter *test* and *node_modules* directories by default.</li>
           <li> Bugfix: In some cases, Maven does not show all of the dependencies.</li>
