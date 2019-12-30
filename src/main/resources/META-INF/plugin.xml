@@ -9,7 +9,14 @@
 
     <change-notes>
         <![CDATA[
-          <li> The plugin cannot find the NPM executable in some cases.</li>
+          <li> Add 'Show in dependencies tree' button in the editor, while clicking on a dependency.</li>
+          <li> Show license and top issue severity information when hovering above a dependency.</li>
+          <li> Read certificates from IDEA certificates manager.</li>
+          <li> New icons.</li>
+          <li> Allow filtering npm projects from Xray scanning. Filter *test* and *node_modules* directories by default.</li>
+          <li> Bugfix: In some cases, Maven does not show all of the dependencies.</li>
+          <li> Bugfix: Duplications in Gradle modules after refresh.</li>
+          <li> Bugfix: NPE when view changes from unsupported to supported
         ]]>
     </change-notes>
 
