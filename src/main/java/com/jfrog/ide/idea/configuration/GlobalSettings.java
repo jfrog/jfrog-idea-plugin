@@ -30,7 +30,7 @@ import com.intellij.util.xmlb.XmlSerializerUtil;
  * @author yahavi
  */
 @State(name = "GlobalSettings", storages = {@Storage("jfrogConfig.xml")})
-public final class GlobalSettings extends ApplicationComponent.Adapter implements PersistentStateComponent<GlobalSettings> {
+public final class GlobalSettings implements ApplicationComponent, PersistentStateComponent<GlobalSettings> {
 
     private XrayServerConfigImpl xrayConfig = new XrayServerConfigImpl();
 
@@ -52,11 +52,23 @@ public final class GlobalSettings extends ApplicationComponent.Adapter implement
         return this.xrayConfig;
     }
 
+    // Required for deserialization.
     public void setXrayConfig(XrayServerConfigImpl xrayConfig) {
+        this.xrayConfig.setUrl(xrayConfig.getUrl());
+        this.xrayConfig.setUsername(xrayConfig.getUsername());
+        this.xrayConfig.setCredentials(xrayConfig.getCredentialsFromPasswordSafe());
+        this.xrayConfig.setExcludedPaths(xrayConfig.getExcludedPaths());
+    }
+
+    public void updateConfig(XrayServerConfigImpl xrayConfig) {
+        if (this.xrayConfig.getUrl() != null && !this.xrayConfig.getUrl().equals(xrayConfig.getUrl())) {
+            this.xrayConfig.removeCredentialsFromPasswordSafe();
+        }
         this.xrayConfig.setUrl(xrayConfig.getUrl());
         this.xrayConfig.setUsername(xrayConfig.getUsername());
         this.xrayConfig.setPassword(xrayConfig.getPassword());
         this.xrayConfig.setExcludedPaths(xrayConfig.getExcludedPaths());
+        this.xrayConfig.addCredentialsToPasswordSafe();
     }
 
     public boolean areCredentialsSet() {

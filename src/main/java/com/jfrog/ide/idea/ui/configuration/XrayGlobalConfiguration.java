@@ -105,7 +105,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
     @Override
     public void apply() {
         GlobalSettings globalSettings = GlobalSettings.getInstance();
-        globalSettings.setXrayConfig(xrayConfig);
+        globalSettings.updateConfig(xrayConfig);
         MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
         messageBus.syncPublisher(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE).update();
         connectionResults.setText("");
