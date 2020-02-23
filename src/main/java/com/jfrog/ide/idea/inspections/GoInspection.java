@@ -1,9 +1,9 @@
 package com.jfrog.ide.idea.inspections;
 
-import com.google.common.collect.Sets;
+import com.goide.vgo.mod.psi.VgoModuleSpec;
+import com.goide.vgo.mod.psi.VgoRequireDirective;
+import com.goide.vgo.mod.psi.VgoVisitor;
 import com.intellij.codeInspection.ProblemsHolder;
-import com.intellij.json.psi.JsonElementVisitor;
-import com.intellij.json.psi.JsonProperty;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
@@ -18,31 +18,32 @@ import org.jfrog.build.extractor.scan.GeneralInfo;
 import java.util.Set;
 
 /**
- * @author yahavi
+ * Created by Bar Belity on 17/02/2020.
  */
-@SuppressWarnings("InspectionDescriptionNotFoundInspection")
-public class NpmInspection extends AbstractInspection {
 
-    public NpmInspection() {
-        super("package.json");
+@SuppressWarnings("InspectionDescriptionNotFoundInspection")
+public class GoInspection extends AbstractInspection {
+
+    public GoInspection() {
+        super("go.mod");
     }
 
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        return new JsonElementVisitor() {
+        return new VgoVisitor() {
             @Override
-            public void visitProperty(@NotNull JsonProperty element) {
-                super.visitProperty(element);
-                NpmInspection.this.visitElement(holder, element);
+            public void visitModuleSpec(VgoModuleSpec element) {
+                super.visitPsiElement(element);
+                GoInspection.this.visitElement(holder, element);
             }
         };
     }
 
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-        if (element instanceof JsonProperty) {
-            NpmInspection.this.visitElement(holder, element);
+        if (element instanceof VgoModuleSpec) {
+            GoInspection.this.visitElement(holder, element);
         }
     }
 
@@ -53,8 +54,8 @@ public class NpmInspection extends AbstractInspection {
 
     @Override
     boolean isDependency(PsiElement element) {
-        PsiElement parentElement = element.getParent().getParent();
-        return parentElement != null && StringUtils.equalsAny(parentElement.getFirstChild().getText(), "\"dependencies\"", "\"devDependencies\"");
+        PsiElement parentElement = element.getParent();
+        return parentElement instanceof VgoRequireDirective;
     }
 
     @Override
@@ -76,7 +77,6 @@ public class NpmInspection extends AbstractInspection {
 
     @Override
     GeneralInfo createGeneralInfo(PsiElement element) {
-        String artifactId = StringUtils.unwrap(element.getFirstChild().getText(), "\"");
-        return new GeneralInfo().artifactId(artifactId).groupId(artifactId);
+        return new GeneralInfo().artifactId(element.getFirstChild().getText());
     }
 }

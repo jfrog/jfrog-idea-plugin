@@ -2,7 +2,7 @@ package com.jfrog.ide.idea.ui;
 
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.utils.ProjectsMap;
-import com.jfrog.ide.idea.NpmProject;
+import com.jfrog.ide.idea.projects.NpmProject;
 
 /**
  * @author yahavi

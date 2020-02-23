@@ -217,6 +217,40 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     }
 
     /**
+     * Get all submodules from the dependencies-tree which are containing the dependency element.
+     *
+     * @param element - The Psi element in the package descriptor
+     * @param root - The root of the dependencies tree
+     * @return Set of modules containing the dependency or null if not found
+     */
+    Set<DependenciesTree> getModulesFromTree(PsiElement element, DependenciesTree root) {
+        // Single project, single module
+        if (root.getGeneralInfo() != null) {
+            return Sets.newHashSet(root);
+        }
+        // Multi project
+        String path = element.getContainingFile().getVirtualFile().getParent().getPath();
+        for (DependenciesTree child : root.getChildren()) {
+            if (isContainingPath(child, path)) {
+                return Sets.newHashSet(child);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Return true if and only if the dependencies tree node containing the input path.
+     *
+     * @param node - The dependencies tree node
+     * @param path - The path to check
+     * @return true if and only if the dependencies tree node containing the input path
+     */
+    private boolean isContainingPath(DependenciesTree node, String path) {
+        GeneralInfo childGeneralInfo = node.getGeneralInfo();
+        return StringUtils.equals(childGeneralInfo.getPath(), path);
+    }
+
+    /**
      * Collect all modules containing the dependency stated in the general info.
      *
      * @param project     - The project

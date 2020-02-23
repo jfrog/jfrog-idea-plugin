@@ -1,4 +1,4 @@
-package com.jfrog.ide.idea;
+package com.jfrog.ide.idea.projects;
 
 import com.intellij.openapi.components.BaseComponent;
 import com.intellij.openapi.extensions.ExtensionPointName;
@@ -11,29 +11,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.picocontainer.PicoContainer;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 /**
- * Unlike maven or gradle, for npm, there there's no real project in IntelliJ. We therefore use this project.
- *
- * @author yahavi
+ * Unlike maven or gradle, for npm and go, there there's no real project in IntelliJ. We therefore use this project.
+ * Created by Bar Belity on 19/02/2020.
  */
-@SuppressWarnings("ConstantConditions")
-public class NpmProject implements Project {
-
-    private String basePath;
-    private VirtualFile virtualFile;
-
-    public NpmProject(String basePath) {
-        this.basePath = basePath;
-    }
-
-    public NpmProject(VirtualFile baseDir, String basePath) {
-        this(basePath);
-        Path packageJsonPath = Paths.get(baseDir.getPath()).relativize(Paths.get(basePath, "package.json"));
-        this.virtualFile = baseDir.findFileByRelativePath(packageJsonPath.toString());
-    }
+public class ProjectBase implements Project {
+    protected String basePath;
+    protected VirtualFile virtualFile;
 
     @NotNull
     @Override
