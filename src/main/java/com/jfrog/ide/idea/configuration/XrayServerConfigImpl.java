@@ -21,6 +21,7 @@ package com.jfrog.ide.idea.configuration;
 
 import com.google.common.base.Objects;
 import com.intellij.credentialStore.CredentialAttributes;
+import com.intellij.credentialStore.CredentialAttributesKt;
 import com.intellij.credentialStore.Credentials;
 import com.intellij.ide.passwordSafe.PasswordSafe;
 import com.intellij.openapi.util.Comparing;
@@ -49,7 +50,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
  */
 @Immutable
 public class XrayServerConfigImpl implements XrayServerConfig {
-    private static final String XRAY_SETTINGS_CREDENTIALS_KEY = "XRAY_SETTINGS_CREDENTIALS_KEY";
+    private static final String XRAY_SETTINGS_CREDENTIALS_KEY = "com.jfrog.xray.idea";
     public static final String DEFAULT_EXCLUSIONS = "**/*{.idea,test,node_modules}*";
 
     @OptionTag
@@ -138,7 +139,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     }
 
     public CredentialAttributes getCredentialAttributes() {
-        return new CredentialAttributes(XRAY_SETTINGS_CREDENTIALS_KEY, getUrl(), GlobalSettings.class);
+        return new CredentialAttributes(CredentialAttributesKt.generateServiceName(XRAY_SETTINGS_CREDENTIALS_KEY, getUrl()));
     }
 
     @Override

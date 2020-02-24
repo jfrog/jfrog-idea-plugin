@@ -52,23 +52,33 @@ public final class GlobalSettings implements ApplicationComponent, PersistentSta
         return this.xrayConfig;
     }
 
-    // Required for deserialization.
+    /**
+     * Method is called by Idea IS for reading the previously saved config file 'jfrogConfig.xml' from the disk.
+     * @param xrayConfig
+     */
+    @SuppressWarnings("unused")
     public void setXrayConfig(XrayServerConfigImpl xrayConfig) {
-        this.xrayConfig.setUrl(xrayConfig.getUrl());
-        this.xrayConfig.setUsername(xrayConfig.getUsername());
+        setCommonConfigFields(xrayConfig);
         this.xrayConfig.setCredentials(xrayConfig.getCredentialsFromPasswordSafe());
-        this.xrayConfig.setExcludedPaths(xrayConfig.getExcludedPaths());
     }
 
+    /**
+     * Update xray configurations with new values.
+     * @param xrayConfig - the new configurations to update.
+     */
     public void updateConfig(XrayServerConfigImpl xrayConfig) {
         if (this.xrayConfig.getUrl() != null && !this.xrayConfig.getUrl().equals(xrayConfig.getUrl())) {
             this.xrayConfig.removeCredentialsFromPasswordSafe();
         }
+        setCommonConfigFields(xrayConfig);
+        this.xrayConfig.setPassword(xrayConfig.getPassword());
+        this.xrayConfig.addCredentialsToPasswordSafe();
+    }
+
+    public void setCommonConfigFields(XrayServerConfigImpl xrayConfig) {
         this.xrayConfig.setUrl(xrayConfig.getUrl());
         this.xrayConfig.setUsername(xrayConfig.getUsername());
-        this.xrayConfig.setPassword(xrayConfig.getPassword());
         this.xrayConfig.setExcludedPaths(xrayConfig.getExcludedPaths());
-        this.xrayConfig.addCredentialsToPasswordSafe();
     }
 
     public boolean areCredentialsSet() {
