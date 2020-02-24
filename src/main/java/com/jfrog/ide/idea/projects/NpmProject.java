@@ -8,7 +8,6 @@ import java.nio.file.Paths;
 /**
  * @author yahavi
  */
-@SuppressWarnings("ConstantConditions")
 public class NpmProject extends ProjectBase {
     public NpmProject(String basePath) {
         this.basePath = basePath;

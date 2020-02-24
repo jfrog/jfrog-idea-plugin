@@ -43,6 +43,6 @@ public class GoScanManager extends ScanManager {
 
     @Override
     protected void buildTree(@Nullable DataNode<ProjectData> externalProject) throws IOException {
-        setScanResults(goTreeBuilder.buildTree(getLog()));
+        setScanResults(goTreeBuilder.buildTree());
     }
 }
