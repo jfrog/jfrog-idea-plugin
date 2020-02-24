@@ -55,9 +55,9 @@ public class XrayServerConfigImpl implements XrayServerConfig {
 
     @OptionTag
     private String url;
-    @Transient
+    @OptionTag
     private String username;
-    @Transient
+    @Tag
     private String password;
     @Tag
     private String excludedPaths; // Pattern of project paths to exclude from Xray scanning for npm
@@ -189,6 +189,10 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     }
 
     void setPassword(String password) {
+        if (password == null) {
+            this.password = null;
+            return;
+        }
         this.password = PasswordUtil.encodePassword(password);
     }
 

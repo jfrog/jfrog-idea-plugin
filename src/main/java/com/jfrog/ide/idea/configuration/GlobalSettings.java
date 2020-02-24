@@ -25,6 +25,7 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * @author yahavi
@@ -38,9 +39,19 @@ public final class GlobalSettings implements ApplicationComponent, PersistentSta
         return ApplicationManager.getApplication().getComponent(GlobalSettings.class);
     }
 
+    /**
+     * Produces the state object to persist to file.
+     * Object to persist has null username and password as Password-safe is used for credentials store.
+     * @return the state object to persist with clear credentials.
+     */
     @Override
     public GlobalSettings getState() {
-        return this;
+        GlobalSettings settings = new GlobalSettings();
+        settings.xrayConfig.setPassword(null);
+        settings.xrayConfig.setUsername(null);
+        settings.xrayConfig.setUrl(this.xrayConfig.getUrl());
+        settings.xrayConfig.setExcludedPaths(this.xrayConfig.getExcludedPaths());
+        return settings;
     }
 
     @Override
@@ -54,12 +65,17 @@ public final class GlobalSettings implements ApplicationComponent, PersistentSta
 
     /**
      * Method is called by Idea IS for reading the previously saved config file 'jfrogConfig.xml' from the disk.
-     * @param xrayConfig
+     * Check if previous configurations contain credentials, perform migration if necessary.
+     * @param xrayConfig - configurations read from file.
      */
     @SuppressWarnings("unused")
     public void setXrayConfig(XrayServerConfigImpl xrayConfig) {
         setCommonConfigFields(xrayConfig);
-        this.xrayConfig.setCredentials(xrayConfig.getCredentialsFromPasswordSafe());
+        if (shouldPerformCredentialsMigration(xrayConfig)) {
+            migrateCredentialsFromFileToPasswordSafe(xrayConfig);
+        } else {
+            this.xrayConfig.setCredentials(xrayConfig.getCredentialsFromPasswordSafe());
+        }
     }
 
     /**
@@ -71,17 +87,39 @@ public final class GlobalSettings implements ApplicationComponent, PersistentSta
             this.xrayConfig.removeCredentialsFromPasswordSafe();
         }
         setCommonConfigFields(xrayConfig);
+        this.xrayConfig.setUsername(xrayConfig.getUsername());
         this.xrayConfig.setPassword(xrayConfig.getPassword());
         this.xrayConfig.addCredentialsToPasswordSafe();
     }
 
     public void setCommonConfigFields(XrayServerConfigImpl xrayConfig) {
         this.xrayConfig.setUrl(xrayConfig.getUrl());
-        this.xrayConfig.setUsername(xrayConfig.getUsername());
         this.xrayConfig.setExcludedPaths(xrayConfig.getExcludedPaths());
     }
 
     public boolean areCredentialsSet() {
         return xrayConfig != null && !xrayConfig.isEmpty();
+    }
+
+    /**
+     * Perform credentials migration from file to PasswordSafe.
+     * If credentials were stored on file, set the new values from it, save to PasswordSafe
+     * and persist configuration to file.
+     * @param xrayConfig - configurations read from 'jfrogConfig.xml'.
+     */
+    private void migrateCredentialsFromFileToPasswordSafe(XrayServerConfigImpl xrayConfig) {
+        this.xrayConfig.setUsername(xrayConfig.getUsername());
+        this.xrayConfig.setPassword(xrayConfig.getPassword());
+        this.xrayConfig.addCredentialsToPasswordSafe();
+        ApplicationManager.getApplication().saveSettings();
+    }
+
+    /**
+     * Determine whether should perform credentials migration or not.
+     * @param xrayConfig - configurations read from 'jfrogConfig.xml'.
+     * @return true if credentials are stored in file.
+     */
+    private boolean shouldPerformCredentialsMigration(XrayServerConfigImpl xrayConfig) {
+        return !StringUtils.isBlank(xrayConfig.getUsername()) || !StringUtils.isBlank(xrayConfig.getPassword());
     }
 }
