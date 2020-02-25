@@ -7,6 +7,7 @@ import com.intellij.json.psi.JsonProperty;
  */
 public class NpmInspectionTest extends InspectionsTest {
 
+    private static final String PACKAGE_DESCRIPTOR = "package.json";
     private final Object[][] DEPENDENCIES = {
             // offset, groupId, artifactId
             {67, "a", "a"},
@@ -19,7 +20,7 @@ public class NpmInspectionTest extends InspectionsTest {
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public void setUp() throws Exception {
-        super.setUp(new NpmInspection(), JsonProperty.class);
+        super.setUp(new NpmInspection(), PACKAGE_DESCRIPTOR, JsonProperty.class);
     }
 
     public void testDependencies() {

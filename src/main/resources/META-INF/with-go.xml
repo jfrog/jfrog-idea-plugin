@@ -1,4 +1,5 @@
 <idea-plugin>
+    <depends>com.intellij.modules.platform</depends>
     <extensions defaultExtensionNs="com.intellij">
         <localInspection language="vgo"
                          displayName="Show in dependencies tree"

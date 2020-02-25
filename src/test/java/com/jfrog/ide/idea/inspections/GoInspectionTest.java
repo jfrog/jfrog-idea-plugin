@@ -7,6 +7,7 @@ import com.goide.vgo.mod.psi.VgoModuleSpec;
  */
 public class GoInspectionTest extends InspectionsTest {
 
+    private static final String PACKAGE_DESCRIPTOR = "go.mod";
     private final Object[][] DEPENDENCIES = {
         // offset, groupId, artifactId
         {54, "", "github.com/jfrog/gocmd"},
@@ -19,7 +20,7 @@ public class GoInspectionTest extends InspectionsTest {
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public void setUp() throws Exception {
-        super.setUp(new GoInspection(), VgoModuleSpec.class);
+        super.setUp(new GoInspection(), PACKAGE_DESCRIPTOR, VgoModuleSpec.class);
     }
 
     public void testDependencies() {
