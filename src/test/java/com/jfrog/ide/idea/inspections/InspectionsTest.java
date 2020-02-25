@@ -2,22 +2,22 @@ package com.jfrog.ide.idea.inspections;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.junit.Assert;
 
 /**
  * @author yahavi
  */
-public abstract class InspectionsTest extends LightCodeInsightFixtureTestCase {
+public abstract class InspectionsTest extends LightJavaCodeInsightFixtureTestCase {
 
     PsiFile fileDescriptor;
     AbstractInspection inspection;
     private Class<? extends PsiElement> psiClass;
 
-    public void setUp(AbstractInspection inspection, Class<? extends PsiElement> psiClass) throws Exception {
+    public void setUp(AbstractInspection inspection, String packageDescriptorName, Class<? extends PsiElement> psiClass) throws Exception {
         super.setUp();
-        this.fileDescriptor = myFixture.configureByFile(inspection.getPackageDescriptorName());
+        this.fileDescriptor = myFixture.configureByFile(packageDescriptorName);
         this.inspection = inspection;
         this.psiClass = psiClass;
     }

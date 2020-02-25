@@ -7,6 +7,7 @@ import com.intellij.psi.xml.XmlTag;
  */
 public class MavenInspectionTest extends InspectionsTest {
 
+    private static final String PACKAGE_DESCRIPTOR = "pom.xml";
     private final Object[][] DEPENDENCIES = {
             // offset, groupId, artifactId
             {789, "a", "b"}
@@ -17,7 +18,7 @@ public class MavenInspectionTest extends InspectionsTest {
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public void setUp() throws Exception {
-        super.setUp(new MavenInspection(), XmlTag.class);
+        super.setUp(new MavenInspection(), PACKAGE_DESCRIPTOR, XmlTag.class);
     }
 
     public void testDependencies() {

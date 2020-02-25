@@ -28,6 +28,7 @@
     <depends>org.jetbrains.idea.maven</depends>
     <depends>org.intellij.groovy</depends>
     <depends>com.intellij.modules.java</depends>
+    <depends config-file="with-go.xml" optional="true">org.jetbrains.plugins.go</depends>
 
     <application-components>
         <component>

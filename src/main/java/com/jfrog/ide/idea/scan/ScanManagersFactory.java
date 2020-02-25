@@ -7,7 +7,9 @@ import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
-import com.jfrog.ide.idea.NpmProject;
+import com.jfrog.ide.common.utils.PackageFileFinder;
+import com.jfrog.ide.idea.projects.GoProject;
+import com.jfrog.ide.idea.projects.NpmProject;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.ui.issues.IssuesTree;
@@ -21,8 +23,6 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-
-import static com.jfrog.ide.common.utils.Utils.findPackageJsonDirs;
 
 /**
  * Created by yahavi
@@ -108,29 +108,62 @@ public class ScanManagersFactory {
             scanManagers.put(projectHash, scanManager);
         } else {
             if (MavenScanManager.isApplicable(mainProject)) {
-                scanManagers.put(projectHash, new MavenScanManager(mainProject));
+                scanManagers.put(projectHash, createScanManager(ScanManagerTypes.MAVEN, mainProject, ""));
             }
             if (GradleScanManager.isApplicable(mainProject)) {
-                scanManagers.put(projectHash, new GradleScanManager(mainProject));
+                scanManagers.put(projectHash, createScanManager(ScanManagerTypes.GRADLE, mainProject, ""));
             }
         }
         paths.add(Utils.getProjectBasePath(mainProject));
-        createNpmScanManagers(scanManagers, paths);
+        createScanManagers(scanManagers, paths);
         this.scanManagers = scanManagers;
     }
 
-    private void createNpmScanManagers(Map<Integer, ScanManager> scanManagers, Set<Path> paths) throws IOException {
+    private void createScanManagers(Map<Integer, ScanManager> scanManagers, Set<Path> paths) throws IOException {
         scanManagers.values().stream().map(ScanManager::getProjectPaths).flatMap(Collection::stream).forEach(paths::add);
-        Set<String> packageJsonDirs = findPackageJsonDirs(paths, GlobalSettings.getInstance().getXrayConfig().getExcludedPaths());
-        for (String dir : packageJsonDirs) {
+        PackageFileFinder packageFileFinder = new PackageFileFinder(paths, GlobalSettings.getInstance().getXrayConfig().getExcludedPaths());
+
+        // Create npm scan-managers.
+        Set<String> packageJsonDirs = packageFileFinder.getNpmPackagesFilePairs();
+        createScanManagersForPackageDirs(packageJsonDirs, scanManagers, ScanManagerTypes.NPM);
+
+        // Create go scan-managers.
+        Set<String> gomodDirs = packageFileFinder.getGoPackagesFilePairs();
+        createScanManagersForPackageDirs(gomodDirs, scanManagers, ScanManagerTypes.GO);
+    }
+
+    private void createScanManagersForPackageDirs(Set<String> packageDirs, Map<Integer, ScanManager> scanManagers,
+                                                  ScanManagerTypes type) throws IOException {
+        for (String dir : packageDirs) {
             int projectHash = Utils.getProjectIdentifier(dir, dir);
-            ScanManager scanManager = this.scanManagers.get(projectHash);
+            ScanManager scanManager = scanManagers.get(projectHash);
             if (scanManager != null) {
                 scanManagers.put(projectHash, scanManager);
             } else {
-                scanManagers.put(projectHash, new NpmScanManager(mainProject, new NpmProject(mainProject.getBaseDir(), dir)));
+                scanManagers.put(projectHash, createScanManager(type, mainProject, dir));
             }
         }
+    }
+
+    private enum ScanManagerTypes {
+        MAVEN,
+        GRADLE,
+        NPM,
+        GO
+    }
+
+    private ScanManager createScanManager(ScanManagerTypes type, Project project, String dir) throws IOException {
+        switch (type) {
+            case MAVEN:
+                return new MavenScanManager(project);
+            case GRADLE:
+                return new GradleScanManager(project);
+            case NPM:
+                return new NpmScanManager(project, new NpmProject(project.getBaseDir(), dir));
+            case GO:
+                return new GoScanManager(project, new GoProject(project.getBaseDir(), dir));
+        }
+        throw new IOException("Invalid scan-manager type provided.");
     }
 
     private boolean isScanInProgress() {

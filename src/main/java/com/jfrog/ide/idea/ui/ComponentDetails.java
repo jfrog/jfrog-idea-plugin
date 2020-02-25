@@ -8,7 +8,7 @@ import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.common.utils.Utils;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.jfrog.build.extractor.scan.License;
@@ -29,7 +29,7 @@ public class ComponentDetails extends JPanel {
         setBackground(UIUtil.getTableBackground());
         GeneralInfo generalInfo = node.getGeneralInfo();
         String pkgType = StringUtils.capitalize(generalInfo.getPkgType());
-        if (StringUtils.equals(pkgType, "Npm")) {
+        if (StringUtils.equalsAny(pkgType, "Npm", "Go")) {
             // Npm
             addText("Package:", generalInfo.getGroupId());
         } else {
