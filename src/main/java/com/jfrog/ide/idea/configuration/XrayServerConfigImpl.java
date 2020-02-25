@@ -20,12 +20,17 @@
 package com.jfrog.ide.idea.configuration;
 
 import com.google.common.base.Objects;
+import com.intellij.credentialStore.CredentialAttributes;
+import com.intellij.credentialStore.CredentialAttributesKt;
+import com.intellij.credentialStore.Credentials;
+import com.intellij.ide.passwordSafe.PasswordSafe;
 import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.PasswordUtil;
 import com.intellij.util.net.HttpConfigurable;
 import com.intellij.util.net.ssl.CertificateManager;
 import com.intellij.util.xmlb.annotations.OptionTag;
 import com.intellij.util.xmlb.annotations.Tag;
+import com.intellij.util.xmlb.annotations.Transient;
 import com.jfrog.ide.common.configuration.XrayServerConfig;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,6 +50,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
  */
 @Immutable
 public class XrayServerConfigImpl implements XrayServerConfig {
+    private static final String XRAY_SETTINGS_CREDENTIALS_KEY = "com.jfrog.xray.idea";
     public static final String DEFAULT_EXCLUSIONS = "**/*{.idea,test,node_modules}*";
 
     @OptionTag
@@ -112,6 +118,30 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         }
     }
 
+    public Credentials getCredentialsFromPasswordSafe() {
+        if (StringUtils.isEmpty(getUrl())) {
+            return null;
+        }
+        try {
+            return PasswordSafe.getInstance().get(getCredentialAttributes());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public void addCredentialsToPasswordSafe() {
+        Credentials credentials = new Credentials(getUsername(), getPassword());
+        PasswordSafe.getInstance().set(getCredentialAttributes(), credentials);
+    }
+
+    public void removeCredentialsFromPasswordSafe() {
+        PasswordSafe.getInstance().set(getCredentialAttributes(), null);
+    }
+
+    public CredentialAttributes getCredentialAttributes() {
+        return new CredentialAttributes(CredentialAttributesKt.generateServiceName(XRAY_SETTINGS_CREDENTIALS_KEY, getUrl()));
+    }
+
     @Override
     public boolean isNoHostVerification() {
         return CertificateManager.getInstance().getState().ACCEPT_AUTOMATICALLY;
@@ -159,7 +189,16 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     }
 
     void setPassword(String password) {
+        if (password == null) {
+            this.password = null;
+            return;
+        }
         this.password = PasswordUtil.encodePassword(password);
+    }
+
+    void setCredentials(Credentials credentials) {
+        setUsername(credentials.getUserName());
+        setPassword(credentials.getPasswordAsString());
     }
 
     @Override
