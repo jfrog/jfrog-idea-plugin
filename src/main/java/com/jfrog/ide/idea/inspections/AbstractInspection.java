@@ -17,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -36,10 +35,6 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
 
     AbstractInspection(String packageDescriptorName) {
         this.packageDescriptorName = packageDescriptorName;
-    }
-
-    String getPackageDescriptorName() {
-        return this.packageDescriptorName;
     }
 
     /**
@@ -257,7 +252,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * @param modulesList - List of all relevant modules
      * @param node        - The project node
      * @param generalInfo - General info of the dependency
-     * @return list of all nodes of the Gradle modules
+     * @return set of all modules containing the dependency stated in the general info
      */
     Set<DependenciesTree> collectModules(Project project, List<?> modulesList, DependenciesTree node, GeneralInfo generalInfo) {
         // Single project, single module
@@ -265,37 +260,62 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
             return Sets.newHashSet(node);
         }
 
-        // Multi project
+        // Get the node of the project
         node = getProjectNode(node, project);
 
-        // Multi module
-        if (isModule(node, generalInfo)) {
-            return Sets.newHashSet(node);
-        }
+        // Multi modules
+        return collectMultiModules(node, generalInfo);
+    }
 
+    /**
+     * Collect the nodes containing the dependency. Specifically handle the following cases:
+     * 1. The dependency is a module under node
+     * 2. The dependency is a direct dependency under node
+     * 3. The dependency is a level 2 dependency under node
+     * @param projectNode          - The project node
+     * @param generatedGeneralInfo - General info of the dependency
+     * @return the nodes containing the dependency
+     */
+    private Set<DependenciesTree> collectMultiModules(DependenciesTree projectNode, GeneralInfo generatedGeneralInfo) {
         Set<DependenciesTree> modules = Sets.newHashSet();
-        node.getChildren().forEach(child -> child.getChildren().stream()
-                .map(DependenciesTree::getGeneralInfo)
-                .filter(Objects::nonNull)
-                .filter(grandChildGeneralInfo -> compareGeneralInfos(generalInfo, grandChildGeneralInfo))
-                .findAny()
-                .ifPresent(grandChildGeneralInfo -> modules.add(child)));
+        for (DependenciesTree child : projectNode.getChildren()) {
+            Object userObject = child.getUserObject();
+            if (userObject == null) {
+                continue;
+            }
+            String componentId = userObject.toString();
+            if (componentId.contains(":")) {
+                // Check if the dependency is a direct dependency under the project node
+                GeneralInfo generalInfo = new GeneralInfo().componentId(componentId);
+                if (compareGeneralInfos(generatedGeneralInfo, generalInfo)) {
+                    modules.add(projectNode);
+                }
+            } else {
+                // Check if the dependency is a module under the project node
+                if (componentId.equals(generatedGeneralInfo.getArtifactId())) {
+                    modules.add(projectNode);
+                }
+            }
+
+            // Check if the dependency is a level 2 dependency under the project node
+            if (isParent(child, generatedGeneralInfo)) {
+                modules.add(child);
+            }
+        }
         return modules;
     }
 
     /**
-     * Return true if and only if the dependency stated in the General info is a module in the project.
-     *
+     * Return true iff the node is a direct parent of the dependency.
      * @param node        - The project node
      * @param generalInfo - General info of the dependency
-     * @return true if and only if the dependency stated in the General info is a module in the project
+     * @return true iff the node is a direct parent of the dependency
      */
-    private boolean isModule(DependenciesTree node, GeneralInfo generalInfo) {
+    private boolean isParent(DependenciesTree node, GeneralInfo generalInfo) {
         return node.getChildren().stream()
-                .map(DefaultMutableTreeNode::getUserObject)
+                .map(DependenciesTree::getGeneralInfo)
                 .filter(Objects::nonNull)
-                .map(Object::toString)
-                .anyMatch(name -> name.equals(generalInfo.getArtifactId()));
+                .anyMatch(childGeneralInfo -> compareGeneralInfos(generalInfo, childGeneralInfo));
     }
 
     /**
