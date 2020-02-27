@@ -269,9 +269,9 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
 
     /**
      * Collect the nodes containing the dependency. Specifically handle the following cases:
-     * 1. The dependency is a module under node
-     * 2. The dependency is a direct dependency under node
-     * 3. The dependency is a level 2 dependency under node
+     * 1. The dependency is a module under the project node
+     * 2. The dependency is a direct dependency under the project node
+     * 3. The dependency is a level 2 dependency under the project node
      * @param projectNode          - The project node
      * @param generatedGeneralInfo - General info of the dependency
      * @return the nodes containing the dependency
