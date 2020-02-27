@@ -212,28 +212,6 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     }
 
     /**
-     * Get all submodules from the dependencies-tree which are containing the dependency element.
-     *
-     * @param element - The Psi element in the package descriptor
-     * @param root - The root of the dependencies tree
-     * @return Set of modules containing the dependency or null if not found
-     */
-    Set<DependenciesTree> getModulesFromTree(PsiElement element, DependenciesTree root) {
-        // Single project, single module
-        if (root.getGeneralInfo() != null) {
-            return Sets.newHashSet(root);
-        }
-        // Multi project
-        String path = element.getContainingFile().getVirtualFile().getParent().getPath();
-        for (DependenciesTree child : root.getChildren()) {
-            if (isContainingPath(child, path)) {
-                return Sets.newHashSet(child);
-            }
-        }
-        return null;
-    }
-
-    /**
      * Return true if and only if the dependencies tree node containing the input path.
      *
      * @param node - The dependencies tree node
@@ -246,25 +224,50 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     }
 
     /**
-     * Collect all modules containing the dependency stated in the general info.
+     * Get all submodules from the dependencies-tree which are containing the dependency element.
+     * Currently in use for Go and npm.
      *
+     * @param root - The root of the dependencies tree
+     * @param element - The Psi element in the package descriptor
+     * @return Set of modules containing the dependency or null if not found
+     */
+    Set<DependenciesTree> collectModules(DependenciesTree root, PsiElement element) {
+        // Single project, single module
+        if (root.getGeneralInfo() != null) {
+            return Sets.newHashSet(root);
+        }
+
+        // Multi project
+        String path = element.getContainingFile().getVirtualFile().getParent().getPath();
+        for (DependenciesTree child : root.getChildren()) {
+            if (isContainingPath(child, path)) {
+                return Sets.newHashSet(child);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get all submodules from the dependencies-tree which are containing the dependency element.
+     * Currently in use for Gradle and Maven.
+     *
+     * @param root        - The root of the dependencies tree
      * @param project     - The project
      * @param modulesList - List of all relevant modules
-     * @param node        - The project node
      * @param generalInfo - General info of the dependency
      * @return set of all modules containing the dependency stated in the general info
      */
-    Set<DependenciesTree> collectModules(Project project, List<?> modulesList, DependenciesTree node, GeneralInfo generalInfo) {
+    Set<DependenciesTree> collectModules(DependenciesTree root, Project project, List<?> modulesList, GeneralInfo generalInfo) {
         // Single project, single module
-        if (modulesList.size() <= 1 && node.getGeneralInfo() != null) {
-            return Sets.newHashSet(node);
+        if (modulesList.size() <= 1 && root.getGeneralInfo() != null) {
+            return Sets.newHashSet(root);
         }
 
         // Get the node of the project
-        node = getProjectNode(node, project);
+        root = getProjectNode(root, project);
 
         // Multi modules
-        return collectMultiModules(node, generalInfo);
+        return collectMultiModules(root, generalInfo);
     }
 
     /**
