@@ -71,7 +71,7 @@ public class NpmInspection extends AbstractInspection {
         if (root == null) {
             return null;
         }
-        return getModulesFromTree(element, root);
+        return collectModules(root, element);
     }
 
     @Override

@@ -112,7 +112,7 @@ public class GradleInspection extends AbstractInspection {
         }
 
         // Collect the modules containing the dependency
-        return collectModules(project, gradleModules, root, generalInfo);
+        return collectModules(root, project, gradleModules, generalInfo);
     }
 
     /**

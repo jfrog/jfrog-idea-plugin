@@ -103,6 +103,6 @@ public class MavenInspection extends AbstractInspection {
         }
 
         // Search for the relevant module
-        return collectModules(project, mavenProjectsManager.getProjects(), root, generalInfo);
+        return collectModules(root, project, mavenProjectsManager.getProjects(), generalInfo);
     }
 }
