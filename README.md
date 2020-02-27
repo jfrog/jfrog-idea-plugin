@@ -5,9 +5,6 @@
 
 JFrog IntelliJ IDEA plugin adds JFrog Xray scanning of Maven, Gradle and Npm project dependencies to your IntelliJ IDEA.
 
-# Using JFrog IntelliJ IDEA plugin
-To learn how to use JFrog IntelliJ IDEA plugin, please visit the [JFrog IntelliJ IDEA Plugin User Guide](https://www.jfrog.com/confluence/display/XRAY/IDE+Integration).
-
 # Building and Testing the Sources
 
 To build the plugin sources, please follow these steps:
@@ -32,6 +29,9 @@ To build and run the plugin following your code changes, follow these steps:
 
 # Code Contributions
 We welcome community contribution through pull requests.
+
+# Using JFrog IntelliJ IDEA plugin
+To learn how to use JFrog IntelliJ IDEA plugin, please visit the [JFrog IntelliJ IDEA Plugin User Guide](https://www.jfrog.com/confluence/display/XRAY/IDE+Integration).
 
 # Release Notes
 The release are available on [Bintray](https://bintray.com/jfrog/jfrog-jars/jfrog-idea-plugin#release).
