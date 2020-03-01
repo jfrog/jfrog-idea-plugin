@@ -4,20 +4,15 @@
     <vendor email="https://www.jfrog.com/support-service" url="https://www.jfrog.com">JFrog</vendor>
 
     <description><![CDATA[
-      The JFrog IntelliJ IDEA plugin adds JFrog Xray scanning of Maven, Gradle, and npm project dependencies to your IntelliJ IDEA. It allows developers to view panels displaying vulnerability information about the components and their dependencies directly in their IntelliJ IDEA.
+      The JFrog IntelliJ IDEA plugin adds JFrog Xray scanning of Maven, Gradle, Go and npm project dependencies to your IntelliJ IDEA. It allows developers to view panels displaying vulnerability information about the components and their dependencies directly in their IntelliJ IDEA.
     ]]></description>
 
     <change-notes>
         <![CDATA[
-          <li> Add 'Show in dependencies tree' button in the editor, while clicking on a dependency.</li>
-          <li> Show license and top issue severity information when hovering above a dependency.</li>
-          <li> Read certificates from IDEA certificates manager.</li>
-          <li> New icons.</li>
-          <li> Allow filtering npm projects from Xray scanning. Filter *test* and *node_modules* directories by default.</li>
-          <li> Bugfix: In some cases, Maven does not show all of the dependencies.</li>
-          <li> Bugfix: Duplications in Gradle modules after refresh.</li>
-          <li> Bugfix: NPE when view changes from unsupported to supported.</li>
-          <li> Bugfix: In npm projects, XrayScanCache.json files are created in workspace.</li>
+          <li> Support Go projects.</li>
+          <li> Store credentials in Password Safe.</li>
+          <li> Grade - Improve inspections.</li>
+          <li> Npm - Trigger dependency scan on package-lock.json change.</li>
         ]]>
     </change-notes>
 
