@@ -11,6 +11,9 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFileManager;
+import com.intellij.openapi.vfs.newvfs.BulkFileListener;
+import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.log.ProgressIndicator;
@@ -39,6 +42,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -233,4 +237,25 @@ public abstract class ScanManager extends ScanManagerBase {
         return project.getBasePath();
     }
 
+    /**
+     * Subscribe ScanManager for VFS-change events.
+     * Perform dependencies scan and update tree after the provided file has changed.
+     * @param fileName - file to track for changes.
+     */
+    protected void subscribeLaunchDependencyScanOnFileChangedEvents(String fileName) {
+        String fileToSubscribe = Paths.get(Utils.getProjectBasePath(project).toString(), fileName).toString();
+
+        // Register for file change event of go.sum file.
+        mainProject.getMessageBus().connect().subscribe(VirtualFileManager.VFS_CHANGES, new BulkFileListener() {
+            @Override
+            public void after(@NotNull List<? extends VFileEvent> events) {
+                for (VFileEvent event : events) {
+                    String filePath = event.getPath();
+                    if (StringUtils.equals(filePath, fileToSubscribe)) {
+                        asyncScanAndUpdateResults();
+                    }
+                }
+            }
+        });
+    }
 }

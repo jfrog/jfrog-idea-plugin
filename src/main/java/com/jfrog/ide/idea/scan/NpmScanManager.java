@@ -34,6 +34,7 @@ public class NpmScanManager extends ScanManager {
         super(mainProject, project, ComponentPrefix.NPM);
         getLog().info("Found npm project: " + getProjectName());
         npmTreeBuilder = new NpmTreeBuilder(Utils.getProjectBasePath(project), EnvironmentUtil.getEnvironmentMap());
+        subscribeLaunchDependencyScanOnFileChangedEvents("package-lock.json");
     }
 
     @Override
