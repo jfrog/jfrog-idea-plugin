@@ -23,13 +23,15 @@ intellij {
 }
 
 repositories {
-    jcenter()
     mavenLocal()
     maven {
         url "https://oss.jfrog.org/artifactory/libs-snapshot"
         mavenContent {
             snapshotsOnly()
         }
+    }
+    maven {
+        url "http://oss.jfrog.org/artifactory/libs-release"
     }
 }
 
