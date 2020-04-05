@@ -27,8 +27,8 @@ public class IssuesTableModel extends AbstractTableModel {
 
     public enum IssueColumn {
         SEVERITY("Severity"),
-        ISSUE_TYPE("Issue Type"),
         FIXED_VERSIONS("Fixed Versions"),
+        ISSUE_TYPE("Issue Type"),
         COMPONENT("Component"),
         SUMMARY("Summary");
 
