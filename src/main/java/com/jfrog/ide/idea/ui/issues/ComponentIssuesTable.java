@@ -47,7 +47,6 @@ class ComponentIssuesTable extends JBTable {
     private void resizeTableColumns() {
         int tableWidth = getParent().getWidth();
         tableWidth -= getColumnModel().getColumn(SEVERITY.ordinal()).getPreferredWidth();
-        tableWidth -= getColumnModel().getColumn(ISSUE_TYPE.ordinal()).getPreferredWidth();
 
         TableColumn fixedVersionsCol = getColumnModel().getColumn(FIXED_VERSIONS.ordinal());
         fixedVersionsCol.setPreferredWidth((int) (fixedVersionsCol.getPreferredWidth() * 1.1));

@@ -27,9 +27,8 @@ public class IssuesTableModel extends AbstractTableModel {
 
     public enum IssueColumn {
         SEVERITY("Severity"),
-        FIXED_VERSIONS("Fixed Versions"),
-        ISSUE_TYPE("Issue Type"),
         COMPONENT("Component"),
+        FIXED_VERSIONS("Fixed Versions"),
         SUMMARY("Summary");
 
         private String name;
@@ -67,8 +66,6 @@ public class IssuesTableModel extends AbstractTableModel {
                 return issue.getSeverity();
             case SUMMARY:
                 return issue.getSummary();
-            case ISSUE_TYPE:
-                return StringUtils.capitalize(issue.getIssueType());
             case COMPONENT:
                 return issue.getComponent();
             case FIXED_VERSIONS:

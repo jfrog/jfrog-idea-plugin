@@ -17,8 +17,6 @@ class ComponentIssueDetails extends ComponentDetails {
         super(node);
         Issue topIssue = node.getTopIssue();
         addText("Top Issue Severity:", StringUtils.capitalize(topIssue.getSeverity().toString()));
-        addText("Top Issue Type:", StringUtils.capitalize(topIssue.getIssueType()));
-        addText("Issues Count:", String.valueOf(node.getIssueCount()));
     }
 
     static void createIssuesDetailsView(JPanel panel, DependenciesTree node) {
