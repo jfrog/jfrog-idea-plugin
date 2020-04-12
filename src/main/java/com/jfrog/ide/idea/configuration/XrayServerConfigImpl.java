@@ -30,7 +30,6 @@ import com.intellij.util.net.HttpConfigurable;
 import com.intellij.util.net.ssl.CertificateManager;
 import com.intellij.util.xmlb.annotations.OptionTag;
 import com.intellij.util.xmlb.annotations.Tag;
-import com.intellij.util.xmlb.annotations.Transient;
 import com.jfrog.ide.common.configuration.XrayServerConfig;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +51,9 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public class XrayServerConfigImpl implements XrayServerConfig {
     private static final String XRAY_SETTINGS_CREDENTIALS_KEY = "com.jfrog.xray.idea";
     public static final String DEFAULT_EXCLUSIONS = "**/*{.idea,test,node_modules}*";
+    private static final String USERNAME_ENV = "JFROG_IDEA_USERNAME";
+    private static final String PASSWORD_ENV = "JFROG_IDEA_PASSWORD";
+    private static final String URL_ENV = "JFROG_IDEA_URL";
 
     @OptionTag
     private String url;
@@ -197,8 +199,28 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     }
 
     void setCredentials(Credentials credentials) {
+        if (credentials == null) {
+            return;
+        }
         setUsername(credentials.getUserName());
         setPassword(credentials.getPasswordAsString());
+    }
+
+    /**
+     * Initialize connection details from environment variables.
+     * Minimal required details are url and username.
+     */
+    public void initConnectionDetailsFromEnv() {
+        String urlEnv = System.getenv(URL_ENV);
+        String usernameEnv = System.getenv(USERNAME_ENV);
+        String passwordEnv = System.getenv(PASSWORD_ENV);
+        if (StringUtils.isBlank(urlEnv) || StringUtils.isBlank(usernameEnv)) {
+            return;
+        }
+        setUrl(urlEnv);
+        setUsername(usernameEnv);
+        setPassword(passwordEnv);
+        addCredentialsToPasswordSafe();
     }
 
     @Override

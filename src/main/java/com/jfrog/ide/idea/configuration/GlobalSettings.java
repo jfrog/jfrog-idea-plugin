@@ -76,6 +76,11 @@ public final class GlobalSettings implements ApplicationComponent, PersistentSta
         } else {
             this.xrayConfig.setCredentials(xrayConfig.getCredentialsFromPasswordSafe());
         }
+        if (StringUtils.isNotBlank(this.xrayConfig.getUrl()) && StringUtils.isNotBlank(this.xrayConfig.getUsername())) {
+            return;
+        }
+        // If loaded configuration is empty, try to load from environment variables.
+        this.xrayConfig.initConnectionDetailsFromEnv();
     }
 
     /**
