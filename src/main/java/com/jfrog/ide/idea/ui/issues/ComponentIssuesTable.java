@@ -30,8 +30,8 @@ class ComponentIssuesTable extends JBTable {
         setAutoResizeMode(AUTO_RESIZE_OFF);
     }
 
-    void updateIssuesTable(Set<Issue> issueSet) {
-        TableModel model = new IssuesTableModel(issueSet);
+    void updateIssuesTable(Set<Issue> issueSet, Set<String> selectedComponents) {
+        TableModel model = new IssuesTableModel(issueSet, selectedComponents);
         TableRowSorter<TableModel> sorter = new TableRowSorter<>(model);
         sorter.setComparator(SEVERITY.ordinal(), Comparator.comparing(o -> ((Severity) o)));
         setModel(model);
@@ -46,10 +46,13 @@ class ComponentIssuesTable extends JBTable {
 
     private void resizeTableColumns() {
         int tableWidth = getParent().getWidth();
-        tableWidth -= getColumnModel().getColumn(SEVERITY.ordinal()).getPreferredWidth();
+
+        TableColumn severityCol = getColumnModel().getColumn(SEVERITY.ordinal());
+        severityCol.setPreferredWidth(severityCol.getPreferredWidth() / 2);
+        tableWidth -= severityCol.getPreferredWidth();
 
         TableColumn fixedVersionsCol = getColumnModel().getColumn(FIXED_VERSIONS.ordinal());
-        fixedVersionsCol.setPreferredWidth((int) (fixedVersionsCol.getPreferredWidth() * 1.1));
+        fixedVersionsCol.setPreferredWidth((int) (fixedVersionsCol.getPreferredWidth() * 1.3));
         tableWidth -= fixedVersionsCol.getPreferredWidth();
 
         getColumnModel().getColumn(SUMMARY.ordinal()).setPreferredWidth((int) (tableWidth * 0.6));

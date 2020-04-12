@@ -147,7 +147,9 @@ public class IssuesTab {
                 .map(scanManager -> scanManager.getFilteredScanIssues(FilterManagerService.getInstance(mainProject), selectedNodes))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
-        issuesTable.updateIssuesTable(issueSet);
+
+        Set<String> selectedNodeNames = selectedNodes.stream().map(node -> node.toString()).collect(Collectors.toSet());
+        issuesTable.updateIssuesTable(issueSet, selectedNodeNames);
     }
 
     /**

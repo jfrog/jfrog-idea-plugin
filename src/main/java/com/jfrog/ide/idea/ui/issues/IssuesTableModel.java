@@ -16,13 +16,15 @@ import java.util.Set;
 public class IssuesTableModel extends AbstractTableModel {
 
     private Set<Issue> issues;
+    private Set<String> components;
 
     IssuesTableModel() {
-        this(Sets.newHashSet());
+        this(Sets.newHashSet(), Sets.newHashSet());
     }
 
-    IssuesTableModel(@NotNull Set<Issue> issues) {
+    IssuesTableModel(@NotNull Set<Issue> issues, @NotNull Set<String> components) {
         this.issues = issues;
+        this.components = components;
     }
 
     public enum IssueColumn {
@@ -42,6 +44,10 @@ public class IssuesTableModel extends AbstractTableModel {
         }
     }
 
+    public Set<String> getComponents() {
+        return this.components;
+    }
+
     @Override
     public int getColumnCount() {
         return IssueColumn.values().length;
@@ -54,6 +60,9 @@ public class IssuesTableModel extends AbstractTableModel {
 
     @Override
     public String getColumnName(int col) {
+        if (col == IssueColumn.SEVERITY.ordinal()) {
+            return "";
+        }
         return IssueColumn.values()[col].getName();
     }
 
