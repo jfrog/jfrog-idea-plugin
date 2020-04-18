@@ -36,7 +36,7 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: '1.2.x-SNAPSHOT'
+    implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: '1.3.0'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
 }
 

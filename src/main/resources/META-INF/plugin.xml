@@ -19,10 +19,7 @@
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
     <idea-version since-build="183.3795.13"/>
     <depends>com.intellij.modules.lang</depends>
-    <depends>org.jetbrains.plugins.gradle</depends>
-    <depends>org.jetbrains.idea.maven</depends>
-    <depends>org.intellij.groovy</depends>
-    <depends>com.intellij.modules.java</depends>
+    <depends config-file="with-java.xml" optional="true">com.intellij.modules.java</depends>
     <depends config-file="with-go.xml" optional="true">org.jetbrains.plugins.go</depends>
 
     <application-components>
@@ -50,21 +47,7 @@
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"
                          implementationClass="com.jfrog.ide.idea.inspections.NpmInspection"/>
-        <localInspection language="XML"
-                         displayName="Show in dependencies tree"
-                         groupBundle="messages.InspectionsBundle"
-                         groupKey="group.names.probable.bugs"
-                         enabledByDefault="true"
-                         implementationClass="com.jfrog.ide.idea.inspections.MavenInspection"/>
-        <localInspection language="Groovy"
-                         displayName="Show in dependencies tree"
-                         groupBundle="messages.InspectionsBundle"
-                         groupKey="group.names.probable.bugs"
-                         enabledByDefault="true"
-                         implementationClass="com.jfrog.ide.idea.inspections.GradleInspection"/>
         <annotator language="JSON" implementationClass="com.jfrog.ide.idea.inspections.NpmInspection"/>
-        <annotator language="XML" implementationClass="com.jfrog.ide.idea.inspections.MavenInspection"/>
-        <annotator language="Groovy" implementationClass="com.jfrog.ide.idea.inspections.GradleInspection"/>
     </extensions>
 
     <actions>
