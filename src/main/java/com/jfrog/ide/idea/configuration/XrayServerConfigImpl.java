@@ -25,7 +25,7 @@ import com.intellij.credentialStore.CredentialAttributesKt;
 import com.intellij.credentialStore.Credentials;
 import com.intellij.ide.passwordSafe.PasswordSafe;
 import com.intellij.openapi.util.Comparing;
-import com.intellij.openapi.util.PasswordUtil;
+import com.intellij.util.EnvironmentUtil;
 import com.intellij.util.net.HttpConfigurable;
 import com.intellij.util.net.ssl.CertificateManager;
 import com.intellij.util.xmlb.annotations.OptionTag;
@@ -110,14 +110,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     @Override
     @CheckForNull
     public String getPassword() {
-        if (password == null) {
-            return null;
-        }
-        try {
-            return PasswordUtil.decodePassword(password);
-        } catch (NumberFormatException e) {
-            return null;
-        }
+        return password;
     }
 
     public Credentials getCredentialsFromPasswordSafe() {
@@ -191,11 +184,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     }
 
     void setPassword(String password) {
-        if (password == null) {
-            this.password = null;
-            return;
-        }
-        this.password = PasswordUtil.encodePassword(password);
+        this.password = password;
     }
 
     void setCredentials(Credentials credentials) {
@@ -208,13 +197,13 @@ public class XrayServerConfigImpl implements XrayServerConfig {
 
     /**
      * Initialize connection details from environment variables.
-     * Minimal required details are url and username.
+     * All connection details must be provided from env, otherwise don't use them.
      */
     public void initConnectionDetailsFromEnv() {
-        String urlEnv = System.getenv(URL_ENV);
-        String usernameEnv = System.getenv(USERNAME_ENV);
-        String passwordEnv = System.getenv(PASSWORD_ENV);
-        if (StringUtils.isBlank(urlEnv) || StringUtils.isBlank(usernameEnv)) {
+        String urlEnv = EnvironmentUtil.getValue(URL_ENV);
+        String usernameEnv = EnvironmentUtil.getValue(USERNAME_ENV);
+        String passwordEnv = EnvironmentUtil.getValue(PASSWORD_ENV);
+        if (StringUtils.isBlank(urlEnv) || StringUtils.isBlank(usernameEnv) || StringUtils.isBlank(passwordEnv)) {
             return;
         }
         setUrl(urlEnv);
@@ -257,11 +246,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         }
 
         public Builder setPassword(@Nullable String password) {
-            if (password != null) {
-                this.password = PasswordUtil.encodePassword(password);
-            } else {
-                this.password = "";
-            }
+            this.password = password != null ? password : "";
             return this;
         }
 
