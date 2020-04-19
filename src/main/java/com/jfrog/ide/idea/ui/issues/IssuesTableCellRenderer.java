@@ -21,6 +21,7 @@ public class IssuesTableCellRenderer extends DefaultTableCellRenderer {
             editSeverityColumn(cellRenderer, value);
         } else {
             cellRenderer.setIcon(null);
+            cellRenderer.setHorizontalAlignment(JLabel.LEADING);
         }
 
         // Bold cell if current issue is direct.
@@ -37,6 +38,7 @@ public class IssuesTableCellRenderer extends DefaultTableCellRenderer {
         cellRenderer.setOpaque(true);
         cellRenderer.setToolTipText(value.toString());
         cellRenderer.setText("");
+        cellRenderer.setHorizontalAlignment(JLabel.CENTER);
     }
 
     private static void boldIfDirectIssue(DefaultTableCellRenderer cellRenderer, JTable table, int row) {

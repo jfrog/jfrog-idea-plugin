@@ -24,6 +24,7 @@ import org.jfrog.build.extractor.scan.DependenciesTree;
 import org.jfrog.build.extractor.scan.Issue;
 
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.util.List;
@@ -148,7 +149,7 @@ public class IssuesTab {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
 
-        Set<String> selectedNodeNames = selectedNodes.stream().map(node -> node.toString()).collect(Collectors.toSet());
+        Set<String> selectedNodeNames = selectedNodes.stream().map(DefaultMutableTreeNode::toString).collect(Collectors.toSet());
         issuesTable.updateIssuesTable(issueSet, selectedNodeNames);
     }
 
