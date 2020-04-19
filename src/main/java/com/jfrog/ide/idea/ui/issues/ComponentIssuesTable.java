@@ -41,25 +41,17 @@ class ComponentIssuesTable extends JBTable {
         resizeAndRepaint();
     }
 
+    /**
+     * Sort rows by columns:
+     * 1. Severity - from high to low.
+     * 2. Component - direct before transitive issues.
+     */
     private TableRowSorter<TableModel> createTableRowSorter(TableModel model, Set<String> selectedComponents) {
         TableRowSorter<TableModel> sorter = new TableRowSorter<>(model);
         sorter.setComparator(SEVERITY.ordinal(), Comparator.comparing(o -> ((Severity) o)));
-
-        // Add a comparator for 'Component' column, current-component's issues are shown before transitive-component's issues.
-        Comparator<String> comparator = (s1, s2) -> {
-            if (selectedComponents.contains(s1) && selectedComponents.contains(s2)) {
-                return s1.compareTo(s2);
-            }
-            if (selectedComponents.contains(s1)) {
-                return -1;
-            }
-            if (selectedComponents.contains(s2)) {
-                return 1;
-            }
-            return s1.compareTo(s2);
-        };
-        sorter.setComparator(COMPONENT.ordinal(), comparator);
-
+        sorter.setComparator(COMPONENT.ordinal(), Comparator
+                .comparing(s -> selectedComponents.contains(s.toString()) ? -1 : 0)
+                .thenComparing(s -> (String) s));
         sorter.setSortKeys(SORT_KEYS);
         sorter.sort();
         return sorter;
