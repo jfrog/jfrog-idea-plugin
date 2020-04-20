@@ -43,8 +43,10 @@ public class FilterManagerService extends FilterManager implements PersistentSta
             }
             state.selectedLicences = null;
             // Update licenses tree with applied filters.
-            MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
-            messageBus.syncPublisher(ApplicationEvents.ON_SCAN_FILTER_LICENSES_CHANGE).update();
+            if (selectedLicenses.containsValue(false)) {
+                MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
+                messageBus.syncPublisher(ApplicationEvents.ON_SCAN_FILTER_LICENSES_CHANGE).update();
+            }
         }
         return selectedLicenses;
     }
@@ -69,10 +71,8 @@ public class FilterManagerService extends FilterManager implements PersistentSta
         return state;
     }
 
-    public void loadState(FiltersState state) {
-        if (state == null) {
-            return;
-        }
+    @Override
+    public void loadState(@NotNull FiltersState state) {
         this.state = state;
         setSelectedSeverities(state.selectedSeverities);
     }
