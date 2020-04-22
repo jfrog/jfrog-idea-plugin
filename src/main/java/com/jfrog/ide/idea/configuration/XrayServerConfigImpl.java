@@ -63,6 +63,8 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     private String password;
     @Tag
     private String excludedPaths; // Pattern of project paths to exclude from Xray scanning for npm
+    @Tag
+    private boolean connectionDetailsFromEnv;
 
     XrayServerConfigImpl() {
     }
@@ -72,6 +74,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         this.username = builder.username;
         this.password = builder.password;
         this.excludedPaths = builder.excludedPaths;
+        this.connectionDetailsFromEnv = builder.connectionDetailsFromEnv;
     }
 
     boolean isEmpty() {
@@ -88,7 +91,8 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         return Comparing.equal(getUrl(), other.getUrl()) &&
                 Comparing.equal(getPassword(), other.getPassword()) &&
                 Comparing.equal(getUsername(), other.getUsername()) &&
-                Comparing.equal(getExcludedPaths(), other.getExcludedPaths());
+                Comparing.equal(getExcludedPaths(), other.getExcludedPaths()) &&
+                Comparing.equal(isConnectionDetailsFromEnv(), other.isConnectionDetailsFromEnv());
     }
 
     @Override
@@ -195,6 +199,14 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         setPassword(credentials.getPasswordAsString());
     }
 
+    void setConnectionDetailsFromEnv(boolean connectionDetailsFromEnv) {
+        this.connectionDetailsFromEnv = connectionDetailsFromEnv;
+    }
+
+    public boolean isConnectionDetailsFromEnv() {
+        return connectionDetailsFromEnv;
+    }
+
     /**
      * Initialize connection details from environment variables.
      * All connection details must be provided from env, otherwise don't use them.
@@ -204,12 +216,13 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         String usernameEnv = EnvironmentUtil.getValue(USERNAME_ENV);
         String passwordEnv = EnvironmentUtil.getValue(PASSWORD_ENV);
         if (StringUtils.isBlank(urlEnv) || StringUtils.isBlank(usernameEnv) || StringUtils.isBlank(passwordEnv)) {
+            setConnectionDetailsFromEnv(false);
             return;
         }
         setUrl(urlEnv);
         setUsername(usernameEnv);
         setPassword(passwordEnv);
-        addCredentialsToPasswordSafe();
+        setConnectionDetailsFromEnv(true);
     }
 
     @Override
@@ -226,6 +239,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         private String username;
         private String password;
         private String excludedPaths;
+        private boolean connectionDetailsFromEnv;
 
         private Builder() {
             // no args
@@ -252,6 +266,11 @@ public class XrayServerConfigImpl implements XrayServerConfig {
 
         public Builder setExcludedPaths(@Nullable String excludedPaths) {
             this.excludedPaths = excludedPaths;
+            return this;
+        }
+
+        public Builder setConnectionDetailsFromEnv(boolean connectionDetailsFromEnv) {
+            this.connectionDetailsFromEnv = connectionDetailsFromEnv;
             return this;
         }
     }
