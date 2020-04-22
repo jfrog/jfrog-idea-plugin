@@ -12,7 +12,7 @@ environment:
 before_test:
   - sh: curl -s "https://get.sdkman.io" | bash
   - sh: source "$HOME/.sdkman/bin/sdkman-init.sh"
-  - sh: sdk install java 8.0.252-zulu && java -version
+  - sh: sdk install java `sdk list java | grep -E "8.*-zulu" | head -1 | awk '{print $NF}'` && java -version
 
 test_script:
   - sh: ./gradlew clean verifyPlugin test
