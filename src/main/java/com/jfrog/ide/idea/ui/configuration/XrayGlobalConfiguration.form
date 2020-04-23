@@ -168,7 +168,7 @@
         </constraints>
         <properties>
           <enabled value="false"/>
-          <text value="JFROG_IDE_PASSWORD environments variables."/>
+          <text value="JFROG_IDE_PASSWORD environment variables."/>
         </properties>
       </component>
     </children>
