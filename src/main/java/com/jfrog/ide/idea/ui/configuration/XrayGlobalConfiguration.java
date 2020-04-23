@@ -78,6 +78,8 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
                 username.setEnabled(false);
                 url.setEnabled(false);
                 password.setEnabled(false);
+                xrayConfig.readConnectionDetailsFromEnv();
+                updateConnectionDetailsTextFields();
             } else {
                 username.setEnabled(true);
                 url.setEnabled(true);
@@ -156,9 +158,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
 
         xrayConfig = GlobalSettings.getInstance().getXrayConfig();
         if (xrayConfig != null) {
-            url.setText(xrayConfig.getUrl());
-            username.setText(xrayConfig.getUsername());
-            password.setText(xrayConfig.getPassword());
+            updateConnectionDetailsTextFields();
             excludedPaths.setText(xrayConfig.getExcludedPaths());
             connectionDetailsFromEnv.setSelected(xrayConfig.isConnectionDetailsFromEnv());
         } else {
@@ -168,6 +168,12 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
             excludedPaths.setText(DEFAULT_EXCLUSIONS);
             connectionDetailsFromEnv.setSelected(false);
         }
+    }
+
+    private void updateConnectionDetailsTextFields() {
+        url.setText(xrayConfig.getUrl());
+        username.setText(xrayConfig.getUsername());
+        password.setText(xrayConfig.getPassword());
     }
 
     @SuppressWarnings("BoundFieldAssignment")

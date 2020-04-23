@@ -38,7 +38,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
     @SuppressWarnings("unused")
     GlobalSettings() {
         this.xrayConfig = new XrayServerConfigImpl();
-        this.xrayConfig.initConnectionDetailsFromEnv();
+        this.xrayConfig.setConnectionDetailsFromEnv(this.xrayConfig.readConnectionDetailsFromEnv());
     }
 
     GlobalSettings(XrayServerConfigImpl xrayConfig) {
@@ -90,7 +90,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
     public void setXrayConfig(@NotNull XrayServerConfigImpl xrayConfig) {
         if (xrayConfig.isConnectionDetailsFromEnv()) {
             // Load connection details from environment variables.
-            this.xrayConfig.initConnectionDetailsFromEnv();
+            this.xrayConfig.setConnectionDetailsFromEnv(this.xrayConfig.readConnectionDetailsFromEnv());
             this.xrayConfig.setExcludedPaths(xrayConfig.getExcludedPaths());
             return;
         }
@@ -113,7 +113,8 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
             if (this.xrayConfig.getUrl() != null) {
                 this.xrayConfig.removeCredentialsFromPasswordSafe();
             }
-            this.xrayConfig.initConnectionDetailsFromEnv();
+            this.xrayConfig.setConnectionDetailsFromEnv(true);
+            this.xrayConfig.readConnectionDetailsFromEnv();
             this.xrayConfig.setExcludedPaths(xrayConfig.getExcludedPaths());
             return;
         }

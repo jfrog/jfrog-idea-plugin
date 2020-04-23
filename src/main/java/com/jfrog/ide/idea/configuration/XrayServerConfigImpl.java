@@ -208,21 +208,21 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     }
 
     /**
-     * Initialize connection details from environment variables.
+     * Read connection details from environment variables.
      * All connection details must be provided from env, otherwise don't use them.
+     * @return true if connection details loaded from env.
      */
-    public void initConnectionDetailsFromEnv() {
+    public boolean readConnectionDetailsFromEnv() {
         String urlEnv = EnvironmentUtil.getValue(URL_ENV);
         String usernameEnv = EnvironmentUtil.getValue(USERNAME_ENV);
         String passwordEnv = EnvironmentUtil.getValue(PASSWORD_ENV);
         if (StringUtils.isBlank(urlEnv) || StringUtils.isBlank(usernameEnv) || StringUtils.isBlank(passwordEnv)) {
-            setConnectionDetailsFromEnv(false);
-            return;
+            return false;
         }
         setUrl(urlEnv);
         setUsername(usernameEnv);
         setPassword(passwordEnv);
-        setConnectionDetailsFromEnv(true);
+        return true;
     }
 
     @Override
