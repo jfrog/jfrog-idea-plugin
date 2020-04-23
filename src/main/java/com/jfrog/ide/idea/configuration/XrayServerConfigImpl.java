@@ -51,9 +51,9 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public class XrayServerConfigImpl implements XrayServerConfig {
     private static final String XRAY_SETTINGS_CREDENTIALS_KEY = "com.jfrog.xray.idea";
     public static final String DEFAULT_EXCLUSIONS = "**/*{.idea,test,node_modules}*";
-    private static final String USERNAME_ENV = "JFROG_IDEA_USERNAME";
-    private static final String PASSWORD_ENV = "JFROG_IDEA_PASSWORD";
-    private static final String URL_ENV = "JFROG_IDEA_URL";
+    private static final String USERNAME_ENV = "JFROG_IDE_USERNAME";
+    private static final String PASSWORD_ENV = "JFROG_IDE_PASSWORD";
+    private static final String URL_ENV = "JFROG_IDE_URL";
 
     @OptionTag
     private String url;
