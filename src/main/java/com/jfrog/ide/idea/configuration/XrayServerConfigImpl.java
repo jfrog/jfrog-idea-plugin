@@ -217,6 +217,9 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         String usernameEnv = EnvironmentUtil.getValue(USERNAME_ENV);
         String passwordEnv = EnvironmentUtil.getValue(PASSWORD_ENV);
         if (StringUtils.isBlank(urlEnv) || StringUtils.isBlank(usernameEnv) || StringUtils.isBlank(passwordEnv)) {
+            setUrl("");
+            setUsername("");
+            setPassword("");
             return false;
         }
         setUrl(urlEnv);
