@@ -159,7 +159,7 @@
         <properties>
           <enabled value="false"/>
           <foreground color="-4473925"/>
-          <text value="To read connection details from your environment, set the following variables:"/>
+          <text value="Load connection details from the JFROG_IDE_URL, JFROG_IDE_USERNAME and"/>
         </properties>
       </component>
       <component id="94e41" class="javax.swing.JLabel">
@@ -168,7 +168,7 @@
         </constraints>
         <properties>
           <enabled value="false"/>
-          <text value="JFROG_IDE_URL, JFROG_IDE_USERNAME and JFROG_IDE_PASSWORD."/>
+          <text value="JFROG_IDE_PASSWORD environments variables."/>
         </properties>
       </component>
     </children>
