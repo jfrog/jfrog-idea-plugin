@@ -124,6 +124,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
         MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
         messageBus.syncPublisher(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE).update();
         connectionResults.setText("");
+        loadConfig();
     }
 
     @Override

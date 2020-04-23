@@ -109,15 +109,22 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
      * @param xrayConfig - the new configurations to update.
      */
     public void updateConfig(XrayServerConfigImpl xrayConfig) {
+        if (xrayConfig.isConnectionDetailsFromEnv()) {
+            if (this.xrayConfig.getUrl() != null) {
+                this.xrayConfig.removeCredentialsFromPasswordSafe();
+            }
+            this.xrayConfig.initConnectionDetailsFromEnv();
+            this.xrayConfig.setExcludedPaths(xrayConfig.getExcludedPaths());
+            return;
+        }
+
         if (this.xrayConfig.getUrl() != null && !this.xrayConfig.getUrl().equals(xrayConfig.getUrl())) {
             this.xrayConfig.removeCredentialsFromPasswordSafe();
         }
         setCommonConfigFields(xrayConfig);
         this.xrayConfig.setUsername(xrayConfig.getUsername());
         this.xrayConfig.setPassword(xrayConfig.getPassword());
-        if (!this.xrayConfig.isConnectionDetailsFromEnv()) {
-            this.xrayConfig.addCredentialsToPasswordSafe();
-        }
+        this.xrayConfig.addCredentialsToPasswordSafe();
     }
 
     public void setCommonConfigFields(XrayServerConfigImpl xrayConfig) {
