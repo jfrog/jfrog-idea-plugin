@@ -38,7 +38,6 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
     @SuppressWarnings("unused")
     GlobalSettings() {
         this.xrayConfig = new XrayServerConfigImpl();
-        this.xrayConfig.setConnectionDetailsFromEnv(this.xrayConfig.readConnectionDetailsFromEnv());
     }
 
     GlobalSettings(XrayServerConfigImpl xrayConfig) {
@@ -74,6 +73,11 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
     @Override
     public void loadState(@NotNull GlobalSettings state) {
         XmlSerializerUtil.copyBean(state, this);
+    }
+
+    @Override
+    public void noStateLoaded() {
+        this.xrayConfig.setConnectionDetailsFromEnv(this.xrayConfig.readConnectionDetailsFromEnv());
     }
 
     public XrayServerConfigImpl getXrayConfig() {

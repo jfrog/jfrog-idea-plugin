@@ -97,7 +97,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getUrl(), getPassword(), getUsername());
+        return Objects.hashCode(getUrl(), getPassword(), getUsername(), isConnectionDetailsFromEnv());
     }
 
     @Override
@@ -129,6 +129,9 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     }
 
     public void addCredentialsToPasswordSafe() {
+        if (StringUtils.isEmpty(getUrl())) {
+            return;
+        }
         Credentials credentials = new Credentials(getUsername(), getPassword());
         PasswordSafe.getInstance().set(getCredentialAttributes(), credentials);
     }
