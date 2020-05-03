@@ -25,12 +25,11 @@ import com.intellij.credentialStore.CredentialAttributesKt;
 import com.intellij.credentialStore.Credentials;
 import com.intellij.ide.passwordSafe.PasswordSafe;
 import com.intellij.openapi.util.Comparing;
-import com.intellij.openapi.util.PasswordUtil;
+import com.intellij.util.EnvironmentUtil;
 import com.intellij.util.net.HttpConfigurable;
 import com.intellij.util.net.ssl.CertificateManager;
 import com.intellij.util.xmlb.annotations.OptionTag;
 import com.intellij.util.xmlb.annotations.Tag;
-import com.intellij.util.xmlb.annotations.Transient;
 import com.jfrog.ide.common.configuration.XrayServerConfig;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +51,9 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public class XrayServerConfigImpl implements XrayServerConfig {
     private static final String XRAY_SETTINGS_CREDENTIALS_KEY = "com.jfrog.xray.idea";
     public static final String DEFAULT_EXCLUSIONS = "**/*{.idea,test,node_modules}*";
+    private static final String USERNAME_ENV = "JFROG_IDE_USERNAME";
+    private static final String PASSWORD_ENV = "JFROG_IDE_PASSWORD";
+    private static final String URL_ENV = "JFROG_IDE_URL";
 
     @OptionTag
     private String url;
@@ -61,6 +63,8 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     private String password;
     @Tag
     private String excludedPaths; // Pattern of project paths to exclude from Xray scanning for npm
+    @Tag
+    private boolean connectionDetailsFromEnv;
 
     XrayServerConfigImpl() {
     }
@@ -70,6 +74,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         this.username = builder.username;
         this.password = builder.password;
         this.excludedPaths = builder.excludedPaths;
+        this.connectionDetailsFromEnv = builder.connectionDetailsFromEnv;
     }
 
     boolean isEmpty() {
@@ -86,12 +91,13 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         return Comparing.equal(getUrl(), other.getUrl()) &&
                 Comparing.equal(getPassword(), other.getPassword()) &&
                 Comparing.equal(getUsername(), other.getUsername()) &&
-                Comparing.equal(getExcludedPaths(), other.getExcludedPaths());
+                Comparing.equal(getExcludedPaths(), other.getExcludedPaths()) &&
+                Comparing.equal(isConnectionDetailsFromEnv(), other.isConnectionDetailsFromEnv());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getUrl(), getPassword(), getUsername());
+        return Objects.hashCode(getUrl(), getPassword(), getUsername(), isConnectionDetailsFromEnv());
     }
 
     @Override
@@ -108,14 +114,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     @Override
     @CheckForNull
     public String getPassword() {
-        if (password == null) {
-            return null;
-        }
-        try {
-            return PasswordUtil.decodePassword(password);
-        } catch (NumberFormatException e) {
-            return null;
-        }
+        return password;
     }
 
     public Credentials getCredentialsFromPasswordSafe() {
@@ -130,6 +129,9 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     }
 
     public void addCredentialsToPasswordSafe() {
+        if (StringUtils.isEmpty(getUrl())) {
+            return;
+        }
         Credentials credentials = new Credentials(getUsername(), getPassword());
         PasswordSafe.getInstance().set(getCredentialAttributes(), credentials);
     }
@@ -189,16 +191,44 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     }
 
     void setPassword(String password) {
-        if (password == null) {
-            this.password = null;
-            return;
-        }
-        this.password = PasswordUtil.encodePassword(password);
+        this.password = password;
     }
 
     void setCredentials(Credentials credentials) {
+        if (credentials == null) {
+            return;
+        }
         setUsername(credentials.getUserName());
         setPassword(credentials.getPasswordAsString());
+    }
+
+    void setConnectionDetailsFromEnv(boolean connectionDetailsFromEnv) {
+        this.connectionDetailsFromEnv = connectionDetailsFromEnv;
+    }
+
+    public boolean isConnectionDetailsFromEnv() {
+        return connectionDetailsFromEnv;
+    }
+
+    /**
+     * Read connection details from environment variables.
+     * All connection details must be provided from env, otherwise don't use them.
+     * @return true if connection details loaded from env.
+     */
+    public boolean readConnectionDetailsFromEnv() {
+        String urlEnv = EnvironmentUtil.getValue(URL_ENV);
+        String usernameEnv = EnvironmentUtil.getValue(USERNAME_ENV);
+        String passwordEnv = EnvironmentUtil.getValue(PASSWORD_ENV);
+        if (StringUtils.isBlank(urlEnv) || StringUtils.isBlank(usernameEnv) || StringUtils.isBlank(passwordEnv)) {
+            setUrl("");
+            setUsername("");
+            setPassword("");
+            return false;
+        }
+        setUrl(urlEnv);
+        setUsername(usernameEnv);
+        setPassword(passwordEnv);
+        return true;
     }
 
     @Override
@@ -215,6 +245,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         private String username;
         private String password;
         private String excludedPaths;
+        private boolean connectionDetailsFromEnv;
 
         private Builder() {
             // no args
@@ -235,16 +266,17 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         }
 
         public Builder setPassword(@Nullable String password) {
-            if (password != null) {
-                this.password = PasswordUtil.encodePassword(password);
-            } else {
-                this.password = "";
-            }
+            this.password = password != null ? password : "";
             return this;
         }
 
         public Builder setExcludedPaths(@Nullable String excludedPaths) {
             this.excludedPaths = excludedPaths;
+            return this;
+        }
+
+        public Builder setConnectionDetailsFromEnv(boolean connectionDetailsFromEnv) {
+            this.connectionDetailsFromEnv = connectionDetailsFromEnv;
             return this;
         }
     }
