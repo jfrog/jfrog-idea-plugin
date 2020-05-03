@@ -30,7 +30,6 @@ public class ComponentDetails extends JPanel {
         GeneralInfo generalInfo = node.getGeneralInfo();
         String pkgType = StringUtils.capitalize(generalInfo.getPkgType());
         if (StringUtils.equalsAny(pkgType, "Npm", "Go")) {
-            // Npm
             addText("Package:", generalInfo.getGroupId());
         } else {
             // Maven/Gradle
