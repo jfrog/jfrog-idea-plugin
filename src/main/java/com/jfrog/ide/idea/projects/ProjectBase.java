@@ -10,6 +10,7 @@ import com.intellij.util.messages.MessageBus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.picocontainer.PicoContainer;
+import org.picocontainer.alternatives.EmptyPicoContainer;
 
 /**
  * Unlike maven or gradle, for npm and go, there there's no real project in IntelliJ. We therefore use this project.
@@ -115,7 +116,7 @@ public class ProjectBase implements Project {
     @NotNull
     @Override
     public PicoContainer getPicoContainer() {
-        return null;
+        return new EmptyPicoContainer();
     }
 
     @NotNull

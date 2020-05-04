@@ -97,7 +97,7 @@ public class ScanManagersFactory {
     }
 
     /**
-     * Scan for Maven, Gradle and Npm projects. Create new ScanManagers and delete unnecessary ones.
+     * Scan projects, create new ScanManagers and delete unnecessary ones.
      */
     public void refreshScanManagers() throws IOException {
         Map<Integer, ScanManager> scanManagers = Maps.newHashMap();

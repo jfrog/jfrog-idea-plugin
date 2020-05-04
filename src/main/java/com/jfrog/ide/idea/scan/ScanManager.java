@@ -1,6 +1,12 @@
 package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Sets;
+import com.intellij.codeInspection.GlobalInspectionContext;
+import com.intellij.codeInspection.InspectionEngine;
+import com.intellij.codeInspection.InspectionManager;
+import com.intellij.codeInspection.LocalInspectionTool;
+import com.intellij.codeInspection.ex.InspectionManagerEx;
+import com.intellij.codeInspection.ex.LocalInspectionToolWrapper;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
@@ -14,6 +20,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.openapi.vfs.newvfs.BulkFileListener;
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
+import com.intellij.psi.PsiFile;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.log.ProgressIndicator;
@@ -52,7 +59,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class ScanManager extends ScanManagerBase {
 
     private static final Path HOME_PATH = Paths.get(System.getProperty("user.home"), ".jfrog-idea-plugin");
-    private Project mainProject;
+    protected Project mainProject;
     Project project;
 
     // Lock to prevent multiple simultaneous scans
@@ -82,6 +89,19 @@ public abstract class ScanManager extends ScanManagerBase {
      * Implementation should be project type specific.
      */
     protected abstract void buildTree(@Nullable DataNode<ProjectData> externalProject) throws IOException;
+
+    /**
+     * Return all project descriptors under the scan-manager project, which need to be inspected by the corresponding {@link LocalInspectionTool}.
+     * @return all project descriptors under the scan-manager project to be inspected.
+     */
+    protected abstract PsiFile[] getProjectDescriptors();
+
+    /**
+     * Return the Inspection tool corresponding to the scan-manager type.
+     * The returned Inspection tool is used to perform the inspection on the project-descriptor files.
+     * @return the Inspection tool corresponding to the scan-manager type.
+     */
+    protected abstract LocalInspectionTool getInspectionTool();
 
     /**
      * Scan and update dependency components.
@@ -159,6 +179,7 @@ public abstract class ScanManager extends ScanManagerBase {
                     scanAndCacheArtifacts(indicator, quickScan);
                     addXrayInfoToTree(getScanResults());
                     setScanResults();
+                    DumbService.getInstance(mainProject).smartInvokeLater(() -> runInspections());
                 } catch (ProcessCanceledException e) {
                     getLog().info("Xray scan was canceled");
                 } catch (Exception e) {
@@ -171,6 +192,16 @@ public abstract class ScanManager extends ScanManagerBase {
                 getLog().error(StringUtils.defaultIfEmpty(errorDetails, errorMessage));
             }
         };
+    }
+
+    private void runInspections() {
+        PsiFile[] projectDescriptors = getProjectDescriptors();
+        InspectionManagerEx inspectionManagerEx = (InspectionManagerEx) InspectionManager.getInstance(mainProject);
+        GlobalInspectionContext context = inspectionManagerEx.createNewGlobalContext(false);
+        LocalInspectionTool localInspectionTool = getInspectionTool();
+        for (PsiFile descriptor : projectDescriptors) {
+            InspectionEngine.runInspectionOnFile(descriptor, new LocalInspectionToolWrapper(localInspectionTool), context);
+        }
     }
 
     private void registerOnChangeHandlers() {
