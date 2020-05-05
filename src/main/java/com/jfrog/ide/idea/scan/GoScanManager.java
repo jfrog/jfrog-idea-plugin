@@ -56,8 +56,11 @@ public class GoScanManager extends ScanManager {
 
     @Override
     protected PsiFile[] getProjectDescriptors() {
-        String gomodPath = Paths.get(Utils.getProjectBasePath(project).toString(), "go.mod").toString();
-        VirtualFile file = LocalFileSystem.getInstance().findFileByPath(gomodPath);
+        String goModPath = Paths.get(Utils.getProjectBasePath(project).toString(), "go.mod").toString();
+        VirtualFile file = LocalFileSystem.getInstance().findFileByPath(goModPath);
+        if (file == null) {
+            return null;
+        }
         PsiFile psiFile = PsiManager.getInstance(mainProject).findFile(file);
         return new PsiFile[] {psiFile};
     }

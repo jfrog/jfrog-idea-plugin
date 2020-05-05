@@ -107,8 +107,11 @@ public class GradleScanManager extends ScanManager {
 
     @Override
     protected PsiFile[] getProjectDescriptors() {
-        String buildgradlePath = Paths.get(Utils.getProjectBasePath(project).toString(), "build.gradle").toString();
-        VirtualFile file = LocalFileSystem.getInstance().findFileByPath(buildgradlePath);
+        String buildGradlePath = Paths.get(Utils.getProjectBasePath(project).toString(), "build.gradle").toString();
+        VirtualFile file = LocalFileSystem.getInstance().findFileByPath(buildGradlePath);
+        if (file == null) {
+            return null;
+        }
         PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
         return new PsiFile[] {psiFile};
     }

@@ -56,8 +56,11 @@ public class NpmScanManager extends ScanManager {
 
     @Override
     protected PsiFile[] getProjectDescriptors() {
-        String packagjsonPath = Paths.get(Utils.getProjectBasePath(project).toString(), "package.json").toString();
-        VirtualFile file = LocalFileSystem.getInstance().findFileByPath(packagjsonPath);
+        String packageJsonPath = Paths.get(Utils.getProjectBasePath(project).toString(), "package.json").toString();
+        VirtualFile file = LocalFileSystem.getInstance().findFileByPath(packageJsonPath);
+        if (file == null) {
+            return null;
+        }
         PsiFile psiFile = PsiManager.getInstance(mainProject).findFile(file);
         return new PsiFile[] {psiFile};
     }

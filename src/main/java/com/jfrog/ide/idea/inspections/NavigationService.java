@@ -7,7 +7,10 @@ import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Bar Belity on 27/04/2020.
@@ -23,7 +26,7 @@ public class NavigationService {
 
     /**
      * Add a navigation element to the node in tree.
-     * @param treeNode
+     * @param treeNode The tree-node to register the navigation from.
      * @param navigationTarget Target element in the project descriptor.
      */
     public void addNavigation(DependenciesTree treeNode, PsiElement navigationTarget) {
@@ -42,7 +45,7 @@ public class NavigationService {
 
     /**
      * Get navigation targets for a specific node in tree.
-     * @param treeNode
+     * @param treeNode The tree-node to get its navigation.
      * @return Set of candidates for navigation.
      */
     public Set<PsiElement> getNavigation(DependenciesTree treeNode) {

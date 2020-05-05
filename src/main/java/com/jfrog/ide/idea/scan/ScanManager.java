@@ -38,6 +38,7 @@ import com.jfrog.ide.idea.ui.licenses.LicensesTree;
 import com.jfrog.ide.idea.utils.Utils;
 import com.jfrog.xray.client.services.summary.Components;
 import org.apache.commons.lang.StringUtils;
+import org.assertj.core.util.Arrays;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfrog.build.extractor.scan.DependenciesTree;
@@ -196,6 +197,9 @@ public abstract class ScanManager extends ScanManagerBase {
 
     private void runInspections() {
         PsiFile[] projectDescriptors = getProjectDescriptors();
+        if (Arrays.isNullOrEmpty(projectDescriptors)) {
+            return;
+        }
         InspectionManagerEx inspectionManagerEx = (InspectionManagerEx) InspectionManager.getInstance(mainProject);
         GlobalInspectionContext context = inspectionManagerEx.createNewGlobalContext(false);
         LocalInspectionTool localInspectionTool = getInspectionTool();

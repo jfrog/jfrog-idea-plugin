@@ -4,10 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.JBPopupMenu;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
-import com.intellij.pom.Navigatable;
-import com.intellij.psi.PsiElement;
 import com.intellij.ui.OnePixelSplitter;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.SideBorder;
@@ -16,7 +13,6 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
-import com.jfrog.ide.idea.inspections.NavigationService;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import com.jfrog.ide.idea.ui.components.FilterButton;
 import com.jfrog.ide.idea.ui.components.TitledPane;
@@ -31,10 +27,6 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,8 +46,6 @@ public class IssuesTab {
     private JComponent issuesPanel;
     private IssuesTree issuesTree;
     private Project mainProject;
-    private static final String POPUP_MENU_HEADLINE = "Show in project descriptor";
-    private JBPopupMenu popupMenu = new JBPopupMenu();
 
     /**
      * @param mainProject - Currently opened IntelliJ project
@@ -66,7 +56,6 @@ public class IssuesTab {
     public JPanel createIssuesViewTab(@NotNull Project mainProject, boolean supported) {
         this.mainProject = mainProject;
         this.issuesTree = IssuesTree.getInstance(mainProject);
-        addRightClickListener(this.issuesTree);
         IssueFilterMenu issueFilterMenu = new IssueFilterMenu(mainProject);
         JPanel issuesFilterButton = new FilterButton(issueFilterMenu, "Severity", "Select severities to show");
         JPanel toolbar = ComponentUtils.createActionToolbar("Severities toolbar", issuesFilterButton, issuesTree);
@@ -217,66 +206,6 @@ public class IssuesTab {
         });
 
         issuesTree.addOnProjectChangeListener(mainProject.getMessageBus().connect());
-    }
-
-    private void addRightClickListener(IssuesTree tree) {
-        MouseListener mouseListener = new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                handleContextMenu(tree, e);
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                handleContextMenu(tree, e);
-            }
-        };
-        tree.addMouseListener(mouseListener);
-    }
-
-    private void handleContextMenu(IssuesTree tree, MouseEvent e) {
-        if (!e.isPopupTrigger()) {
-            return;
-        }
-
-        // Event is right-click.
-        TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
-        if (selPath == null) {
-            return;
-        }
-        tree.setSelectionPath(selPath);
-        DependenciesTree selectedNode = (DependenciesTree)selPath.getLastPathComponent();
-        JBPopupMenu popupMenu = getNodePopupMenu(selectedNode);
-        if (popupMenu != null) {
-            popupMenu.show(tree, e.getX(), e.getY());
-        }
-    }
-
-    private JBPopupMenu getNodePopupMenu(DependenciesTree selectedNode) {
-        popupMenu.removeAll();
-        NavigationService navigationService = NavigationService.getInstance(mainProject);
-        Set<PsiElement> navigationCandidates = navigationService.getNavigation(selectedNode);
-        if (navigationCandidates == null) {
-            // Find parent for navigation.
-            selectedNode = navigationService.getNavigableParent(selectedNode);
-            if (selectedNode == null) {
-                return null;
-            }
-            navigationCandidates = navigationService.getNavigation(selectedNode);
-            if (navigationCandidates == null) {
-                return null;
-            }
-        }
-        PsiElement navigationTarget = navigationCandidates.iterator().next();
-        JMenuItem jumpToElement = new JMenuItem(new AbstractAction(POPUP_MENU_HEADLINE) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (navigationTarget != null && navigationTarget instanceof Navigatable && ((Navigatable) navigationTarget).canNavigate()) {
-                    ((Navigatable) navigationTarget).navigate(true);
-                }
-            }
-        });
-        popupMenu.add(jumpToElement);
-        return popupMenu;
+        issuesTree.addRightClickListener();
     }
 }
