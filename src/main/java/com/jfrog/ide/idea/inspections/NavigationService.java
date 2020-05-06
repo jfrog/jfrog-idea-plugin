@@ -67,4 +67,12 @@ public class NavigationService {
         }
         return null;
     }
+
+    /**
+     * Clear existing navigation map.
+     */
+    public static void clearNavigationMap(@NotNull Project project) {
+        NavigationService navigationService = NavigationService.getInstance(project);
+        navigationService.navigationMap.clear();
+    }
 }

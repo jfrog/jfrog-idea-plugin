@@ -35,19 +35,24 @@ public class FilterManagerService extends FilterManager implements PersistentSta
     @Override
     public Map<License, Boolean> getSelectedLicenses() {
         Map<License, Boolean> selectedLicenses = super.getSelectedLicenses();
-        if (state.selectedLicences != null) {
-            for (License license : selectedLicenses.keySet()) {
-                if (state.selectedLicences.containsKey(license.getName())) {
-                    selectedLicenses.put(license, state.selectedLicences.get(license.getName()));
-                }
-            }
-            state.selectedLicences = null;
-            // Update licenses tree with applied filters.
-            if (selectedLicenses.containsValue(false)) {
-                MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
-                messageBus.syncPublisher(ApplicationEvents.ON_SCAN_FILTER_LICENSES_CHANGE).update();
+        if (state == null || state.selectedLicences == null) {
+            return selectedLicenses;
+        }
+
+        // Previous state exists.
+        for (License license : selectedLicenses.keySet()) {
+            if (state.selectedLicences.containsKey(license.getName())) {
+                selectedLicenses.put(license, state.selectedLicences.get(license.getName()));
             }
         }
+        state.selectedLicences = null;
+
+        // Update licenses tree with applied filters.
+        if (selectedLicenses.containsValue(false)) {
+            MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
+            messageBus.syncPublisher(ApplicationEvents.ON_SCAN_FILTER_LICENSES_CHANGE).update();
+        }
+
         return selectedLicenses;
     }
 

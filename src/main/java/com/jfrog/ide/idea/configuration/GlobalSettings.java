@@ -40,10 +40,6 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         this.xrayConfig = new XrayServerConfigImpl();
     }
 
-    GlobalSettings(XrayServerConfigImpl xrayConfig) {
-        this.xrayConfig = xrayConfig;
-    }
-
     public static GlobalSettings getInstance() {
         return ApplicationManager.getApplication().getComponent(GlobalSettings.class);
     }
@@ -59,7 +55,8 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         XrayServerConfigImpl serverConfig = new XrayServerConfigImpl();
         serverConfig.setExcludedPaths(this.xrayConfig.getExcludedPaths());
         serverConfig.setConnectionDetailsFromEnv(this.xrayConfig.isConnectionDetailsFromEnv());
-        GlobalSettings settings = new GlobalSettings(serverConfig);
+        GlobalSettings settings = new GlobalSettings();
+        settings.xrayConfig = serverConfig;
         if (this.xrayConfig.isConnectionDetailsFromEnv()) {
             return settings;
         }
