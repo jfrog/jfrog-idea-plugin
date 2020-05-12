@@ -206,5 +206,6 @@ public class IssuesTab {
         });
 
         issuesTree.addOnProjectChangeListener(mainProject.getMessageBus().connect());
+        issuesTree.addRightClickListener();
     }
 }

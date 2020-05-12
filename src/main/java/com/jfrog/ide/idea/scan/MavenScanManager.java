@@ -1,13 +1,19 @@
 package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Sets;
+import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
 import com.intellij.openapi.externalSystem.model.project.ProjectData;
 import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefreshCallback;
+import com.intellij.openapi.fileTypes.StdFileTypes;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.search.FilenameIndex;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.idea.inspections.MavenInspection;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -72,6 +78,18 @@ public class MavenScanManager extends ScanManager {
         } else {
             setScanResults(rootNode);
         }
+    }
+
+    @Override
+    protected PsiFile[] getProjectDescriptors() {
+        // As project can contain sub-projects, look for all 'pom.xml' files under it.
+        GlobalSearchScope scope = GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.projectScope(project), StdFileTypes.XML);
+        return FilenameIndex.getFilesByName(project, "pom.xml", scope);
+    }
+
+    @Override
+    protected LocalInspectionTool getInspectionTool() {
+        return new MavenInspection();
     }
 
     private void addSubmodules(DependenciesTree mavenNode, MavenProject mavenProject, Set<String> added, Set<String> projectsIds) {
