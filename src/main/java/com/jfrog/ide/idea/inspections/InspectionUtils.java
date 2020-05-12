@@ -6,7 +6,6 @@ import com.intellij.psi.PsiElement;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -17,20 +16,18 @@ public class InspectionUtils {
     final static String SHOW_IN_DEPENDENCIES_TREE = "Show in dependencies tree";
 
     /**
-     * Register "Top issue" and "Licenses" annotations.
+     * Create the 'Show in dependencies tree' quickfix.
      *
      * @param problemsHolder - The "Show in dependencies tree" quickfix will be registered in this container
-     * @param dependencies   - The dependencies tree nodes correlated to the element
-     * @param elements       - The elements to apply the annotations.
+     * @param dependency     - The dependency tree node correlated to the element
+     * @param elements       - The elements to apply the annotations
      */
-    static void registerProblem(ProblemsHolder problemsHolder, List<DependenciesTree> dependencies, PsiElement[] elements) {
-        for (DependenciesTree dependency : dependencies) {
-            String description = getDescription(dependency, dependencies.size());
-            ShowInDependenciesTree quickFix = new ShowInDependenciesTree(dependency, description);
-            Arrays.stream(elements)
-                    .filter(Objects::nonNull)
-                    .forEach(element -> problemsHolder.registerProblem(element, description, ProblemHighlightType.INFORMATION, quickFix));
-        }
+    static void registerProblem(ProblemsHolder problemsHolder, DependenciesTree dependency, PsiElement[] elements, int dependenciesSize) {
+        String description = getDescription(dependency, dependenciesSize);
+        ShowInDependenciesTree quickFix = new ShowInDependenciesTree(dependency, description);
+        Arrays.stream(elements)
+                .filter(Objects::nonNull)
+                .forEach(element -> problemsHolder.registerProblem(element, description, ProblemHighlightType.INFORMATION, quickFix));
     }
 
     /**

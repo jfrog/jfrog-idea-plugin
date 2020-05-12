@@ -16,21 +16,22 @@ import java.util.Set;
 public class IssuesTableModel extends AbstractTableModel {
 
     private Set<Issue> issues;
+    private Set<String> components;
 
     IssuesTableModel() {
-        this(Sets.newHashSet());
+        this(Sets.newHashSet(), Sets.newHashSet());
     }
 
-    IssuesTableModel(@NotNull Set<Issue> issues) {
+    IssuesTableModel(@NotNull Set<Issue> issues, @NotNull Set<String> components) {
         this.issues = issues;
+        this.components = components;
     }
 
     public enum IssueColumn {
         SEVERITY("Severity"),
-        SUMMARY("Summary"),
-        ISSUE_TYPE("Issue Type"),
         COMPONENT("Component"),
-        FIXED_VERSIONS("Fixed Versions");
+        FIXED_VERSIONS("Fixed Versions"),
+        SUMMARY("Summary");
 
         private String name;
 
@@ -41,6 +42,10 @@ public class IssuesTableModel extends AbstractTableModel {
         public String getName() {
             return this.name;
         }
+    }
+
+    public Set<String> getComponents() {
+        return this.components;
     }
 
     @Override
@@ -55,6 +60,9 @@ public class IssuesTableModel extends AbstractTableModel {
 
     @Override
     public String getColumnName(int col) {
+        if (col == IssueColumn.SEVERITY.ordinal()) {
+            return "";
+        }
         return IssueColumn.values()[col].getName();
     }
 
@@ -67,8 +75,6 @@ public class IssuesTableModel extends AbstractTableModel {
                 return issue.getSeverity();
             case SUMMARY:
                 return issue.getSummary();
-            case ISSUE_TYPE:
-                return StringUtils.capitalize(issue.getIssueType());
             case COMPONENT:
                 return issue.getComponent();
             case FIXED_VERSIONS:

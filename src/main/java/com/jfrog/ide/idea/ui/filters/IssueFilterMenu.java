@@ -15,9 +15,6 @@ public class IssueFilterMenu extends FilterMenu<Severity> {
     public IssueFilterMenu(@NotNull Project mainProject) {
         super(mainProject);
         Map<Severity, Boolean> severitiesFilters = FilterManagerService.getInstance(mainProject).getSelectedSeverities();
-        for (Severity severity : Severity.NEW_SEVERITIES) {
-            severitiesFilters.put(severity, true);
-        }
         addComponents(severitiesFilters, false, ApplicationEvents.ON_SCAN_FILTER_ISSUES_CHANGE);
     }
 }

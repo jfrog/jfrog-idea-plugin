@@ -1,6 +1,5 @@
 package com.jfrog.ide.idea.inspections;
 
-import com.google.common.collect.Sets;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.json.psi.JsonElementVisitor;
 import com.intellij.json.psi.JsonProperty;

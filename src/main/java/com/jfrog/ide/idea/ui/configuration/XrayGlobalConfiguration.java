@@ -3,6 +3,7 @@ package com.jfrog.ide.idea.ui.configuration;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.messages.MessageBus;
@@ -41,6 +42,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
     private JBTextField username;
     private JBTextField url;
     private JPanel config;
+    private JBCheckBox connectionDetailsFromEnv;
 
     public XrayGlobalConfiguration() {
         testConnectionButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
@@ -70,6 +72,20 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
                 connectionResults.setText(Results.error(exception));
             }
         }));
+        connectionDetailsFromEnv.addItemListener(e -> {
+            JBCheckBox cb = (JBCheckBox) e.getSource();
+            if (cb.isSelected()) {
+                username.setEnabled(false);
+                url.setEnabled(false);
+                password.setEnabled(false);
+                xrayConfig.readConnectionDetailsFromEnv();
+                updateConnectionDetailsTextFields();
+            } else {
+                username.setEnabled(true);
+                url.setEnabled(true);
+                password.setEnabled(true);
+            }
+        });
     }
 
     @Nls
@@ -97,6 +113,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
                 .setUsername(username.getText())
                 .setPassword(String.valueOf(password.getPassword()))
                 .setExcludedPaths(excludedPaths.getText())
+                .setConnectionDetailsFromEnv(connectionDetailsFromEnv.isSelected())
                 .build();
 
         return !xrayConfig.equals(GlobalSettings.getInstance().getXrayConfig());
@@ -109,6 +126,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
         MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
         messageBus.syncPublisher(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE).update();
         connectionResults.setText("");
+        loadConfig();
     }
 
     @Override
@@ -140,16 +158,22 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
 
         xrayConfig = GlobalSettings.getInstance().getXrayConfig();
         if (xrayConfig != null) {
-            url.setText(xrayConfig.getUrl());
-            username.setText(xrayConfig.getUsername());
-            password.setText(xrayConfig.getPassword());
+            updateConnectionDetailsTextFields();
             excludedPaths.setText(xrayConfig.getExcludedPaths());
+            connectionDetailsFromEnv.setSelected(xrayConfig.isConnectionDetailsFromEnv());
         } else {
             url.setText("");
             username.setText("");
             password.setText("");
             excludedPaths.setText(DEFAULT_EXCLUSIONS);
+            connectionDetailsFromEnv.setSelected(false);
         }
+    }
+
+    private void updateConnectionDetailsTextFields() {
+        url.setText(xrayConfig.getUrl());
+        username.setText(xrayConfig.getUsername());
+        password.setText(xrayConfig.getPassword());
     }
 
     @SuppressWarnings("BoundFieldAssignment")
@@ -159,6 +183,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
         username = new JBTextField();
         password = new JBPasswordField();
         excludedPaths = new JBTextField();
+        connectionDetailsFromEnv = new JBCheckBox();
 
         loadConfig();
     }

@@ -38,15 +38,21 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     }
 
     /**
-     * Get Psi element and decide whether to add "Show in dependencies tree" option.
+     * Get Psi element and decide whether to add "Show in dependencies tree" option, and register a corresponding
+     * navigation from item in tree to item in project-descriptor.
      *
      * @param problemsHolder - The "Show in dependencies tree" option will be registered in this container.
      * @param element        - The Psi element in the package descriptor
      */
     void visitElement(ProblemsHolder problemsHolder, PsiElement element) {
         List<DependenciesTree> dependencies = getDependencies(element);
-        if (CollectionUtils.isNotEmpty(dependencies)) {
-            InspectionUtils.registerProblem(problemsHolder, dependencies, getTargetElements(element));
+        if (CollectionUtils.isEmpty(dependencies)) {
+            return;
+        }
+        NavigationService navigationService = NavigationService.getInstance(element.getProject());
+        for (DependenciesTree dependency : dependencies) {
+            InspectionUtils.registerProblem(problemsHolder, dependency, getTargetElements(element), dependencies.size());
+            navigationService.addNavigation(dependency, element);
         }
     }
 

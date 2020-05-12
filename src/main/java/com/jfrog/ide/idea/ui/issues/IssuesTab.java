@@ -24,6 +24,7 @@ import org.jfrog.build.extractor.scan.DependenciesTree;
 import org.jfrog.build.extractor.scan.Issue;
 
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.util.List;
@@ -49,7 +50,7 @@ public class IssuesTab {
     /**
      * @param mainProject - Currently opened IntelliJ project
      * @param supported   - True if the current opened project is supported by the plugin.
-     *                    If now, show the "Unsupported project type" message.
+     *                    If not, show the "Unsupported project type" message.
      * @return the issues view panel
      */
     public JPanel createIssuesViewTab(@NotNull Project mainProject, boolean supported) {
@@ -147,7 +148,9 @@ public class IssuesTab {
                 .map(scanManager -> scanManager.getFilteredScanIssues(FilterManagerService.getInstance(mainProject), selectedNodes))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
-        issuesTable.updateIssuesTable(issueSet);
+
+        Set<String> selectedNodeNames = selectedNodes.stream().map(DefaultMutableTreeNode::toString).collect(Collectors.toSet());
+        issuesTable.updateIssuesTable(issueSet, selectedNodeNames);
     }
 
     /**
@@ -203,5 +206,6 @@ public class IssuesTab {
         });
 
         issuesTree.addOnProjectChangeListener(mainProject.getMessageBus().connect());
+        issuesTree.addRightClickListener();
     }
 }
