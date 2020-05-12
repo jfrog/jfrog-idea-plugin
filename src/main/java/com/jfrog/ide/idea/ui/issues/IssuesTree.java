@@ -3,6 +3,7 @@ package com.jfrog.ide.idea.ui.issues;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.JBMenuItem;
 import com.intellij.openapi.ui.JBPopupMenu;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiElement;
@@ -117,14 +118,13 @@ public class IssuesTree extends BaseTree {
     }
 
     public void addRightClickListener() {
-        IssuesTree tree = this;
         MouseListener mouseListener = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                handleContextMenu(tree, e);
+                handleContextMenu(IssuesTree.this, e);
             }
         };
-        tree.addMouseListener(mouseListener);
+        addMouseListener(mouseListener);
     }
 
     private void handleContextMenu(IssuesTree tree, MouseEvent e) {
@@ -137,14 +137,11 @@ public class IssuesTree extends BaseTree {
         if (selPath == null) {
             return;
         }
-        DependenciesTree selectedNode = (DependenciesTree)selPath.getLastPathComponent();
-        JBPopupMenu popupMenu = getNodePopupMenu(selectedNode);
-        if (popupMenu != null) {
-            popupMenu.show(tree, e.getX(), e.getY());
-        }
+        createNodePopupMenu((DependenciesTree) selPath.getLastPathComponent());
+        popupMenu.show(tree, e.getX(), e.getY());
     }
 
-    private JBPopupMenu getNodePopupMenu(DependenciesTree selectedNode) {
+    private void createNodePopupMenu(DependenciesTree selectedNode) {
         popupMenu.removeAll();
         NavigationService navigationService = NavigationService.getInstance(mainProject);
         Set<PsiElement> navigationCandidates = navigationService.getNavigation(selectedNode);
@@ -152,27 +149,26 @@ public class IssuesTree extends BaseTree {
             // Find parent for navigation.
             selectedNode = navigationService.getNavigableParent(selectedNode);
             if (selectedNode == null) {
-                return null;
+                return;
             }
             navigationCandidates = navigationService.getNavigation(selectedNode);
             if (navigationCandidates == null) {
-                return null;
+                return;
             }
         }
         PsiElement navigationTarget = navigationCandidates.iterator().next();
-        JMenuItem jumpToElement = new JMenuItem(new AbstractAction(POPUP_MENU_HEADLINE) {
+        JMenuItem jumpToElement = new JBMenuItem(new AbstractAction(POPUP_MENU_HEADLINE) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!(navigationTarget instanceof Navigatable)) {
                     return;
                 }
-                Navigatable  navigatable = (Navigatable) navigationTarget;
+                Navigatable navigatable = (Navigatable) navigationTarget;
                 if (navigatable.canNavigate()) {
                     navigatable.navigate(true);
                 }
             }
         });
         popupMenu.add(jumpToElement);
-        return popupMenu;
     }
 }
