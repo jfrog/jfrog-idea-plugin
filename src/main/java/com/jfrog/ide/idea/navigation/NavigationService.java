@@ -1,9 +1,12 @@
-package com.jfrog.ide.idea.inspections;
+package com.jfrog.ide.idea.navigation;
 
 import com.google.common.collect.Maps;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 
@@ -18,7 +21,7 @@ import java.util.Set;
  */
 public class NavigationService {
 
-    private Map<DependenciesTree, Set<PsiElement>> navigationMap = Maps.newHashMap();
+    private Map<DependenciesTree, Set<NavigationTarget>> navigationMap = Maps.newHashMap();
 
     public static NavigationService getInstance(@NotNull Project project) {
         return ServiceManager.getService(project, NavigationService.class);
@@ -27,11 +30,18 @@ public class NavigationService {
     /**
      * Add a navigation element to the node in tree.
      * @param treeNode The tree-node to register the navigation from.
-     * @param navigationTarget Target element in the project descriptor.
+     * @param navigationTargetElement The PsiElement we register the navigation to.
      */
-    public void addNavigation(DependenciesTree treeNode, PsiElement navigationTarget) {
-        Set<PsiElement> navigationTargets;
-        navigationTargets = navigationMap.get(treeNode);
+    public void addNavigation(DependenciesTree treeNode, PsiElement navigationTargetElement) {
+        PsiFile containingFile = navigationTargetElement.getContainingFile();
+        FileViewProvider fileViewProvider = containingFile.getViewProvider();
+        Document document = fileViewProvider.getDocument();
+        if (document == null) {
+            return;
+        }
+
+        NavigationTarget navigationTarget = new NavigationTarget(containingFile.getVirtualFile(), document.getLineNumber(navigationTargetElement.getTextOffset()));
+        Set<NavigationTarget> navigationTargets = navigationMap.get(treeNode);
         if (navigationTargets == null) {
             navigationTargets = new HashSet<>(Collections.singletonList(navigationTarget));
             navigationMap.put(treeNode, navigationTargets);
@@ -48,7 +58,7 @@ public class NavigationService {
      * @param treeNode The tree-node to get its navigation.
      * @return Set of candidates for navigation.
      */
-    public Set<PsiElement> getNavigation(DependenciesTree treeNode) {
+    public Set<NavigationTarget> getNavigation(DependenciesTree treeNode) {
         return navigationMap.get(treeNode);
     }
 

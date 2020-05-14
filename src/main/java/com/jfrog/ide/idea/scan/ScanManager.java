@@ -33,7 +33,7 @@ import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.events.ProjectEvents;
-import com.jfrog.ide.idea.inspections.NavigationService;
+import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
 import com.jfrog.ide.idea.ui.filters.FilterManagerService;

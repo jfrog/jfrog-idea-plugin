@@ -2,16 +2,17 @@ package com.jfrog.ide.idea.ui.issues;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBMenuItem;
 import com.intellij.openapi.ui.JBPopupMenu;
-import com.intellij.pom.Navigatable;
-import com.intellij.psi.PsiElement;
+import com.intellij.ui.components.JBMenu;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.filter.FilterManager;
 import com.jfrog.ide.common.utils.ProjectsMap;
+import com.jfrog.ide.idea.navigation.NavigationTarget;
 import com.jfrog.ide.idea.events.ProjectEvents;
-import com.jfrog.ide.idea.inspections.NavigationService;
+import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.ui.BaseTree;
 import com.jfrog.ide.idea.ui.filters.FilterManagerService;
 import com.jfrog.ide.idea.ui.listeners.IssuesTreeExpansionListener;
@@ -144,7 +145,7 @@ public class IssuesTree extends BaseTree {
     private void createNodePopupMenu(DependenciesTree selectedNode) {
         popupMenu.removeAll();
         NavigationService navigationService = NavigationService.getInstance(mainProject);
-        Set<PsiElement> navigationCandidates = navigationService.getNavigation(selectedNode);
+        Set<NavigationTarget> navigationCandidates = navigationService.getNavigation(selectedNode);
         if (navigationCandidates == null) {
             // Find parent for navigation.
             selectedNode = navigationService.getNavigableParent(selectedNode);
@@ -156,19 +157,37 @@ public class IssuesTree extends BaseTree {
                 return;
             }
         }
-        PsiElement navigationTarget = navigationCandidates.iterator().next();
-        JMenuItem jumpToElement = new JBMenuItem(new AbstractAction(POPUP_MENU_HEADLINE) {
+
+        if (navigationCandidates.size() > 1) {
+            addMultiNavigation(navigationCandidates);
+        } else {
+            addSingleNavigation(navigationCandidates);
+        }
+    }
+
+    private void addSingleNavigation(Set<NavigationTarget> navigationCandidates) {
+        NavigationTarget navigationTarget = navigationCandidates.iterator().next();
+        popupMenu.add(createNavigationMenuItem(navigationTarget, POPUP_MENU_HEADLINE));
+    }
+
+    private void addMultiNavigation(Set<NavigationTarget> navigationCandidates) {
+        JMenu multiMenu = new JBMenu();
+        multiMenu.setText(POPUP_MENU_HEADLINE);
+        for (NavigationTarget element : navigationCandidates) {
+            String headLine = element.getVirtualFile().getName() + " " + (element.getLineNumber() + 1);
+            multiMenu.add(createNavigationMenuItem(element, headLine));
+        }
+        popupMenu.add(multiMenu);
+    }
+
+    private JMenuItem createNavigationMenuItem(NavigationTarget navigationTarget, String headLine) {
+        JMenuItem jumpToElement = new JBMenuItem(new AbstractAction(headLine) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!(navigationTarget instanceof Navigatable)) {
-                    return;
-                }
-                Navigatable navigatable = (Navigatable) navigationTarget;
-                if (navigatable.canNavigate()) {
-                    navigatable.navigate(true);
-                }
+                OpenFileDescriptor openFileDescriptor = new OpenFileDescriptor(mainProject, navigationTarget.getVirtualFile(), navigationTarget.getLineNumber(), 0);
+                openFileDescriptor.navigate(true);
             }
         });
-        popupMenu.add(jumpToElement);
+        return jumpToElement;
     }
 }
