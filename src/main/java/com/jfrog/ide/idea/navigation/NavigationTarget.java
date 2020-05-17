@@ -1,7 +1,8 @@
 package com.jfrog.ide.idea.navigation;
 
-import com.google.common.base.Objects;
 import com.intellij.openapi.vfs.VirtualFile;
+
+import java.util.Objects;
 
 /**
  * Created by Bar Belity on 14/05/2020.
@@ -30,11 +31,11 @@ public class NavigationTarget {
         if (!(o instanceof NavigationTarget)) return false;
         NavigationTarget that = (NavigationTarget) o;
         return lineNumber == that.lineNumber &&
-                java.util.Objects.equals(virtualFile, that.virtualFile);
+                Objects.equals(virtualFile, that.virtualFile);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(virtualFile, lineNumber);
+        return Objects.hash(virtualFile, lineNumber);
     }
 }

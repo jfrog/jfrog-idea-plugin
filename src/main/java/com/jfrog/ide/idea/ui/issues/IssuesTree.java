@@ -10,9 +10,10 @@ import com.intellij.ui.components.JBMenu;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.filter.FilterManager;
 import com.jfrog.ide.common.utils.ProjectsMap;
-import com.jfrog.ide.idea.navigation.NavigationTarget;
 import com.jfrog.ide.idea.events.ProjectEvents;
+import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.navigation.NavigationService;
+import com.jfrog.ide.idea.navigation.NavigationTarget;
 import com.jfrog.ide.idea.ui.BaseTree;
 import com.jfrog.ide.idea.ui.filters.FilterManagerService;
 import com.jfrog.ide.idea.ui.listeners.IssuesTreeExpansionListener;
@@ -25,6 +26,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.IntStream;
@@ -173,21 +177,38 @@ public class IssuesTree extends BaseTree {
     private void addMultiNavigation(Set<NavigationTarget> navigationCandidates) {
         JMenu multiMenu = new JBMenu();
         multiMenu.setText(POPUP_MENU_HEADLINE);
-        for (NavigationTarget element : navigationCandidates) {
-            String headLine = element.getVirtualFile().getName() + " " + (element.getLineNumber() + 1);
-            multiMenu.add(createNavigationMenuItem(element, headLine));
+        for (NavigationTarget navigationTarget : navigationCandidates) {
+            String descriptorPath = getRelativizedDescriptorPath(navigationTarget);
+            multiMenu.add(createNavigationMenuItem(navigationTarget, descriptorPath + " " + (navigationTarget.getLineNumber() + 1)));
         }
         popupMenu.add(multiMenu);
     }
 
+    private String getRelativizedDescriptorPath(NavigationTarget navigationTarget) {
+        String pathResult = navigationTarget.getVirtualFile().getName();
+        String projBasePath = mainProject.getBasePath();
+        if (projBasePath == null) {
+            return pathResult;
+        }
+
+        try {
+            Path basePath = Paths.get(mainProject.getBasePath());
+            Path descriptorPath = Paths.get(navigationTarget.getVirtualFile().getPath());
+            pathResult = basePath.relativize(descriptorPath).toString();
+        } catch (InvalidPathException ex) {
+            Logger log = Logger.getInstance(mainProject);
+            log.error("Failed getting project-descriptor's path.");
+        }
+
+        return pathResult;
+    }
+
     private JMenuItem createNavigationMenuItem(NavigationTarget navigationTarget, String headLine) {
-        JMenuItem jumpToElement = new JBMenuItem(new AbstractAction(headLine) {
+        return new JBMenuItem(new AbstractAction(headLine) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                OpenFileDescriptor openFileDescriptor = new OpenFileDescriptor(mainProject, navigationTarget.getVirtualFile(), navigationTarget.getLineNumber(), 0);
-                openFileDescriptor.navigate(true);
+                new OpenFileDescriptor(mainProject, navigationTarget.getVirtualFile(), navigationTarget.getLineNumber(), 0).navigate(true);
             }
         });
-        return jumpToElement;
     }
 }

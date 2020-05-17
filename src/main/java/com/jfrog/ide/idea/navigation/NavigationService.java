@@ -47,9 +47,6 @@ public class NavigationService {
             navigationMap.put(treeNode, navigationTargets);
             return;
         }
-        if (navigationTargets.contains(navigationTarget)) {
-            return;
-        }
         navigationTargets.add(navigationTarget);
     }
 
