@@ -197,7 +197,7 @@ public class IssuesTree extends BaseTree {
             pathResult = basePath.relativize(descriptorPath).toString();
         } catch (InvalidPathException ex) {
             Logger log = Logger.getInstance(mainProject);
-            log.error("Failed getting project-descriptor's path.");
+            log.error("Failed getting project-descriptor's path.", ex);
         }
 
         return pathResult;
