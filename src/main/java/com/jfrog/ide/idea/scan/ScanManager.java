@@ -165,7 +165,9 @@ public abstract class ScanManager extends ScanManagerBase {
      * @return all project modules locations as Paths
      */
     public Set<Path> getProjectPaths() {
-        return Sets.newHashSet(Utils.getProjectBasePath(project));
+        Set<Path> paths = Sets.newHashSet();
+        paths.add(Utils.getProjectBasePath(project));
+        return paths;
     }
 
     /**
