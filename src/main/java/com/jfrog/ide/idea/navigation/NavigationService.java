@@ -28,8 +28,17 @@ public class NavigationService {
     }
 
     /**
+     * Clear existing navigation map.
+     */
+    public static void clearNavigationMap(@NotNull Project project) {
+        NavigationService navigationService = NavigationService.getInstance(project);
+        navigationService.navigationMap.clear();
+    }
+
+    /**
      * Add a navigation element to the node in tree.
-     * @param treeNode The tree-node to register the navigation from.
+     *
+     * @param treeNode                The tree-node to register the navigation from.
      * @param navigationTargetElement The PsiElement we register the navigation to.
      */
     public void addNavigation(DependenciesTree treeNode, PsiElement navigationTargetElement) {
@@ -40,7 +49,7 @@ public class NavigationService {
             return;
         }
 
-        NavigationTarget navigationTarget = new NavigationTarget(containingFile.getVirtualFile(), document.getLineNumber(navigationTargetElement.getTextOffset()));
+        NavigationTarget navigationTarget = new NavigationTarget(navigationTargetElement, document.getLineNumber(navigationTargetElement.getTextOffset()));
         Set<NavigationTarget> navigationTargets = navigationMap.get(treeNode);
         if (navigationTargets == null) {
             navigationTargets = new HashSet<>(Collections.singletonList(navigationTarget));
@@ -52,6 +61,7 @@ public class NavigationService {
 
     /**
      * Get navigation targets for a specific node in tree.
+     *
      * @param treeNode The tree-node to get its navigation.
      * @return Set of candidates for navigation.
      */
@@ -61,6 +71,7 @@ public class NavigationService {
 
     /**
      * Get a navigable ancestor of a DependenciesTree node, in the issues tree.
+     *
      * @param node To find its navigable ancestor.
      * @return The first navigable ancestor of 'node', null of not found.
      */
@@ -73,13 +84,5 @@ public class NavigationService {
             parentCandidate = (DependenciesTree) parentCandidate.getParent();
         }
         return null;
-    }
-
-    /**
-     * Clear existing navigation map.
-     */
-    public static void clearNavigationMap(@NotNull Project project) {
-        NavigationService navigationService = NavigationService.getInstance(project);
-        navigationService.navigationMap.clear();
     }
 }
