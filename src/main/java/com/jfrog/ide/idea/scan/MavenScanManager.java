@@ -67,10 +67,7 @@ public class MavenScanManager extends ScanManager {
     @Override
     protected void buildTree(@Nullable DataNode<ProjectData> externalProject) {
         DependenciesTree rootNode = new DependenciesTree(project.getName());
-        // Any parent pom will appear in the dependencies tree. We want to display it as a module instead.
-        Set<String> projects = Sets.newHashSet();
-        MavenProjectsManager.getInstance(project).getProjects().forEach(project -> projects.add(project.getMavenId().getKey()));
-        MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject -> populateMavenModule(rootNode, rootMavenProject, Sets.newHashSet(), projects));
+        MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject -> populateMavenModule(rootNode, rootMavenProject, Sets.newHashSet()));
         GeneralInfo generalInfo = new GeneralInfo().artifactId(project.getName()).path(Utils.getProjectBasePath(project).toString()).pkgType("maven");
         rootNode.setGeneralInfo(generalInfo);
         if (rootNode.getChildren().size() == 1) {
@@ -92,11 +89,11 @@ public class MavenScanManager extends ScanManager {
         return new MavenInspection();
     }
 
-    private void addSubmodules(DependenciesTree mavenNode, MavenProject mavenProject, Set<String> added, Set<String> projectsIds) {
+    private void addSubmodules(DependenciesTree mavenNode, MavenProject mavenProject, Set<String> added) {
         mavenProject.getExistingModuleFiles().stream()
                 .map(this::getModuleByVirtualFile)
                 .filter(Objects::nonNull)
-                .forEach(mavenModule -> populateMavenModule(mavenNode, mavenModule, added, projectsIds));
+                .forEach(mavenModule -> populateMavenModule(mavenNode, mavenModule, added));
     }
 
     /**
@@ -105,14 +102,14 @@ public class MavenScanManager extends ScanManager {
      * @param root             - The root dependencies node
      * @param rootMavenProject - The root Maven project
      * @param added            - This set is used to make sure the dependencies added are unique between module and its parent
-     * @param projectsIds      - The Maven project ids
      */
-    private void populateMavenModule(DependenciesTree root, MavenProject rootMavenProject, Set<String> added, Set<String> projectsIds) {
+    private void populateMavenModule(DependenciesTree root, MavenProject rootMavenProject, Set<String> added) {
         DependenciesTree mavenNode = populateMavenModuleNode(rootMavenProject);
         root.add(mavenNode);
         added = Sets.newHashSet(added);
-        addMavenProjectDependencies(mavenNode, rootMavenProject, added, projectsIds);
-        addSubmodules(mavenNode, rootMavenProject, added, projectsIds);
+        added.add(rootMavenProject.toString());
+        addMavenProjectDependencies(mavenNode, rootMavenProject, added);
+        addSubmodules(mavenNode, rootMavenProject, added);
     }
 
     private MavenProject getModuleByVirtualFile(VirtualFile virtualFile) {
@@ -123,12 +120,11 @@ public class MavenScanManager extends ScanManager {
                 .orElse(null);
     }
 
-    private void addMavenProjectDependencies(DependenciesTree node, MavenProject mavenProject, Set<String> added, Set<String> projectsIds) {
+    private void addMavenProjectDependencies(DependenciesTree node, MavenProject mavenProject, Set<String> added) {
         mavenProject.getDependencyTree()
                 .stream()
-                .filter(dependencyTree -> added.add(dependencyTree.getArtifact().getDisplayStringForLibraryName()) &&
-                        !projectsIds.contains(dependencyTree.getArtifact().getDisplayStringForLibraryName()))
-                .forEach(dependencyTree -> updateChildrenNodes(node, dependencyTree));
+                .filter(dependencyTree -> added.add(dependencyTree.getArtifact().getDisplayStringForLibraryName()))
+                .forEach(dependencyTree -> updateChildrenNodes(node, dependencyTree, added));
     }
 
     /**
@@ -145,11 +141,13 @@ public class MavenScanManager extends ScanManager {
         return node;
     }
 
-    private void updateChildrenNodes(DependenciesTree parentNode, MavenArtifactNode mavenArtifactNode) {
+    private void updateChildrenNodes(DependenciesTree parentNode, MavenArtifactNode mavenArtifactNode, Set<String> added) {
         DependenciesTree currentNode = new DependenciesTree(mavenArtifactNode.getArtifact().getDisplayStringSimple());
         populateDependenciesTreeNode(currentNode);
         mavenArtifactNode.getDependencies()
-                .forEach(childrenArtifactNode -> updateChildrenNodes(currentNode, childrenArtifactNode));
+                .stream()
+                .filter(dependencyTree -> added.add(dependencyTree.getArtifact().getDisplayStringForLibraryName()))
+                .forEach(childrenArtifactNode -> updateChildrenNodes(currentNode, childrenArtifactNode, added));
         parentNode.add(currentNode);
     }
 
