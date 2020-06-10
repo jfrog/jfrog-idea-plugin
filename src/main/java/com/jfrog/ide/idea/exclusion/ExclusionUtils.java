@@ -16,11 +16,8 @@ public class ExclusionUtils {
      * @return true if the provided nodeToExclude can be excluded from project-descriptor.
      */
     public static boolean isExcludable(DependenciesTree nodeToExclude, DependenciesTree affectedNode) {
-        if ("maven".equals(nodeToExclude.getGeneralInfo().getPkgType())) {
-            DependenciesTree rootNode = (DependenciesTree) nodeToExclude.getRoot();
-            if ("maven".equals(rootNode.getGeneralInfo().getPkgType())) {
-                return MavenExclusion.isExcludable(nodeToExclude, affectedNode);
-            }
+        if (MavenExclusion.isMavenPackageType(nodeToExclude)) {
+            return MavenExclusion.isExcludable(nodeToExclude, affectedNode);
         }
         return false;
     }
@@ -32,10 +29,9 @@ public class ExclusionUtils {
      * @param navigationTarget - The navigation-target of the node to exclude.
      * @return the corresponding Excludable object, Null if exclusion is not supported for this node.
      */
-    public static Excludable getExcludable(DependenciesTree nodeToExclude, NavigationTarget navigationTarget) {
-        if ("maven".equals(nodeToExclude.getGeneralInfo().getPkgType())) {
-            DependenciesTree rootNode = (DependenciesTree) nodeToExclude.getRoot();
-            if ("maven".equals(rootNode.getGeneralInfo().getPkgType())) {
+    public static Excludable getExcludable(DependenciesTree nodeToExclude, DependenciesTree affectedNode, NavigationTarget navigationTarget) {
+        if (MavenExclusion.isMavenPackageType(nodeToExclude)) {
+            if (MavenExclusion.isExcludable(nodeToExclude, affectedNode)) {
                 return new MavenExclusion(nodeToExclude, navigationTarget);
             }
         }

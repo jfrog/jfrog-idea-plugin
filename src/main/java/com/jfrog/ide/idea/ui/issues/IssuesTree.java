@@ -229,29 +229,37 @@ public class IssuesTree extends BaseTree {
     }
 
     private void addNodeExclusion(DependenciesTree nodeToExclude, Set<NavigationTarget> parentCandidates, DependenciesTree affectedNode) {
+        if (parentCandidates.size() > 1) {
+            addMultiExclusion(nodeToExclude, affectedNode, parentCandidates);
+        } else {
+            addSingleExclusion(nodeToExclude, affectedNode, parentCandidates.iterator().next());
+        }
+    }
+
+    private void addMultiExclusion(DependenciesTree nodeToExclude, DependenciesTree affectedNode, Set<NavigationTarget> parentCandidates) {
         if (!ExclusionUtils.isExcludable(nodeToExclude, affectedNode)) {
             return;
         }
-        if (parentCandidates.size() > 1) {
-            addMultiExclusion(nodeToExclude, parentCandidates);
-        } else {
-            addSingleExclusion(nodeToExclude, parentCandidates.iterator().next());
-        }
-    }
-
-    private void addMultiExclusion(DependenciesTree nodeToExclude, Set<NavigationTarget> parentCandidates) {
         JMenu multiMenu = new JBMenu();
         multiMenu.setText(EXCLUDE_DEPENDENCY);
         for (NavigationTarget parentCandidate : parentCandidates) {
-            Excludable excludable = ExclusionUtils.getExcludable(nodeToExclude, parentCandidate);
+            Excludable excludable = ExclusionUtils.getExcludable(nodeToExclude, affectedNode, parentCandidate);
+            if (excludable == null) {
+                continue;
+            }
             String descriptorPath = getRelativizedDescriptorPath(parentCandidate);
             multiMenu.add(createExcludeMenuItem(excludable, descriptorPath + " " + (parentCandidate.getLineNumber() + 1)));
         }
-        popupMenu.add(multiMenu);
+        if (multiMenu.getItemCount() > 0) {
+            popupMenu.add(multiMenu);
+        }
     }
 
-    private void addSingleExclusion(DependenciesTree nodeToExclude, NavigationTarget parentCandidate) {
-        Excludable excludable = ExclusionUtils.getExcludable(nodeToExclude, parentCandidate);
+    private void addSingleExclusion(DependenciesTree nodeToExclude, DependenciesTree affectedNode, NavigationTarget parentCandidate) {
+        Excludable excludable = ExclusionUtils.getExcludable(nodeToExclude, affectedNode, parentCandidate);
+        if (excludable == null) {
+            return;
+        }
         popupMenu.add(createExcludeMenuItem(excludable, EXCLUDE_DEPENDENCY));
     }
 

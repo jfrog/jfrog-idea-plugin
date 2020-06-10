@@ -2,6 +2,8 @@ package com.jfrog.ide.idea.exclusion;
 
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.project.Project;
+import com.intellij.pom.Navigatable;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.xml.XmlFile;
@@ -25,8 +27,28 @@ public class MavenExclusion implements Excludable {
         this.navigationTarget = navigationTarget;
     }
 
+    /**
+     * Walk up the dependencies-tree to validate that the whole path is of 'Maven' nodes.
+     * This is required as dependency nodes in 'Gradle' projects are also of type 'Maven'.
+     * @param nodeToExclude - The node in tree to exclude.
+     * @param affectedNode - Direct dependency's node in tree which will be affected by the exclusion.
+     * @return true if nodeToExclude is a valid Maven node which can be excluded.
+     */
     public static boolean isExcludable(DependenciesTree nodeToExclude, DependenciesTree affectedNode) {
-        return nodeToExclude.getGeneralInfo().getPkgType().equals("maven") && !nodeToExclude.equals(affectedNode);
+        DependenciesTree currNode = nodeToExclude;
+        // If currNode.getGeneralInfo() returns null, meaning there are several projects in the tree and reached the
+        // top level node.
+        while (currNode != null && currNode.getGeneralInfo() != null) {
+            if (!isMavenPackageType(currNode)) {
+                return false;
+            }
+            currNode = (DependenciesTree) currNode.getParent();
+        }
+        return !nodeToExclude.equals(affectedNode);
+    }
+
+    public static boolean isMavenPackageType(DependenciesTree node) {
+        return node.getGeneralInfo() != null && "maven".equals(node.getGeneralInfo().getPkgType());
     }
 
     @Override
@@ -44,6 +66,7 @@ public class MavenExclusion implements Excludable {
                 return;
             }
             XmlTag xmlElement = (XmlTag) navigationTarget.getElement();
+            navigateToElement(xmlElement);
             XmlTag exclusionsTag = xmlElement.findFirstSubTag(MAVEN_EXCLUSIONS_TAG);
             if (exclusionsTag == null) {
                 exclusionsTag = xmlElement.createChildTag(MAVEN_EXCLUSIONS_TAG, "", "", false);
@@ -68,10 +91,9 @@ public class MavenExclusion implements Excludable {
                 continue;
             }
             XmlTag artifactIdTag = exclusionTag.findFirstSubTag(MavenInspection.MAVEN_ARTIFACT_ID_TAG);
-            if (artifactIdTag == null || !artifactId.equals(artifactIdTag.getValue().getText())) {
-                continue;
+            if (artifactIdTag != null && artifactId.equals(artifactIdTag.getValue().getText())) {
+                return true;
             }
-            return true;
         }
         return false;
     }
@@ -83,5 +105,16 @@ public class MavenExclusion implements Excludable {
         exclusionTag.addSubTag(groupIdTag, true);
         exclusionTag.addSubTag(artifactIdTag, false);
         exclusionsTag.addSubTag(exclusionTag, false);
+    }
+
+    private void navigateToElement(XmlTag xmlElement) {
+        PsiElement navigationTarget = xmlElement.getNavigationElement();
+        if (!(navigationTarget instanceof Navigatable)) {
+            return;
+        }
+        Navigatable navigatable = (Navigatable) navigationTarget;
+        if (navigatable.canNavigate()) {
+            navigatable.navigate(true);
+        }
     }
 }
