@@ -109,12 +109,8 @@ public class ScanManagersFactory {
         if (scanManager != null) {
             scanManagers.put(projectHash, scanManager);
         } else {
-            if (MavenScanManager.isApplicable(mainProject)) {
-                scanManagers.put(projectHash, createScanManager(ScanManagerTypes.MAVEN, mainProject, ""));
-            }
-            if (GradleScanManager.isApplicable(mainProject)) {
-                scanManagers.put(projectHash, createScanManager(ScanManagerTypes.GRADLE, mainProject, ""));
-            }
+            createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.MAVEN, "");
+            createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.GRADLE, "");
         }
         paths.add(Utils.getProjectBasePath(mainProject));
         createScanManagers(scanManagers, paths);
@@ -142,7 +138,7 @@ public class ScanManagersFactory {
             if (scanManager != null) {
                 scanManagers.put(projectHash, scanManager);
             } else {
-                scanManagers.put(projectHash, createScanManager(type, mainProject, dir));
+                createScanManagerIfApplicable(scanManagers, projectHash, type, dir);
             }
         }
     }
@@ -154,18 +150,40 @@ public class ScanManagersFactory {
         GO
     }
 
-    private ScanManager createScanManager(ScanManagerTypes type, Project project, String dir) throws IOException {
-        switch (type) {
-            case MAVEN:
-                return new MavenScanManager(project);
-            case GRADLE:
-                return new GradleScanManager(project);
-            case NPM:
-                return new NpmScanManager(project, new NpmProject(project.getBaseDir(), dir));
-            case GO:
-                return new GoScanManager(project, new GoProject(project.getBaseDir(), dir));
+    /**
+     * Create a new scan manager according to the scan manager type. Add it to the scan managers set.
+     * Maven - Create only if 'maven' plugin is installed and there are Maven projects.
+     * Gradle - Create only if 'gradle' plugin is installed and there are Gradle projects.
+     * Go & npm - Always create.
+     *
+     * @param scanManagers - Scan managers set
+     * @param projectHash  - Project hash - calculated by the project name and the path
+     * @param type         - Project type
+     * @param dir          - Project dir
+     * @throws IOException in any case of error during scan manager creation.
+     */
+    private void createScanManagerIfApplicable(Map<Integer, ScanManager> scanManagers, int projectHash, ScanManagerTypes type, String dir) throws IOException {
+        try {
+            switch (type) {
+                case MAVEN:
+                    if (MavenScanManager.isApplicable(mainProject)) {
+                        scanManagers.put(projectHash, new MavenScanManager(mainProject));
+                    }
+                    return;
+                case GRADLE:
+                    if (GradleScanManager.isApplicable(mainProject)) {
+                        scanManagers.put(projectHash, new GradleScanManager(mainProject));
+                    }
+                    return;
+                case NPM:
+                    scanManagers.put(projectHash, new NpmScanManager(mainProject, new NpmProject(mainProject.getBaseDir(), dir)));
+                    return;
+                case GO:
+                    scanManagers.put(projectHash, new GoScanManager(mainProject, new GoProject(mainProject.getBaseDir(), dir)));
+            }
+        } catch (NoClassDefFoundError noClassDefFoundError) {
+            // The 'maven' or 'gradle' plugins are not installed.
         }
-        throw new IOException("Invalid scan-manager type provided.");
     }
 
     private boolean isScanInProgress() {
