@@ -5,13 +5,19 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBMenuItem;
 import com.intellij.openapi.ui.JBPopupMenu;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.pom.Navigatable;
-import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiInvalidElementAccessException;
+import com.intellij.ui.components.JBMenu;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.filter.FilterManager;
 import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.events.ProjectEvents;
-import com.jfrog.ide.idea.inspections.NavigationService;
+import com.jfrog.ide.idea.exclusion.Excludable;
+import com.jfrog.ide.idea.exclusion.ExclusionUtils;
+import com.jfrog.ide.idea.log.Logger;
+import com.jfrog.ide.idea.navigation.NavigationService;
+import com.jfrog.ide.idea.navigation.NavigationTarget;
 import com.jfrog.ide.idea.ui.BaseTree;
 import com.jfrog.ide.idea.ui.filters.FilterManagerService;
 import com.jfrog.ide.idea.ui.listeners.IssuesTreeExpansionListener;
@@ -24,6 +30,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.IntStream;
@@ -33,19 +42,20 @@ import java.util.stream.IntStream;
  */
 public class IssuesTree extends BaseTree {
 
-    private static final String POPUP_MENU_HEADLINE = "Show in project descriptor";
+    private static final String SHOW_IN_PROJECT_DESCRIPTOR = "Show in project descriptor";
+    private static final String EXCLUDE_DEPENDENCY = "Exclude dependency";
     private IssuesTreeExpansionListener issuesTreeExpansionListener;
     private JPanel issuesCountPanel;
     private JLabel issuesCount;
     private JBPopupMenu popupMenu = new JBPopupMenu();
 
-    public static IssuesTree getInstance(@NotNull Project project) {
-        return ServiceManager.getService(project, IssuesTree.class);
-    }
-
     private IssuesTree(@NotNull Project mainProject) {
         super(mainProject);
         setCellRenderer(new IssuesTreeCellRenderer());
+    }
+
+    public static IssuesTree getInstance(@NotNull Project project) {
+        return ServiceManager.getService(project, IssuesTree.class);
     }
 
     void setIssuesCountLabel(JLabel issuesCount) {
@@ -144,31 +154,121 @@ public class IssuesTree extends BaseTree {
     private void createNodePopupMenu(DependenciesTree selectedNode) {
         popupMenu.removeAll();
         NavigationService navigationService = NavigationService.getInstance(mainProject);
-        Set<PsiElement> navigationCandidates = navigationService.getNavigation(selectedNode);
+        Set<NavigationTarget> navigationCandidates = navigationService.getNavigation(selectedNode);
+        DependenciesTree affectedNode = selectedNode;
         if (navigationCandidates == null) {
-            // Find parent for navigation.
-            selectedNode = navigationService.getNavigableParent(selectedNode);
-            if (selectedNode == null) {
+            // Find the direct dependency containing the selected dependency.
+            affectedNode = navigationService.getNavigableParent(selectedNode);
+            if (affectedNode == null) {
                 return;
             }
-            navigationCandidates = navigationService.getNavigation(selectedNode);
+            navigationCandidates = navigationService.getNavigation(affectedNode);
             if (navigationCandidates == null) {
                 return;
             }
         }
-        PsiElement navigationTarget = navigationCandidates.iterator().next();
-        JMenuItem jumpToElement = new JBMenuItem(new AbstractAction(POPUP_MENU_HEADLINE) {
+
+        addNodeNavigation(navigationCandidates);
+        addNodeExclusion(selectedNode, navigationCandidates, affectedNode);
+    }
+
+    private void addNodeNavigation(Set<NavigationTarget> navigationCandidates) {
+        if (navigationCandidates.size() > 1) {
+            addMultiNavigation(navigationCandidates);
+        } else {
+            addSingleNavigation(navigationCandidates.iterator().next());
+        }
+    }
+
+    private void addSingleNavigation(NavigationTarget navigationTarget) {
+        popupMenu.add(createNavigationMenuItem(navigationTarget, SHOW_IN_PROJECT_DESCRIPTOR));
+    }
+
+    private void addMultiNavigation(Set<NavigationTarget> navigationCandidates) {
+        JMenu multiMenu = new JBMenu();
+        multiMenu.setText(SHOW_IN_PROJECT_DESCRIPTOR);
+        for (NavigationTarget navigationTarget : navigationCandidates) {
+            String descriptorPath = getRelativizedDescriptorPath(navigationTarget);
+            multiMenu.add(createNavigationMenuItem(navigationTarget, descriptorPath + " " + (navigationTarget.getLineNumber() + 1)));
+        }
+        popupMenu.add(multiMenu);
+    }
+
+    private String getRelativizedDescriptorPath(NavigationTarget navigationTarget) {
+        String pathResult = "";
+        try {
+            VirtualFile descriptorVirtualFile = navigationTarget.getElement().getContainingFile().getVirtualFile();
+            pathResult = descriptorVirtualFile.getName();
+            String projBasePath = mainProject.getBasePath();
+            if (projBasePath == null) {
+                return pathResult;
+            }
+            Path basePath = Paths.get(mainProject.getBasePath());
+            Path descriptorPath = Paths.get(descriptorVirtualFile.getPath());
+            pathResult = basePath.relativize(descriptorPath).toString();
+        } catch (InvalidPathException | PsiInvalidElementAccessException ex) {
+            Logger log = Logger.getInstance(mainProject);
+            log.error("Failed getting project-descriptor's path.", ex);
+        }
+        return pathResult;
+    }
+
+    private JMenuItem createNavigationMenuItem(NavigationTarget navigationTarget, String headLine) {
+        return new JBMenuItem(new AbstractAction(headLine) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!(navigationTarget instanceof Navigatable)) {
+                if (!(navigationTarget.getElement() instanceof Navigatable)) {
                     return;
                 }
-                Navigatable navigatable = (Navigatable) navigationTarget;
+                Navigatable navigatable = (Navigatable) navigationTarget.getElement();
                 if (navigatable.canNavigate()) {
                     navigatable.navigate(true);
                 }
             }
         });
-        popupMenu.add(jumpToElement);
+    }
+
+    private void addNodeExclusion(DependenciesTree nodeToExclude, Set<NavigationTarget> parentCandidates, DependenciesTree affectedNode) {
+        if (parentCandidates.size() > 1) {
+            addMultiExclusion(nodeToExclude, affectedNode, parentCandidates);
+        } else {
+            addSingleExclusion(nodeToExclude, affectedNode, parentCandidates.iterator().next());
+        }
+    }
+
+    private void addMultiExclusion(DependenciesTree nodeToExclude, DependenciesTree affectedNode, Set<NavigationTarget> parentCandidates) {
+        if (!ExclusionUtils.isExcludable(nodeToExclude, affectedNode)) {
+            return;
+        }
+        JMenu multiMenu = new JBMenu();
+        multiMenu.setText(EXCLUDE_DEPENDENCY);
+        for (NavigationTarget parentCandidate : parentCandidates) {
+            Excludable excludable = ExclusionUtils.getExcludable(nodeToExclude, affectedNode, parentCandidate);
+            if (excludable == null) {
+                continue;
+            }
+            String descriptorPath = getRelativizedDescriptorPath(parentCandidate);
+            multiMenu.add(createExcludeMenuItem(excludable, descriptorPath + " " + (parentCandidate.getLineNumber() + 1)));
+        }
+        if (multiMenu.getItemCount() > 0) {
+            popupMenu.add(multiMenu);
+        }
+    }
+
+    private void addSingleExclusion(DependenciesTree nodeToExclude, DependenciesTree affectedNode, NavigationTarget parentCandidate) {
+        Excludable excludable = ExclusionUtils.getExcludable(nodeToExclude, affectedNode, parentCandidate);
+        if (excludable == null) {
+            return;
+        }
+        popupMenu.add(createExcludeMenuItem(excludable, EXCLUDE_DEPENDENCY));
+    }
+
+    private JBMenuItem createExcludeMenuItem(Excludable excludable, String headLine) {
+        return new JBMenuItem(new AbstractAction(headLine) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                excludable.exclude(mainProject);
+            }
+        });
     }
 }

@@ -33,7 +33,6 @@ import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.events.ProjectEvents;
-import com.jfrog.ide.idea.inspections.NavigationService;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
 import com.jfrog.ide.idea.ui.filters.FilterManagerService;
@@ -42,7 +41,7 @@ import com.jfrog.ide.idea.ui.licenses.LicensesTree;
 import com.jfrog.ide.idea.utils.Utils;
 import com.jfrog.xray.client.services.summary.Components;
 import org.apache.commons.lang.StringUtils;
-import org.assertj.core.util.Arrays;
+import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfrog.build.extractor.scan.DependenciesTree;
@@ -165,7 +164,9 @@ public abstract class ScanManager extends ScanManagerBase {
      * @return all project modules locations as Paths
      */
     public Set<Path> getProjectPaths() {
-        return Sets.newHashSet(Utils.getProjectBasePath(project));
+        Set<Path> paths = Sets.newHashSet();
+        paths.add(Utils.getProjectBasePath(project));
+        return paths;
     }
 
     /**
@@ -201,10 +202,9 @@ public abstract class ScanManager extends ScanManagerBase {
 
     private void runInspections() {
         PsiFile[] projectDescriptors = getProjectDescriptors();
-        if (Arrays.isNullOrEmpty(projectDescriptors)) {
+        if (ArrayUtils.isEmpty(projectDescriptors)) {
             return;
         }
-        NavigationService.clearNavigationMap(mainProject);
         InspectionManagerEx inspectionManagerEx = (InspectionManagerEx) InspectionManager.getInstance(mainProject);
         GlobalInspectionContext context = inspectionManagerEx.createNewGlobalContext(false);
         LocalInspectionTool localInspectionTool = getInspectionTool();
@@ -212,7 +212,7 @@ public abstract class ScanManager extends ScanManagerBase {
             // Run inspection on descriptor.
             InspectionEngine.runInspectionOnFile(descriptor, new LocalInspectionToolWrapper(localInspectionTool), context);
             FileEditor[] editors = FileEditorManager.getInstance(mainProject).getAllEditors(descriptor.getVirtualFile());
-            if (!Arrays.isNullOrEmpty(editors)) {
+            if (!ArrayUtils.isEmpty(editors)) {
                 // Refresh descriptor highlighting only if it is already opened.
                 DaemonCodeAnalyzer.getInstance(mainProject).restart(descriptor);
             }

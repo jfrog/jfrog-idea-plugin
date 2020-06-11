@@ -10,6 +10,7 @@ import com.intellij.openapi.project.Project;
 import com.jfrog.ide.common.utils.PackageFileFinder;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.log.Logger;
+import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.projects.GoProject;
 import com.jfrog.ide.idea.projects.NpmProject;
 import com.jfrog.ide.idea.ui.issues.IssuesTree;
@@ -71,6 +72,7 @@ public class ScanManagersFactory {
             }
             refreshScanManagers();
             resetViews(issuesTree, licensesTree);
+            NavigationService.clearNavigationMap(mainProject);
             for (ScanManager scanManager : scanManagers.values()) {
                 scanManager.asyncScanAndUpdateResults(quickScan, libraryDependencies);
             }

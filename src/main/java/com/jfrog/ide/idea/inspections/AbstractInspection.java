@@ -10,6 +10,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.PsiElement;
+import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.ui.issues.IssuesTree;
 import org.apache.commons.collections4.CollectionUtils;
