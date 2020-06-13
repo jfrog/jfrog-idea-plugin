@@ -2,6 +2,7 @@ package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.ProjectKeys;
@@ -17,7 +18,12 @@ import com.intellij.openapi.externalSystem.settings.ExternalProjectSettings;
 import com.intellij.openapi.externalSystem.util.ExternalSystemApiUtil;
 import com.intellij.openapi.externalSystem.util.ExternalSystemUtil;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.idea.inspections.GradleInspection;
 import com.jfrog.ide.idea.utils.Utils;
 import com.jfrog.xray.client.impl.services.summary.ComponentDetailImpl;
 import org.apache.commons.lang3.StringUtils;
@@ -97,6 +103,22 @@ public class GradleScanManager extends ScanManager {
             return;
         }
         ExternalSystemUtil.refreshProject(project, GradleConstants.SYSTEM_ID, getProjectBasePath(project).toString(), cbk, false, ProgressExecutionMode.IN_BACKGROUND_ASYNC);
+    }
+
+    @Override
+    protected PsiFile[] getProjectDescriptors() {
+        String buildGradlePath = Paths.get(Utils.getProjectBasePath(project).toString(), "build.gradle").toString();
+        VirtualFile file = LocalFileSystem.getInstance().findFileByPath(buildGradlePath);
+        if (file == null) {
+            return null;
+        }
+        PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
+        return new PsiFile[] {psiFile};
+    }
+
+    @Override
+    protected LocalInspectionTool getInspectionTool() {
+        return new GradleInspection();
     }
 
     @Override

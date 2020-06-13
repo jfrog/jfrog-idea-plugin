@@ -1,0 +1,12 @@
+<idea-plugin>
+    <depends>org.intellij.groovy</depends>
+    <extensions defaultExtensionNs="com.intellij">
+        <localInspection language="Groovy"
+                         displayName="Show in dependencies tree"
+                         groupBundle="messages.InspectionsBundle"
+                         groupKey="group.names.probable.bugs"
+                         enabledByDefault="true"
+                         implementationClass="com.jfrog.ide.idea.inspections.GradleInspection"/>
+        <annotator language="Groovy" implementationClass="com.jfrog.ide.idea.inspections.GradleInspection"/>
+    </extensions>
+</idea-plugin>

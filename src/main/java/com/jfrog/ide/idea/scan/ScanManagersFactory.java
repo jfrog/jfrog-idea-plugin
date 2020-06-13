@@ -8,10 +8,11 @@ import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.common.utils.PackageFileFinder;
-import com.jfrog.ide.idea.projects.GoProject;
-import com.jfrog.ide.idea.projects.NpmProject;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.log.Logger;
+import com.jfrog.ide.idea.navigation.NavigationService;
+import com.jfrog.ide.idea.projects.GoProject;
+import com.jfrog.ide.idea.projects.NpmProject;
 import com.jfrog.ide.idea.ui.issues.IssuesTree;
 import com.jfrog.ide.idea.ui.licenses.LicensesTree;
 import com.jfrog.ide.idea.utils.Utils;
@@ -71,6 +72,7 @@ public class ScanManagersFactory {
             }
             refreshScanManagers();
             resetViews(issuesTree, licensesTree);
+            NavigationService.clearNavigationMap(mainProject);
             for (ScanManager scanManager : scanManagers.values()) {
                 scanManager.asyncScanAndUpdateResults(quickScan, libraryDependencies);
             }
@@ -97,7 +99,7 @@ public class ScanManagersFactory {
     }
 
     /**
-     * Scan for Maven, Gradle and Npm projects. Create new ScanManagers and delete unnecessary ones.
+     * Scan projects, create new ScanManagers and delete unnecessary ones.
      */
     public void refreshScanManagers() throws IOException {
         Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
@@ -107,12 +109,8 @@ public class ScanManagersFactory {
         if (scanManager != null) {
             scanManagers.put(projectHash, scanManager);
         } else {
-            if (MavenScanManager.isApplicable(mainProject)) {
-                scanManagers.put(projectHash, createScanManager(ScanManagerTypes.MAVEN, mainProject, ""));
-            }
-            if (GradleScanManager.isApplicable(mainProject)) {
-                scanManagers.put(projectHash, createScanManager(ScanManagerTypes.GRADLE, mainProject, ""));
-            }
+            createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.MAVEN, "");
+            createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.GRADLE, "");
         }
         paths.add(Utils.getProjectBasePath(mainProject));
         createScanManagers(scanManagers, paths);
@@ -140,7 +138,7 @@ public class ScanManagersFactory {
             if (scanManager != null) {
                 scanManagers.put(projectHash, scanManager);
             } else {
-                scanManagers.put(projectHash, createScanManager(type, mainProject, dir));
+                createScanManagerIfApplicable(scanManagers, projectHash, type, dir);
             }
         }
     }
@@ -152,18 +150,40 @@ public class ScanManagersFactory {
         GO
     }
 
-    private ScanManager createScanManager(ScanManagerTypes type, Project project, String dir) throws IOException {
-        switch (type) {
-            case MAVEN:
-                return new MavenScanManager(project);
-            case GRADLE:
-                return new GradleScanManager(project);
-            case NPM:
-                return new NpmScanManager(project, new NpmProject(project.getBaseDir(), dir));
-            case GO:
-                return new GoScanManager(project, new GoProject(project.getBaseDir(), dir));
+    /**
+     * Create a new scan manager according to the scan manager type. Add it to the scan managers set.
+     * Maven - Create only if 'maven' plugin is installed and there are Maven projects.
+     * Gradle - Create only if 'gradle' plugin is installed and there are Gradle projects.
+     * Go & npm - Always create.
+     *
+     * @param scanManagers - Scan managers set
+     * @param projectHash  - Project hash - calculated by the project name and the path
+     * @param type         - Project type
+     * @param dir          - Project dir
+     * @throws IOException in any case of error during scan manager creation.
+     */
+    private void createScanManagerIfApplicable(Map<Integer, ScanManager> scanManagers, int projectHash, ScanManagerTypes type, String dir) throws IOException {
+        try {
+            switch (type) {
+                case MAVEN:
+                    if (MavenScanManager.isApplicable(mainProject)) {
+                        scanManagers.put(projectHash, new MavenScanManager(mainProject));
+                    }
+                    return;
+                case GRADLE:
+                    if (GradleScanManager.isApplicable(mainProject)) {
+                        scanManagers.put(projectHash, new GradleScanManager(mainProject));
+                    }
+                    return;
+                case NPM:
+                    scanManagers.put(projectHash, new NpmScanManager(mainProject, new NpmProject(mainProject.getBaseDir(), dir)));
+                    return;
+                case GO:
+                    scanManagers.put(projectHash, new GoScanManager(mainProject, new GoProject(mainProject.getBaseDir(), dir)));
+            }
+        } catch (NoClassDefFoundError noClassDefFoundError) {
+            // The 'maven' or 'gradle' plugins are not installed.
         }
-        throw new IOException("Invalid scan-manager type provided.");
     }
 
     private boolean isScanInProgress() {

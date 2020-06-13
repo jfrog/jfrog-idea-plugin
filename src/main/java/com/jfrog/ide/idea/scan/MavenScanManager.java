@@ -1,20 +1,30 @@
 package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Sets;
+import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
 import com.intellij.openapi.externalSystem.model.project.ProjectData;
 import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefreshCallback;
+import com.intellij.openapi.fileTypes.StdFileTypes;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.search.FilenameIndex;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.idea.inspections.MavenInspection;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.idea.maven.model.MavenArtifactNode;
 import org.jetbrains.idea.maven.model.MavenId;
 import org.jetbrains.idea.maven.project.MavenProject;
+import org.jetbrains.idea.maven.project.MavenProjectChanges;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
+import org.jetbrains.idea.maven.project.MavenProjectsTree;
+import org.jetbrains.idea.maven.server.NativeMavenProjectHolder;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 
@@ -33,7 +43,7 @@ public class MavenScanManager extends ScanManager {
 
     MavenScanManager(Project project) throws IOException {
         super(project, project, ComponentPrefix.GAV);
-        MavenProjectsManager.getInstance(project).addManagerListener(new MavenProjectsListener());
+        MavenProjectsManager.getInstance(project).addProjectsTreeListener(new MavenProjectsTreeListener());
     }
 
     static boolean isApplicable(@NotNull Project project) {
@@ -72,6 +82,18 @@ public class MavenScanManager extends ScanManager {
         } else {
             setScanResults(rootNode);
         }
+    }
+
+    @Override
+    protected PsiFile[] getProjectDescriptors() {
+        // As project can contain sub-projects, look for all 'pom.xml' files under it.
+        GlobalSearchScope scope = GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.projectScope(project), StdFileTypes.XML);
+        return FilenameIndex.getFilesByName(project, "pom.xml", scope);
+    }
+
+    @Override
+    protected LocalInspectionTool getInspectionTool() {
+        return new MavenInspection();
     }
 
     private void addSubmodules(DependenciesTree mavenNode, MavenProject mavenProject, Set<String> added, Set<String> projectsIds) {
@@ -136,20 +158,13 @@ public class MavenScanManager extends ScanManager {
     }
 
     /**
-     * Maven project listener for scanning artifacts on dependencies changes.
+     * Maven projects tree listener for scanning artifacts on dependencies changes.
      */
-    private class MavenProjectsListener implements MavenProjectsManager.Listener {
 
+    private final class MavenProjectsTreeListener implements MavenProjectsTree.Listener {
         @Override
-        public void activated() {
-        }
-
-        @Override
-        public void projectsScheduled() {
-        }
-
-        @Override
-        public void importAndResolveScheduled() {
+        public void projectResolved(@NotNull Pair<MavenProject, MavenProjectChanges> projectWithChanges,
+                                    NativeMavenProjectHolder nativeMavenProject) {
             asyncScanAndUpdateResults();
         }
     }
