@@ -19,8 +19,8 @@ public class MavenExclusion implements Excludable {
 
     public static final String MAVEN_EXCLUSIONS_TAG = "exclusions";
     public static final String MAVEN_EXCLUSION_TAG = "exclusion";
-    private DependenciesTree nodeToExclude;
-    private NavigationTarget navigationTarget;
+    private final DependenciesTree nodeToExclude;
+    private final NavigationTarget navigationTarget;
 
     public MavenExclusion(DependenciesTree nodeToExclude, NavigationTarget navigationTarget) {
         this.nodeToExclude = nodeToExclude;
@@ -35,6 +35,10 @@ public class MavenExclusion implements Excludable {
      * @return true if nodeToExclude is a valid Maven node which can be excluded.
      */
     public static boolean isExcludable(DependenciesTree nodeToExclude, DependenciesTree affectedNode) {
+        if (nodeToExclude == null || nodeToExclude.equals(affectedNode)) {
+             return false;
+        }
+
         DependenciesTree currNode = nodeToExclude;
         // If currNode.getGeneralInfo() returns null, meaning there are several projects in the tree and reached the
         // top level node.
@@ -44,7 +48,7 @@ public class MavenExclusion implements Excludable {
             }
             currNode = (DependenciesTree) currNode.getParent();
         }
-        return !nodeToExclude.equals(affectedNode);
+        return true;
     }
 
     public static boolean isMavenPackageType(DependenciesTree node) {

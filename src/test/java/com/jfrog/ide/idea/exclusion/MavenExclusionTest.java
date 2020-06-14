@@ -31,6 +31,20 @@ public class MavenExclusionTest extends LightJavaCodeInsightFixtureTestCase {
         return "src/test/resources/exclusion";
     }
 
+    private void initTestingTree() {
+        root = new DependenciesTree("node-root");
+        one = createDependenciesTreeNode("1", "maven");
+        two = createDependenciesTreeNode("2", "gradle");
+        three = createDependenciesTreeNode("3", "maven");
+        four = createDependenciesTreeNode("4", "maven");
+        five = createDependenciesTreeNode("5", "maven");
+        root.add(one); // root -> 1
+        root.add(two); // root -> 2
+        one.add(three); // 1 -> 3
+        two.add(four); // 2 -> 4
+        four.add(five); // 4 -> 5
+    }
+
     public void testIsMavenPackageType() {
         Assert.assertTrue("isMavenPackageType should be true on " + one,
                 MavenExclusion.isMavenPackageType(one));
@@ -71,6 +85,7 @@ public class MavenExclusionTest extends LightJavaCodeInsightFixtureTestCase {
         PsiElement element = TestUtils.getNonLeafElement(fileDescriptor, XmlTag.class, existingExclusion.offset);
         Assert.assertTrue("Found element should be of type XmlTag", element instanceof XmlTag);
         XmlTag exclusionsTag = ((XmlTag) element).findFirstSubTag(MavenExclusion.MAVEN_EXCLUSIONS_TAG);
+        assertNotNull(exclusionsTag);
         XmlTag[] allExclusions = exclusionsTag.findSubTags(MavenExclusion.MAVEN_EXCLUSION_TAG);
 
         // Look for exclusion of existingExclusion.
@@ -93,6 +108,7 @@ public class MavenExclusionTest extends LightJavaCodeInsightFixtureTestCase {
         PsiElement element = TestUtils.getNonLeafElement(fileDescriptor, XmlTag.class, exclusionTestCase.offset);
         Assert.assertTrue("Found element should be of type XmlTag", element instanceof XmlTag);
         XmlTag exclusionsTag = ((XmlTag) element).findFirstSubTag(MavenExclusion.MAVEN_EXCLUSIONS_TAG);
+        assertNotNull(exclusionsTag);
         XmlTag[] allExclusions = exclusionsTag.findSubTags(MavenExclusion.MAVEN_EXCLUSION_TAG);
 
         // Look for exclusion of testCase - should not be found.
@@ -103,9 +119,8 @@ public class MavenExclusionTest extends LightJavaCodeInsightFixtureTestCase {
 
         // Add exclusion of testCase.
         XmlFile xmlFileDescriptor = (XmlFile) fileDescriptor;
-        WriteCommandAction.writeCommandAction(xmlFileDescriptor.getProject(), xmlFileDescriptor).run(() -> {
-            exclusion.createAndAddExclusionTags(exclusionsTag, exclusionTestCase.groupId, exclusionTestCase.artifactId);
-        });
+        WriteCommandAction.writeCommandAction(xmlFileDescriptor.getProject(), xmlFileDescriptor).run(() ->
+                exclusion.createAndAddExclusionTags(exclusionsTag, exclusionTestCase.groupId, exclusionTestCase.artifactId));
 
         // Look for exclusion of testCase - should be found.
         allExclusions = exclusionsTag.findSubTags(MavenExclusion.MAVEN_EXCLUSION_TAG);
@@ -113,21 +128,6 @@ public class MavenExclusionTest extends LightJavaCodeInsightFixtureTestCase {
                 String.format("exclusionExists should be true for group-id: %s, artifact-id: %s for dependency:\n%s",
                         exclusionTestCase.groupId, exclusionTestCase.artifactId, element.getText()),
                 exclusion.exclusionExists(allExclusions, exclusionTestCase.groupId, exclusionTestCase.artifactId));
-    }
-
-    DependenciesTree initTestingTree() {
-        root = new DependenciesTree("node-root");
-        one = createDependenciesTreeNode("1", "maven");
-        two = createDependenciesTreeNode("2", "gradle");
-        three = createDependenciesTreeNode("3", "maven");
-        four = createDependenciesTreeNode("4", "maven");
-        five = createDependenciesTreeNode("5", "maven");
-        root.add(one); // root -> 1
-        root.add(two); // root -> 2
-        one.add(three); // 1 -> 3
-        two.add(four); // 2 -> 4
-        four.add(five); // 4 -> 5
-        return root;
     }
 
     DependenciesTree createDependenciesTreeNode(String nodeValue, String pkgType) {
@@ -140,15 +140,15 @@ public class MavenExclusionTest extends LightJavaCodeInsightFixtureTestCase {
         return node;
     }
 
-    class ExclusionTestCase {
+    static class ExclusionTestCase {
         // Parent dependency offset in pom.xml.
-        int offset;
+        private final int offset;
 
         // Exclusion's group-id.
-        String groupId;
+        private final String groupId;
 
         // Exclusion's artifact-id.
-        String artifactId;
+        private final String artifactId;
 
         ExclusionTestCase(int offset, String groupId, String artifactId) {
             this.offset = offset;
