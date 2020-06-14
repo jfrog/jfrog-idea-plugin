@@ -3,6 +3,7 @@ package com.jfrog.ide.idea.inspections;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
+import com.jfrog.ide.idea.TestUtils;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.junit.Assert;
 
@@ -24,22 +25,12 @@ public abstract class InspectionsTest extends LightJavaCodeInsightFixtureTestCas
 
     @Override
     protected String getTestDataPath() {
-        return "src/test/resources";
-    }
-
-    PsiElement getNonLeafElement(int position) {
-        PsiElement element = fileDescriptor.findElementAt(position);
-        Assert.assertNotNull(element);
-        while (!(psiClass.isAssignableFrom(element.getClass()))) {
-            element = element.getParent();
-            Assert.assertNotNull(element);
-        }
-        return element;
+        return "src/test/resources/inspections";
     }
 
     public void isDependencyTest(Object[][] dependencies) {
         for (Object[] dependency : dependencies) {
-            PsiElement element = getNonLeafElement((int) dependency[0]);
+            PsiElement element = TestUtils.getNonLeafElement(fileDescriptor, psiClass, (int) dependency[0]);
             Assert.assertTrue("isDependency should be true on " + element.getText(),
                     inspection.isDependency(element));
         }
@@ -47,14 +38,14 @@ public abstract class InspectionsTest extends LightJavaCodeInsightFixtureTestCas
 
     public void isNonDependencyTest(int[] nonDependenciesOffsets) {
         for (int position : nonDependenciesOffsets) {
-            PsiElement element = getNonLeafElement(position);
+            PsiElement element = TestUtils.getNonLeafElement(fileDescriptor, psiClass, position);
             Assert.assertFalse(inspection.isDependency(element));
         }
     }
 
     public void createGeneralInfoTest(Object[][] dependencies) {
         for (Object[] dependency : dependencies) {
-            PsiElement element = getNonLeafElement((int) dependency[0]);
+            PsiElement element = TestUtils.getNonLeafElement(fileDescriptor, psiClass, (int) dependency[0]);
             GeneralInfo generalInfo = inspection.createGeneralInfo(element);
             Assert.assertNotNull(generalInfo);
             Assert.assertEquals(generalInfoToString(generalInfo), generalInfoToString(createGeneralInfo(dependency)));

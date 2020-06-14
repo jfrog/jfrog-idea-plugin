@@ -19,8 +19,8 @@ public class MavenExclusion implements Excludable {
 
     public static final String MAVEN_EXCLUSIONS_TAG = "exclusions";
     public static final String MAVEN_EXCLUSION_TAG = "exclusion";
-    private DependenciesTree nodeToExclude;
-    private NavigationTarget navigationTarget;
+    private final DependenciesTree nodeToExclude;
+    private final NavigationTarget navigationTarget;
 
     public MavenExclusion(DependenciesTree nodeToExclude, NavigationTarget navigationTarget) {
         this.nodeToExclude = nodeToExclude;
@@ -35,6 +35,10 @@ public class MavenExclusion implements Excludable {
      * @return true if nodeToExclude is a valid Maven node which can be excluded.
      */
     public static boolean isExcludable(DependenciesTree nodeToExclude, DependenciesTree affectedNode) {
+        if (nodeToExclude == null || nodeToExclude.equals(affectedNode)) {
+             return false;
+        }
+
         DependenciesTree currNode = nodeToExclude;
         // If currNode.getGeneralInfo() returns null, meaning there are several projects in the tree and reached the
         // top level node.
@@ -44,11 +48,11 @@ public class MavenExclusion implements Excludable {
             }
             currNode = (DependenciesTree) currNode.getParent();
         }
-        return !nodeToExclude.equals(affectedNode);
+        return true;
     }
 
     public static boolean isMavenPackageType(DependenciesTree node) {
-        return node.getGeneralInfo() != null && "maven".equals(node.getGeneralInfo().getPkgType());
+        return node != null && node.getGeneralInfo() != null && "maven".equals(node.getGeneralInfo().getPkgType());
     }
 
     @Override
@@ -84,7 +88,7 @@ public class MavenExclusion implements Excludable {
         });
     }
 
-    private boolean exclusionExists(XmlTag[] allExclusions, String groupId, String artifactId) {
+    boolean exclusionExists(XmlTag[] allExclusions, String groupId, String artifactId) {
         for (XmlTag exclusionTag : allExclusions) {
             XmlTag groupIdTag = exclusionTag.findFirstSubTag(MavenInspection.MAVEN_GROUP_ID_TAG);
             if (groupIdTag == null || !groupId.equals(groupIdTag.getValue().getText())) {
@@ -98,7 +102,7 @@ public class MavenExclusion implements Excludable {
         return false;
     }
 
-    private void createAndAddExclusionTags(XmlTag exclusionsTag, String groupId, String artifactId) {
+    void createAndAddExclusionTags(XmlTag exclusionsTag, String groupId, String artifactId) {
         XmlTag exclusionTag = exclusionsTag.createChildTag(MAVEN_EXCLUSION_TAG, "", "", false);
         XmlTag groupIdTag = exclusionTag.createChildTag(MavenInspection.MAVEN_GROUP_ID_TAG, "", groupId, false);
         XmlTag artifactIdTag = exclusionTag.createChildTag(MavenInspection.MAVEN_ARTIFACT_ID_TAG, "", artifactId, false);
