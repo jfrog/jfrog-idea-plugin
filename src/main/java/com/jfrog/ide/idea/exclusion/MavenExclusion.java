@@ -28,8 +28,9 @@ public class MavenExclusion implements Excludable {
     }
 
     /**
-     * Walk up the dependencies-tree to validate that the whole path is of 'Maven' nodes.
-     * This is required as dependency nodes in 'Gradle' projects are also of type 'Maven'.
+     * Walk up the dependencies-tree to validate that the project's root is of type 'Maven'.
+     * This is required as dependency nodes in 'Gradle' projects are also of type 'Maven', and dependency nodes
+     * can have type 'null'.
      * @param nodeToExclude - The node in tree to exclude.
      * @param affectedNode - Direct dependency's node in tree which will be affected by the exclusion.
      * @return true if nodeToExclude is a valid Maven node which can be excluded.
@@ -38,17 +39,7 @@ public class MavenExclusion implements Excludable {
         if (nodeToExclude == null || nodeToExclude.equals(affectedNode)) {
              return false;
         }
-
-        DependenciesTree currNode = nodeToExclude;
-        // If currNode.getGeneralInfo() returns null, meaning there are several projects in the tree and reached the
-        // top level node.
-        while (currNode != null && currNode.getGeneralInfo() != null) {
-            if (!isMavenPackageType(currNode)) {
-                return false;
-            }
-            currNode = (DependenciesTree) currNode.getParent();
-        }
-        return true;
+        return isMavenPackageType(ExclusionUtils.getProjectRoot(nodeToExclude));
     }
 
     public static boolean isMavenPackageType(DependenciesTree node) {

@@ -48,7 +48,6 @@ public class NavigationService {
         if (document == null) {
             return;
         }
-
         NavigationTarget navigationTarget = new NavigationTarget(navigationTargetElement, document.getLineNumber(navigationTargetElement.getTextOffset()));
         Set<NavigationTarget> navigationTargets = navigationMap.get(treeNode);
         if (navigationTargets == null) {
@@ -56,7 +55,25 @@ public class NavigationService {
             navigationMap.put(treeNode, navigationTargets);
             return;
         }
-        navigationTargets.add(navigationTarget);
+        if (!isRedundantNavigation(navigationTargets, navigationTarget)) {
+            navigationTargets.add(navigationTarget);
+        }
+    }
+
+    /**
+     * A navigation is redundant when a navigation to the same file and line-number already exists.
+     * @param existingNavigations - Set of existing registered navigations from a node in issues-tree.
+     * @param newNavigation - The new navigation candidate for addition.
+     * @return true if the new navigation candidate is redundant.
+     */
+    private boolean isRedundantNavigation(Set<NavigationTarget> existingNavigations, NavigationTarget newNavigation) {
+        for (NavigationTarget existingTarget : existingNavigations) {
+            if (existingTarget.getLineNumber() == newNavigation.getLineNumber() &&
+                    existingTarget.getElement().getContainingFile().equals(newNavigation.getElement().getContainingFile())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
