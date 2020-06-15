@@ -1,0 +1,2 @@
+- [ ] All [tests](https://ci.appveyor.com/project/jfrog-ecosystem/jfrog-idea-plugin) passed. If this feature is not already covered by the tests, I added new tests.
+-----
