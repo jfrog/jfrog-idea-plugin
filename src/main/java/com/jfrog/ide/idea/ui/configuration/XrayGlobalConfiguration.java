@@ -84,8 +84,8 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
                 username.setEnabled(true);
                 url.setEnabled(true);
                 password.setEnabled(true);
-                xrayConfig = GlobalSettings.getInstance().getXrayConfig();
-                if (xrayConfig != null && !xrayConfig.isConnectionDetailsFromEnv()) {
+                XrayServerConfigImpl oldConfig = GlobalSettings.getInstance().getXrayConfig();
+                if (oldConfig != null && !oldConfig.isConnectionDetailsFromEnv()) {
                     reset();
                 }
             }
