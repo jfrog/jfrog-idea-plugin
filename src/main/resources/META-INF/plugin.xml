@@ -9,10 +9,11 @@
 
     <change-notes>
         <![CDATA[
-          <li> Support Go projects.</li>
-          <li> Store credentials in Password Safe.</li>
-          <li> Grade - Improve inspections.</li>
-          <li> Npm - Trigger dependency scan on package-lock.json change.</li>
+          <li> Support WebStorm and GoLand IDEs.</li>
+          <li> Allow initializing connection details to Xray using environment variables.</li>
+          <li> Persist issues and licenses view filters.</li>
+          <li> Enable navigation from issues-tree components to the project's descriptor.</li>
+          <li> Allow exclusion of transitive Maven dependencies from the issues-tree.</li>
         ]]>
     </change-notes>
 
