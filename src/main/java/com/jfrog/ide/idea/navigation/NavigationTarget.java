@@ -31,11 +31,11 @@ public class NavigationTarget {
         if (!(o instanceof NavigationTarget)) return false;
         NavigationTarget that = (NavigationTarget) o;
         return lineNumber == that.lineNumber &&
-                Objects.equals(element, that.element);
+                Objects.equals(element.getContainingFile(), that.element.getContainingFile());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(element, lineNumber);
+        return Objects.hash(element.getContainingFile(), lineNumber);
     }
 }

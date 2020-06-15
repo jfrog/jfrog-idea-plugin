@@ -16,10 +16,7 @@ public class ExclusionUtils {
      * @return true if the provided nodeToExclude can be excluded from project-descriptor.
      */
     public static boolean isExcludable(DependenciesTree nodeToExclude, DependenciesTree affectedNode) {
-        if (MavenExclusion.isMavenPackageType(nodeToExclude)) {
-            return MavenExclusion.isExcludable(nodeToExclude, affectedNode);
-        }
-        return false;
+        return MavenExclusion.isExcludable(nodeToExclude, affectedNode);
     }
 
     /**
@@ -30,11 +27,26 @@ public class ExclusionUtils {
      * @return the corresponding Excludable object, Null if exclusion is not supported for this node.
      */
     public static Excludable getExcludable(DependenciesTree nodeToExclude, DependenciesTree affectedNode, NavigationTarget navigationTarget) {
-        if (MavenExclusion.isMavenPackageType(nodeToExclude)) {
-            if (MavenExclusion.isExcludable(nodeToExclude, affectedNode)) {
-                return new MavenExclusion(nodeToExclude, navigationTarget);
-            }
+        if (MavenExclusion.isExcludable(nodeToExclude, affectedNode)) {
+            return new MavenExclusion(nodeToExclude, navigationTarget);
         }
         return null;
+    }
+
+    /**
+     * Find node's root project node.
+     * In single project tree - the root's parent is null.
+     * In multi project tree - the root-parent's general info is null.
+     * @param node - DependenciesTree node to find its project's root.
+     * @return the project root node.
+     */
+    public static DependenciesTree getProjectRoot(DependenciesTree node) {
+        if (node == null) {
+            return null;
+        }
+        while (node.getParent() != null && ((DependenciesTree) node.getParent()).getGeneralInfo() != null) {
+            node = (DependenciesTree) node.getParent();
+        }
+        return node;
     }
 }

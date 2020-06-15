@@ -48,7 +48,6 @@ public class NavigationService {
         if (document == null) {
             return;
         }
-
         NavigationTarget navigationTarget = new NavigationTarget(navigationTargetElement, document.getLineNumber(navigationTargetElement.getTextOffset()));
         Set<NavigationTarget> navigationTargets = navigationMap.get(treeNode);
         if (navigationTargets == null) {
