@@ -2,6 +2,7 @@ package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -176,10 +178,12 @@ public class ScanManagersFactory {
                     }
                     return;
                 case NPM:
-                    scanManagers.put(projectHash, new NpmScanManager(mainProject, new NpmProject(mainProject.getBaseDir(), dir)));
+                    scanManagers.put(projectHash, new NpmScanManager(mainProject,
+                            new NpmProject(Objects.requireNonNull(ProjectUtil.guessProjectDir(mainProject)), dir)));
                     return;
                 case GO:
-                    scanManagers.put(projectHash, new GoScanManager(mainProject, new GoProject(mainProject.getBaseDir(), dir)));
+                    scanManagers.put(projectHash, new GoScanManager(mainProject,
+                                    new GoProject(Objects.requireNonNull(ProjectUtil.guessProjectDir(mainProject)), dir)));
             }
         } catch (NoClassDefFoundError noClassDefFoundError) {
             // The 'maven' or 'gradle' plugins are not installed.

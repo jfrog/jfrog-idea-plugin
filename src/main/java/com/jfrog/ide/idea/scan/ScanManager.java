@@ -145,7 +145,6 @@ public abstract class ScanManager extends ScanManagerBase {
                     return;
                 }
                 scanAndUpdate(quickScan, new ProgressIndicatorImpl(indicator), libraryDependencies);
-                indicator.finishNonCancelableSection();
             }
         };
         // The progress manager is only good for foreground threads.

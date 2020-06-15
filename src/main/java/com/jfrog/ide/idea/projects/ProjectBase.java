@@ -1,7 +1,6 @@
 package com.jfrog.ide.idea.projects;
 
-import com.intellij.openapi.components.BaseComponent;
-import com.intellij.openapi.extensions.ExtensionPointName;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Condition;
 import com.intellij.openapi.util.Key;
@@ -64,7 +63,7 @@ public class ProjectBase implements Project {
     @NotNull
     @Override
     public String getLocationHash() {
-        return null;
+        return getName();
     }
 
     @Override
@@ -88,29 +87,13 @@ public class ProjectBase implements Project {
     }
 
     @Override
-    public BaseComponent getComponent(@NotNull String name) {
-        return null;
-    }
-
-    @Override
     public <T> T getComponent(@NotNull Class<T> interfaceClass) {
-        return null;
-    }
-
-    @Override
-    public <T> T getComponent(@NotNull Class<T> interfaceClass, T defaultImplementationIfAbsent) {
         return null;
     }
 
     @Override
     public boolean hasComponent(@NotNull Class interfaceClass) {
         return false;
-    }
-
-    @NotNull
-    @Override
-    public <T> T[] getComponents(@NotNull Class<T> baseClass) {
-        return null;
     }
 
     @NotNull
@@ -122,7 +105,7 @@ public class ProjectBase implements Project {
     @NotNull
     @Override
     public MessageBus getMessageBus() {
-        return null;
+        return ApplicationManager.getApplication().getMessageBus();
     }
 
     @Override
@@ -132,14 +115,8 @@ public class ProjectBase implements Project {
 
     @NotNull
     @Override
-    public <T> T[] getExtensions(@NotNull ExtensionPointName<T> extensionPointName) {
-        return null;
-    }
-
-    @NotNull
-    @Override
     public Condition<?> getDisposed() {
-        return null;
+        return ApplicationManager.getApplication().getDisposed();
     }
 
     @Override
