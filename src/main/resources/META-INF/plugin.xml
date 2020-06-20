@@ -4,7 +4,7 @@
     <vendor email="https://www.jfrog.com/support-service" url="https://www.jfrog.com">JFrog</vendor>
 
     <description><![CDATA[
-      The JFrog IntelliJ IDEA plugin adds JFrog Xray scanning of Maven, Gradle, Go and npm project dependencies to your IntelliJ IDEA. It allows developers to view panels displaying vulnerability information about the components and their dependencies directly in their IntelliJ IDEA.
+      The JFrog plugin adds JFrog Xray scanning of Maven, Gradle, Go and npm project dependencies to your IDE. It allows developers to view panels displaying vulnerability information about the components and their dependencies directly in their IDE. The plugin is compatible with IntelliJ IDEA, WebStorm and GoLand.
     ]]></description>
 
     <change-notes>
