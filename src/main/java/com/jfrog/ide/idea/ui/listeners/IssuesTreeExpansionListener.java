@@ -1,12 +1,13 @@
 package com.jfrog.ide.idea.ui.listeners;
 
 import com.intellij.ui.treeStructure.Tree;
-import org.jfrog.build.extractor.scan.DependenciesTree;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
+import org.jfrog.build.extractor.scan.DependenciesTree;
 
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
+import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.util.Map;
 
@@ -37,7 +38,11 @@ public class IssuesTreeExpansionListener implements TreeExpansionListener {
 
     public void setIssuesCountPanel() {
         issuesCountPanel.removeAll();
-        DependenciesTree root = (DependenciesTree) issuesComponentsTree.getModel().getRoot();
+        TreeModel model = issuesComponentsTree.getModel();
+        if (model == null) {
+            return;
+        }
+        DependenciesTree root = (DependenciesTree) model.getRoot();
         setIssuesCountPanel(root, ComponentUtils.getTreePath(root));
     }
 
