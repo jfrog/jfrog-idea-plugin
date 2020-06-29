@@ -101,6 +101,16 @@ public class ScanManagersFactory {
     }
 
     /**
+     * Run inspections for all scan managers.
+     */
+    public void runInspectionsForAllScanManagers() {
+        NavigationService.clearNavigationMap(mainProject);
+        for (ScanManager scanManager : scanManagers.values()) {
+            scanManager.runInspections();
+        }
+    }
+
+    /**
      * Scan projects, create new ScanManagers and delete unnecessary ones.
      */
     public void refreshScanManagers() throws IOException {

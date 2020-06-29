@@ -199,7 +199,7 @@ public abstract class ScanManager extends ScanManagerBase {
         };
     }
 
-    private void runInspections() {
+    void runInspections() {
         PsiFile[] projectDescriptors = getProjectDescriptors();
         if (ArrayUtils.isEmpty(projectDescriptors)) {
             return;

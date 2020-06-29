@@ -2,6 +2,7 @@ package com.jfrog.ide.idea.ui.issues;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBMenuItem;
 import com.intellij.openapi.ui.JBPopupMenu;
@@ -18,6 +19,7 @@ import com.jfrog.ide.idea.exclusion.ExclusionUtils;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.navigation.NavigationTarget;
+import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import com.jfrog.ide.idea.ui.BaseTree;
 import com.jfrog.ide.idea.ui.filters.FilterManagerService;
 import com.jfrog.ide.idea.ui.listeners.IssuesTreeExpansionListener;
@@ -94,6 +96,7 @@ public class IssuesTree extends BaseTree {
         filteredRoot.setIssues(filteredRoot.processTreeIssues());
         appendProjectWhenReady(filteredRoot);
         calculateIssuesCount();
+        DumbService.getInstance(mainProject).smartInvokeLater(() -> ScanManagersFactory.getInstance(mainProject).runInspectionsForAllScanManagers());
     }
 
     @Override
