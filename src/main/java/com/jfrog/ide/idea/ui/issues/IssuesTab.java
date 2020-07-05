@@ -82,10 +82,10 @@ public class IssuesTab {
      */
     private JComponent createIssuesComponentsTreeView() {
         JPanel componentsTreePanel = new JBPanel<>(new BorderLayout()).withBackground(UIUtil.getTableBackground());
-        JLabel componentsTreeTitle = new JBLabel(" Component Name (Issues Count)");
+        JLabel componentsTreeTitle = new JBLabel(" Component (Issues #)");
         componentsTreeTitle.setFont(componentsTreeTitle.getFont().deriveFont(TITLE_FONT_SIZE));
         componentsTreePanel.add(componentsTreeTitle, BorderLayout.LINE_START);
-        JPanel treePanel = new JBPanel<>(new BorderLayout()).withBackground(UIUtil.getTableBackground());
+        JPanel treePanel = new JBPanel<>(new GridLayout()).withBackground(UIUtil.getTableBackground());
         TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(issuesTree, ComponentUtils::getPathSearchString, true);
         treePanel.add(treeSpeedSearch.getComponent(), BorderLayout.WEST);
         JScrollPane treeScrollPane = ScrollPaneFactory.createScrollPane(treePanel);

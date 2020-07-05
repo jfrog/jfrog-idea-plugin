@@ -27,7 +27,7 @@ public class CollapseAllAction extends AnAction implements DumbAware {
     }
 
     @Override
-    public void actionPerformed(AnActionEvent e) {
+    public void actionPerformed(@NotNull AnActionEvent e) {
         for (int i = myTree.getRowCount() - 1; i >= 0; i--) {
             myTree.collapseRow(i);
         }

@@ -27,7 +27,7 @@ public class ExpandAllAction extends AnAction implements DumbAware {
     }
 
     @Override
-    public void actionPerformed(AnActionEvent e) {
+    public void actionPerformed(@NotNull AnActionEvent e) {
         for (int i = 0; i < myTree.getRowCount(); i++) {
             myTree.expandRow(i);
         }
