@@ -31,6 +31,11 @@ public class IssuesTreeCellRenderer extends JBDefaultTreeCellRenderer {
         Issue topIssue = scanTreeNode.getTopIssue();
         cellRenderer.setIcon(IconUtils.load(StringUtils.lowerCase(topIssue.getSeverity().toString())));
 
+        // Add issues-count to tree node.
+        if (scanTreeNode.getIssueCount() > 0) {
+            cellRenderer.setText(scanTreeNode.toString() + " (" + scanTreeNode.getIssueCount() + ")");
+        }
+
         return cellRenderer;
     }
 }

@@ -1,6 +1,5 @@
 package com.jfrog.ide.idea.ui.issues;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
@@ -22,7 +21,6 @@ import com.jfrog.ide.idea.navigation.NavigationTarget;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import com.jfrog.ide.idea.ui.BaseTree;
 import com.jfrog.ide.idea.ui.filters.FilterManagerService;
-import com.jfrog.ide.idea.ui.listeners.IssuesTreeExpansionListener;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 
@@ -35,9 +33,7 @@ import java.awt.event.MouseListener;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.IntStream;
 
 /**
  * @author yahavi
@@ -46,9 +42,6 @@ public class IssuesTree extends BaseTree {
 
     private static final String SHOW_IN_PROJECT_DESCRIPTOR = "Show in project descriptor";
     private static final String EXCLUDE_DEPENDENCY = "Exclude dependency";
-    private IssuesTreeExpansionListener issuesTreeExpansionListener;
-    private JPanel issuesCountPanel;
-    private JLabel issuesCount;
     private JBPopupMenu popupMenu = new JBPopupMenu();
 
     private IssuesTree(@NotNull Project mainProject) {
@@ -58,24 +51,6 @@ public class IssuesTree extends BaseTree {
 
     public static IssuesTree getInstance(@NotNull Project project) {
         return ServiceManager.getService(project, IssuesTree.class);
-    }
-
-    void setIssuesCountLabel(JLabel issuesCount) {
-        this.issuesCount = issuesCount;
-    }
-
-    void createExpansionListener(JPanel issuesCountPanel, Map<TreePath, JPanel> issuesCountPanels) {
-        this.issuesCountPanel = issuesCountPanel;
-        this.issuesTreeExpansionListener = new IssuesTreeExpansionListener(this, issuesCountPanel, issuesCountPanels);
-    }
-
-    void addTreeExpansionListener() {
-        addTreeExpansionListener(issuesTreeExpansionListener);
-    }
-
-    public void populateTree(DependenciesTree root) {
-        super.populateTree(root);
-        issuesTreeExpansionListener.setIssuesCountPanel();
     }
 
     @Override
@@ -95,39 +70,7 @@ public class IssuesTree extends BaseTree {
         filterManager.applyFilters(project, filteredRoot, new DependenciesTree());
         filteredRoot.setIssues(filteredRoot.processTreeIssues());
         appendProjectWhenReady(filteredRoot);
-        calculateIssuesCount();
         DumbService.getInstance(mainProject).smartInvokeLater(() -> ScanManagersFactory.getInstance(mainProject).runInspectionsForAllScanManagers());
-    }
-
-    @Override
-    public void applyFiltersForAllProjects() {
-        resetIssuesCountPanels();
-        super.applyFiltersForAllProjects();
-    }
-
-    @Override
-    public void reset() {
-        super.reset();
-        resetIssuesCountPanels();
-    }
-
-    private void resetIssuesCountPanels() {
-        if (issuesCount != null && issuesCountPanel != null) {
-            issuesCount.setText("Issues (0) ");
-            issuesCountPanel.removeAll();
-        }
-    }
-
-    private void calculateIssuesCount() {
-        ApplicationManager.getApplication().invokeLater(() -> {
-            DependenciesTree root = (DependenciesTree) getModel().getRoot();
-            int sum = root.getChildren().stream()
-                    .map(DependenciesTree::getIssues)
-                    .distinct()
-                    .flatMapToInt(issues -> IntStream.of(issues.size()))
-                    .sum();
-            issuesCount.setText("Issues (" + sum + ") ");
-        });
     }
 
     public void addRightClickListener() {

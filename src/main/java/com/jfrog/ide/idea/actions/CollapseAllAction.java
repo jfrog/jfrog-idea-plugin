@@ -7,9 +7,6 @@ import com.intellij.openapi.project.DumbAware;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import javax.swing.event.TreeExpansionListener;
-
-import static com.jfrog.ide.idea.utils.Utils.getIssuesTreeExpansionListener;
 
 /**
  * Collapse all action that calls treeCollapsed() once in the end instead of for each row.
@@ -30,20 +27,9 @@ public class CollapseAllAction extends AnAction implements DumbAware {
     }
 
     @Override
-    public void actionPerformed(AnActionEvent e) {
-        TreeExpansionListener treeExpansionListener = getIssuesTreeExpansionListener(myTree.getTreeExpansionListeners());
-
-        if (treeExpansionListener != null) {
-            myTree.removeTreeExpansionListener(treeExpansionListener);
-        }
-
+    public void actionPerformed(@NotNull AnActionEvent e) {
         for (int i = myTree.getRowCount() - 1; i >= 0; i--) {
             myTree.collapseRow(i);
-        }
-
-        if (treeExpansionListener != null) {
-            myTree.addTreeExpansionListener(treeExpansionListener);
-            treeExpansionListener.treeCollapsed(null);
         }
     }
 }
