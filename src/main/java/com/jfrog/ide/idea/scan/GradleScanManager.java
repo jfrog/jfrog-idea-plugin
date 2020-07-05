@@ -137,10 +137,14 @@ public class GradleScanManager extends ScanManager {
         }
 
         // Collect dependencies from project components ('main' and 'test').
-        projectDependencies.getComponentsDependencies().forEach(componentDependency ->
-                componentDependency.getCompileDependenciesGraph().getDependencies().stream()
-                .filter(GradleScanManager::isArtifactDependencyNode)
-                .forEach(moduleDependencies::add));
+        projectDependencies.getComponentsDependencies().forEach(componentDependency -> {
+                    componentDependency.getCompileDependenciesGraph().getDependencies().stream()
+                            .filter(GradleScanManager::isArtifactDependencyNode)
+                            .forEach(moduleDependencies::add);
+                    componentDependency.getRuntimeDependenciesGraph().getDependencies().stream()
+                            .filter(GradleScanManager::isArtifactDependencyNode)
+                            .forEach(moduleDependencies::add);
+        });
 
         // Populate dependencies-tree for all modules.
         moduleDependencies.forEach(dependencyNode -> populateDependenciesTree(modules.get(moduleId), dependencyNode));
@@ -194,7 +198,7 @@ public class GradleScanManager extends ScanManager {
         this.dependenciesData = ExternalSystemApiUtil.findAllRecursively(externalProject, ProjectKeys.DEPENDENCIES_GRAPH);
     }
 
-    private static String getModuleId(DataNode<?> dataNode) {
+    private static String getModuleId(DataNode<ProjectDependencies> dataNode) {
         DataNode<ModuleData> moduleDataNode = dataNode.getDataNode(ProjectKeys.MODULE);
         if (moduleDataNode == null) {
             return "";
