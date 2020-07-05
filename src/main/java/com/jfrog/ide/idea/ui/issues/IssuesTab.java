@@ -1,7 +1,6 @@
 package com.jfrog.ide.idea.ui.issues;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
@@ -27,8 +26,10 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.*;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.jfrog.ide.idea.ui.JFrogToolWindow.*;
@@ -38,7 +39,6 @@ import static com.jfrog.ide.idea.ui.JFrogToolWindow.*;
  */
 public class IssuesTab {
 
-    private Map<TreePath, JPanel> issuesCountPanels = Maps.newHashMap();
     private OnePixelSplitter issuesRightHorizontalSplit;
     private ComponentIssuesTable issuesTable;
     private JScrollPane issuesDetailsScroll;
@@ -81,23 +81,13 @@ public class IssuesTab {
      * @return the issues tree panel
      */
     private JComponent createIssuesComponentsTreeView() {
-        JLabel issuesCount = new JBLabel("Issues (0) ");
-
-        JPanel componentsTreePanel = new JBPanel(new BorderLayout()).withBackground(UIUtil.getTableBackground());
-        JLabel componentsTreeTitle = new JBLabel(" Components Tree");
+        JPanel componentsTreePanel = new JBPanel<>(new BorderLayout()).withBackground(UIUtil.getTableBackground());
+        JLabel componentsTreeTitle = new JBLabel(" Component Name (Issues Count)");
         componentsTreeTitle.setFont(componentsTreeTitle.getFont().deriveFont(TITLE_FONT_SIZE));
         componentsTreePanel.add(componentsTreeTitle, BorderLayout.LINE_START);
-        componentsTreePanel.add(issuesCount, BorderLayout.LINE_END);
-
-        JPanel issuesCountPanel = new JBPanel().withBackground(UIUtil.getTableBackground());
-        issuesCountPanel.setLayout(new BoxLayout(issuesCountPanel, BoxLayout.Y_AXIS));
-        issuesTree.createExpansionListener(issuesCountPanel, issuesCountPanels);
-        issuesTree.setIssuesCountLabel(issuesCount);
-
-        JBPanel treePanel = new JBPanel(new BorderLayout()).withBackground(UIUtil.getTableBackground());
+        JPanel treePanel = new JBPanel<>(new BorderLayout()).withBackground(UIUtil.getTableBackground());
         TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(issuesTree, ComponentUtils::getPathSearchString, true);
         treePanel.add(treeSpeedSearch.getComponent(), BorderLayout.WEST);
-        treePanel.add(issuesCountPanel, BorderLayout.CENTER);
         JScrollPane treeScrollPane = ScrollPaneFactory.createScrollPane(treePanel);
         treeScrollPane.getVerticalScrollBar().setUnitIncrement(SCROLL_BAR_SCROLLING_UNITS);
         return new TitledPane(JSplitPane.VERTICAL_SPLIT, TITLE_LABEL_SIZE, componentsTreePanel, treeScrollPane);
@@ -131,7 +121,7 @@ public class IssuesTab {
         JLabel title = new JBLabel(" Component Details");
         title.setFont(title.getFont().deriveFont(TITLE_FONT_SIZE));
 
-        issuesDetailsPanel = new JBPanel(new BorderLayout()).withBackground(UIUtil.getTableBackground());
+        issuesDetailsPanel = new JBPanel<>(new BorderLayout()).withBackground(UIUtil.getTableBackground());
         String panelText = supported ? ComponentUtils.SELECT_COMPONENT_TEXT : ComponentUtils.UNSUPPORTED_TEXT;
         issuesDetailsPanel.add(ComponentUtils.createDisabledTextLabel(panelText), BorderLayout.CENTER);
         issuesDetailsScroll = ScrollPaneFactory.createScrollPane(issuesDetailsPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -185,20 +175,11 @@ public class IssuesTab {
      * Register the issues tree listeners.
      */
     public void registerListeners() {
-        issuesTree.addTreeExpansionListener();
-
         // Issues component selection listener
         issuesTree.addTreeSelectionListener(e -> {
             updateIssuesTable();
             if (e == null || e.getNewLeadSelectionPath() == null) {
                 return;
-            }
-            // Color the issues count panel
-            for (TreePath path : e.getPaths()) {
-                JPanel issueCountPanel = issuesCountPanels.get(path);
-                if (issueCountPanel != null) {
-                    issueCountPanel.setBackground(e.isAddedPath(path) ? UIUtil.getTreeSelectionBackground(true) : UIUtil.getTableBackground());
-                }
             }
             ComponentIssueDetails.createIssuesDetailsView(issuesDetailsPanel, (DependenciesTree) e.getNewLeadSelectionPath().getLastPathComponent());
             // Scroll back to the beginning of the scrollable panel
