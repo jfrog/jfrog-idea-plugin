@@ -18,10 +18,10 @@
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="183.3795.13"/>
+    <idea-version since-build="201.7846.76"/>
     <depends>com.intellij.modules.lang</depends>
     <depends config-file="with-java.xml" optional="true">com.intellij.modules.java</depends>
-    <depends config-file="with-gradle.xml" optional="true">org.jetbrains.plugins.gradle</depends>
+    <depends config-file="with-gradle.xml" optional="true">com.intellij.gradle</depends>
     <depends config-file="with-maven.xml" optional="true">org.jetbrains.idea.maven</depends>
     <depends config-file="with-go.xml" optional="true">org.jetbrains.plugins.go</depends>
 
@@ -34,7 +34,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable id="JFrog" displayName="JFrog Xray Configuration"
                                  instance="com.jfrog.ide.idea.ui.configuration.XrayGlobalConfiguration"/>
-        <externalProjectDataService implementation="com.jfrog.ide.idea.GradleDependenciesDataService"/>
+        <externalProjectDataService implementation="com.jfrog.ide.idea.gradle.GradleDependenciesDataService"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.ui.filters.FilterManagerService"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.scan.ScanManagersFactory"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.ui.licenses.LicensesTree"/>

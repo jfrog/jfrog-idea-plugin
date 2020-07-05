@@ -5,7 +5,7 @@ buildscript {
 }
 
 plugins {
-    id "org.jetbrains.intellij" version "0.4.15"
+    id "org.jetbrains.intellij" version "0.4.20"
 }
 
 sourceCompatibility = 1.8
@@ -16,8 +16,8 @@ apply plugin: 'org.jetbrains.intellij'
 apply plugin: 'java'
 
 intellij {
-    version 'IU-2019.3.3'
-    plugins 'gradle', 'maven', 'Groovy', 'properties', 'java', 'org.jetbrains.plugins.go:193.5662.53.103'
+    version 'IU-2020.1.2'
+    plugins 'gradle', 'maven', 'Groovy', 'properties', 'java', 'org.jetbrains.plugins.go:201.7846.76.189'
     pluginName 'JFrog'
     updateSinceUntilBuild = false
 }

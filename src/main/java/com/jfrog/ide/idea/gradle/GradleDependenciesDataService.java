@@ -1,10 +1,10 @@
-package com.jfrog.ide.idea;
+package com.jfrog.ide.idea.gradle;
 
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.Key;
 import com.intellij.openapi.externalSystem.model.ProjectKeys;
-import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
 import com.intellij.openapi.externalSystem.model.project.ProjectData;
+import com.intellij.openapi.externalSystem.model.project.dependencies.ProjectDependencies;
 import com.intellij.openapi.externalSystem.service.project.IdeModifiableModelsProvider;
 import com.intellij.openapi.externalSystem.service.project.manage.AbstractProjectDataService;
 import com.intellij.openapi.externalSystem.util.ExternalSystemConstants;
@@ -23,12 +23,12 @@ import java.util.Collection;
  * Created by Yahav Itzhak on 9 Nov 2017.
  */
 @Order(ExternalSystemConstants.UNORDERED)
-public class GradleDependenciesDataService extends AbstractProjectDataService<LibraryDependencyData, Module> {
+public class GradleDependenciesDataService extends AbstractProjectDataService<ProjectDependencies, Module> {
 
     @NotNull
     @Override
-    public Key<LibraryDependencyData> getTargetDataKey() {
-        return ProjectKeys.LIBRARY_DEPENDENCY;
+    public Key<ProjectDependencies> getTargetDataKey() {
+        return ProjectKeys.DEPENDENCIES_GRAPH;
     }
 
     /**
@@ -40,7 +40,7 @@ public class GradleDependenciesDataService extends AbstractProjectDataService<Li
      * @param modelsProvider contains the project modules
      */
     @Override
-    public void importData(@NotNull Collection<DataNode<LibraryDependencyData>> toImport,
+    public void importData(@NotNull Collection<DataNode<ProjectDependencies>> toImport,
                            @Nullable ProjectData projectData,
                            @NotNull Project project,
                            @NotNull IdeModifiableModelsProvider modelsProvider) {

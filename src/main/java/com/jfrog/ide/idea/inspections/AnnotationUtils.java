@@ -32,10 +32,15 @@ public class AnnotationUtils {
         String topIssue = getTopIssueString(dependency);
         Arrays.stream(elements)
                 .filter(Objects::nonNull)
-                .map(PsiElement::getTextRange)
-                .forEach(textRange -> {
-                    annotationHolder.createAnnotation(problemHighlightType, textRange, topIssue);
-                    annotationHolder.createAnnotation(problemHighlightType, textRange, licensesString);
+                .forEach(element -> {
+                    try {
+                        annotationHolder.newAnnotation(problemHighlightType, topIssue).range(element).create();
+                        annotationHolder.newAnnotation(problemHighlightType, licensesString).range(element).create();
+                    } catch (IllegalArgumentException e) {
+                        // Exception is thrown when the element we register the annotation for is out of bound of the
+                        // containing element exists in the provided annotationHolder.
+                        // This scenario may occur during a gradle-inspections.
+                    }
                 });
     }
 
