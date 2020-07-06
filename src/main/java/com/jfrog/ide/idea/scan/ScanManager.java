@@ -10,8 +10,8 @@ import com.intellij.codeInspection.ex.InspectionManagerEx;
 import com.intellij.codeInspection.ex.LocalInspectionToolWrapper;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
-import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
 import com.intellij.openapi.externalSystem.model.project.ProjectData;
+import com.intellij.openapi.externalSystem.model.project.dependencies.ProjectDependencies;
 import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefreshCallback;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -67,7 +67,7 @@ public abstract class ScanManager extends ScanManagerBase {
     Project project;
 
     // Lock to prevent multiple simultaneous scans
-    private AtomicBoolean scanInProgress = new AtomicBoolean(false);
+    private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
 
     /**
      * @param mainProject - Currently opened IntelliJ project. We'll use this project to retrieve project based services
@@ -86,7 +86,7 @@ public abstract class ScanManager extends ScanManagerBase {
     /**
      * Refresh project dependencies.
      */
-    protected abstract void refreshDependencies(ExternalProjectRefreshCallback cbk, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies);
+    protected abstract void refreshDependencies(ExternalProjectRefreshCallback cbk, @Nullable Collection<DataNode<ProjectDependencies>> dependenciesData);
 
     /**
      * Collect and return {@link Components} to be scanned by JFrog Xray.
@@ -110,7 +110,7 @@ public abstract class ScanManager extends ScanManagerBase {
     /**
      * Scan and update dependency components.
      */
-    private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies) {
+    private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator, @Nullable Collection<DataNode<ProjectDependencies>> dependenciesData) {
         // Don't scan if Xray is not configured
         if (!GlobalSettings.getInstance().areCredentialsSet()) {
             getLog().error("Xray server is not configured.");
@@ -125,7 +125,7 @@ public abstract class ScanManager extends ScanManagerBase {
         }
         try {
             // Refresh dependencies -> Collect -> Scan and store to cache -> Update view
-            refreshDependencies(getRefreshDependenciesCbk(quickScan, indicator), libraryDependencies);
+            refreshDependencies(getRefreshDependenciesCbk(quickScan, indicator), dependenciesData);
         } finally {
             scanInProgress.set(false);
         }
@@ -134,17 +134,17 @@ public abstract class ScanManager extends ScanManagerBase {
     /**
      * Launch async dependency scan.
      */
-    void asyncScanAndUpdateResults(boolean quickScan, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies) {
+    void asyncScanAndUpdateResults(boolean quickScan, @Nullable Collection<DataNode<ProjectDependencies>> dependenciesData) {
         if (DumbService.isDumb(mainProject)) { // If intellij is still indexing the project
             return;
         }
-        Task.Backgroundable scanAndUpdateTask = new Task.Backgroundable(null, "Xray: Scanning for Vulnerabilities...") {
+        Task.Backgroundable scanAndUpdateTask = new Task.Backgroundable(null, "Xray: Scanning for vulnerabilities...") {
             @Override
             public void run(@NotNull com.intellij.openapi.progress.ProgressIndicator indicator) {
                 if (project.isDisposed()) {
                     return;
                 }
-                scanAndUpdate(quickScan, new ProgressIndicatorImpl(indicator), libraryDependencies);
+                scanAndUpdate(quickScan, new ProgressIndicatorImpl(indicator), dependenciesData);
             }
         };
         // The progress manager is only good for foreground threads.
@@ -289,8 +289,6 @@ public abstract class ScanManager extends ScanManagerBase {
      */
     protected void subscribeLaunchDependencyScanOnFileChangedEvents(String fileName) {
         String fileToSubscribe = Paths.get(Utils.getProjectBasePath(project).toString(), fileName).toString();
-
-        // Register for file change event of go.sum file.
         mainProject.getMessageBus().connect().subscribe(VirtualFileManager.VFS_CHANGES, new BulkFileListener() {
             @Override
             public void after(@NotNull List<? extends VFileEvent> events) {

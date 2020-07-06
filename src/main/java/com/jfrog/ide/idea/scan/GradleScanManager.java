@@ -1,15 +1,16 @@
 package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.ProjectKeys;
-import com.intellij.openapi.externalSystem.model.project.AbstractDependencyData;
-import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
 import com.intellij.openapi.externalSystem.model.project.ModuleData;
 import com.intellij.openapi.externalSystem.model.project.ProjectData;
+import com.intellij.openapi.externalSystem.model.project.dependencies.ArtifactDependencyNode;
+import com.intellij.openapi.externalSystem.model.project.dependencies.ComponentDependencies;
+import com.intellij.openapi.externalSystem.model.project.dependencies.DependencyNode;
+import com.intellij.openapi.externalSystem.model.project.dependencies.ProjectDependencies;
 import com.intellij.openapi.externalSystem.model.task.ExternalSystemTaskType;
 import com.intellij.openapi.externalSystem.service.execution.ProgressExecutionMode;
 import com.intellij.openapi.externalSystem.service.internal.ExternalSystemProcessingManager;
@@ -27,7 +28,6 @@ import com.jfrog.ide.idea.inspections.GradleInspection;
 import com.jfrog.ide.idea.utils.Utils;
 import com.jfrog.xray.client.impl.services.summary.ComponentDetailImpl;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.gradle.settings.GradleSettings;
@@ -38,13 +38,9 @@ import org.jfrog.build.extractor.scan.GeneralInfo;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
 
@@ -53,7 +49,7 @@ import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
  */
 public class GradleScanManager extends ScanManager {
 
-    private Collection<DataNode<LibraryDependencyData>> libraryDependencies;
+    private Collection<DataNode<ProjectDependencies>> dependenciesData;
     private Map<String, DependenciesTree> modules = Maps.newHashMap();
 
     GradleScanManager(Project project) throws IOException {
@@ -88,12 +84,12 @@ public class GradleScanManager extends ScanManager {
     }
 
     @Override
-    protected void refreshDependencies(ExternalProjectRefreshCallback cbk, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies) {
-        if (libraryDependencies != null) {
+    protected void refreshDependencies(ExternalProjectRefreshCallback cbk, @Nullable Collection<DataNode<ProjectDependencies>> dependenciesData) {
+        if (dependenciesData != null) {
             // Change the dependencies only if there are new dependencies
-            this.libraryDependencies = libraryDependencies;
+            this.dependenciesData = dependenciesData;
         }
-        if (this.libraryDependencies != null) {
+        if (this.dependenciesData != null) {
             cbk.onSuccess(null);
             return;
         }
@@ -123,17 +119,10 @@ public class GradleScanManager extends ScanManager {
 
     @Override
     protected void buildTree(@Nullable DataNode<ProjectData> externalProject) {
-        DependenciesTree rootNode = new DependenciesTree(project.getName());
         collectDependenciesIfMissing(externalProject);
-        libraryDependencies.parallelStream()
-                .filter(GradleScanManager::isLibraryDependency)
-                .filter(GradleScanManager::isRootDependency)
-                .map(dataNode -> Pair.of(getModuleId(dataNode), dataNode))
-                .filter(distinctByName(pair -> pair.getLeft() + getDependencyName(pair.getRight())))
-                .filter(pair -> modules.containsKey(pair.getLeft()))
-                .forEach(pair -> populateDependenciesTree(modules.get(pair.getLeft()), pair.getRight()));
+        dependenciesData.forEach(this::populateModulesWithDependencies);
+        DependenciesTree rootNode = new DependenciesTree(project.getName());
         modules.values().forEach(rootNode::add);
-
         GeneralInfo generalInfo = new GeneralInfo().name(project.getName()).path(Utils.getProjectBasePath(project).toString());
         rootNode.setGeneralInfo(generalInfo);
         if (rootNode.getChildren().size() == 1) {
@@ -143,10 +132,47 @@ public class GradleScanManager extends ScanManager {
         }
     }
 
+    private void populateModulesWithDependencies(DataNode<ProjectDependencies> dataNode) {
+        Map<String, DependencyNode> moduleDependencies = new HashMap<>();
+        ProjectDependencies projectDependencies = dataNode.getData();
+        String moduleId = getModuleId(dataNode);
+        if (!modules.containsKey(moduleId)) {
+            return;
+        }
+
+        // Collect dependencies from project components ('main' and 'test').
+        for (ComponentDependencies componentDependency : projectDependencies.getComponentsDependencies()) {
+            Stream.concat(componentDependency.getCompileDependenciesGraph().getDependencies().stream(), componentDependency.getRuntimeDependenciesGraph().getDependencies().stream())
+                    .filter(GradleScanManager::isArtifactDependencyNode)
+                    .filter(dependencyNode -> !moduleDependencies.containsKey(dependencyNode.getDisplayName()))
+                    .forEach(dependencyNode -> moduleDependencies.put(dependencyNode.getDisplayName(), dependencyNode));
+        }
+
+        // Populate dependencies-tree for all modules.
+        moduleDependencies.values().forEach(dependencyNode -> populateDependenciesTree(modules.get(moduleId), dependencyNode));
+    }
+
+    private void populateDependenciesTree(DependenciesTree dependenciesTree, DependencyNode dependencyNode) {
+        ComponentDetailImpl scanComponent = new ComponentDetailImpl(dependencyNode.getDisplayName(), "");
+        DependenciesTree treeNode = new DependenciesTree(scanComponent);
+
+        // Recursively search for dependencies and add to tree.
+        List<DependencyNode> childrenList = dependencyNode.getDependencies().stream()
+                .filter(GradleScanManager::isArtifactDependencyNode)
+                .collect(Collectors.toList());
+        childrenList.forEach(child -> populateDependenciesTree(treeNode, child));
+
+        dependenciesTree.add(treeNode);
+    }
+
+    private static boolean isArtifactDependencyNode(DependencyNode dependencyNode) {
+        return dependencyNode instanceof ArtifactDependencyNode;
+    }
+
     private void collectDependenciesIfMissing(DataNode<ProjectData> externalProject) {
-        if (libraryDependencies == null) {
+        if (dependenciesData == null) {
             collectModuleDependencies(externalProject);
-            collectLibraryDependencies(externalProject);
+            collectDependenciesData(externalProject);
         } else {
             modules.values().forEach(child -> child.getChildren().clear());
         }
@@ -170,58 +196,15 @@ public class GradleScanManager extends ScanManager {
         });
     }
 
-    private void collectLibraryDependencies(DataNode<ProjectData> externalProject) {
-        libraryDependencies = ExternalSystemApiUtil.findAllRecursively(externalProject, ProjectKeys.LIBRARY_DEPENDENCY);
+    private void collectDependenciesData(DataNode<ProjectData> externalProject) {
+        this.dependenciesData = ExternalSystemApiUtil.findAllRecursively(externalProject, ProjectKeys.DEPENDENCIES_GRAPH);
     }
 
-    private static boolean isLibraryDependency(DataNode<LibraryDependencyData> dataNode) {
-        return ProjectKeys.LIBRARY_DEPENDENCY.equals(dataNode.getKey());
-    }
-
-    private static boolean isRootDependency(DataNode<LibraryDependencyData> dataNode) {
-        return dataNode.getParent() == null || !ProjectKeys.LIBRARY_DEPENDENCY.equals(dataNode.getParent().getKey());
-    }
-
-    private static <T> Predicate<T> distinctByName(Function<? super T, ?> getNameFunc) {
-        Set<Object> seen = Sets.newHashSet();
-        return t -> seen.add(getNameFunc.apply(t));
-    }
-
-    private static String getModuleId(DataNode<LibraryDependencyData> dataNode) {
+    private static String getModuleId(DataNode<ProjectDependencies> dataNode) {
         DataNode<ModuleData> moduleDataNode = dataNode.getDataNode(ProjectKeys.MODULE);
         if (moduleDataNode == null) {
             return "";
         }
         return StringUtils.removeStart(moduleDataNode.getData().getId(), ":");
-    }
-
-    private String getDependencyName(DataNode<LibraryDependencyData> dataNode) {
-        return dataNode.getData().getExternalName();
-    }
-
-    private void populateDependenciesTree(DependenciesTree dependenciesTree, DataNode<? extends AbstractDependencyData> dataNode) {
-        String componentId = dataNode.getData().getExternalName();
-
-        int colonCount = StringUtils.countMatches(componentId, ":");
-        if (colonCount == 3) {
-            // <Group ID>:<Artifact ID>:<Classifier>:<Version>. The classifier should be ignored.
-            int secondColonIdx = componentId.indexOf(":", componentId.indexOf(":") + 1);
-            int thirdColonIdx = componentId.indexOf(":", secondColonIdx + 1);
-            componentId = componentId.substring(0, secondColonIdx) + componentId.substring(thirdColonIdx);
-            colonCount--;
-        }
-        if (colonCount != 2) {
-            if (StringUtils.isNotBlank(componentId)) {
-                getLog().warn("Bad component ID structure: Should be <GroupID>:<ArtifactID>:<Version>, got '" + componentId + "'");
-            }
-            return;
-        }
-
-        ComponentDetailImpl scanComponent = new ComponentDetailImpl(componentId, "");
-        DependenciesTree treeNode = new DependenciesTree(scanComponent);
-        for (DataNode child : dataNode.getChildren()) {
-            populateDependenciesTree(treeNode, child);
-        }
-        dependenciesTree.add(treeNode);
     }
 }

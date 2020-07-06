@@ -2,12 +2,12 @@ package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
-import com.intellij.openapi.externalSystem.model.project.LibraryDependencyData;
+import com.intellij.openapi.externalSystem.model.project.dependencies.ProjectDependencies;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.jfrog.ide.common.utils.PackageFileFinder;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.log.Logger;
@@ -51,10 +51,10 @@ public class ScanManagersFactory {
     /**
      * Start an Xray scan for all projects.
      *
-     * @param quickScan           - True to allow usage of the scan cache.
-     * @param libraryDependencies - Dependencies to use in Gradle scans.
+     * @param quickScan        - True to allow usage of the scan cache.
+     * @param dependenciesData - Dependencies to use in Gradle scans.
      */
-    public void startScan(boolean quickScan, @Nullable Collection<DataNode<LibraryDependencyData>> libraryDependencies) {
+    public void startScan(boolean quickScan, @Nullable Collection<DataNode<ProjectDependencies>> dependenciesData) {
         if (DumbService.isDumb(mainProject)) { // If intellij is still indexing the project
             return;
         }
@@ -76,7 +76,7 @@ public class ScanManagersFactory {
             resetViews(issuesTree, licensesTree);
             NavigationService.clearNavigationMap(mainProject);
             for (ScanManager scanManager : scanManagers.values()) {
-                scanManager.asyncScanAndUpdateResults(quickScan, libraryDependencies);
+                scanManager.asyncScanAndUpdateResults(quickScan, dependenciesData);
             }
         } catch (IOException | RuntimeException e) {
             Logger.getInstance(mainProject).error("", e);
@@ -88,16 +88,16 @@ public class ScanManagersFactory {
      * For known Gradle projects - Start scan only for the project.
      * For new Gradle projects - Start a full scan.
      *
-     * @param project             - The Gradle project
-     * @param libraryDependencies - Gradle's dependencies
+     * @param project          - The Gradle project
+     * @param dependenciesData - Gradle's dependencies
      */
-    public void tryScanSingleProject(Project project, Collection<DataNode<LibraryDependencyData>> libraryDependencies) {
+    public void tryScanSingleProject(Project project, Collection<DataNode<ProjectDependencies>> dependenciesData) {
         ScanManager scanManager = scanManagers.get(Utils.getProjectIdentifier(project));
         if (scanManager != null) { // If Gradle project already exists
-            scanManager.asyncScanAndUpdateResults(true, libraryDependencies);
+            scanManager.asyncScanAndUpdateResults(true, dependenciesData);
             return;
         }
-        startScan(true, libraryDependencies); // New Gradle project
+        startScan(true, dependenciesData); // New Gradle project
     }
 
     /**
