@@ -94,7 +94,7 @@ public class ComponentUtils {
 
     public static JComponent createNoCredentialsView() {
         HyperlinkLabel link = new HyperlinkLabel();
-        link.setHyperlinkText("To start using the JFrog Plugin, please ", "configure", " your JFrog Xray details.");
+        link.setHyperlinkText("To start using the JFrog Plugin, please ", " configure", " your JFrog Xray details.");
         link.addHyperlinkListener(e -> ShowSettingsUtil.getInstance().showSettingsDialog(null, XrayGlobalConfiguration.class));
         return createUnsupportedPanel(link);
     }
