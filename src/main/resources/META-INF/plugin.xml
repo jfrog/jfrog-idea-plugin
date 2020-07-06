@@ -9,11 +9,10 @@
 
     <change-notes>
         <![CDATA[
-          <li> Support WebStorm and GoLand IDEs.</li>
-          <li> Allow initializing connection details to Xray using environment variables.</li>
-          <li> Persist issues and licenses view filters.</li>
-          <li> Enable navigation from issues-tree components to the project's descriptor.</li>
-          <li> Allow exclusion of transitive Maven dependencies from the issues-tree.</li>
+          <li> Minimal supported IDEA version changed to 2020.1.</li>
+          <li> Bugfix: In Gradle projects, the issues-tree is shown flat.</li>
+          <li> Bugfix: Broken navigation from issues-tree to descriptor after applying a filter.</li>
+          <li> Visual improvements.</li>
         ]]>
     </change-notes>
 
