@@ -25,6 +25,7 @@ import com.intellij.credentialStore.CredentialAttributesKt;
 import com.intellij.credentialStore.Credentials;
 import com.intellij.ide.passwordSafe.PasswordSafe;
 import com.intellij.openapi.util.Comparing;
+import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.util.EnvironmentUtil;
 import com.intellij.util.net.HttpConfigurable;
 import com.intellij.util.net.ssl.CertificateManager;
@@ -37,10 +38,16 @@ import org.jfrog.client.http.model.ProxyConfig;
 import org.jfrog.client.util.KeyStoreProvider;
 import org.jfrog.client.util.KeyStoreProviderException;
 import org.jfrog.client.util.KeyStoreProviderFactory;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
+import java.net.Proxy;
+import java.net.URI;
+import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -169,9 +176,63 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     @Override
     public ProxyConfig getProxyConfForTargetUrl(String xrayUrl) {
         HttpConfigurable httpConfigurable = HttpConfigurable.getInstance();
-        if (!httpConfigurable.isHttpProxyEnabledForUrl(xrayUrl)) {
+        if (httpConfigurable.USE_PROXY_PAC) {
+            return getProxyConfForTargetUrlUsingPac(httpConfigurable, xrayUrl);
+        }
+        if (httpConfigurable.isHttpProxyEnabledForUrl(xrayUrl)) {
+            return getProxyConfForTargetUrlUsingManualConf(httpConfigurable);
+        }
+        return null;
+    }
+
+    /**
+     * Read Proxy config from proxy auto-configuration (PAC) file.
+     *
+     * @param httpConfigurable - Intellij HTTP details
+     * @param xrayUrl          - The Xray URL
+     * @return Proxy config
+     */
+    private ProxyConfig getProxyConfForTargetUrlUsingPac(HttpConfigurable httpConfigurable, String xrayUrl) {
+        URI xrayUri = VfsUtil.toUri(xrayUrl);
+        if (xrayUri == null) {
+            // Proxy URL is illegal
             return null;
         }
+
+        List<Proxy> proxies = httpConfigurable.getOnlyBySettingsSelector().select(xrayUri);
+        if (CollectionUtils.isEmpty(proxies)) {
+            // No proxy found for Xray URL
+            return null;
+        }
+        // Currently only 1 proxy is supported
+        Proxy firstProxy = proxies.get(0);
+        if (firstProxy.type().equals(Proxy.Type.DIRECT)) {
+            // Xray URL is configured with "no proxy"
+            return null;
+        }
+        InetSocketAddress inetSocketAddress = (InetSocketAddress) firstProxy.address();
+        ProxyConfig proxyConfig = new ProxyConfig();
+        proxyConfig.setHost(inetSocketAddress.getHostString());
+        proxyConfig.setPort(inetSocketAddress.getPort());
+        if (httpConfigurable.isGenericPasswordCanceled(proxyConfig.getHost(), proxyConfig.getPort())) {
+            // Authentication is disabled
+            return proxyConfig;
+        }
+        PasswordAuthentication passwordAuthentication = httpConfigurable.getGenericPassword(proxyConfig.getHost(), proxyConfig.getPort());
+        if (passwordAuthentication != null) {
+            proxyConfig.setUsername(passwordAuthentication.getUserName());
+            proxyConfig.setPassword(String.valueOf(passwordAuthentication.getPassword()));
+        }
+        return proxyConfig;
+    }
+
+    /**
+     * Read Proxy config using manual proxy configuration.
+     *
+     * @param httpConfigurable - Intellij HTTP details
+     * @return Proxy config
+     */
+    private ProxyConfig getProxyConfForTargetUrlUsingManualConf(HttpConfigurable httpConfigurable) {
         ProxyConfig proxyConfig = new ProxyConfig();
         proxyConfig.setHost(trim(httpConfigurable.PROXY_HOST));
         proxyConfig.setPort(httpConfigurable.PROXY_PORT);
@@ -213,6 +274,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     /**
      * Read connection details from environment variables.
      * All connection details must be provided from env, otherwise don't use them.
+     *
      * @return true if connection details loaded from env.
      */
     public boolean readConnectionDetailsFromEnv() {
