@@ -10,6 +10,7 @@ import com.jfrog.ide.common.filter.FilterManager;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.License;
+import org.jfrog.build.extractor.scan.Scope;
 import org.jfrog.build.extractor.scan.Severity;
 
 import java.util.HashMap;
@@ -30,6 +31,7 @@ public class FilterManagerService extends FilterManager implements PersistentSta
     /**
      * Only on first scan after project opens, update the selected-licenses from state.
      * After updating, set state's licenses map to null.
+     *
      * @return Selected licenses map according to persisted state.
      */
     @Override
@@ -47,18 +49,49 @@ public class FilterManagerService extends FilterManager implements PersistentSta
         }
         state.selectedLicences = null;
 
-        // Update licenses tree with applied filters.
+        // Update components tree with applied filters.
         if (selectedLicenses.containsValue(false)) {
             MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
-            messageBus.syncPublisher(ApplicationEvents.ON_SCAN_FILTER_LICENSES_CHANGE).update();
+            messageBus.syncPublisher(ApplicationEvents.ON_SCAN_FILTER_CHANGE).update();
         }
 
         return selectedLicenses;
     }
 
+    /**
+     * Only on first scan after project opens, update the selected-scopes from state.
+     * After updating, set state's scopes map to null.
+     *
+     * @return Selected scopes map according to persisted state.
+     */
+    @Override
+    public Map<Scope, Boolean> getSelectedScopes() {
+        Map<Scope, Boolean> selectedScopes = super.getSelectedScopes();
+        if (state == null || state.selectedScopes == null) {
+            return selectedScopes;
+        }
+
+        // Previous state exists.
+        for (Scope scope : selectedScopes.keySet()) {
+            if (state.selectedScopes.containsKey(scope.getName())) {
+                selectedScopes.put(scope, state.selectedScopes.get(scope.getName()));
+            }
+        }
+        state.selectedScopes = null;
+
+        // Update components tree with applied filters.
+        if (selectedScopes.containsValue(false)) {
+            MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
+            messageBus.syncPublisher(ApplicationEvents.ON_SCAN_FILTER_CHANGE).update();
+        }
+
+        return selectedScopes;
+    }
+
     static class FiltersState {
         public Map<Severity, Boolean> selectedSeverities;
         public Map<String, Boolean> selectedLicences;
+        public Map<String, Boolean> selectedScopes;
     }
 
     @Override
@@ -67,11 +100,12 @@ public class FilterManagerService extends FilterManager implements PersistentSta
         state.selectedSeverities = getSelectedSeverities();
 
         // Persist only license name and whether it is selected or not.
-        Map<License, Boolean> selectedLicences = super.getSelectedLicenses();
         state.selectedLicences = new HashMap<>();
-        for (License license : selectedLicences.keySet()) {
-            state.selectedLicences.put(license.getName(), selectedLicences.get(license));
-        }
+        super.getSelectedLicenses().forEach((license, selected) -> state.selectedLicences.put(license.getName(), selected));
+
+        // Persist only scope name and whether it is selected or not.
+        state.selectedScopes = new HashMap<>();
+        super.getSelectedScopes().forEach((scope, selected) -> state.selectedScopes.put(scope.getName(), selected));
 
         return state;
     }

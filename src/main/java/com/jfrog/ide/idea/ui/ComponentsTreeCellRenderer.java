@@ -1,4 +1,4 @@
-package com.jfrog.ide.idea.ui.issues;
+package com.jfrog.ide.idea.ui;
 
 import com.intellij.ui.JBDefaultTreeCellRenderer;
 import com.jfrog.ide.idea.ui.utils.IconUtils;
@@ -13,7 +13,7 @@ import java.awt.*;
 /**
  * Created by Yahav Itzhak on 22 Nov 2017.
  */
-public class IssuesTreeCellRenderer extends JBDefaultTreeCellRenderer {
+public class ComponentsTreeCellRenderer extends JBDefaultTreeCellRenderer {
 
     @Override
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {

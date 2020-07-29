@@ -1,7 +1,6 @@
 package com.jfrog.ide.idea.ui.filters;
 
 import com.intellij.openapi.project.Project;
-import com.jfrog.ide.idea.events.ApplicationEvents;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.Severity;
 
@@ -12,9 +11,12 @@ import java.util.Map;
  */
 public class IssueFilterMenu extends FilterMenu<Severity> {
 
+    public static final String NAME = "Severity";
+    public static final String TOOLTIP = "Select severities to show";
+
     public IssueFilterMenu(@NotNull Project mainProject) {
-        super(mainProject);
+        super(mainProject, NAME, TOOLTIP);
         Map<Severity, Boolean> severitiesFilters = FilterManagerService.getInstance(mainProject).getSelectedSeverities();
-        addComponents(severitiesFilters, false, ApplicationEvents.ON_SCAN_FILTER_ISSUES_CHANGE);
+        addComponents(severitiesFilters, false);
     }
 }

@@ -1,7 +1,6 @@
 package com.jfrog.ide.idea.ui.filters;
 
 import com.intellij.openapi.project.Project;
-import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import org.apache.commons.collections4.CollectionUtils;
@@ -16,11 +15,15 @@ import java.util.Set;
  */
 public class LicenseFilterMenu extends FilterMenu<License> {
 
+    public static final String NAME = "License";
+    public static final String TOOLTIP = "Select licenses to show";
+
     public LicenseFilterMenu(@NotNull Project mainProject) {
-        super(mainProject);
+        super(mainProject, NAME, TOOLTIP);
     }
 
-    public void setLicenses() {
+    @Override
+    public void refresh() {
         Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(mainProject);
         if (CollectionUtils.isEmpty(scanManagers)) {
             return;
@@ -31,6 +34,7 @@ public class LicenseFilterMenu extends FilterMenu<License> {
                         .stream()
                         .filter(license -> !selectedLicenses.containsKey(license))
                         .forEach(license -> selectedLicenses.put(license, true)));
-        addComponents(selectedLicenses, true, ApplicationEvents.ON_SCAN_FILTER_LICENSES_CHANGE);
+        addComponents(selectedLicenses, true);
+        super.refresh();
     }
 }

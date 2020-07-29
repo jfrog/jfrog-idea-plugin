@@ -8,10 +8,6 @@ import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.content.ContentManager;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.idea.events.ApplicationEvents;
-import com.jfrog.ide.idea.ui.issues.IssuesTab;
-import com.jfrog.ide.idea.ui.issues.IssuesTree;
-import com.jfrog.ide.idea.ui.licenses.LicensesTab;
-import com.jfrog.ide.idea.ui.licenses.LicensesTree;
 import org.jetbrains.annotations.NotNull;
 
 
@@ -24,53 +20,35 @@ public class JFrogToolWindow {
     public static final int TITLE_LABEL_SIZE = (int) TITLE_FONT_SIZE + 10;
     public static final int SCROLL_BAR_SCROLLING_UNITS = 16;
 
-    private LicensesTab licensesTab;
-    private IssuesTab issuesTab;
-
-    JFrogToolWindow() {
-        this.licensesTab = new LicensesTab();
-        this.issuesTab = new IssuesTab();
-    }
-
     void initToolWindow(@NotNull ToolWindow toolWindow, @NotNull Project mainProject, boolean supported) {
         ContentManager contentManager = toolWindow.getContentManager();
-        addContent(contentManager, mainProject, supported);
-        registerListeners(mainProject);
+        JFrogContent content = new JFrogContent(mainProject, supported);
+        addContent(contentManager, content);
+        registerListeners(mainProject, content);
     }
 
-    private void addContent(ContentManager contentManager, @NotNull Project project, boolean supported) {
+    private void addContent(ContentManager contentManager, JFrogContent content) {
         ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
-        Content issuesContent = contentFactory.createContent(issuesTab.createIssuesViewTab(project, supported), "Issues", false);
-        Content licenseContent = contentFactory.createContent(licensesTab.createLicenseInfoTab(project, supported), "Licenses Info", false);
+        Content issuesContent = contentFactory.createContent(content, "", false);
         contentManager.addContent(issuesContent);
-        contentManager.addContent(licenseContent);
     }
 
-    private void createOnConfigurationChangeHandler() {
-        ApplicationManager.getApplication().invokeLater(() -> {
-            issuesTab.onConfigurationChange();
-            licensesTab.onConfigurationChange();
-        });
+    private void createOnConfigurationChangeHandler(JFrogContent JFrogContent) {
+        ApplicationManager.getApplication().invokeLater(JFrogContent::onConfigurationChange);
     }
 
-    private void registerListeners(@NotNull Project mainProject) {
+    private void registerListeners(@NotNull Project mainProject, JFrogContent content) {
         MessageBusConnection applicationBusConnection = ApplicationManager.getApplication().getMessageBus().connect();
         // Xray credentials were set listener
-        applicationBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, this::createOnConfigurationChangeHandler);
+        applicationBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () -> createOnConfigurationChangeHandler(content));
 
         MessageBusConnection projectBusConnection = mainProject.getMessageBus().connect();
-        projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_FILTER_ISSUES_CHANGE, () -> ApplicationManager.getApplication().invokeLater(() -> {
-            IssuesTree.getInstance(mainProject).applyFiltersForAllProjects();
-            issuesTab.updateIssuesTable();
+        projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_FILTER_CHANGE, () -> ApplicationManager.getApplication().invokeLater(() -> {
+            ComponentsTree.getInstance(mainProject).applyFiltersForAllProjects();
+            content.updateIssuesTable();
         }));
 
-        projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_FILTER_LICENSES_CHANGE, () -> ApplicationManager.getApplication().invokeLater(() ->
-                LicensesTree.getInstance(mainProject).applyFiltersForAllProjects()));
-
         // Issues tab listeners
-        issuesTab.registerListeners();
-
-        // Licenses tab listeners
-        licensesTab.registerListeners();
+        content.registerListeners();
     }
 }

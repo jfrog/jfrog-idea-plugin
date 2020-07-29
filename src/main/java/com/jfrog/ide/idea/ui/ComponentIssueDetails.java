@@ -1,6 +1,5 @@
-package com.jfrog.ide.idea.ui.issues;
+package com.jfrog.ide.idea.ui;
 
-import com.jfrog.ide.idea.ui.ComponentDetails;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 import org.jfrog.build.extractor.scan.Issue;
@@ -11,12 +10,12 @@ import java.awt.*;
 /**
  * @author yahavi
  */
-class ComponentIssueDetails extends ComponentDetails {
+public class ComponentIssueDetails extends ComponentDetails {
 
     private ComponentIssueDetails(DependenciesTree node) {
         super(node);
         Issue topIssue = node.getTopIssue();
-        addText("Top Issue Severity:", StringUtils.capitalize(topIssue.getSeverity().toString()));
+        addText("Top Issue Severity", StringUtils.capitalize(topIssue.getSeverity().toString()));
     }
 
     static void createIssuesDetailsView(JPanel panel, DependenciesTree node) {
