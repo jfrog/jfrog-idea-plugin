@@ -47,7 +47,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
     public XrayGlobalConfiguration() {
         testConnectionButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
             try {
-                connectionResults.setText("Connecting to Xray...");
+                setConnectionResults("Connecting to Xray...");
                 config.validate();
                 config.repaint();
                 // use as a workaround to version not being username password validated
@@ -56,7 +56,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
 
                 // Check version
                 if (!isXrayVersionSupported(xrayVersion)) {
-                    connectionResults.setText(Results.unsupported(xrayVersion));
+                    setConnectionResults(Results.unsupported(xrayVersion));
                     return;
                 }
 
@@ -66,10 +66,10 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
                     throw new IOException(testComponentPermissionRes.getRight());
                 }
 
-                connectionResults.setText(Results.success(xrayVersion));
+                setConnectionResults(Results.success(xrayVersion));
 
             } catch (IOException | KeyStoreProviderException exception) {
-                connectionResults.setText(Results.error(exception));
+                setConnectionResults(Results.error(exception));
             }
         }));
         connectionDetailsFromEnv.addItemListener(e -> {
@@ -92,6 +92,10 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
                 }
             }
         });
+    }
+
+    private void setConnectionResults(String results) {
+        connectionResults.setText("<html>" + results + "</html>");
     }
 
     @Nls
@@ -158,7 +162,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
     }
 
     private void loadConfig() {
-        url.getEmptyText().setText("Example: http://localhost:8000");
+        url.getEmptyText().setText("Example: http://myjfrog.acme.org/xray");
         excludedPaths.setInputVerifier(new ExclusionsVerifier());
         connectionResults.setText("");
 
