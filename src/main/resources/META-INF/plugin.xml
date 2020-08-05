@@ -34,12 +34,12 @@
         <applicationConfigurable id="JFrog" displayName="JFrog Xray Configuration"
                                  instance="com.jfrog.ide.idea.ui.configuration.XrayGlobalConfiguration"/>
         <externalProjectDataService implementation="com.jfrog.ide.idea.gradle.GradleDependenciesDataService"/>
+        <applicationService serviceImplementation="com.jfrog.ide.idea.log.Logger"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.ui.filters.FilterManagerService"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.scan.ScanManagersFactory"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.ui.licenses.LicensesTree"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.ui.issues.IssuesTree"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.ui.JFrogToolWindow"/>
-        <projectService serviceImplementation="com.jfrog.ide.idea.log.Logger"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.navigation.NavigationService"/>
         <toolWindow id="JFrog" anchor="bottom" icon="/icons/jfrog_icon.png"
                     factoryClass="com.jfrog.ide.idea.ui.JFrogToolWindowFactory" canCloseContents="false"/>

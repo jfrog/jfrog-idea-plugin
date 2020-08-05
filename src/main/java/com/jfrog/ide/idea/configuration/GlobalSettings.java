@@ -48,6 +48,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
      * Produces the state object to persist to file.
      * If configuration loaded from environment-variables, don't persist connection details.
      * Object to persist has null username and password as Password-safe is used for credentials store.
+     *
      * @return the state object to persist with clear credentials.
      */
     @Override
@@ -55,6 +56,8 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         XrayServerConfigImpl serverConfig = new XrayServerConfigImpl();
         serverConfig.setExcludedPaths(this.xrayConfig.getExcludedPaths());
         serverConfig.setConnectionDetailsFromEnv(this.xrayConfig.isConnectionDetailsFromEnv());
+        serverConfig.setConnectionRetries(this.xrayConfig.getConnectionRetries());
+        serverConfig.setConnectionTimeout(this.xrayConfig.getConnectionTimeout());
         GlobalSettings settings = new GlobalSettings();
         settings.xrayConfig = serverConfig;
         if (this.xrayConfig.isConnectionDetailsFromEnv()) {
@@ -85,6 +88,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
      * Method is called by Idea IS for reading the previously saved config file 'jfrogConfig.xml' from the disk.
      * Check if previous configurations contain credentials, perform migration if necessary.
      * If connection details loaded from environment, don't override them.
+     *
      * @param xrayConfig - configurations read from file.
      */
     @SuppressWarnings("unused")
@@ -93,6 +97,8 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
             // Load connection details from environment variables.
             this.xrayConfig.setConnectionDetailsFromEnv(this.xrayConfig.readConnectionDetailsFromEnv());
             this.xrayConfig.setExcludedPaths(xrayConfig.getExcludedPaths());
+            this.xrayConfig.setConnectionRetries(xrayConfig.getConnectionRetries());
+            this.xrayConfig.setConnectionTimeout(xrayConfig.getConnectionTimeout());
             return;
         }
 
@@ -107,6 +113,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
 
     /**
      * Update xray configurations with new values.
+     *
      * @param xrayConfig - the new configurations to update.
      */
     public void updateConfig(XrayServerConfigImpl xrayConfig) {
@@ -117,6 +124,8 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
             this.xrayConfig.setConnectionDetailsFromEnv(true);
             this.xrayConfig.readConnectionDetailsFromEnv();
             this.xrayConfig.setExcludedPaths(xrayConfig.getExcludedPaths());
+            this.xrayConfig.setConnectionRetries(xrayConfig.getConnectionRetries());
+            this.xrayConfig.setConnectionTimeout(xrayConfig.getConnectionTimeout());
             return;
         }
 
@@ -133,6 +142,8 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         this.xrayConfig.setUrl(xrayConfig.getUrl());
         this.xrayConfig.setExcludedPaths(xrayConfig.getExcludedPaths());
         this.xrayConfig.setConnectionDetailsFromEnv(xrayConfig.isConnectionDetailsFromEnv());
+        this.xrayConfig.setConnectionRetries(xrayConfig.getConnectionRetries());
+        this.xrayConfig.setConnectionTimeout(xrayConfig.getConnectionTimeout());
     }
 
     public boolean areCredentialsSet() {
@@ -143,6 +154,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
      * Perform credentials migration from file to PasswordSafe.
      * If credentials were stored on file, set the new values from it, save to PasswordSafe
      * and persist configuration to file.
+     *
      * @param xrayConfig - configurations read from 'jfrogConfig.xml'.
      */
     private void migrateCredentialsFromFileToPasswordSafe(XrayServerConfigImpl xrayConfig) {
@@ -154,6 +166,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
 
     /**
      * Determine whether should perform credentials migration or not.
+     *
      * @param xrayConfig - configurations read from 'jfrogConfig.xml'.
      * @return true if credentials are stored in file.
      */

@@ -153,7 +153,7 @@ public class IssuesTree extends BaseTree {
             Path descriptorPath = Paths.get(descriptorVirtualFile.getPath());
             pathResult = basePath.relativize(descriptorPath).toString();
         } catch (InvalidPathException | PsiInvalidElementAccessException ex) {
-            Logger log = Logger.getInstance(mainProject);
+            Logger log = Logger.getInstance();
             log.error("Failed getting project-descriptor's path.", ex);
         }
         return pathResult;

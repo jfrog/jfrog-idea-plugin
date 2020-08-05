@@ -31,16 +31,16 @@ import com.intellij.util.net.ssl.CertificateManager;
 import com.intellij.util.xmlb.annotations.OptionTag;
 import com.intellij.util.xmlb.annotations.Tag;
 import com.jfrog.ide.common.configuration.XrayServerConfig;
-import org.apache.commons.lang.ArrayUtils;
+import com.jfrog.ide.idea.ui.configuration.ConnectionRetriesSpinner;
+import com.jfrog.ide.idea.ui.configuration.ConnectionTimeoutSpinner;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jfrog.client.http.model.ProxyConfig;
-import org.jfrog.client.util.KeyStoreProvider;
-import org.jfrog.client.util.KeyStoreProviderException;
-import org.jfrog.client.util.KeyStoreProviderFactory;
+import org.jfrog.build.client.ProxyConfiguration;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import javax.net.ssl.SSLContext;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -65,6 +65,10 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     private String excludedPaths; // Pattern of project paths to exclude from Xray scanning for npm
     @Tag
     private boolean connectionDetailsFromEnv;
+    @Tag
+    private Integer connectionRetries;
+    @Tag
+    private Integer connectionTimeout;
 
     XrayServerConfigImpl() {
     }
@@ -75,6 +79,8 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         this.password = builder.password;
         this.excludedPaths = builder.excludedPaths;
         this.connectionDetailsFromEnv = builder.connectionDetailsFromEnv;
+        this.connectionRetries = builder.connectionRetries;
+        this.connectionTimeout = builder.connectionTimeout;
     }
 
     boolean isEmpty() {
@@ -92,12 +98,14 @@ public class XrayServerConfigImpl implements XrayServerConfig {
                 Comparing.equal(getPassword(), other.getPassword()) &&
                 Comparing.equal(getUsername(), other.getUsername()) &&
                 Comparing.equal(getExcludedPaths(), other.getExcludedPaths()) &&
-                Comparing.equal(isConnectionDetailsFromEnv(), other.isConnectionDetailsFromEnv());
+                Comparing.equal(isConnectionDetailsFromEnv(), other.isConnectionDetailsFromEnv()) &&
+                Comparing.equal(getConnectionRetries(), other.getConnectionRetries()) &&
+                Comparing.equal(getConnectionTimeout(), other.getConnectionTimeout());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getUrl(), getPassword(), getUsername(), isConnectionDetailsFromEnv());
+        return Objects.hashCode(getUrl(), getPassword(), getUsername(), isConnectionDetailsFromEnv(), getConnectionRetries(), getConnectionTimeout());
     }
 
     @Override
@@ -145,7 +153,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     }
 
     @Override
-    public boolean isNoHostVerification() {
+    public boolean isInsecureTls() {
         return CertificateManager.getInstance().getState().ACCEPT_AUTOMATICALLY;
     }
 
@@ -154,12 +162,18 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     }
 
     @Override
-    public KeyStoreProvider getKeyStoreProvider() throws KeyStoreProviderException {
-        CertificateManager certificateManager = CertificateManager.getInstance();
-        if (ArrayUtils.isEmpty(certificateManager.getCustomTrustManager().getAcceptedIssuers())) {
-            return null;
-        }
-        return KeyStoreProviderFactory.getProvider(certificateManager.getCacertsPath(), certificateManager.getPassword());
+    public SSLContext getSslContext() {
+        return CertificateManager.getInstance().getSslContext();
+    }
+
+    @Override
+    public int getConnectionRetries() {
+        return ObjectUtils.defaultIfNull(this.connectionRetries, ConnectionRetriesSpinner.RANGE.initial);
+    }
+
+    @Override
+    public int getConnectionTimeout() {
+        return ObjectUtils.defaultIfNull(this.connectionTimeout, ConnectionTimeoutSpinner.RANGE.initial);
     }
 
     void setExcludedPaths(String excludedPaths) {
@@ -167,17 +181,17 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     }
 
     @Override
-    public ProxyConfig getProxyConfForTargetUrl(String xrayUrl) {
+    public ProxyConfiguration getProxyConfForTargetUrl(String xrayUrl) {
         HttpConfigurable httpConfigurable = HttpConfigurable.getInstance();
         if (!httpConfigurable.isHttpProxyEnabledForUrl(xrayUrl)) {
             return null;
         }
-        ProxyConfig proxyConfig = new ProxyConfig();
-        proxyConfig.setHost(trim(httpConfigurable.PROXY_HOST));
-        proxyConfig.setPort(httpConfigurable.PROXY_PORT);
+        ProxyConfiguration proxyConfig = new ProxyConfiguration();
+        proxyConfig.host = trim(httpConfigurable.PROXY_HOST);
+        proxyConfig.port = httpConfigurable.PROXY_PORT;
         if (httpConfigurable.PROXY_AUTHENTICATION) {
-            proxyConfig.setUsername(trim(httpConfigurable.getProxyLogin()));
-            proxyConfig.setPassword(httpConfigurable.getPlainProxyPassword());
+            proxyConfig.username = trim(httpConfigurable.getProxyLogin());
+            proxyConfig.password = httpConfigurable.getPlainProxyPassword();
         }
         return proxyConfig;
     }
@@ -210,9 +224,18 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         return connectionDetailsFromEnv;
     }
 
+    void setConnectionRetries(int connectionRetries) {
+        this.connectionRetries = connectionRetries;
+    }
+
+    void setConnectionTimeout(int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
+
     /**
      * Read connection details from environment variables.
      * All connection details must be provided from env, otherwise don't use them.
+     *
      * @return true if connection details loaded from env.
      */
     public boolean readConnectionDetailsFromEnv() {
@@ -246,6 +269,8 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         private String password;
         private String excludedPaths;
         private boolean connectionDetailsFromEnv;
+        private int connectionRetries;
+        private int connectionTimeout;
 
         private Builder() {
             // no args
@@ -277,6 +302,16 @@ public class XrayServerConfigImpl implements XrayServerConfig {
 
         public Builder setConnectionDetailsFromEnv(boolean connectionDetailsFromEnv) {
             this.connectionDetailsFromEnv = connectionDetailsFromEnv;
+            return this;
+        }
+
+        public Builder setConnectionRetries(int connectionRetries) {
+            this.connectionRetries = connectionRetries;
+            return this;
+        }
+
+        public Builder setConnectionTimeout(int connectionTimeout) {
+            this.connectionTimeout = connectionTimeout;
             return this;
         }
     }
