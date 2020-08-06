@@ -37,13 +37,11 @@ node('java') {
     }
 
     stage('Push changes') {
-        withCredentials([usernamePassword(credentialsId: 'github-deployer', usernameVariable: 'GITHUB_USERNAME', passwordVariable: 'GITHUB_PASSWORD')]) {
-            sh '''#!/bin/bash
-                set -o pipefail
-                git push https://${GITHUB_USERNAME}:${GITHUB_PASSWORD}@github.com/JFrog/jfrog-idea-plugin.git 2>&1 | grep -v "http"
-                git push https://${GITHUB_USERNAME}:${GITHUB_PASSWORD}@github.com/JFrog/jfrog-idea-plugin.git --tags 2>&1 | grep -v "http"
-            '''
-        }
+        sh '''#!/bin/bash
+            set -o pipefail
+            git push https://${GITHUB_USERNAME}:${GITHUB_PASSWORD}@github.com/JFrog/jfrog-idea-plugin.git 2>&1 | grep -v "http"
+            git push https://${GITHUB_USERNAME}:${GITHUB_PASSWORD}@github.com/JFrog/jfrog-idea-plugin.git --tags 2>&1 | grep -v "http"
+        '''
     }
 
     stage('Promote') {
