@@ -1,7 +1,7 @@
 node('java') {
     cleanWs()
     git url: 'https://github.com/JFrog/jfrog-idea-plugin.git'
-    def jdktool = tool name: "1.8.0_102"
+    def jdktool = tool name: "openjdk-8"
     env.JAVA_HOME = jdktool
 
     def server = Artifactory.server('oss.jfrog.org')
