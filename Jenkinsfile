@@ -1,7 +1,7 @@
 node('java') {
     cleanWs()
     git url: 'https://github.com/JFrog/jfrog-idea-plugin.git'
-    def jdktool = tool name: "1.8.0_102"
+    def jdktool = tool name: "openjdk-8"
     env.JAVA_HOME = jdktool
 
     def server = Artifactory.server('oss.jfrog.org')
@@ -37,7 +37,7 @@ node('java') {
     }
 
     stage('Push changes') {
-        sh '''#!/bin/bash 
+        sh '''#!/bin/bash
             set -o pipefail
             git push https://${GITHUB_USERNAME}:${GITHUB_PASSWORD}@github.com/JFrog/jfrog-idea-plugin.git 2>&1 | grep -v "http"
             git push https://${GITHUB_USERNAME}:${GITHUB_PASSWORD}@github.com/JFrog/jfrog-idea-plugin.git --tags 2>&1 | grep -v "http"
