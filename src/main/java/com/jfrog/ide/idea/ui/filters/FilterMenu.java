@@ -70,6 +70,13 @@ public abstract class FilterMenu<FilterType> extends JBPopupMenu {
         }
     }
 
+    /**
+     * This method is a filter for adding the filter checkboxes.
+     * If the filter is already exist in the list, we should not add it again.
+     *
+     * @param checkBoxMenuItem - The checkbox item to check.
+     * @return true if the checkbox is new. False otherwise.
+     */
     private boolean isCheckboxNew(MenuCheckbox checkBoxMenuItem) {
         return Arrays.stream(getComponents())
                 .map(component -> (MenuCheckbox) component)

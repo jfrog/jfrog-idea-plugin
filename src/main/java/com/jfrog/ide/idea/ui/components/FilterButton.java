@@ -51,6 +51,11 @@ public class FilterButton extends JPanel {
         indicateFocusing();
     }
 
+    /**
+     * If one of the filters is applied (a checkbox is unselected), show this in the UI.
+     *
+     * @param filterEnabled - True if one of the filters is applied.
+     */
     public void indicateFilterEnable(boolean filterEnabled) {
         this.filterEnabled = filterEnabled;
         if (filterEnabled) {
