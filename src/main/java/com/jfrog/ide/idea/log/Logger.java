@@ -2,11 +2,8 @@ package com.jfrog.ide.idea.log;
 
 import com.intellij.notification.*;
 import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.project.Project;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.plexus.util.ExceptionUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.util.Log;
 
 /**
@@ -17,13 +14,14 @@ public class Logger implements Log {
 
     private static final NotificationGroup EVENT_LOG_NOTIFIER = new NotificationGroup("JFROG_LOG", NotificationDisplayType.NONE, true);
     private static final NotificationGroup BALLOON_NOTIFIER = new NotificationGroup("JFROG_BALLOON", NotificationDisplayType.BALLOON, false);
+    private static final com.intellij.openapi.diagnostic.Logger ideaLogger = com.intellij.openapi.diagnostic.Logger.getInstance(Logger.class);
     private static Notification lastNotification;
 
     private static final String INFORMATION_TITLE = "JFrog Xray";
     private static final String ERROR_TITLE = "JFrog Xray scan failed";
 
-    public static Logger getInstance(@NotNull Project project) {
-        return ServiceManager.getService(project, Logger.class);
+    public static Logger getInstance() {
+        return ServiceManager.getService(Logger.class);
     }
 
     private Logger() {
@@ -31,23 +29,26 @@ public class Logger implements Log {
 
     @Override
     public void debug(String message) {
-        throw new NotImplementedException("Debug logging is not supported");
+        ideaLogger.debug(message);
     }
 
     @Override
     public void info(String message) {
+        ideaLogger.info(message);
         NotificationType notificationType = NotificationType.INFORMATION;
         log(INFORMATION_TITLE, message, notificationType);
     }
 
     @Override
     public void warn(String message) {
+        ideaLogger.warn(message);
         NotificationType notificationType = NotificationType.WARNING;
         log(INFORMATION_TITLE, message, notificationType);
     }
 
     @Override
     public void error(String message) {
+        ideaLogger.error(message);
         NotificationType notificationType = NotificationType.ERROR;
         popupBalloon(message, notificationType);
         log(ERROR_TITLE, message, notificationType);
@@ -55,6 +56,7 @@ public class Logger implements Log {
 
     @Override
     public void error(String message, Throwable t) {
+        ideaLogger.error(message, t);
         NotificationType notificationType = NotificationType.ERROR;
         popupBalloon(message, notificationType);
         String title = StringUtils.defaultIfBlank(t.getMessage(), ERROR_TITLE);

@@ -10,14 +10,14 @@ import com.intellij.util.messages.MessageBus;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.XrayServerConfigImpl;
 import com.jfrog.ide.idea.events.ApplicationEvents;
+import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.xray.client.Xray;
-import com.jfrog.xray.client.impl.XrayClient;
+import com.jfrog.xray.client.impl.XrayClientBuilder;
 import com.jfrog.xray.client.services.system.Version;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
-import org.jfrog.client.util.KeyStoreProviderException;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -43,6 +43,8 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
     private JBTextField url;
     private JPanel config;
     private JBCheckBox connectionDetailsFromEnv;
+    private ConnectionRetriesSpinner connectionRetries;
+    private ConnectionTimeoutSpinner connectionTimeout;
 
     public XrayGlobalConfiguration() {
         testConnectionButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
@@ -68,7 +70,7 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
 
                 setConnectionResults(Results.success(xrayVersion));
 
-            } catch (IOException | KeyStoreProviderException exception) {
+            } catch (IOException exception) {
                 setConnectionResults(Results.error(exception));
             }
         }));
@@ -124,6 +126,8 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
                 .setPassword(String.valueOf(password.getPassword()))
                 .setExcludedPaths(excludedPaths.getText())
                 .setConnectionDetailsFromEnv(connectionDetailsFromEnv.isSelected())
+                .setConnectionRetries(connectionRetries.getNumber())
+                .setConnectionTimeout(connectionTimeout.getNumber())
                 .build();
 
         return !xrayConfig.equals(GlobalSettings.getInstance().getXrayConfig());
@@ -149,16 +153,18 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
 
     }
 
-    private Xray createXrayClient() throws KeyStoreProviderException {
-        // use as a workaround to version not being username password validated
+    private Xray createXrayClient() {
         String urlStr = StringUtil.trim(url.getText());
-        return XrayClient.create(urlStr,
-                StringUtil.trim(username.getText()),
-                String.valueOf(password.getPassword()),
-                USER_AGENT,
-                xrayConfig.isNoHostVerification(),
-                xrayConfig.getKeyStoreProvider(),
-                xrayConfig.getProxyConfForTargetUrl(urlStr));
+        return (Xray) new XrayClientBuilder()
+                .setUrl(urlStr)
+                .setUserName(StringUtil.trim(username.getText()))
+                .setPassword(String.valueOf(password.getPassword()))
+                .setUserAgent(USER_AGENT)
+                .setInsecureTls(xrayConfig.isInsecureTls())
+                .setSslContext(xrayConfig.getSslContext())
+                .setProxyConfiguration(xrayConfig.getProxyConfForTargetUrl(urlStr))
+                .setLog(Logger.getInstance())
+                .build();
     }
 
     private void loadConfig() {
@@ -170,6 +176,8 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
         if (xrayConfig != null) {
             updateConnectionDetailsTextFields();
             excludedPaths.setText(xrayConfig.getExcludedPaths());
+            connectionRetries.setValue(xrayConfig.getConnectionRetries());
+            connectionTimeout.setValue(xrayConfig.getConnectionTimeout());
             connectionDetailsFromEnv.setSelected(xrayConfig.isConnectionDetailsFromEnv());
         } else {
             url.setText("");
@@ -177,6 +185,8 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
             password.setText("");
             excludedPaths.setText(DEFAULT_EXCLUSIONS);
             connectionDetailsFromEnv.setSelected(false);
+            connectionRetries.setValue(ConnectionRetriesSpinner.RANGE.initial);
+            connectionTimeout.setValue(ConnectionTimeoutSpinner.RANGE.initial);
         }
     }
 
@@ -184,18 +194,6 @@ public class XrayGlobalConfiguration implements Configurable, Configurable.NoScr
         url.setText(xrayConfig.getUrl());
         username.setText(xrayConfig.getUsername());
         password.setText(xrayConfig.getPassword());
-    }
-
-    @SuppressWarnings("BoundFieldAssignment")
-    private void createUIComponents() {
-        xrayConfig = GlobalSettings.getInstance().getXrayConfig();
-        url = new JBTextField();
-        username = new JBTextField();
-        password = new JBPasswordField();
-        excludedPaths = new JBTextField();
-        connectionDetailsFromEnv = new JBCheckBox();
-
-        loadConfig();
     }
 
     private class ExclusionsVerifier extends InputVerifier {

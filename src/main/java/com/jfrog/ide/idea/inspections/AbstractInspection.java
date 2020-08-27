@@ -234,7 +234,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * Get all submodules from the dependencies-tree which are containing the dependency element.
      * Currently in use for Go and npm.
      *
-     * @param root - The root of the dependencies tree
+     * @param root    - The root of the dependencies tree
      * @param element - The Psi element in the package descriptor
      * @return Set of modules containing the dependency or null if not found
      */
@@ -282,6 +282,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * 1. The dependency is a module under the project node
      * 2. The dependency is a direct dependency under the project node
      * 3. The dependency is a level 2 dependency under the project node
+     *
      * @param projectNode          - The project node
      * @param generatedGeneralInfo - General info of the dependency
      * @return the nodes containing the dependency
@@ -317,6 +318,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
 
     /**
      * Return true iff the node is a direct parent of the dependency.
+     *
      * @param node        - The project node
      * @param generalInfo - General info of the dependency
      * @return true iff the node is a direct parent of the dependency

@@ -32,17 +32,17 @@ import com.intellij.util.net.ssl.CertificateManager;
 import com.intellij.util.xmlb.annotations.OptionTag;
 import com.intellij.util.xmlb.annotations.Tag;
 import com.jfrog.ide.common.configuration.XrayServerConfig;
-import org.apache.commons.lang.ArrayUtils;
+import com.jfrog.ide.idea.ui.configuration.ConnectionRetriesSpinner;
+import com.jfrog.ide.idea.ui.configuration.ConnectionTimeoutSpinner;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jfrog.client.http.model.ProxyConfig;
-import org.jfrog.client.util.KeyStoreProvider;
-import org.jfrog.client.util.KeyStoreProviderException;
-import org.jfrog.client.util.KeyStoreProviderFactory;
-import org.springframework.util.CollectionUtils;
+import org.jfrog.build.client.ProxyConfiguration;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import javax.net.ssl.SSLContext;
 import java.net.InetSocketAddress;
 import java.net.PasswordAuthentication;
 import java.net.Proxy;
@@ -72,6 +72,10 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     private String excludedPaths; // Pattern of project paths to exclude from Xray scanning for npm
     @Tag
     private boolean connectionDetailsFromEnv;
+    @Tag
+    private Integer connectionRetries;
+    @Tag
+    private Integer connectionTimeout;
 
     XrayServerConfigImpl() {
     }
@@ -82,6 +86,8 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         this.password = builder.password;
         this.excludedPaths = builder.excludedPaths;
         this.connectionDetailsFromEnv = builder.connectionDetailsFromEnv;
+        this.connectionRetries = builder.connectionRetries;
+        this.connectionTimeout = builder.connectionTimeout;
     }
 
     boolean isEmpty() {
@@ -99,12 +105,14 @@ public class XrayServerConfigImpl implements XrayServerConfig {
                 Comparing.equal(getPassword(), other.getPassword()) &&
                 Comparing.equal(getUsername(), other.getUsername()) &&
                 Comparing.equal(getExcludedPaths(), other.getExcludedPaths()) &&
-                Comparing.equal(isConnectionDetailsFromEnv(), other.isConnectionDetailsFromEnv());
+                Comparing.equal(isConnectionDetailsFromEnv(), other.isConnectionDetailsFromEnv()) &&
+                Comparing.equal(getConnectionRetries(), other.getConnectionRetries()) &&
+                Comparing.equal(getConnectionTimeout(), other.getConnectionTimeout());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getUrl(), getPassword(), getUsername(), isConnectionDetailsFromEnv());
+        return Objects.hashCode(getUrl(), getPassword(), getUsername(), isConnectionDetailsFromEnv(), getConnectionRetries(), getConnectionTimeout());
     }
 
     @Override
@@ -152,7 +160,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     }
 
     @Override
-    public boolean isNoHostVerification() {
+    public boolean isInsecureTls() {
         return CertificateManager.getInstance().getState().ACCEPT_AUTOMATICALLY;
     }
 
@@ -161,12 +169,18 @@ public class XrayServerConfigImpl implements XrayServerConfig {
     }
 
     @Override
-    public KeyStoreProvider getKeyStoreProvider() throws KeyStoreProviderException {
-        CertificateManager certificateManager = CertificateManager.getInstance();
-        if (ArrayUtils.isEmpty(certificateManager.getCustomTrustManager().getAcceptedIssuers())) {
-            return null;
-        }
-        return KeyStoreProviderFactory.getProvider(certificateManager.getCacertsPath(), certificateManager.getPassword());
+    public SSLContext getSslContext() {
+        return CertificateManager.getInstance().getSslContext();
+    }
+
+    @Override
+    public int getConnectionRetries() {
+        return ObjectUtils.defaultIfNull(this.connectionRetries, ConnectionRetriesSpinner.RANGE.initial);
+    }
+
+    @Override
+    public int getConnectionTimeout() {
+        return ObjectUtils.defaultIfNull(this.connectionTimeout, ConnectionTimeoutSpinner.RANGE.initial);
     }
 
     void setExcludedPaths(String excludedPaths) {
@@ -181,7 +195,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
      * @return the proxy configuration as configured in IDEA settings.
      */
     @Override
-    public ProxyConfig getProxyConfForTargetUrl(String xrayUrl) {
+    public ProxyConfiguration getProxyConfForTargetUrl(String xrayUrl) {
         HttpConfigurable httpConfigurable = HttpConfigurable.getInstance();
         if (httpConfigurable.USE_PROXY_PAC) {
             // 'Auto-detect proxy settings' option is selected
@@ -202,7 +216,7 @@ public class XrayServerConfigImpl implements XrayServerConfig {
      * @param xrayUrl          - The Xray URL
      * @return Proxy config
      */
-    private ProxyConfig getProxyConfForTargetUrlUsingPac(HttpConfigurable httpConfigurable, String xrayUrl) {
+    private ProxyConfiguration getProxyConfForTargetUrlUsingPac(HttpConfigurable httpConfigurable, String xrayUrl) {
         URI xrayUri = VfsUtil.toUri(xrayUrl);
         if (xrayUri == null) {
             // Proxy URL is illegal
@@ -221,17 +235,17 @@ public class XrayServerConfigImpl implements XrayServerConfig {
             return null;
         }
         InetSocketAddress inetSocketAddress = (InetSocketAddress) firstProxy.address();
-        ProxyConfig proxyConfig = new ProxyConfig();
-        proxyConfig.setHost(inetSocketAddress.getHostString());
-        proxyConfig.setPort(inetSocketAddress.getPort());
-        if (httpConfigurable.isGenericPasswordCanceled(proxyConfig.getHost(), proxyConfig.getPort())) {
+        ProxyConfiguration proxyConfig = new ProxyConfiguration();
+        proxyConfig.host = inetSocketAddress.getHostString();
+        proxyConfig.port = inetSocketAddress.getPort();
+        if (httpConfigurable.isGenericPasswordCanceled(proxyConfig.host, proxyConfig.port)) {
             // Authentication is disabled
             return proxyConfig;
         }
-        PasswordAuthentication passwordAuthentication = httpConfigurable.getGenericPassword(proxyConfig.getHost(), proxyConfig.getPort());
+        PasswordAuthentication passwordAuthentication = httpConfigurable.getGenericPassword(proxyConfig.host, proxyConfig.port);
         if (passwordAuthentication != null) {
-            proxyConfig.setUsername(passwordAuthentication.getUserName());
-            proxyConfig.setPassword(String.valueOf(passwordAuthentication.getPassword()));
+            proxyConfig.username = passwordAuthentication.getUserName();
+            proxyConfig.password = String.valueOf(passwordAuthentication.getPassword());
         }
         return proxyConfig;
     }
@@ -242,13 +256,13 @@ public class XrayServerConfigImpl implements XrayServerConfig {
      * @param httpConfigurable - Intellij HTTP details
      * @return Proxy config
      */
-    private ProxyConfig getProxyConfForTargetUrlUsingManualConf(HttpConfigurable httpConfigurable) {
-        ProxyConfig proxyConfig = new ProxyConfig();
-        proxyConfig.setHost(trim(httpConfigurable.PROXY_HOST));
-        proxyConfig.setPort(httpConfigurable.PROXY_PORT);
+    private ProxyConfiguration getProxyConfForTargetUrlUsingManualConf(HttpConfigurable httpConfigurable) {
+        ProxyConfiguration proxyConfig = new ProxyConfiguration();
+        proxyConfig.host = trim(httpConfigurable.PROXY_HOST);
+        proxyConfig.port = httpConfigurable.PROXY_PORT;
         if (httpConfigurable.PROXY_AUTHENTICATION) {
-            proxyConfig.setUsername(trim(httpConfigurable.getProxyLogin()));
-            proxyConfig.setPassword(httpConfigurable.getPlainProxyPassword());
+            proxyConfig.username = trim(httpConfigurable.getProxyLogin());
+            proxyConfig.password = httpConfigurable.getPlainProxyPassword();
         }
         return proxyConfig;
     }
@@ -279,6 +293,14 @@ public class XrayServerConfigImpl implements XrayServerConfig {
 
     public boolean isConnectionDetailsFromEnv() {
         return connectionDetailsFromEnv;
+    }
+
+    void setConnectionRetries(int connectionRetries) {
+        this.connectionRetries = connectionRetries;
+    }
+
+    void setConnectionTimeout(int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
     }
 
     /**
@@ -318,6 +340,8 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         private String password;
         private String excludedPaths;
         private boolean connectionDetailsFromEnv;
+        private int connectionRetries;
+        private int connectionTimeout;
 
         private Builder() {
             // no args
@@ -349,6 +373,16 @@ public class XrayServerConfigImpl implements XrayServerConfig {
 
         public Builder setConnectionDetailsFromEnv(boolean connectionDetailsFromEnv) {
             this.connectionDetailsFromEnv = connectionDetailsFromEnv;
+            return this;
+        }
+
+        public Builder setConnectionRetries(int connectionRetries) {
+            this.connectionRetries = connectionRetries;
+            return this;
+        }
+
+        public Builder setConnectionTimeout(int connectionTimeout) {
+            this.connectionTimeout = connectionTimeout;
             return this;
         }
     }

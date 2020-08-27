@@ -58,11 +58,11 @@ public class ScanManagersFactory {
             return;
         }
         if (isScanInProgress()) {
-            Logger.getInstance(mainProject).info("Previous scan still running...");
+            Logger.getInstance().info("Previous scan still running...");
             return;
         }
         if (!GlobalSettings.getInstance().areCredentialsSet()) {
-            Logger.getInstance(mainProject).error("Xray server is not configured.");
+            Logger.getInstance().error("Xray server is not configured.");
             return;
         }
         try {
@@ -77,7 +77,7 @@ public class ScanManagersFactory {
                 scanManager.asyncScanAndUpdateResults(quickScan, dependenciesData);
             }
         } catch (IOException | RuntimeException e) {
-            Logger.getInstance(mainProject).error("", e);
+            Logger.getInstance().error("", e);
         }
     }
 
