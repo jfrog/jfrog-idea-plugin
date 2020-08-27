@@ -1,6 +1,8 @@
 package com.jfrog.ide.idea.scan;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
@@ -34,6 +36,7 @@ import org.jetbrains.plugins.gradle.settings.GradleSettings;
 import org.jetbrains.plugins.gradle.util.GradleConstants;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
+import org.jfrog.build.extractor.scan.Scope;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -109,7 +112,7 @@ public class GradleScanManager extends ScanManager {
             return null;
         }
         PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
-        return new PsiFile[] {psiFile};
+        return new PsiFile[]{psiFile};
     }
 
     @Override
@@ -133,7 +136,7 @@ public class GradleScanManager extends ScanManager {
     }
 
     private void populateModulesWithDependencies(DataNode<ProjectDependencies> dataNode) {
-        Map<String, DependencyNode> moduleDependencies = new HashMap<>();
+        Multimap<DependencyNode, Scope> moduleDependencies = HashMultimap.create();
         ProjectDependencies projectDependencies = dataNode.getData();
         String moduleId = getModuleId(dataNode);
         if (!modules.containsKey(moduleId)) {
@@ -144,23 +147,24 @@ public class GradleScanManager extends ScanManager {
         for (ComponentDependencies componentDependency : projectDependencies.getComponentsDependencies()) {
             Stream.concat(componentDependency.getCompileDependenciesGraph().getDependencies().stream(), componentDependency.getRuntimeDependenciesGraph().getDependencies().stream())
                     .filter(GradleScanManager::isArtifactDependencyNode)
-                    .filter(dependencyNode -> !moduleDependencies.containsKey(dependencyNode.getDisplayName()))
-                    .forEach(dependencyNode -> moduleDependencies.put(dependencyNode.getDisplayName(), dependencyNode));
+                    .forEach(dependencyNode -> moduleDependencies.put(dependencyNode, new Scope(componentDependency.getComponentName())));
         }
-
         // Populate dependencies-tree for all modules.
-        moduleDependencies.values().forEach(dependencyNode -> populateDependenciesTree(modules.get(moduleId), dependencyNode));
+        moduleDependencies.asMap().forEach((key, value) -> populateDependenciesTree(modules.get(moduleId), key, (Set<Scope>) value));
     }
 
-    private void populateDependenciesTree(DependenciesTree dependenciesTree, DependencyNode dependencyNode) {
+    private void populateDependenciesTree(DependenciesTree dependenciesTree, DependencyNode dependencyNode, Set<Scope> scopes) {
         ComponentDetailImpl scanComponent = new ComponentDetailImpl(dependencyNode.getDisplayName(), "");
         DependenciesTree treeNode = new DependenciesTree(scanComponent);
+        if (scopes != null) {
+            treeNode.setScopes(scopes);
+        }
 
         // Recursively search for dependencies and add to tree.
         List<DependencyNode> childrenList = dependencyNode.getDependencies().stream()
                 .filter(GradleScanManager::isArtifactDependencyNode)
                 .collect(Collectors.toList());
-        childrenList.forEach(child -> populateDependenciesTree(treeNode, child));
+        childrenList.forEach(child -> populateDependenciesTree(treeNode, child, null));
 
         dependenciesTree.add(treeNode);
     }

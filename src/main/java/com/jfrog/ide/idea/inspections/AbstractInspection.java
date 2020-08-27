@@ -12,7 +12,7 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.PsiElement;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.scan.ScanManager;
-import com.jfrog.ide.idea.ui.issues.IssuesTree;
+import com.jfrog.ide.idea.ui.ComponentsTree;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.extractor.scan.DependenciesTree;
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractInspection extends LocalInspectionTool implements Annotator {
 
-    private String packageDescriptorName;
+    private final String packageDescriptorName;
 
     AbstractInspection(String packageDescriptorName) {
         this.packageDescriptorName = packageDescriptorName;
@@ -211,11 +211,11 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      */
     DependenciesTree getRootDependenciesTree(PsiElement element) {
         Project project = element.getProject();
-        IssuesTree issuesTree = IssuesTree.getInstance(project);
-        if (issuesTree == null || issuesTree.getModel() == null) {
+        ComponentsTree componentsTree = ComponentsTree.getInstance(project);
+        if (componentsTree == null || componentsTree.getModel() == null) {
             return null;
         }
-        return (DependenciesTree) issuesTree.getModel().getRoot();
+        return (DependenciesTree) componentsTree.getModel().getRoot();
     }
 
     /**

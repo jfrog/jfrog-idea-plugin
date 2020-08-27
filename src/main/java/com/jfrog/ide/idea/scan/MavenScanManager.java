@@ -18,6 +18,7 @@ import com.jfrog.ide.idea.inspections.MavenInspection;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.idea.maven.model.MavenArtifact;
 import org.jetbrains.idea.maven.model.MavenArtifactNode;
 import org.jetbrains.idea.maven.model.MavenId;
 import org.jetbrains.idea.maven.project.MavenProject;
@@ -27,6 +28,7 @@ import org.jetbrains.idea.maven.project.MavenProjectsTree;
 import org.jetbrains.idea.maven.server.NativeMavenProjectHolder;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
+import org.jfrog.build.extractor.scan.Scope;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -128,7 +130,7 @@ public class MavenScanManager extends ScanManager {
         mavenProject.getDependencyTree()
                 .stream()
                 .filter(dependencyTree -> added.add(dependencyTree.getArtifact().getDisplayStringForLibraryName()))
-                .forEach(dependencyTree -> updateChildrenNodes(node, dependencyTree, added));
+                .forEach(dependencyTree -> updateChildrenNodes(node, dependencyTree, added, true));
     }
 
     /**
@@ -145,13 +147,17 @@ public class MavenScanManager extends ScanManager {
         return node;
     }
 
-    private void updateChildrenNodes(DependenciesTree parentNode, MavenArtifactNode mavenArtifactNode, Set<String> added) {
-        DependenciesTree currentNode = new DependenciesTree(mavenArtifactNode.getArtifact().getDisplayStringSimple());
+    private void updateChildrenNodes(DependenciesTree parentNode, MavenArtifactNode mavenArtifactNode, Set<String> added, boolean setScopes) {
+        MavenArtifact mavenArtifact = mavenArtifactNode.getArtifact();
+        DependenciesTree currentNode = new DependenciesTree(mavenArtifact.getDisplayStringSimple());
+        if (setScopes) {
+            currentNode.setScopes(Sets.newHashSet(new Scope(mavenArtifact.getScope())));
+        }
         populateDependenciesTreeNode(currentNode);
         mavenArtifactNode.getDependencies()
                 .stream()
                 .filter(dependencyTree -> added.add(dependencyTree.getArtifact().getDisplayStringForLibraryName()))
-                .forEach(childrenArtifactNode -> updateChildrenNodes(currentNode, childrenArtifactNode, added));
+                .forEach(childrenArtifactNode -> updateChildrenNodes(currentNode, childrenArtifactNode, added, false));
         parentNode.add(currentNode);
     }
 

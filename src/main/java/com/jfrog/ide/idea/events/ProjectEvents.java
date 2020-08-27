@@ -9,8 +9,7 @@ import com.jfrog.ide.common.utils.ProjectsMap;
  * @author yahavi
  */
 public interface ProjectEvents {
-    Topic<ProjectEvents> ON_SCAN_PROJECT_ISSUES_CHANGE = Topic.create("Scan issues changed", ProjectEvents.class);
-    Topic<ProjectEvents> ON_SCAN_PROJECT_LICENSES_CHANGE = Topic.create("Scan licenses changed", ProjectEvents.class);
+    Topic<ProjectEvents> ON_SCAN_PROJECT_CHANGE = Topic.create("Scan changed", ProjectEvents.class);
 
     /**
      * Called when the store of issues in changed files is modified. It is modified only as a result of a user action to analyse all changed files.

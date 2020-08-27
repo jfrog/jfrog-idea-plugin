@@ -12,10 +12,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.jfrog.build.extractor.scan.License;
+import org.jfrog.build.extractor.scan.Scope;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author yahavi
@@ -30,23 +32,32 @@ public class ComponentDetails extends JPanel {
         GeneralInfo generalInfo = node.getGeneralInfo();
         String pkgType = StringUtils.capitalize(generalInfo.getPkgType());
         if (StringUtils.equalsAny(pkgType, "Npm", "Go")) {
-            addText("Package:", generalInfo.getGroupId());
+            addText("Package", generalInfo.getGroupId());
         } else {
             // Maven/Gradle
-            addText("Group:", generalInfo.getGroupId());
-            addText("Artifact:", generalInfo.getArtifactId());
+            addText("Group", generalInfo.getGroupId());
+            addText("Artifact", generalInfo.getArtifactId());
         }
-        addText("Version:", generalInfo.getVersion());
-        addText("Type:", pkgType);
-        addText("Path:", generalInfo.getPath());
+        addText("Version", generalInfo.getVersion());
+        addText("Type", pkgType);
+        addScopes(node.getScopes());
+        addText("Path", generalInfo.getPath());
         addLicenses(node.getLicenses());
+    }
+
+    private void addScopes(Set<Scope> scopes) {
+        if (scopes.size() == 1 && scopes.contains(new Scope())) {
+            // Don't show 'None' scope if this is the only one scope
+            return;
+        }
+        addText("Scopes", scopes.stream().map(Scope::toString).collect(Collectors.joining(",")));
     }
 
     private void addLicenses(Set<License> licenses) {
         if (licenses.isEmpty()) {
             return;
         }
-        JPanel licensesPanel = new JBPanel(new HorizontalLayout(1));
+        JPanel licensesPanel = new JBPanel<>(new HorizontalLayout(1));
         licensesPanel.setBackground(UIUtil.getTableBackground());
         for (License license : licenses) {
             if (CollectionUtils.isEmpty(license.getMoreInfoUrl())) {
@@ -73,7 +84,7 @@ public class ComponentDetails extends JPanel {
         if (StringUtils.isBlank(text)) {
             return;
         }
-        JLabel headerLabel = createHeaderLabel(header);
+        JLabel headerLabel = createHeaderLabel(header + ":");
         GridBagConstraints gridBagConstraints = createGridBagConstraints();
 
         gridBagConstraints.gridy = lastTextPosition++;

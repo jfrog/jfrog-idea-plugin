@@ -7,14 +7,14 @@ import com.jfrog.ide.idea.projects.NpmProject;
 /**
  * @author yahavi
  */
-public class BaseTreeImpl extends BaseTree {
+public class BaseTreeImpl extends ComponentsTree {
 
     BaseTreeImpl() {
         super(new NpmProject("."));
     }
 
     @Override
-    protected void addOnProjectChangeListener(MessageBusConnection busConnection) {
+    public void addOnProjectChangeListener(MessageBusConnection busConnection) {
 
     }
 

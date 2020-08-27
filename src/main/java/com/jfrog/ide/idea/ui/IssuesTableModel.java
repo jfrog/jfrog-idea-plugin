@@ -1,4 +1,4 @@
-package com.jfrog.ide.idea.ui.issues;
+package com.jfrog.ide.idea.ui;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.collections4.ListUtils;
@@ -15,8 +15,8 @@ import java.util.Set;
  */
 public class IssuesTableModel extends AbstractTableModel {
 
-    private Set<Issue> issues;
-    private Set<String> components;
+    private final Set<Issue> issues;
+    private final Set<String> components;
 
     IssuesTableModel() {
         this(Sets.newHashSet(), Sets.newHashSet());
@@ -33,7 +33,7 @@ public class IssuesTableModel extends AbstractTableModel {
         FIXED_VERSIONS("Fixed Versions"),
         SUMMARY("Summary");
 
-        private String name;
+        private final String name;
 
         IssueColumn(String name) {
             this.name = name;

@@ -6,7 +6,7 @@ import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Iconable;
 import com.intellij.util.ui.tree.TreeUtil;
-import com.jfrog.ide.idea.ui.issues.IssuesTree;
+import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.utils.IconUtils;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.Nls;
@@ -22,8 +22,8 @@ import javax.swing.*;
  */
 public class ShowInDependenciesTree implements LocalQuickFix, Iconable, HighPriorityAction {
 
-    private DependenciesTree node;
-    private String description;
+    private final DependenciesTree node;
+    private final String description;
 
     public ShowInDependenciesTree(DependenciesTree node, String description) {
         this.node = node;
@@ -45,6 +45,6 @@ public class ShowInDependenciesTree implements LocalQuickFix, Iconable, HighPrio
     @Override
     public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
         Utils.focusJFrogToolWindow(project);
-        TreeUtil.selectInTree(project, node, true, IssuesTree.getInstance(project), true);
+        TreeUtil.selectInTree(project, node, true, ComponentsTree.getInstance(project), true);
     }
 }
