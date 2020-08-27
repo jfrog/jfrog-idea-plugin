@@ -1,4 +1,4 @@
-package com.jfrog.ide.idea.ui.issues;
+package com.jfrog.ide.idea.ui;
 
 import com.jfrog.ide.idea.ui.utils.IconUtils;
 

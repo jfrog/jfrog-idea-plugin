@@ -12,7 +12,7 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.PsiElement;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.scan.ScanManager;
-import com.jfrog.ide.idea.ui.issues.IssuesTree;
+import com.jfrog.ide.idea.ui.ComponentsTree;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.extractor.scan.DependenciesTree;
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractInspection extends LocalInspectionTool implements Annotator {
 
-    private String packageDescriptorName;
+    private final String packageDescriptorName;
 
     AbstractInspection(String packageDescriptorName) {
         this.packageDescriptorName = packageDescriptorName;
@@ -211,11 +211,11 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      */
     DependenciesTree getRootDependenciesTree(PsiElement element) {
         Project project = element.getProject();
-        IssuesTree issuesTree = IssuesTree.getInstance(project);
-        if (issuesTree == null || issuesTree.getModel() == null) {
+        ComponentsTree componentsTree = ComponentsTree.getInstance(project);
+        if (componentsTree == null || componentsTree.getModel() == null) {
             return null;
         }
-        return (DependenciesTree) issuesTree.getModel().getRoot();
+        return (DependenciesTree) componentsTree.getModel().getRoot();
     }
 
     /**
@@ -234,7 +234,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * Get all submodules from the dependencies-tree which are containing the dependency element.
      * Currently in use for Go and npm.
      *
-     * @param root - The root of the dependencies tree
+     * @param root    - The root of the dependencies tree
      * @param element - The Psi element in the package descriptor
      * @return Set of modules containing the dependency or null if not found
      */
@@ -282,6 +282,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * 1. The dependency is a module under the project node
      * 2. The dependency is a direct dependency under the project node
      * 3. The dependency is a level 2 dependency under the project node
+     *
      * @param projectNode          - The project node
      * @param generatedGeneralInfo - General info of the dependency
      * @return the nodes containing the dependency
@@ -317,6 +318,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
 
     /**
      * Return true iff the node is a direct parent of the dependency.
+     *
      * @param node        - The project node
      * @param generalInfo - General info of the dependency
      * @return true iff the node is a direct parent of the dependency

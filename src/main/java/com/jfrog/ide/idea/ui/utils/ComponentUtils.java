@@ -1,26 +1,26 @@
 package com.jfrog.ide.idea.ui.utils;
 
-import com.google.common.collect.Lists;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.options.ShowSettingsUtil;
+import com.intellij.openapi.project.Project;
 import com.intellij.ui.HyperlinkLabel;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
-import com.intellij.ui.treeStructure.Tree;
-import com.intellij.util.ui.JBDimension;
 import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.idea.actions.CollapseAllAction;
 import com.jfrog.ide.idea.actions.ExpandAllAction;
+import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.configuration.XrayGlobalConfiguration;
+import com.jfrog.ide.idea.ui.filters.IssueFilterMenu;
+import com.jfrog.ide.idea.ui.filters.LicenseFilterMenu;
+import com.jfrog.ide.idea.ui.filters.ScopeFilterMenu;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 
 import javax.swing.*;
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.util.List;
 
 /**
  * Created by romang on 5/7/17.
@@ -47,48 +47,31 @@ public class ComponentUtils {
         return label;
     }
 
-    public static JPanel createIssueCountLabel(int issueCount, int rowHeight) {
-        JPanel issueCountPanel = new JBPanel(new BorderLayout()).withBackground(UIUtil.getTableBackground());
-        JLabel issueCountLabel = new JBLabel();
-        issueCountPanel.add(issueCountLabel, BorderLayout.EAST);
-        setIssueCountPanel(issueCount, issueCountPanel);
-
-        issueCountLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
-        issueCountLabel.setMinimumSize(new JBDimension(issueCountLabel.getMinimumSize().width, rowHeight));
-        issueCountLabel.setMaximumSize(new JBDimension(issueCountLabel.getMaximumSize().width, rowHeight));
-
-        issueCountPanel.setMinimumSize(new JBDimension(issueCountPanel.getMinimumSize().width, rowHeight));
-        issueCountPanel.setMaximumSize(new JBDimension(issueCountPanel.getMaximumSize().width, rowHeight));
-        return issueCountPanel;
-    }
-
-    public static void setIssueCountPanel(int issueCount, JPanel issueCountPanel) {
-        JLabel issueCountLabel = (JLabel) issueCountPanel.getComponent(0);
-        if (issueCount != 0) {
-            issueCountLabel.setText(" (" + issueCount + ") ");
-        } else {
-            issueCountLabel.setText("");
-        }
-    }
-
-    public static TreePath getTreePath(TreeNode treeNode) {
-        List<Object> nodes = Lists.newArrayList(treeNode);
-        while ((treeNode = treeNode.getParent()) != null) {
-            nodes.add(0, treeNode);
-        }
-        return new TreePath(nodes.toArray());
-    }
-
-    public static JPanel createActionToolbar(String id, JPanel filterButton, Tree componentsTree) {
+    public static JPanel createActionToolbar(String id, Project mainProject, ComponentsTree componentsTree) {
         DefaultActionGroup defaultActionGroup = new DefaultActionGroup();
         defaultActionGroup.addAction(ActionManager.getInstance().getAction("Xray.Refresh"));
         defaultActionGroup.addAction(new CollapseAllAction(componentsTree));
         defaultActionGroup.addAction(new ExpandAllAction(componentsTree));
 
         ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(id, defaultActionGroup, true);
-        JPanel toolbarPanel = new JBPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        JPanel toolbarPanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, 0, 0));
         toolbarPanel.add(actionToolbar.getComponent());
-        toolbarPanel.add(filterButton);
+
+        // Add issues filter
+        IssueFilterMenu issueFilterMenu = new IssueFilterMenu(mainProject);
+        componentsTree.addFilterMenu(issueFilterMenu);
+        toolbarPanel.add(issueFilterMenu.getFilterButton());
+
+        // Add licenses filter
+        LicenseFilterMenu licenseFilterMenu = new LicenseFilterMenu(mainProject);
+        componentsTree.addFilterMenu(licenseFilterMenu);
+        toolbarPanel.add(licenseFilterMenu.getFilterButton());
+
+        // Add scopes filter
+        ScopeFilterMenu scopeFilterMenu = new ScopeFilterMenu(mainProject);
+        componentsTree.addFilterMenu(scopeFilterMenu);
+        toolbarPanel.add(scopeFilterMenu.getFilterButton());
+
         return toolbarPanel;
     }
 
@@ -100,7 +83,7 @@ public class ComponentUtils {
     }
 
     private static JPanel createUnsupportedPanel(Component label) {
-        JBPanel panel = new JBPanel(new GridBagLayout());
+        JBPanel<?> panel = new JBPanel<>(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.BOTH;
         c.anchor = GridBagConstraints.CENTER;

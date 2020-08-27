@@ -6,8 +6,8 @@ import com.intellij.ui.RoundedLineBorder;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
-import org.jetbrains.annotations.NotNull;
 import com.jfrog.ide.idea.ui.filters.FilterMenu;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -23,9 +23,10 @@ public class FilterButton extends JPanel {
     private static final int GAP_BEFORE_ARROW = 3;
     private static final int BORDER_SIZE = 2;
     private JLabel myNameLabel;
-    private FilterMenu filterMenu;
+    private final FilterMenu<?> filterMenu;
+    private boolean filterEnabled;
 
-    public FilterButton(FilterMenu filterMenu, String myName, String toolTip) {
+    public FilterButton(FilterMenu<?> filterMenu, String myName, String toolTip) {
         this.filterMenu = filterMenu;
         initUi(myName, toolTip);
     }
@@ -48,6 +49,20 @@ public class FilterButton extends JPanel {
         showPopupMenuOnClick();
         indicateHovering();
         indicateFocusing();
+    }
+
+    /**
+     * If one of the filters is applied (a checkbox is unselected), show this in the UI.
+     *
+     * @param filterEnabled - True if one of the filters is applied.
+     */
+    public void indicateFilterEnable(boolean filterEnabled) {
+        this.filterEnabled = filterEnabled;
+        if (filterEnabled) {
+            setOnHoverForeground();
+        } else {
+            setDefaultForeground();
+        }
     }
 
     /**
@@ -81,12 +96,16 @@ public class FilterButton extends JPanel {
         myNameLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(@NotNull MouseEvent e) {
-                setOnHoverForeground();
+                if (!filterEnabled) {
+                    setOnHoverForeground();
+                }
             }
 
             @Override
             public void mouseExited(@NotNull MouseEvent e) {
-                setDefaultForeground();
+                if (!filterEnabled) {
+                    setDefaultForeground();
+                }
             }
         });
     }

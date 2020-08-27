@@ -1,4 +1,4 @@
-package com.jfrog.ide.idea.ui.issues;
+package com.jfrog.ide.idea.ui;
 
 import com.google.common.collect.Lists;
 import com.intellij.openapi.application.ApplicationManager;
@@ -13,10 +13,8 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
-import com.jfrog.ide.idea.ui.components.FilterButton;
 import com.jfrog.ide.idea.ui.components.TitledPane;
 import com.jfrog.ide.idea.ui.filters.FilterManagerService;
-import com.jfrog.ide.idea.ui.filters.IssueFilterMenu;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependenciesTree;
@@ -37,56 +35,52 @@ import static com.jfrog.ide.idea.ui.JFrogToolWindow.*;
 /**
  * @author yahavi
  */
-public class IssuesTab {
+public class JFrogContent extends SimpleToolWindowPanel {
 
-    private OnePixelSplitter issuesRightHorizontalSplit;
+    private final OnePixelSplitter rightHorizontalSplit;
+    private final ComponentsTree componentsTree;
     private ComponentIssuesTable issuesTable;
     private JScrollPane issuesDetailsScroll;
+    private final JComponent issuesPanel;
+    private final Project mainProject;
     private JPanel issuesDetailsPanel;
-    private JComponent issuesPanel;
-    private IssuesTree issuesTree;
-    private Project mainProject;
 
     /**
      * @param mainProject - Currently opened IntelliJ project
      * @param supported   - True if the current opened project is supported by the plugin.
      *                    If not, show the "Unsupported project type" message.
-     * @return the issues view panel
      */
-    public JPanel createIssuesViewTab(@NotNull Project mainProject, boolean supported) {
+    public JFrogContent(@NotNull Project mainProject, boolean supported) {
+        super(true);
         this.mainProject = mainProject;
-        this.issuesTree = IssuesTree.getInstance(mainProject);
-        IssueFilterMenu issueFilterMenu = new IssueFilterMenu(mainProject);
-        JPanel issuesFilterButton = new FilterButton(issueFilterMenu, "Severity", "Select severities to show");
-        JPanel toolbar = ComponentUtils.createActionToolbar("Severities toolbar", issuesFilterButton, issuesTree);
+        this.componentsTree = ComponentsTree.getInstance(mainProject);
+        JPanel toolbar = ComponentUtils.createActionToolbar("JFrog toolbar", mainProject, componentsTree);
 
         issuesPanel = createComponentsIssueDetailView();
-        issuesRightHorizontalSplit = new OnePixelSplitter(true, 0.55f);
-        issuesRightHorizontalSplit.setFirstComponent(createComponentsDetailsView(supported));
-        issuesRightHorizontalSplit.setSecondComponent(issuesPanel);
+        rightHorizontalSplit = new OnePixelSplitter(true, 0.55f);
+        rightHorizontalSplit.setFirstComponent(createComponentsDetailsView(supported));
+        rightHorizontalSplit.setSecondComponent(issuesPanel);
 
         OnePixelSplitter centralVerticalSplit = new OnePixelSplitter(false, 0.20f);
-        centralVerticalSplit.setFirstComponent(createIssuesComponentsTreeView());
-        centralVerticalSplit.setSecondComponent(issuesRightHorizontalSplit);
+        centralVerticalSplit.setFirstComponent(createComponentsTreeView());
+        centralVerticalSplit.setSecondComponent(rightHorizontalSplit);
 
-        SimpleToolWindowPanel issuesViewTab = new SimpleToolWindowPanel(true);
-        issuesViewTab.setToolbar(toolbar);
-        issuesViewTab.setContent(centralVerticalSplit);
-        return issuesViewTab;
+        setToolbar(toolbar);
+        setContent(centralVerticalSplit);
     }
 
     /**
-     * Create the issues tree panel.
+     * Create the components tree panel.
      *
-     * @return the issues tree panel
+     * @return the components tree panel
      */
-    private JComponent createIssuesComponentsTreeView() {
+    private JComponent createComponentsTreeView() {
         JPanel componentsTreePanel = new JBPanel<>(new BorderLayout()).withBackground(UIUtil.getTableBackground());
         JLabel componentsTreeTitle = new JBLabel(" Component (Issues #)");
         componentsTreeTitle.setFont(componentsTreeTitle.getFont().deriveFont(TITLE_FONT_SIZE));
         componentsTreePanel.add(componentsTreeTitle, BorderLayout.LINE_START);
         JPanel treePanel = new JBPanel<>(new GridLayout()).withBackground(UIUtil.getTableBackground());
-        TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(issuesTree, ComponentUtils::getPathSearchString, true);
+        TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(componentsTree, ComponentUtils::getPathSearchString, true);
         treePanel.add(treeSpeedSearch.getComponent(), BorderLayout.WEST);
         JScrollPane treeScrollPane = ScrollPaneFactory.createScrollPane(treePanel);
         treeScrollPane.getVerticalScrollBar().setUnitIncrement(SCROLL_BAR_SCROLLING_UNITS);
@@ -149,14 +143,14 @@ public class IssuesTab {
      * @return the selected nodes in the dependencies tree
      */
     private List<DependenciesTree> getSelectedNodes() {
-        if (issuesTree.getModel() == null) {
+        if (componentsTree.getModel() == null) {
             return Lists.newArrayList();
         }
         // If no node selected - Return the root
-        if (issuesTree.getSelectionPaths() == null) {
-            return Lists.newArrayList((DependenciesTree) issuesTree.getModel().getRoot());
+        if (componentsTree.getSelectionPaths() == null) {
+            return Lists.newArrayList((DependenciesTree) componentsTree.getModel().getRoot());
         }
-        return Arrays.stream(issuesTree.getSelectionPaths())
+        return Arrays.stream(componentsTree.getSelectionPaths())
                 .map(TreePath::getLastPathComponent)
                 .map(obj -> (DependenciesTree) obj)
                 .collect(Collectors.toList());
@@ -166,7 +160,7 @@ public class IssuesTab {
      * Called after a change in the credentials.
      */
     public void onConfigurationChange() {
-        issuesRightHorizontalSplit.setFirstComponent(createComponentsDetailsView(true));
+        rightHorizontalSplit.setFirstComponent(createComponentsDetailsView(true));
         issuesPanel.validate();
         issuesPanel.repaint();
     }
@@ -175,8 +169,8 @@ public class IssuesTab {
      * Register the issues tree listeners.
      */
     public void registerListeners() {
-        // Issues component selection listener
-        issuesTree.addTreeSelectionListener(e -> {
+        // Component selection listener
+        componentsTree.addTreeSelectionListener(e -> {
             updateIssuesTable();
             if (e == null || e.getNewLeadSelectionPath() == null) {
                 return;
@@ -186,7 +180,7 @@ public class IssuesTab {
             ApplicationManager.getApplication().invokeLater(() -> issuesDetailsScroll.getViewport().setViewPosition(new Point()));
         });
 
-        issuesTree.addOnProjectChangeListener(mainProject.getMessageBus().connect());
-        issuesTree.addRightClickListener();
+        componentsTree.addOnProjectChangeListener(mainProject.getMessageBus().connect());
+        componentsTree.addRightClickListener();
     }
 }

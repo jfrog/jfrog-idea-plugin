@@ -14,8 +14,7 @@ import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.projects.GoProject;
 import com.jfrog.ide.idea.projects.NpmProject;
-import com.jfrog.ide.idea.ui.issues.IssuesTree;
-import com.jfrog.ide.idea.ui.licenses.LicensesTree;
+import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +32,7 @@ import java.util.Set;
 public class ScanManagersFactory {
 
     private Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
-    private Project mainProject;
+    private final Project mainProject;
 
     public static ScanManagersFactory getInstance(@NotNull Project project) {
         return ServiceManager.getService(project, ScanManagersFactory.class);
@@ -67,13 +66,12 @@ public class ScanManagersFactory {
             return;
         }
         try {
-            IssuesTree issuesTree = IssuesTree.getInstance(mainProject);
-            LicensesTree licensesTree = LicensesTree.getInstance(mainProject);
-            if (issuesTree == null || licensesTree == null) {
+            ComponentsTree componentsTree = ComponentsTree.getInstance(mainProject);
+            if (componentsTree == null) {
                 return;
             }
             refreshScanManagers();
-            resetViews(issuesTree, licensesTree);
+            componentsTree.reset();
             NavigationService.clearNavigationMap(mainProject);
             for (ScanManager scanManager : scanManagers.values()) {
                 scanManager.asyncScanAndUpdateResults(quickScan, dependenciesData);
@@ -193,7 +191,7 @@ public class ScanManagersFactory {
                     return;
                 case GO:
                     scanManagers.put(projectHash, new GoScanManager(mainProject,
-                                    new GoProject(Objects.requireNonNull(ProjectUtil.guessProjectDir(mainProject)), dir)));
+                            new GoProject(Objects.requireNonNull(ProjectUtil.guessProjectDir(mainProject)), dir)));
             }
         } catch (NoClassDefFoundError noClassDefFoundError) {
             // The 'maven' or 'gradle' plugins are not installed.
@@ -202,10 +200,5 @@ public class ScanManagersFactory {
 
     private boolean isScanInProgress() {
         return scanManagers.values().stream().anyMatch(ScanManager::isScanInProgress);
-    }
-
-    private void resetViews(IssuesTree issuesTree, LicensesTree licensesTree) {
-        issuesTree.reset();
-        licensesTree.reset();
     }
 }

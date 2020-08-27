@@ -35,9 +35,8 @@ import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.events.ProjectEvents;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
+import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.filters.FilterManagerService;
-import com.jfrog.ide.idea.ui.issues.IssuesTree;
-import com.jfrog.ide.idea.ui.licenses.LicensesTree;
 import com.jfrog.ide.idea.utils.Utils;
 import com.jfrog.xray.client.services.summary.Components;
 import org.apache.commons.lang.StringUtils;
@@ -46,6 +45,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 import org.jfrog.build.extractor.scan.License;
+import org.jfrog.build.extractor.scan.Scope;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -71,7 +71,7 @@ public abstract class ScanManager extends ScanManagerBase {
 
     /**
      * @param mainProject - Currently opened IntelliJ project. We'll use this project to retrieve project based services
-     *                    like {@link FilterManagerService}, {@link LicensesTree} and {@link IssuesTree}.
+     *                    like {@link FilterManagerService} and {@link ComponentsTree}.
      * @param project     - Current working project.
      * @param prefix      - Components prefix for xray scan, e.g. gav:// or npm://.
      */
@@ -96,6 +96,7 @@ public abstract class ScanManager extends ScanManagerBase {
 
     /**
      * Return all project descriptors under the scan-manager project, which need to be inspected by the corresponding {@link LocalInspectionTool}.
+     *
      * @return all project descriptors under the scan-manager project to be inspected.
      */
     protected abstract PsiFile[] getProjectDescriptors();
@@ -103,6 +104,7 @@ public abstract class ScanManager extends ScanManagerBase {
     /**
      * Return the Inspection tool corresponding to the scan-manager type.
      * The returned Inspection tool is used to perform the inspection on the project-descriptor files.
+     *
      * @return the Inspection tool corresponding to the scan-manager type.
      */
     protected abstract LocalInspectionTool getInspectionTool();
@@ -236,9 +238,17 @@ public abstract class ScanManager extends ScanManagerBase {
         return allLicenses;
     }
 
-    private void collectAllLicenses(DependenciesTree node, Set<License> allLicenses) {
-        allLicenses.addAll(node.getLicenses());
-        node.getChildren().forEach(child -> collectAllLicenses(child, allLicenses));
+    /**
+     * @return all scopes available from the current scan results.
+     */
+    public Set<Scope> getAllScopes() {
+        Set<Scope> allScopes = Sets.newHashSet();
+        if (getScanResults() == null) {
+            return allScopes;
+        }
+        DependenciesTree node = (DependenciesTree) getScanResults().getRoot();
+        collectAllScopes(node, allScopes);
+        return allScopes;
     }
 
     /**
@@ -250,19 +260,15 @@ public abstract class ScanManager extends ScanManagerBase {
             return;
         }
         if (!scanResults.isLeaf()) {
-            addFilterManagerLicenses(FilterManagerService.getInstance(mainProject));
+            addLicensesAndScopes(FilterManagerService.getInstance(mainProject));
         }
         ProjectsMap.ProjectKey projectKey = ProjectsMap.createKey(getProjectName(),
                 scanResults.getGeneralInfo());
         MessageBus projectMessageBus = mainProject.getMessageBus();
 
-        IssuesTree issuesTree = IssuesTree.getInstance(mainProject);
-        issuesTree.addScanResults(getProjectName(), scanResults);
-        projectMessageBus.syncPublisher(ProjectEvents.ON_SCAN_PROJECT_ISSUES_CHANGE).update(projectKey);
-
-        LicensesTree licensesTree = LicensesTree.getInstance(mainProject);
-        licensesTree.addScanResults(getProjectName(), scanResults);
-        projectMessageBus.syncPublisher(ProjectEvents.ON_SCAN_PROJECT_LICENSES_CHANGE).update(projectKey);
+        ComponentsTree componentsTree = ComponentsTree.getInstance(mainProject);
+        componentsTree.addScanResults(getProjectName(), scanResults);
+        projectMessageBus.syncPublisher(ProjectEvents.ON_SCAN_PROJECT_CHANGE).update(projectKey);
     }
 
     @Override
@@ -285,6 +291,7 @@ public abstract class ScanManager extends ScanManagerBase {
     /**
      * Subscribe ScanManager for VFS-change events.
      * Perform dependencies scan and update tree after the provided file has changed.
+     *
      * @param fileName - file to track for changes.
      */
     protected void subscribeLaunchDependencyScanOnFileChangedEvents(String fileName) {

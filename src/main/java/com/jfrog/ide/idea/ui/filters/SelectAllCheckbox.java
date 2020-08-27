@@ -3,7 +3,6 @@ package com.jfrog.ide.idea.ui.filters;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.components.JBCheckBoxMenuItem;
 import com.intellij.util.messages.MessageBus;
-import com.intellij.util.messages.Topic;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,7 +19,7 @@ class SelectAllCheckbox<FilterType> extends MenuCheckbox {
         setSelected(true);
     }
 
-    void setListeners(@NotNull Map<FilterType, Boolean> selectionMap, @NotNull List<SelectionCheckbox> checkBoxMenuItems, Topic<ApplicationEvents> event) {
+    void setListeners(@NotNull Map<FilterType, Boolean> selectionMap, @NotNull List<SelectionCheckbox<FilterType>> checkBoxMenuItems) {
         removeListeners();
         addItemListener(e -> {
             selectionMap.entrySet().forEach(booleanEntry -> booleanEntry.setValue(isSelected()));
@@ -32,7 +31,7 @@ class SelectAllCheckbox<FilterType> extends MenuCheckbox {
                 }
             }
             MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
-            messageBus.syncPublisher(event).update();
+            messageBus.syncPublisher(ApplicationEvents.ON_SCAN_FILTER_CHANGE).update();
         });
     }
 

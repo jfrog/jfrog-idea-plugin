@@ -6,6 +6,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.openapi.wm.impl.ToolWindowImpl;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.jfrog.build.extractor.scan.DependenciesTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 
@@ -24,7 +25,8 @@ public class Utils {
     public static boolean areRootNodesEqual(DependenciesTree lhs, DependenciesTree rhs) {
         GeneralInfo lhsGeneralInfo = lhs.getGeneralInfo();
         GeneralInfo rhsGeneralInfo = rhs.getGeneralInfo();
-        return StringUtils.equals(lhsGeneralInfo.getName(), rhsGeneralInfo.getName()) &&
+        return ObjectUtils.allNotNull(lhsGeneralInfo, rhsGeneralInfo) &&
+                StringUtils.equals(lhsGeneralInfo.getName(), rhsGeneralInfo.getName()) &&
                 StringUtils.equals(lhsGeneralInfo.getPath(), rhsGeneralInfo.getPath());
     }
 

@@ -1,4 +1,4 @@
-package com.jfrog.ide.idea.ui.issues;
+package com.jfrog.ide.idea.ui;
 
 import com.google.common.collect.Lists;
 import com.intellij.ui.table.JBTable;
@@ -13,12 +13,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
-import static com.jfrog.ide.idea.ui.issues.IssuesTableModel.IssueColumn.*;
+import static com.jfrog.ide.idea.ui.IssuesTableModel.IssueColumn.*;
 
 /**
  * @author yahavi
  */
-class ComponentIssuesTable extends JBTable {
+public class ComponentIssuesTable extends JBTable {
 
     private static final List<RowSorter.SortKey> SORT_KEYS = Lists.newArrayList(
             new RowSorter.SortKey(SEVERITY.ordinal(), SortOrder.DESCENDING),
@@ -32,7 +32,7 @@ class ComponentIssuesTable extends JBTable {
         setAutoResizeMode(AUTO_RESIZE_OFF);
     }
 
-    void updateIssuesTable(Set<Issue> issueSet, Set<String> selectedComponents) {
+    public void updateIssuesTable(Set<Issue> issueSet, Set<String> selectedComponents) {
         TableModel model = new IssuesTableModel(issueSet, selectedComponents);
         TableRowSorter<TableModel> sorter = createTableRowSorter(model, selectedComponents);
         setModel(model);

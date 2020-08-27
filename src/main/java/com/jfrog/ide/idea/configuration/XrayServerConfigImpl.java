@@ -25,6 +25,7 @@ import com.intellij.credentialStore.CredentialAttributesKt;
 import com.intellij.credentialStore.Credentials;
 import com.intellij.ide.passwordSafe.PasswordSafe;
 import com.intellij.openapi.util.Comparing;
+import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.util.EnvironmentUtil;
 import com.intellij.util.net.HttpConfigurable;
 import com.intellij.util.net.ssl.CertificateManager;
@@ -33,6 +34,7 @@ import com.intellij.util.xmlb.annotations.Tag;
 import com.jfrog.ide.common.configuration.XrayServerConfig;
 import com.jfrog.ide.idea.ui.configuration.ConnectionRetriesSpinner;
 import com.jfrog.ide.idea.ui.configuration.ConnectionTimeoutSpinner;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.client.ProxyConfiguration;
@@ -41,6 +43,11 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import javax.net.ssl.SSLContext;
+import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
+import java.net.Proxy;
+import java.net.URI;
+import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -180,12 +187,76 @@ public class XrayServerConfigImpl implements XrayServerConfig {
         this.excludedPaths = excludedPaths;
     }
 
+    /**
+     * Get proxy configuration as configured under 'Appearance & Behavior' -> 'System Settings' -> 'HTTP Proxy'
+     *
+     * @param xrayUrl - The xray URL. The URL is necessary to determine whether to bypass proxy or to pick the relevant
+     *                proxy configuration for the Xray URL as configured in *.pac file.
+     * @return the proxy configuration as configured in IDEA settings.
+     */
     @Override
     public ProxyConfiguration getProxyConfForTargetUrl(String xrayUrl) {
         HttpConfigurable httpConfigurable = HttpConfigurable.getInstance();
-        if (!httpConfigurable.isHttpProxyEnabledForUrl(xrayUrl)) {
+        if (httpConfigurable.USE_PROXY_PAC) {
+            // 'Auto-detect proxy settings' option is selected
+            return getProxyConfForTargetUrlUsingPac(httpConfigurable, xrayUrl);
+        }
+        if (httpConfigurable.isHttpProxyEnabledForUrl(xrayUrl)) {
+            // 'Manual proxy configuration' option is selected
+            return getProxyConfForTargetUrlUsingManualConf(httpConfigurable);
+        }
+        // 'No proxy' option is selected
+        return null;
+    }
+
+    /**
+     * Read Proxy config from proxy auto-configuration (PAC) file.
+     *
+     * @param httpConfigurable - Intellij HTTP details
+     * @param xrayUrl          - The Xray URL
+     * @return Proxy config
+     */
+    private ProxyConfiguration getProxyConfForTargetUrlUsingPac(HttpConfigurable httpConfigurable, String xrayUrl) {
+        URI xrayUri = VfsUtil.toUri(xrayUrl);
+        if (xrayUri == null) {
+            // Proxy URL is illegal
             return null;
         }
+
+        List<Proxy> proxies = httpConfigurable.getOnlyBySettingsSelector().select(xrayUri);
+        if (CollectionUtils.isEmpty(proxies)) {
+            // No proxy found for Xray URL
+            return null;
+        }
+        // Currently only 1 proxy is supported
+        Proxy firstProxy = proxies.get(0);
+        if (firstProxy.type().equals(Proxy.Type.DIRECT)) {
+            // Xray URL is configured with "no proxy"
+            return null;
+        }
+        InetSocketAddress inetSocketAddress = (InetSocketAddress) firstProxy.address();
+        ProxyConfiguration proxyConfig = new ProxyConfiguration();
+        proxyConfig.host = inetSocketAddress.getHostString();
+        proxyConfig.port = inetSocketAddress.getPort();
+        if (httpConfigurable.isGenericPasswordCanceled(proxyConfig.host, proxyConfig.port)) {
+            // Authentication is disabled
+            return proxyConfig;
+        }
+        PasswordAuthentication passwordAuthentication = httpConfigurable.getGenericPassword(proxyConfig.host, proxyConfig.port);
+        if (passwordAuthentication != null) {
+            proxyConfig.username = passwordAuthentication.getUserName();
+            proxyConfig.password = String.valueOf(passwordAuthentication.getPassword());
+        }
+        return proxyConfig;
+    }
+
+    /**
+     * Read Proxy config using manual proxy configuration.
+     *
+     * @param httpConfigurable - Intellij HTTP details
+     * @return Proxy config
+     */
+    private ProxyConfiguration getProxyConfForTargetUrlUsingManualConf(HttpConfigurable httpConfigurable) {
         ProxyConfiguration proxyConfig = new ProxyConfiguration();
         proxyConfig.host = trim(httpConfigurable.PROXY_HOST);
         proxyConfig.port = httpConfigurable.PROXY_PORT;
