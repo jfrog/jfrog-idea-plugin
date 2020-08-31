@@ -9,10 +9,12 @@
 
     <change-notes>
         <![CDATA[
-          <li> Minimal supported IDEA version changed to 2020.1.</li>
-          <li> Bugfix: In Gradle projects, the issues-tree is shown flat.</li>
-          <li> Bugfix: Broken navigation from issues-tree to descriptor after applying a filter.</li>
-          <li> Visual improvements.</li>
+          <li> Allow filtering by scope.</li>
+          <li> Support PAC proxy configuration.</li>
+          <li> Add connection retries and timeout to the general configuration.</li>
+          <li> Updated HTTP client.</li>
+          <li> Better logging.</li>
+          <li> UI improvements.</li>
         ]]>
     </change-notes>
 
