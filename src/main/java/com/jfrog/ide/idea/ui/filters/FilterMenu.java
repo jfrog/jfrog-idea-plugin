@@ -39,7 +39,8 @@ public abstract class FilterMenu<FilterType> extends JBPopupMenu {
     /**
      * Add all menu's components in 3 steps: Set 'All' checkbox, set listeners and add the required components.
      *
-     * @param selectionMap map between FilterType and boolean that represents whether the filter is checked or not
+     * @param selectionMap   - Map between FilterType and boolean that represents whether the filter is checked or not
+     * @param putUnknownLast - Put the unknown checkbox last in the filters list
      */
     void addComponents(@NotNull Map<FilterType, Boolean> selectionMap, boolean putUnknownLast) {
         setSelectAllCheckbox(selectionMap);
@@ -47,6 +48,12 @@ public abstract class FilterMenu<FilterType> extends JBPopupMenu {
         addCheckboxes(putUnknownLast);
     }
 
+    /**
+     * Set 'All' checkbox. If all checkboxes are checked make 'All' checked.
+     * Otherwise - If there is one filter applied make 'All' unchecked.
+     *
+     * @param selectionMap - map between FilterType and boolean that represents whether the filter is checked or not
+     */
     private void setSelectAllCheckbox(Map<FilterType, Boolean> selectionMap) {
         selectAllCheckbox.setChecked(!selectionMap.containsValue(false));
     }

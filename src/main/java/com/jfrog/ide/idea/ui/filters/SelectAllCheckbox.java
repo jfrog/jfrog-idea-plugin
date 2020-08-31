@@ -14,6 +14,7 @@ import java.util.Map;
  * Created by Yahav Itzhak on 22 Nov 2017.
  */
 class SelectAllCheckbox<FilterType> extends MenuCheckbox {
+    // If falsy, disable triggers
     private boolean active = true;
 
     SelectAllCheckbox() {
@@ -41,7 +42,7 @@ class SelectAllCheckbox<FilterType> extends MenuCheckbox {
     }
 
     /**
-     * Set button checked without trigger the listeners.
+     * Set button checked without triggering the listeners.
      *
      * @param checked - true if the button is checked, otherwise false
      */

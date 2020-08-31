@@ -2,7 +2,6 @@ package com.jfrog.ide.idea.ui.filters;
 
 import com.intellij.ui.components.JBCheckBoxMenuItem;
 
-import javax.swing.*;
 import java.awt.event.MouseEvent;
 
 /**
@@ -17,11 +16,5 @@ public class MenuCheckbox extends JBCheckBoxMenuItem {
             return;
         }
         super.processMouseEvent(evt);
-    }
-
-    void setChecked(boolean checked) {
-        ButtonModel buttonModel = getModel();
-        buttonModel.setPressed(checked);
-        buttonModel.setSelected(checked);
     }
 }
