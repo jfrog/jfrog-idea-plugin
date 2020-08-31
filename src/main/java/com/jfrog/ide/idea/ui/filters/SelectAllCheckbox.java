@@ -14,6 +14,9 @@ import java.util.Map;
  * Created by Yahav Itzhak on 22 Nov 2017.
  */
 class SelectAllCheckbox<FilterType> extends MenuCheckbox {
+    // If falsy, disable triggers
+    private boolean active = true;
+
     SelectAllCheckbox() {
         setText("All");
         setSelected(true);
@@ -22,6 +25,9 @@ class SelectAllCheckbox<FilterType> extends MenuCheckbox {
     void setListeners(@NotNull Map<FilterType, Boolean> selectionMap, @NotNull List<SelectionCheckbox<FilterType>> checkBoxMenuItems) {
         removeListeners();
         addItemListener(e -> {
+            if (!active) {
+                return;
+            }
             selectionMap.entrySet().forEach(booleanEntry -> booleanEntry.setValue(isSelected()));
 
             for (JBCheckBoxMenuItem i : checkBoxMenuItems) {
@@ -33,6 +39,17 @@ class SelectAllCheckbox<FilterType> extends MenuCheckbox {
             MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
             messageBus.syncPublisher(ApplicationEvents.ON_SCAN_FILTER_CHANGE).update();
         });
+    }
+
+    /**
+     * Set button checked without triggering the listeners.
+     *
+     * @param checked - true if the button is checked, otherwise false
+     */
+    void setChecked(boolean checked) {
+        this.active = false;
+        setSelected(checked);
+        this.active = true;
     }
 
     private void removeListeners() {

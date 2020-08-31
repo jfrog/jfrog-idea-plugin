@@ -5,7 +5,6 @@ import com.intellij.util.messages.MessageBus;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.event.ItemListener;
 import java.util.Map;
 
 /**
@@ -20,11 +19,5 @@ class SelectionCheckbox<FilterType> extends MenuCheckbox {
             MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
             messageBus.syncPublisher(ApplicationEvents.ON_SCAN_FILTER_CHANGE).update();
         });
-    }
-
-    void removeItemListeners() {
-        for (ItemListener itemListener : getItemListeners()) {
-            removeItemListener(itemListener);
-        }
     }
 }
