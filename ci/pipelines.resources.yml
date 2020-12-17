@@ -1,0 +1,20 @@
+resources:
+  - name: ideaSnapshotGit
+    type: GitRepo
+    configuration:
+      path: jfrog/jfrog-idea-plugin
+      gitProvider: github
+      buildOn:
+        pullRequestCreate: true
+      branches:
+        include: master
+      cancelPendingRunsOn:
+        pullRequestUpdate: true
+
+  - name: ideaReleaseGit
+    type: GitRepo
+    configuration:
+      path: jfrog/jfrog-idea-plugin
+      gitProvider: github
+      buildOn:
+        commit: false
