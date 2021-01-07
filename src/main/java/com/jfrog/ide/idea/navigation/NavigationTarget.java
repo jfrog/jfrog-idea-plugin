@@ -9,8 +9,8 @@ import java.util.Objects;
  */
 public class NavigationTarget {
 
-    private PsiElement element;
-    private int lineNumber;
+    private final PsiElement element;
+    private final int lineNumber;
 
     NavigationTarget(PsiElement element, int lineNumber) {
         this.element = element;
@@ -31,6 +31,7 @@ public class NavigationTarget {
         if (!(o instanceof NavigationTarget)) return false;
         NavigationTarget that = (NavigationTarget) o;
         return lineNumber == that.lineNumber &&
+                element.isValid() && that.element.isValid() &&
                 Objects.equals(element.getContainingFile(), that.element.getContainingFile());
     }
 
