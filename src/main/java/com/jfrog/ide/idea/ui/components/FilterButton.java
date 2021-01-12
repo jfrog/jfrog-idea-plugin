@@ -16,6 +16,9 @@ import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import static com.jfrog.ide.idea.ui.configuration.Utils.setActiveForegroundColor;
+import static com.jfrog.ide.idea.ui.configuration.Utils.setInactiveForegroundColor;
+
 /**
  * Created by Yahav Itzhak on 22 Nov 2017.
  */
@@ -36,7 +39,7 @@ public class FilterButton extends JPanel {
         myNameLabel.setIcon(AllIcons.General.Filter);
         JLabel arrow = new JBLabel(AllIcons.Ide.Statusbar_arrows);
         setToolTipText(toolTip);
-        setDefaultForeground();
+        setInactiveForegroundColor(myNameLabel);
         setBorder(createUnfocusedBorder());
 
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
@@ -59,9 +62,9 @@ public class FilterButton extends JPanel {
     public void indicateFilterEnable(boolean filterEnabled) {
         this.filterEnabled = filterEnabled;
         if (filterEnabled) {
-            setOnHoverForeground();
+            setActiveForegroundColor(myNameLabel);
         } else {
-            setDefaultForeground();
+            setInactiveForegroundColor(myNameLabel);
         }
     }
 
@@ -97,25 +100,17 @@ public class FilterButton extends JPanel {
             @Override
             public void mouseEntered(@NotNull MouseEvent e) {
                 if (!filterEnabled) {
-                    setOnHoverForeground();
+                    setActiveForegroundColor(myNameLabel);
                 }
             }
 
             @Override
             public void mouseExited(@NotNull MouseEvent e) {
                 if (!filterEnabled) {
-                    setDefaultForeground();
+                    setInactiveForegroundColor(myNameLabel);
                 }
             }
         });
-    }
-
-    private void setDefaultForeground() {
-        myNameLabel.setForeground(UIUtil.isUnderDarcula() ? UIUtil.getHeaderInactiveColor() : UIUtil.getInactiveTextColor());
-    }
-
-    private void setOnHoverForeground() {
-        myNameLabel.setForeground(UIUtil.isUnderDarcula() ? UIUtil.getHeaderActiveColor() : UIUtil.getTextAreaForeground());
     }
 
     private void showPopupMenu() {

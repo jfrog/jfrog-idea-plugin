@@ -12,7 +12,7 @@ import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.idea.actions.CollapseAllAction;
 import com.jfrog.ide.idea.actions.ExpandAllAction;
 import com.jfrog.ide.idea.ui.ComponentsTree;
-import com.jfrog.ide.idea.ui.configuration.XrayGlobalConfiguration;
+import com.jfrog.ide.idea.ui.configuration.JFrogGlobalConfiguration;
 import com.jfrog.ide.idea.ui.filters.IssueFilterMenu;
 import com.jfrog.ide.idea.ui.filters.LicenseFilterMenu;
 import com.jfrog.ide.idea.ui.filters.ScopeFilterMenu;
@@ -78,7 +78,7 @@ public class ComponentUtils {
     public static JComponent createNoCredentialsView() {
         HyperlinkLabel link = new HyperlinkLabel();
         link.setHyperlinkText("To start using the JFrog Plugin, please ", " configure", " your JFrog Xray details.");
-        link.addHyperlinkListener(e -> ShowSettingsUtil.getInstance().showSettingsDialog(null, XrayGlobalConfiguration.class));
+        link.addHyperlinkListener(e -> ShowSettingsUtil.getInstance().showSettingsDialog(null, JFrogGlobalConfiguration.class));
         return createUnsupportedPanel(link);
     }
 
