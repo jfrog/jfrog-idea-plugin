@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.jfrog.ide.idea.ui.configuration.JFrogGlobalConfiguration">
+  <grid id="27dc6" binding="config" layout-manager="GridLayoutManager" row-count="19" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="0" right="0"/>
+    <constraints>
+      <xy x="20" y="20" width="1055" height="621"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="d1e80" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="133" height="16"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="JFrog platform URL"/>
+          <toolTipText value=""/>
+        </properties>
+      </component>
+      <component id="c1160" class="com.intellij.ui.components.JBTextField" binding="platformUrl">
+        <constraints>
+          <grid row="3" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value=""/>
+          <toolTipText value="Example: http://myjfrog.acme.org/xray"/>
+        </properties>
+      </component>
+      <component id="57af0" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="133" height="16"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="Username"/>
+        </properties>
+      </component>
+      <component id="9bd3b" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="133" height="16"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="Password/API key"/>
+        </properties>
+      </component>
+      <component id="bf090" class="com.intellij.ui.components.JBTextField" binding="username">
+        <constraints>
+          <grid row="4" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="6f33d" class="com.intellij.ui.components.JBPasswordField" binding="password">
+        <constraints>
+          <grid row="5" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+        </constraints>
+        <properties/>
+      </component>
+      <vspacer id="aece4">
+        <constraints>
+          <grid row="14" column="1" row-span="3" col-span="2" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
+      <vspacer id="75e1b">
+        <constraints>
+          <grid row="16" column="0" row-span="3" col-span="3" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false">
+            <preferred-size width="133" height="14"/>
+          </grid>
+        </constraints>
+      </vspacer>
+      <component id="10519" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="14" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <enabled value="false"/>
+          <text value="A glob pattern used to exclude specific paths from being scanned by JFrog Xray."/>
+        </properties>
+      </component>
+      <component id="e7f46" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="15" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <enabled value="false"/>
+          <text value="For example, package.json files under directories named testdata will not be scanned."/>
+        </properties>
+      </component>
+      <component id="13f88" class="com.intellij.ui.components.JBTextField" binding="excludedPaths">
+        <constraints>
+          <grid row="13" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="&quot;**/*{.idea,test,node_modules}*&quot;"/>
+          <toolTipText value=""/>
+        </properties>
+      </component>
+      <component id="1c8d6" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="13" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Npm excluded paths"/>
+          <toolTipText value="Pattern of project paths to exclude from Xray scanning for npm."/>
+        </properties>
+      </component>
+      <component id="5cb50" class="javax.swing.JSeparator">
+        <constraints>
+          <grid row="12" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="6" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="5ec90" class="com.intellij.ui.components.JBCheckBox" binding="connectionDetailsFromEnv">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Load connection details from environment variables"/>
+        </properties>
+      </component>
+      <component id="ea8fa" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="3" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <enabled value="false"/>
+          <foreground color="-4473925"/>
+          <text value="Load connection details from the JFROG_IDE_URL, JFROG_IDE_USERNAME and"/>
+        </properties>
+      </component>
+      <component id="94e41" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="3" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <enabled value="false"/>
+          <text value="JFROG_IDE_PASSWORD environment variables."/>
+        </properties>
+      </component>
+      <component id="9c3e0" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Connection retries"/>
+          <toolTipText value=""/>
+        </properties>
+      </component>
+      <component id="1e8d4" class="com.jfrog.ide.idea.ui.configuration.ConnectionRetriesSpinner" binding="connectionRetries">
+        <constraints>
+          <grid row="10" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="1" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="1921d" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="11" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Connection timeout"/>
+          <toolTipText value="Time in seconds"/>
+        </properties>
+      </component>
+      <component id="d0b8f" class="com.jfrog.ide.idea.ui.configuration.ConnectionTimeoutSpinner" binding="connectionTimeout">
+        <constraints>
+          <grid row="11" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="1" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="66" height="30"/>
+          </grid>
+        </constraints>
+        <properties>
+          <editor value=""/>
+          <name value=""/>
+          <toolTipText value="Time in seconds"/>
+        </properties>
+      </component>
+      <component id="678b7" class="javax.swing.JButton" binding="testConnectionButton" default-binding="true">
+        <constraints>
+          <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="133" height="30"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="Test connection"/>
+        </properties>
+      </component>
+      <component id="8234b" class="javax.swing.JLabel" binding="connectionResults">
+        <constraints>
+          <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <enabled value="true"/>
+          <font name="Courier 10 Pitch"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <component id="5641b" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="133" height="16"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="JFrog Xray URL"/>
+          <toolTipText value=""/>
+        </properties>
+      </component>
+      <component id="c1dce" class="javax.swing.JCheckBox" binding="setRtAndXraySeparately" default-binding="true">
+        <constraints>
+          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Set Artifactory and Xray URLs separately"/>
+        </properties>
+      </component>
+      <component id="a5dab" class="com.intellij.ui.components.JBTextField" binding="xrayUrl">
+        <constraints>
+          <grid row="7" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value=""/>
+          <toolTipText value="Example: http://myjfrog.acme.org/xray"/>
+        </properties>
+      </component>
+      <component id="15430" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="133" height="16"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="JFrog Artifactory URL"/>
+          <toolTipText value=""/>
+        </properties>
+      </component>
+      <component id="5e6a8" class="com.intellij.ui.components.JBTextField" binding="artifactoryUrl">
+        <constraints>
+          <grid row="8" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value=""/>
+          <toolTipText value="Example: http://myjfrog.acme.org/xray"/>
+        </properties>
+      </component>
+      <component id="dee21" class="javax.swing.JLabel" binding="xrayConnectionResults">
+        <constraints>
+          <grid row="7" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value=""/>
+        </properties>
+      </component>
+      <component id="816ef" class="javax.swing.JLabel" binding="artifactoryConnectionResults">
+        <constraints>
+          <grid row="8" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value=""/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>

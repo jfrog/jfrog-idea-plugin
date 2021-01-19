@@ -129,7 +129,7 @@ public class ScanManagersFactory {
 
     private void createScanManagers(Map<Integer, ScanManager> scanManagers, Set<Path> paths) throws IOException {
         scanManagers.values().stream().map(ScanManager::getProjectPaths).flatMap(Collection::stream).forEach(paths::add);
-        PackageFileFinder packageFileFinder = new PackageFileFinder(paths, GlobalSettings.getInstance().getXrayConfig().getExcludedPaths());
+        PackageFileFinder packageFileFinder = new PackageFileFinder(paths, GlobalSettings.getInstance().getServerConfig().getExcludedPaths());
 
         // Create npm scan-managers.
         Set<String> packageJsonDirs = packageFileFinder.getNpmPackagesFilePairs();

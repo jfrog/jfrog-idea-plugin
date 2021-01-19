@@ -24,8 +24,11 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
+
+import static com.jfrog.ide.idea.ui.configuration.Utils.migrateXrayConfigToPlatformConfig;
+import static org.apache.commons.lang3.StringUtils.isAnyBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * @author yahavi
@@ -33,10 +36,14 @@ import org.jetbrains.annotations.NotNull;
 @State(name = "GlobalSettings", storages = {@Storage("jfrogConfig.xml")})
 public final class GlobalSettings implements PersistentStateComponent<GlobalSettings> {
 
-    private XrayServerConfigImpl xrayConfig;
+    private ServerConfigImpl serverConfig;
+
+    @Deprecated
+    private final XrayServerConfigImpl xrayConfig;
 
     @SuppressWarnings("unused")
     GlobalSettings() {
+        this.serverConfig = new ServerConfigImpl();
         this.xrayConfig = new XrayServerConfigImpl();
     }
 
@@ -53,20 +60,22 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
      */
     @Override
     public GlobalSettings getState() {
-        XrayServerConfigImpl serverConfig = new XrayServerConfigImpl();
-        serverConfig.setExcludedPaths(this.xrayConfig.getExcludedPaths());
-        serverConfig.setConnectionDetailsFromEnv(this.xrayConfig.isConnectionDetailsFromEnv());
-        serverConfig.setConnectionRetries(this.xrayConfig.getConnectionRetries());
-        serverConfig.setConnectionTimeout(this.xrayConfig.getConnectionTimeout());
+        ServerConfigImpl serverConfig = new ServerConfigImpl();
+        serverConfig.setExcludedPaths(this.serverConfig.getExcludedPaths());
+        serverConfig.setConnectionDetailsFromEnv(this.serverConfig.isConnectionDetailsFromEnv());
+        serverConfig.setConnectionRetries(this.serverConfig.getConnectionRetries());
+        serverConfig.setConnectionTimeout(this.serverConfig.getConnectionTimeout());
         GlobalSettings settings = new GlobalSettings();
-        settings.xrayConfig = serverConfig;
-        if (this.xrayConfig.isConnectionDetailsFromEnv()) {
+        settings.serverConfig = serverConfig;
+        if (this.serverConfig.isConnectionDetailsFromEnv()) {
             return settings;
         }
 
-        settings.xrayConfig.setPassword(null);
-        settings.xrayConfig.setUsername(null);
-        settings.xrayConfig.setUrl(this.xrayConfig.getUrl());
+        settings.serverConfig.setPassword(null);
+        settings.serverConfig.setUsername(null);
+        settings.serverConfig.setUrl(this.serverConfig.getUrl());
+        settings.serverConfig.setXrayUrl(this.serverConfig.getXrayUrl());
+        settings.serverConfig.setArtifactoryUrl(this.serverConfig.getArtifactoryUrl());
         return settings;
     }
 
@@ -77,9 +86,14 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
 
     @Override
     public void noStateLoaded() {
-        this.xrayConfig.setConnectionDetailsFromEnv(this.xrayConfig.readConnectionDetailsFromEnv());
+        this.serverConfig.setConnectionDetailsFromEnv(this.serverConfig.readConnectionDetailsFromEnv());
     }
 
+    public ServerConfigImpl getServerConfig() {
+        return this.serverConfig;
+    }
+
+    @Deprecated
     public XrayServerConfigImpl getXrayConfig() {
         return this.xrayConfig;
     }
@@ -91,63 +105,84 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
      *
      * @param xrayConfig - configurations read from file.
      */
-    @SuppressWarnings("unused")
-    public void setXrayConfig(@NotNull XrayServerConfigImpl xrayConfig) {
-        if (xrayConfig.isConnectionDetailsFromEnv()) {
+    @Deprecated
+    public void setXrayConfig(XrayServerConfigImpl xrayConfig) {
+        String xrayUrl = xrayConfig.getUrl();
+        if (isBlank(xrayUrl)) {
+            return;
+        }
+        xrayConfig.setXrayUrl(xrayUrl);
+        migrateXrayConfigToPlatformConfig(xrayConfig);
+        setServerConfig(xrayConfig);
+    }
+
+    /**
+     * Method is called by Idea IS for reading the previously saved config file 'jfrogConfig.xml' from the disk.
+     * Check if previous configurations contain credentials, perform migration if necessary.
+     * If connection details loaded from environment, don't override them.
+     *
+     * @param serverConfig - configurations read from file.
+     */
+    public void setServerConfig(@NotNull ServerConfigImpl serverConfig) {
+        if (serverConfig.isConnectionDetailsFromEnv()) {
             // Load connection details from environment variables.
-            this.xrayConfig.setConnectionDetailsFromEnv(this.xrayConfig.readConnectionDetailsFromEnv());
-            this.xrayConfig.setExcludedPaths(xrayConfig.getExcludedPaths());
-            this.xrayConfig.setConnectionRetries(xrayConfig.getConnectionRetries());
-            this.xrayConfig.setConnectionTimeout(xrayConfig.getConnectionTimeout());
+            this.serverConfig.setConnectionDetailsFromEnv(this.serverConfig.readConnectionDetailsFromEnv());
+            this.serverConfig.setExcludedPaths(serverConfig.getExcludedPaths());
+            this.serverConfig.setConnectionRetries(serverConfig.getConnectionRetries());
+            this.serverConfig.setConnectionTimeout(serverConfig.getConnectionTimeout());
             return;
         }
 
         // Load configuration from state.
-        setCommonConfigFields(xrayConfig);
-        if (shouldPerformCredentialsMigration(xrayConfig)) {
-            migrateCredentialsFromFileToPasswordSafe(xrayConfig);
+        setCommonConfigFields(serverConfig);
+        if (shouldPerformCredentialsMigration(serverConfig)) {
+            migrateCredentialsFromFileToPasswordSafe(serverConfig);
         } else {
-            this.xrayConfig.setCredentials(xrayConfig.getCredentialsFromPasswordSafe());
+            this.serverConfig.setCredentials(serverConfig.getCredentialsFromPasswordSafe());
         }
     }
 
     /**
      * Update xray configurations with new values.
      *
-     * @param xrayConfig - the new configurations to update.
+     * @param serverConfig - the new configurations to update.
      */
-    public void updateConfig(XrayServerConfigImpl xrayConfig) {
-        if (xrayConfig.isConnectionDetailsFromEnv()) {
-            if (this.xrayConfig.getUrl() != null) {
-                this.xrayConfig.removeCredentialsFromPasswordSafe();
+    public void updateConfig(ServerConfigImpl serverConfig) {
+        if (serverConfig.isConnectionDetailsFromEnv()) {
+            if (this.serverConfig.getUrl() != null) {
+                this.serverConfig.removeCredentialsFromPasswordSafe();
             }
-            this.xrayConfig.setConnectionDetailsFromEnv(true);
-            this.xrayConfig.readConnectionDetailsFromEnv();
-            this.xrayConfig.setExcludedPaths(xrayConfig.getExcludedPaths());
-            this.xrayConfig.setConnectionRetries(xrayConfig.getConnectionRetries());
-            this.xrayConfig.setConnectionTimeout(xrayConfig.getConnectionTimeout());
+            this.serverConfig.setConnectionDetailsFromEnv(true);
+            this.serverConfig.readConnectionDetailsFromEnv();
+            this.serverConfig.setExcludedPaths(serverConfig.getExcludedPaths());
+            this.serverConfig.setConnectionRetries(serverConfig.getConnectionRetries());
+            this.serverConfig.setConnectionTimeout(serverConfig.getConnectionTimeout());
             return;
         }
 
-        if (this.xrayConfig.getUrl() != null && !this.xrayConfig.getUrl().equals(xrayConfig.getUrl())) {
-            this.xrayConfig.removeCredentialsFromPasswordSafe();
+        if (this.serverConfig.getUrl() != null && !this.serverConfig.getUrl().equals(serverConfig.getUrl())) {
+            this.serverConfig.removeCredentialsFromPasswordSafe();
         }
-        setCommonConfigFields(xrayConfig);
-        this.xrayConfig.setUsername(xrayConfig.getUsername());
-        this.xrayConfig.setPassword(xrayConfig.getPassword());
-        this.xrayConfig.addCredentialsToPasswordSafe();
+        setCommonConfigFields(serverConfig);
+        this.serverConfig.setUsername(serverConfig.getUsername());
+        this.serverConfig.setPassword(serverConfig.getPassword());
+        this.serverConfig.addCredentialsToPasswordSafe();
     }
 
-    public void setCommonConfigFields(XrayServerConfigImpl xrayConfig) {
-        this.xrayConfig.setUrl(xrayConfig.getUrl());
-        this.xrayConfig.setExcludedPaths(xrayConfig.getExcludedPaths());
-        this.xrayConfig.setConnectionDetailsFromEnv(xrayConfig.isConnectionDetailsFromEnv());
-        this.xrayConfig.setConnectionRetries(xrayConfig.getConnectionRetries());
-        this.xrayConfig.setConnectionTimeout(xrayConfig.getConnectionTimeout());
+    public void setCommonConfigFields(ServerConfigImpl serverConfig) {
+        this.serverConfig.setUrl(serverConfig.getUrl());
+        this.serverConfig.setXrayUrl(serverConfig.getXrayUrl());
+        this.serverConfig.setArtifactoryUrl(serverConfig.getArtifactoryUrl());
+        this.serverConfig.setExcludedPaths(serverConfig.getExcludedPaths());
+        this.serverConfig.setConnectionDetailsFromEnv(serverConfig.isConnectionDetailsFromEnv());
+        this.serverConfig.setConnectionRetries(serverConfig.getConnectionRetries());
+        this.serverConfig.setConnectionTimeout(serverConfig.getConnectionTimeout());
+        this.serverConfig.setJFrogSettingsCredentialsKey(serverConfig.getJFrogSettingsCredentialsKey());
+        this.serverConfig.setXraySettingsCredentialsKey(serverConfig.getXraySettingsCredentialsKey());
     }
 
     public boolean areCredentialsSet() {
-        return xrayConfig != null && !xrayConfig.isEmpty();
+        return serverConfig != null && !serverConfig.isEmpty();
     }
 
     /**
@@ -155,12 +190,12 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
      * If credentials were stored on file, set the new values from it, save to PasswordSafe
      * and persist configuration to file.
      *
-     * @param xrayConfig - configurations read from 'jfrogConfig.xml'.
+     * @param serverConfig - configurations read from 'jfrogConfig.xml'.
      */
-    private void migrateCredentialsFromFileToPasswordSafe(XrayServerConfigImpl xrayConfig) {
-        this.xrayConfig.setUsername(xrayConfig.getUsername());
-        this.xrayConfig.setPassword(xrayConfig.getPassword());
-        this.xrayConfig.addCredentialsToPasswordSafe();
+    private void migrateCredentialsFromFileToPasswordSafe(ServerConfigImpl serverConfig) {
+        this.serverConfig.setUsername(serverConfig.getUsername());
+        this.serverConfig.setPassword(serverConfig.getPassword());
+        this.serverConfig.addCredentialsToPasswordSafe();
         ApplicationManager.getApplication().saveSettings();
     }
 
@@ -170,7 +205,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
      * @param xrayConfig - configurations read from 'jfrogConfig.xml'.
      * @return true if credentials are stored in file.
      */
-    private boolean shouldPerformCredentialsMigration(XrayServerConfigImpl xrayConfig) {
-        return !StringUtils.isBlank(xrayConfig.getUsername()) || !StringUtils.isBlank(xrayConfig.getPassword());
+    private boolean shouldPerformCredentialsMigration(ServerConfigImpl xrayConfig) {
+        return !isAnyBlank(xrayConfig.getUsername(), xrayConfig.getPassword());
     }
 }

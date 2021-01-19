@@ -76,7 +76,7 @@ public abstract class ScanManager extends ScanManagerBase {
      * @param prefix      - Components prefix for xray scan, e.g. gav:// or npm://.
      */
     ScanManager(@NotNull Project mainProject, @NotNull Project project, ComponentPrefix prefix) throws IOException {
-        super(HOME_PATH.resolve("cache"), project.getName(), Logger.getInstance(), GlobalSettings.getInstance().getXrayConfig(), prefix);
+        super(HOME_PATH.resolve("cache"), project.getName(), Logger.getInstance(), GlobalSettings.getInstance().getServerConfig(), prefix);
         this.mainProject = mainProject;
         this.project = project;
         Files.createDirectories(HOME_PATH);

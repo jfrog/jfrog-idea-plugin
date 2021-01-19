@@ -2,7 +2,7 @@ package com.jfrog.ide.idea.configuration;
 
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import com.intellij.util.net.HttpConfigurable;
-import com.jfrog.ide.common.configuration.XrayServerConfig;
+import com.jfrog.ide.common.configuration.ServerConfig;
 import org.jfrog.build.client.ProxyConfiguration;
 
 import java.io.File;
@@ -14,7 +14,7 @@ import java.net.URL;
  */
 public class GetProxyConfForTargetUrlTest extends LightJavaCodeInsightFixtureTestCase {
 
-    private final XrayServerConfig xrayServerConfig = new XrayServerConfigImpl();
+    private final ServerConfig serverConfig = new ServerConfigImpl();
     private HttpConfigurable httpConfigurable;
 
     @Override
@@ -37,7 +37,7 @@ public class GetProxyConfForTargetUrlTest extends LightJavaCodeInsightFixtureTes
      * Check that we get null proxy configuration if proxy is not defined.
      */
     public void testProxyNotConfigured() {
-        ProxyConfiguration proxyConfig = xrayServerConfig.getProxyConfForTargetUrl("https://1.2.3.4");
+        ProxyConfiguration proxyConfig = serverConfig.getProxyConfForTargetUrl("https://1.2.3.4");
         assertNull(proxyConfig);
     }
 
@@ -54,7 +54,7 @@ public class GetProxyConfForTargetUrlTest extends LightJavaCodeInsightFixtureTes
         httpConfigurable.setPlainProxyPassword("password");
 
         // Get proxy config for https://1.2.3.4
-        ProxyConfiguration proxyConfig = xrayServerConfig.getProxyConfForTargetUrl("https://1.2.3.4");
+        ProxyConfiguration proxyConfig = serverConfig.getProxyConfForTargetUrl("https://1.2.3.4");
         assertNotNull(proxyConfig);
 
         // Check proxy config
@@ -75,7 +75,7 @@ public class GetProxyConfForTargetUrlTest extends LightJavaCodeInsightFixtureTes
         httpConfigurable.putGenericPassword("proxyPacHost.org", 8888, passwordAuthentication, true);
 
         // Get proxy config for https://1.2.3.4
-        ProxyConfiguration proxyConfig = xrayServerConfig.getProxyConfForTargetUrl("https://1.2.3.4");
+        ProxyConfiguration proxyConfig = serverConfig.getProxyConfForTargetUrl("https://1.2.3.4");
         assertNotNull(proxyConfig);
 
         // Check proxy config
@@ -94,7 +94,7 @@ public class GetProxyConfForTargetUrlTest extends LightJavaCodeInsightFixtureTes
         httpConfigurable.USE_PROXY_PAC = true;
 
         // Assert no proxy config for https://1.2.3.5
-        ProxyConfiguration proxyConfig = xrayServerConfig.getProxyConfForTargetUrl("https://1.2.3.5");
+        ProxyConfiguration proxyConfig = serverConfig.getProxyConfForTargetUrl("https://1.2.3.5");
         assertNull(proxyConfig);
     }
 }

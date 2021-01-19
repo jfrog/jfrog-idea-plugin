@@ -33,8 +33,8 @@
     </application-components>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationConfigurable id="JFrog" displayName="JFrog Xray Configuration"
-                                 instance="com.jfrog.ide.idea.ui.configuration.XrayGlobalConfiguration"/>
+        <applicationConfigurable id="JFrog" displayName="JFrog Configuration"
+                                 instance="com.jfrog.ide.idea.ui.configuration.JFrogGlobalConfiguration"/>
         <externalProjectDataService implementation="com.jfrog.ide.idea.gradle.GradleDependenciesDataService"/>
         <applicationService serviceImplementation="com.jfrog.ide.idea.log.Logger"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.ui.filters.FilterManagerService"/>
