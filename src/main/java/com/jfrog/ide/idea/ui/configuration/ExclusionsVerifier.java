@@ -6,12 +6,15 @@ import javax.swing.*;
 import java.nio.file.FileSystems;
 import java.util.regex.PatternSyntaxException;
 
-import static com.jfrog.ide.idea.configuration.ServerConfigImpl.DEFAULT_EXCLUSIONS;
-
 /**
+ * Input verifier for the "Excluded paths" field in the UI configuration.
+ * This verifier make sure the input glob pattern is legal.
+ *
  * @author yahavi
  **/
 public class ExclusionsVerifier extends InputVerifier {
+    public static final String DEFAULT_EXCLUSIONS = "**/*{.idea,test,node_modules}*";
+
     private final JTextField excludedPaths;
 
     public ExclusionsVerifier(JTextField excludedPaths) {

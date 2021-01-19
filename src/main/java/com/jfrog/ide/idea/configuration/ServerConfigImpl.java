@@ -45,6 +45,7 @@ import java.net.URI;
 import java.util.List;
 
 import static com.intellij.openapi.util.Comparing.equal;
+import static com.jfrog.ide.idea.ui.configuration.ExclusionsVerifier.DEFAULT_EXCLUSIONS;
 import static com.jfrog.ide.idea.ui.configuration.Utils.*;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.*;
@@ -54,7 +55,6 @@ import static org.apache.commons.lang3.StringUtils.*;
  */
 @Immutable
 public class ServerConfigImpl implements ServerConfig {
-    public static final String DEFAULT_EXCLUSIONS = "**/*{.idea,test,node_modules}*";
     private static final String JFROG_SETTINGS_CREDENTIALS_KEY = "credentials";
     static final String ARTIFACTORY_URL_ENV = "JFROG_IDE_ARTIFACTORY_URL";
     public static final String JFROG_SETTINGS_KEY = "com.jfrog.idea";
@@ -78,16 +78,19 @@ public class ServerConfigImpl implements ServerConfig {
     private String username;
     @Tag
     private String password;
+    // Pattern of project paths to exclude from Xray scanning for npm
     @Tag
-    private String excludedPaths; // Pattern of project paths to exclude from Xray scanning for npm
+    private String excludedPaths;
     @Tag
     private boolean connectionDetailsFromEnv;
     @Tag
     private Integer connectionRetries;
     @Tag
     private Integer connectionTimeout;
+    // The subsystem key of the plugin configuration in the PasswordSafe
     @Transient
     private String jfrogSettingsCredentialsKey = JFROG_SETTINGS_KEY;
+    // The subsystem key of the legacy plugin configuration in the PasswordSafe
     @Transient
     @Deprecated
     private String xraySettingsCredentialsKey = XRAY_SETTINGS_KEY;

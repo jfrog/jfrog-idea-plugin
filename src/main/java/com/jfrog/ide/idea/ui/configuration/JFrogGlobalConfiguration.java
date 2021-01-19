@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.*;
-import static com.jfrog.ide.idea.configuration.ServerConfigImpl.DEFAULT_EXCLUSIONS;
+import static com.jfrog.ide.idea.ui.configuration.ExclusionsVerifier.DEFAULT_EXCLUSIONS;
 import static com.jfrog.ide.idea.ui.configuration.Utils.clearText;
 import static org.apache.commons.collections4.CollectionUtils.addIgnoreNull;
 import static org.apache.commons.lang3.StringUtils.*;
@@ -128,7 +128,6 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             setConnectionResults("Connecting to Xray...");
             config.validate();
             config.repaint();
-            // use as a workaround to version not being username password validated
             Version xrayVersion = xrayClient.system().version();
 
             // Check version
