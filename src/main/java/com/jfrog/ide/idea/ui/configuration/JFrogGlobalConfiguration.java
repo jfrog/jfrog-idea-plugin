@@ -17,6 +17,8 @@ import com.jfrog.xray.client.impl.XrayClientBuilder;
 import com.jfrog.xray.client.services.system.Version;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.conn.ssl.TrustAllStrategy;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 import org.jfrog.artifactory.client.Artifactory;
@@ -24,10 +26,14 @@ import org.jfrog.artifactory.client.ArtifactoryClientBuilder;
 import org.jfrog.artifactory.client.ProxyConfig;
 import org.jfrog.build.client.ProxyConfiguration;
 
+import javax.net.ssl.SSLContext;
 import javax.swing.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -170,8 +176,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     }
 
     private void initConnectionDetailsFromEnv() {
-        List<JComponent> effectedComponents =
-                Lists.newArrayList(setRtAndXraySeparately, platformUrl, username, password);
+        List<JComponent> effectedComponents = Lists.newArrayList(setRtAndXraySeparately, platformUrl, username, password);
         connectionDetailsFromEnv.addItemListener(e -> {
             JBCheckBox cb = (JBCheckBox) e.getSource();
             if (cb.isSelected()) {
@@ -268,7 +273,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     }
 
     @Nullable
-    private Artifactory createArtifactoryClient() {
+    private Artifactory createArtifactoryClient() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
         String urlStr = trim(artifactoryUrl.getText());
         if (isBlank(urlStr)) {
             return null;
@@ -278,13 +283,16 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         if (proxyConfiguration != null) {
             proxyConfig = new ProxyConfig(proxyConfiguration.host, proxyConfiguration.port, "", proxyConfiguration.username, proxyConfiguration.password);
         }
-        return ArtifactoryClientBuilder.create()
+        ArtifactoryClientBuilder builder = ArtifactoryClientBuilder.create()
                 .setUrl(urlStr)
                 .setUsername(trim(username.getText()))
                 .setPassword(String.valueOf(password.getPassword()))
                 .setUserAgent(USER_AGENT)
-                .setProxy(proxyConfig)
-                .build();
+                .setProxy(proxyConfig);
+        SSLContext sslContext = serverConfig.isInsecureTls() ?
+                SSLContextBuilder.create().loadTrustMaterial(TrustAllStrategy.INSTANCE).build() :
+                serverConfig.getSslContext();
+        return builder.setSslContext(sslContext).build();
     }
 
     private void loadConfig() {
