@@ -93,7 +93,7 @@
         </constraints>
         <properties>
           <enabled value="false"/>
-          <text value="The excluded paths supported only by npm and Go projects."/>
+          <text value="This is supported only by npm and Go projects."/>
         </properties>
       </component>
       <component id="13f88" class="com.intellij.ui.components.JBTextField" binding="excludedPaths">
