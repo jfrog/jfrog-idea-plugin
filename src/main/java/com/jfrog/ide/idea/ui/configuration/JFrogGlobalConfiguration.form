@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.jfrog.ide.idea.ui.configuration.JFrogGlobalConfiguration">
-  <grid id="27dc6" binding="config" layout-manager="GridLayoutManager" row-count="19" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="27dc6" binding="config" layout-manager="GridLayoutManager" row-count="20" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
       <xy x="20" y="20" width="1055" height="621"/>
@@ -68,32 +68,32 @@
       </component>
       <vspacer id="aece4">
         <constraints>
-          <grid row="14" column="1" row-span="3" col-span="2" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+          <grid row="15" column="1" row-span="3" col-span="2" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
         </constraints>
       </vspacer>
       <vspacer id="75e1b">
         <constraints>
-          <grid row="16" column="0" row-span="3" col-span="3" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false">
+          <grid row="17" column="0" row-span="3" col-span="3" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false">
             <preferred-size width="133" height="14"/>
           </grid>
         </constraints>
       </vspacer>
       <component id="10519" class="javax.swing.JLabel">
         <constraints>
-          <grid row="14" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <enabled value="false"/>
-          <text value="A glob pattern used to exclude specific paths from being scanned by JFrog Xray."/>
-        </properties>
-      </component>
-      <component id="e7f46" class="javax.swing.JLabel">
-        <constraints>
           <grid row="15" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <enabled value="false"/>
           <text value="For example, package.json files under directories named testdata will not be scanned."/>
+        </properties>
+      </component>
+      <component id="e7f46" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="16" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <enabled value="false"/>
+          <text value="This is supported only by npm and Go projects."/>
         </properties>
       </component>
       <component id="13f88" class="com.intellij.ui.components.JBTextField" binding="excludedPaths">
@@ -104,7 +104,7 @@
         </constraints>
         <properties>
           <text value="&quot;**/*{.idea,test,node_modules}*&quot;"/>
-          <toolTipText value=""/>
+          <toolTipText value="Pattern of project paths to exclude from Xray scanning for npm and Go projects."/>
         </properties>
       </component>
       <component id="1c8d6" class="javax.swing.JLabel">
@@ -112,8 +112,8 @@
           <grid row="13" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="Npm excluded paths"/>
-          <toolTipText value="Pattern of project paths to exclude from Xray scanning for npm."/>
+          <text value="Excluded paths"/>
+          <toolTipText value="Pattern of project paths to exclude from Xray scanning for npm and Go projects."/>
         </properties>
       </component>
       <component id="5cb50" class="javax.swing.JSeparator">
@@ -271,6 +271,15 @@
         </constraints>
         <properties>
           <text value=""/>
+        </properties>
+      </component>
+      <component id="97f1c" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="14" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <enabled value="false"/>
+          <text value="A glob pattern used to exclude specific local paths from being scanned by JFrog Xray."/>
         </properties>
       </component>
     </children>
