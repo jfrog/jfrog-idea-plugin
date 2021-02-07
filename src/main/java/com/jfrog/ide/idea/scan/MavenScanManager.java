@@ -148,6 +148,7 @@ public class MavenScanManager extends ScanManager {
     }
 
     private void updateChildrenNodes(DependenciesTree parentNode, MavenArtifactNode mavenArtifactNode, Set<String> added, boolean setScopes) {
+        final Set<String> addedInSubTree = Sets.newHashSet(added);
         MavenArtifact mavenArtifact = mavenArtifactNode.getArtifact();
         DependenciesTree currentNode = new DependenciesTree(mavenArtifact.getDisplayStringSimple());
         if (setScopes) {
@@ -156,8 +157,8 @@ public class MavenScanManager extends ScanManager {
         populateDependenciesTreeNode(currentNode);
         mavenArtifactNode.getDependencies()
                 .stream()
-                .filter(dependencyTree -> added.add(dependencyTree.getArtifact().getDisplayStringForLibraryName()))
-                .forEach(childrenArtifactNode -> updateChildrenNodes(currentNode, childrenArtifactNode, added, false));
+                .filter(dependencyTree -> addedInSubTree.add(dependencyTree.getArtifact().getDisplayStringForLibraryName()))
+                .forEach(childrenArtifactNode -> updateChildrenNodes(currentNode, childrenArtifactNode, addedInSubTree, false));
         parentNode.add(currentNode);
     }
 
