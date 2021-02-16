@@ -148,6 +148,7 @@ public class MavenScanManager extends ScanManager {
     }
 
     private void updateChildrenNodes(DependenciesTree parentNode, MavenArtifactNode mavenArtifactNode, Set<String> added, boolean setScopes) {
+        // This set is used to disallow duplications between a node and its ancestors
         final Set<String> addedInSubTree = Sets.newHashSet(added);
         MavenArtifact mavenArtifact = mavenArtifactNode.getArtifact();
         DependenciesTree currentNode = new DependenciesTree(mavenArtifact.getDisplayStringSimple());
