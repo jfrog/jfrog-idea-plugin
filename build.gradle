@@ -22,6 +22,10 @@ intellij {
     updateSinceUntilBuild = false
 }
 
+runIde {
+    jvmArgs '-Xmx2G'
+}
+
 repositories {
     mavenLocal()
     maven {
