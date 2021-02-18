@@ -1,8 +1,6 @@
 package com.jfrog.ide.idea.scan;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.*;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.externalSystem.model.DataNode;
@@ -136,7 +134,12 @@ public class GradleScanManager extends ScanManager {
     }
 
     private void populateModulesWithDependencies(DataNode<ProjectDependencies> dataNode) {
-        Multimap<DependencyNode, Scope> moduleDependencies = HashMultimap.create();
+        // The DependencyNode's equals and hash functions compares the node's children, an integer number and some other
+        // non-relevant fields. Comparing with these functions causes unwanted duplications in the dependency tree.
+        // Therefore we will use TreeMultimap with custom comparators.
+        Multimap<DependencyNode, Scope> moduleDependencies = TreeMultimap.create(
+                (DependencyNode key1, DependencyNode key2) -> StringUtils.compare(key1.getDisplayName(), key2.getDisplayName()),
+                (Scope value1, Scope value2) -> StringUtils.compare(value1.getName(), value2.getName()));
         ProjectDependencies projectDependencies = dataNode.getData();
         String moduleId = getModuleId(dataNode);
         if (!modules.containsKey(moduleId)) {
