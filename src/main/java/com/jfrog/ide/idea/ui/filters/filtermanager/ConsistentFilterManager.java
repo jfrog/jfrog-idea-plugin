@@ -1,13 +1,10 @@
-package com.jfrog.ide.idea.ui.filters;
+package com.jfrog.ide.idea.ui.filters.filtermanager;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.components.State;
-import com.intellij.openapi.project.Project;
 import com.intellij.util.messages.MessageBus;
 import com.jfrog.ide.common.filter.FilterManager;
-import com.jfrog.ide.idea.events.ApplicationEvents;
+import com.jfrog.ide.idea.Syncable;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.License;
 import org.jfrog.build.extractor.scan.Scope;
@@ -19,14 +16,9 @@ import java.util.Map;
 /**
  * @author yahavi
  */
-@State(name = "FilterState")
-public class FilterManagerService extends FilterManager implements PersistentStateComponent<FilterManagerService.FiltersState> {
+public abstract class ConsistentFilterManager extends FilterManager implements PersistentStateComponent<ConsistentFilterManager.FiltersState>, Syncable {
 
     private FiltersState state;
-
-    public static FilterManager getInstance(@NotNull Project project) {
-        return ServiceManager.getService(project, FilterManagerService.class);
-    }
 
     /**
      * Only on first scan after project opens, update the selected-licenses from state.
@@ -34,7 +26,6 @@ public class FilterManagerService extends FilterManager implements PersistentSta
      *
      * @return Selected licenses map according to persisted state.
      */
-    @Override
     public Map<License, Boolean> getSelectedLicenses() {
         Map<License, Boolean> selectedLicenses = super.getSelectedLicenses();
         if (state == null || state.selectedLicences == null) {
@@ -52,7 +43,7 @@ public class FilterManagerService extends FilterManager implements PersistentSta
         // Update components tree with applied filters.
         if (selectedLicenses.containsValue(false)) {
             MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
-            messageBus.syncPublisher(ApplicationEvents.ON_SCAN_FILTER_CHANGE).update();
+            messageBus.syncPublisher(getSyncEvent()).update();
         }
 
         return selectedLicenses;
@@ -82,7 +73,7 @@ public class FilterManagerService extends FilterManager implements PersistentSta
         // Update components tree with applied filters.
         if (selectedScopes.containsValue(false)) {
             MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
-            messageBus.syncPublisher(ApplicationEvents.ON_SCAN_FILTER_CHANGE).update();
+            messageBus.syncPublisher(getSyncEvent()).update();
         }
 
         return selectedScopes;

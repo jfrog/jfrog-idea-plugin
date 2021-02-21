@@ -6,7 +6,7 @@ import com.intellij.ui.RoundedLineBorder;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
-import com.jfrog.ide.idea.ui.filters.FilterMenu;
+import com.jfrog.ide.idea.ui.filters.filtermenu.FilterMenu;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;

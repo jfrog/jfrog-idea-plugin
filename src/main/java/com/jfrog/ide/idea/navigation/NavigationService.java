@@ -8,7 +8,7 @@ import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.build.extractor.scan.DependenciesTree;
+import org.jfrog.build.extractor.scan.DependencyTree;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -21,7 +21,7 @@ import java.util.Set;
  */
 public class NavigationService {
 
-    private Map<DependenciesTree, Set<NavigationTarget>> navigationMap = Maps.newHashMap();
+    private Map<DependencyTree, Set<NavigationTarget>> navigationMap = Maps.newHashMap();
 
     public static NavigationService getInstance(@NotNull Project project) {
         return ServiceManager.getService(project, NavigationService.class);
@@ -41,7 +41,7 @@ public class NavigationService {
      * @param treeNode                The tree-node to register the navigation from.
      * @param navigationTargetElement The PsiElement we register the navigation to.
      */
-    public void addNavigation(DependenciesTree treeNode, PsiElement navigationTargetElement) {
+    public void addNavigation(DependencyTree treeNode, PsiElement navigationTargetElement) {
         PsiFile containingFile = navigationTargetElement.getContainingFile();
         FileViewProvider fileViewProvider = containingFile.getViewProvider();
         Document document = fileViewProvider.getDocument();
@@ -64,23 +64,23 @@ public class NavigationService {
      * @param treeNode The tree-node to get its navigation.
      * @return Set of candidates for navigation.
      */
-    public Set<NavigationTarget> getNavigation(DependenciesTree treeNode) {
+    public Set<NavigationTarget> getNavigation(DependencyTree treeNode) {
         return navigationMap.get(treeNode);
     }
 
     /**
-     * Get a navigable ancestor of a DependenciesTree node, in the issues tree.
+     * Get a navigable ancestor of a DependencyTree node, in the issues tree.
      *
      * @param node To find its navigable ancestor.
      * @return The first navigable ancestor of 'node', null of not found.
      */
-    public DependenciesTree getNavigableParent(DependenciesTree node) {
-        DependenciesTree parentCandidate = node;
+    public DependencyTree getNavigableParent(DependencyTree node) {
+        DependencyTree parentCandidate = node;
         while (parentCandidate != null) {
             if (navigationMap.get(parentCandidate) != null) {
                 return parentCandidate;
             }
-            parentCandidate = (DependenciesTree) parentCandidate.getParent();
+            parentCandidate = (DependencyTree) parentCandidate.getParent();
         }
         return null;
     }

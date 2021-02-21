@@ -34,7 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.plugins.gradle.settings.GradleSettings;
 import org.jetbrains.plugins.gradle.util.GradleConstants;
-import org.jfrog.build.extractor.scan.DependenciesTree;
+import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.jfrog.build.extractor.scan.Scope;
 
@@ -53,7 +53,7 @@ import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
 public class GradleScanManager extends ScanManager {
 
     private Collection<DataNode<ProjectDependencies>> dependenciesData;
-    private Map<String, DependenciesTree> modules = Maps.newHashMap();
+    private Map<String, DependencyTree> modules = Maps.newHashMap();
 
     GradleScanManager(Project project) throws IOException {
         super(project, project, ComponentPrefix.GAV);
@@ -124,12 +124,12 @@ public class GradleScanManager extends ScanManager {
     protected void buildTree(@Nullable DataNode<ProjectData> externalProject) {
         collectDependenciesIfMissing(externalProject);
         dependenciesData.forEach(this::populateModulesWithDependencies);
-        DependenciesTree rootNode = new DependenciesTree(project.getName());
+        DependencyTree rootNode = new DependencyTree(project.getName());
         modules.values().forEach(rootNode::add);
         GeneralInfo generalInfo = new GeneralInfo().name(project.getName()).path(Utils.getProjectBasePath(project).toString());
         rootNode.setGeneralInfo(generalInfo);
         if (rootNode.getChildren().size() == 1) {
-            setScanResults((DependenciesTree) rootNode.getChildAt(0));
+            setScanResults((DependencyTree) rootNode.getChildAt(0));
         } else {
             setScanResults(rootNode);
         }
@@ -150,12 +150,12 @@ public class GradleScanManager extends ScanManager {
                     .forEach(dependencyNode -> moduleDependencies.put(dependencyNode, new Scope(componentDependency.getComponentName())));
         }
         // Populate dependencies-tree for all modules.
-        moduleDependencies.asMap().forEach((key, value) -> populateDependenciesTree(modules.get(moduleId), key, (Set<Scope>) value));
+        moduleDependencies.asMap().forEach((key, value) -> populateDependencyTree(modules.get(moduleId), key, (Set<Scope>) value));
     }
 
-    private void populateDependenciesTree(DependenciesTree dependenciesTree, DependencyNode dependencyNode, Set<Scope> scopes) {
+    private void populateDependencyTree(DependencyTree DependencyTree, DependencyNode dependencyNode, Set<Scope> scopes) {
         ComponentDetailImpl scanComponent = new ComponentDetailImpl(dependencyNode.getDisplayName(), "");
-        DependenciesTree treeNode = new DependenciesTree(scanComponent);
+        DependencyTree treeNode = new DependencyTree(scanComponent);
         if (scopes != null) {
             treeNode.setScopes(scopes);
         }
@@ -164,9 +164,9 @@ public class GradleScanManager extends ScanManager {
         List<DependencyNode> childrenList = dependencyNode.getDependencies().stream()
                 .filter(GradleScanManager::isArtifactDependencyNode)
                 .collect(Collectors.toList());
-        childrenList.forEach(child -> populateDependenciesTree(treeNode, child, null));
+        childrenList.forEach(child -> populateDependencyTree(treeNode, child, null));
 
-        dependenciesTree.add(treeNode);
+        DependencyTree.add(treeNode);
     }
 
     private static boolean isArtifactDependencyNode(DependencyNode dependencyNode) {
@@ -194,7 +194,7 @@ public class GradleScanManager extends ScanManager {
             String groupId = Objects.toString(module.getData().getGroup(), "");
             String artifactId = StringUtils.removeStart(module.getData().getId(), ":");
             String version = Objects.toString(module.getData().getVersion(), "");
-            DependenciesTree scanTreeNode = new DependenciesTree(artifactId);
+            DependencyTree scanTreeNode = new DependencyTree(artifactId);
             scanTreeNode.setGeneralInfo(new GeneralInfo().pkgType("gradle").groupId(groupId).artifactId(artifactId).version(version));
             modules.put(StringUtils.removeStart(module.getData().getId(), ":"), scanTreeNode);
         });

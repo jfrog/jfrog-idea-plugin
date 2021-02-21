@@ -7,7 +7,7 @@ import com.intellij.psi.xml.XmlFile;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import com.jfrog.ide.idea.TestUtils;
-import org.jfrog.build.extractor.scan.DependenciesTree;
+import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.junit.Assert;
 
@@ -17,7 +17,7 @@ import org.junit.Assert;
 public class MavenExclusionTest extends LightJavaCodeInsightFixtureTestCase {
 
     PsiFile fileDescriptor;
-    DependenciesTree root, one, two, three, four, five;
+    DependencyTree root, one, two, three, four, five;
 
     @Override
     public void setUp() throws Exception {
@@ -32,12 +32,12 @@ public class MavenExclusionTest extends LightJavaCodeInsightFixtureTestCase {
     }
 
     private void initTestingTree() {
-        root = new DependenciesTree("node-root");
-        one = createDependenciesTreeNode("1", "maven");
-        two = createDependenciesTreeNode("2", "gradle");
-        three = createDependenciesTreeNode("3", "maven");
-        four = createDependenciesTreeNode("4", "maven");
-        five = createDependenciesTreeNode("5", "maven");
+        root = new DependencyTree("node-root");
+        one = createDependencyTreeNode("1", "maven");
+        two = createDependencyTreeNode("2", "gradle");
+        three = createDependencyTreeNode("3", "maven");
+        four = createDependencyTreeNode("4", "maven");
+        five = createDependencyTreeNode("5", "maven");
         root.add(one); // root -> 1
         root.add(two); // root -> 2
         one.add(three); // 1 -> 3
@@ -59,10 +59,10 @@ public class MavenExclusionTest extends LightJavaCodeInsightFixtureTestCase {
                 MavenExclusion.isMavenPackageType(root));
 
         Assert.assertFalse("isMavenPackageType should be false on " + root.getParent(),
-                MavenExclusion.isMavenPackageType((DependenciesTree) root.getParent()));
+                MavenExclusion.isMavenPackageType((DependencyTree) root.getParent()));
 
         Assert.assertFalse("isMavenPackageType should be false on " + one.getParent(),
-                MavenExclusion.isMavenPackageType((DependenciesTree) one.getParent()));
+                MavenExclusion.isMavenPackageType((DependencyTree) one.getParent()));
     }
 
     public void testIsExcludable() {
@@ -130,8 +130,8 @@ public class MavenExclusionTest extends LightJavaCodeInsightFixtureTestCase {
                 exclusion.exclusionExists(allExclusions, exclusionTestCase.groupId, exclusionTestCase.artifactId));
     }
 
-    DependenciesTree createDependenciesTreeNode(String nodeValue, String pkgType) {
-        DependenciesTree node = new DependenciesTree("node-" + nodeValue);
+    DependencyTree createDependencyTreeNode(String nodeValue, String pkgType) {
+        DependencyTree node = new DependencyTree("node-" + nodeValue);
         node.setGeneralInfo(new GeneralInfo()
                 .groupId("group-id-" + nodeValue)
                 .artifactId("artifact-id-" + nodeValue)

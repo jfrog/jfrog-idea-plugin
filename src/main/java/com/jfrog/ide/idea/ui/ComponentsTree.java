@@ -1,8 +1,6 @@
 package com.jfrog.ide.idea.ui;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBMenuItem;
 import com.intellij.openapi.ui.JBPopupMenu;
@@ -12,20 +10,16 @@ import com.intellij.psi.PsiInvalidElementAccessException;
 import com.intellij.ui.components.JBMenu;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.messages.MessageBusConnection;
-import com.jfrog.ide.common.filter.FilterManager;
 import com.jfrog.ide.common.utils.ProjectsMap;
-import com.jfrog.ide.idea.events.ProjectEvents;
 import com.jfrog.ide.idea.exclusion.Excludable;
 import com.jfrog.ide.idea.exclusion.ExclusionUtils;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.navigation.NavigationTarget;
-import com.jfrog.ide.idea.scan.ScanManagersFactory;
-import com.jfrog.ide.idea.ui.filters.FilterManagerService;
-import com.jfrog.ide.idea.ui.filters.FilterMenu;
+import com.jfrog.ide.idea.ui.filters.filtermenu.FilterMenu;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.build.extractor.scan.DependenciesTree;
+import org.jfrog.build.extractor.scan.DependencyTree;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;
@@ -43,14 +37,14 @@ import java.util.*;
 /**
  * @author yahavi
  */
-public class ComponentsTree extends Tree {
+public abstract class ComponentsTree extends Tree {
 
     private static final String SHOW_IN_PROJECT_DESCRIPTOR = "Show in project descriptor";
     private static final String EXCLUDE_DEPENDENCY = "Exclude dependency";
 
     private final List<FilterMenu<?>> filterMenus = new ArrayList<>();
     private final JBPopupMenu popupMenu = new JBPopupMenu();
-    private ProjectsMap projects = new ProjectsMap();
+    ProjectsMap projects = new ProjectsMap();
 
     protected Project mainProject;
 
@@ -62,11 +56,7 @@ public class ComponentsTree extends Tree {
         setCellRenderer(new ComponentsTreeCellRenderer());
     }
 
-    public static ComponentsTree getInstance(@NotNull Project project) {
-        return ServiceManager.getService(project, ComponentsTree.class);
-    }
-
-    public void populateTree(DependenciesTree root) {
+    public void populateTree(DependencyTree root) {
         filterMenus.forEach(FilterMenu::refresh);
         setModel(new DefaultTreeModel(root));
         validate();
@@ -82,50 +72,38 @@ public class ComponentsTree extends Tree {
         this.filterMenus.add(filterMenu);
     }
 
-    public void addScanResults(String projectName, DependenciesTree dependenciesTree) {
-        projects.put(projectName, dependenciesTree);
+    public void addScanResults(String projectName, DependencyTree dependencyTree) {
+        projects.put(projectName, dependencyTree);
     }
 
     public void applyFiltersForAllProjects() {
         setModel(null);
-        for (Map.Entry<ProjectsMap.ProjectKey, DependenciesTree> entry : projects.entrySet()) {
+        for (Map.Entry<ProjectsMap.ProjectKey, DependencyTree> entry : projects.entrySet()) {
             applyFilters(entry.getKey());
         }
     }
 
-    public void addOnProjectChangeListener(MessageBusConnection busConnection) {
-        busConnection.subscribe(ProjectEvents.ON_SCAN_PROJECT_CHANGE, this::applyFilters);
-    }
+    public abstract void addOnProjectChangeListener(MessageBusConnection busConnection);
 
-    public void applyFilters(ProjectsMap.ProjectKey projectKey) {
-        DependenciesTree project = projects.get(projectKey);
-        if (project == null) {
-            return;
-        }
-        FilterManager filterManager = FilterManagerService.getInstance(mainProject);
-        DependenciesTree filteredRoot = filterManager.applyFilters(project);
-        filteredRoot.setIssues(filteredRoot.processTreeIssues());
-        appendProjectWhenReady(filteredRoot);
-        DumbService.getInstance(mainProject).smartInvokeLater(() -> ScanManagersFactory.getInstance(mainProject).runInspectionsForAllScanManagers());
-    }
+    public abstract void applyFilters(ProjectsMap.ProjectKey projectKey);
 
-    protected void appendProjectWhenReady(DependenciesTree filteredRoot) {
+    protected void appendProjectWhenReady(DependencyTree filteredRoot) {
         ApplicationManager.getApplication().invokeLater(() -> appendProject(filteredRoot));
     }
 
-    public void appendProject(DependenciesTree filteredRoot) {
+    public void appendProject(DependencyTree filteredRoot) {
         // No projects in tree - Add filtered root as a single project and show only its children.
         if (getModel() == null) {
             populateTree(filteredRoot);
             return;
         }
 
-        DependenciesTree root = (DependenciesTree) getModel().getRoot();
+        DependencyTree root = (DependencyTree) getModel().getRoot();
         // One project in tree - Append filtered root and the old root the a new empty parent node.
         if (root.getUserObject() != null) {
-            DependenciesTree newRoot = filteredRoot;
+            DependencyTree newRoot = filteredRoot;
             if (!Utils.areRootNodesEqual(root, filteredRoot)) {
-                newRoot = new DependenciesTree();
+                newRoot = new DependencyTree();
                 newRoot.add(root);
                 newRoot.add(filteredRoot);
             }
@@ -138,8 +116,8 @@ public class ComponentsTree extends Tree {
         populateTree(root);
     }
 
-    private int searchNode(DependenciesTree root, DependenciesTree filteredRoot) {
-        Vector<DependenciesTree> children = root.getChildren();
+    private int searchNode(DependencyTree root, DependencyTree filteredRoot) {
+        Vector<DependencyTree> children = root.getChildren();
         for (int i = 0; i < children.size(); i++) {
             if (Utils.areRootNodesEqual(children.get(i), filteredRoot)) {
                 return i;
@@ -148,7 +126,7 @@ public class ComponentsTree extends Tree {
         return -1;
     }
 
-    private void addOrReplace(DependenciesTree root, DependenciesTree filteredRoot) {
+    private void addOrReplace(DependencyTree root, DependencyTree filteredRoot) {
         int childIndex = searchNode(root, filteredRoot);
         if (childIndex >= 0) {
             root.remove(childIndex);
@@ -176,15 +154,15 @@ public class ComponentsTree extends Tree {
         if (selPath == null) {
             return;
         }
-        createNodePopupMenu((DependenciesTree) selPath.getLastPathComponent());
+        createNodePopupMenu((DependencyTree) selPath.getLastPathComponent());
         popupMenu.show(tree, e.getX(), e.getY());
     }
 
-    private void createNodePopupMenu(DependenciesTree selectedNode) {
+    private void createNodePopupMenu(DependencyTree selectedNode) {
         popupMenu.removeAll();
         NavigationService navigationService = NavigationService.getInstance(mainProject);
         Set<NavigationTarget> navigationCandidates = navigationService.getNavigation(selectedNode);
-        DependenciesTree affectedNode = selectedNode;
+        DependencyTree affectedNode = selectedNode;
         if (navigationCandidates == null) {
             // Find the direct dependency containing the selected dependency.
             affectedNode = navigationService.getNavigableParent(selectedNode);
@@ -257,7 +235,7 @@ public class ComponentsTree extends Tree {
         });
     }
 
-    private void addNodeExclusion(DependenciesTree nodeToExclude, Set<NavigationTarget> parentCandidates, DependenciesTree affectedNode) {
+    private void addNodeExclusion(DependencyTree nodeToExclude, Set<NavigationTarget> parentCandidates, DependencyTree affectedNode) {
         if (parentCandidates.size() > 1) {
             addMultiExclusion(nodeToExclude, affectedNode, parentCandidates);
         } else {
@@ -265,7 +243,7 @@ public class ComponentsTree extends Tree {
         }
     }
 
-    private void addMultiExclusion(DependenciesTree nodeToExclude, DependenciesTree affectedNode, Set<NavigationTarget> parentCandidates) {
+    private void addMultiExclusion(DependencyTree nodeToExclude, DependencyTree affectedNode, Set<NavigationTarget> parentCandidates) {
         if (!ExclusionUtils.isExcludable(nodeToExclude, affectedNode)) {
             return;
         }
@@ -284,7 +262,7 @@ public class ComponentsTree extends Tree {
         }
     }
 
-    private void addSingleExclusion(DependenciesTree nodeToExclude, DependenciesTree affectedNode, NavigationTarget parentCandidate) {
+    private void addSingleExclusion(DependencyTree nodeToExclude, DependencyTree affectedNode, NavigationTarget parentCandidate) {
         Excludable excludable = ExclusionUtils.getExcludable(nodeToExclude, affectedNode, parentCandidate);
         if (excludable == null) {
             return;

@@ -6,26 +6,26 @@ import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Iconable;
 import com.intellij.util.ui.tree.TreeUtil;
-import com.jfrog.ide.idea.ui.ComponentsTree;
+import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.ui.utils.IconUtils;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.build.extractor.scan.DependenciesTree;
+import org.jfrog.build.extractor.scan.DependencyTree;
 
 import javax.swing.*;
 
 /**
- * Adds the yellow bulb action - "Show in dependencies tree".
+ * Adds the yellow bulb action - "Show in dependency tree".
  *
  * @author yahavi
  */
-public class ShowInDependenciesTree implements LocalQuickFix, Iconable, HighPriorityAction {
+public class ShowInDependencyTree implements LocalQuickFix, Iconable, HighPriorityAction {
 
-    private final DependenciesTree node;
+    private final DependencyTree node;
     private final String description;
 
-    public ShowInDependenciesTree(DependenciesTree node, String description) {
+    public ShowInDependencyTree(DependencyTree node, String description) {
         this.node = node;
         this.description = description;
     }
@@ -45,6 +45,6 @@ public class ShowInDependenciesTree implements LocalQuickFix, Iconable, HighPrio
     @Override
     public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
         Utils.focusJFrogToolWindow(project);
-        TreeUtil.selectInTree(project, node, true, ComponentsTree.getInstance(project), true);
+        TreeUtil.selectInTree(project, node, true, LocalComponentsTree.getInstance(project), true);
     }
 }

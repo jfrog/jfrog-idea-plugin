@@ -18,7 +18,7 @@ import org.jetbrains.plugins.groovy.lang.psi.api.statements.arguments.GrNamedArg
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.GrExpression;
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.literals.GrLiteral;
 import org.jetbrains.plugins.groovy.lang.psi.api.util.GrNamedArgumentsOwner;
-import org.jfrog.build.extractor.scan.DependenciesTree;
+import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 
 import java.util.Collection;
@@ -103,9 +103,9 @@ public class GradleInspection extends AbstractInspection {
     }
 
     @Override
-    Set<DependenciesTree> getModules(PsiElement element, GeneralInfo generalInfo) {
+    Set<DependencyTree> getModules(PsiElement element, GeneralInfo generalInfo) {
         Project project = element.getProject();
-        DependenciesTree root = getRootDependenciesTree(element);
+        DependencyTree root = getRootDependencyTree(element);
         List<String> gradleModules = getGradleModules(project);
         if (root == null || gradleModules == null) {
             return null;

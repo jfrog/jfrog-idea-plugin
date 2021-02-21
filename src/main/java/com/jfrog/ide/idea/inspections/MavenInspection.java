@@ -14,7 +14,7 @@ import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
-import org.jfrog.build.extractor.scan.DependenciesTree;
+import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 
 import java.util.Set;
@@ -94,9 +94,9 @@ public class MavenInspection extends AbstractInspection {
     }
 
     @Override
-    Set<DependenciesTree> getModules(PsiElement element, GeneralInfo generalInfo) {
+    Set<DependencyTree> getModules(PsiElement element, GeneralInfo generalInfo) {
         Project project = element.getProject();
-        DependenciesTree root = getRootDependenciesTree(element);
+        DependencyTree root = getRootDependencyTree(element);
         MavenProjectsManager mavenProjectsManager = MavenProjectsManager.getInstance(project);
         if (root == null || mavenProjectsManager == null) {
             return null;

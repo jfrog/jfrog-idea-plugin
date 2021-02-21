@@ -7,7 +7,7 @@ import com.jfrog.ide.idea.scan.ScanManagersFactory;
 /**
  * Created by romang on 3/6/17.
  */
-public class RefreshAction extends AnAction {
+public class RefreshLocalAction extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {

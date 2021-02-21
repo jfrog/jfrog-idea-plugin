@@ -16,6 +16,7 @@ public class ProgressIndicatorImpl implements com.jfrog.ide.common.log.ProgressI
 
     @Override
     public void setFraction(double fraction) {
+        indicator.setIndeterminate(false);
         indicator.setFraction(fraction);
     }
 }

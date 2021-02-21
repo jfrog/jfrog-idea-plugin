@@ -112,8 +112,12 @@ public class ServerConfigImpl implements ServerConfig {
         this.xraySettingsCredentialsKey = builder.xraySettingsCredentialsKey;
     }
 
-    boolean isEmpty() {
-        return isAllBlank(url, artifactoryUrl, xrayUrl, username, password);
+    boolean isXrayConfigured() {
+        return !isAnyBlank(url, xrayUrl, username, password);
+    }
+
+    boolean isArtifactoryConfigured() {
+        return !isAnyBlank(artifactoryUrl, username, password);
     }
 
     @Override

@@ -26,7 +26,7 @@ import org.jetbrains.idea.maven.project.MavenProjectChanges;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
 import org.jetbrains.idea.maven.project.MavenProjectsTree;
 import org.jetbrains.idea.maven.server.NativeMavenProjectHolder;
-import org.jfrog.build.extractor.scan.DependenciesTree;
+import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.jfrog.build.extractor.scan.Scope;
 
@@ -72,12 +72,12 @@ public class MavenScanManager extends ScanManager {
 
     @Override
     protected void buildTree(@Nullable DataNode<ProjectData> externalProject) {
-        DependenciesTree rootNode = new DependenciesTree(project.getName());
+        DependencyTree rootNode = new DependencyTree(project.getName());
         MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject -> populateMavenModule(rootNode, rootMavenProject, Sets.newHashSet()));
         GeneralInfo generalInfo = new GeneralInfo().artifactId(project.getName()).path(Utils.getProjectBasePath(project).toString()).pkgType("maven");
         rootNode.setGeneralInfo(generalInfo);
         if (rootNode.getChildren().size() == 1) {
-            setScanResults((DependenciesTree) rootNode.getChildAt(0));
+            setScanResults((DependencyTree) rootNode.getChildAt(0));
         } else {
             setScanResults(rootNode);
         }
@@ -95,7 +95,7 @@ public class MavenScanManager extends ScanManager {
         return new MavenInspection();
     }
 
-    private void addSubmodules(DependenciesTree mavenNode, MavenProject mavenProject, Set<String> added) {
+    private void addSubmodules(DependencyTree mavenNode, MavenProject mavenProject, Set<String> added) {
         mavenProject.getExistingModuleFiles().stream()
                 .map(this::getModuleByVirtualFile)
                 .filter(Objects::nonNull)
@@ -103,14 +103,14 @@ public class MavenScanManager extends ScanManager {
     }
 
     /**
-     * Populate recursively the dependencies tree with the maven module and its dependencies.
+     * Populate recursively the dependency tree with the maven module and its dependencies.
      *
      * @param root             - The root dependencies node
      * @param rootMavenProject - The root Maven project
      * @param added            - This set is used to make sure the dependencies added are unique between module and its parent
      */
-    private void populateMavenModule(DependenciesTree root, MavenProject rootMavenProject, Set<String> added) {
-        DependenciesTree mavenNode = populateMavenModuleNode(rootMavenProject);
+    private void populateMavenModule(DependencyTree root, MavenProject rootMavenProject, Set<String> added) {
+        DependencyTree mavenNode = populateMavenModuleNode(rootMavenProject);
         root.add(mavenNode);
         added = Sets.newHashSet(added);
         added.add(rootMavenProject.toString());
@@ -126,7 +126,7 @@ public class MavenScanManager extends ScanManager {
                 .orElse(null);
     }
 
-    private void addMavenProjectDependencies(DependenciesTree node, MavenProject mavenProject, Set<String> added) {
+    private void addMavenProjectDependencies(DependencyTree node, MavenProject mavenProject, Set<String> added) {
         mavenProject.getDependencyTree()
                 .stream()
                 .filter(dependencyTree -> added.add(dependencyTree.getArtifact().getDisplayStringForLibraryName()))
@@ -136,8 +136,8 @@ public class MavenScanManager extends ScanManager {
     /**
      * Populate Maven module node.
      */
-    private DependenciesTree populateMavenModuleNode(MavenProject mavenProject) {
-        DependenciesTree node = new DependenciesTree(mavenProject.getMavenId().getArtifactId());
+    private DependencyTree populateMavenModuleNode(MavenProject mavenProject) {
+        DependencyTree node = new DependencyTree(mavenProject.getMavenId().getArtifactId());
         MavenId mavenId = mavenProject.getMavenId();
         node.setGeneralInfo(new GeneralInfo()
                 .groupId(mavenId.getGroupId())
@@ -147,15 +147,15 @@ public class MavenScanManager extends ScanManager {
         return node;
     }
 
-    private void updateChildrenNodes(DependenciesTree parentNode, MavenArtifactNode mavenArtifactNode, Set<String> added, boolean setScopes) {
+    private void updateChildrenNodes(DependencyTree parentNode, MavenArtifactNode mavenArtifactNode, Set<String> added, boolean setScopes) {
         // This set is used to disallow duplications between a node and its ancestors
         final Set<String> addedInSubTree = Sets.newHashSet(added);
         MavenArtifact mavenArtifact = mavenArtifactNode.getArtifact();
-        DependenciesTree currentNode = new DependenciesTree(mavenArtifact.getDisplayStringSimple());
+        DependencyTree currentNode = new DependencyTree(mavenArtifact.getDisplayStringSimple());
         if (setScopes) {
             currentNode.setScopes(Sets.newHashSet(new Scope(mavenArtifact.getScope())));
         }
-        populateDependenciesTreeNode(currentNode);
+        populateDependencyTreeNode(currentNode);
         mavenArtifactNode.getDependencies()
                 .stream()
                 .filter(dependencyTree -> addedInSubTree.add(dependencyTree.getArtifact().getDisplayStringForLibraryName()))

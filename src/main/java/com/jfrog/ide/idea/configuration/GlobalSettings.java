@@ -181,8 +181,12 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         this.serverConfig.setXraySettingsCredentialsKey(serverConfig.getXraySettingsCredentialsKey());
     }
 
+    public boolean areXrayCredentialsSet() {
+        return serverConfig != null && serverConfig.isXrayConfigured();
+    }
+
     public boolean areCredentialsSet() {
-        return serverConfig != null && !serverConfig.isEmpty();
+        return serverConfig != null && serverConfig.isArtifactoryConfigured() && serverConfig.isXrayConfigured();
     }
 
     /**

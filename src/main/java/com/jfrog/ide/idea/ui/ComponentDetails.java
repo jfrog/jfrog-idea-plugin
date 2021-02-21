@@ -9,7 +9,7 @@ import com.jfrog.ide.common.utils.Utils;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jfrog.build.extractor.scan.DependenciesTree;
+import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.jfrog.build.extractor.scan.License;
 import org.jfrog.build.extractor.scan.Scope;
@@ -26,7 +26,7 @@ public class ComponentDetails extends JPanel {
 
     private int lastTextPosition = 0;
 
-    public ComponentDetails(DependenciesTree node) {
+    public ComponentDetails(DependencyTree node) {
         setLayout(new GridBagLayout());
         setBackground(UIUtil.getTableBackground());
         GeneralInfo generalInfo = node.getGeneralInfo();

@@ -1,8 +1,11 @@
-package com.jfrog.ide.idea.ui.filters;
+package com.jfrog.ide.idea.ui.filters.filtermenu;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.util.messages.Topic;
+import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
+import com.jfrog.ide.idea.ui.filters.filtermanager.LocalFilterManager;
 import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.License;
@@ -13,13 +16,10 @@ import java.util.Set;
 /**
  * Created by Yahav Itzhak on 23 Nov 2017.
  */
-public class LicenseFilterMenu extends FilterMenu<License> {
+public class LocalLicenseFilterMenu extends LicenseFilterMenu {
 
-    public static final String NAME = "License";
-    public static final String TOOLTIP = "Select licenses to show";
-
-    public LicenseFilterMenu(@NotNull Project mainProject) {
-        super(mainProject, NAME, TOOLTIP);
+    public LocalLicenseFilterMenu(@NotNull Project mainProject) {
+        super(mainProject);
     }
 
     @Override
@@ -28,7 +28,7 @@ public class LicenseFilterMenu extends FilterMenu<License> {
         if (CollectionUtils.isEmpty(scanManagers)) {
             return;
         }
-        Map<License, Boolean> selectedLicenses = FilterManagerService.getInstance(mainProject).getSelectedLicenses();
+        Map<License, Boolean> selectedLicenses = LocalFilterManager.getInstance(mainProject).getSelectedLicenses();
         scanManagers.forEach(scanManager ->
                 scanManager.getAllLicenses()
                         .stream()
@@ -36,5 +36,10 @@ public class LicenseFilterMenu extends FilterMenu<License> {
                         .forEach(license -> selectedLicenses.put(license, true)));
         addComponents(selectedLicenses, true);
         super.refresh();
+    }
+
+    @Override
+    public Topic<ApplicationEvents> getSyncEvent() {
+        return ApplicationEvents.ON_SCAN_FILTER_CHANGE;
     }
 }

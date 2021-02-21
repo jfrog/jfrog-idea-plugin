@@ -7,6 +7,7 @@ import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.messages.MessageBus;
+import com.jfrog.ide.common.utils.ArtifactoryConnectionUtils;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
 import com.jfrog.ide.idea.events.ApplicationEvents;
@@ -15,18 +16,17 @@ import com.jfrog.ide.idea.ui.components.ConnectionResultsGesture;
 import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.impl.XrayClientBuilder;
 import com.jfrog.xray.client.services.system.Version;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.conn.ssl.TrustAllStrategy;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
-import org.jfrog.artifactory.client.Artifactory;
-import org.jfrog.artifactory.client.ArtifactoryClientBuilder;
-import org.jfrog.artifactory.client.ProxyConfig;
-import org.jfrog.build.client.ProxyConfiguration;
+import org.jfrog.build.client.ArtifactoryVersion;
+import org.jfrog.build.extractor.clientConfiguration.ArtifactoryDependenciesClientBuilder;
+import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
 
-import javax.net.ssl.SSLContext;
 import javax.swing.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -37,6 +37,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.jfrog.ide.common.utils.ArtifactoryConnectionUtils.isArtifactoryVersionSupported;
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.*;
 import static com.jfrog.ide.idea.ui.configuration.ExclusionsVerifier.DEFAULT_EXCLUSIONS;
 import static com.jfrog.ide.idea.ui.configuration.Utils.clearText;
@@ -48,7 +49,7 @@ import static org.apache.commons.lang3.StringUtils.*;
  */
 public class JFrogGlobalConfiguration implements Configurable, Configurable.NoScroll {
 
-    private static final String USER_AGENT = "jfrog-idea-plugin/" + JFrogGlobalConfiguration.class.getPackage().getImplementationVersion();
+    public static final String USER_AGENT = "jfrog-idea-plugin/" + JFrogGlobalConfiguration.class.getPackage().getImplementationVersion();
 
     private ServerConfigImpl serverConfig;
     private JButton testConnectionButton;
@@ -67,7 +68,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private JCheckBox setRtAndXraySeparately;
     private JLabel xrayConnectionResults;
     private JLabel artifactoryConnectionResults;
-    private ConnectionResultsGesture xrayConnectionResultsGesture;
+    private ConnectionResultsGesture connectionResultsGesture;
     private ConnectionResultsGesture artifactoryConnectionResultsGesture;
 
     public JFrogGlobalConfiguration() {
@@ -98,7 +99,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     }
 
     private void initTestConnection() {
-        xrayConnectionResultsGesture = new ConnectionResultsGesture(xrayConnectionResults);
+        connectionResultsGesture = new ConnectionResultsGesture(xrayConnectionResults);
         artifactoryConnectionResultsGesture = new ConnectionResultsGesture(artifactoryConnectionResults);
         testConnectionButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
             if (!setRtAndXraySeparately.isSelected()) {
@@ -125,11 +126,11 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     }
 
     private String checkXrayConnection() {
+        if (isBlank(xrayUrl.getText())) {
+            return null;
+        }
         try {
             Xray xrayClient = createXrayClient();
-            if (xrayClient == null) {
-                return null;
-            }
 
             setConnectionResults("Connecting to Xray...");
             config.validate();
@@ -138,7 +139,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
 
             // Check version
             if (!isXrayVersionSupported(xrayVersion)) {
-                xrayConnectionResultsGesture.setFailure(Results.unsupported(xrayVersion));
+                connectionResultsGesture.setFailure(Results.unsupported(xrayVersion));
                 return Results.unsupported(xrayVersion);
             }
 
@@ -148,27 +149,33 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
                 throw new IOException(testComponentPermissionRes.getRight());
             }
 
-            xrayConnectionResultsGesture.setSuccess();
+            connectionResultsGesture.setSuccess();
             return Results.success(xrayVersion);
         } catch (IOException exception) {
-            xrayConnectionResultsGesture.setFailure(ExceptionUtils.getRootCauseMessage(exception));
+            connectionResultsGesture.setFailure(ExceptionUtils.getRootCauseMessage(exception));
             return "Could not connect to JFrog Xray.";
         }
     }
 
     private String checkArtifactoryConnection() {
-        try {
-            Artifactory artifactoryClient = createArtifactoryClient();
-            if (artifactoryClient == null) {
-                return null;
-            }
+        if (StringUtils.isBlank(artifactoryUrl.getText())) {
+            return null;
+        }
+        try (ArtifactoryDependenciesClient artifactoryClient = createArtifactoryDependenciesClient().build()) {
             setConnectionResults("Connecting to Artifactory...");
             config.validate();
             config.repaint();
 
-            org.jfrog.artifactory.client.model.Version version = artifactoryClient.system().version();
+            ArtifactoryVersion artifactoryVersion = artifactoryClient.getArtifactoryVersion();
+            // Check version
+            if (!isArtifactoryVersionSupported(artifactoryVersion)) {
+                String results = ArtifactoryConnectionUtils.Results.unsupported(artifactoryVersion);
+                connectionResultsGesture.setFailure(results);
+                return results;
+            }
+
             artifactoryConnectionResultsGesture.setSuccess();
-            return "Successfully connected to Artifactory version: " + version.getVersion();
+            return ArtifactoryConnectionUtils.Results.success(artifactoryVersion);
         } catch (Exception exception) {
             artifactoryConnectionResultsGesture.setFailure(ExceptionUtils.getRootCauseMessage(exception));
             return "Could not connect to JFrog Artifactory.";
@@ -254,12 +261,8 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         loadConfig();
     }
 
-    @Nullable
     private Xray createXrayClient() {
         String urlStr = trim(xrayUrl.getText());
-        if (isBlank(urlStr)) {
-            return null;
-        }
         return (Xray) new XrayClientBuilder()
                 .setUrl(urlStr)
                 .setUserName(trim(username.getText()))
@@ -272,27 +275,17 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
                 .build();
     }
 
-    @Nullable
-    private Artifactory createArtifactoryClient() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+    private ArtifactoryDependenciesClientBuilder createArtifactoryDependenciesClient() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
         String urlStr = trim(artifactoryUrl.getText());
-        if (isBlank(urlStr)) {
-            return null;
-        }
-        ProxyConfig proxyConfig = null;
-        ProxyConfiguration proxyConfiguration = serverConfig.getProxyConfForTargetUrl(urlStr);
-        if (proxyConfiguration != null) {
-            proxyConfig = new ProxyConfig(proxyConfiguration.host, proxyConfiguration.port, "", proxyConfiguration.username, proxyConfiguration.password);
-        }
-        ArtifactoryClientBuilder builder = ArtifactoryClientBuilder.create()
-                .setUrl(urlStr)
-                .setUsername(trim(username.getText()))
-                .setPassword(String.valueOf(password.getPassword()))
-                .setUserAgent(USER_AGENT)
-                .setProxy(proxyConfig);
-        SSLContext sslContext = serverConfig.isInsecureTls() ?
-                SSLContextBuilder.create().loadTrustMaterial(TrustAllStrategy.INSTANCE).build() :
-                serverConfig.getSslContext();
-        return builder.setSslContext(sslContext).build();
+        return new ArtifactoryDependenciesClientBuilder()
+                .setArtifactoryUrl(urlStr)
+                .setUsername(serverConfig.getUsername())
+                .setPassword(serverConfig.getPassword())
+                .setProxyConfiguration(serverConfig.getProxyConfForTargetUrl(urlStr))
+                .setLog(Logger.getInstance())
+                .setSslContext(serverConfig.isInsecureTls() ?
+                        SSLContextBuilder.create().loadTrustMaterial(TrustAllStrategy.INSTANCE).build() :
+                        serverConfig.getSslContext());
     }
 
     private void loadConfig() {
