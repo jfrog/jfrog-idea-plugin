@@ -95,7 +95,7 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
         // Create parent toolbar containing the builds and the component tree toolbars
         JPanel parentToolbarPanel = new JBPanel<>(new GridLayout(2, 0));
         toolbarPanel.add(createBuildStatusPanel());
-        parentToolbarPanel.add(toolbarPanel);
+        parentToolbarPanel.add(ScrollPaneFactory.createScrollPane(toolbarPanel));
         parentToolbarPanel.add(createComponentsTreePanel(false));
 
         return parentToolbarPanel;
