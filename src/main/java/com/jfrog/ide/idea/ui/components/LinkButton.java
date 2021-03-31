@@ -18,51 +18,50 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 /**
  * @author yahavi
  **/
-public class BuildLogButton extends JBLabel {
+public class LinkButton extends JBLabel {
     private MouseListener mouseListener;
 
-    public BuildLogButton() {
-        setToolTipText("Click to view the build log");
+    public LinkButton(String tooltip) {
+        setToolTipText(tooltip);
         setInactiveForegroundColor(this);
     }
 
-    public void initBuildLogButton(Project project, BuildGeneralInfo buildGeneralInfo) {
+    public void init(Project project, String text, String link) {
         removeMouseListener(mouseListener);
-        String buildLog = buildGeneralInfo.getPath();
-        if (isBlank(buildLog)) {
+        if (isBlank(link)) {
             setIcon(null);
             setText("");
             return;
         }
         setIcon(AllIcons.Ide.External_link_arrow);
-        setText("Build Log");
-        mouseListener = new BuildLogMouseAdapter(project, buildLog);
+        setText(text);
+        mouseListener = new BuildLogMouseAdapter(project, link);
         addMouseListener(mouseListener);
     }
 
     private class BuildLogMouseAdapter extends MouseAdapter {
-        private final String buildLog;
+        private final String link;
         private final Project project;
 
-        private BuildLogMouseAdapter(Project project, String buildLog) {
-            this.buildLog = buildLog;
+        private BuildLogMouseAdapter(Project project, String link) {
+            this.link = link;
             this.project = project;
         }
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            BrowserUtil.browse(buildLog);
+            BrowserUtil.browse(link);
         }
 
         @Override
         public void mouseEntered(MouseEvent e) {
-            setActiveForegroundColor(BuildLogButton.this);
-            WindowManager.getInstance().getStatusBar(project).setInfo(buildLog);
+            setActiveForegroundColor(LinkButton.this);
+            WindowManager.getInstance().getStatusBar(project).setInfo(link);
         }
 
         @Override
         public void mouseExited(MouseEvent e) {
-            setInactiveForegroundColor(BuildLogButton.this);
+            setInactiveForegroundColor(LinkButton.this);
             WindowManager.getInstance().getStatusBar(project).setInfo(null);
         }
     }

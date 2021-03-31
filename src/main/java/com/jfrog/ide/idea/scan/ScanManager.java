@@ -117,7 +117,7 @@ public abstract class ScanManager extends ScanManagerBase {
     private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator, @Nullable Collection<DataNode<ProjectDependencies>> dependenciesData) {
         // Don't scan if Xray is not configured
         if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
-            getLog().error("Xray server is not configured.");
+            getLog().warn("Xray server is not configured.");
             return;
         }
         // Prevent multiple simultaneous scans

@@ -106,7 +106,7 @@ public class CiManager extends CiManagerBase {
         ComponentsTree componentsTree = CiComponentsTree.getInstance(mainProject);
         componentsTree.reset();
         try {
-            DependencyTree buildTree = loadBuildTree(buildGeneralInfo.getArtifactId(), buildGeneralInfo.getVersion());
+            BuildDependencyTree buildTree = loadBuildTree(buildGeneralInfo.getArtifactId(), buildGeneralInfo.getVersion());
             if (buildTree.isLeaf()) {
                 return;
             }
@@ -138,7 +138,7 @@ public class CiManager extends CiManagerBase {
     }
 
     private boolean scanPreconditionsMet() {
-        if (!GlobalSettings.getInstance().areCredentialsSet()) {
+        if (!GlobalSettings.getInstance().areArtifactoryCredentialsSet()) {
             Logger.getInstance().warn("Artifactory server is not configured.");
             return false;
         }

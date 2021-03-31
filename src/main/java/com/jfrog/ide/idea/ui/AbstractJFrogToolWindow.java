@@ -147,7 +147,6 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel {
         ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar("JFrog toolbar", actionGroup, true);
         JPanel toolbarPanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, 0, 0));
         toolbarPanel.add(actionToolbar.getComponent());
-        toolbarPanel.setBorder(BorderFactory.createRaisedSoftBevelBorder());
         return toolbarPanel;
     }
 

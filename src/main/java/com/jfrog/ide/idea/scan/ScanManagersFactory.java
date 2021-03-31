@@ -63,7 +63,7 @@ public class ScanManagersFactory {
             return;
         }
         if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
-            Logger.getInstance().error("Xray server is not configured.");
+            Logger.getInstance().warn("Xray server is not configured.");
             return;
         }
         try {

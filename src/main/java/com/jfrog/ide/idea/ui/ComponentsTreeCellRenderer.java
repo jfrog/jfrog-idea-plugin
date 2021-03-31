@@ -5,6 +5,7 @@ import com.jfrog.ide.idea.ui.utils.IconUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.Issue;
+import org.jfrog.build.extractor.scan.Severity;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -24,8 +25,9 @@ public class ComponentsTreeCellRenderer extends JBDefaultTreeCellRenderer {
         Issue topIssue = scanTreeNode.getTopIssue();
         cellRenderer.setIcon(IconUtils.load(StringUtils.lowerCase(topIssue.getSeverity().toString())));
 
-        // Add issues-count to tree node.
-        if (scanTreeNode.getIssueCount() > 0) {
+        // Add issues-count to tree node. We make sure the issues count is shown only on trees scanned by Xray,
+        // by showing it only when the severity level is higher than unknown.
+        if (scanTreeNode.getIssueCount() > 0 && topIssue.getSeverity().isHigherThan(Severity.Unknown)) {
             cellRenderer.setText(scanTreeNode.toString() + " (" + scanTreeNode.getIssueCount() + ")");
         }
 

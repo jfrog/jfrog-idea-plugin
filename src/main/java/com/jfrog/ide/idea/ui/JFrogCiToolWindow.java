@@ -14,12 +14,14 @@ import com.jfrog.ide.common.ci.BuildGeneralInfo;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.events.BuildEvents;
-import com.jfrog.ide.idea.ui.components.BuildLogButton;
+import com.jfrog.ide.idea.ui.components.LinkButton;
 import com.jfrog.ide.idea.ui.components.TitledPane;
 import com.jfrog.ide.idea.ui.filters.builds.BuildsMenu;
 import com.jfrog.ide.idea.ui.filters.filtermanager.CiFilterManager;
 import com.jfrog.ide.idea.ui.filters.filtermenu.*;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.Vcs;
 import org.jfrog.build.extractor.scan.DependencyTree;
@@ -43,9 +45,10 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd MMM yyyy HH:mm:ss");
-    private BuildLogButton buildLogButton;
+    private LinkButton linkButton;
     private JLabel buildStarted;
     private JLabel buildStatus;
+    private LinkButton seeMore;
     private JLabel branch;
     private JLabel commit;
 
@@ -70,7 +73,7 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
 
     @Override
     JComponent createComponentsDetailsView(boolean supported) {
-        if (!GlobalSettings.getInstance().areCredentialsSet()) {
+        if (!GlobalSettings.getInstance().areArtifactoryCredentialsSet()) {
             return ComponentUtils.createNoCredentialsView();
         }
         JLabel title = new JBLabel(" Component Details");
@@ -129,9 +132,10 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
         buildStarted = createAndAddLabelWithTooltip("Build timestamp", buildStatusPanel);
         branch = createAndAddLabelWithTooltip("Build branch", buildStatusPanel);
         commit = createAndAddLabelWithTooltip("The commit message that triggered the build", buildStatusPanel);
-
-        buildLogButton = new BuildLogButton();
-        buildStatusPanel.add(buildLogButton);
+        linkButton = new LinkButton("Click to view the build log");
+        seeMore = new LinkButton("See more in this view");
+        buildStatusPanel.add(linkButton);
+        buildStatusPanel.add(seeMore);
 
         return buildStatusPanel;
     }
@@ -144,8 +148,9 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
     private void setBuildDetails(BuildGeneralInfo buildGeneralInfo) {
         setBuildStarted(buildGeneralInfo);
         setBuildStatus(buildGeneralInfo);
+        setSeeMore(buildGeneralInfo);
         setVcsInformation(buildGeneralInfo);
-        buildLogButton.initBuildLogButton(mainProject, buildGeneralInfo);
+        linkButton.init(mainProject, "Build Log", buildGeneralInfo.getPath());
     }
 
     private void setBuildStarted(BuildGeneralInfo buildGeneralInfo) {
@@ -163,6 +168,16 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
                 return;
             default:
                 setTextAndIcon(buildStatus, "Status: Unknown", AllIcons.RunConfigurations.TestUnknown);
+        }
+    }
+
+    private void setSeeMore(BuildGeneralInfo buildGeneralInfo) {
+        Vcs vcs = buildGeneralInfo.getVcs();
+        if (!ObjectUtils.allNotNull(vcs, buildGeneralInfo.getStatus()) ||
+                StringUtils.isAnyBlank(vcs.getBranch(), vcs.getMessage(), buildGeneralInfo.getPath())) {
+            seeMore.init(mainProject, "See more in this view", "https://www.jfrog.com/confluence/display/JFROG/JFrog+IntelliJ+IDEA+Plugin");
+        } else {
+            seeMore.init(mainProject, "", "");
         }
     }
 

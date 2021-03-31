@@ -20,7 +20,6 @@ public class ComponentUtils {
 
     public static final String UNSUPPORTED_TEXT = "Unsupported project type, currently only Maven, Gradle, Go and npm projects are supported.";
     public static final String SELECT_COMPONENT_TEXT = "Select component or issue for more details.";
-    public static final String NO_BUILDS_DETECTED = "No builds detected";
 
     public static JTextArea createJTextArea(String text, boolean lineWrap) {
         JTextArea jTextArea = new JTextArea(text);
