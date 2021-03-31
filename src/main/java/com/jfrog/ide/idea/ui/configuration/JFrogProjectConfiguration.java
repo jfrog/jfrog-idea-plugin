@@ -49,7 +49,7 @@ public class JFrogProjectConfiguration implements Configurable, Configurable.NoS
         PropertiesComponent propertiesComponent = PropertiesComponent.getInstance(project);
         propertiesComponent.setValue(BUILDS_PATTERN_KEY, trim(buildsPattern.getText()));
         MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
-        messageBus.syncPublisher(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE).update();
+        messageBus.syncPublisher(ApplicationEvents.ON_BUILDS_CONFIGURATION_CHANGE).update();
     }
 
     @Override

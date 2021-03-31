@@ -13,6 +13,10 @@ import org.jetbrains.annotations.NotNull;
 @State(name = "LocalFilterState")
 public class LocalFilterManager extends ConsistentFilterManager {
 
+    public LocalFilterManager(Project mainProject) {
+        super(mainProject);
+    }
+
     public static LocalFilterManager getInstance(@NotNull Project project) {
         return ServiceManager.getService(project, LocalFilterManager.class);
     }

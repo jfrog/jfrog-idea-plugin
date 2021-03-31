@@ -1,8 +1,7 @@
 package com.jfrog.ide.idea.ui.filters.filtermanager;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
-import com.intellij.util.messages.MessageBus;
+import com.intellij.openapi.project.Project;
 import com.jfrog.ide.common.filter.FilterManager;
 import com.jfrog.ide.idea.Syncable;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +17,12 @@ import java.util.Map;
  */
 public abstract class ConsistentFilterManager extends FilterManager implements PersistentStateComponent<ConsistentFilterManager.FiltersState>, Syncable {
 
+    private final Project mainProject;
     private FiltersState state;
+
+    public ConsistentFilterManager(Project mainProject) {
+        this.mainProject = mainProject;
+    }
 
     /**
      * Only on first scan after project opens, update the selected-licenses from state.
@@ -42,8 +46,7 @@ public abstract class ConsistentFilterManager extends FilterManager implements P
 
         // Update components tree with applied filters.
         if (selectedLicenses.containsValue(false)) {
-            MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
-            messageBus.syncPublisher(getSyncEvent()).update();
+            mainProject.getMessageBus().syncPublisher(getSyncEvent()).update();
         }
 
         return selectedLicenses;
@@ -72,8 +75,7 @@ public abstract class ConsistentFilterManager extends FilterManager implements P
 
         // Update components tree with applied filters.
         if (selectedScopes.containsValue(false)) {
-            MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
-            messageBus.syncPublisher(getSyncEvent()).update();
+            mainProject.getMessageBus().syncPublisher(getSyncEvent()).update();
         }
 
         return selectedScopes;

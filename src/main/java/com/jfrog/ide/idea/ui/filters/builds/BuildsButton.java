@@ -2,7 +2,6 @@ package com.jfrog.ide.idea.ui.filters.builds;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.Topic;
@@ -18,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import javax.swing.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.IOException;
 
 /**
  * Created by Yahav Itzhak on 22 Nov 2017.
@@ -56,7 +54,7 @@ public class BuildsButton extends JComboBox<String> implements Syncable, Disposa
                 String selectedBuild = (String) e.getItem();
                 CiFilterManager.getInstance(mainProject).getSelectableBuilds()
                         .forEach(selectableItem -> selectableItem.setValue(StringUtils.equals(selectedBuild, selectableItem.getKey())));
-                MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
+                MessageBus messageBus = mainProject.getMessageBus();
                 messageBus.syncPublisher(getSyncEvent()).update();
                 BuildGeneralInfo generalInfo = CiManager.getInstance(mainProject).getBuildGeneralInfo(selectedBuild);
                 if (generalInfo == null) {

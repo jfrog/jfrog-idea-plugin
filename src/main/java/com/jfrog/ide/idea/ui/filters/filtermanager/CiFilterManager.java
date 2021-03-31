@@ -18,6 +18,10 @@ import java.util.Vector;
 @State(name = "CiFilterState")
 public class CiFilterManager extends ConsistentFilterManager {
 
+    public CiFilterManager(Project mainProject) {
+        super(mainProject);
+    }
+
     public static CiFilterManager getInstance(@NotNull Project project) {
         return ServiceManager.getService(project, CiFilterManager.class);
     }

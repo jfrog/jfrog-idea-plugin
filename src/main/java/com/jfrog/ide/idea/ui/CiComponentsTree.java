@@ -3,19 +3,15 @@ package com.jfrog.ide.idea.ui;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
-import com.jfrog.ide.common.ci.BuildGeneralInfo;
 import com.jfrog.ide.common.filter.FilterManager;
 import com.jfrog.ide.common.utils.ProjectsMap;
-import com.jfrog.ide.idea.events.BuildEvents;
 import com.jfrog.ide.idea.events.ProjectEvents;
 import com.jfrog.ide.idea.ui.filters.builds.BuildsMenu;
 import com.jfrog.ide.idea.ui.filters.filtermanager.CiFilterManager;
 import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependencyTree;
-import org.jfrog.build.extractor.scan.GeneralInfo;
 
 /**
  * @author yahavi
@@ -48,11 +44,6 @@ public class CiComponentsTree extends ComponentsTree {
     @Override
     protected void appendProjectWhenReady(DependencyTree filteredRoot) {
         ApplicationManager.getApplication().invokeLater(() -> {
-            MessageBus projectMessageBus = mainProject.getMessageBus();
-            GeneralInfo generalInfo = filteredRoot.getGeneralInfo();
-            if (generalInfo instanceof BuildGeneralInfo) {
-                projectMessageBus.syncPublisher(BuildEvents.ON_SELECTED_BUILD).update((BuildGeneralInfo) generalInfo);
-            }
             if (CollectionUtils.size(filteredRoot.getChildren()) == 1) {
                 appendProject(filteredRoot.getChildren().get(0));
             } else {

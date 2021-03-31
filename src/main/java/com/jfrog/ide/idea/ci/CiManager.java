@@ -116,7 +116,7 @@ public class CiManager extends CiManagerBase {
             ProjectsMap.ProjectKey projectKey = ProjectsMap.createKey(mainProject.getName(), buildTree.getGeneralInfo());
             projectMessageBus.syncPublisher(ProjectEvents.ON_SCAN_CI_CHANGE).update(projectKey);
         } catch (IOException | ParseException | IllegalArgumentException e) {
-            Logger.getInstance().error(String.format(LOAD_BUILD_FAIL_FMT, buildGeneralInfo.getName(), buildGeneralInfo.getVersion()), e);
+            Logger.getInstance().error(String.format(LOAD_BUILD_FAIL_FMT, buildGeneralInfo.getArtifactId(), buildGeneralInfo.getVersion()), e);
         }
     }
 
@@ -156,7 +156,8 @@ public class CiManager extends CiManagerBase {
     private void registerOnChangeHandlers() {
         MessageBusConnection busConnection = ApplicationManager.getApplication().getMessageBus().connect();
         busConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, this::asyncRefreshBuilds);
-        busConnection.subscribe(ApplicationEvents.ON_BUILDS_CONFIGURATION_CHANGE, this::asyncRefreshBuilds);
-        busConnection.subscribe(BuildEvents.ON_SELECTED_BUILD, this::loadBuild);
+        MessageBusConnection projectBusConnection = mainProject.getMessageBus().connect();
+        projectBusConnection.subscribe(ApplicationEvents.ON_BUILDS_CONFIGURATION_CHANGE, this::asyncRefreshBuilds);
+        projectBusConnection.subscribe(BuildEvents.ON_SELECTED_BUILD, this::loadBuild);
     }
 }
