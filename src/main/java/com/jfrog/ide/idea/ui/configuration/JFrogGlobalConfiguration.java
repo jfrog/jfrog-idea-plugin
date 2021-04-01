@@ -147,11 +147,6 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
                 throw new IOException(testComponentPermissionRes.getRight());
             }
 
-            if (!isXrayVersionForCiSupported(xrayVersion)) {
-                connectionResultsGesture.setFailure(Results.unsupportedForCi(xrayVersion));
-                return Results.unsupportedForCi(xrayVersion);
-            }
-
             connectionResultsGesture.setSuccess();
             return Results.success(xrayVersion);
         } catch (IOException exception) {
