@@ -7,7 +7,6 @@ import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.util.messages.MessageBus;
-import com.jfrog.ide.common.utils.ArtifactoryConnectionUtils;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
 import com.jfrog.ide.idea.events.ApplicationEvents;
@@ -23,7 +22,6 @@ import org.apache.http.conn.ssl.TrustAllStrategy;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
-import org.jfrog.build.client.ArtifactoryVersion;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryDependenciesClientBuilder;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
 
@@ -37,7 +35,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.jfrog.ide.common.utils.ArtifactoryConnectionUtils.isArtifactoryVersionSupported;
+import static com.jfrog.ide.common.ci.Utils.createAqlForBuildArtifacts;
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.*;
 import static com.jfrog.ide.idea.ui.configuration.ExclusionsVerifier.DEFAULT_EXCLUSIONS;
 import static com.jfrog.ide.idea.ui.configuration.Utils.clearText;
@@ -171,16 +169,12 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             config.validate();
             config.repaint();
 
-            ArtifactoryVersion artifactoryVersion = artifactoryClient.getArtifactoryVersion();
-            // Check version
-            if (!isArtifactoryVersionSupported(artifactoryVersion)) {
-                String results = ArtifactoryConnectionUtils.Results.unsupported(artifactoryVersion);
-                connectionResultsGesture.setFailure(results);
-                return results;
-            }
+            // Check connection.
+            // This command will throw an exception if there is a connection or credentials issue.
+            artifactoryClient.searchArtifactsByAql(createAqlForBuildArtifacts("*"));
 
             artifactoryConnectionResultsGesture.setSuccess();
-            return ArtifactoryConnectionUtils.Results.success(artifactoryVersion);
+            return "Successfully connected to Artifactory version" + artifactoryClient.getArtifactoryVersion();
         } catch (Exception exception) {
             artifactoryConnectionResultsGesture.setFailure(ExceptionUtils.getRootCauseMessage(exception));
             return "Could not connect to JFrog Artifactory.";
