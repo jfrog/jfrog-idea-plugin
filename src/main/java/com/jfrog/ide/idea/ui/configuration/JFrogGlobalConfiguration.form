@@ -47,7 +47,7 @@
           </grid>
         </constraints>
         <properties>
-          <text value="Password/API key"/>
+          <text value="Password"/>
         </properties>
       </component>
       <component id="bf090" class="com.intellij.ui.components.JBTextField" binding="username">
