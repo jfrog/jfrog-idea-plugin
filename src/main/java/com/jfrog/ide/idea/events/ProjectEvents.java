@@ -1,7 +1,6 @@
 package com.jfrog.ide.idea.events;
 
 import com.intellij.util.messages.Topic;
-import com.jfrog.ide.common.ci.BuildGeneralInfo;
 import com.jfrog.ide.common.utils.ProjectsMap;
 
 /**

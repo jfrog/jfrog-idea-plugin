@@ -78,6 +78,11 @@ public class CiManager extends CiManagerBase {
                     String buildsPattern = propertiesComponent.getValue(BUILDS_PATTERN_KEY);
                     buildCiTree(buildsPattern, new ProgressIndicatorImpl(indicator));
                     CiFilterManager.getInstance(mainProject).collectBuildsInformation(root);
+                    if (root.isLeaf()) {
+                        // Clean the tree and the builds list
+                        mainProject.getMessageBus().syncPublisher(ProjectEvents.ON_SCAN_CI_CHANGE).update(null);
+                        return;
+                    }
                     BuildDependencyTree dependencyTree = (BuildDependencyTree) root.getFirstChild();
                     loadBuild(dependencyTree.getGeneralInfo());
                 } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {

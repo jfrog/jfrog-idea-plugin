@@ -52,8 +52,18 @@ public class CiComponentsTree extends ComponentsTree {
         });
     }
 
+    /**
+     * Apply filters for the given project. If projectKey is null, clean the tree and the builds menu.
+     *
+     * @param projectKey - The project to apply the filters.
+     */
     @Override
     public void applyFilters(ProjectsMap.ProjectKey projectKey) {
+        if (projectKey == null) {
+            reset();
+            buildsMenu.refresh();
+            return;
+        }
         DependencyTree project = projects.get(projectKey);
         if (project == null) {
             return;
