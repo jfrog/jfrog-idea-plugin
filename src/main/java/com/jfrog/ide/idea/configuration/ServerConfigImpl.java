@@ -113,7 +113,7 @@ public class ServerConfigImpl implements ServerConfig {
     }
 
     boolean isXrayConfigured() {
-        return !isAnyBlank(url, xrayUrl, username, password);
+        return !isAnyBlank(xrayUrl, username, password);
     }
 
     boolean isArtifactoryConfigured() {
