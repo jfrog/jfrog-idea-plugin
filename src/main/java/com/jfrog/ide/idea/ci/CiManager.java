@@ -107,9 +107,6 @@ public class CiManager extends CiManagerBase {
         componentsTree.reset();
         try {
             BuildDependencyTree buildTree = loadBuildTree(buildGeneralInfo.getArtifactId(), buildGeneralInfo.getVersion());
-            if (buildTree.isLeaf()) {
-                return;
-            }
             CiFilterManager.getInstance(mainProject).collectsFiltersInformation(buildTree);
             componentsTree.addScanResults(mainProject.getName(), buildTree);
             MessageBus projectMessageBus = mainProject.getMessageBus();
