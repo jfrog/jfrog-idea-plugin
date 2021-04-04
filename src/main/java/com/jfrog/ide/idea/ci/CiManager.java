@@ -150,11 +150,12 @@ public class CiManager extends CiManagerBase {
 
     private boolean scanPreconditionsMet() {
         if (!GlobalSettings.getInstance().areArtifactoryCredentialsSet()) {
-            Logger.getInstance().warn("Artifactory server is not configured.");
+            Logger.getInstance().info("CI integration disabled - Artifactory server is not configured.");
             return false;
         }
         if (StringUtils.isBlank(propertiesComponent.getValue(BUILDS_PATTERN_KEY))) {
-            Logger.getInstance().warn("Builds pattern is not set.");
+            Logger.getInstance().info("CI integration disabled - build name pattern is not set. " +
+                    "Configure it under the JFrog CI Integration page in the configuration.");
             return false;
         }
         if (!scanInProgress.compareAndSet(false, true)) {

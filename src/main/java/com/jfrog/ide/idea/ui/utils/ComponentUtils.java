@@ -40,7 +40,7 @@ public class ComponentUtils {
 
     public static JComponent createNoCredentialsView() {
         HyperlinkLabel link = new HyperlinkLabel();
-        link.setHyperlinkText("To start using the JFrog Plugin, please ", " configure", " your JFrog platform details.");
+        link.setHyperlinkText("To use this section of the JFrog Plugin, please ", " configure", " your JFrog platform details.");
         link.addHyperlinkListener(e -> ShowSettingsUtil.getInstance().showSettingsDialog(null, JFrogGlobalConfiguration.class));
         return createUnsupportedPanel(link);
     }

@@ -17,7 +17,7 @@ public class Logger implements Log {
     private static final com.intellij.openapi.diagnostic.Logger ideaLogger = com.intellij.openapi.diagnostic.Logger.getInstance(Logger.class);
     private static Notification lastNotification;
 
-    private static final String INFORMATION_TITLE = "JFrog Xray";
+    private static final String INFORMATION_TITLE = "JFrog";
     private static final String ERROR_TITLE = "JFrog Xray scan failed";
 
     public static Logger getInstance() {
