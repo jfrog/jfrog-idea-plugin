@@ -20,8 +20,6 @@ import com.jfrog.ide.idea.ui.filters.builds.BuildsMenu;
 import com.jfrog.ide.idea.ui.filters.filtermanager.CiFilterManager;
 import com.jfrog.ide.idea.ui.filters.filtermenu.*;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.Vcs;
 import org.jfrog.build.extractor.scan.DependencyTree;
@@ -37,6 +35,7 @@ import java.util.Set;
 import static com.jfrog.ide.idea.ui.JFrogToolWindow.TITLE_FONT_SIZE;
 import static com.jfrog.ide.idea.ui.JFrogToolWindow.TITLE_LABEL_SIZE;
 import static com.jfrog.ide.idea.ui.utils.ComponentUtils.*;
+import static org.apache.commons.lang3.StringUtils.isAnyBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
@@ -150,15 +149,19 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
         setBuildStatus(buildGeneralInfo);
         setSeeMore(buildGeneralInfo);
         setVcsInformation(buildGeneralInfo);
-        linkButton.init(mainProject, "Build Log", buildGeneralInfo.getPath());
+        setBuildLogLink(buildGeneralInfo);
     }
 
     private void setBuildStarted(BuildGeneralInfo buildGeneralInfo) {
-        Date started = buildGeneralInfo.getStarted();
+        Date started = buildGeneralInfo != null ? buildGeneralInfo.getStarted() : null;
         setTextAndIcon(buildStarted, started != null ? DATE_FORMAT.format(started) : "", AllIcons.Actions.Profile);
     }
 
     private void setBuildStatus(BuildGeneralInfo buildGeneralInfo) {
+        if (buildGeneralInfo == null) {
+            setTextAndIcon(buildStatus, "", null);
+            return;
+        }
         switch (buildGeneralInfo.getStatus()) {
             case PASSED:
                 setTextAndIcon(buildStatus, "Status: Success", AllIcons.RunConfigurations.TestPassed);
@@ -172,9 +175,9 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
     }
 
     private void setSeeMore(BuildGeneralInfo buildGeneralInfo) {
-        Vcs vcs = buildGeneralInfo.getVcs();
-        if (!ObjectUtils.allNotNull(vcs, buildGeneralInfo.getStatus()) ||
-                StringUtils.isAnyBlank(vcs.getBranch(), vcs.getMessage(), buildGeneralInfo.getPath())) {
+        Vcs vcs = buildGeneralInfo != null ? buildGeneralInfo.getVcs() : null;
+        if (vcs == null || buildGeneralInfo.getStatus() == null ||
+                isAnyBlank(vcs.getBranch(), vcs.getMessage(), buildGeneralInfo.getPath())) {
             seeMore.init(mainProject, "See more in this view", "https://www.jfrog.com/confluence/display/JFROG/JFrog+IntelliJ+IDEA+Plugin");
         } else {
             seeMore.init(mainProject, "", "");
@@ -182,16 +185,19 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
     }
 
     private void setVcsInformation(BuildGeneralInfo buildGeneralInfo) {
-        Vcs vcs = buildGeneralInfo.getVcs();
+        Vcs vcs = buildGeneralInfo != null ? buildGeneralInfo.getVcs() : null;
         if (vcs == null) {
-            branch.setText("");
-            branch.setIcon(null);
-            commit.setText("");
-            commit.setIcon(null);
+            setTextAndIcon(branch, "", null);
+            setTextAndIcon(commit, "", null);
             return;
         }
         setTextAndIcon(branch, vcs.getBranch(), AllIcons.Vcs.Branch);
         setTextAndIcon(commit, vcs.getMessage(), AllIcons.Vcs.CommitNode);
+    }
+
+    private void setBuildLogLink(BuildGeneralInfo buildGeneralInfo) {
+        String link = buildGeneralInfo != null ? buildGeneralInfo.getPath() : null;
+        linkButton.init(mainProject, "Build Log", link);
     }
 
     private JLabel createAndAddLabelWithTooltip(String tooltip, JPanel buildStatusPanel) {

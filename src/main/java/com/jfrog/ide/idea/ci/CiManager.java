@@ -80,7 +80,7 @@ public class CiManager extends CiManagerBase {
                     CiFilterManager.getInstance(mainProject).collectBuildsInformation(root);
                     if (root.isLeaf()) {
                         // Clean the tree and the builds list
-                        mainProject.getMessageBus().syncPublisher(ProjectEvents.ON_SCAN_CI_CHANGE).update(null);
+                        mainProject.getMessageBus().syncPublisher(BuildEvents.ON_SELECTED_BUILD).update(null);
                         return;
                     }
                     BuildDependencyTree dependencyTree = (BuildDependencyTree) root.getFirstChild();
@@ -110,16 +110,19 @@ public class CiManager extends CiManagerBase {
     public void loadBuild(GeneralInfo buildGeneralInfo) {
         ComponentsTree componentsTree = CiComponentsTree.getInstance(mainProject);
         componentsTree.reset();
-        try {
-            BuildDependencyTree buildTree = loadBuildTree(buildGeneralInfo.getArtifactId(), buildGeneralInfo.getVersion());
-            CiFilterManager.getInstance(mainProject).collectsFiltersInformation(buildTree);
-            componentsTree.addScanResults(mainProject.getName(), buildTree);
-            MessageBus projectMessageBus = mainProject.getMessageBus();
-            ProjectsMap.ProjectKey projectKey = ProjectsMap.createKey(mainProject.getName(), buildTree.getGeneralInfo());
-            projectMessageBus.syncPublisher(ProjectEvents.ON_SCAN_CI_CHANGE).update(projectKey);
-        } catch (IOException | ParseException | IllegalArgumentException e) {
-            Logger.getInstance().error(String.format(LOAD_BUILD_FAIL_FMT, buildGeneralInfo.getArtifactId(), buildGeneralInfo.getVersion()), e);
+        ProjectsMap.ProjectKey projectKey = null;
+        if (buildGeneralInfo != null) {
+            try {
+                BuildDependencyTree buildTree = loadBuildTree(buildGeneralInfo.getArtifactId(), buildGeneralInfo.getVersion());
+                CiFilterManager.getInstance(mainProject).collectsFiltersInformation(buildTree);
+                componentsTree.addScanResults(mainProject.getName(), buildTree);
+                projectKey = ProjectsMap.createKey(mainProject.getName(), buildTree.getGeneralInfo());
+            } catch (IOException | ParseException | IllegalArgumentException e) {
+                Logger.getInstance().error(String.format(LOAD_BUILD_FAIL_FMT, buildGeneralInfo.getArtifactId(), buildGeneralInfo.getVersion()), e);
+            }
         }
+        MessageBus projectMessageBus = mainProject.getMessageBus();
+        projectMessageBus.syncPublisher(ProjectEvents.ON_SCAN_CI_CHANGE).update(projectKey);
     }
 
     /**
