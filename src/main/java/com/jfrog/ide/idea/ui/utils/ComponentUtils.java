@@ -1,22 +1,13 @@
 package com.jfrog.ide.idea.ui.utils;
 
-import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.ActionToolbar;
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.options.ShowSettingsUtil;
-import com.intellij.openapi.project.Project;
 import com.intellij.ui.HyperlinkLabel;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.UIUtil;
-import com.jfrog.ide.idea.actions.CollapseAllAction;
-import com.jfrog.ide.idea.actions.ExpandAllAction;
-import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.configuration.JFrogGlobalConfiguration;
-import com.jfrog.ide.idea.ui.filters.IssueFilterMenu;
-import com.jfrog.ide.idea.ui.filters.LicenseFilterMenu;
-import com.jfrog.ide.idea.ui.filters.ScopeFilterMenu;
-import org.jfrog.build.extractor.scan.DependenciesTree;
+import org.jfrog.build.extractor.scan.DependencyTree;
 
 import javax.swing.*;
 import javax.swing.tree.TreePath;
@@ -47,38 +38,17 @@ public class ComponentUtils {
         return label;
     }
 
-    public static JPanel createActionToolbar(String id, Project mainProject, ComponentsTree componentsTree) {
-        DefaultActionGroup defaultActionGroup = new DefaultActionGroup();
-        defaultActionGroup.addAction(ActionManager.getInstance().getAction("Xray.Refresh"));
-        defaultActionGroup.addAction(new CollapseAllAction(componentsTree));
-        defaultActionGroup.addAction(new ExpandAllAction(componentsTree));
-
-        ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(id, defaultActionGroup, true);
-        JPanel toolbarPanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        toolbarPanel.add(actionToolbar.getComponent());
-
-        // Add issues filter
-        IssueFilterMenu issueFilterMenu = new IssueFilterMenu(mainProject);
-        componentsTree.addFilterMenu(issueFilterMenu);
-        toolbarPanel.add(issueFilterMenu.getFilterButton());
-
-        // Add licenses filter
-        LicenseFilterMenu licenseFilterMenu = new LicenseFilterMenu(mainProject);
-        componentsTree.addFilterMenu(licenseFilterMenu);
-        toolbarPanel.add(licenseFilterMenu.getFilterButton());
-
-        // Add scopes filter
-        ScopeFilterMenu scopeFilterMenu = new ScopeFilterMenu(mainProject);
-        componentsTree.addFilterMenu(scopeFilterMenu);
-        toolbarPanel.add(scopeFilterMenu.getFilterButton());
-
-        return toolbarPanel;
-    }
-
     public static JComponent createNoCredentialsView() {
         HyperlinkLabel link = new HyperlinkLabel();
-        link.setHyperlinkText("To start using the JFrog Plugin, please ", " configure", " your JFrog Xray details.");
+        link.setHyperlinkText("To use this section of the JFrog Plugin, please ", " configure", " your JFrog platform details.");
         link.addHyperlinkListener(e -> ShowSettingsUtil.getInstance().showSettingsDialog(null, JFrogGlobalConfiguration.class));
+        return createUnsupportedPanel(link);
+    }
+
+    public static JComponent createNoBuildsView() {
+        HyperlinkLabel link = new HyperlinkLabel();
+        link.setHyperlinkText("No builds detected. To start viewing your builds please follow ", " this", " guide.");
+        link.addHyperlinkListener(e -> BrowserUtil.browse("https://www.jfrog.com/confluence/display/JFROG/JFrog+IntelliJ+IDEA+Plugin"));
         return createUnsupportedPanel(link);
     }
 
@@ -93,7 +63,7 @@ public class ComponentUtils {
     }
 
     public static String getPathSearchString(TreePath path) {
-        DependenciesTree node = (DependenciesTree) path.getLastPathComponent();
+        DependencyTree node = (DependencyTree) path.getLastPathComponent();
         return node == null ? "" : node.toString();
     }
 }

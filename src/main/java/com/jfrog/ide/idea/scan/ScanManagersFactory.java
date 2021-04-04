@@ -15,6 +15,7 @@ import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.projects.GoProject;
 import com.jfrog.ide.idea.projects.NpmProject;
 import com.jfrog.ide.idea.ui.ComponentsTree;
+import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -61,12 +62,12 @@ public class ScanManagersFactory {
             Logger.getInstance().info("Previous scan still running...");
             return;
         }
-        if (!GlobalSettings.getInstance().areCredentialsSet()) {
-            Logger.getInstance().error("Xray server is not configured.");
+        if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
+            Logger.getInstance().warn("Xray server is not configured.");
             return;
         }
         try {
-            ComponentsTree componentsTree = ComponentsTree.getInstance(mainProject);
+            ComponentsTree componentsTree = LocalComponentsTree.getInstance(mainProject);
             if (componentsTree == null) {
                 return;
             }

@@ -1,6 +1,7 @@
 package com.jfrog.ide.idea.ui;
 
 import com.google.common.collect.Lists;
+import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
@@ -10,14 +11,18 @@ import com.intellij.ui.SideBorder;
 import com.intellij.ui.TreeSpeedSearch;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
+import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.ui.UIUtil;
-import com.jfrog.ide.idea.configuration.GlobalSettings;
-import com.jfrog.ide.idea.scan.ScanManagersFactory;
+import com.jfrog.ide.idea.actions.CollapseAllAction;
+import com.jfrog.ide.idea.actions.ExpandAllAction;
+import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.ui.components.TitledPane;
-import com.jfrog.ide.idea.ui.filters.FilterManagerService;
+import com.jfrog.ide.idea.ui.filters.filtermenu.IssueFilterMenu;
+import com.jfrog.ide.idea.ui.filters.filtermenu.LicenseFilterMenu;
+import com.jfrog.ide.idea.ui.filters.filtermenu.ScopeFilterMenu;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.build.extractor.scan.DependenciesTree;
+import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.Issue;
 
 import javax.swing.*;
@@ -25,7 +30,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,26 +39,26 @@ import static com.jfrog.ide.idea.ui.JFrogToolWindow.*;
 /**
  * @author yahavi
  */
-public class JFrogContent extends SimpleToolWindowPanel {
+public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel {
 
     private final OnePixelSplitter rightHorizontalSplit;
-    private final ComponentsTree componentsTree;
-    private ComponentIssuesTable issuesTable;
-    private JScrollPane issuesDetailsScroll;
+    ComponentIssuesTable issuesTable;
     private final JComponent issuesPanel;
-    private final Project mainProject;
-    private JPanel issuesDetailsPanel;
+    final ComponentsTree componentsTree;
+    JScrollPane issuesDetailsScroll;
+    JPanel issuesDetailsPanel;
+    final Project mainProject;
 
     /**
      * @param mainProject - Currently opened IntelliJ project
      * @param supported   - True if the current opened project is supported by the plugin.
      *                    If not, show the "Unsupported project type" message.
      */
-    public JFrogContent(@NotNull Project mainProject, boolean supported) {
+    public AbstractJFrogToolWindow(@NotNull Project mainProject, boolean supported, ComponentsTree componentsTree) {
         super(true);
         this.mainProject = mainProject;
-        this.componentsTree = ComponentsTree.getInstance(mainProject);
-        JPanel toolbar = ComponentUtils.createActionToolbar("JFrog toolbar", mainProject, componentsTree);
+        this.componentsTree = componentsTree;
+        JPanel toolbar = createActionToolbar();
 
         issuesPanel = createComponentsIssueDetailView();
         rightHorizontalSplit = new OnePixelSplitter(true, 0.55f);
@@ -67,6 +71,83 @@ public class JFrogContent extends SimpleToolWindowPanel {
 
         setToolbar(toolbar);
         setContent(centralVerticalSplit);
+        registerListeners();
+    }
+
+    /**
+     * Create the action toolbar. That is the top toolbar.
+     * * @return the action toolbar
+     */
+    abstract JPanel createActionToolbar();
+
+    /**
+     * Create the component details view. That is the top right details panel.
+     *
+     * @param supported - True if the current opened project is supported by the plugin.
+     *                  If now, show the "Unsupported project type" message.
+     * @return the component details view
+     */
+    abstract JComponent createComponentsDetailsView(boolean supported);
+
+    /**
+     * Get issues to display in the issues table.
+     *
+     * @param selectedNodes - The selected nodes in the components tree
+     * @return issues to display in the issues table
+     */
+    abstract Set<Issue> getIssuesToDisplay(List<DependencyTree> selectedNodes);
+
+    /**
+     * Create CI or local issues filter menu
+     *
+     * @return issues filter menu
+     */
+    abstract IssueFilterMenu createIssueFilterMenu();
+
+    /**
+     * Create CI or local licenses filter menu
+     *
+     * @return licenses filter menu
+     */
+    abstract LicenseFilterMenu createLicenseFilterMenu();
+
+    /**
+     * Create CI or local scopes filter menu
+     *
+     * @return scopes filter menu
+     */
+    abstract ScopeFilterMenu createScopeFilterMenu();
+
+    JPanel createComponentsTreePanel(boolean addRefreshButton) {
+        DefaultActionGroup actionGroup = new DefaultActionGroup(new CollapseAllAction(componentsTree), new ExpandAllAction(componentsTree));
+        if (addRefreshButton) {
+            actionGroup.addAction(ActionManager.getInstance().getAction("JFrog.RefreshLocal"), Constraints.FIRST);
+        }
+
+        JPanel toolbarPanel = createJFrogToolbar(actionGroup);
+        // Add issues filter
+        IssueFilterMenu issueFilterMenu = createIssueFilterMenu();
+        componentsTree.addFilterMenu(issueFilterMenu);
+        toolbarPanel.add(issueFilterMenu.getFilterButton());
+
+        // Add licenses filter
+        LicenseFilterMenu licenseFilterMenu = createLicenseFilterMenu();
+        componentsTree.addFilterMenu(licenseFilterMenu);
+        toolbarPanel.add(licenseFilterMenu.getFilterButton());
+
+        // Add scopes filter
+        ScopeFilterMenu scopeFilterMenu = createScopeFilterMenu();
+        componentsTree.addFilterMenu(scopeFilterMenu);
+        toolbarPanel.add(scopeFilterMenu.getFilterButton());
+
+        return toolbarPanel;
+    }
+
+    JPanel createJFrogToolbar(ActionGroup actionGroup) {
+        ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar("JFrog toolbar", actionGroup, true);
+        JPanel toolbarPanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        toolbarPanel.add(actionToolbar.getComponent());
+        return toolbarPanel;
     }
 
     /**
@@ -102,57 +183,30 @@ public class JFrogContent extends SimpleToolWindowPanel {
     }
 
     /**
-     * Create the component details view. That is the top right details panel.
-     *
-     * @param supported - True if the current opened project is supported by the plugin.
-     *                  If now, show the "Unsupported project type" message.
-     * @return the component details view
-     */
-    private JComponent createComponentsDetailsView(boolean supported) {
-        if (!GlobalSettings.getInstance().areCredentialsSet()) {
-            return ComponentUtils.createNoCredentialsView();
-        }
-        JLabel title = new JBLabel(" Component Details");
-        title.setFont(title.getFont().deriveFont(TITLE_FONT_SIZE));
-
-        issuesDetailsPanel = new JBPanel<>(new BorderLayout()).withBackground(UIUtil.getTableBackground());
-        String panelText = supported ? ComponentUtils.SELECT_COMPONENT_TEXT : ComponentUtils.UNSUPPORTED_TEXT;
-        issuesDetailsPanel.add(ComponentUtils.createDisabledTextLabel(panelText), BorderLayout.CENTER);
-        issuesDetailsScroll = ScrollPaneFactory.createScrollPane(issuesDetailsPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        return new TitledPane(JSplitPane.VERTICAL_SPLIT, TITLE_LABEL_SIZE, title, issuesDetailsScroll);
-    }
-
-    /**
-     * Update the issues table according to the user choice in the dependencies tree.
+     * Update the issues table according to the user choice in the dependency tree.
      */
     public void updateIssuesTable() {
-        List<DependenciesTree> selectedNodes = getSelectedNodes();
-        Set<Issue> issueSet = ScanManagersFactory.getScanManagers(mainProject)
-                .stream()
-                .map(scanManager -> scanManager.getFilteredScanIssues(FilterManagerService.getInstance(mainProject), selectedNodes))
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
-
+        List<DependencyTree> selectedNodes = getSelectedNodes();
         Set<String> selectedNodeNames = selectedNodes.stream().map(DefaultMutableTreeNode::toString).collect(Collectors.toSet());
-        issuesTable.updateIssuesTable(issueSet, selectedNodeNames);
+        issuesTable.updateIssuesTable(getIssuesToDisplay(selectedNodes), selectedNodeNames);
     }
 
     /**
-     * Return the selected nodes in the dependencies tree.
+     * Return the selected nodes in the dependency tree.
      *
-     * @return the selected nodes in the dependencies tree
+     * @return the selected nodes in the dependency tree
      */
-    private List<DependenciesTree> getSelectedNodes() {
+    List<DependencyTree> getSelectedNodes() {
         if (componentsTree.getModel() == null) {
             return Lists.newArrayList();
         }
         // If no node selected - Return the root
         if (componentsTree.getSelectionPaths() == null) {
-            return Lists.newArrayList((DependenciesTree) componentsTree.getModel().getRoot());
+            return Lists.newArrayList((DependencyTree) componentsTree.getModel().getRoot());
         }
         return Arrays.stream(componentsTree.getSelectionPaths())
                 .map(TreePath::getLastPathComponent)
-                .map(obj -> (DependenciesTree) obj)
+                .map(obj -> (DependencyTree) obj)
                 .collect(Collectors.toList());
     }
 
@@ -169,13 +223,18 @@ public class JFrogContent extends SimpleToolWindowPanel {
      * Register the issues tree listeners.
      */
     public void registerListeners() {
+        MessageBusConnection applicationBusConnection = ApplicationManager.getApplication().getMessageBus().connect();
+        // Xray credentials were set listener
+        applicationBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () ->
+                ApplicationManager.getApplication().invokeLater(this::onConfigurationChange));
+
         // Component selection listener
         componentsTree.addTreeSelectionListener(e -> {
             updateIssuesTable();
             if (e == null || e.getNewLeadSelectionPath() == null) {
                 return;
             }
-            ComponentIssueDetails.createIssuesDetailsView(issuesDetailsPanel, (DependenciesTree) e.getNewLeadSelectionPath().getLastPathComponent());
+            ComponentIssueDetails.createIssuesDetailsView(issuesDetailsPanel, (DependencyTree) e.getNewLeadSelectionPath().getLastPathComponent());
             // Scroll back to the beginning of the scrollable panel
             ApplicationManager.getApplication().invokeLater(() -> issuesDetailsScroll.getViewport().setViewPosition(new Point()));
         });

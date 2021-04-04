@@ -3,7 +3,7 @@ package com.jfrog.ide.idea.inspections;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.psi.PsiElement;
-import org.jfrog.build.extractor.scan.DependenciesTree;
+import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.Issue;
 import org.jfrog.build.extractor.scan.License;
 
@@ -23,10 +23,10 @@ public class AnnotationUtils {
      * Register "Top issue" and "Licenses" annotations.
      *
      * @param annotationHolder - The annotations will be registered in this container
-     * @param dependency       - The dependencies tree node correlated to the element
+     * @param dependency       - The dependency tree node correlated to the element
      * @param elements         - The elements to apply the annotations.
      */
-    static void registerAnnotation(AnnotationHolder annotationHolder, DependenciesTree dependency, PsiElement[] elements) {
+    static void registerAnnotation(AnnotationHolder annotationHolder, DependencyTree dependency, PsiElement[] elements) {
         HighlightSeverity problemHighlightType = getHighlightSeverity(dependency);
         String licensesString = getLicensesString(dependency);
         String topIssue = getTopIssueString(dependency);
@@ -45,21 +45,18 @@ public class AnnotationUtils {
     }
 
     /**
-     * Get the severity of the dependencies tree node.
+     * Get the severity of the dependency tree node.
      *
-     * @param node - The dependencies tree node
-     * @return the severity of the dependencies tree node
+     * @param node - The dependency tree node
+     * @return the severity of the dependency tree node
      */
-    private static HighlightSeverity getHighlightSeverity(DependenciesTree node) {
+    private static HighlightSeverity getHighlightSeverity(DependencyTree node) {
         switch (node.getTopIssue().getSeverity()) {
             case High:
             case Critical:
                 return HighlightSeverity.ERROR; // Red underline
             case Low:
-                //noinspection deprecation
-            case Minor:
             case Medium:
-            case Major:
                 return HighlightSeverity.WEAK_WARNING; // White underline
             default: // Normal, information, unknown and pending
                 return HighlightSeverity.INFORMATION; // No underline
@@ -69,10 +66,10 @@ public class AnnotationUtils {
     /**
      * Get the top issue string.
      *
-     * @param node - The dependencies tree node
+     * @param node - The dependency tree node
      * @return the top issue string
      */
-    private static String getTopIssueString(DependenciesTree node) {
+    private static String getTopIssueString(DependencyTree node) {
         Issue topIssue = node.getTopIssue();
         if (topIssue.isHigherSeverityThan(NORMAL_SEVERITY_ISSUE)) {
             return "Top issue severity: " + topIssue.getSeverity();
@@ -83,10 +80,10 @@ public class AnnotationUtils {
     /**
      * Get licenses string
      *
-     * @param node - The dependencies tree node
+     * @param node - The dependency tree node
      * @return licenses string
      */
-    private static String getLicensesString(DependenciesTree node) {
+    private static String getLicensesString(DependencyTree node) {
         String results = "Licenses: ";
         List<String> licensesStrings = node.getLicenses().stream().map(License::getName).collect(Collectors.toList());
         if (licensesStrings.isEmpty()) {

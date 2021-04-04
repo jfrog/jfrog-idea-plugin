@@ -48,7 +48,7 @@ public class GradleDependenciesDataService extends AbstractProjectDataService<Pr
             return;
         }
 
-        if (GlobalSettings.getInstance().areCredentialsSet()) {
+        if (GlobalSettings.getInstance().areXrayCredentialsSet()) {
             ScanManagersFactory.getInstance(project).tryScanSingleProject(project, toImport);
         }
     }

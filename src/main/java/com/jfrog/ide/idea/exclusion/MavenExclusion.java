@@ -10,7 +10,7 @@ import com.intellij.psi.xml.XmlFile;
 import com.intellij.psi.xml.XmlTag;
 import com.jfrog.ide.idea.inspections.MavenInspection;
 import com.jfrog.ide.idea.navigation.NavigationTarget;
-import org.jfrog.build.extractor.scan.DependenciesTree;
+import org.jfrog.build.extractor.scan.DependencyTree;
 
 /**
  * Created by Bar Belity on 28/05/2020.
@@ -19,10 +19,10 @@ public class MavenExclusion implements Excludable {
 
     public static final String MAVEN_EXCLUSIONS_TAG = "exclusions";
     public static final String MAVEN_EXCLUSION_TAG = "exclusion";
-    private final DependenciesTree nodeToExclude;
+    private final DependencyTree nodeToExclude;
     private final NavigationTarget navigationTarget;
 
-    public MavenExclusion(DependenciesTree nodeToExclude, NavigationTarget navigationTarget) {
+    public MavenExclusion(DependencyTree nodeToExclude, NavigationTarget navigationTarget) {
         this.nodeToExclude = nodeToExclude;
         this.navigationTarget = navigationTarget;
     }
@@ -35,14 +35,14 @@ public class MavenExclusion implements Excludable {
      * @param affectedNode - Direct dependency's node in tree which will be affected by the exclusion.
      * @return true if nodeToExclude is a valid Maven node which can be excluded.
      */
-    public static boolean isExcludable(DependenciesTree nodeToExclude, DependenciesTree affectedNode) {
+    public static boolean isExcludable(DependencyTree nodeToExclude, DependencyTree affectedNode) {
         if (nodeToExclude == null || nodeToExclude.equals(affectedNode)) {
              return false;
         }
         return isMavenPackageType(ExclusionUtils.getProjectRoot(nodeToExclude));
     }
 
-    public static boolean isMavenPackageType(DependenciesTree node) {
+    public static boolean isMavenPackageType(DependencyTree node) {
         return node != null && node.getGeneralInfo() != null && "maven".equals(node.getGeneralInfo().getPkgType());
     }
 

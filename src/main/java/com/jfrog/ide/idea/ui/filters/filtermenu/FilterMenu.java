@@ -1,8 +1,12 @@
-package com.jfrog.ide.idea.ui.filters;
+package com.jfrog.ide.idea.ui.filters.filtermenu;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBPopupMenu;
+import com.jfrog.ide.idea.Syncable;
 import com.jfrog.ide.idea.ui.components.FilterButton;
+import com.jfrog.ide.idea.ui.filters.MenuCheckbox;
+import com.jfrog.ide.idea.ui.filters.SelectAllCheckbox;
+import com.jfrog.ide.idea.ui.filters.SelectionCheckbox;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -16,14 +20,14 @@ import java.util.Map;
 /**
  * Created by Yahav Itzhak on 22 Nov 2017.
  */
-public abstract class FilterMenu<FilterType> extends JBPopupMenu {
+public abstract class FilterMenu<FilterType> extends JBPopupMenu implements Syncable {
 
-    private final SelectAllCheckbox<FilterType> selectAllCheckbox = new SelectAllCheckbox<>();
+    private final SelectAllCheckbox<FilterType> selectAllCheckbox = new SelectAllCheckbox<>(getSyncEvent());
     private final List<SelectionCheckbox<FilterType>> checkBoxMenuItems = Lists.newArrayList();
-    Project mainProject;
-    FilterButton filterButton;
+    protected FilterButton filterButton;
+    protected Project mainProject;
 
-    FilterMenu(@NotNull Project mainProject, String name, String tooltip) {
+    protected FilterMenu(@NotNull Project mainProject, String name, String tooltip) {
         this.mainProject = mainProject;
         this.filterButton = new FilterButton(this, name, tooltip);
     }
@@ -42,7 +46,7 @@ public abstract class FilterMenu<FilterType> extends JBPopupMenu {
      * @param selectionMap   - Map between FilterType and boolean that represents whether the filter is checked or not
      * @param putUnknownLast - Put the unknown checkbox last in the filters list
      */
-    void addComponents(@NotNull Map<FilterType, Boolean> selectionMap, boolean putUnknownLast) {
+    protected void addComponents(@NotNull Map<FilterType, Boolean> selectionMap, boolean putUnknownLast) {
         setSelectAllCheckbox(selectionMap);
         setListeners(selectionMap);
         addCheckboxes(putUnknownLast);
@@ -63,7 +67,7 @@ public abstract class FilterMenu<FilterType> extends JBPopupMenu {
                 .filter(item -> checkBoxMenuItems.stream()
                         .map(AbstractButton::getText)
                         .noneMatch(text -> StringUtils.equals(text, item.toString())))
-                .map(key -> new SelectionCheckbox<>(selectionMap, key))
+                .map(key -> new SelectionCheckbox<>(selectionMap, key, getSyncEvent()))
                 .forEach(checkBoxMenuItems::add);
         selectAllCheckbox.setListeners(selectionMap, checkBoxMenuItems);
     }

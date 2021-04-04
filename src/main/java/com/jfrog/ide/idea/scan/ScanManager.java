@@ -36,14 +36,16 @@ import com.jfrog.ide.idea.events.ProjectEvents;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
 import com.jfrog.ide.idea.ui.ComponentsTree;
-import com.jfrog.ide.idea.ui.filters.FilterManagerService;
+import com.jfrog.ide.idea.ui.LocalComponentsTree;
+import com.jfrog.ide.idea.ui.filters.filtermanager.ConsistentFilterManager;
+import com.jfrog.ide.idea.ui.filters.filtermanager.LocalFilterManager;
 import com.jfrog.ide.idea.utils.Utils;
 import com.jfrog.xray.client.services.summary.Components;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jfrog.build.extractor.scan.DependenciesTree;
+import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.License;
 import org.jfrog.build.extractor.scan.Scope;
 
@@ -71,7 +73,7 @@ public abstract class ScanManager extends ScanManagerBase {
 
     /**
      * @param mainProject - Currently opened IntelliJ project. We'll use this project to retrieve project based services
-     *                    like {@link FilterManagerService} and {@link ComponentsTree}.
+     *                    like {@link ConsistentFilterManager} and {@link ComponentsTree}.
      * @param project     - Current working project.
      * @param prefix      - Components prefix for xray scan, e.g. gav:// or npm://.
      */
@@ -114,8 +116,8 @@ public abstract class ScanManager extends ScanManagerBase {
      */
     private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator, @Nullable Collection<DataNode<ProjectDependencies>> dependenciesData) {
         // Don't scan if Xray is not configured
-        if (!GlobalSettings.getInstance().areCredentialsSet()) {
-            getLog().error("Xray server is not configured.");
+        if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
+            getLog().warn("Xray server is not configured.");
             return;
         }
         // Prevent multiple simultaneous scans
@@ -229,44 +231,38 @@ public abstract class ScanManager extends ScanManagerBase {
      * @return all licenses available from the current scan results.
      */
     public Set<License> getAllLicenses() {
-        Set<License> allLicenses = Sets.newHashSet();
         if (getScanResults() == null) {
-            return allLicenses;
+            return Sets.newHashSet();
         }
-        DependenciesTree node = (DependenciesTree) getScanResults().getRoot();
-        collectAllLicenses(node, allLicenses);
-        return allLicenses;
+        return collectAllLicenses((DependencyTree) getScanResults().getRoot());
     }
 
     /**
      * @return all scopes available from the current scan results.
      */
     public Set<Scope> getAllScopes() {
-        Set<Scope> allScopes = Sets.newHashSet();
         if (getScanResults() == null) {
-            return allScopes;
+            return Sets.newHashSet();
         }
-        DependenciesTree node = (DependenciesTree) getScanResults().getRoot();
-        collectAllScopes(node, allScopes);
-        return allScopes;
+        return collectAllScopes((DependencyTree) getScanResults().getRoot());
     }
 
     /**
      * filter scan components tree model according to the user filters and sort the issues tree.
      */
     private void setScanResults() {
-        DependenciesTree scanResults = getScanResults();
+        DependencyTree scanResults = getScanResults();
         if (scanResults == null) {
             return;
         }
         if (!scanResults.isLeaf()) {
-            addLicensesAndScopes(FilterManagerService.getInstance(mainProject));
+            LocalFilterManager.getInstance(mainProject).collectsFiltersInformation(scanResults);
         }
         ProjectsMap.ProjectKey projectKey = ProjectsMap.createKey(getProjectName(),
                 scanResults.getGeneralInfo());
         MessageBus projectMessageBus = mainProject.getMessageBus();
 
-        ComponentsTree componentsTree = ComponentsTree.getInstance(mainProject);
+        ComponentsTree componentsTree = LocalComponentsTree.getInstance(mainProject);
         componentsTree.addScanResults(getProjectName(), scanResults);
         projectMessageBus.syncPublisher(ProjectEvents.ON_SCAN_PROJECT_CHANGE).update(projectKey);
     }

@@ -3,6 +3,7 @@ package com.jfrog.ide.idea.ui.filters;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.ui.components.JBCheckBoxMenuItem;
 import com.intellij.util.messages.MessageBus;
+import com.intellij.util.messages.Topic;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,16 +14,19 @@ import java.util.Map;
 /**
  * Created by Yahav Itzhak on 22 Nov 2017.
  */
-class SelectAllCheckbox<FilterType> extends MenuCheckbox {
+public class SelectAllCheckbox<FilterType> extends MenuCheckbox {
+
+    private final Topic<ApplicationEvents> syncEvent;
     // If falsy, disable triggers
     private boolean active = true;
 
-    SelectAllCheckbox() {
+    public SelectAllCheckbox(Topic<ApplicationEvents> syncEvent) {
+        this.syncEvent = syncEvent;
         setText("All");
         setSelected(true);
     }
 
-    void setListeners(@NotNull Map<FilterType, Boolean> selectionMap, @NotNull List<SelectionCheckbox<FilterType>> checkBoxMenuItems) {
+    public void setListeners(@NotNull Map<FilterType, Boolean> selectionMap, @NotNull List<SelectionCheckbox<FilterType>> checkBoxMenuItems) {
         removeListeners();
         addItemListener(e -> {
             if (!active) {
@@ -37,7 +41,7 @@ class SelectAllCheckbox<FilterType> extends MenuCheckbox {
                 }
             }
             MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
-            messageBus.syncPublisher(ApplicationEvents.ON_SCAN_FILTER_CHANGE).update();
+            messageBus.syncPublisher(syncEvent).update();
         });
     }
 
@@ -46,7 +50,7 @@ class SelectAllCheckbox<FilterType> extends MenuCheckbox {
      *
      * @param checked - true if the button is checked, otherwise false
      */
-    void setChecked(boolean checked) {
+    public void setChecked(boolean checked) {
         this.active = false;
         setSelected(checked);
         this.active = true;

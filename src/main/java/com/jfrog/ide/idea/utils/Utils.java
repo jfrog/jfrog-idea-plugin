@@ -7,7 +7,8 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.openapi.wm.impl.ToolWindowImpl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.jfrog.build.extractor.scan.DependenciesTree;
+import org.jfrog.build.extractor.scan.DependencyTree;
+import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 
 import java.nio.file.Path;
@@ -22,7 +23,7 @@ public class Utils {
         return project.getBasePath() != null ? Paths.get(project.getBasePath()) : Paths.get(".");
     }
 
-    public static boolean areRootNodesEqual(DependenciesTree lhs, DependenciesTree rhs) {
+    public static boolean areRootNodesEqual(DependencyTree lhs, DependencyTree rhs) {
         GeneralInfo lhsGeneralInfo = lhs.getGeneralInfo();
         GeneralInfo rhsGeneralInfo = rhs.getGeneralInfo();
         return ObjectUtils.allNotNull(lhsGeneralInfo, rhsGeneralInfo) &&

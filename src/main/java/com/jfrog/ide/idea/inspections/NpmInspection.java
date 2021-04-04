@@ -11,7 +11,7 @@ import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.build.extractor.scan.DependenciesTree;
+import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 
 import java.util.Set;
@@ -65,8 +65,8 @@ public class NpmInspection extends AbstractInspection {
     }
 
     @Override
-    Set<DependenciesTree> getModules(PsiElement element, GeneralInfo generalInfo) {
-        DependenciesTree root = getRootDependenciesTree(element);
+    Set<DependencyTree> getModules(PsiElement element, GeneralInfo generalInfo) {
+        DependencyTree root = getRootDependencyTree(element);
         if (root == null) {
             return null;
         }

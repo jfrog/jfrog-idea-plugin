@@ -15,7 +15,7 @@ import com.jfrog.ide.common.go.GoTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.idea.inspections.GoInspection;
 import com.jfrog.ide.idea.projects.GoProject;
-import com.jfrog.ide.idea.ui.filters.FilterManagerService;
+import com.jfrog.ide.idea.ui.filters.filtermanager.ConsistentFilterManager;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +33,7 @@ public class GoScanManager extends ScanManager {
 
     /**
      * @param mainProject - Currently opened IntelliJ project. We'll use this project to retrieve project based services
-     *                    like {@link FilterManagerService} and {@link ComponentsTree}.
+     *                    like {@link ConsistentFilterManager} and {@link ComponentsTree}.
      * @param project     - Go project {@link GoProject}.
      */
     GoScanManager(Project mainProject, Project project) throws IOException {

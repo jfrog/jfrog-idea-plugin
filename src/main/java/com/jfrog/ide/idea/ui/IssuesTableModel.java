@@ -2,13 +2,14 @@ package com.jfrog.ide.idea.ui;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.Issue;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by Yahav Itzhak on 13 Nov 2017.
@@ -23,7 +24,9 @@ public class IssuesTableModel extends AbstractTableModel {
     }
 
     IssuesTableModel(@NotNull Set<Issue> issues, @NotNull Set<String> components) {
-        this.issues = issues;
+        this.issues = issues.stream()
+                .filter(issue -> StringUtils.isNotBlank(issue.getSummary()))
+                .collect(Collectors.toSet());
         this.components = components;
     }
 

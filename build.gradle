@@ -41,7 +41,6 @@ repositories {
 
 dependencies {
     implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: '1.4.x-SNAPSHOT'
-    implementation group: 'org.jfrog.artifactory.client', name: 'artifactory-java-client-services', version: '2.9.x-SNAPSHOT'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
     testImplementation group: 'com.github.stefanbirkner', name: 'system-lambda', version: '1.1.1'
 }
