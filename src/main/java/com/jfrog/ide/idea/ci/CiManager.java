@@ -78,13 +78,7 @@ public class CiManager extends CiManagerBase {
                     String buildsPattern = propertiesComponent.getValue(BUILDS_PATTERN_KEY);
                     buildCiTree(buildsPattern, new ProgressIndicatorImpl(indicator));
                     CiFilterManager.getInstance(mainProject).collectBuildsInformation(root);
-                    if (root.isLeaf()) {
-                        // Clean the tree and the builds list
-                        mainProject.getMessageBus().syncPublisher(BuildEvents.ON_SELECTED_BUILD).update(null);
-                        return;
-                    }
-                    BuildDependencyTree dependencyTree = (BuildDependencyTree) root.getFirstChild();
-                    loadBuild(dependencyTree.getGeneralInfo());
+                    loadFirstBuild();
                 } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
                     Logger.getInstance().error("Failed to refresh builds", e);
                 } finally {
@@ -140,6 +134,18 @@ public class CiManager extends CiManagerBase {
                 .filter(generalInfo -> StringUtils.equals(buildName, generalInfo.getArtifactId()))
                 .filter(generalInfo -> StringUtils.equals(buildNumber, generalInfo.getVersion()))
                 .findAny().orElse(null);
+    }
+
+    /**
+     * Load first build. If no builds found, delete all currently displayed build information from the UI.
+     */
+    private void loadFirstBuild() {
+        BuildGeneralInfo generalInfo = null;
+        if (!root.isLeaf()) {
+            BuildDependencyTree dependencyTree = (BuildDependencyTree) root.getFirstChild();
+            generalInfo = (BuildGeneralInfo) dependencyTree.getGeneralInfo();
+        }
+        mainProject.getMessageBus().syncPublisher(BuildEvents.ON_SELECTED_BUILD).update(generalInfo);
     }
 
     private boolean scanPreconditionsMet() {
