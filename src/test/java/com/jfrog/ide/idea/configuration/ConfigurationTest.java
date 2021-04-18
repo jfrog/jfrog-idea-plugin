@@ -1,9 +1,11 @@
 package com.jfrog.ide.idea.configuration;
 
-import com.github.stefanbirkner.systemlambda.SystemLambda;
 import com.intellij.credentialStore.Credentials;
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
+import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.idea.ui.configuration.Utils;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import static com.jfrog.ide.idea.configuration.ServerConfigImpl.*;
 
@@ -114,12 +116,14 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
     /**
      * Test set server config from environment variables.
      */
-    public void testSetServerConfigFromEnv() throws Exception {
-        SystemLambda.withEnvironmentVariable(PLATFORM_URL_ENV, "https://tython.jfrog.io")
-                .and(XRAY_URL_ENV, "https://tython.jfrog.io/xray")
-                .and(ARTIFACTORY_URL_ENV, "https://tython.jfrog.io/artifactory")
-                .and(USERNAME_ENV, "leia")
-                .and(PASSWORD_ENV, "princess").execute(() -> {
+    public void testSetServerConfigFromEnv() {
+        try (MockedStatic<EnvironmentUtil> mockController = Mockito.mockStatic(EnvironmentUtil.class)) {
+            mockController.when(() -> EnvironmentUtil.getValue(PLATFORM_URL_ENV)).thenReturn("https://tython.jfrog.io");
+            mockController.when(() -> EnvironmentUtil.getValue(XRAY_URL_ENV)).thenReturn("https://tython.jfrog.io/xray");
+            mockController.when(() -> EnvironmentUtil.getValue(ARTIFACTORY_URL_ENV)).thenReturn("https://tython.jfrog.io/artifactory");
+            mockController.when(() -> EnvironmentUtil.getValue(USERNAME_ENV)).thenReturn("leia");
+            mockController.when(() -> EnvironmentUtil.getValue(PASSWORD_ENV)).thenReturn("princess");
+
             // Create overriding server config
             GlobalSettings globalSettings = new GlobalSettings();
             ServerConfigImpl overrideServerConfig = createServerConfig(false, false);
@@ -139,17 +143,18 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
             assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
             assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
             assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
-        });
+        }
     }
 
     /**
      * Test set server config from JFROG_IDE_URL legacy environment variable.
      */
     @SuppressWarnings("deprecation")
-    public void testSetServerConfigFromLegacyEnv() throws Exception {
-        SystemLambda.withEnvironmentVariable(LEGACY_XRAY_URL_ENV, "https://tython.jfrog.io/xray")
-                .and(USERNAME_ENV, "leia")
-                .and(PASSWORD_ENV, "princess").execute(() -> {
+    public void testSetServerConfigFromLegacyEnv() {
+        try (MockedStatic<EnvironmentUtil> mockController = Mockito.mockStatic(EnvironmentUtil.class)) {
+            mockController.when(() -> EnvironmentUtil.getValue(LEGACY_XRAY_URL_ENV)).thenReturn("https://tython.jfrog.io/xray");
+            mockController.when(() -> EnvironmentUtil.getValue(USERNAME_ENV)).thenReturn("leia");
+            mockController.when(() -> EnvironmentUtil.getValue(PASSWORD_ENV)).thenReturn("princess");
             // Create overriding server config
             GlobalSettings globalSettings = new GlobalSettings();
             ServerConfigImpl overrideServerConfig = createServerConfig(false, false);
@@ -169,7 +174,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
             assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
             assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
             assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
-        });
+        }
     }
 
     /**
@@ -177,13 +182,14 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
      * This time, the URL provided could not be resolved to the platform URL.
      */
     @SuppressWarnings("deprecation")
-    public void testSetServerConfigFromXrayLegacyEnv() throws Exception {
-        SystemLambda.withEnvironmentVariable(LEGACY_XRAY_URL_ENV, "https://tython-xray.jfrog.io")
-                .and(PLATFORM_URL_ENV, "")
-                .and(ARTIFACTORY_URL_ENV, "")
-                .and(XRAY_URL_ENV, "")
-                .and(USERNAME_ENV, "leia")
-                .and(PASSWORD_ENV, "princess").execute(() -> {
+    public void testSetServerConfigFromXrayLegacyEnv() {
+        try (MockedStatic<EnvironmentUtil> mockController = Mockito.mockStatic(EnvironmentUtil.class)) {
+            mockController.when(() -> EnvironmentUtil.getValue(LEGACY_XRAY_URL_ENV)).thenReturn("https://tython-xray.jfrog.io");
+            mockController.when(() -> EnvironmentUtil.getValue(PLATFORM_URL_ENV)).thenReturn("");
+            mockController.when(() -> EnvironmentUtil.getValue(ARTIFACTORY_URL_ENV)).thenReturn("");
+            mockController.when(() -> EnvironmentUtil.getValue(USERNAME_ENV)).thenReturn("leia");
+            mockController.when(() -> EnvironmentUtil.getValue(PASSWORD_ENV)).thenReturn("princess");
+
             // Create overriding server config
             GlobalSettings globalSettings = new GlobalSettings();
             ServerConfigImpl overrideServerConfig = createServerConfig(false, false);
@@ -203,7 +209,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
             assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
             assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
             assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
-        });
+        }
     }
 
     /**
