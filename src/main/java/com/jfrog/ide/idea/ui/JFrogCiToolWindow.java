@@ -117,6 +117,7 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
             updateIssuesTable();
         }));
         projectBusConnection.subscribe(BuildEvents.ON_SELECTED_BUILD, this::setBuildDetails);
+        projectBusConnection.subscribe(ApplicationEvents.ON_BUILDS_CONFIGURATION_CHANGE, () -> ApplicationManager.getApplication().invokeLater(this::onConfigurationChange));
     }
 
     /**
