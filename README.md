@@ -34,4 +34,4 @@ We welcome community contribution through pull requests.
 To learn how to use JFrog IntelliJ IDEA plugin, please visit the [JFrog IntelliJ IDEA Plugin User Guide](https://www.jfrog.com/confluence/display/XRAY/IDE+Integration).
 
 # Release Notes
-The release are available on [Bintray](https://bintray.com/jfrog/jfrog-jars/jfrog-idea-plugin#release).
+The release are available on [Marketplace](https://plugins.jetbrains.com/plugin/9834-jfrog/versions).
