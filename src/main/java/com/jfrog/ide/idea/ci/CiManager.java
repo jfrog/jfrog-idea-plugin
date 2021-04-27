@@ -126,9 +126,8 @@ public class CiManager extends CiManagerBase {
      * @return the build general info or null
      */
     public BuildGeneralInfo getBuildGeneralInfo(String buildIdentifier) {
-        String[] buildSplit = buildIdentifier.split("/");
-        String buildName = buildSplit[0];
-        String buildNumber = buildSplit[1];
+        String buildName = StringUtils.substringBeforeLast(buildIdentifier, "/");
+        String buildNumber = StringUtils.substringAfterLast(buildIdentifier, "/");
         return (BuildGeneralInfo) root.getChildren().stream()
                 .map(DependencyTree::getGeneralInfo)
                 .filter(generalInfo -> StringUtils.equals(buildName, generalInfo.getArtifactId()))
