@@ -40,7 +40,7 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: '1.4.x-SNAPSHOT'
+    implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: '1.5.0'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
     testImplementation "org.mockito:mockito-core:3.9.0"
     testImplementation "org.mockito:mockito-inline:3.9.0"
