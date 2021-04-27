@@ -4,6 +4,7 @@ import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
@@ -35,6 +36,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jfrog.ide.idea.ui.configuration.JFrogProjectConfiguration.BUILDS_PATTERN_KEY;
@@ -76,7 +78,7 @@ public class CiManager extends CiManagerBase {
                         return;
                     }
                     String buildsPattern = propertiesComponent.getValue(BUILDS_PATTERN_KEY);
-                    buildCiTree(buildsPattern, new ProgressIndicatorImpl(indicator));
+                    buildCiTree(buildsPattern, new ProgressIndicatorImpl(indicator), () -> checkCanceled(indicator));
                     CiFilterManager.getInstance(mainProject).collectBuildsInformation(root);
                     loadFirstBuild();
                 } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
@@ -92,6 +94,20 @@ public class CiManager extends CiManagerBase {
         } else {
             // Run the scan task when the thread is in the foreground.
             ApplicationManager.getApplication().invokeLater(() -> ProgressManager.getInstance().run(scanAndUpdateTask));
+        }
+    }
+
+    /**
+     * Check if "cancel" was clicked.
+     *
+     * @param indicator - The progress indicator
+     * @throws CancellationException in case the scan process should be canceled.
+     */
+    private void checkCanceled(com.intellij.openapi.progress.ProgressIndicator indicator) throws CancellationException {
+        try {
+            indicator.checkCanceled();
+        } catch (ProcessCanceledException ignored) {
+            throw new CancellationException();
         }
     }
 
