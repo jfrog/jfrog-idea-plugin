@@ -48,7 +48,7 @@ public class ComponentUtils {
     public static JComponent createNoBuildsView() {
         HyperlinkLabel link = new HyperlinkLabel();
         link.setHyperlinkText("No builds detected. To start viewing your builds please follow ", " this", " guide.");
-        link.addHyperlinkListener(e -> BrowserUtil.browse("https://www.jfrog.com/confluence/display/JFROG/JFrog+IntelliJ+IDEA+Plugin"));
+        link.addHyperlinkListener(e -> BrowserUtil.browse("https://www.jfrog.com/confluence/display/JFROG/JFrog+IntelliJ+IDEA+Plugin#JFrogIntelliJIDEAPlugin-TheCIView"));
         return createUnsupportedPanel(link);
     }
 
