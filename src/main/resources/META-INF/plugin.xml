@@ -9,11 +9,15 @@
 
     <change-notes>
         <![CDATA[
-          <li> Allow filtering by scope.</li>
-          <li> Support PAC proxy configuration.</li>
-          <li> Add connection retries and timeout to the general configuration.</li>
-          <li> Updated HTTP client.</li>
-          <li> Better logging.</li>
+          <li> New CI integration tab.</li>
+          <li> Support new Xray Critical level severity.</li>
+          <li> Allow providing the JFrog platform URL.</li>
+          <li> Improved logging.</li>
+          <li> Improve description for excluded paths.</li>
+          <li> Support npm 7.</li>
+          <li> Maven - Bugfix: allow duplicated dependencies in same modules.</li>
+          <li> Gradle - Bugfix: dependency tree duplications.</li>
+          <li> Go - Bugfix: loop in dependency graph causes stack overflow.</li>
           <li> UI improvements.</li>
         ]]>
     </change-notes>
