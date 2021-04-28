@@ -169,7 +169,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             artifactoryClient.searchArtifactsByAql(createAqlForBuildArtifacts("*"));
 
             artifactoryConnectionResultsGesture.setSuccess();
-            return "Successfully connected to Artifactory version" + artifactoryClient.getArtifactoryVersion();
+            return "Successfully connected to Artifactory version: " + artifactoryClient.getArtifactoryVersion();
         } catch (Exception exception) {
             artifactoryConnectionResultsGesture.setFailure(ExceptionUtils.getRootCauseMessage(exception));
             return "Could not connect to JFrog Artifactory.";
