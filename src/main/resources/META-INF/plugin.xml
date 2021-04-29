@@ -9,15 +9,7 @@
 
     <change-notes>
         <![CDATA[
-          <li> New CI integration tab.</li>
-          <li> Support new Xray Critical level severity.</li>
-          <li> Allow providing the JFrog platform URL.</li>
-          <li> Improved logging.</li>
-          <li> Improve description for excluded paths.</li>
-          <li> Support npm 7.</li>
-          <li> Maven - Bugfix: allow duplicated dependencies in same modules.</li>
-          <li> Gradle - Bugfix: dependency tree duplications.</li>
-          <li> Go - Bugfix: loop in dependency graph causes stack overflow.</li>
+          <li> Go - better handling checksum errors in go.sum.</li>
           <li> UI improvements.</li>
         ]]>
     </change-notes>
