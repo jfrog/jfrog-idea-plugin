@@ -33,7 +33,6 @@
                                  instance="com.jfrog.ide.idea.ui.configuration.JFrogGlobalConfiguration"/>
         <projectConfigurable id="JFrogCi" displayName="JFrog CI Integration"
                              instance="com.jfrog.ide.idea.ui.configuration.JFrogProjectConfiguration"/>
-        <externalProjectDataService implementation="com.jfrog.ide.idea.gradle.GradleDependenciesDataService"/>
         <applicationService serviceImplementation="com.jfrog.ide.idea.log.Logger"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.ui.filters.filtermanager.LocalFilterManager"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.ui.filters.filtermanager.CiFilterManager"/>
