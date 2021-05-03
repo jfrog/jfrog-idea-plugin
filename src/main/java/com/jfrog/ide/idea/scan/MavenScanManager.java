@@ -4,8 +4,6 @@ import com.google.common.collect.Sets;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.openapi.externalSystem.model.DataNode;
 import com.intellij.openapi.externalSystem.model.project.ProjectData;
-import com.intellij.openapi.externalSystem.model.project.dependencies.ProjectDependencies;
-import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefreshCallback;
 import com.intellij.openapi.fileTypes.StdFileTypes;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
@@ -33,7 +31,6 @@ import org.jfrog.build.extractor.scan.Scope;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -66,12 +63,7 @@ public class MavenScanManager extends ScanManager {
     }
 
     @Override
-    protected void refreshDependencies(ExternalProjectRefreshCallback cbk, @Nullable Collection<DataNode<ProjectDependencies>> dependenciesData) {
-        cbk.onSuccess(null);
-    }
-
-    @Override
-    protected void buildTree(@Nullable DataNode<ProjectData> externalProject) {
+    protected void buildTree() {
         DependencyTree rootNode = new DependencyTree(project.getName());
         MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject -> populateMavenModule(rootNode, rootMavenProject, Sets.newHashSet()));
         GeneralInfo generalInfo = new GeneralInfo().artifactId(project.getName()).path(Utils.getProjectBasePath(project).toString()).pkgType("maven");

@@ -23,7 +23,7 @@ intellij {
 }
 
 runIde {
-    jvmArgs '-Xmx2G'
+    jvmArgs '-Xmx4G'
 }
 
 repositories {
@@ -40,7 +40,7 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: '1.5.2'
+    implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: '1.5.x-SNAPSHOT'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
     testImplementation "org.mockito:mockito-core:3.9.0"
     testImplementation "org.mockito:mockito-inline:3.9.0"

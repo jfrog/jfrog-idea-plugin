@@ -14,6 +14,6 @@ public class RefreshLocalAction extends AnAction {
         if (e.getProject() == null) {
             return;
         }
-        ScanManagersFactory.getInstance(e.getProject()).startScan(false, null);
+        ScanManagersFactory.getInstance(e.getProject()).startScan(false);
     }
 }
