@@ -9,11 +9,12 @@ import com.intellij.psi.PsiManager;
 import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.gradle.GradleTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
-import com.jfrog.ide.idea.inspections.GradleInspection;
+import com.jfrog.ide.idea.inspections.GradleGroovyInspection;
+import com.jfrog.ide.idea.inspections.GradleKotlinInspection;
 import com.jfrog.ide.idea.utils.Utils;
 
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
 /**
  * Created by Yahav Itzhak on 9 Nov 2017.
@@ -21,6 +22,7 @@ import java.nio.file.Paths;
 public class GradleScanManager extends ScanManager {
 
     private final GradleTreeBuilder gradleTreeBuilder;
+    private boolean isKotlin;
 
     GradleScanManager(Project mainProject, Project project) throws IOException {
         super(mainProject, project, ComponentPrefix.GAV);
@@ -30,10 +32,15 @@ public class GradleScanManager extends ScanManager {
 
     @Override
     protected PsiFile[] getProjectDescriptors() {
-        String buildGradlePath = Paths.get(Utils.getProjectBasePath(project).toString(), "build.gradle").toString();
-        VirtualFile file = LocalFileSystem.getInstance().findFileByPath(buildGradlePath);
+        LocalFileSystem localFileSystem = LocalFileSystem.getInstance();
+        Path basePath = Utils.getProjectBasePath(project);
+        VirtualFile file = localFileSystem.findFileByPath(basePath.resolve("build.gradle").toString());
         if (file == null) {
-            return null;
+            file = localFileSystem.findFileByPath(basePath.resolve("build.gradle.kts").toString());
+            if (file == null) {
+                return null;
+            }
+            isKotlin = true;
         }
         PsiFile psiFile = PsiManager.getInstance(mainProject).findFile(file);
         return new PsiFile[]{psiFile};
@@ -41,7 +48,7 @@ public class GradleScanManager extends ScanManager {
 
     @Override
     protected LocalInspectionTool getInspectionTool() {
-        return new GradleInspection();
+        return isKotlin ? new GradleKotlinInspection() : new GradleGroovyInspection();
     }
 
     @Override

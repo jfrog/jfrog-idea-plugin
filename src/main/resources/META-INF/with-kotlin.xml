@@ -1,12 +1,12 @@
 <idea-plugin>
-    <depends>org.intellij.groovy</depends>
+    <depends>org.jetbrains.kotlin</depends>
     <extensions defaultExtensionNs="com.intellij">
-        <localInspection language="Groovy"
+        <localInspection language="kotlin"
                          displayName="Show in dependency tree"
                          groupBundle="messages.InspectionsBundle"
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"
-                         implementationClass="com.jfrog.ide.idea.inspections.GradleInspection"/>
-        <annotator language="Groovy" implementationClass="com.jfrog.ide.idea.inspections.GradleInspection"/>
+                         implementationClass="com.jfrog.ide.idea.inspections.GradleKotlinInspection"/>
+        <annotator language="kotlin" implementationClass="com.jfrog.ide.idea.inspections.GradleKotlinInspection"/>
     </extensions>
 </idea-plugin>
