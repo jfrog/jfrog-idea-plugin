@@ -2,7 +2,7 @@
 [![Marketplace](https://img.shields.io/jetbrains/plugin/v/9834-jfrog)](https://plugins.jetbrains.com/plugin/9834-jfrog)
 # JFrog Idea Plugin 
 
-JFrog IntelliJ IDEA plugin adds JFrog Xray scanning of Maven, Gradle, Go and Npm project dependencies to your IntelliJ IDEA.
+JFrog IntelliJ IDEA plugin adds JFrog Xray scanning of Maven, Gradle, Go, Npm, and PyPI project dependencies to your IntelliJ IDEA.
 
 # Building and Testing the Sources
 

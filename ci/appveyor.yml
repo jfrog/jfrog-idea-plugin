@@ -3,7 +3,7 @@ image:
   - Ubuntu
   - Visual Studio 2017
 
-stack: node 8, jdk 8
+stack: node 8, jdk 8, python 3.7.9
 environment:
   APPVEYOR_YML_DISABLE_PS_LINUX: true
   nodejs_version: "8"

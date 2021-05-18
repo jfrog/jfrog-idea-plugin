@@ -122,6 +122,7 @@ public class ScanManagersFactory {
         } else {
             createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.MAVEN, "");
             createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.GRADLE, "");
+            createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.PYPI, "");
         }
         paths.add(Utils.getProjectBasePath(mainProject));
         createScanManagers(scanManagers, paths);
@@ -158,7 +159,8 @@ public class ScanManagersFactory {
         MAVEN,
         GRADLE,
         NPM,
-        GO
+        GO,
+        PYPI
     }
 
     /**
@@ -184,6 +186,11 @@ public class ScanManagersFactory {
                 case GRADLE:
                     if (GradleScanManager.isApplicable(mainProject)) {
                         scanManagers.put(projectHash, new GradleScanManager(mainProject));
+                    }
+                    return;
+                case PYPI:
+                    if (PypiScanManager.isApplicable()) {
+                        scanManagers.put(projectHash, new PypiScanManager(mainProject));
                     }
                     return;
                 case NPM:

@@ -15,12 +15,14 @@
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="201.6668.121"/>
+    <idea-version since-build="203.4203.26"/>
     <depends>com.intellij.modules.lang</depends>
     <depends config-file="with-java.xml" optional="true">com.intellij.modules.java</depends>
     <depends config-file="with-gradle.xml" optional="true">com.intellij.gradle</depends>
     <depends config-file="with-maven.xml" optional="true">org.jetbrains.idea.maven</depends>
     <depends config-file="with-go.xml" optional="true">org.jetbrains.plugins.go</depends>
+    <depends config-file="with-python.xml" optional="true">com.intellij.modules.python</depends>
+    <depends config-file="with-python-ce.xml" optional="true">PythonCore</depends>
 
     <application-components>
         <component>
