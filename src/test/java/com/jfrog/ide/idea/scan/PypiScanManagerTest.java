@@ -50,24 +50,9 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-
-        tmpDir = Files.createTempDirectory("").toFile();
-        CommandExecutor commandExecutor = new CommandExecutor("python3", null);
-        CommandResults results = commandExecutor.exeCommand(tmpDir, Lists.newArrayList("-m", "venv", "pip-venv"), null, new NullLog());
-        assertTrue(results.getRes() + ". Error: " + results.getErr(), results.isOk());
-        Path venvPath = tmpDir.toPath().resolve("pip-venv").resolve("bin").resolve("python");
-        pythonSdk = new ProjectJdkImpl(SDK_NAME, PythonSdkType.getInstance(), venvPath.toString(), "");
-        PyPackageManager pyPackageManager = PyPackageManagers.getInstance().forSdk(pythonSdk);
-        ProgressManager.getInstance().run(new Task.Modal(getProject(), "Install Dependency", false) {
-            @Override
-            public void run(@NotNull ProgressIndicator indicator) {
-                try {
-                    pyPackageManager.install(DIRECT_DEPENDENCY_NAME + "==" + DIRECT_DEPENDENCY_VERSION);
-                } catch (ExecutionException e) {
-                    fail(ExceptionUtils.getRootCauseMessage(e));
-                }
-            }
-        });
+        createVirtualEnv();
+        resolvePythonSdk();
+        installDependencyOnVirtualEnv();
     }
 
     @Override
@@ -75,6 +60,7 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
         if (tmpDir != null) {
             FileUtils.deleteDirectory(tmpDir);
         }
+        PyPackageManagers.getInstance().clearCache(pythonSdk);
         super.tearDown();
     }
 
@@ -83,40 +69,68 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
         return LightJavaCodeInsightFixtureTestCase.JAVA_11;
     }
 
+    private void createVirtualEnv() throws IOException, InterruptedException {
+        tmpDir = Files.createTempDirectory("").toFile();
+        CommandExecutor commandExecutor = new CommandExecutor("python3", null);
+        CommandResults results = commandExecutor.exeCommand(tmpDir, Lists.newArrayList("-m", "venv", "pip-venv"), null, new NullLog());
+        assertTrue(results.getRes() + ". Error: " + results.getErr(), results.isOk());
+    }
+
+    private void resolvePythonSdk() {
+        Path venvPath = tmpDir.toPath().resolve("pip-venv").resolve("bin").resolve("python");
+        pythonSdk = new ProjectJdkImpl(SDK_NAME, PythonSdkType.getInstance(), venvPath.toString(), "");
+    }
+
+    private void installDependencyOnVirtualEnv() {
+        ProgressManager.getInstance().run(new Task.Modal(getProject(), "Install Dependency", false) {
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+                try {
+                    PyPackageManager pyPackageManager = PyPackageManager.getInstance(pythonSdk);
+                    pyPackageManager.install(DIRECT_DEPENDENCY_NAME + "==" + DIRECT_DEPENDENCY_VERSION);
+                } catch (ExecutionException e) {
+                    fail(ExceptionUtils.getRootCauseMessage(e));
+                }
+            }
+        });
+    }
+
     public void testBuildTree() throws IOException {
+        PypiScanManager pypiScanManager = new PypiScanManager(getProject());
+
+        // Create Pypi dependency tree
         try (MockedStatic<PythonSdkUtil> mockController = Mockito.mockStatic(PythonSdkUtil.class)) {
             mockController.when(PythonSdkUtil::getAllSdks).thenReturn(Lists.newArrayList(pythonSdk));
-            PypiScanManager pypiScanManager = new PypiScanManager(getProject());
             pypiScanManager.buildTree(null);
-
-            // Check root SDK node
-            DependencyTree results = pypiScanManager.getScanResults();
-            assertEquals(SDK_NAME, results.getUserObject());
-            assertEquals(Sets.newHashSet(new Scope()), results.getScopes());
-            GeneralInfo generalInfo = results.getGeneralInfo();
-            assertEquals("Python SDK", generalInfo.getPkgType());
-            assertEquals(SDK_NAME, generalInfo.getArtifactId());
-            assertEquals(pythonSdk.getHomePath(), generalInfo.getPath());
-            assertSize(1, results.getChildren());
-
-            // Check direct dependency
-            DependencyTree pipGrip = TestUtils.getAndAssertChild(results, DIRECT_DEPENDENCY_NAME + ":" + DIRECT_DEPENDENCY_VERSION);
-            assertEquals(Sets.newHashSet(new Scope()), pipGrip.getScopes());
-            assertSize(7, pipGrip.getChildren());
-            generalInfo = pipGrip.getGeneralInfo();
-            assertEquals("pypi", generalInfo.getPkgType());
-            assertEquals(DIRECT_DEPENDENCY_NAME, generalInfo.getArtifactId());
-            assertEquals(DIRECT_DEPENDENCY_VERSION, generalInfo.getVersion());
-
-            // Check transitive dependency
-            DependencyTree anyTree = TestUtils.getAndAssertChild(pipGrip, TRANSITIVE_DEPENDENCY_NAME + ":" + TRANSITIVE_DEPENDENCY_VERSION);
-            assertEquals(Sets.newHashSet(new Scope()), anyTree.getScopes());
-            generalInfo = anyTree.getGeneralInfo();
-            assertEquals("pypi", generalInfo.getPkgType());
-            assertEquals(TRANSITIVE_DEPENDENCY_NAME, generalInfo.getArtifactId());
-            assertEquals(TRANSITIVE_DEPENDENCY_VERSION, generalInfo.getVersion());
-            assertSize(1, anyTree.getChildren());
         }
+
+        // Check root SDK node
+        DependencyTree results = pypiScanManager.getScanResults();
+        assertEquals(SDK_NAME, results.getUserObject());
+        assertEquals(Sets.newHashSet(new Scope()), results.getScopes());
+        GeneralInfo generalInfo = results.getGeneralInfo();
+        assertEquals("Python SDK", generalInfo.getPkgType());
+        assertEquals(SDK_NAME, generalInfo.getArtifactId());
+        assertEquals(pythonSdk.getHomePath(), generalInfo.getPath());
+        assertSize(1, results.getChildren());
+
+        // Check direct dependency
+        DependencyTree pipGrip = TestUtils.getAndAssertChild(results, DIRECT_DEPENDENCY_NAME + ":" + DIRECT_DEPENDENCY_VERSION);
+        assertEquals(Sets.newHashSet(new Scope()), pipGrip.getScopes());
+        assertSize(7, pipGrip.getChildren());
+        generalInfo = pipGrip.getGeneralInfo();
+        assertEquals("pypi", generalInfo.getPkgType());
+        assertEquals(DIRECT_DEPENDENCY_NAME, generalInfo.getArtifactId());
+        assertEquals(DIRECT_DEPENDENCY_VERSION, generalInfo.getVersion());
+
+        // Check transitive dependency
+        DependencyTree anyTree = TestUtils.getAndAssertChild(pipGrip, TRANSITIVE_DEPENDENCY_NAME + ":" + TRANSITIVE_DEPENDENCY_VERSION);
+        assertEquals(Sets.newHashSet(new Scope()), anyTree.getScopes());
+        generalInfo = anyTree.getGeneralInfo();
+        assertEquals("pypi", generalInfo.getPkgType());
+        assertEquals(TRANSITIVE_DEPENDENCY_NAME, generalInfo.getArtifactId());
+        assertEquals(TRANSITIVE_DEPENDENCY_VERSION, generalInfo.getVersion());
+        assertSize(1, anyTree.getChildren());
     }
 
     public void testRefreshPythonSdk() throws IOException {

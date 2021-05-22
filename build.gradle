@@ -5,7 +5,7 @@ buildscript {
 }
 
 plugins {
-    id "org.jetbrains.intellij" version "0.4.21"
+    id "org.jetbrains.intellij" version "0.7.3"
 }
 
 sourceCompatibility = 1.11
@@ -40,7 +40,7 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: '1.5.2'
+    implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: '1.5.x-SNAPSHOT'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
     testImplementation "org.mockito:mockito-core:3.9.0"
     testImplementation "org.mockito:mockito-inline:3.9.0"
