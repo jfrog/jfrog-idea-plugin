@@ -3,7 +3,7 @@ image:
   - Ubuntu
   - Visual Studio 2017
 
-stack: node 8, jdk 8, python 3.7.9
+stack: node 8, jdk 11.0.2, python 3.7.9
 environment:
   APPVEYOR_YML_DISABLE_PS_LINUX: true
   nodejs_version: "8"
@@ -12,7 +12,7 @@ environment:
 before_test:
   - sh: curl -s "https://get.sdkman.io" | bash
   - sh: source "$HOME/.sdkman/bin/sdkman-init.sh"
-  - sh: sdk install java `sdk list java | grep -E "8.*-zulu" | head -1 | awk '{print $NF}'` && java -version
+  - sh: sdk install java `sdk list java | grep -E "11.*-zulu" | head -1 | awk '{print $NF}'` && java -version
 
 test_script:
   - sh: ./gradlew clean verifyPlugin test

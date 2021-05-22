@@ -112,7 +112,7 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
         assertEquals("Python SDK", generalInfo.getPkgType());
         assertEquals(SDK_NAME, generalInfo.getArtifactId());
         assertEquals(pythonSdk.getHomePath(), generalInfo.getPath());
-        assertSize(1, results.getChildren());
+        assertNotEmpty(results.getChildren());
 
         // Check direct dependency
         DependencyTree pipGrip = TestUtils.getAndAssertChild(results, DIRECT_DEPENDENCY_NAME + ":" + DIRECT_DEPENDENCY_VERSION);
