@@ -101,7 +101,7 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
         // Create Pypi dependency tree
         try (MockedStatic<PythonSdkUtil> mockController = Mockito.mockStatic(PythonSdkUtil.class)) {
             mockController.when(PythonSdkUtil::getAllSdks).thenReturn(Lists.newArrayList(pythonSdk));
-            pypiScanManager.buildTree(null);
+            pypiScanManager.buildTree();
         }
 
         // Check root SDK node
