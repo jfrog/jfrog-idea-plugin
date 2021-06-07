@@ -100,9 +100,11 @@ public class ScanManagersFactory {
         if (scanManager != null) {
             scanManagers.put(projectHash, scanManager);
         } else {
-            // The Maven scan manager is a special case whereby we retrieve the
-            // information on the Maven dependencies from the Maven plugin.
+            // Unlike other scan managers whereby we create them if the package descriptor exist, the Maven and Pypi
+            // scan managers are created if the Maven or the Python plugins are installed and there are projects
+            // loaded, respectfully.
             createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.MAVEN, "");
+            createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.PYPI, "");
         }
         paths.add(Utils.getProjectBasePath(mainProject));
         createScanManagers(scanManagers, paths);
@@ -143,12 +145,14 @@ public class ScanManagersFactory {
         MAVEN,
         GRADLE,
         NPM,
-        GO
+        GO,
+        PYPI
     }
 
     /**
      * Create a new scan manager according to the scan manager type. Add it to the scan managers set.
-     * Maven - Create only if 'maven' plugin is installed and there are Maven projects.
+     * Maven - Create only if the 'maven' plugin is installed and there are Maven projects.
+     * Pypi - Create only if the 'python' plugin is installed and there are Python SDKs applied.
      * Go, npm and gradle - Always create.
      *
      * @param scanManagers - Scan managers set
@@ -165,6 +169,11 @@ public class ScanManagersFactory {
                         scanManagers.put(projectHash, new MavenScanManager(mainProject));
                     }
                     return;
+                case PYPI:
+                    if (PypiScanManager.isApplicable()) {
+                        scanManagers.put(projectHash, new PypiScanManager(mainProject));
+                    }
+                    return;
                 case GRADLE:
                     scanManagers.put(projectHash, new GradleScanManager(mainProject,
                             new GradleProject(Objects.requireNonNull(ProjectUtil.guessProjectDir(mainProject)), dir)));
@@ -178,7 +187,7 @@ public class ScanManagersFactory {
                             new GoProject(Objects.requireNonNull(ProjectUtil.guessProjectDir(mainProject)), dir)));
             }
         } catch (NoClassDefFoundError noClassDefFoundError) {
-            // The 'maven' or 'gradle' plugins are not installed.
+            // The 'maven' or 'python' plugins are not installed.
         }
     }
 

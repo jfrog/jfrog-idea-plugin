@@ -18,7 +18,7 @@ import java.awt.*;
  */
 public class ComponentUtils {
 
-    public static final String UNSUPPORTED_TEXT = "Unsupported project type, currently only Maven, Gradle, Go and npm projects are supported.";
+    public static final String UNSUPPORTED_TEXT = "Unsupported project type, currently only Maven, Gradle, Go, npm, and PyPI projects are supported.";
     public static final String SELECT_COMPONENT_TEXT = "Select component or issue for more details.";
 
     public static JTextArea createJTextArea(String text, boolean lineWrap) {

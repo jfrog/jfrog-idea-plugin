@@ -8,7 +8,6 @@ import com.intellij.openapi.wm.impl.ToolWindowImpl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.jfrog.build.extractor.scan.DependencyTree;
-import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 
 import java.nio.file.Path;
@@ -28,7 +27,8 @@ public class Utils {
         GeneralInfo rhsGeneralInfo = rhs.getGeneralInfo();
         return ObjectUtils.allNotNull(lhsGeneralInfo, rhsGeneralInfo) &&
                 StringUtils.equals(lhsGeneralInfo.getName(), rhsGeneralInfo.getName()) &&
-                StringUtils.equals(lhsGeneralInfo.getPath(), rhsGeneralInfo.getPath());
+                StringUtils.equals(lhsGeneralInfo.getPath(), rhsGeneralInfo.getPath()) &&
+                StringUtils.equals(lhsGeneralInfo.getPkgType(), rhsGeneralInfo.getPkgType());
     }
 
     public static int getProjectIdentifier(String name, String path) {
