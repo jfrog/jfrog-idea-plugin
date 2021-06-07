@@ -13,6 +13,12 @@ public class GradleProject extends ProjectBase {
         this.basePath = basePath;
     }
 
+    /**
+     * Create a new Gradle project.
+     *
+     * @param baseDir  - Represents the base directory of the IntelliJ opened project
+     * @param basePath - The directory where the build.gradle or the build.gradle.kts are located
+     */
     public GradleProject(VirtualFile baseDir, String basePath) {
         this(basePath);
         Path buildGradleFile = Paths.get(baseDir.getPath()).relativize(Paths.get(basePath, "build.gradle"));

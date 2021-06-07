@@ -100,6 +100,8 @@ public class ScanManagersFactory {
         if (scanManager != null) {
             scanManagers.put(projectHash, scanManager);
         } else {
+            // The Maven scan manager is a special case whereby we retrieve the
+            // information on the Maven dependencies from the Maven plugin.
             createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.MAVEN, "");
         }
         paths.add(Utils.getProjectBasePath(mainProject));
@@ -147,8 +149,7 @@ public class ScanManagersFactory {
     /**
      * Create a new scan manager according to the scan manager type. Add it to the scan managers set.
      * Maven - Create only if 'maven' plugin is installed and there are Maven projects.
-     * Gradle - Create only if 'gradle' plugin is installed and there are Gradle projects.
-     * Go & npm - Always create.
+     * Go, npm and gradle - Always create.
      *
      * @param scanManagers - Scan managers set
      * @param projectHash  - Project hash - calculated by the project name and the path

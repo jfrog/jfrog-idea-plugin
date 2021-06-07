@@ -22,7 +22,7 @@ import java.nio.file.Path;
 public class GradleScanManager extends ScanManager {
 
     private final GradleTreeBuilder gradleTreeBuilder;
-    private boolean isKotlin;
+    private boolean kotlin;
 
     GradleScanManager(Project mainProject, Project project) throws IOException {
         super(mainProject, project, ComponentPrefix.GAV);
@@ -40,7 +40,7 @@ public class GradleScanManager extends ScanManager {
             if (file == null) {
                 return null;
             }
-            isKotlin = true;
+            kotlin = true;
         }
         PsiFile psiFile = PsiManager.getInstance(mainProject).findFile(file);
         return new PsiFile[]{psiFile};
@@ -48,7 +48,7 @@ public class GradleScanManager extends ScanManager {
 
     @Override
     protected LocalInspectionTool getInspectionTool() {
-        return isKotlin ? new GradleKotlinInspection() : new GradleGroovyInspection();
+        return kotlin ? new GradleKotlinInspection() : new GradleGroovyInspection();
     }
 
     @Override
