@@ -1,31 +1,30 @@
 package com.jfrog.ide.idea.inspections;
 
-import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.literals.GrLiteral;
+import org.jetbrains.kotlin.psi.KtValueArgumentList;
 
 /**
  * @author yahavi
  */
-public class GradleInspectionTest extends InspectionsTest {
+public class GradleKotlinInspectionTest extends InspectionsTest {
 
     // We are setting 'build.groovy' instead pf 'build.gradle' since the testing FW doesn't identify 'build.gradle'
     // files as groovy-script.
-    private static final String PACKAGE_DESCRIPTOR = "build.groovy";
+    private static final String PACKAGE_DESCRIPTOR = "build.gradle.kts";
     private final Object[][] DEPENDENCIES = {
             // offset, groupId, artifactId
-            {96, "a", "b"},
-            {139, "a", "b"},
-            {180, "a", "b"},
-            {215, "d", "e"},
-            {256, "a", "b"},
-            {321, "", "project"}
+            {96, "", "project"},
+            {119, "a", "b"},
+            {144, "d", "e"},
+            {147, "d", "e"},
+            {155, "d", "e"},
     };
 
-    private final int[] NON_DEPENDENCIES_POSITIONS = {20, 287, 385};
+    private final int[] NON_DEPENDENCIES_POSITIONS = {273, 338};
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public void setUp() throws Exception {
-        super.setUp(new GradleInspection(), PACKAGE_DESCRIPTOR, GrLiteral.class);
+        super.setUp(new GradleKotlinInspection(), PACKAGE_DESCRIPTOR, KtValueArgumentList.class);
     }
 
     public void testDependencies() {

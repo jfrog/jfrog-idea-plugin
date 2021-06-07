@@ -3,8 +3,6 @@ package com.jfrog.ide.idea.scan;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.externalSystem.model.DataNode;
-import com.intellij.openapi.externalSystem.model.project.dependencies.ProjectDependencies;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
@@ -13,12 +11,12 @@ import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.projects.GoProject;
+import com.jfrog.ide.idea.projects.GradleProject;
 import com.jfrog.ide.idea.projects.NpmProject;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -51,10 +49,9 @@ public class ScanManagersFactory {
     /**
      * Start an Xray scan for all projects.
      *
-     * @param quickScan        - True to allow usage of the scan cache.
-     * @param dependenciesData - Dependencies to use in Gradle scans.
+     * @param quickScan - True to allow usage of the scan cache.
      */
-    public void startScan(boolean quickScan, @Nullable Collection<DataNode<ProjectDependencies>> dependenciesData) {
+    public void startScan(boolean quickScan) {
         if (DumbService.isDumb(mainProject)) { // If intellij is still indexing the project
             return;
         }
@@ -75,28 +72,11 @@ public class ScanManagersFactory {
             componentsTree.reset();
             NavigationService.clearNavigationMap(mainProject);
             for (ScanManager scanManager : scanManagers.values()) {
-                scanManager.asyncScanAndUpdateResults(quickScan, dependenciesData);
+                scanManager.asyncScanAndUpdateResults(quickScan);
             }
         } catch (IOException | RuntimeException e) {
             Logger.getInstance().error("", e);
         }
-    }
-
-    /**
-     * Start an Xray scan after Gradle dependencies import.
-     * For known Gradle projects - Start scan only for the project.
-     * For new Gradle projects - Start a full scan.
-     *
-     * @param project          - The Gradle project
-     * @param dependenciesData - Gradle's dependencies
-     */
-    public void tryScanSingleProject(Project project, Collection<DataNode<ProjectDependencies>> dependenciesData) {
-        ScanManager scanManager = scanManagers.get(Utils.getProjectIdentifier(project));
-        if (scanManager != null) { // If Gradle project already exists
-            scanManager.asyncScanAndUpdateResults(true, dependenciesData);
-            return;
-        }
-        startScan(true, dependenciesData); // New Gradle project
     }
 
     /**
@@ -120,8 +100,10 @@ public class ScanManagersFactory {
         if (scanManager != null) {
             scanManagers.put(projectHash, scanManager);
         } else {
+            // Unlike other scan managers whereby we create them if the package descriptor exist, the Maven and Pypi
+            // scan managers are created if the Maven or the Python plugins are installed and there are projects
+            // loaded, respectfully.
             createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.MAVEN, "");
-            createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.GRADLE, "");
             createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.PYPI, "");
         }
         paths.add(Utils.getProjectBasePath(mainProject));
@@ -136,6 +118,10 @@ public class ScanManagersFactory {
         // Create npm scan-managers.
         Set<String> packageJsonDirs = packageFileFinder.getNpmPackagesFilePairs();
         createScanManagersForPackageDirs(packageJsonDirs, scanManagers, ScanManagerTypes.NPM);
+
+        // Create gradle scan-managers.
+        Set<String> buildGradleDirs = packageFileFinder.getBuildGradlePackagesFilePairs();
+        createScanManagersForPackageDirs(buildGradleDirs, scanManagers, ScanManagerTypes.GRADLE);
 
         // Create go scan-managers.
         Set<String> gomodDirs = packageFileFinder.getGoPackagesFilePairs();
@@ -165,9 +151,9 @@ public class ScanManagersFactory {
 
     /**
      * Create a new scan manager according to the scan manager type. Add it to the scan managers set.
-     * Maven - Create only if 'maven' plugin is installed and there are Maven projects.
-     * Gradle - Create only if 'gradle' plugin is installed and there are Gradle projects.
-     * Go & npm - Always create.
+     * Maven - Create only if the 'maven' plugin is installed and there are Maven projects.
+     * Pypi - Create only if the 'python' plugin is installed and there are Python SDKs applied.
+     * Go, npm and gradle - Always create.
      *
      * @param scanManagers - Scan managers set
      * @param projectHash  - Project hash - calculated by the project name and the path
@@ -183,15 +169,14 @@ public class ScanManagersFactory {
                         scanManagers.put(projectHash, new MavenScanManager(mainProject));
                     }
                     return;
-                case GRADLE:
-                    if (GradleScanManager.isApplicable(mainProject)) {
-                        scanManagers.put(projectHash, new GradleScanManager(mainProject));
-                    }
-                    return;
                 case PYPI:
                     if (PypiScanManager.isApplicable()) {
                         scanManagers.put(projectHash, new PypiScanManager(mainProject));
                     }
+                    return;
+                case GRADLE:
+                    scanManagers.put(projectHash, new GradleScanManager(mainProject,
+                            new GradleProject(Objects.requireNonNull(ProjectUtil.guessProjectDir(mainProject)), dir)));
                     return;
                 case NPM:
                     scanManagers.put(projectHash, new NpmScanManager(mainProject,
@@ -202,7 +187,7 @@ public class ScanManagersFactory {
                             new GoProject(Objects.requireNonNull(ProjectUtil.guessProjectDir(mainProject)), dir)));
             }
         } catch (NoClassDefFoundError noClassDefFoundError) {
-            // The 'maven' or 'gradle' plugins are not installed.
+            // The 'maven' or 'python' plugins are not installed.
         }
     }
 

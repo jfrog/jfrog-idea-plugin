@@ -9,7 +9,6 @@ import com.intellij.util.ui.tree.TreeUtil;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.ui.utils.IconUtils;
 import com.jfrog.ide.idea.utils.Utils;
-import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependencyTree;
 
@@ -35,7 +34,6 @@ public class ShowInDependencyTree implements LocalQuickFix, Iconable, HighPriori
         return IconUtils.load("jfrog_icon");
     }
 
-    @Nls(capitalization = Nls.Capitalization.Sentence)
     @NotNull
     @Override
     public String getFamilyName() {

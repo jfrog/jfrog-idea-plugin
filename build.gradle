@@ -17,7 +17,7 @@ apply plugin: 'java'
 
 intellij {
     version 'IU-2020.3'
-    plugins = ['gradle', 'maven', 'Groovy', 'properties', 'java', 'org.jetbrains.plugins.go:203.5981.155', "Pythonid:203.5981.165"]
+    plugins = ['gradle', 'maven', 'Groovy', 'properties', 'java', 'Kotlin', 'org.jetbrains.plugins.go:203.5981.155', 'Pythonid:203.5981.165']
     pluginName 'JFrog'
     updateSinceUntilBuild = false
 }

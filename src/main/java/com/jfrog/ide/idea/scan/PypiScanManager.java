@@ -4,10 +4,6 @@ import com.google.common.collect.Sets;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.execution.ExecutionException;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.externalSystem.model.DataNode;
-import com.intellij.openapi.externalSystem.model.project.ProjectData;
-import com.intellij.openapi.externalSystem.model.project.dependencies.ProjectDependencies;
-import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefreshCallback;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.util.Disposer;
@@ -25,7 +21,6 @@ import com.jfrog.ide.idea.utils.Utils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.jetbrains.annotations.Nullable;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.jfrog.build.extractor.scan.Scope;
@@ -60,12 +55,7 @@ public class PypiScanManager extends ScanManager {
     }
 
     @Override
-    protected void refreshDependencies(ExternalProjectRefreshCallback cbk, @Nullable Collection<DataNode<ProjectDependencies>> dependenciesData) {
-        cbk.onSuccess(null);
-    }
-
-    @Override
-    protected void buildTree(@Nullable DataNode<ProjectData> externalProject) {
+    protected void buildTree() {
         refreshPythonSdks();
         DependencyTree rootNode = createRootNode();
         initDependencyNode(rootNode, project.getName(), "", Utils.getProjectBasePath(project).toString(), "pypi");
