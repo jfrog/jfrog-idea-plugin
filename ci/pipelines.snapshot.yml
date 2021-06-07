@@ -9,7 +9,7 @@ pipelines:
           auto:
             language: java
             versions:
-              - "8.0.0"
+              - "11.0.0"
 
     steps:
       - name: Snapshot
