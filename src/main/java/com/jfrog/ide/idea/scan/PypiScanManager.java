@@ -137,7 +137,7 @@ public class PypiScanManager extends ScanManager {
                 .map(String::toLowerCase)
                 .collect(Collectors.toSet());
         for (PyPackage pyPackage : values) {
-            // If pyPackage contained in one of the dependencies, we conclude it is transitive dependency.
+            // If pyPackage is contained in one of the dependencies, we conclude it is a transitive dependency.
             // If it's transitive, we shouldn't add it as a direct dependency.
             if (!allDependencies.contains(pyPackage.getName().toLowerCase())) {
                 populateDependencyTree(sdkNode, pyPackage, dependencyMapping);
