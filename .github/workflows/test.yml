@@ -1,0 +1,36 @@
+name: Test
+
+on: [ push, pull_request ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macOS-latest ]
+    steps:
+      - uses: actions/checkout@v2
+
+      # Install required tools
+      - name: Set up Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+      - name: Setup NodeJS
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+          check-latest: true
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      # Run tests
+      - name: Tests on macOS, Linux
+        run: ./gradlew clean verifyPlugin test
+        if: runner.os != 'Windows'
+      - name: Tests on Windows
+        run: ./gradlew.bat clean verifyPlugin test
+        if: runner.os == 'Windows'

@@ -15,6 +15,7 @@ import com.jetbrains.python.sdk.PythonSdkType;
 import com.jetbrains.python.sdk.PythonSdkUtil;
 import com.jfrog.ide.idea.TestUtils;
 import org.apache.commons.compress.utils.Sets;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.codehaus.plexus.util.FileUtils;
 import org.jetbrains.annotations.NotNull;
@@ -71,14 +72,21 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
 
     private void createVirtualEnv() throws IOException, InterruptedException {
         tmpDir = Files.createTempDirectory("").toFile();
-        CommandExecutor commandExecutor = new CommandExecutor("python3", null);
+        CommandExecutor commandExecutor = new CommandExecutor("python", null);
         CommandResults results = commandExecutor.exeCommand(tmpDir, Lists.newArrayList("-m", "venv", "pip-venv"), null, new NullLog());
+        if (!results.isOk()) {
+            // The Python tests required Python 3 because the "venv" module exists only at Python 3.
+            // In some machines the "python" executable is Python 2.
+            commandExecutor = new CommandExecutor("python3", null);
+            results = commandExecutor.exeCommand(tmpDir, Lists.newArrayList("-m", "venv", "pip-venv"), null, new NullLog());
+        }
         assertTrue(results.getRes() + ". Error: " + results.getErr(), results.isOk());
     }
 
     private void resolvePythonSdk() {
-        Path venvPath = tmpDir.toPath().resolve("pip-venv").resolve("bin").resolve("python");
-        pythonSdk = new ProjectJdkImpl(SDK_NAME, PythonSdkType.getInstance(), venvPath.toString(), "");
+        Path virtualEnv = tmpDir.toPath().resolve("pip-venv");
+        Path venvPath = SystemUtils.IS_OS_WINDOWS ? virtualEnv.resolve("Scripts") : virtualEnv.resolve("bin");
+        pythonSdk = new ProjectJdkImpl(SDK_NAME, PythonSdkType.getInstance(), venvPath.resolve("python").toString(), "");
     }
 
     private void installDependencyOnVirtualEnv() {
