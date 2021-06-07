@@ -18,7 +18,8 @@
     <idea-version since-build="201.6668.121"/>
     <depends>com.intellij.modules.lang</depends>
     <depends config-file="with-java.xml" optional="true">com.intellij.modules.java</depends>
-    <depends config-file="with-gradle.xml" optional="true">com.intellij.gradle</depends>
+    <depends config-file="with-groovy.xml" optional="true">org.intellij.groovy</depends>
+    <depends config-file="with-kotlin.xml" optional="true">org.jetbrains.kotlin</depends>
     <depends config-file="with-maven.xml" optional="true">org.jetbrains.idea.maven</depends>
     <depends config-file="with-go.xml" optional="true">org.jetbrains.plugins.go</depends>
 
@@ -33,7 +34,6 @@
                                  instance="com.jfrog.ide.idea.ui.configuration.JFrogGlobalConfiguration"/>
         <projectConfigurable id="JFrogCi" displayName="JFrog CI Integration"
                              instance="com.jfrog.ide.idea.ui.configuration.JFrogProjectConfiguration"/>
-        <externalProjectDataService implementation="com.jfrog.ide.idea.gradle.GradleDependenciesDataService"/>
         <applicationService serviceImplementation="com.jfrog.ide.idea.log.Logger"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.ui.filters.filtermanager.LocalFilterManager"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.ui.filters.filtermanager.CiFilterManager"/>

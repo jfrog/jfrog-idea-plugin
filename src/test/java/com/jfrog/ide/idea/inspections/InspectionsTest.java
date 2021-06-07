@@ -48,7 +48,7 @@ public abstract class InspectionsTest extends LightJavaCodeInsightFixtureTestCas
             PsiElement element = TestUtils.getNonLeafElement(fileDescriptor, psiClass, (int) dependency[0]);
             GeneralInfo generalInfo = inspection.createGeneralInfo(element);
             Assert.assertNotNull(generalInfo);
-            Assert.assertEquals(generalInfoToString(generalInfo), generalInfoToString(createGeneralInfo(dependency)));
+            Assert.assertEquals(generalInfoToString(createGeneralInfo(dependency)), generalInfoToString(generalInfo));
             Assert.assertTrue(inspection.compareGeneralInfos(generalInfo, createGeneralInfo(dependency)));
         }
     }

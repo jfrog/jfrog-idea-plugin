@@ -9,10 +9,6 @@ import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ex.InspectionManagerEx;
 import com.intellij.codeInspection.ex.LocalInspectionToolWrapper;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.externalSystem.model.DataNode;
-import com.intellij.openapi.externalSystem.model.project.ProjectData;
-import com.intellij.openapi.externalSystem.model.project.dependencies.ProjectDependencies;
-import com.intellij.openapi.externalSystem.service.project.ExternalProjectRefreshCallback;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.progress.ProcessCanceledException;
@@ -44,7 +40,6 @@ import com.jfrog.xray.client.services.summary.Components;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.License;
 import org.jfrog.build.extractor.scan.Scope;
@@ -54,7 +49,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -86,15 +80,10 @@ public abstract class ScanManager extends ScanManagerBase {
     }
 
     /**
-     * Refresh project dependencies.
-     */
-    protected abstract void refreshDependencies(ExternalProjectRefreshCallback cbk, @Nullable Collection<DataNode<ProjectDependencies>> dependenciesData);
-
-    /**
      * Collect and return {@link Components} to be scanned by JFrog Xray.
      * Implementation should be project type specific.
      */
-    protected abstract void buildTree(@Nullable DataNode<ProjectData> externalProject) throws IOException;
+    protected abstract void buildTree() throws IOException;
 
     /**
      * Return all project descriptors under the scan-manager project, which need to be inspected by the corresponding {@link LocalInspectionTool}.
@@ -114,22 +103,17 @@ public abstract class ScanManager extends ScanManagerBase {
     /**
      * Scan and update dependency components.
      */
-    private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator, @Nullable Collection<DataNode<ProjectDependencies>> dependenciesData) {
-        // Don't scan if Xray is not configured
-        if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
-            getLog().warn("Xray server is not configured.");
-            return;
-        }
-        // Prevent multiple simultaneous scans
-        if (!scanInProgress.compareAndSet(false, true)) {
-            if (!quickScan) {
-                getLog().info("Scan already in progress");
-            }
-            return;
-        }
+    private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator) {
         try {
-            // Refresh dependencies -> Collect -> Scan and store to cache -> Update view
-            refreshDependencies(getRefreshDependenciesCbk(quickScan, indicator), dependenciesData);
+            buildTree();
+            scanAndCacheArtifacts(indicator, quickScan);
+            addXrayInfoToTree(getScanResults());
+            setScanResults();
+            DumbService.getInstance(mainProject).smartInvokeLater(this::runInspections);
+        } catch (ProcessCanceledException e) {
+            getLog().info("Xray scan was canceled");
+        } catch (Exception e) {
+            getLog().error("", e);
         } finally {
             scanInProgress.set(false);
         }
@@ -138,7 +122,7 @@ public abstract class ScanManager extends ScanManagerBase {
     /**
      * Launch async dependency scan.
      */
-    void asyncScanAndUpdateResults(boolean quickScan, @Nullable Collection<DataNode<ProjectDependencies>> dependenciesData) {
+    void asyncScanAndUpdateResults(boolean quickScan) {
         if (DumbService.isDumb(mainProject)) { // If intellij is still indexing the project
             return;
         }
@@ -148,7 +132,18 @@ public abstract class ScanManager extends ScanManagerBase {
                 if (project.isDisposed()) {
                     return;
                 }
-                scanAndUpdate(quickScan, new ProgressIndicatorImpl(indicator), dependenciesData);
+                if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
+                    getLog().warn("Xray server is not configured.");
+                    return;
+                }
+                // Prevent multiple simultaneous scans
+                if (!scanInProgress.compareAndSet(false, true)) {
+                    if (!quickScan) {
+                        getLog().info("Scan already in progress");
+                    }
+                    return;
+                }
+                scanAndUpdate(quickScan, new ProgressIndicatorImpl(indicator));
             }
         };
         // The progress manager is only good for foreground threads.
@@ -176,31 +171,7 @@ public abstract class ScanManager extends ScanManagerBase {
      * Launch async dependency scan.
      */
     void asyncScanAndUpdateResults() {
-        asyncScanAndUpdateResults(true, null);
-    }
-
-    private ExternalProjectRefreshCallback getRefreshDependenciesCbk(boolean quickScan, ProgressIndicator indicator) {
-        return new ExternalProjectRefreshCallback() {
-            @Override
-            public void onSuccess(@Nullable DataNode<ProjectData> externalProject) {
-                try {
-                    buildTree(externalProject);
-                    scanAndCacheArtifacts(indicator, quickScan);
-                    addXrayInfoToTree(getScanResults());
-                    setScanResults();
-                    DumbService.getInstance(mainProject).smartInvokeLater(() -> runInspections());
-                } catch (ProcessCanceledException e) {
-                    getLog().info("Xray scan was canceled");
-                } catch (Exception e) {
-                    getLog().error("", e);
-                }
-            }
-
-            @Override
-            public void onFailure(@NotNull String errorMessage, @Nullable String errorDetails) {
-                getLog().error(StringUtils.defaultIfEmpty(errorDetails, errorMessage));
-            }
-        };
+        asyncScanAndUpdateResults(true);
     }
 
     void runInspections() {

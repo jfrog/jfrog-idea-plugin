@@ -8,7 +8,6 @@ import com.intellij.ui.components.JBTextField;
 import com.intellij.util.messages.MessageBus;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -29,12 +28,13 @@ public class JFrogProjectConfiguration implements Configurable, Configurable.NoS
     }
 
     @Override
-    public @Nls(capitalization = Nls.Capitalization.Title) String getDisplayName() {
+    public String getDisplayName() {
         return "CI Integration";
     }
 
     @Override
-    public @Nullable JComponent createComponent() {
+    public @Nullable
+    JComponent createComponent() {
         return config;
     }
 
