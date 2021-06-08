@@ -75,7 +75,7 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
         CommandExecutor commandExecutor = new CommandExecutor("python", null);
         CommandResults results = commandExecutor.exeCommand(tmpDir, Lists.newArrayList("-m", "venv", "pip-venv"), null, new NullLog());
         if (!results.isOk()) {
-            // The Python tests required Python 3 because the "venv" module exists only at Python 3.
+            // The Python tests requires Python 3 because the "venv" module exists only at Python 3.
             // In some machines the "python" executable is Python 2.
             commandExecutor = new CommandExecutor("python3", null);
             results = commandExecutor.exeCommand(tmpDir, Lists.newArrayList("-m", "venv", "pip-venv"), null, new NullLog());
