@@ -17,10 +17,10 @@ public class JFrogToolWindow {
     public static final int TITLE_LABEL_SIZE = (int) TITLE_FONT_SIZE + 10;
     public static final int SCROLL_BAR_SCROLLING_UNITS = 16;
 
-    void initToolWindow(@NotNull ToolWindow toolWindow, @NotNull Project mainProject, boolean localProjectSupported, boolean buildsConfigured) {
+    void initToolWindow(@NotNull ToolWindow toolWindow, @NotNull Project project, boolean localProjectSupported, boolean buildsConfigured) {
         ContentManager contentManager = toolWindow.getContentManager();
-        JFrogLocalToolWindow jfrogLocalContent = new JFrogLocalToolWindow(mainProject, localProjectSupported);
-        JFrogCiToolWindow jFrogCiContent = new JFrogCiToolWindow(mainProject, buildsConfigured);
+        JFrogLocalToolWindow jfrogLocalContent = new JFrogLocalToolWindow(project, localProjectSupported);
+        JFrogCiToolWindow jFrogCiContent = new JFrogCiToolWindow(project, buildsConfigured);
         addContent(contentManager, jfrogLocalContent, jFrogCiContent);
     }
 

@@ -3,10 +3,8 @@ package com.jfrog.ide.idea.scan;
 import com.google.common.collect.Sets;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.execution.ExecutionException;
-import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
-import com.intellij.openapi.util.Disposer;
 import com.intellij.psi.PsiFile;
 import com.jetbrains.python.packaging.PyPackage;
 import com.jetbrains.python.packaging.PyPackageManager;
@@ -17,9 +15,7 @@ import com.jetbrains.python.sdk.PythonSdkUtil;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.filters.filtermanager.ConsistentFilterManager;
-import com.jfrog.ide.idea.utils.Utils;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
@@ -33,64 +29,37 @@ import java.util.stream.Collectors;
  * @author yahavi
  */
 public class PypiScanManager extends ScanManager {
-    private List<Sdk> pythonSdks = Lists.newArrayList();
-    private final Disposable sdkDisposable = () -> {
-    };
+    private final Sdk pythonSdk;
+
+    static List<Sdk> getAllPythonSdks() {
+        return PythonSdkUtil.getAllSdks();
+    }
 
     /**
-     * @param mainProject - Currently opened IntelliJ project. We'll use this project to retrieve project based services
-     *                    like {@link ConsistentFilterManager} and {@link ComponentsTree}.
+     * @param project - Currently opened IntelliJ project. We'll use this project to retrieve project based services
+     *                like {@link ConsistentFilterManager} and {@link ComponentsTree}.
      */
-    PypiScanManager(Project mainProject) throws IOException {
-        super(mainProject, mainProject, ComponentPrefix.PYPI);
-        getLog().info("Found PyPI project: " + getProjectName());
-    }
-
-    static boolean isApplicable() {
-        return CollectionUtils.isNotEmpty(PythonSdkUtil.getAllSdks());
-    }
-
-    List<Sdk> getPythonSdks() {
-        return pythonSdks;
+    PypiScanManager(Project project, Sdk pythonSdk) throws IOException {
+        super(project, pythonSdk.getHomePath(), ComponentPrefix.PYPI);
+        this.pythonSdk = pythonSdk;
+        getLog().info("Found PyPI SDK: " + getProjectName());
+        PyPackageUtil.runOnChangeUnderInterpreterPaths(pythonSdk, this.project, this::asyncScanAndUpdateResults);
     }
 
     @Override
     protected void buildTree() {
-        refreshPythonSdks();
         DependencyTree rootNode = createRootNode();
-        initDependencyNode(rootNode, project.getName(), "", Utils.getProjectBasePath(project).toString(), "pypi");
+        initDependencyNode(rootNode, pythonSdk.getName(), "", pythonSdk.getHomePath(), "pypi");
 
-        for (Sdk pythonSdk : pythonSdks) {
-            try {
-                DependencyTree sdkNode = createSdkDependencyTree(pythonSdk);
-                rootNode.add(sdkNode);
-            } catch (ExecutionException e) {
-                getLog().error(ExceptionUtils.getRootCauseMessage(e), e);
-            }
+        try {
+            rootNode.add(createSdkDependencyTree(pythonSdk));
+        } catch (ExecutionException e) {
+            getLog().error(ExceptionUtils.getRootCauseMessage(e), e);
         }
         if (rootNode.getChildren().size() == 1) {
-            setScanResults((DependencyTree) rootNode.getChildAt(0));
-        } else {
-            setScanResults(rootNode);
+            rootNode = (DependencyTree) rootNode.getChildAt(0);
         }
-    }
-
-    /**
-     * Refresh Python SDKs and listen to changes in the SDK environment.
-     * For example, a scan should be triggered after running 'pip install'.
-     */
-    void refreshPythonSdks() {
-        if (!Disposer.isDisposed(sdkDisposable)) {
-            // Remove old "RunOnChangeUnderInterpreterPaths" listeners
-            Disposer.dispose(sdkDisposable);
-        }
-        Disposer.register(project, sdkDisposable);
-        List<Sdk> pythonSdks = PythonSdkUtil.getAllSdks();
-        for (Sdk pythonSdk : pythonSdks) {
-            getLog().debug("Found Python SDK: " + pythonSdk.getName());
-            PyPackageUtil.runOnChangeUnderInterpreterPaths(pythonSdk, sdkDisposable, this::asyncScanAndUpdateResults);
-        }
-        this.pythonSdks = pythonSdks;
+        setScanResults(rootNode);
     }
 
     /**
@@ -99,8 +68,8 @@ public class PypiScanManager extends ScanManager {
      * @return root node of all Python SDKs.
      */
     private DependencyTree createRootNode() {
-        DependencyTree rootNode = new DependencyTree(project.getName());
-        GeneralInfo generalInfo = new GeneralInfo().artifactId(project.getName()).path(Utils.getProjectBasePath(project).toString()).pkgType("pypi");
+        DependencyTree rootNode = new DependencyTree(pythonSdk.getName());
+        GeneralInfo generalInfo = new GeneralInfo().artifactId(pythonSdk.getName()).path(pythonSdk.getHomePath()).pkgType("pypi");
         rootNode.setGeneralInfo(generalInfo);
         rootNode.setScopes(Sets.newHashSet(new Scope()));
         return rootNode;

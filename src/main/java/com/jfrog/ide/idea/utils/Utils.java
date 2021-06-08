@@ -4,7 +4,6 @@ import com.google.common.base.Objects;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import com.intellij.openapi.wm.impl.ToolWindowImpl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.jfrog.build.extractor.scan.DependencyTree;
@@ -41,6 +40,8 @@ public class Utils {
 
     public static void focusJFrogToolWindow(Project project) {
         ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("JFrog");
-        ((ToolWindowImpl) toolWindow).fireActivated();
+        if (toolWindow != null) {
+            toolWindow.activate(null);
+        }
     }
 }

@@ -38,16 +38,18 @@ public class ComponentUtils {
         return label;
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static JComponent createNoCredentialsView() {
         HyperlinkLabel link = new HyperlinkLabel();
-        link.setHyperlinkText("To use this section of the JFrog Plugin, please ", " configure", " your JFrog platform details.");
+        link.setTextWithHyperlink("To use this section of the JFrog Plugin, please <hyperlink>configure</hyperlink> your JFrog platform details.");
         link.addHyperlinkListener(e -> ShowSettingsUtil.getInstance().showSettingsDialog(null, JFrogGlobalConfiguration.class));
         return createUnsupportedPanel(link);
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static JComponent createNoBuildsView() {
         HyperlinkLabel link = new HyperlinkLabel();
-        link.setHyperlinkText("No builds detected. To start viewing your builds please follow ", " this", " guide.");
+        link.setTextWithHyperlink("No builds detected. To start viewing your builds please follow <hyperlink>this</hyperlink> guide.");
         link.addHyperlinkListener(e -> BrowserUtil.browse("https://www.jfrog.com/confluence/display/JFROG/JFrog+IntelliJ+IDEA+Plugin#JFrogIntelliJIDEAPlugin-TheCIView"));
         return createUnsupportedPanel(link);
     }

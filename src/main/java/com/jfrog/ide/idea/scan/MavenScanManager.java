@@ -2,9 +2,7 @@ package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Sets;
 import com.intellij.codeInspection.LocalInspectionTool;
-import com.intellij.openapi.externalSystem.model.DataNode;
-import com.intellij.openapi.externalSystem.model.project.ProjectData;
-import com.intellij.openapi.fileTypes.StdFileTypes;
+import com.intellij.ide.highlighter.XmlFileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -15,7 +13,6 @@ import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.idea.inspections.MavenInspection;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.idea.maven.model.MavenArtifact;
 import org.jetbrains.idea.maven.model.MavenArtifactNode;
 import org.jetbrains.idea.maven.model.MavenId;
@@ -41,7 +38,8 @@ import java.util.stream.Collectors;
 public class MavenScanManager extends ScanManager {
 
     MavenScanManager(Project project) throws IOException {
-        super(project, project, ComponentPrefix.GAV);
+        super(project, Utils.getProjectBasePath(project).toString(), ComponentPrefix.GAV);
+        getLog().info("Found Maven project: " + getProjectName());
         MavenProjectsManager.getInstance(project).addProjectsTreeListener(new MavenProjectsTreeListener());
     }
 
@@ -66,7 +64,7 @@ public class MavenScanManager extends ScanManager {
     protected void buildTree() {
         DependencyTree rootNode = new DependencyTree(project.getName());
         MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject -> populateMavenModule(rootNode, rootMavenProject, Sets.newHashSet()));
-        GeneralInfo generalInfo = new GeneralInfo().artifactId(project.getName()).path(Utils.getProjectBasePath(project).toString()).pkgType("maven");
+        GeneralInfo generalInfo = new GeneralInfo().artifactId(project.getName()).path(basePath).pkgType("maven");
         rootNode.setGeneralInfo(generalInfo);
         if (rootNode.getChildren().size() == 1) {
             setScanResults((DependencyTree) rootNode.getChildAt(0));
@@ -78,7 +76,7 @@ public class MavenScanManager extends ScanManager {
     @Override
     protected PsiFile[] getProjectDescriptors() {
         // As project can contain sub-projects, look for all 'pom.xml' files under it.
-        GlobalSearchScope scope = GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.projectScope(project), StdFileTypes.XML);
+        GlobalSearchScope scope = GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.projectScope(project), XmlFileType.INSTANCE);
         return FilenameIndex.getFilesByName(project, "pom.xml", scope);
     }
 

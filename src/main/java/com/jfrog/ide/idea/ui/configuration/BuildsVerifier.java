@@ -17,8 +17,14 @@ public class BuildsVerifier extends InputVerifier {
         this.buildsPattern = buildsPattern;
     }
 
-    @Override
+    // For JDK < 9
+    @SuppressWarnings("deprecation")
     public boolean shouldYieldFocus(JComponent input) {
+        return shouldYieldFocus(input, null);
+    }
+
+    // For JDK >= 9
+    public boolean shouldYieldFocus(JComponent input, JComponent ignore) {
         if (verify(input)) {
             return true;
         }

@@ -51,25 +51,26 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
     private JLabel branch;
     private JLabel commit;
 
-    public JFrogCiToolWindow(@NotNull Project mainProject, boolean buildsConfigured) {
-        super(mainProject, buildsConfigured, CiComponentsTree.getInstance(mainProject));
+    public JFrogCiToolWindow(@NotNull Project project, boolean buildsConfigured) {
+        super(project, buildsConfigured, CiComponentsTree.getInstance(project));
     }
 
     @Override
     IssueFilterMenu createIssueFilterMenu() {
-        return new CiIssueFilterMenu(mainProject);
+        return new CiIssueFilterMenu(project);
     }
 
     @Override
     LicenseFilterMenu createLicenseFilterMenu() {
-        return new CiLicenseFilterMenu(mainProject);
+        return new CiLicenseFilterMenu(project);
     }
 
     @Override
     ScopeFilterMenu createScopeFilterMenu() {
-        return new CiScopeFilterMenu(mainProject);
+        return new CiScopeFilterMenu(project);
     }
 
+    @SuppressWarnings("DialogTitleCapitalization")
     @Override
     JComponent createComponentsDetailsView(boolean supported) {
         if (!GlobalSettings.getInstance().areArtifactoryCredentialsSet()) {
@@ -90,7 +91,7 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
         JPanel toolbarPanel = createJFrogToolbar(actionGroup);
 
         // Add builds selector
-        BuildsMenu buildsMenu = new BuildsMenu(mainProject);
+        BuildsMenu buildsMenu = new BuildsMenu(project);
         ((CiComponentsTree) componentsTree).setBuildsMenu(buildsMenu);
         toolbarPanel.add(buildsMenu.getBuildButton());
 
@@ -105,15 +106,15 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
 
     @Override
     public Set<Issue> getIssuesToDisplay(List<DependencyTree> selectedNodes) {
-        return CiFilterManager.getInstance(mainProject).getFilteredScanIssues(selectedNodes);
+        return CiFilterManager.getInstance(project).getFilteredScanIssues(selectedNodes);
     }
 
     @Override
     public void registerListeners() {
         super.registerListeners();
-        MessageBusConnection projectBusConnection = mainProject.getMessageBus().connect();
+        MessageBusConnection projectBusConnection = project.getMessageBus().connect();
         projectBusConnection.subscribe(ApplicationEvents.ON_CI_FILTER_CHANGE, () -> ApplicationManager.getApplication().invokeLater(() -> {
-            CiComponentsTree.getInstance(mainProject).applyFiltersForAllProjects();
+            CiComponentsTree.getInstance(project).applyFiltersForAllProjects();
             updateIssuesTable();
         }));
         projectBusConnection.subscribe(BuildEvents.ON_SELECTED_BUILD, this::setBuildDetails);
@@ -179,9 +180,9 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
         Vcs vcs = buildGeneralInfo != null ? buildGeneralInfo.getVcs() : null;
         if (vcs == null || buildGeneralInfo.getStatus() == null ||
                 isAnyBlank(vcs.getBranch(), vcs.getMessage(), buildGeneralInfo.getPath())) {
-            seeMore.init(mainProject, "See more in this view", "https://www.jfrog.com/confluence/display/JFROG/JFrog+IntelliJ+IDEA+Plugin");
+            seeMore.init(project, "See more in this view", "https://www.jfrog.com/confluence/display/JFROG/JFrog+IntelliJ+IDEA+Plugin");
         } else {
-            seeMore.init(mainProject, "", "");
+            seeMore.init(project, "", "");
         }
     }
 
@@ -198,7 +199,7 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
 
     private void setBuildLogLink(BuildGeneralInfo buildGeneralInfo) {
         String link = buildGeneralInfo != null ? buildGeneralInfo.getPath() : null;
-        linkButton.init(mainProject, "Build Log", link);
+        linkButton.init(project, "Build Log", link);
     }
 
     private JLabel createAndAddLabelWithTooltip(String tooltip, JPanel buildStatusPanel) {

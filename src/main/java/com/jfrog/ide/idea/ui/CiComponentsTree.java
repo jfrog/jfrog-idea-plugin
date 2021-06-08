@@ -19,8 +19,8 @@ import org.jfrog.build.extractor.scan.DependencyTree;
 public class CiComponentsTree extends ComponentsTree {
     private BuildsMenu buildsMenu;
 
-    public CiComponentsTree(@NotNull Project mainProject) {
-        super(mainProject);
+    public CiComponentsTree(@NotNull Project project) {
+        super(project);
     }
 
     public static CiComponentsTree getInstance(@NotNull Project project) {
@@ -68,7 +68,7 @@ public class CiComponentsTree extends ComponentsTree {
         if (project == null) {
             return;
         }
-        FilterManager filterManager = CiFilterManager.getInstance(mainProject);
+        FilterManager filterManager = CiFilterManager.getInstance(this.project);
         DependencyTree filteredRoot = filterManager.applyFilters(project);
         filteredRoot.setIssues(filteredRoot.processTreeIssues());
         appendProjectWhenReady(filteredRoot);

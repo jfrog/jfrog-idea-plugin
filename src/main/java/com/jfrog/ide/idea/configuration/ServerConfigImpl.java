@@ -19,7 +19,6 @@
  */
 package com.jfrog.ide.idea.configuration;
 
-import com.google.common.base.Objects;
 import com.intellij.credentialStore.Credentials;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.util.EnvironmentUtil;
@@ -43,8 +42,8 @@ import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 
-import static com.intellij.openapi.util.Comparing.equal;
 import static com.jfrog.ide.idea.ui.configuration.ExclusionsVerifier.DEFAULT_EXCLUSIONS;
 import static com.jfrog.ide.idea.ui.configuration.Utils.*;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -127,20 +126,20 @@ public class ServerConfigImpl implements ServerConfig {
         }
         ServerConfigImpl other = (ServerConfigImpl) o;
 
-        return equal(getUrl(), other.getUrl()) &&
-                equal(getXrayUrl(), other.getXrayUrl()) &&
-                equal(getArtifactoryUrl(), other.getArtifactoryUrl()) &&
-                equal(getPassword(), other.getPassword()) &&
-                equal(getUsername(), other.getUsername()) &&
-                equal(getExcludedPaths(), other.getExcludedPaths()) &&
-                equal(isConnectionDetailsFromEnv(), other.isConnectionDetailsFromEnv()) &&
-                equal(getConnectionRetries(), other.getConnectionRetries()) &&
-                equal(getConnectionTimeout(), other.getConnectionTimeout());
+        return Objects.equals(getUrl(), other.getUrl()) &&
+                Objects.equals(getXrayUrl(), other.getXrayUrl()) &&
+                Objects.equals(getArtifactoryUrl(), other.getArtifactoryUrl()) &&
+                Objects.equals(getPassword(), other.getPassword()) &&
+                Objects.equals(getUsername(), other.getUsername()) &&
+                Objects.equals(getExcludedPaths(), other.getExcludedPaths()) &&
+                isConnectionDetailsFromEnv() == other.isConnectionDetailsFromEnv() &&
+                getConnectionRetries() == other.getConnectionRetries() &&
+                getConnectionTimeout() == other.getConnectionTimeout();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getUrl(), getXrayUrl(), getArtifactoryUrl(), getPassword(), getUsername(),
+        return Objects.hash(getUrl(), getXrayUrl(), getArtifactoryUrl(), getPassword(), getUsername(),
                 isConnectionDetailsFromEnv(), getConnectionRetries(), getConnectionTimeout());
     }
 

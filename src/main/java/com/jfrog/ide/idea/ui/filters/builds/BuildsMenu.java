@@ -11,11 +11,11 @@ import com.jfrog.ide.idea.ui.filters.filtermanager.CiFilterManager;
 public class BuildsMenu extends JBPopupMenu {
 
     private final ComboboxSpeedSearch buildsButton;
-    private final Project mainProject;
+    private final Project project;
 
-    public BuildsMenu(Project mainProject) {
-        this.mainProject = mainProject;
-        this.buildsButton = new ComboboxSpeedSearch(new BuildsButton(mainProject));
+    public BuildsMenu(Project project) {
+        this.project = project;
+        this.buildsButton = new ComboboxSpeedSearch(new BuildsButton(project));
     }
 
     public void refresh() {
@@ -26,7 +26,7 @@ public class BuildsMenu extends JBPopupMenu {
         buildsButton.removeAllItems();
 
         // Add builds from to the collected builds information in the last builds scan
-        CiFilterManager.getInstance(mainProject).getSelectableBuilds().forEach(build -> {
+        CiFilterManager.getInstance(project).getSelectableBuilds().forEach(build -> {
             String item = build.getKey();
             buildsButton.addItem(item);
             if (build.getValue()) {

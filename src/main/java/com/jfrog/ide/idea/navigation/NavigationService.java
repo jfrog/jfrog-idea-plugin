@@ -21,7 +21,7 @@ import java.util.Set;
  */
 public class NavigationService {
 
-    private Map<DependencyTree, Set<NavigationTarget>> navigationMap = Maps.newHashMap();
+    private final Map<DependencyTree, Set<NavigationTarget>> navigationMap = Maps.newHashMap();
 
     public static NavigationService getInstance(@NotNull Project project) {
         return ServiceManager.getService(project, NavigationService.class);

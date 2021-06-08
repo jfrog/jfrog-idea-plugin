@@ -5,12 +5,10 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.messages.Topic;
 import com.jfrog.ide.idea.events.ApplicationEvents;
-import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependencyTree;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import java.util.Vector;
 
 /**
  * @author yahavi
@@ -18,8 +16,8 @@ import java.util.Vector;
 @State(name = "CiFilterState")
 public class CiFilterManager extends ConsistentFilterManager {
 
-    public CiFilterManager(Project mainProject) {
-        super(mainProject);
+    public CiFilterManager(Project project) {
+        super(project);
     }
 
     public static CiFilterManager getInstance(@NotNull Project project) {

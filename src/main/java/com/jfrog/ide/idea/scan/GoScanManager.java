@@ -10,10 +10,8 @@ import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.go.GoTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.idea.inspections.GoInspection;
-import com.jfrog.ide.idea.projects.GoProject;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.filters.filtermanager.ConsistentFilterManager;
-import com.jfrog.ide.idea.utils.Utils;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -26,14 +24,14 @@ public class GoScanManager extends ScanManager {
     private final GoTreeBuilder goTreeBuilder;
 
     /**
-     * @param mainProject - Currently opened IntelliJ project. We'll use this project to retrieve project based services
-     *                    like {@link ConsistentFilterManager} and {@link ComponentsTree}.
-     * @param project     - Go project {@link GoProject}.
+     * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
+     *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
+     * @param basePath - The go.mod directory.
      */
-    GoScanManager(Project mainProject, Project project) throws IOException {
-        super(mainProject, project, ComponentPrefix.GO);
-        getLog().info("Found go project: " + getProjectName());
-        goTreeBuilder = new GoTreeBuilder(Utils.getProjectBasePath(project), EnvironmentUtil.getEnvironmentMap(), getLog());
+    GoScanManager(Project project, String basePath) throws IOException {
+        super(project, basePath, ComponentPrefix.GO);
+        getLog().info("Found Go project: " + getProjectName());
+        goTreeBuilder = new GoTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap(), getLog());
         subscribeLaunchDependencyScanOnFileChangedEvents("go.sum");
     }
 
@@ -44,12 +42,12 @@ public class GoScanManager extends ScanManager {
 
     @Override
     protected PsiFile[] getProjectDescriptors() {
-        String goModPath = Paths.get(Utils.getProjectBasePath(project).toString(), "go.mod").toString();
+        String goModPath = Paths.get(basePath, "go.mod").toString();
         VirtualFile file = LocalFileSystem.getInstance().findFileByPath(goModPath);
         if (file == null) {
             return null;
         }
-        PsiFile psiFile = PsiManager.getInstance(mainProject).findFile(file);
+        PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
         return new PsiFile[]{psiFile};
     }
 

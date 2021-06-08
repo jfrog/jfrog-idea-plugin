@@ -11,8 +11,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public class CiIssueFilterMenu extends IssueFilterMenu {
 
-    public CiIssueFilterMenu(@NotNull Project mainProject) {
-        super(mainProject, CiFilterManager.getInstance(mainProject));
+    public CiIssueFilterMenu(@NotNull Project project) {
+        super(project, CiFilterManager.getInstance(project));
     }
 
     @Override

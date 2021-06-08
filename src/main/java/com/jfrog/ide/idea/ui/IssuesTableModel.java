@@ -1,12 +1,12 @@
 package com.jfrog.ide.idea.ui;
 
 import com.google.common.collect.Sets;
-import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.Issue;
 
 import javax.swing.table.AbstractTableModel;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -81,7 +81,7 @@ public class IssuesTableModel extends AbstractTableModel {
             case COMPONENT:
                 return issue.getComponent();
             case FIXED_VERSIONS:
-                List<String> fixedVersions = ListUtils.emptyIfNull(issue.getFixedVersions());
+                List<String> fixedVersions = issue.getFixedVersions() == null ? Collections.emptyList() : issue.getFixedVersions();
                 return StringUtils.defaultIfEmpty(String.join(", ", fixedVersions), "[]");
         }
         return "N/A";

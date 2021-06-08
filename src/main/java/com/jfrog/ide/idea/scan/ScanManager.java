@@ -35,7 +35,6 @@ import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.ui.filters.filtermanager.ConsistentFilterManager;
 import com.jfrog.ide.idea.ui.filters.filtermanager.LocalFilterManager;
-import com.jfrog.ide.idea.utils.Utils;
 import com.jfrog.xray.client.services.summary.Components;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -59,22 +58,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class ScanManager extends ScanManagerBase {
 
     private static final Path HOME_PATH = Paths.get(System.getProperty("user.home"), ".jfrog-idea-plugin");
-    protected Project mainProject;
-    Project project;
+    protected Project project;
+    String basePath;
 
     // Lock to prevent multiple simultaneous scans
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
 
     /**
-     * @param mainProject - Currently opened IntelliJ project. We'll use this project to retrieve project based services
-     *                    like {@link ConsistentFilterManager} and {@link ComponentsTree}.
-     * @param project     - Current working project.
-     * @param prefix      - Components prefix for xray scan, e.g. gav:// or npm://.
+     * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
+     *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
+     * @param basePath - Project base path.
+     * @param prefix   - Components prefix for xray scan, e.g. gav:// or npm://.
      */
-    ScanManager(@NotNull Project mainProject, @NotNull Project project, ComponentPrefix prefix) throws IOException {
-        super(HOME_PATH.resolve("cache"), project.getName(), Logger.getInstance(), GlobalSettings.getInstance().getServerConfig(), prefix);
-        this.mainProject = mainProject;
+    ScanManager(@NotNull Project project, String basePath, ComponentPrefix prefix) throws IOException {
+        super(HOME_PATH.resolve("cache"), basePath, Logger.getInstance(), GlobalSettings.getInstance().getServerConfig(), prefix);
         this.project = project;
+        this.basePath = basePath;
         Files.createDirectories(HOME_PATH);
         registerOnChangeHandlers();
     }
@@ -109,7 +108,7 @@ public abstract class ScanManager extends ScanManagerBase {
             scanAndCacheArtifacts(indicator, quickScan);
             addXrayInfoToTree(getScanResults());
             setScanResults();
-            DumbService.getInstance(mainProject).smartInvokeLater(this::runInspections);
+            DumbService.getInstance(project).smartInvokeLater(this::runInspections);
         } catch (ProcessCanceledException e) {
             getLog().info("Xray scan was canceled");
         } catch (Exception e) {
@@ -123,7 +122,7 @@ public abstract class ScanManager extends ScanManagerBase {
      * Launch async dependency scan.
      */
     void asyncScanAndUpdateResults(boolean quickScan) {
-        if (DumbService.isDumb(mainProject)) { // If intellij is still indexing the project
+        if (DumbService.isDumb(project)) { // If intellij is still indexing the project
             return;
         }
         Task.Backgroundable scanAndUpdateTask = new Task.Backgroundable(null, "Xray: Scanning for vulnerabilities...") {
@@ -163,7 +162,7 @@ public abstract class ScanManager extends ScanManagerBase {
      */
     public Set<Path> getProjectPaths() {
         Set<Path> paths = Sets.newHashSet();
-        paths.add(Utils.getProjectBasePath(project));
+        paths.add(Paths.get(basePath));
         return paths;
     }
 
@@ -179,16 +178,16 @@ public abstract class ScanManager extends ScanManagerBase {
         if (ArrayUtils.isEmpty(projectDescriptors)) {
             return;
         }
-        InspectionManagerEx inspectionManagerEx = (InspectionManagerEx) InspectionManager.getInstance(mainProject);
+        InspectionManagerEx inspectionManagerEx = (InspectionManagerEx) InspectionManager.getInstance(project);
         GlobalInspectionContext context = inspectionManagerEx.createNewGlobalContext(false);
         LocalInspectionTool localInspectionTool = getInspectionTool();
         for (PsiFile descriptor : projectDescriptors) {
             // Run inspection on descriptor.
             InspectionEngine.runInspectionOnFile(descriptor, new LocalInspectionToolWrapper(localInspectionTool), context);
-            FileEditor[] editors = FileEditorManager.getInstance(mainProject).getAllEditors(descriptor.getVirtualFile());
+            FileEditor[] editors = FileEditorManager.getInstance(project).getAllEditors(descriptor.getVirtualFile());
             if (!ArrayUtils.isEmpty(editors)) {
                 // Refresh descriptor highlighting only if it is already opened.
-                DaemonCodeAnalyzer.getInstance(mainProject).restart(descriptor);
+                DaemonCodeAnalyzer.getInstance(project).restart(descriptor);
             }
         }
     }
@@ -227,13 +226,13 @@ public abstract class ScanManager extends ScanManagerBase {
             return;
         }
         if (!scanResults.isLeaf()) {
-            LocalFilterManager.getInstance(mainProject).collectsFiltersInformation(scanResults);
+            LocalFilterManager.getInstance(project).collectsFiltersInformation(scanResults);
         }
         ProjectsMap.ProjectKey projectKey = ProjectsMap.createKey(getProjectName(),
                 scanResults.getGeneralInfo());
-        MessageBus projectMessageBus = mainProject.getMessageBus();
+        MessageBus projectMessageBus = project.getMessageBus();
 
-        ComponentsTree componentsTree = LocalComponentsTree.getInstance(mainProject);
+        ComponentsTree componentsTree = LocalComponentsTree.getInstance(project);
         componentsTree.addScanResults(getProjectName(), scanResults);
         projectMessageBus.syncPublisher(ProjectEvents.ON_SCAN_PROJECT_CHANGE).update(projectKey);
     }
@@ -252,7 +251,7 @@ public abstract class ScanManager extends ScanManagerBase {
     }
 
     public String getProjectPath() {
-        return project.getBasePath();
+        return this.basePath;
     }
 
     /**
@@ -262,8 +261,8 @@ public abstract class ScanManager extends ScanManagerBase {
      * @param fileName - file to track for changes.
      */
     protected void subscribeLaunchDependencyScanOnFileChangedEvents(String fileName) {
-        String fileToSubscribe = Paths.get(Utils.getProjectBasePath(project).toString(), fileName).toString();
-        mainProject.getMessageBus().connect().subscribe(VirtualFileManager.VFS_CHANGES, new BulkFileListener() {
+        String fileToSubscribe = Paths.get(basePath, fileName).toString();
+        project.getMessageBus().connect().subscribe(VirtualFileManager.VFS_CHANGES, new BulkFileListener() {
             @Override
             public void after(@NotNull List<? extends VFileEvent> events) {
                 for (VFileEvent event : events) {

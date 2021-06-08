@@ -53,12 +53,12 @@ public class CiManager extends CiManagerBase {
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
 
     private final PropertiesComponent propertiesComponent;
-    private final Project mainProject;
+    private final Project project;
 
     private CiManager(@NotNull Project project) throws IOException {
         super(HOME_PATH.resolve("ci-cache"), project.getName(), Logger.getInstance(), GlobalSettings.getInstance().getServerConfig());
         this.propertiesComponent = PropertiesComponent.getInstance(project);
-        this.mainProject = project;
+        this.project = project;
         registerOnChangeHandlers();
     }
 
@@ -74,12 +74,12 @@ public class CiManager extends CiManagerBase {
             @Override
             public void run(@NotNull com.intellij.openapi.progress.ProgressIndicator indicator) {
                 try {
-                    if (mainProject.isDisposed()) {
+                    if (project.isDisposed()) {
                         return;
                     }
                     String buildsPattern = propertiesComponent.getValue(BUILDS_PATTERN_KEY);
                     buildCiTree(buildsPattern, new ProgressIndicatorImpl(indicator), () -> checkCanceled(indicator));
-                    CiFilterManager.getInstance(mainProject).collectBuildsInformation(root);
+                    CiFilterManager.getInstance(project).collectBuildsInformation(root);
                     loadFirstBuild();
                 } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
                     Logger.getInstance().error("Failed to refresh builds", e);
@@ -118,20 +118,20 @@ public class CiManager extends CiManagerBase {
      * @param buildGeneralInfo - The build general info
      */
     public void loadBuild(GeneralInfo buildGeneralInfo) {
-        ComponentsTree componentsTree = CiComponentsTree.getInstance(mainProject);
+        ComponentsTree componentsTree = CiComponentsTree.getInstance(project);
         componentsTree.reset();
         ProjectsMap.ProjectKey projectKey = null;
         if (buildGeneralInfo != null) {
             try {
                 BuildDependencyTree buildTree = loadBuildTree(buildGeneralInfo.getArtifactId(), buildGeneralInfo.getVersion());
-                CiFilterManager.getInstance(mainProject).collectsFiltersInformation(buildTree);
-                componentsTree.addScanResults(mainProject.getName(), buildTree);
-                projectKey = ProjectsMap.createKey(mainProject.getName(), buildTree.getGeneralInfo());
+                CiFilterManager.getInstance(project).collectsFiltersInformation(buildTree);
+                componentsTree.addScanResults(project.getName(), buildTree);
+                projectKey = ProjectsMap.createKey(project.getName(), buildTree.getGeneralInfo());
             } catch (IOException | ParseException | IllegalArgumentException e) {
                 Logger.getInstance().error(String.format(LOAD_BUILD_FAIL_FMT, buildGeneralInfo.getArtifactId(), buildGeneralInfo.getVersion()), e);
             }
         }
-        MessageBus projectMessageBus = mainProject.getMessageBus();
+        MessageBus projectMessageBus = project.getMessageBus();
         projectMessageBus.syncPublisher(ProjectEvents.ON_SCAN_CI_CHANGE).update(projectKey);
     }
 
@@ -160,7 +160,7 @@ public class CiManager extends CiManagerBase {
             BuildDependencyTree dependencyTree = (BuildDependencyTree) root.getFirstChild();
             generalInfo = (BuildGeneralInfo) dependencyTree.getGeneralInfo();
         }
-        mainProject.getMessageBus().syncPublisher(BuildEvents.ON_SELECTED_BUILD).update(generalInfo);
+        project.getMessageBus().syncPublisher(BuildEvents.ON_SELECTED_BUILD).update(generalInfo);
     }
 
     private boolean scanPreconditionsMet() {
@@ -183,7 +183,7 @@ public class CiManager extends CiManagerBase {
     private void registerOnChangeHandlers() {
         MessageBusConnection busConnection = ApplicationManager.getApplication().getMessageBus().connect();
         busConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, this::asyncRefreshBuilds);
-        MessageBusConnection projectBusConnection = mainProject.getMessageBus().connect();
+        MessageBusConnection projectBusConnection = project.getMessageBus().connect();
         projectBusConnection.subscribe(ApplicationEvents.ON_BUILDS_CONFIGURATION_CHANGE, this::asyncRefreshBuilds);
         projectBusConnection.subscribe(BuildEvents.ON_SELECTED_BUILD, this::loadBuild);
     }

@@ -12,7 +12,7 @@ public abstract class LicenseFilterMenu extends FilterMenu<License> {
     public static final String NAME = "License";
     public static final String TOOLTIP = "Select licenses to show";
 
-    public LicenseFilterMenu(@NotNull Project mainProject) {
-        super(mainProject, NAME, TOOLTIP);
+    public LicenseFilterMenu(@NotNull Project project) {
+        super(project, NAME, TOOLTIP);
     }
 }

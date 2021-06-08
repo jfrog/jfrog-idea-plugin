@@ -2,9 +2,9 @@ package com.jfrog.ide.idea.ui.filters.filtermenu;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.util.messages.Topic;
+import com.jfrog.ide.idea.ci.CiManager;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.ui.filters.filtermanager.CiFilterManager;
-import com.jfrog.ide.idea.ci.CiManager;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.Scope;
 
@@ -15,14 +15,14 @@ import java.util.Map;
  */
 public class CiScopeFilterMenu extends ScopeFilterMenu {
 
-    public CiScopeFilterMenu(@NotNull Project mainProject) {
-        super(mainProject);
+    public CiScopeFilterMenu(@NotNull Project project) {
+        super(project);
     }
 
     @Override
     public void refresh() {
         // Get selected scopes
-        Map<Scope, Boolean> selectedScopes = CiFilterManager.getInstance(mainProject).getSelectedScopes();
+        Map<Scope, Boolean> selectedScopes = CiFilterManager.getInstance(project).getSelectedScopes();
 
         // Hide the button if there are no scopes - for example in Go projects
         if (selectedScopes.size() == 1 && selectedScopes.containsKey(new Scope())) {
@@ -34,7 +34,7 @@ public class CiScopeFilterMenu extends ScopeFilterMenu {
         }
 
         // Add checkboxes and triggers
-        CiManager.getInstance(mainProject).getAllScopes()
+        CiManager.getInstance(project).getAllScopes()
                 .stream()
                 .filter(scope -> !selectedScopes.containsKey(scope))
                 .forEach(scope -> selectedScopes.put(scope, true));

@@ -33,7 +33,7 @@ public class GoInspection extends AbstractInspection {
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
         return new VgoVisitor() {
             @Override
-            public void visitModuleSpec(VgoModuleSpec element) {
+            public void visitModuleSpec(@NotNull VgoModuleSpec element) {
                 super.visitPsiElement(element);
                 GoInspection.this.visitElement(holder, element);
             }

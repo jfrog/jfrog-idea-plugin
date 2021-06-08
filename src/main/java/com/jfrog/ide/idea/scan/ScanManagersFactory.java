@@ -5,14 +5,11 @@ import com.google.common.collect.Sets;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectUtil;
+import com.intellij.openapi.projectRoots.Sdk;
 import com.jfrog.ide.common.utils.PackageFileFinder;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.navigation.NavigationService;
-import com.jfrog.ide.idea.projects.GoProject;
-import com.jfrog.ide.idea.projects.GradleProject;
-import com.jfrog.ide.idea.projects.NpmProject;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.utils.Utils;
@@ -22,7 +19,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -31,14 +27,14 @@ import java.util.Set;
 public class ScanManagersFactory {
 
     private Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
-    private final Project mainProject;
+    private final Project project;
 
     public static ScanManagersFactory getInstance(@NotNull Project project) {
         return ServiceManager.getService(project, ScanManagersFactory.class);
     }
 
     private ScanManagersFactory(@NotNull Project project) {
-        this.mainProject = project;
+        this.project = project;
     }
 
     public static Set<ScanManager> getScanManagers(@NotNull Project project) {
@@ -52,7 +48,7 @@ public class ScanManagersFactory {
      * @param quickScan - True to allow usage of the scan cache.
      */
     public void startScan(boolean quickScan) {
-        if (DumbService.isDumb(mainProject)) { // If intellij is still indexing the project
+        if (DumbService.isDumb(project)) { // If intellij is still indexing the project
             return;
         }
         if (isScanInProgress()) {
@@ -64,13 +60,13 @@ public class ScanManagersFactory {
             return;
         }
         try {
-            ComponentsTree componentsTree = LocalComponentsTree.getInstance(mainProject);
+            ComponentsTree componentsTree = LocalComponentsTree.getInstance(project);
             if (componentsTree == null) {
                 return;
             }
             refreshScanManagers();
             componentsTree.reset();
-            NavigationService.clearNavigationMap(mainProject);
+            NavigationService.clearNavigationMap(project);
             for (ScanManager scanManager : scanManagers.values()) {
                 scanManager.asyncScanAndUpdateResults(quickScan);
             }
@@ -83,7 +79,7 @@ public class ScanManagersFactory {
      * Run inspections for all scan managers.
      */
     public void runInspectionsForAllScanManagers() {
-        NavigationService.clearNavigationMap(mainProject);
+        NavigationService.clearNavigationMap(project);
         for (ScanManager scanManager : scanManagers.values()) {
             scanManager.runInspections();
         }
@@ -95,19 +91,18 @@ public class ScanManagersFactory {
     public void refreshScanManagers() throws IOException {
         Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
         final Set<Path> paths = Sets.newHashSet();
-        int projectHash = Utils.getProjectIdentifier(mainProject);
+        int projectHash = Utils.getProjectIdentifier(project);
         ScanManager scanManager = this.scanManagers.get(projectHash);
         if (scanManager != null) {
             scanManagers.put(projectHash, scanManager);
         } else {
-            // Unlike other scan managers whereby we create them if the package descriptor exist, the Maven and Pypi
-            // scan managers are created if the Maven or the Python plugins are installed and there are projects
-            // loaded, respectfully.
+            // Unlike other scan managers whereby we create them if the package descriptor exist, the Maven
+            // scan manager is created if the Maven plugin is installed and there are Maven projects loaded.
             createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.MAVEN, "");
-            createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.PYPI, "");
         }
-        paths.add(Utils.getProjectBasePath(mainProject));
+        paths.add(Utils.getProjectBasePath(project));
         createScanManagers(scanManagers, paths);
+        createPypiScanManagerIfApplicable(scanManagers);
         this.scanManagers = scanManagers;
     }
 
@@ -119,13 +114,33 @@ public class ScanManagersFactory {
         Set<String> packageJsonDirs = packageFileFinder.getNpmPackagesFilePairs();
         createScanManagersForPackageDirs(packageJsonDirs, scanManagers, ScanManagerTypes.NPM);
 
-        // Create gradle scan-managers.
+        // Create Gradle scan-managers.
         Set<String> buildGradleDirs = packageFileFinder.getBuildGradlePackagesFilePairs();
         createScanManagersForPackageDirs(buildGradleDirs, scanManagers, ScanManagerTypes.GRADLE);
 
-        // Create go scan-managers.
-        Set<String> gomodDirs = packageFileFinder.getGoPackagesFilePairs();
-        createScanManagersForPackageDirs(gomodDirs, scanManagers, ScanManagerTypes.GO);
+        // Create Go scan-managers.
+        Set<String> goModDirs = packageFileFinder.getGoPackagesFilePairs();
+        createScanManagersForPackageDirs(goModDirs, scanManagers, ScanManagerTypes.GO);
+    }
+
+    /**
+     * Create PypiScanManager for each Python SDK configured.
+     *
+     * @param scanManagers - The scan managers list
+     */
+    private void createPypiScanManagerIfApplicable(Map<Integer, ScanManager> scanManagers) throws IOException {
+        try {
+            for (Sdk pythonSdk : PypiScanManager.getAllPythonSdks()) {
+                int projectHash = Utils.getProjectIdentifier(pythonSdk.getName(), pythonSdk.getHomePath());
+                ScanManager scanManager = this.scanManagers.get(projectHash);
+                if (scanManager == null) {
+                    scanManager = new PypiScanManager(project, pythonSdk);
+                }
+                scanManagers.put(projectHash, scanManager);
+            }
+        } catch (NoClassDefFoundError noClassDefFoundError) {
+            // The 'python' plugins is not installed.
+        }
     }
 
     private void createScanManagersForPackageDirs(Set<String> packageDirs, Map<Integer, ScanManager> scanManagers,
@@ -145,14 +160,12 @@ public class ScanManagersFactory {
         MAVEN,
         GRADLE,
         NPM,
-        GO,
-        PYPI
+        GO
     }
 
     /**
      * Create a new scan manager according to the scan manager type. Add it to the scan managers set.
      * Maven - Create only if the 'maven' plugin is installed and there are Maven projects.
-     * Pypi - Create only if the 'python' plugin is installed and there are Python SDKs applied.
      * Go, npm and gradle - Always create.
      *
      * @param scanManagers - Scan managers set
@@ -165,26 +178,18 @@ public class ScanManagersFactory {
         try {
             switch (type) {
                 case MAVEN:
-                    if (MavenScanManager.isApplicable(mainProject)) {
-                        scanManagers.put(projectHash, new MavenScanManager(mainProject));
-                    }
-                    return;
-                case PYPI:
-                    if (PypiScanManager.isApplicable()) {
-                        scanManagers.put(projectHash, new PypiScanManager(mainProject));
+                    if (MavenScanManager.isApplicable(project)) {
+                        scanManagers.put(projectHash, new MavenScanManager(project));
                     }
                     return;
                 case GRADLE:
-                    scanManagers.put(projectHash, new GradleScanManager(mainProject,
-                            new GradleProject(Objects.requireNonNull(ProjectUtil.guessProjectDir(mainProject)), dir)));
+                    scanManagers.put(projectHash, new GradleScanManager(project, dir));
                     return;
                 case NPM:
-                    scanManagers.put(projectHash, new NpmScanManager(mainProject,
-                            new NpmProject(Objects.requireNonNull(ProjectUtil.guessProjectDir(mainProject)), dir)));
+                    scanManagers.put(projectHash, new NpmScanManager(project, dir));
                     return;
                 case GO:
-                    scanManagers.put(projectHash, new GoScanManager(mainProject,
-                            new GoProject(Objects.requireNonNull(ProjectUtil.guessProjectDir(mainProject)), dir)));
+                    scanManagers.put(projectHash, new GoScanManager(project, dir));
             }
         } catch (NoClassDefFoundError noClassDefFoundError) {
             // The 'maven' or 'python' plugins are not installed.
