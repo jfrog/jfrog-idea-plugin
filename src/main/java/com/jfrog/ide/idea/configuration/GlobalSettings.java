@@ -19,6 +19,7 @@
  */
 package com.jfrog.ide.idea.configuration;
 
+import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
@@ -200,7 +201,8 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         this.serverConfig.setUsername(serverConfig.getUsername());
         this.serverConfig.setPassword(serverConfig.getPassword());
         this.serverConfig.addCredentialsToPasswordSafe();
-        ApplicationManager.getApplication().saveSettings();
+        Application application = ApplicationManager.getApplication();
+        application.invokeLater(application::saveSettings);
     }
 
     /**
