@@ -22,8 +22,8 @@ import org.apache.http.conn.ssl.TrustAllStrategy;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
-import org.jfrog.build.extractor.clientConfiguration.ArtifactoryDependenciesClientBuilder;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
+import org.jfrog.build.extractor.clientConfiguration.ArtifactoryManagerBuilder;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 
 import javax.swing.*;
 import java.awt.event.FocusAdapter;
@@ -159,17 +159,17 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         if (StringUtils.isBlank(artifactoryUrl.getText())) {
             return null;
         }
-        try (ArtifactoryDependenciesClient artifactoryClient = createArtifactoryDependenciesClient().build()) {
+        try (ArtifactoryManager artifactoryManager = createArtifactoryManagerBuilder().build()) {
             setConnectionResults("Connecting to Artifactory...");
             config.validate();
             config.repaint();
 
             // Check connection.
             // This command will throw an exception if there is a connection or credentials issue.
-            artifactoryClient.searchArtifactsByAql(createAqlForBuildArtifacts("*"));
+            artifactoryManager.searchArtifactsByAql(createAqlForBuildArtifacts("*"));
 
             artifactoryConnectionResultsGesture.setSuccess();
-            return "Successfully connected to Artifactory version: " + artifactoryClient.getArtifactoryVersion();
+            return "Successfully connected to Artifactory version: " + artifactoryManager.getVersion();
         } catch (Exception exception) {
             artifactoryConnectionResultsGesture.setFailure(ExceptionUtils.getRootCauseMessage(exception));
             return "Could not connect to JFrog Artifactory.";
@@ -269,9 +269,9 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
                 .build();
     }
 
-    private ArtifactoryDependenciesClientBuilder createArtifactoryDependenciesClient() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+    private ArtifactoryManagerBuilder createArtifactoryManagerBuilder() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
         String urlStr = trim(artifactoryUrl.getText());
-        return new ArtifactoryDependenciesClientBuilder()
+        return new ArtifactoryManagerBuilder()
                 .setArtifactoryUrl(urlStr)
                 .setUsername(serverConfig.getUsername())
                 .setPassword(serverConfig.getPassword())
