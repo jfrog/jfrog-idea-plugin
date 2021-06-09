@@ -43,7 +43,7 @@ public class PypiScanManager extends ScanManager {
         super(project, pythonSdk.getHomePath(), ComponentPrefix.PYPI);
         this.pythonSdk = pythonSdk;
         getLog().info("Found PyPI SDK: " + getProjectName());
-        PyPackageUtil.runOnChangeUnderInterpreterPaths(pythonSdk, this::asyncScanAndUpdateResults);
+        PyPackageUtil.runOnChangeUnderInterpreterPaths(pythonSdk, this.project, this::asyncScanAndUpdateResults);
     }
 
     @Override
