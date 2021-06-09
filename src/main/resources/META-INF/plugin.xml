@@ -18,6 +18,7 @@
           <li>Gradle - Fix an issue in Gradle whereby scan failed with "invalid type code: 00".</li>
           <li>npm - Fix an issue whereby scan failed using npm 7.</li>
           <li>CI - Fix an issue whereby build patterns with slash weren't encoded correctly.</li>
+          <li>Fix an issue whereby saveSettings may occur before IntelliJ finishes loading.</li>
         ]]>
     </change-notes>
 
