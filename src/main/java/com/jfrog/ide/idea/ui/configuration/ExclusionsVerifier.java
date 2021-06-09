@@ -22,7 +22,7 @@ public class ExclusionsVerifier extends InputVerifier {
     }
 
     @Override
-    public boolean shouldYieldFocus(JComponent input) {
+    public boolean shouldYieldFocus(JComponent input, JComponent target) {
         if (verify(input)) {
             return true;
         }

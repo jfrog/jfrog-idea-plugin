@@ -5,7 +5,6 @@ import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.components.JBLabel;
-import com.jfrog.ide.common.ci.BuildGeneralInfo;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;

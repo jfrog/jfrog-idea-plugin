@@ -47,16 +47,16 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel {
     final ComponentsTree componentsTree;
     JScrollPane issuesDetailsScroll;
     JPanel issuesDetailsPanel;
-    final Project mainProject;
+    final Project project;
 
     /**
-     * @param mainProject - Currently opened IntelliJ project
-     * @param supported   - True if the current opened project is supported by the plugin.
-     *                    If not, show the "Unsupported project type" message.
+     * @param project   - Currently opened IntelliJ project
+     * @param supported - True if the current opened project is supported by the plugin.
+     *                  If not, show the "Unsupported project type" message.
      */
-    public AbstractJFrogToolWindow(@NotNull Project mainProject, boolean supported, ComponentsTree componentsTree) {
+    public AbstractJFrogToolWindow(@NotNull Project project, boolean supported, ComponentsTree componentsTree) {
         super(true);
-        this.mainProject = mainProject;
+        this.project = project;
         this.componentsTree = componentsTree;
         JPanel toolbar = createActionToolbar();
 
@@ -173,6 +173,7 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel {
      *
      * @return the issues details panel
      */
+    @SuppressWarnings("DialogTitleCapitalization")
     private JComponent createComponentsIssueDetailView() {
         issuesTable = new ComponentIssuesTable();
         JScrollPane tableScroll = ScrollPaneFactory.createScrollPane(issuesTable, SideBorder.ALL);
@@ -239,7 +240,7 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel {
             ApplicationManager.getApplication().invokeLater(() -> issuesDetailsScroll.getViewport().setViewPosition(new Point()));
         });
 
-        componentsTree.addOnProjectChangeListener(mainProject.getMessageBus().connect());
+        componentsTree.addOnProjectChangeListener(project.getMessageBus().connect());
         componentsTree.addRightClickListener();
     }
 }

@@ -18,18 +18,18 @@ import java.util.Set;
  */
 public class LocalScopeFilterMenu extends ScopeFilterMenu {
 
-    public LocalScopeFilterMenu(@NotNull Project mainProject) {
-        super(mainProject);
+    public LocalScopeFilterMenu(@NotNull Project project) {
+        super(project);
     }
 
     @Override
     public void refresh() {
         // Get selected scopes
-        Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(mainProject);
+        Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(project);
         if (CollectionUtils.isEmpty(scanManagers)) {
             return;
         }
-        Map<Scope, Boolean> selectedScopes = LocalFilterManager.getInstance(mainProject).getSelectedScopes();
+        Map<Scope, Boolean> selectedScopes = LocalFilterManager.getInstance(project).getSelectedScopes();
 
         // Hide the button if there are no scopes - for example in Go projects
         if (selectedScopes.size() == 1 && selectedScopes.containsKey(new Scope())) {

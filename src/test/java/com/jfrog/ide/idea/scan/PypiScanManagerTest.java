@@ -12,7 +12,6 @@ import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import com.jetbrains.python.packaging.PyPackageManager;
 import com.jetbrains.python.packaging.PyPackageManagers;
 import com.jetbrains.python.sdk.PythonSdkType;
-import com.jetbrains.python.sdk.PythonSdkUtil;
 import com.jfrog.ide.idea.TestUtils;
 import org.apache.commons.compress.utils.Sets;
 import org.apache.commons.lang3.SystemUtils;
@@ -25,15 +24,11 @@ import org.jfrog.build.extractor.executor.CommandResults;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.jfrog.build.extractor.scan.Scope;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author yahavi
@@ -104,13 +99,8 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
     }
 
     public void testBuildTree() throws IOException {
-        PypiScanManager pypiScanManager = new PypiScanManager(getProject());
-
-        // Create Pypi dependency tree
-        try (MockedStatic<PythonSdkUtil> mockController = Mockito.mockStatic(PythonSdkUtil.class)) {
-            mockController.when(PythonSdkUtil::getAllSdks).thenReturn(Lists.newArrayList(pythonSdk));
-            pypiScanManager.buildTree();
-        }
+        PypiScanManager pypiScanManager = new PypiScanManager(getProject(), pythonSdk);
+        pypiScanManager.buildTree();
 
         // Check root SDK node
         DependencyTree results = pypiScanManager.getScanResults();
@@ -139,31 +129,5 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
         assertEquals(TRANSITIVE_DEPENDENCY_NAME, generalInfo.getArtifactId());
         assertEquals(TRANSITIVE_DEPENDENCY_VERSION, generalInfo.getVersion());
         assertSize(1, anyTree.getChildren());
-    }
-
-    public void testRefreshPythonSdk() throws IOException {
-        PypiScanManager pypiScanManager = new PypiScanManager(getProject());
-
-        try (MockedStatic<PythonSdkUtil> mockController = Mockito.mockStatic(PythonSdkUtil.class)) {
-            // Test 1 Python SDK
-            List<Sdk> expected = Lists.newArrayList(pythonSdk);
-            mockController.when(PythonSdkUtil::getAllSdks).thenReturn(expected);
-            pypiScanManager.refreshPythonSdks();
-            assertEquals(expected, pypiScanManager.getPythonSdks());
-            assertTrue(PypiScanManager.isApplicable());
-
-            // Test 2 Python SDKs
-            expected = Lists.newArrayList(pythonSdk, new ProjectJdkImpl("Yet another Python SDK", PythonSdkType.getInstance()));
-            mockController.when(PythonSdkUtil::getAllSdks).thenReturn(expected);
-            pypiScanManager.refreshPythonSdks();
-            assertEquals(expected, pypiScanManager.getPythonSdks());
-            assertTrue(PypiScanManager.isApplicable());
-
-            // Test no Python SDKs
-            mockController.when(PythonSdkUtil::getAllSdks).thenReturn(Collections.emptyList());
-            pypiScanManager.refreshPythonSdks();
-            assertEmpty(pypiScanManager.getPythonSdks());
-            assertFalse(PypiScanManager.isApplicable());
-        }
     }
 }

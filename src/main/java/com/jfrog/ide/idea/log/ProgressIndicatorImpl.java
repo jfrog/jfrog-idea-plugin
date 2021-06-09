@@ -8,7 +8,7 @@ import com.intellij.openapi.progress.ProgressIndicator;
  */
 public class ProgressIndicatorImpl implements com.jfrog.ide.common.log.ProgressIndicator {
 
-    private ProgressIndicator indicator;
+    private final ProgressIndicator indicator;
 
     public ProgressIndicatorImpl(ProgressIndicator indicator) {
         this.indicator = indicator;

@@ -22,28 +22,28 @@ import static com.jfrog.ide.idea.ui.configuration.JFrogProjectConfiguration.BUIL
 public class JFrogToolWindowFactory implements ToolWindowFactory {
 
     @Override
-    public void createToolWindowContent(@NotNull final Project mainProject, @NotNull final ToolWindow toolWindow) {
-        boolean localProjectSupported = isLocalProjectSupported(mainProject);
-        boolean buildsConfigured = isBuildsConfigured(mainProject);
-        DumbService.getInstance(mainProject).runWhenSmart(() -> {
-            ServiceManager.getService(mainProject, JFrogToolWindow.class).initToolWindow(toolWindow, mainProject, localProjectSupported, buildsConfigured);
-            ScanManagersFactory.getInstance(mainProject).startScan(true);
-            CiManager.getInstance(mainProject).asyncRefreshBuilds();
+    public void createToolWindowContent(@NotNull final Project project, @NotNull final ToolWindow toolWindow) {
+        boolean localProjectSupported = isLocalProjectSupported(project);
+        boolean buildsConfigured = isBuildsConfigured(project);
+        DumbService.getInstance(project).runWhenSmart(() -> {
+            ServiceManager.getService(project, JFrogToolWindow.class).initToolWindow(toolWindow, project, localProjectSupported, buildsConfigured);
+            ScanManagersFactory.getInstance(project).startScan(true);
+            CiManager.getInstance(project).asyncRefreshBuilds();
         });
     }
 
-    private boolean isLocalProjectSupported(Project mainProject) {
-        ScanManagersFactory scanManagersFactory = ScanManagersFactory.getInstance(mainProject);
+    private boolean isLocalProjectSupported(Project project) {
+        ScanManagersFactory scanManagersFactory = ScanManagersFactory.getInstance(project);
         try {
             scanManagersFactory.refreshScanManagers();
         } catch (IOException e) {
             // Ignore
         }
-        return CollectionUtils.isNotEmpty(ScanManagersFactory.getScanManagers(mainProject));
+        return CollectionUtils.isNotEmpty(ScanManagersFactory.getScanManagers(project));
     }
 
-    private boolean isBuildsConfigured(Project mainProject) {
-        String buildsPattern = PropertiesComponent.getInstance(mainProject).getValue(BUILDS_PATTERN_KEY);
+    private boolean isBuildsConfigured(Project project) {
+        String buildsPattern = PropertiesComponent.getInstance(project).getValue(BUILDS_PATTERN_KEY);
         return StringUtils.isNotBlank(buildsPattern);
     }
 }

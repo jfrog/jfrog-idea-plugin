@@ -25,10 +25,10 @@ public abstract class FilterMenu<FilterType> extends JBPopupMenu implements Sync
     private final SelectAllCheckbox<FilterType> selectAllCheckbox = new SelectAllCheckbox<>(getSyncEvent());
     private final List<SelectionCheckbox<FilterType>> checkBoxMenuItems = Lists.newArrayList();
     protected FilterButton filterButton;
-    protected Project mainProject;
+    protected Project project;
 
-    protected FilterMenu(@NotNull Project mainProject, String name, String tooltip) {
-        this.mainProject = mainProject;
+    protected FilterMenu(@NotNull Project project, String name, String tooltip) {
+        this.project = project;
         this.filterButton = new FilterButton(this, name, tooltip);
     }
 

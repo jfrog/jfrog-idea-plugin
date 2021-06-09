@@ -46,11 +46,11 @@ public abstract class ComponentsTree extends Tree {
     private final JBPopupMenu popupMenu = new JBPopupMenu();
     ProjectsMap projects = new ProjectsMap();
 
-    protected Project mainProject;
+    protected Project project;
 
-    public ComponentsTree(@NotNull Project mainProject) {
+    public ComponentsTree(@NotNull Project project) {
         super((TreeModel) null);
-        this.mainProject = mainProject;
+        this.project = project;
         expandRow(0);
         setRootVisible(false);
         setCellRenderer(new ComponentsTreeCellRenderer());
@@ -160,7 +160,7 @@ public abstract class ComponentsTree extends Tree {
 
     private void createNodePopupMenu(DependencyTree selectedNode) {
         popupMenu.removeAll();
-        NavigationService navigationService = NavigationService.getInstance(mainProject);
+        NavigationService navigationService = NavigationService.getInstance(project);
         Set<NavigationTarget> navigationCandidates = navigationService.getNavigation(selectedNode);
         DependencyTree affectedNode = selectedNode;
         if (navigationCandidates == null) {
@@ -206,11 +206,11 @@ public abstract class ComponentsTree extends Tree {
         try {
             VirtualFile descriptorVirtualFile = navigationTarget.getElement().getContainingFile().getVirtualFile();
             pathResult = descriptorVirtualFile.getName();
-            String projBasePath = mainProject.getBasePath();
+            String projBasePath = project.getBasePath();
             if (projBasePath == null) {
                 return pathResult;
             }
-            Path basePath = Paths.get(mainProject.getBasePath());
+            Path basePath = Paths.get(project.getBasePath());
             Path descriptorPath = Paths.get(descriptorVirtualFile.getPath());
             pathResult = basePath.relativize(descriptorPath).toString();
         } catch (InvalidPathException | PsiInvalidElementAccessException ex) {
@@ -274,7 +274,7 @@ public abstract class ComponentsTree extends Tree {
         return new JBMenuItem(new AbstractAction(headLine) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                excludable.exclude(mainProject);
+                excludable.exclude(project);
             }
         });
     }

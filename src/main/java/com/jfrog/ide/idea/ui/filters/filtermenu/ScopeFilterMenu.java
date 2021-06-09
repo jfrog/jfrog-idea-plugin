@@ -12,8 +12,8 @@ public abstract class ScopeFilterMenu extends FilterMenu<Scope> {
     public static final String NAME = "Scope";
     public static final String TOOLTIP = "Select scopes to show";
 
-    public ScopeFilterMenu(@NotNull Project mainProject) {
-        super(mainProject, NAME, TOOLTIP);
+    public ScopeFilterMenu(@NotNull Project project) {
+        super(project, NAME, TOOLTIP);
     }
 
 }

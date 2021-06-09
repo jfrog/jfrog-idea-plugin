@@ -11,8 +11,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public class LocalIssueFilterMenu extends IssueFilterMenu {
 
-    public LocalIssueFilterMenu(@NotNull Project mainProject) {
-        super(mainProject, LocalFilterManager.getInstance(mainProject));
+    public LocalIssueFilterMenu(@NotNull Project project) {
+        super(project, LocalFilterManager.getInstance(project));
     }
 
     @Override

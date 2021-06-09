@@ -17,11 +17,11 @@ import java.util.Map;
  */
 public abstract class ConsistentFilterManager extends FilterManager implements PersistentStateComponent<ConsistentFilterManager.FiltersState>, Syncable {
 
-    private final Project mainProject;
+    private final Project project;
     private FiltersState state;
 
-    public ConsistentFilterManager(Project mainProject) {
-        this.mainProject = mainProject;
+    public ConsistentFilterManager(Project project) {
+        this.project = project;
     }
 
     /**
@@ -46,7 +46,7 @@ public abstract class ConsistentFilterManager extends FilterManager implements P
 
         // Update components tree with applied filters.
         if (selectedLicenses.containsValue(false)) {
-            mainProject.getMessageBus().syncPublisher(getSyncEvent()).update();
+            project.getMessageBus().syncPublisher(getSyncEvent()).update();
         }
 
         return selectedLicenses;
@@ -75,7 +75,7 @@ public abstract class ConsistentFilterManager extends FilterManager implements P
 
         // Update components tree with applied filters.
         if (selectedScopes.containsValue(false)) {
-            mainProject.getMessageBus().syncPublisher(getSyncEvent()).update();
+            project.getMessageBus().syncPublisher(getSyncEvent()).update();
         }
 
         return selectedScopes;

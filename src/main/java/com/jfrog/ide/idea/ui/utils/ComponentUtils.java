@@ -38,6 +38,7 @@ public class ComponentUtils {
         return label;
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static JComponent createNoCredentialsView() {
         HyperlinkLabel link = new HyperlinkLabel();
         link.setHyperlinkText("To use this section of the JFrog Plugin, please ", " configure", " your JFrog platform details.");
@@ -45,6 +46,7 @@ public class ComponentUtils {
         return createUnsupportedPanel(link);
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static JComponent createNoBuildsView() {
         HyperlinkLabel link = new HyperlinkLabel();
         link.setHyperlinkText("No builds detected. To start viewing your builds please follow ", " this", " guide.");

@@ -24,10 +24,10 @@ import java.awt.event.ItemListener;
 public class BuildsButton extends JComboBox<String> implements Syncable, Disposable {
 
     private ItemListener onSelectBuildListener;
-    private final Project mainProject;
+    private final Project project;
 
-    public BuildsButton(Project mainProject) {
-        this.mainProject = mainProject;
+    public BuildsButton(Project project) {
+        this.project = project;
         setRenderer(new BuildsCellRenderer());
     }
 
@@ -52,11 +52,11 @@ public class BuildsButton extends JComboBox<String> implements Syncable, Disposa
         public void itemStateChanged(ItemEvent e) {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 String selectedBuild = (String) e.getItem();
-                CiFilterManager.getInstance(mainProject).getSelectableBuilds()
+                CiFilterManager.getInstance(project).getSelectableBuilds()
                         .forEach(selectableItem -> selectableItem.setValue(StringUtils.equals(selectedBuild, selectableItem.getKey())));
-                MessageBus messageBus = mainProject.getMessageBus();
+                MessageBus messageBus = project.getMessageBus();
                 messageBus.syncPublisher(getSyncEvent()).update();
-                BuildGeneralInfo generalInfo = CiManager.getInstance(mainProject).getBuildGeneralInfo(selectedBuild);
+                BuildGeneralInfo generalInfo = CiManager.getInstance(project).getBuildGeneralInfo(selectedBuild);
                 if (generalInfo == null) {
                     String msg = String.format("Couldn't find build '%s' within the build results.", selectedBuild);
                     Logger.getInstance().error(msg);

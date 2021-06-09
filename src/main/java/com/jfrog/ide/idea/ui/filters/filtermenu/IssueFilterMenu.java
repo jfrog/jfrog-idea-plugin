@@ -17,8 +17,8 @@ public class IssueFilterMenu extends FilterMenu<Severity> {
     public static final String TOOLTIP = "Select severities to show";
     public static final String NAME = "Severity";
 
-    public IssueFilterMenu(@NotNull Project mainProject, FilterManager filterManager) {
-        super(mainProject, NAME, TOOLTIP);
+    public IssueFilterMenu(@NotNull Project project, FilterManager filterManager) {
+        super(project, NAME, TOOLTIP);
         Map<Severity, Boolean> severitiesFilters = filterManager.getSelectedSeverities();
         addComponents(severitiesFilters, false);
     }

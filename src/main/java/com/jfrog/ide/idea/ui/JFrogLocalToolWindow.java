@@ -31,27 +31,27 @@ import static com.jfrog.ide.idea.ui.JFrogToolWindow.TITLE_LABEL_SIZE;
 public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
     /**
-     * @param mainProject - Currently opened IntelliJ project
-     * @param supported   - True if the current opened project is supported by the plugin.
-     *                    If not, show the "Unsupported project type" message.
+     * @param project   - Currently opened IntelliJ project
+     * @param supported - True if the current opened project is supported by the plugin.
+     *                  If not, show the "Unsupported project type" message.
      */
-    public JFrogLocalToolWindow(@NotNull Project mainProject, boolean supported) {
-        super(mainProject, supported, LocalComponentsTree.getInstance(mainProject));
+    public JFrogLocalToolWindow(@NotNull Project project, boolean supported) {
+        super(project, supported, LocalComponentsTree.getInstance(project));
     }
 
     @Override
     IssueFilterMenu createIssueFilterMenu() {
-        return new LocalIssueFilterMenu(mainProject);
+        return new LocalIssueFilterMenu(project);
     }
 
     @Override
     LicenseFilterMenu createLicenseFilterMenu() {
-        return new LocalLicenseFilterMenu(mainProject);
+        return new LocalLicenseFilterMenu(project);
     }
 
     @Override
     ScopeFilterMenu createScopeFilterMenu() {
-        return new LocalScopeFilterMenu(mainProject);
+        return new LocalScopeFilterMenu(project);
     }
 
     @Override
@@ -59,6 +59,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         return createComponentsTreePanel(true);
     }
 
+    @SuppressWarnings("DialogTitleCapitalization")
     @Override
     JComponent createComponentsDetailsView(boolean supported) {
         if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
@@ -76,7 +77,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
     @Override
     public Set<Issue> getIssuesToDisplay(List<DependencyTree> selectedNodes) {
-        return LocalFilterManager.getInstance(mainProject).getFilteredScanIssues(selectedNodes);
+        return LocalFilterManager.getInstance(project).getFilteredScanIssues(selectedNodes);
     }
 
     /**
@@ -84,9 +85,9 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
      */
     public void registerListeners() {
         super.registerListeners();
-        MessageBusConnection projectBusConnection = mainProject.getMessageBus().connect();
+        MessageBusConnection projectBusConnection = project.getMessageBus().connect();
         projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_FILTER_CHANGE, () -> ApplicationManager.getApplication().invokeLater(() -> {
-            LocalComponentsTree.getInstance(mainProject).applyFiltersForAllProjects();
+            LocalComponentsTree.getInstance(project).applyFiltersForAllProjects();
             updateIssuesTable();
         }));
     }

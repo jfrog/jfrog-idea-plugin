@@ -11,10 +11,12 @@ import com.jfrog.ide.common.gradle.GradleTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.idea.inspections.GradleGroovyInspection;
 import com.jfrog.ide.idea.inspections.GradleKotlinInspection;
-import com.jfrog.ide.idea.utils.Utils;
+import com.jfrog.ide.idea.ui.ComponentsTree;
+import com.jfrog.ide.idea.ui.filters.filtermanager.ConsistentFilterManager;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Created by Yahav Itzhak on 9 Nov 2017.
@@ -24,16 +26,21 @@ public class GradleScanManager extends ScanManager {
     private final GradleTreeBuilder gradleTreeBuilder;
     private boolean kotlin;
 
-    GradleScanManager(Project mainProject, Project project) throws IOException {
-        super(mainProject, project, ComponentPrefix.GAV);
-        getLog().info("Found gradle project: " + getProjectName());
-        gradleTreeBuilder = new GradleTreeBuilder(Utils.getProjectBasePath(project), EnvironmentUtil.getEnvironmentMap());
+    /**
+     * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
+     *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
+     * @param basePath - The build.gradle or build.gradle.kts directory.
+     */
+    GradleScanManager(Project project, String basePath) throws IOException {
+        super(project, basePath, ComponentPrefix.GAV);
+        getLog().info("Found Gradle project: " + getProjectName());
+        gradleTreeBuilder = new GradleTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap());
     }
 
     @Override
     protected PsiFile[] getProjectDescriptors() {
         LocalFileSystem localFileSystem = LocalFileSystem.getInstance();
-        Path basePath = Utils.getProjectBasePath(project);
+        Path basePath = Paths.get(this.basePath);
         VirtualFile file = localFileSystem.findFileByPath(basePath.resolve("build.gradle").toString());
         if (file == null) {
             file = localFileSystem.findFileByPath(basePath.resolve("build.gradle.kts").toString());
@@ -42,7 +49,7 @@ public class GradleScanManager extends ScanManager {
             }
             kotlin = true;
         }
-        PsiFile psiFile = PsiManager.getInstance(mainProject).findFile(file);
+        PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
         return new PsiFile[]{psiFile};
     }
 

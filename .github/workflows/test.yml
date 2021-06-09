@@ -29,8 +29,8 @@ jobs:
 
       # Run tests
       - name: Tests on macOS, Linux
-        run: ./gradlew clean verifyPlugin test
+        run: ./gradlew clean verifyPlugin runPluginVerifier test
         if: runner.os != 'Windows'
       - name: Tests on Windows
-        run: ./gradlew.bat clean verifyPlugin test
+        run: ./gradlew.bat clean verifyPlugin runPluginVerifier test
         if: runner.os == 'Windows'

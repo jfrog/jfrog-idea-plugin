@@ -18,17 +18,17 @@ import java.util.Set;
  */
 public class LocalLicenseFilterMenu extends LicenseFilterMenu {
 
-    public LocalLicenseFilterMenu(@NotNull Project mainProject) {
-        super(mainProject);
+    public LocalLicenseFilterMenu(@NotNull Project project) {
+        super(project);
     }
 
     @Override
     public void refresh() {
-        Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(mainProject);
+        Set<ScanManager> scanManagers = ScanManagersFactory.getScanManagers(project);
         if (CollectionUtils.isEmpty(scanManagers)) {
             return;
         }
-        Map<License, Boolean> selectedLicenses = LocalFilterManager.getInstance(mainProject).getSelectedLicenses();
+        Map<License, Boolean> selectedLicenses = LocalFilterManager.getInstance(project).getSelectedLicenses();
         scanManagers.forEach(scanManager ->
                 scanManager.getAllLicenses()
                         .stream()

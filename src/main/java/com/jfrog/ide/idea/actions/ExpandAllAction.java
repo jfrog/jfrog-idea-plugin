@@ -17,6 +17,7 @@ public class ExpandAllAction extends AnAction implements DumbAware {
 
     private JTree myTree;
 
+    @SuppressWarnings("DialogTitleCapitalization")
     private ExpandAllAction() {
         super("Expand All", "Expand All", AllIcons.Actions.Expandall);
     }

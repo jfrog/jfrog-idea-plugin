@@ -1,8 +1,8 @@
 package com.jfrog.ide.idea.ui;
 
+import com.intellij.mock.MockProject;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.utils.ProjectsMap;
-import com.jfrog.ide.idea.projects.NpmProject;
 
 /**
  * @author yahavi
@@ -10,16 +10,15 @@ import com.jfrog.ide.idea.projects.NpmProject;
 public class BaseTreeImpl extends ComponentsTree {
 
     BaseTreeImpl() {
-        super(new NpmProject("."));
+        super(new MockProject(null, () -> {
+        }));
     }
 
     @Override
     public void addOnProjectChangeListener(MessageBusConnection busConnection) {
-
     }
 
     @Override
     public void applyFilters(ProjectsMap.ProjectKey projectName) {
-
     }
 }

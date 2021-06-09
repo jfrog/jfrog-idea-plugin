@@ -16,8 +16,8 @@ import org.jfrog.build.extractor.scan.DependencyTree;
  * @author yahavi
  */
 public class LocalComponentsTree extends ComponentsTree {
-    public LocalComponentsTree(@NotNull Project mainProject) {
-        super(mainProject);
+    public LocalComponentsTree(@NotNull Project project) {
+        super(project);
     }
 
     public static LocalComponentsTree getInstance(@NotNull Project project) {
@@ -34,11 +34,11 @@ public class LocalComponentsTree extends ComponentsTree {
         if (project == null) {
             return;
         }
-        FilterManager filterManager = LocalFilterManager.getInstance(mainProject);
+        FilterManager filterManager = LocalFilterManager.getInstance(this.project);
         DependencyTree filteredRoot = filterManager.applyFilters(project);
         filteredRoot.setIssues(filteredRoot.processTreeIssues());
         appendProjectWhenReady(filteredRoot);
-        DumbService.getInstance(mainProject).smartInvokeLater(() -> ScanManagersFactory.getInstance(mainProject).runInspectionsForAllScanManagers());
+        DumbService.getInstance(this.project).smartInvokeLater(() -> ScanManagersFactory.getInstance(this.project).runInspectionsForAllScanManagers());
     }
 
 }
