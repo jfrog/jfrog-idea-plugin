@@ -1,16 +1,23 @@
 <idea-plugin>
     <id>org.jfrog.idea</id>
     <name>JFrog</name>
-    <vendor email="https://www.jfrog.com/support-service" url="https://www.jfrog.com">JFrog</vendor>
+    <vendor email="support@jfrog.com" url="https://www.jfrog.com">JFrog</vendor>
 
     <description><![CDATA[
-      The JFrog plugin adds JFrog Xray scanning of Maven, Gradle, Go and npm project dependencies to your IDE. It allows developers to view panels displaying vulnerability information about the components and their dependencies directly in their IDE. The plugin is compatible with IntelliJ IDEA, WebStorm and GoLand.
+      The JFrog plugin adds JFrog Xray scanning of Maven, Gradle, Go, npm, and PyPI project dependencies to your IDE.
+      The plugin allows developers to see valuable information about the status of their code by continuously scanning it locally with JFrog Xray.
+      Since version 1.8.0, the plugin also allows developers to track the status of the code while it is being built, tested and scanned on the CI server.
+      The plugin is compatible with IntelliJ IDEA, WebStorm, GoLand, PyCharm, and Android Studio.
     ]]></description>
 
     <change-notes>
         <![CDATA[
-          <li> Go - better handling checksum errors in go.sum.</li>
-          <li> UI improvements.</li>
+          <li>Support Android Studio and Android projects on IntelliJ IDEA.</li>
+          <li>Support PyCharm and PyPI projects on Intellij IDEA.</li>
+          <li>Gradle - add support for Kotlin DSL in showing vulnerable components.</li>
+          <li>Gradle - Fix an issue in Gradle whereby scan failed with "invalid type code: 00".</li>
+          <li>npm - Fix an issue whereby scan failed using npm 7.</li>
+          <li>CI - fix an issue whereby build patterns with slash doesn't encoded correctly.</li>
         ]]>
     </change-notes>
 
