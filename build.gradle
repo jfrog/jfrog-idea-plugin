@@ -44,9 +44,17 @@ repositories {
     }
 }
 
+def buildInfoVersion = '2.26.4'
 dependencies {
+    implementation group: 'org.jfrog.buildinfo', name: 'build-info-extractor', version: buildInfoVersion
+    implementation group: 'org.jfrog.buildinfo', name: 'build-info-client', version: buildInfoVersion
+    implementation group: 'org.jfrog.buildinfo', name: 'build-info-api', version: buildInfoVersion
+    implementation group: 'com.jfrog.xray.client', name: 'xray-client-java', version: '0.7.x-SNAPSHOT'
     implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: '1.5.x-SNAPSHOT'
+    implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
+    implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-jre'
+
     testImplementation "org.mockito:mockito-core:3.9.0"
     testImplementation "org.mockito:mockito-inline:3.9.0"
 }
