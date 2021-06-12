@@ -21,6 +21,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import static com.jfrog.ide.common.log.Utils.logError;
+
 /**
  * Created by yahavi
  */
@@ -71,7 +73,7 @@ public class ScanManagersFactory {
                 scanManager.asyncScanAndUpdateResults(quickScan);
             }
         } catch (IOException | RuntimeException e) {
-            Logger.getInstance().error("", e);
+            logError(Logger.getInstance(), "", e, !quickScan);
         }
     }
 

@@ -36,7 +36,7 @@ public class GoScanManager extends ScanManager {
     }
 
     @Override
-    protected void buildTree() throws IOException {
+    protected void buildTree(boolean shouldToast) throws IOException {
         setScanResults(goTreeBuilder.buildTree());
     }
 

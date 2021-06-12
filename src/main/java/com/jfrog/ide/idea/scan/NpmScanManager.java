@@ -36,8 +36,8 @@ public class NpmScanManager extends ScanManager {
     }
 
     @Override
-    protected void buildTree() throws IOException {
-        setScanResults(npmTreeBuilder.buildTree(getLog()));
+    protected void buildTree(boolean shouldToast) throws IOException {
+        setScanResults(npmTreeBuilder.buildTree(getLog(), shouldToast));
     }
 
     @Override

@@ -100,7 +100,7 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
 
     public void testBuildTree() throws IOException {
         PypiScanManager pypiScanManager = new PypiScanManager(getProject(), pythonSdk);
-        pypiScanManager.buildTree();
+        pypiScanManager.buildTree(false);
 
         // Check root SDK node
         DependencyTree results = pypiScanManager.getScanResults();

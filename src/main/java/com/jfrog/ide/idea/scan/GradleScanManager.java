@@ -59,7 +59,7 @@ public class GradleScanManager extends ScanManager {
     }
 
     @Override
-    protected void buildTree() throws IOException {
+    protected void buildTree(boolean shouldToast) throws IOException {
         setScanResults(gradleTreeBuilder.buildTree(getLog()));
     }
 }

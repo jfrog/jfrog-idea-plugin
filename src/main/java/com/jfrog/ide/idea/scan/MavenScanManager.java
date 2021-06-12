@@ -61,7 +61,7 @@ public class MavenScanManager extends ScanManager {
     }
 
     @Override
-    protected void buildTree() {
+    protected void buildTree(boolean shouldToast) {
         DependencyTree rootNode = new DependencyTree(project.getName());
         MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject -> populateMavenModule(rootNode, rootMavenProject, Sets.newHashSet()));
         GeneralInfo generalInfo = new GeneralInfo().artifactId(project.getName()).path(basePath).pkgType("maven");
