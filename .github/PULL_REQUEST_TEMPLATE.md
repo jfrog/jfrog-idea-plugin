@@ -1,2 +1,2 @@
-- [ ] All [tests](https://ci.appveyor.com/project/jfrog-ecosystem/jfrog-idea-plugin) passed. If this feature is not already covered by the tests, I added new tests.
+- [ ] All [tests](https://github.com/jfrog/jfrog-idea-plugin/actions/workflows/test.yml) passed. If this feature is not already covered by the tests, I added new tests.
 -----
