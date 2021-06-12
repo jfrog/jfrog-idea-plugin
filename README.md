@@ -1,4 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/vypm9uua3vf3plan?svg=true)](https://ci.appveyor.com/project/jfrog-ecosystem/jfrog-idea-plugin)
+[![Build status](https://github.com/jfrog/jfrog-idea-plugin/actions/workflows/test.yml/badge.svg)](https://github.com/jfrog/jfrog-idea-plugin/actions/workflows/test.yml)
 [![Marketplace](https://img.shields.io/jetbrains/plugin/v/9834-jfrog)](https://plugins.jetbrains.com/plugin/9834-jfrog)
 # JFrog Idea Plugin 
 
