@@ -1,5 +1,4 @@
 <idea-plugin>
-    <depends>org.jetbrains.kotlin</depends>
     <extensions defaultExtensionNs="com.intellij">
         <localInspection language="kotlin"
                          displayName="Show in dependency tree"

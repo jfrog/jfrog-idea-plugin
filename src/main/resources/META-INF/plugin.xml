@@ -26,6 +26,7 @@
     <idea-version since-build="203.5419.21"/>
     <depends>com.intellij.modules.lang</depends>
     <depends config-file="with-java.xml" optional="true">com.intellij.modules.java</depends>
+    <depends config-file="with-gradle.xml" optional="true">com.intellij.gradle</depends>
     <depends config-file="with-groovy.xml" optional="true">org.intellij.groovy</depends>
     <depends config-file="with-kotlin.xml" optional="true">org.jetbrains.kotlin</depends>
     <depends config-file="with-maven.xml" optional="true">org.jetbrains.idea.maven</depends>
