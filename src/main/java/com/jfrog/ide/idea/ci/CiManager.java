@@ -39,6 +39,7 @@ import java.text.ParseException;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.jfrog.ide.common.log.Utils.logError;
 import static com.jfrog.ide.idea.ui.configuration.JFrogProjectConfiguration.BUILDS_PATTERN_KEY;
 
 /**
@@ -66,7 +67,7 @@ public class CiManager extends CiManagerBase {
         return ServiceManager.getService(project, CiManager.class);
     }
 
-    public void asyncRefreshBuilds() {
+    public void asyncRefreshBuilds(boolean shouldToast) {
         if (!scanPreconditionsMet()) {
             return;
         }
@@ -78,11 +79,11 @@ public class CiManager extends CiManagerBase {
                         return;
                     }
                     String buildsPattern = propertiesComponent.getValue(BUILDS_PATTERN_KEY);
-                    buildCiTree(buildsPattern, new ProgressIndicatorImpl(indicator), () -> checkCanceled(indicator));
+                    buildCiTree(buildsPattern, new ProgressIndicatorImpl(indicator), () -> checkCanceled(indicator), shouldToast);
                     CiFilterManager.getInstance(project).collectBuildsInformation(root);
                     loadFirstBuild();
                 } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
-                    Logger.getInstance().error("Failed to refresh builds", e);
+                    logError(Logger.getInstance(), "Failed to refresh builds", e, shouldToast);
                 } finally {
                     scanInProgress.set(false);
                 }
@@ -182,9 +183,9 @@ public class CiManager extends CiManagerBase {
 
     private void registerOnChangeHandlers() {
         MessageBusConnection busConnection = ApplicationManager.getApplication().getMessageBus().connect();
-        busConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, this::asyncRefreshBuilds);
+        busConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () -> asyncRefreshBuilds(true));
         MessageBusConnection projectBusConnection = project.getMessageBus().connect();
-        projectBusConnection.subscribe(ApplicationEvents.ON_BUILDS_CONFIGURATION_CHANGE, this::asyncRefreshBuilds);
+        projectBusConnection.subscribe(ApplicationEvents.ON_BUILDS_CONFIGURATION_CHANGE, () -> asyncRefreshBuilds(true));
         projectBusConnection.subscribe(BuildEvents.ON_SELECTED_BUILD, this::loadBuild);
     }
 }

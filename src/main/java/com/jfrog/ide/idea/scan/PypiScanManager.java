@@ -16,7 +16,6 @@ import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.filters.filtermanager.ConsistentFilterManager;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.jfrog.build.extractor.scan.Scope;
@@ -24,6 +23,8 @@ import org.jfrog.build.extractor.scan.Scope;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.jfrog.ide.common.log.Utils.logError;
 
 /**
  * @author yahavi
@@ -47,14 +48,14 @@ public class PypiScanManager extends ScanManager {
     }
 
     @Override
-    protected void buildTree() {
+    protected void buildTree(boolean shouldToast) {
         DependencyTree rootNode = createRootNode();
         initDependencyNode(rootNode, pythonSdk.getName(), "", pythonSdk.getHomePath(), "pypi");
 
         try {
             rootNode.add(createSdkDependencyTree(pythonSdk));
         } catch (ExecutionException e) {
-            getLog().error(ExceptionUtils.getRootCauseMessage(e), e);
+            logError(getLog(), "", e, shouldToast);
         }
         if (rootNode.getChildren().size() == 1) {
             rootNode = (DependencyTree) rootNode.getChildAt(0);

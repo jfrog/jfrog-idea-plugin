@@ -14,6 +14,6 @@ public class RefreshBuildsAction extends AnAction {
         if (e.getProject() == null) {
             return;
         }
-        CiManager.getInstance(e.getProject()).asyncRefreshBuilds();
+        CiManager.getInstance(e.getProject()).asyncRefreshBuilds(false);
     }
 }

@@ -46,6 +46,12 @@ public class Logger implements Log {
         log(INFORMATION_TITLE, message, notificationType);
     }
 
+    /**
+     * Log an error.
+     * Notice - For the best user experience, make sure that only interactive actions should call this method.
+     *
+     * @param message - The message to log
+     */
     @Override
     public void error(String message) {
         ideaLogger.error(message);
@@ -54,6 +60,13 @@ public class Logger implements Log {
         log(ERROR_TITLE, message, notificationType);
     }
 
+    /**
+     * Log an error.
+     * Notice - For the best user experience, make sure that only interactive actions should call this method.
+     *
+     * @param message - The message to log
+     * @param t       - The exception raised
+     */
     @Override
     public void error(String message, Throwable t) {
         ideaLogger.error(message, t);

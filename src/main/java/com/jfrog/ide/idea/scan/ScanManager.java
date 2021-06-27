@@ -52,6 +52,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.jfrog.ide.common.log.Utils.logError;
+
 /**
  * Created by romang on 4/26/17.
  */
@@ -81,8 +83,10 @@ public abstract class ScanManager extends ScanManagerBase {
     /**
      * Collect and return {@link Components} to be scanned by JFrog Xray.
      * Implementation should be project type specific.
+     *
+     * @param shouldToast - True if should pop up a balloon when an error occurs.
      */
-    protected abstract void buildTree() throws IOException;
+    protected abstract void buildTree(boolean shouldToast) throws IOException;
 
     /**
      * Return all project descriptors under the scan-manager project, which need to be inspected by the corresponding {@link LocalInspectionTool}.
@@ -104,7 +108,7 @@ public abstract class ScanManager extends ScanManagerBase {
      */
     private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator) {
         try {
-            buildTree();
+            buildTree(!quickScan);
             scanAndCacheArtifacts(indicator, quickScan);
             addXrayInfoToTree(getScanResults());
             setScanResults();
@@ -112,7 +116,7 @@ public abstract class ScanManager extends ScanManagerBase {
         } catch (ProcessCanceledException e) {
             getLog().info("Xray scan was canceled");
         } catch (Exception e) {
-            getLog().error("", e);
+            logError(getLog(), "Xray Scan failed", e, !quickScan);
         } finally {
             scanInProgress.set(false);
         }
