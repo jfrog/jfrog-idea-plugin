@@ -33,14 +33,9 @@ runIde {
 
 repositories {
     mavenLocal()
+    mavenCentral()
     maven {
-        url "https://oss.jfrog.org/artifactory/libs-snapshot"
-        mavenContent {
-            snapshotsOnly()
-        }
-    }
-    maven {
-        url "https://oss.jfrog.org/artifactory/libs-release"
+        url "https://releases.jfrog.io/artifactory/oss-releases"
     }
 }
 
