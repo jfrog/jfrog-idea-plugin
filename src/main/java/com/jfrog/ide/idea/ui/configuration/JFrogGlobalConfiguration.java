@@ -272,7 +272,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private ArtifactoryManagerBuilder createArtifactoryManagerBuilder() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
         String urlStr = trim(artifactoryUrl.getText());
         return new ArtifactoryManagerBuilder()
-                .setArtifactoryUrl(urlStr)
+                .setServerUrl(urlStr)
                 .setUsername(serverConfig.getUsername())
                 .setPassword(serverConfig.getPassword())
                 .setProxyConfiguration(serverConfig.getProxyConfForTargetUrl(urlStr))
