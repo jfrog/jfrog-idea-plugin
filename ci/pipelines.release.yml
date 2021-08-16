@@ -22,7 +22,7 @@ pipelines:
           inputResources:
             - name: ideaReleaseGit
           integrations:
-            - name: ojo
+            - name: releases_temp
             - name: github_generic
         execution:
           onStart:
@@ -49,10 +49,9 @@ pipelines:
             - curl -fL https://getcli.jfrog.io | sh && chmod +x jfrog
 
             # Configure JFrog CLI
-            - ./jfrog c add ojo --artifactory-url $int_ojo_rt_url --access-token=$int_ojo_rt_token
+            - ./jfrog c add releases --artifactory-url=https://releases.jfrog.io/artifactory --access-token=$int_releases_temp_token
             - ./jfrog rt gradlec --use-wrapper --deploy-ivy-desc=false --deploy-maven-desc=false
-              --server-id-resolve ojo --repo-resolve remote-repos
-              --server-id-deploy ojo --repo-deploy oss-release-local
+              --server-id-deploy releases --repo-deploy oss-release-local
 
             # Update version
             - sed -i "s/\(currentVersion=\).*\$/\1${NEXT_VERSION}/" gradle.properties
@@ -67,7 +66,7 @@ pipelines:
               JFROG_CLI_BUILD_NAME=$JFROG_CLI_BUILD_NAME
               JFROG_CLI_BUILD_NUMBER=$JFROG_CLI_BUILD_NUMBER
               ./jfrog rt gradle clean verifyPlugin buildPlugin artifactoryPublish
-            - ./jfrog rt bp
+#            - ./jfrog rt bp
 
             # Update next development version
             - sed -i "s/\(currentVersion=\).*\$/\1${NEXT_DEVELOPMENT_VERSION}/" gradle.properties
