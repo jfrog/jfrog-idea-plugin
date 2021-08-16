@@ -12,13 +12,8 @@
 
     <change-notes>
         <![CDATA[
-          <li>Support Android Studio and Android projects on IntelliJ IDEA.</li>
-          <li>Support PyCharm and PyPI projects on Intellij IDEA.</li>
-          <li>Gradle - Add support for Kotlin DSL in showing vulnerable components.</li>
-          <li>Gradle - Fix an issue in Gradle whereby scan failed with "invalid type code: 00".</li>
-          <li>npm - Fix an issue whereby scan failed using npm 7.</li>
-          <li>CI - Fix an issue whereby build patterns with slash weren't encoded correctly.</li>
-          <li>Fix an issue whereby saveSettings may occur before IntelliJ finishes loading.</li>
+          <li>Fix an issue whereby in some cases scanning of npm projects throws an exception.</li>
+          <li>Improved usability - error balloons should appear only during interactive scans.</li>
         ]]>
     </change-notes>
 
