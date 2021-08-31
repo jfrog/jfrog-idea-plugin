@@ -24,6 +24,7 @@ import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.common.scan.ScanManagerBase;
 import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
@@ -59,7 +60,6 @@ import static com.jfrog.ide.common.log.Utils.logError;
  */
 public abstract class ScanManager extends ScanManagerBase {
 
-    private static final Path HOME_PATH = Paths.get(System.getProperty("user.home"), ".jfrog-idea-plugin");
     protected Project project;
     String basePath;
 
@@ -72,11 +72,10 @@ public abstract class ScanManager extends ScanManagerBase {
      * @param basePath - Project base path.
      * @param prefix   - Components prefix for xray scan, e.g. gav:// or npm://.
      */
-    ScanManager(@NotNull Project project, String basePath, ComponentPrefix prefix) throws IOException {
-        super(HOME_PATH.resolve("cache"), basePath, Logger.getInstance(), GlobalSettings.getInstance().getServerConfig(), prefix);
+    ScanManager(@NotNull Project project, String basePath, ComponentPrefix prefix, ScanLogic scanLogic) throws IOException {
+        super(scanLogic, basePath, Logger.getInstance(), GlobalSettings.getInstance().getServerConfig(), prefix);
         this.project = project;
         this.basePath = basePath;
-        Files.createDirectories(HOME_PATH);
         registerOnChangeHandlers();
     }
 

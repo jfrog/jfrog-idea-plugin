@@ -6,28 +6,39 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
+import com.jfrog.ide.common.persistency.XrayScanCache;
+import com.jfrog.ide.common.scan.BulkScanLogic;
+import com.jfrog.ide.common.scan.EmptyScanLogic;
+import com.jfrog.ide.common.scan.GraphScanLogic;
+import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.common.utils.PackageFileFinder;
+import com.jfrog.ide.common.utils.XrayConnectionUtils;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.utils.Utils;
+import com.jfrog.xray.client.impl.XrayClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 import static com.jfrog.ide.common.log.Utils.logError;
+import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBuilder;
 
 /**
  * Created by yahavi
  */
 public class ScanManagersFactory {
 
+    private static final Path HOME_PATH = Paths.get(System.getProperty("user.home"), ".jfrog-idea-plugin");
     private Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
     private final Project project;
 
@@ -36,6 +47,11 @@ public class ScanManagersFactory {
     }
 
     private ScanManagersFactory(@NotNull Project project) {
+        try {
+            Files.createDirectories(HOME_PATH);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         this.project = project;
     }
 
@@ -70,7 +86,11 @@ public class ScanManagersFactory {
             componentsTree.reset();
             NavigationService.clearNavigationMap(project);
             for (ScanManager scanManager : scanManagers.values()) {
-                scanManager.asyncScanAndUpdateResults(quickScan);
+                try {
+                    scanManager.asyncScanAndUpdateResults(quickScan);
+                } catch (RuntimeException e) {
+                    logError(Logger.getInstance(), "", e, !quickScan);
+                }
             }
         } catch (IOException | RuntimeException e) {
             logError(Logger.getInstance(), "", e, !quickScan);
@@ -95,34 +115,54 @@ public class ScanManagersFactory {
         final Set<Path> paths = Sets.newHashSet();
         int projectHash = Utils.getProjectIdentifier(project);
         ScanManager scanManager = this.scanManagers.get(projectHash);
+        ScanLogic logic = createScanLogic();
         if (scanManager != null) {
             scanManagers.put(projectHash, scanManager);
         } else {
             // Unlike other scan managers whereby we create them if the package descriptor exist, the Maven
             // scan manager is created if the Maven plugin is installed and there are Maven projects loaded.
-            createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.MAVEN, "");
+            createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.MAVEN, "", logic);
         }
         paths.add(Utils.getProjectBasePath(project));
-        createScanManagers(scanManagers, paths);
-        createPypiScanManagerIfApplicable(scanManagers);
+        createScanManagers(scanManagers, paths, logic);
+        createPypiScanManagerIfApplicable(scanManagers, logic);
         this.scanManagers = scanManagers;
     }
 
-    private void createScanManagers(Map<Integer, ScanManager> scanManagers, Set<Path> paths) throws IOException {
+    private ScanLogic createScanLogic() {
+        Logger log =Logger.getInstance();
+        XrayClient client = createXrayClientBuilder(GlobalSettings.getInstance().getServerConfig(), log).build();
+        try {
+            XrayScanCache scanCache = new XrayScanCache(project.getName(), HOME_PATH.resolve("cache"), log);
+
+            if (GraphScanLogic.isXrayVersionSupported(client.system().version())) {
+                return new GraphScanLogic();
+            } else {
+                if (BulkScanLogic.isXrayVersionSupported(client.system().version())) {
+                    return new BulkScanLogic(scanCache, log);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new EmptyScanLogic(log);
+    }
+
+    private void createScanManagers(Map<Integer, ScanManager> scanManagers, Set<Path> paths, ScanLogic logic) throws IOException {
         scanManagers.values().stream().map(ScanManager::getProjectPaths).flatMap(Collection::stream).forEach(paths::add);
         PackageFileFinder packageFileFinder = new PackageFileFinder(paths, GlobalSettings.getInstance().getServerConfig().getExcludedPaths(), Logger.getInstance());
 
         // Create npm scan-managers.
         Set<String> packageJsonDirs = packageFileFinder.getNpmPackagesFilePairs();
-        createScanManagersForPackageDirs(packageJsonDirs, scanManagers, ScanManagerTypes.NPM);
+        createScanManagersForPackageDirs(packageJsonDirs, scanManagers, ScanManagerTypes.NPM, logic);
 
         // Create Gradle scan-managers.
         Set<String> buildGradleDirs = packageFileFinder.getBuildGradlePackagesFilePairs();
-        createScanManagersForPackageDirs(buildGradleDirs, scanManagers, ScanManagerTypes.GRADLE);
+        createScanManagersForPackageDirs(buildGradleDirs, scanManagers, ScanManagerTypes.GRADLE, logic);
 
         // Create Go scan-managers.
         Set<String> goModDirs = packageFileFinder.getGoPackagesFilePairs();
-        createScanManagersForPackageDirs(goModDirs, scanManagers, ScanManagerTypes.GO);
+        createScanManagersForPackageDirs(goModDirs, scanManagers, ScanManagerTypes.GO, logic);
     }
 
     /**
@@ -130,13 +170,13 @@ public class ScanManagersFactory {
      *
      * @param scanManagers - The scan managers list
      */
-    private void createPypiScanManagerIfApplicable(Map<Integer, ScanManager> scanManagers) throws IOException {
+    private void createPypiScanManagerIfApplicable(Map<Integer, ScanManager> scanManagers, ScanLogic logic) throws IOException {
         try {
             for (Sdk pythonSdk : PypiScanManager.getAllPythonSdks()) {
                 int projectHash = Utils.getProjectIdentifier(pythonSdk.getName(), pythonSdk.getHomePath());
                 ScanManager scanManager = this.scanManagers.get(projectHash);
                 if (scanManager == null) {
-                    scanManager = new PypiScanManager(project, pythonSdk);
+                    scanManager = new PypiScanManager(project, pythonSdk, logic);
                 }
                 scanManagers.put(projectHash, scanManager);
             }
@@ -146,14 +186,14 @@ public class ScanManagersFactory {
     }
 
     private void createScanManagersForPackageDirs(Set<String> packageDirs, Map<Integer, ScanManager> scanManagers,
-                                                  ScanManagerTypes type) throws IOException {
+                                                  ScanManagerTypes type, ScanLogic logic) throws IOException {
         for (String dir : packageDirs) {
             int projectHash = Utils.getProjectIdentifier(dir, dir);
             ScanManager scanManager = scanManagers.get(projectHash);
             if (scanManager != null) {
                 scanManagers.put(projectHash, scanManager);
             } else {
-                createScanManagerIfApplicable(scanManagers, projectHash, type, dir);
+                createScanManagerIfApplicable(scanManagers, projectHash, type, dir, logic);
             }
         }
     }
@@ -176,22 +216,22 @@ public class ScanManagersFactory {
      * @param dir          - Project dir
      * @throws IOException in any case of error during scan manager creation.
      */
-    private void createScanManagerIfApplicable(Map<Integer, ScanManager> scanManagers, int projectHash, ScanManagerTypes type, String dir) throws IOException {
+    private void createScanManagerIfApplicable(Map<Integer, ScanManager> scanManagers, int projectHash, ScanManagerTypes type, String dir, ScanLogic scanLogic) throws IOException {
         try {
             switch (type) {
                 case MAVEN:
                     if (MavenScanManager.isApplicable(project)) {
-                        scanManagers.put(projectHash, new MavenScanManager(project));
+                        scanManagers.put(projectHash, new MavenScanManager(project, scanLogic));
                     }
                     return;
                 case GRADLE:
-                    scanManagers.put(projectHash, new GradleScanManager(project, dir));
+                    scanManagers.put(projectHash, new GradleScanManager(project, dir, scanLogic));
                     return;
                 case NPM:
-                    scanManagers.put(projectHash, new NpmScanManager(project, dir));
+                    scanManagers.put(projectHash, new NpmScanManager(project, dir, scanLogic));
                     return;
                 case GO:
-                    scanManagers.put(projectHash, new GoScanManager(project, dir));
+                    scanManagers.put(projectHash, new GoScanManager(project, dir, scanLogic));
             }
         } catch (NoClassDefFoundError noClassDefFoundError) {
             // The 'maven' or 'python' plugins are not installed.

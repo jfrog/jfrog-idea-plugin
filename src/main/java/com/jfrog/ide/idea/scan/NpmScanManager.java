@@ -9,6 +9,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.npm.NpmTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.NpmInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.filters.filtermanager.ConsistentFilterManager;
@@ -28,8 +29,8 @@ public class NpmScanManager extends ScanManager {
      *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
      * @param basePath - The package.json directory.
      */
-    NpmScanManager(Project project, String basePath) throws IOException {
-        super(project, basePath, ComponentPrefix.NPM);
+    NpmScanManager(Project project, String basePath, ScanLogic logic) throws IOException {
+        super(project, basePath, ComponentPrefix.NPM, logic);
         getLog().info("Found npm project: " + getProjectName());
         npmTreeBuilder = new NpmTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap());
         subscribeLaunchDependencyScanOnFileChangedEvents("package-lock.json");
