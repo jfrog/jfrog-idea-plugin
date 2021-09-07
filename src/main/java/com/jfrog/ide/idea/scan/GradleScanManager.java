@@ -1,6 +1,7 @@
 package com.jfrog.ide.idea.scan;
 
 import com.intellij.codeInspection.LocalInspectionTool;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -11,9 +12,17 @@ import com.jfrog.ide.common.gradle.GradleTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.idea.inspections.GradleGroovyInspection;
 import com.jfrog.ide.idea.inspections.GradleKotlinInspection;
+import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.filters.filtermanager.ConsistentFilterManager;
+import org.apache.commons.lang3.SystemUtils;
+import org.jetbrains.plugins.gradle.service.GradleInstallationManager;
+import org.jetbrains.plugins.gradle.service.settings.GradleConfigurable;
+import org.jetbrains.plugins.gradle.settings.DistributionType;
+import org.jetbrains.plugins.gradle.settings.GradleProjectSettings;
+import org.jetbrains.plugins.gradle.settings.GradleSettings;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,7 +43,7 @@ public class GradleScanManager extends ScanManager {
     GradleScanManager(Project project, String basePath) throws IOException {
         super(project, basePath, ComponentPrefix.GAV);
         getLog().info("Found Gradle project: " + getProjectName());
-        gradleTreeBuilder = new GradleTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap());
+        gradleTreeBuilder = new GradleTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap(), getGradleExe());
     }
 
     @Override
@@ -61,5 +70,53 @@ public class GradleScanManager extends ScanManager {
     @Override
     protected void buildTree(boolean shouldToast) throws IOException {
         setScanResults(gradleTreeBuilder.buildTree(getLog()));
+    }
+
+    /**
+     * Extracts the chosen Gradle executable path from the Gradle plugin. If Gradle is not installed, throw an exception.
+     *
+     * @return the chosen Gradle executable path
+     */
+    private String getGradleExe() {
+        File gradleHome = resolveGradleHome();
+        if (gradleHome == null) {
+            getLog().info("Using Gradle from system path.");
+            return null;
+        }
+        String gradleExe = gradleHome.toPath().resolve("bin").resolve(SystemUtils.IS_OS_WINDOWS ? "gradle.bat" : "gradle").toString();
+        getLog().info("Using Gradle executable " + gradleExe);
+        return gradleExe;
+    }
+
+    private File resolveGradleHome() {
+        GradleProjectSettings projectSettings = GradleSettings.getInstance(project).getLinkedProjectsSettings().stream().findAny().orElse(null);
+        if (projectSettings == null) {
+            getLog().error("Couldn't retrieve Gradle project settings. Hint - make sure the Gradle project was properly imported.");
+            return null;
+        }
+        GradleInstallationManager gradleInstallationManager = ServiceManager.getService(GradleInstallationManager.class);
+        File gradleHome = gradleInstallationManager.getGradleHome(project, projectSettings.getExternalProjectPath());
+        if (gradleHome != null) {
+            return gradleHome;
+        }
+        if (isMisconfigurationError(projectSettings.getExternalProjectPath())) {
+            Logger.openSettings("It looks like Gradle home was not properly set in your project. " +
+                    "Click <a href=\"#settings\">here</a> to set Gradle home.", project, GradleConfigurable.class);
+        } else {
+            getLog().warn("Can't run Gradle from Gradle settings. Hint - try to reload Gradle project and then refresh the scan.");
+        }
+        return null;
+    }
+
+    private boolean isMisconfigurationError(String linkedProjectPath) {
+        GradleProjectSettings projectSettings = GradleSettings.getInstance(project).getLinkedProjectSettings(linkedProjectPath);
+        if (projectSettings != null) {
+            DistributionType distributionType = projectSettings.getDistributionType();
+            // Distribution type has not been chosen or the distribution type is not Gradle wrapper.
+            // If the distribution type is wrapped, it is probable that the Gradle wrapper is not yet created.
+            return distributionType == null || !distributionType.isWrapped();
+        }
+        // Gradle project settings are not set
+        return true;
     }
 }

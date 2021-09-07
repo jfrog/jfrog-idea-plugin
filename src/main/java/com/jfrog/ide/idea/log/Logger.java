@@ -2,6 +2,9 @@ package com.jfrog.ide.idea.log;
 
 import com.intellij.notification.*;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.options.Configurable;
+import com.intellij.openapi.options.ShowSettingsUtil;
+import com.intellij.openapi.project.Project;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.plexus.util.ExceptionUtils;
 import org.jfrog.build.api.util.Log;
@@ -103,5 +106,10 @@ public class Logger implements Log {
                 return "[ERROR] " + message;
         }
         return "[INFO] " + message;
+    }
+
+    public static void openSettings(String details, Project project, Class<? extends Configurable> configurable) {
+        EVENT_LOG_NOTIFIER.createNotification(INFORMATION_TITLE, prependPrefix(details, NotificationType.INFORMATION), NotificationType.INFORMATION,
+                ((notification, event) -> ShowSettingsUtil.getInstance().showSettingsDialog(project, configurable))).notify(project);
     }
 }
