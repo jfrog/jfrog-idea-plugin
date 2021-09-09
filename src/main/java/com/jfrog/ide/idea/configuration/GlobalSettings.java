@@ -63,6 +63,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
     public GlobalSettings getState() {
         ServerConfigImpl serverConfig = new ServerConfigImpl();
         serverConfig.setExcludedPaths(this.serverConfig.getExcludedPaths());
+        serverConfig.setProject(this.serverConfig.getProject());
         serverConfig.setConnectionDetailsFromEnv(this.serverConfig.isConnectionDetailsFromEnv());
         serverConfig.setConnectionRetries(this.serverConfig.getConnectionRetries());
         serverConfig.setConnectionTimeout(this.serverConfig.getConnectionTimeout());
@@ -156,6 +157,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
             this.serverConfig.setConnectionDetailsFromEnv(true);
             this.serverConfig.readConnectionDetailsFromEnv();
             this.serverConfig.setExcludedPaths(serverConfig.getExcludedPaths());
+            this.serverConfig.setProject(serverConfig.getProject());
             this.serverConfig.setConnectionRetries(serverConfig.getConnectionRetries());
             this.serverConfig.setConnectionTimeout(serverConfig.getConnectionTimeout());
             return;
@@ -175,6 +177,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         this.serverConfig.setXrayUrl(serverConfig.getXrayUrl());
         this.serverConfig.setArtifactoryUrl(serverConfig.getArtifactoryUrl());
         this.serverConfig.setExcludedPaths(serverConfig.getExcludedPaths());
+        this.serverConfig.setProject(serverConfig.getProject());
         this.serverConfig.setConnectionDetailsFromEnv(serverConfig.isConnectionDetailsFromEnv());
         this.serverConfig.setConnectionRetries(serverConfig.getConnectionRetries());
         this.serverConfig.setConnectionTimeout(serverConfig.getConnectionTimeout());

@@ -12,6 +12,8 @@ import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import com.jetbrains.python.packaging.PyPackageManager;
 import com.jetbrains.python.packaging.PyPackageManagers;
 import com.jetbrains.python.sdk.PythonSdkType;
+import com.jfrog.ide.common.persistency.XrayScanCache;
+import com.jfrog.ide.common.scan.BulkScanLogic;
 import com.jfrog.ide.idea.TestUtils;
 import org.apache.commons.compress.utils.Sets;
 import org.apache.commons.lang3.SystemUtils;
@@ -29,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * @author yahavi
@@ -39,6 +42,8 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String DIRECT_DEPENDENCY_VERSION = "0.6.8";
     private static final String TRANSITIVE_DEPENDENCY_NAME = "anytree";
     private static final String TRANSITIVE_DEPENDENCY_VERSION = "2.8.0";
+    private static final Path HOME_PATH = Paths.get(System.getProperty("user.home"), ".jfrog-idea-plugin");
+
 
     private Sdk pythonSdk;
     private File tmpDir;
@@ -99,7 +104,7 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
     }
 
     public void testBuildTree() throws IOException {
-        PypiScanManager pypiScanManager = new PypiScanManager(getProject(), pythonSdk);
+        PypiScanManager pypiScanManager = new PypiScanManager(getProject(), pythonSdk,new BulkScanLogic(new XrayScanCache(getProject().getName(), HOME_PATH.resolve("cache"),new NullLog()),new NullLog()));
         pypiScanManager.buildTree(false);
 
         // Check root SDK node

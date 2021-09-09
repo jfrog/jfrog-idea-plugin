@@ -54,6 +54,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private JBPasswordField password;
     private JLabel connectionResults;
     private JBTextField excludedPaths;
+    private JBTextField project;
     private JBTextField username;
     private JBTextField platformUrl;
     private JPanel config;
@@ -232,6 +233,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
                 .setUsername(username.getText())
                 .setPassword(String.valueOf(password.getPassword()))
                 .setExcludedPaths(excludedPaths.getText())
+                .setProject(project.getText())
                 .setConnectionDetailsFromEnv(connectionDetailsFromEnv.isSelected())
                 .setConnectionRetries(connectionRetries.getNumber())
                 .setConnectionTimeout(connectionTimeout.getNumber())
@@ -293,12 +295,14 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         if (serverConfig != null) {
             updateConnectionDetailsTextFields();
             excludedPaths.setText(serverConfig.getExcludedPaths());
+            project.setText(serverConfig.getProject());
             connectionRetries.setValue(serverConfig.getConnectionRetries());
             connectionTimeout.setValue(serverConfig.getConnectionTimeout());
             connectionDetailsFromEnv.setSelected(serverConfig.isConnectionDetailsFromEnv());
         } else {
             clearText(platformUrl, xrayUrl, artifactoryUrl, username, password);
             excludedPaths.setText(DEFAULT_EXCLUSIONS);
+            project.setText("");
             connectionDetailsFromEnv.setSelected(false);
             connectionRetries.setValue(ConnectionRetriesSpinner.RANGE.initial);
             connectionTimeout.setValue(ConnectionTimeoutSpinner.RANGE.initial);

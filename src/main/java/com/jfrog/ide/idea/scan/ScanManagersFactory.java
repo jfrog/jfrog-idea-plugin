@@ -12,7 +12,6 @@ import com.jfrog.ide.common.scan.EmptyScanLogic;
 import com.jfrog.ide.common.scan.GraphScanLogic;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.common.utils.PackageFileFinder;
-import com.jfrog.ide.common.utils.XrayConnectionUtils;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.navigation.NavigationService;
@@ -61,7 +60,7 @@ public class ScanManagersFactory {
     }
 
     /**
-     * Start an Xray scan for all projects.
+     * Start a Xray scan for all projects.
      *
      * @param quickScan - True to allow usage of the scan cache.
      */
@@ -136,7 +135,7 @@ public class ScanManagersFactory {
             XrayScanCache scanCache = new XrayScanCache(project.getName(), HOME_PATH.resolve("cache"), log);
 
             if (GraphScanLogic.isXrayVersionSupported(client.system().version())) {
-                return new GraphScanLogic();
+                return new GraphScanLogic(scanCache,log);
             } else {
                 if (BulkScanLogic.isXrayVersionSupported(client.system().version())) {
                     return new BulkScanLogic(scanCache, log);

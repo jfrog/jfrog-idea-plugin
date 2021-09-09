@@ -19,4 +19,9 @@ public class ProgressIndicatorImpl implements com.jfrog.ide.common.log.ProgressI
         indicator.setIndeterminate(false);
         indicator.setFraction(fraction);
     }
+
+    @Override
+    public void setIndeterminate(boolean indeterminate) {
+        indicator.setIndeterminate(true);
+    }
 }
