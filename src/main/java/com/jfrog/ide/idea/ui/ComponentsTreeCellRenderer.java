@@ -1,6 +1,8 @@
 package com.jfrog.ide.idea.ui;
 
 import com.intellij.ui.render.LabelBasedRenderer;
+import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.idea.ui.utils.IconUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +31,10 @@ public class ComponentsTreeCellRenderer extends LabelBasedRenderer.Tree {
         // by showing it only when the severity level is higher than unknown.
         if (scanTreeNode.getIssueCount() > 0 && topIssue.getSeverity().isHigherThan(Severity.Unknown)) {
             cellRenderer.setText(scanTreeNode + " (" + scanTreeNode.getIssueCount() + ")");
+        }
+
+        if (scanTreeNode.isLicenseViolating()) {
+            cellRenderer.setForeground(UIUtil.getErrorForeground());
         }
 
         return cellRenderer;
