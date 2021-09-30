@@ -31,7 +31,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+
+import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
 
 /**
  * @author yahavi
@@ -42,7 +43,6 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String DIRECT_DEPENDENCY_VERSION = "0.6.8";
     private static final String TRANSITIVE_DEPENDENCY_NAME = "anytree";
     private static final String TRANSITIVE_DEPENDENCY_VERSION = "2.8.0";
-    private static final Path HOME_PATH = Paths.get(System.getProperty("user.home"), ".jfrog-idea-plugin");
 
 
     private Sdk pythonSdk;

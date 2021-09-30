@@ -41,6 +41,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jfrog.ide.common.log.Utils.logError;
 import static com.jfrog.ide.idea.ui.configuration.JFrogProjectConfiguration.BUILDS_PATTERN_KEY;
+import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
 
 /**
  * @author yahavi
@@ -48,7 +49,6 @@ import static com.jfrog.ide.idea.ui.configuration.JFrogProjectConfiguration.BUIL
 @State(name = "CiState")
 public class CiManager extends CiManagerBase {
     private static final String LOAD_BUILD_FAIL_FMT = "Failed to load build '%s/%s'.";
-    private static final Path HOME_PATH = Paths.get(System.getProperty("user.home"), ".jfrog-idea-plugin");
 
     // Lock to prevent multiple simultaneous scans
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);

@@ -137,7 +137,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             Version xrayVersion = xrayClient.system().version();
 
             // Check version
-            if (!isXrayVersionSupported(xrayVersion)) {
+            if (!isSupportedInXrayVersion(xrayVersion)) {
                 connectionResultsGesture.setFailure(Results.unsupported(xrayVersion));
                 return Results.unsupported(xrayVersion);
             }

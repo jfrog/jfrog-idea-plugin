@@ -78,7 +78,7 @@ public class ServerConfigImpl implements ServerConfig {
     private String username;
     @Tag
     private String password;
-    // Artifactory project name to be used as context to Xray scan.
+    // JFrog project key to be used as context to Xray scan.
     @OptionTag
     private String project;
     // Pattern of project paths to exclude from Xray scanning for npm
@@ -410,7 +410,7 @@ public class ServerConfigImpl implements ServerConfig {
             setXrayUrl(xrayUrlEnv);
             setArtifactoryUrl(artifactoryUrlEnv);
         }
-        if(isNotBlank(projectEnv)){
+        if (isNotBlank(projectEnv)) {
             setProject(projectEnv);
         }
         setUsername(usernameEnv);

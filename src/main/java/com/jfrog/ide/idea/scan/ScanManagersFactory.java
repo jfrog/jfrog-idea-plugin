@@ -19,25 +19,25 @@ import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.utils.Utils;
 import com.jfrog.xray.client.impl.XrayClient;
+import com.jfrog.xray.client.services.system.Version;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 import static com.jfrog.ide.common.log.Utils.logError;
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBuilder;
+import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
 
 /**
  * Created by yahavi
  */
 public class ScanManagersFactory {
 
-    private static final Path HOME_PATH = Paths.get(System.getProperty("user.home"), ".jfrog-idea-plugin");
     private Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
     private final Project project;
 
@@ -46,11 +46,6 @@ public class ScanManagersFactory {
     }
 
     private ScanManagersFactory(@NotNull Project project) {
-        try {
-            Files.createDirectories(HOME_PATH);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         this.project = project;
     }
 
@@ -128,21 +123,19 @@ public class ScanManagersFactory {
         this.scanManagers = scanManagers;
     }
 
-    private ScanLogic createScanLogic() {
-        Logger log =Logger.getInstance();
+    private ScanLogic createScanLogic() throws IOException {
+        Logger log = Logger.getInstance();
+        Files.createDirectories(HOME_PATH);
+        XrayScanCache scanCache = new XrayScanCache(project.getName(), HOME_PATH.resolve("cache"), log);
         XrayClient client = createXrayClientBuilder(GlobalSettings.getInstance().getServerConfig(), log).build();
-        try {
-            XrayScanCache scanCache = new XrayScanCache(project.getName(), HOME_PATH.resolve("cache"), log);
+        Version xrayVersion = client.system().version();
 
-            if (GraphScanLogic.isXrayVersionSupported(client.system().version())) {
-                return new GraphScanLogic(scanCache,log);
-            } else {
-                if (BulkScanLogic.isXrayVersionSupported(client.system().version())) {
-                    return new BulkScanLogic(scanCache, log);
-                }
+        if (GraphScanLogic.isSupportedInXrayVersion(xrayVersion)) {
+            return new GraphScanLogic(scanCache, log);
+        } else {
+            if (BulkScanLogic.isSupportedInXrayVersion(xrayVersion)) {
+                return new BulkScanLogic(scanCache, log);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         return new EmptyScanLogic(log);
     }
