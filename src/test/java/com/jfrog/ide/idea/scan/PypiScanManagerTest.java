@@ -44,7 +44,6 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String TRANSITIVE_DEPENDENCY_NAME = "anytree";
     private static final String TRANSITIVE_DEPENDENCY_VERSION = "2.8.0";
 
-
     private Sdk pythonSdk;
     private File tmpDir;
 

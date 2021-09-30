@@ -19,7 +19,6 @@ public class Utils {
 
     public static final Path HOME_PATH = Paths.get(System.getProperty("user.home"), ".jfrog-idea-plugin");
 
-
     public static Path getProjectBasePath(Project project) {
         return project.getBasePath() != null ? Paths.get(project.getBasePath()) : Paths.get(".");
     }

@@ -246,7 +246,6 @@ public class ServerConfigImpl implements ServerConfig {
         this.project = project;
     }
 
-
     /**
      * Get proxy configuration as configured under 'Appearance & Behavior' -> 'System Settings' -> 'HTTP Proxy'
      *

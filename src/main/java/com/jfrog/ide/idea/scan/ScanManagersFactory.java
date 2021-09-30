@@ -54,7 +54,7 @@ public class ScanManagersFactory {
     }
 
     /**
-     * Start a Xray scan for all projects.
+     * Start an Xray scan for all projects.
      *
      * @param quickScan - True to allow usage of the scan cache.
      */
@@ -131,10 +131,9 @@ public class ScanManagersFactory {
 
         if (GraphScanLogic.isSupportedInXrayVersion(xrayVersion)) {
             return new GraphScanLogic(scanCache, log);
-        } else {
-            if (ComponentSummaryScanLogic.isSupportedInXrayVersion(xrayVersion)) {
-                return new ComponentSummaryScanLogic(scanCache, log);
-            }
+        } 
+        if (ComponentSummaryScanLogic.isSupportedInXrayVersion(xrayVersion)) {
+            return new ComponentSummaryScanLogic(scanCache, log);
         }
         throw new IOException("Unsupported JFrog Xray version.");
     }
