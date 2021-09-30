@@ -7,7 +7,7 @@ import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.jfrog.ide.common.persistency.XrayScanCache;
-import com.jfrog.ide.common.scan.BulkScanLogic;
+import com.jfrog.ide.common.scan.ComponentSummaryScanLogic;
 import com.jfrog.ide.common.scan.EmptyScanLogic;
 import com.jfrog.ide.common.scan.GraphScanLogic;
 import com.jfrog.ide.common.scan.ScanLogic;
@@ -133,8 +133,8 @@ public class ScanManagersFactory {
         if (GraphScanLogic.isSupportedInXrayVersion(xrayVersion)) {
             return new GraphScanLogic(scanCache, log);
         } else {
-            if (BulkScanLogic.isSupportedInXrayVersion(xrayVersion)) {
-                return new BulkScanLogic(scanCache, log);
+            if (ComponentSummaryScanLogic.isSupportedInXrayVersion(xrayVersion)) {
+                return new ComponentSummaryScanLogic(scanCache, log);
             }
         }
         return new EmptyScanLogic(log);
