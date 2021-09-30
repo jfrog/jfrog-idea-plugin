@@ -8,7 +8,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.jfrog.ide.common.persistency.XrayScanCache;
 import com.jfrog.ide.common.scan.ComponentSummaryScanLogic;
-import com.jfrog.ide.common.scan.EmptyScanLogic;
 import com.jfrog.ide.common.scan.GraphScanLogic;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.common.utils.PackageFileFinder;
@@ -137,7 +136,7 @@ public class ScanManagersFactory {
                 return new ComponentSummaryScanLogic(scanCache, log);
             }
         }
-        return new EmptyScanLogic(log);
+        throw new IOException("Unsupported JFrog Xray version.");
     }
 
     private void createScanManagers(Map<Integer, ScanManager> scanManagers, Set<Path> paths, ScanLogic logic) throws IOException {
