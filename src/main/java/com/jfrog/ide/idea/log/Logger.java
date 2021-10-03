@@ -2,6 +2,9 @@ package com.jfrog.ide.idea.log;
 
 import com.intellij.notification.*;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.options.Configurable;
+import com.intellij.openapi.options.ShowSettingsUtil;
+import com.intellij.openapi.project.Project;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.plexus.util.ExceptionUtils;
 import org.jfrog.build.api.util.Log;
@@ -103,5 +106,20 @@ public class Logger implements Log {
                 return "[ERROR] " + message;
         }
         return "[INFO] " + message;
+    }
+
+    /**
+     * Add a log message with an open settings link.
+     * Usage example:
+     * Logger.openSettings("It looks like Gradle home was not properly set in your project.
+     * Click <a href=\"#settings\">here</a> to set Gradle home.", project, GradleConfigurable.class);
+     *
+     * @param details      - The log message
+     * @param project      - IDEA project
+     * @param configurable - IDEA settings to open
+     */
+    public static void addOpenSettingsLink(String details, Project project, Class<? extends Configurable> configurable) {
+        EVENT_LOG_NOTIFIER.createNotification(INFORMATION_TITLE, prependPrefix(details, NotificationType.INFORMATION), NotificationType.INFORMATION,
+                ((notification, event) -> ShowSettingsUtil.getInstance().showSettingsDialog(project, configurable))).notify(project);
     }
 }
