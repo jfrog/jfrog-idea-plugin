@@ -145,6 +145,7 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel {
 
     JPanel createJFrogToolbar(ActionGroup actionGroup) {
         ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar("JFrog toolbar", actionGroup, true);
+        actionToolbar.setTargetComponent(this);
         JPanel toolbarPanel = new JBPanel<>(new FlowLayout(FlowLayout.LEFT, 0, 0));
         toolbarPanel.add(actionToolbar.getComponent());
         return toolbarPanel;
