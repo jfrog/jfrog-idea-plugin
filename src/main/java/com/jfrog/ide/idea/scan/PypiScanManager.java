@@ -92,6 +92,7 @@ public class PypiScanManager extends ScanManager {
 
         // Create root SDK node
         DependencyTree sdkNode = new DependencyTree(pythonSdk.getName());
+        sdkNode.setMetadata(true);
         initDependencyNode(sdkNode, pythonSdk.getName(), pythonSdk.getVersionString(), pythonSdk.getHomePath(), "Python SDK");
 
         // Create dependency mapping
