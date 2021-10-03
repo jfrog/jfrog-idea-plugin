@@ -12,8 +12,11 @@
 
     <change-notes>
         <![CDATA[
-          <li>Fix an issue whereby in some cases scanning of npm projects throws an exception.</li>
-          <li>Improved usability - error balloons should appear only during interactive scans.</li>
+          <li>Use the configured Xray policies, by setting a JFrog project.</li>
+          <li>Gradle - Use executable and Java home from Gradle settings.</li>
+          <li>Go - Support relative paths in go.mod files.</li>
+          <li>Go - Reduce tree size by showing only used modules in the dependency tree.</li>
+          <li>Bugfix - In some cases, the plugin tool window was disabled.</li>
         ]]>
     </change-notes>
 
