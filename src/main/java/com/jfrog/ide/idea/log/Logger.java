@@ -108,7 +108,17 @@ public class Logger implements Log {
         return "[INFO] " + message;
     }
 
-    public static void openSettings(String details, Project project, Class<? extends Configurable> configurable) {
+    /**
+     * Add a log message with an open settings link.
+     * Usage example:
+     * Logger.openSettings("It looks like Gradle home was not properly set in your project.
+     * Click <a href=\"#settings\">here</a> to set Gradle home.", project, GradleConfigurable.class);
+     *
+     * @param details      - The log message
+     * @param project      - IDEA project
+     * @param configurable - IDEA settings to open
+     */
+    public static void addOpenSettingsLink(String details, Project project, Class<? extends Configurable> configurable) {
         EVENT_LOG_NOTIFIER.createNotification(INFORMATION_TITLE, prependPrefix(details, NotificationType.INFORMATION), NotificationType.INFORMATION,
                 ((notification, event) -> ShowSettingsUtil.getInstance().showSettingsDialog(project, configurable))).notify(project);
     }

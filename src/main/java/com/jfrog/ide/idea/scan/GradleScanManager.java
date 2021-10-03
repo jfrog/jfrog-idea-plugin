@@ -77,10 +77,10 @@ public class GradleScanManager extends ScanManager {
     }
 
     /**
-     * Extracts the chosen Gradle executable path from the Gradle plugin. If Gradle is not installed, throw an exception.
+     * Extract the chosen Gradle executable path from the Gradle plugin. If Gradle is not configured well, return null.
      *
-     * @param env - The environment variables to set the JAVA_HOME
-     * @return the chosen Gradle executable path
+     * @param env - The environment variables map to set the JAVA_HOME
+     * @return the chosen Gradle executable path or null
      */
     private String getGradleExeAndJdk(Map<String, String> env) {
         File gradleHome = resolveGradleAndSetJavaHome(env);
@@ -118,7 +118,7 @@ public class GradleScanManager extends ScanManager {
         }
         // Gradle wasn't set properly
         if (isMisconfigurationError(projectSettings.getExternalProjectPath())) {
-            Logger.openSettings("It looks like Gradle home was not properly set in your project. " +
+            Logger.addOpenSettingsLink("It looks like Gradle home was not properly set in your project. " +
                     "Click <a href=\"#settings\">here</a> to set Gradle home.", project, GradleConfigurable.class);
         } else {
             getLog().warn("Can't run Gradle from Gradle settings. Hint - try to reload Gradle project and then refresh the scan.");
