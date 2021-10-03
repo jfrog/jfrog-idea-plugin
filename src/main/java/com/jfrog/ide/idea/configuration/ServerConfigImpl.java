@@ -61,6 +61,7 @@ public class ServerConfigImpl implements ServerConfig {
     static final String XRAY_URL_ENV = "JFROG_IDE_XRAY_URL";
     static final String USERNAME_ENV = "JFROG_IDE_USERNAME";
     static final String PASSWORD_ENV = "JFROG_IDE_PASSWORD";
+    static final String PROJECT_ENV = "JFROG_IDE_PROJECT";
 
     @Deprecated
     public static final String XRAY_SETTINGS_KEY = "com.jfrog.xray.idea";
@@ -77,6 +78,9 @@ public class ServerConfigImpl implements ServerConfig {
     private String username;
     @Tag
     private String password;
+    // JFrog project key to be used as context to Xray scan.
+    @OptionTag
+    private String project;
     // Pattern of project paths to exclude from Xray scanning for npm
     @Tag
     private String excludedPaths;
@@ -103,6 +107,7 @@ public class ServerConfigImpl implements ServerConfig {
         this.artifactoryUrl = builder.artifactoryUrl;
         this.username = builder.username;
         this.password = builder.password;
+        this.project = builder.project;
         this.excludedPaths = builder.excludedPaths;
         this.connectionDetailsFromEnv = builder.connectionDetailsFromEnv;
         this.connectionRetries = builder.connectionRetries;
@@ -131,6 +136,7 @@ public class ServerConfigImpl implements ServerConfig {
                 Objects.equals(getArtifactoryUrl(), other.getArtifactoryUrl()) &&
                 Objects.equals(getPassword(), other.getPassword()) &&
                 Objects.equals(getUsername(), other.getUsername()) &&
+                Objects.equals(getProject(), other.getProject()) &&
                 Objects.equals(getExcludedPaths(), other.getExcludedPaths()) &&
                 isConnectionDetailsFromEnv() == other.isConnectionDetailsFromEnv() &&
                 getConnectionRetries() == other.getConnectionRetries() &&
@@ -139,8 +145,8 @@ public class ServerConfigImpl implements ServerConfig {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getUrl(), getXrayUrl(), getArtifactoryUrl(), getPassword(), getUsername(),
-                isConnectionDetailsFromEnv(), getConnectionRetries(), getConnectionTimeout());
+        return Objects.hash(getUrl(), getXrayUrl(), getArtifactoryUrl(), getPassword(), getUsername(), getProject(),
+                getExcludedPaths(), isConnectionDetailsFromEnv(), getConnectionRetries(), getConnectionTimeout());
     }
 
     @Override
@@ -204,6 +210,10 @@ public class ServerConfigImpl implements ServerConfig {
         return defaultIfBlank(this.excludedPaths, DEFAULT_EXCLUSIONS);
     }
 
+    public String getProject() {
+        return trimToEmpty(this.project);
+    }
+
     @Override
     public SSLContext getSslContext() {
         return CertificateManager.getInstance().getSslContext();
@@ -230,6 +240,10 @@ public class ServerConfigImpl implements ServerConfig {
 
     void setExcludedPaths(String excludedPaths) {
         this.excludedPaths = excludedPaths;
+    }
+
+    void setProject(String project) {
+        this.project = project;
     }
 
     /**
@@ -378,6 +392,7 @@ public class ServerConfigImpl implements ServerConfig {
         String legacyXrayUrlEnv = EnvironmentUtil.getValue(LEGACY_XRAY_URL_ENV);
         String usernameEnv = EnvironmentUtil.getValue(USERNAME_ENV);
         String passwordEnv = EnvironmentUtil.getValue(PASSWORD_ENV);
+        String projectEnv = EnvironmentUtil.getValue(PROJECT_ENV);
         if (isAnyBlank(usernameEnv, passwordEnv) || isAllBlank(platformUrlEnv, xrayUrlEnv, artifactoryUrlEnv, legacyXrayUrlEnv)) {
             setUrl("");
             setXrayUrl("");
@@ -393,6 +408,9 @@ public class ServerConfigImpl implements ServerConfig {
             setUrl(platformUrlEnv);
             setXrayUrl(xrayUrlEnv);
             setArtifactoryUrl(artifactoryUrlEnv);
+        }
+        if (isNotBlank(projectEnv)) {
+            setProject(projectEnv);
         }
         setUsername(usernameEnv);
         setPassword(passwordEnv);
@@ -413,6 +431,7 @@ public class ServerConfigImpl implements ServerConfig {
         private String username;
         private String password;
         private String excludedPaths;
+        private String project;
         private boolean connectionDetailsFromEnv;
         private int connectionRetries;
         private int connectionTimeout;
@@ -448,6 +467,11 @@ public class ServerConfigImpl implements ServerConfig {
 
         public Builder setExcludedPaths(@Nullable String excludedPaths) {
             this.excludedPaths = excludedPaths;
+            return this;
+        }
+
+        public Builder setProject(@Nullable String project) {
+            this.project = project;
             return this;
         }
 

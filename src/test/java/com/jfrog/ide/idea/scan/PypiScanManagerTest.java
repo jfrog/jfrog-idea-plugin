@@ -12,6 +12,8 @@ import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import com.jetbrains.python.packaging.PyPackageManager;
 import com.jetbrains.python.packaging.PyPackageManagers;
 import com.jetbrains.python.sdk.PythonSdkType;
+import com.jfrog.ide.common.persistency.XrayScanCache;
+import com.jfrog.ide.common.scan.ComponentSummaryScanLogic;
 import com.jfrog.ide.idea.TestUtils;
 import org.apache.commons.compress.utils.Sets;
 import org.apache.commons.lang3.SystemUtils;
@@ -29,6 +31,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
 
 /**
  * @author yahavi
@@ -99,7 +103,7 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
     }
 
     public void testBuildTree() throws IOException {
-        PypiScanManager pypiScanManager = new PypiScanManager(getProject(), pythonSdk);
+        PypiScanManager pypiScanManager = new PypiScanManager(getProject(), pythonSdk,new ComponentSummaryScanLogic(new XrayScanCache(getProject().getName(), HOME_PATH.resolve("cache"),new NullLog()),new NullLog()));
         pypiScanManager.buildTree(false);
 
         // Check root SDK node
