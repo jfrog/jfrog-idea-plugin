@@ -109,6 +109,7 @@ public abstract class ScanManager extends ScanManagerBase {
      */
     private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator) {
         try {
+            loadScanCache();
             buildTree(!quickScan);
             scanAndCacheArtifacts(indicator, quickScan);
             addXrayInfoToTree(getScanResults());
@@ -124,23 +125,23 @@ public abstract class ScanManager extends ScanManagerBase {
     }
 
     /**
+     * Loads a new XrayScanCache according to the project configuration.
+     *
+     * @throws IOException
+     */
+    void loadScanCache() throws IOException {
+        ServerConfig server = GlobalSettings.getInstance().getServerConfig();
+        XrayScanCache scanCache = new XrayScanCache(project.getName() + server.getProject(), HOME_PATH.resolve("cache"), Logger.getInstance());
+        getScanLogic().setScanCache(scanCache);
+    }
+
+    /**
      * Launch async dependency scan.
      */
     void asyncScanAndUpdateResults(boolean quickScan) {
         if (DumbService.isDumb(project)) { // If intellij is still indexing the project
             return;
         }
-        ServerConfig server = GlobalSettings.getInstance().getServerConfig();
-
-        XrayScanCache scanCache = null;
-        try {
-            scanCache = new XrayScanCache(project.getName() + server.getProject(), HOME_PATH.resolve("cache"), Logger.getInstance());
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        getScanLogic().setScanCache(scanCache);
         Task.Backgroundable scanAndUpdateTask = new Task.Backgroundable(null, "Xray: Scanning for vulnerabilities...") {
             @Override
             public void run(@NotNull com.intellij.openapi.progress.ProgressIndicator indicator) {
