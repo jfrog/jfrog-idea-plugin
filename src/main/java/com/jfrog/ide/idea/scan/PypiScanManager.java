@@ -71,6 +71,7 @@ public class PypiScanManager extends ScanManager {
      */
     private DependencyTree createRootNode() {
         DependencyTree rootNode = new DependencyTree(pythonSdk.getName());
+        rootNode.setMetadata(true);
         GeneralInfo generalInfo = new GeneralInfo().artifactId(pythonSdk.getName()).path(pythonSdk.getHomePath()).pkgType("pypi");
         rootNode.setGeneralInfo(generalInfo);
         rootNode.setScopes(Sets.newHashSet(new Scope()));
@@ -91,6 +92,7 @@ public class PypiScanManager extends ScanManager {
 
         // Create root SDK node
         DependencyTree sdkNode = new DependencyTree(pythonSdk.getName());
+        sdkNode.setMetadata(true);
         initDependencyNode(sdkNode, pythonSdk.getName(), pythonSdk.getVersionString(), pythonSdk.getHomePath(), "Python SDK");
 
         // Create dependency mapping

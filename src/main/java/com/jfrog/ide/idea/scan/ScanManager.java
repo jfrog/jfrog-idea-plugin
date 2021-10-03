@@ -22,7 +22,9 @@ import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
+import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.log.ProgressIndicator;
+import com.jfrog.ide.common.persistency.XrayScanCache;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.common.scan.ScanManagerBase;
@@ -46,7 +48,6 @@ import org.jfrog.build.extractor.scan.Scope;
 
 import javax.swing.*;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -54,6 +55,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jfrog.ide.common.log.Utils.logError;
+import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
 
 /**
  * Created by romang on 4/26/17.
@@ -72,7 +74,7 @@ public abstract class ScanManager extends ScanManagerBase {
      * @param basePath - Project base path.
      * @param prefix   - Components prefix for xray scan, e.g. gav:// or npm://.
      */
-    ScanManager(@NotNull Project project, String basePath, ComponentPrefix prefix, ScanLogic scanLogic) throws IOException {
+    ScanManager(@NotNull Project project, String basePath, ComponentPrefix prefix, ScanLogic scanLogic) {
         super(scanLogic, basePath, Logger.getInstance(), GlobalSettings.getInstance().getServerConfig(), prefix);
         this.project = project;
         this.basePath = basePath;
@@ -107,6 +109,7 @@ public abstract class ScanManager extends ScanManagerBase {
      */
     private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator) {
         try {
+            loadScanCache();
             buildTree(!quickScan);
             scanAndCacheArtifacts(indicator, quickScan);
             addXrayInfoToTree(getScanResults());
@@ -119,6 +122,17 @@ public abstract class ScanManager extends ScanManagerBase {
         } finally {
             scanInProgress.set(false);
         }
+    }
+
+    /**
+     * Loads a new XrayScanCache according to the project configuration.
+     *
+     * @throws IOException
+     */
+    void loadScanCache() throws IOException {
+        ServerConfig server = GlobalSettings.getInstance().getServerConfig();
+        XrayScanCache scanCache = new XrayScanCache(project.getName() + server.getProject(), HOME_PATH.resolve("cache"), Logger.getInstance());
+        getScanLogic().setScanCache(scanCache);
     }
 
     /**
