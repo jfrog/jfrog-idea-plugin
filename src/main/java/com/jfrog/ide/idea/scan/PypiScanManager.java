@@ -71,6 +71,7 @@ public class PypiScanManager extends ScanManager {
      */
     private DependencyTree createRootNode() {
         DependencyTree rootNode = new DependencyTree(pythonSdk.getName());
+        rootNode.setMetadata(true);
         GeneralInfo generalInfo = new GeneralInfo().artifactId(pythonSdk.getName()).path(pythonSdk.getHomePath()).pkgType("pypi");
         rootNode.setGeneralInfo(generalInfo);
         rootNode.setScopes(Sets.newHashSet(new Scope()));

@@ -64,6 +64,7 @@ public class MavenScanManager extends ScanManager {
     @Override
     protected void buildTree(boolean shouldToast) {
         DependencyTree rootNode = new DependencyTree(project.getName());
+        rootNode.setMetadata(true);
         MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject -> populateMavenModule(rootNode, rootMavenProject, Sets.newHashSet()));
         GeneralInfo generalInfo = new GeneralInfo().artifactId(project.getName()).path(basePath).pkgType("maven");
         rootNode.setGeneralInfo(generalInfo);
@@ -102,6 +103,7 @@ public class MavenScanManager extends ScanManager {
      */
     private void populateMavenModule(DependencyTree root, MavenProject rootMavenProject, Set<String> added) {
         DependencyTree mavenNode = populateMavenModuleNode(rootMavenProject);
+        mavenNode.setMetadata(true);
         root.add(mavenNode);
         added = Sets.newHashSet(added);
         added.add(rootMavenProject.toString());

@@ -6,6 +6,7 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
+import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.persistency.XrayScanCache;
 import com.jfrog.ide.common.scan.ComponentSummaryScanLogic;
 import com.jfrog.ide.common.scan.GraphScanLogic;
@@ -125,8 +126,9 @@ public class ScanManagersFactory {
     private ScanLogic createScanLogic() throws IOException {
         Logger log = Logger.getInstance();
         Files.createDirectories(HOME_PATH);
-        XrayScanCache scanCache = new XrayScanCache(project.getName(), HOME_PATH.resolve("cache"), log);
-        XrayClient client = createXrayClientBuilder(GlobalSettings.getInstance().getServerConfig(), log).build();
+        ServerConfig server = GlobalSettings.getInstance().getServerConfig();
+        XrayScanCache scanCache = new XrayScanCache(project.getName() + server.getProject(), HOME_PATH.resolve("cache"), log);
+        XrayClient client = createXrayClientBuilder(server, log).build();
         Version xrayVersion = client.system().version();
 
         if (GraphScanLogic.isSupportedInXrayVersion(xrayVersion)) {
