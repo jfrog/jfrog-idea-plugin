@@ -245,9 +245,14 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     @Override
     public void apply() {
         GlobalSettings globalSettings = GlobalSettings.getInstance();
+        boolean excludedPathsChanged = !StringUtils.equals(serverConfig.getExcludedPaths(), globalSettings.getServerConfig().getExcludedPaths());
         globalSettings.updateConfig(serverConfig);
         MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
-        messageBus.syncPublisher(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE).update();
+        if (excludedPathsChanged) {
+            messageBus.syncPublisher(ApplicationEvents.ON_EXCLUDED_PATHS_CHANGE).update();
+        } else {
+            messageBus.syncPublisher(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE).update();
+        }
         connectionResults.setText("");
         loadConfig();
     }
