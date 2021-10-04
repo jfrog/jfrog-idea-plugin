@@ -10,6 +10,7 @@ import com.intellij.util.messages.Topic;
 public interface ApplicationEvents {
     Topic<ApplicationEvents> ON_CONFIGURATION_DETAILS_CHANGE = Topic.create("Configuration details changed", ApplicationEvents.class);
     Topic<ApplicationEvents> ON_BUILDS_CONFIGURATION_CHANGE = Topic.create("Builds configuration changed", ApplicationEvents.class);
+    Topic<ApplicationEvents> ON_EXCLUDED_PATHS_CHANGE = Topic.create("Excluded paths changed", ApplicationEvents.class);
     Topic<ApplicationEvents> ON_SCAN_FILTER_CHANGE = Topic.create("Scan issues changed", ApplicationEvents.class);
     Topic<ApplicationEvents> ON_CI_FILTER_CHANGE = Topic.create("CI issues changed", ApplicationEvents.class);
 

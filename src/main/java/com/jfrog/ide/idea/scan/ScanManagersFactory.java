@@ -2,10 +2,12 @@ package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
+import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.persistency.ScanCache;
 import com.jfrog.ide.common.persistency.XrayScanCache;
@@ -14,6 +16,7 @@ import com.jfrog.ide.common.scan.GraphScanLogic;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.common.utils.PackageFileFinder;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
+import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.ui.ComponentsTree;
@@ -50,11 +53,19 @@ public class ScanManagersFactory {
 
     private ScanManagersFactory(@NotNull Project project) {
         this.project = project;
+        registerOnChangeHandlers();
     }
 
     public static Set<ScanManager> getScanManagers(@NotNull Project project) {
         ScanManagersFactory scanManagersFactory = getInstance(project);
         return Sets.newHashSet(scanManagersFactory.scanManagers.values());
+    }
+
+    private void registerOnChangeHandlers() {
+        MessageBusConnection busConnection = ApplicationManager.getApplication().getMessageBus().connect();
+        // When the excluded paths change, scan managers should be created or deleted.
+        // Therefore, we run startScan() which recreates the scan managers on refreshScanManagers().
+        busConnection.subscribe(ApplicationEvents.ON_EXCLUDED_PATHS_CHANGE, () -> startScan(true));
     }
 
     /**
