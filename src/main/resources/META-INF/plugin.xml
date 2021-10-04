@@ -12,11 +12,9 @@
 
     <change-notes>
         <![CDATA[
-          <li>Use the configured Xray policies, by setting a JFrog project.</li>
-          <li>Gradle - Use executable and Java home from Gradle settings.</li>
-          <li>Bug fix - Go - Support relative paths in go.mod files.</li>
-          <li>Bug fix - Go - Reduce tree size by showing only used modules in the dependency tree.</li>
-          <li>Bug fix - In some cases, the plugin tool window was disabled.</li>
+          <li>Bug fix - Race condition in multi technology cases .</li>
+          <li>Bug fix - In some cases, changing excluded paths doesn't take effect when clicking on OK button.</li>
+          <li>Bug fix - Go - go.mod and *.go files of sub Go projects should be ignored during the scanning of a project.</li>
         ]]>
     </change-notes>
 
