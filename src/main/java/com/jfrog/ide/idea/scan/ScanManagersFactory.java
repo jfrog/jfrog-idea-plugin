@@ -4,9 +4,13 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.projectRoots.Sdk;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.persistency.ScanCache;
@@ -133,6 +137,13 @@ public class ScanManagersFactory {
             createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.MAVEN, "", scanLogicType, scanCache);
         }
         paths.add(Utils.getProjectBasePath(project));
+        for (Module module : ModuleManager.getInstance(project).getModules()) {
+            VirtualFile modulePath = ProjectUtil.guessModuleDir(module);
+            if (modulePath != null) {
+                paths.add(modulePath.toNioPath());
+            }
+        }
+        Logger.getInstance().debug("Scanning projects in the following paths: " + paths);
         createScanManagers(scanManagers, paths, scanLogicType, scanCache);
         createPypiScanManagerIfApplicable(scanManagers, scanLogicType, scanCache);
         this.scanManagers = scanManagers;
