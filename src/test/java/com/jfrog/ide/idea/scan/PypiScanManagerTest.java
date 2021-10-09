@@ -14,8 +14,6 @@ import com.jetbrains.python.packaging.PyPackageManagers;
 import com.jetbrains.python.sdk.PythonSdkType;
 import com.jfrog.ide.common.persistency.XrayScanCache;
 import com.jfrog.ide.common.scan.ComponentSummaryScanLogic;
-import com.jfrog.ide.idea.TestUtils;
-import org.apache.commons.compress.utils.Sets;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.codehaus.plexus.util.FileUtils;
@@ -25,13 +23,14 @@ import org.jfrog.build.extractor.executor.CommandExecutor;
 import org.jfrog.build.extractor.executor.CommandResults;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
-import org.jfrog.build.extractor.scan.Scope;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static com.jfrog.ide.idea.TestUtils.assertScopes;
+import static com.jfrog.ide.idea.TestUtils.getAndAssertChild;
 import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
 
 /**
@@ -103,13 +102,14 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
     }
 
     public void testBuildTree() throws IOException {
-        PypiScanManager pypiScanManager = new PypiScanManager(getProject(), pythonSdk,new ComponentSummaryScanLogic(new XrayScanCache(getProject().getName(), HOME_PATH.resolve("cache"),new NullLog()),new NullLog()));
+        PypiScanManager pypiScanManager = new PypiScanManager(getProject(), pythonSdk, new ComponentSummaryScanLogic(new XrayScanCache(getProject().getName(), HOME_PATH.resolve("cache"), new NullLog()), new NullLog()));
         pypiScanManager.buildTree(false);
 
         // Check root SDK node
         DependencyTree results = pypiScanManager.getScanResults();
         assertEquals(SDK_NAME, results.getUserObject());
-        assertEquals(Sets.newHashSet(new Scope()), results.getScopes());
+        assertScopes(results);
+        assertTrue(results.isMetadata());
         GeneralInfo generalInfo = results.getGeneralInfo();
         assertEquals("Python SDK", generalInfo.getPkgType());
         assertEquals(SDK_NAME, generalInfo.getArtifactId());
@@ -117,8 +117,8 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
         assertNotEmpty(results.getChildren());
 
         // Check direct dependency
-        DependencyTree pipGrip = TestUtils.getAndAssertChild(results, DIRECT_DEPENDENCY_NAME + ":" + DIRECT_DEPENDENCY_VERSION);
-        assertEquals(Sets.newHashSet(new Scope()), pipGrip.getScopes());
+        DependencyTree pipGrip = getAndAssertChild(results, DIRECT_DEPENDENCY_NAME + ":" + DIRECT_DEPENDENCY_VERSION);
+        assertFalse(pipGrip.isMetadata());
         assertSize(7, pipGrip.getChildren());
         generalInfo = pipGrip.getGeneralInfo();
         assertEquals("pypi", generalInfo.getPkgType());
@@ -126,8 +126,8 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
         assertEquals(DIRECT_DEPENDENCY_VERSION, generalInfo.getVersion());
 
         // Check transitive dependency
-        DependencyTree anyTree = TestUtils.getAndAssertChild(pipGrip, TRANSITIVE_DEPENDENCY_NAME + ":" + TRANSITIVE_DEPENDENCY_VERSION);
-        assertEquals(Sets.newHashSet(new Scope()), anyTree.getScopes());
+        DependencyTree anyTree = getAndAssertChild(pipGrip, TRANSITIVE_DEPENDENCY_NAME + ":" + TRANSITIVE_DEPENDENCY_VERSION);
+        assertFalse(anyTree.isMetadata());
         generalInfo = anyTree.getGeneralInfo();
         assertEquals("pypi", generalInfo.getPkgType());
         assertEquals(TRANSITIVE_DEPENDENCY_NAME, generalInfo.getArtifactId());

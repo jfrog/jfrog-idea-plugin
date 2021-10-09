@@ -44,7 +44,7 @@ public class GradleScanManager extends ScanManager {
      *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
      * @param basePath - The build.gradle or build.gradle.kts directory.
      */
-    GradleScanManager(Project project, String basePath, ScanLogic logic) throws IOException {
+    GradleScanManager(Project project, String basePath, ScanLogic logic) {
         super(project, basePath, ComponentPrefix.GAV, logic);
         getLog().info("Found Gradle project: " + getProjectName());
         Map<String, String> env = Maps.newHashMap(EnvironmentUtil.getEnvironmentMap());
@@ -83,7 +83,7 @@ public class GradleScanManager extends ScanManager {
      * @param env - The environment variables map to set the JAVA_HOME
      * @return the chosen Gradle executable path or null
      */
-    private String getGradleExeAndJdk(Map<String, String> env) {
+    String getGradleExeAndJdk(Map<String, String> env) {
         File gradleHome = resolveGradleAndSetJavaHome(env);
         if (gradleHome == null) {
             getLog().info("Using Gradle from system path.");
