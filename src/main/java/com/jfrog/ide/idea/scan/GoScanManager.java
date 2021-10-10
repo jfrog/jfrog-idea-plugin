@@ -9,7 +9,6 @@ import com.intellij.psi.PsiManager;
 import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.go.GoTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
-import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.GoInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.filters.filtermanager.ConsistentFilterManager;
@@ -29,8 +28,8 @@ public class GoScanManager extends ScanManager {
      *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
      * @param basePath - The go.mod directory.
      */
-    GoScanManager(Project project, String basePath, ScanLogic logic) throws IOException {
-        super(project, basePath, ComponentPrefix.GO, logic);
+    GoScanManager(Project project, String basePath) {
+        super(project, basePath, ComponentPrefix.GO);
         getLog().info("Found Go project: " + getProjectName());
         goTreeBuilder = new GoTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap(), getLog());
         subscribeLaunchDependencyScanOnFileChangedEvents("go.sum");
