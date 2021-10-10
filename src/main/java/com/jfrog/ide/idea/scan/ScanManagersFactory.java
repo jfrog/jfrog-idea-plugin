@@ -26,8 +26,6 @@ import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.utils.Utils;
-import com.jfrog.xray.client.impl.XrayClient;
-import com.jfrog.xray.client.services.system.Version;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -38,17 +36,15 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.jfrog.ide.common.log.Utils.logError;
-import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBuilder;
 import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
+import static com.jfrog.ide.idea.utils.Utils.getScanLogicType;
 
 /**
  * Created by yahavi
  */
 public class ScanManagersFactory {
 
-    private enum ScanLogicType {GraphScan, ComponentSummary}
-
-    private Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
+    Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
     private final Project project;
 
     public static ScanManagersFactory getInstance(@NotNull Project project) {
@@ -94,7 +90,7 @@ public class ScanManagersFactory {
             if (componentsTree == null) {
                 return;
             }
-            refreshScanManagers();
+            refreshScanManagers(getScanLogicType());
             componentsTree.reset();
             NavigationService.clearNavigationMap(project);
             for (ScanManager scanManager : scanManagers.values()) {
@@ -122,7 +118,7 @@ public class ScanManagersFactory {
     /**
      * Scan projects, create new ScanManagers and delete unnecessary ones.
      */
-    public void refreshScanManagers() throws IOException {
+    public void refreshScanManagers(Utils.ScanLogicType scanLogicType) throws IOException {
         Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
         int projectHash = Utils.getProjectIdentifier(project);
         ScanManager scanManager = this.scanManagers.get(projectHash);
@@ -136,7 +132,7 @@ public class ScanManagersFactory {
         Set<Path> scanPaths = createScanPaths(scanManagers);
         createScanManagers(scanManagers, scanPaths);
         createPypiScanManagerIfApplicable(scanManagers);
-        setScanLogic(scanManagers);
+        setScanLogic(scanManagers, scanLogicType);
         this.scanManagers = scanManagers;
     }
 
@@ -146,7 +142,7 @@ public class ScanManagersFactory {
      *
      * @return local scan paths
      */
-    private Set<Path> createScanPaths(Map<Integer, ScanManager> scanManagers) {
+    Set<Path> createScanPaths(Map<Integer, ScanManager> scanManagers) {
         final Set<Path> paths = Sets.newHashSet();
         paths.add(Utils.getProjectBasePath(project));
         for (Module module : ModuleManager.getInstance(project).getModules()) {
@@ -168,8 +164,8 @@ public class ScanManagersFactory {
      * @param logger    - The logger
      * @return Xray scan logic
      */
-    private ScanLogic createScanLogic(ScanLogicType type, ScanCache scanCache, Logger logger) {
-        if (type == ScanLogicType.GraphScan) {
+    private ScanLogic createScanLogic(Utils.ScanLogicType type, ScanCache scanCache, Logger logger) {
+        if (type == Utils.ScanLogicType.GraphScan) {
             return new GraphScanLogic(scanCache, logger);
         }
         return new ComponentSummaryScanLogic(scanCache, logger);
@@ -231,31 +227,10 @@ public class ScanManagersFactory {
      * @param scanManagers - The scan managers before Xray scan
      * @throws IOException in case of any I/O error.
      */
-    private void setScanLogic(Map<Integer, ScanManager> scanManagers) throws IOException {
-        ScanLogicType scanLogicType = getScanLogicType();
+    private void setScanLogic(Map<Integer, ScanManager> scanManagers, Utils.ScanLogicType scanLogicType) throws IOException {
         ScanCache scanCache = createXrayScanCache();
         Logger logger = Logger.getInstance();
         scanManagers.values().forEach(manager -> manager.setScanLogic(createScanLogic(scanLogicType, scanCache, logger)));
-    }
-
-    /**
-     * Get scan logic type, according to the Xray version.
-     *
-     * @return scan logic type, according to the Xray version.
-     * @throws IOException if the version is not supported, or in case of connection error to Xray.
-     */
-    private ScanLogicType getScanLogicType() throws IOException {
-        ServerConfig server = GlobalSettings.getInstance().getServerConfig();
-        XrayClient client = createXrayClientBuilder(server, Logger.getInstance()).build();
-        Version xrayVersion = client.system().version();
-
-        if (GraphScanLogic.isSupportedInXrayVersion(xrayVersion)) {
-            return ScanLogicType.GraphScan;
-        }
-        if (ComponentSummaryScanLogic.isSupportedInXrayVersion(xrayVersion)) {
-            return ScanLogicType.ComponentSummary;
-        }
-        throw new IOException("Unsupported JFrog Xray version.");
     }
 
     /**
