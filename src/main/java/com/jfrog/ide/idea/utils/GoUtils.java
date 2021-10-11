@@ -8,6 +8,7 @@ import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,8 @@ public class GoUtils {
         });
         String goExecutablePath = GoSdkUtil.retrieveEnvironmentPathForGo(project, null);
         if (StringUtils.isNotBlank(goExecutablePath)) {
+            // The returned value may contain more than one path, seperated by ':' or ';'
+            goExecutablePath = StringUtils.substringBefore(goExecutablePath, File.pathSeparator);
             return Paths.get(goExecutablePath, "go").toString();
         }
         return null;
