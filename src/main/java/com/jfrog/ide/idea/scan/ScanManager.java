@@ -21,13 +21,11 @@ import com.intellij.openapi.vfs.newvfs.BulkFileListener;
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.messages.MessageBus;
-import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanManagerBase;
 import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
-import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.events.ProjectEvents;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
@@ -74,7 +72,6 @@ public abstract class ScanManager extends ScanManagerBase {
         super(basePath, Logger.getInstance(), GlobalSettings.getInstance().getServerConfig(), prefix);
         this.project = project;
         this.basePath = basePath;
-        registerOnChangeHandlers();
     }
 
     /**
@@ -191,11 +188,6 @@ public abstract class ScanManager extends ScanManagerBase {
                 DaemonCodeAnalyzer.getInstance(project).restart(descriptor);
             }
         }
-    }
-
-    private void registerOnChangeHandlers() {
-        MessageBusConnection busConnection = ApplicationManager.getApplication().getMessageBus().connect();
-        busConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, this::asyncScanAndUpdateResults);
     }
 
     /**

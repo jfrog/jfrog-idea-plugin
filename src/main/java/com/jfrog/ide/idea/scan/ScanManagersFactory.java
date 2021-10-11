@@ -65,7 +65,7 @@ public class ScanManagersFactory {
         MessageBusConnection busConnection = ApplicationManager.getApplication().getMessageBus().connect();
         // When the excluded paths change, scan managers should be created or deleted.
         // Therefore, we run startScan() which recreates the scan managers on refreshScanManagers().
-        busConnection.subscribe(ApplicationEvents.ON_EXCLUDED_PATHS_CHANGE, () -> startScan(true));
+        busConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () -> startScan(true));
     }
 
     /**
