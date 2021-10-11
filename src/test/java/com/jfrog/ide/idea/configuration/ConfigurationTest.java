@@ -20,6 +20,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String XRAY_URL = "https://steve.jfrog.io/xray";
     private static final String PLATFORM_URL = "https://steve.jfrog.io";
     private static final String EXCLUDED_PATHS = "**/*{ares}*";
+    private static final String JFROG_PROJECT = "ideaTest";
     private static final int CONNECTION_TIMEOUT = 70;
     private static final int CONNECTION_RETRIES = 5;
     private static final String PASSWORD = "prince";
@@ -83,6 +84,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
         assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
         assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
         assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
+        assertEquals(JFROG_PROJECT, actualServerConfig.getProject());
     }
 
     /**
@@ -105,6 +107,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
         assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
         assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
         assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
+        assertEquals(JFROG_PROJECT, actualServerConfig.getProject());
 
         // Check credential were migrated to PasswordSafe
         Credentials credentials = actualServerConfig.getCredentialsFromPasswordSafe();
@@ -123,6 +126,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
             mockController.when(() -> EnvironmentUtil.getValue(ARTIFACTORY_URL_ENV)).thenReturn("https://tython.jfrog.io/artifactory");
             mockController.when(() -> EnvironmentUtil.getValue(USERNAME_ENV)).thenReturn("leia");
             mockController.when(() -> EnvironmentUtil.getValue(PASSWORD_ENV)).thenReturn("princess");
+            mockController.when(() -> EnvironmentUtil.getValue(PROJECT_ENV)).thenReturn("x");
 
             // Create overriding server config
             GlobalSettings globalSettings = new GlobalSettings();
@@ -140,6 +144,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
             assertEquals("https://tython.jfrog.io/artifactory", actualServerConfig.getArtifactoryUrl());
             assertEquals("leia", actualServerConfig.getUsername());
             assertEquals("princess", actualServerConfig.getPassword());
+            assertEquals("x", actualServerConfig.getProject());
             assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
             assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
             assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
@@ -171,6 +176,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
             assertEquals("https://tython.jfrog.io/artifactory", actualServerConfig.getArtifactoryUrl());
             assertEquals("leia", actualServerConfig.getUsername());
             assertEquals("princess", actualServerConfig.getPassword());
+            assertEquals("", actualServerConfig.getProject());
             assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
             assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
             assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
@@ -206,6 +212,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
             assertEquals("", actualServerConfig.getArtifactoryUrl());
             assertEquals("leia", actualServerConfig.getUsername());
             assertEquals("princess", actualServerConfig.getPassword());
+            assertEquals("", actualServerConfig.getProject());
             assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
             assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
             assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
@@ -289,6 +296,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
                 .setConnectionRetries(CONNECTION_RETRIES)
                 .setConnectionTimeout(CONNECTION_TIMEOUT)
                 .setExcludedPaths(EXCLUDED_PATHS)
+                .setProject(JFROG_PROJECT)
                 .build();
     }
 
