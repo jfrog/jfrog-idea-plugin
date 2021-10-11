@@ -1,5 +1,6 @@
 package com.jfrog.ide.idea.scan;
 
+import com.google.common.collect.Maps;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -12,9 +13,11 @@ import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.idea.inspections.GoInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.filters.filtermanager.ConsistentFilterManager;
+import com.jfrog.ide.idea.utils.GoUtils;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Map;
 
 /**
  * Created by Bar Belity on 06/02/2020.
@@ -31,7 +34,14 @@ public class GoScanManager extends ScanManager {
     GoScanManager(Project project, String basePath) {
         super(project, basePath, ComponentPrefix.GO);
         getLog().info("Found Go project: " + getProjectName());
-        goTreeBuilder = new GoTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap(), getLog());
+        Map<String, String> env = Maps.newHashMap(EnvironmentUtil.getEnvironmentMap());
+        String goExec = null;
+        try {
+            goExec = GoUtils.getGoExeAndSetEnv(env, project);
+        } catch (NoClassDefFoundError error) {
+            getLog().warn("Go plugin is not installed. Install it to get a better experience.");
+        }
+        goTreeBuilder = new GoTreeBuilder(goExec, Paths.get(basePath), env, getLog());
         subscribeLaunchDependencyScanOnFileChangedEvents("go.sum");
     }
 
