@@ -112,6 +112,14 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
      */
     protected abstract LocalInspectionTool getInspectionTool();
 
+    protected void sendUsageReport() {
+        String packageType = getProjectPackageType();
+
+    }
+
+    protected abstract String getProjectPackageType();
+
+
     /**
      * Scan and update dependency components.
      *
@@ -124,6 +132,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
             scanAndCacheArtifacts(indicator, quickScan);
             addXrayInfoToTree(getScanResults());
             setScanResults();
+            sendUsageReport();
             DumbService.getInstance(project).smartInvokeLater(this::runInspections);
         } catch (ProcessCanceledException e) {
             getLog().info("Xray scan was canceled");
