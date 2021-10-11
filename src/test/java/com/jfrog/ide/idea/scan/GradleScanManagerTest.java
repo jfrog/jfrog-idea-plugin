@@ -41,7 +41,7 @@ public class GradleScanManagerTest extends HeavyPlatformTestCase {
 
     public void testGetGradleWrapperExeAndJdk() {
         GradleProjectImportUtil.linkAndRefreshGradleProject(wrapperProjectDir, getProject());
-        GradleScanManager gradleScanManager = new GradleScanManager(getProject(), wrapperProjectDir, null);
+        GradleScanManager gradleScanManager = new GradleScanManager(getProject(), wrapperProjectDir);
         Map<String, String> env = new HashMap<>();
         String gradleExe = gradleScanManager.getGradleExeAndJdk(env);
         assertEquals(System.getenv("JAVA_HOME"), env.get("JAVA_HOME"));
@@ -50,7 +50,7 @@ public class GradleScanManagerTest extends HeavyPlatformTestCase {
 
     public void testGetGradleGlobalExeAndJdk() {
         GradleProjectImportUtil.linkAndRefreshGradleProject(globalProjectDir, getProject());
-        GradleScanManager gradleScanManager = new GradleScanManager(getProject(), globalProjectDir, null);
+        GradleScanManager gradleScanManager = new GradleScanManager(getProject(), globalProjectDir);
         Map<String, String> env = new HashMap<>();
         String gradleExe = gradleScanManager.getGradleExeAndJdk(env);
         assertEquals(System.getenv("JAVA_HOME"), env.get("JAVA_HOME"));
@@ -59,7 +59,8 @@ public class GradleScanManagerTest extends HeavyPlatformTestCase {
 
     public void testBuildTree() throws IOException {
         GradleProjectImportUtil.linkAndRefreshGradleProject(globalProjectDir, getProject());
-        GradleScanManager gradleScanManager = new GradleScanManager(getProject(), globalProjectDir, new GraphScanLogic(null, new NullLog()));
+        GradleScanManager gradleScanManager = new GradleScanManager(getProject(), globalProjectDir);
+        gradleScanManager.setScanLogic(new GraphScanLogic(null, new NullLog()));
         gradleScanManager.buildTree(false);
 
         // Run and check scan results
