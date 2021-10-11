@@ -30,6 +30,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
+import static com.jfrog.ide.common.log.Utils.logError;
+
 /**
  * Created by Yahav Itzhak on 9 Nov 2017.
  */
@@ -102,7 +104,7 @@ public class GradleScanManager extends ScanManager {
     private File resolveGradleAndSetJavaHome(Map<String, String> env) {
         GradleProjectSettings projectSettings = GradleSettings.getInstance(project).getLinkedProjectsSettings().stream().findAny().orElse(null);
         if (projectSettings == null) {
-            getLog().error("Couldn't retrieve Gradle project settings. Hint - make sure the Gradle project was properly imported.");
+            logError(getLog(), "Couldn't retrieve Gradle project settings. Hint - make sure the Gradle project was properly imported.", false);
             return null;
         }
         GradleInstallationManager gradleInstallationManager = ServiceManager.getService(GradleInstallationManager.class);
