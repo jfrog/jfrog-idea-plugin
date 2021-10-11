@@ -13,7 +13,6 @@ import com.jetbrains.python.packaging.PyRequirement;
 import com.jetbrains.python.packaging.pipenv.PyPipEnvPackageManager;
 import com.jetbrains.python.sdk.PythonSdkUtil;
 import com.jfrog.ide.common.scan.ComponentPrefix;
-import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.filters.filtermanager.ConsistentFilterManager;
 import org.apache.commons.collections4.CollectionUtils;
@@ -21,7 +20,6 @@ import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.jfrog.build.extractor.scan.Scope;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,8 +39,8 @@ public class PypiScanManager extends ScanManager {
      * @param project - Currently opened IntelliJ project. We'll use this project to retrieve project based services
      *                like {@link ConsistentFilterManager} and {@link ComponentsTree}.
      */
-    PypiScanManager(Project project, Sdk pythonSdk, ScanLogic logic) throws IOException {
-        super(project, pythonSdk.getHomePath(), ComponentPrefix.PYPI, logic);
+    PypiScanManager(Project project, Sdk pythonSdk) {
+        super(project, pythonSdk.getHomePath(), ComponentPrefix.PYPI);
         this.pythonSdk = pythonSdk;
         getLog().info("Found PyPI SDK: " + getProjectName());
         PyPackageUtil.runOnChangeUnderInterpreterPaths(pythonSdk, this.project, this::asyncScanAndUpdateResults);

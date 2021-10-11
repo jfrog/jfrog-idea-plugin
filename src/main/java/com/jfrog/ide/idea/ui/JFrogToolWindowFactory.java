@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 
 import static com.jfrog.ide.idea.ui.configuration.JFrogProjectConfiguration.BUILDS_PATTERN_KEY;
+import static com.jfrog.ide.idea.utils.Utils.getScanLogicType;
 
 /**
  * @author yahavi
@@ -35,7 +36,7 @@ public class JFrogToolWindowFactory implements ToolWindowFactory {
     private boolean isLocalProjectSupported(Project project) {
         ScanManagersFactory scanManagersFactory = ScanManagersFactory.getInstance(project);
         try {
-            scanManagersFactory.refreshScanManagers();
+            scanManagersFactory.refreshScanManagers(getScanLogicType());
         } catch (IOException e) {
             // Ignore
         }

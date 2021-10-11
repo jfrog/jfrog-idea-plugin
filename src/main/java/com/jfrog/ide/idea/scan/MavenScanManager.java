@@ -10,7 +10,6 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.jfrog.ide.common.scan.ComponentPrefix;
-import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.MavenInspection;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +25,6 @@ import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.jfrog.build.extractor.scan.Scope;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -38,8 +36,8 @@ import java.util.stream.Collectors;
  */
 public class MavenScanManager extends ScanManager {
 
-    MavenScanManager(Project project, ScanLogic logic) throws IOException {
-        super(project, Utils.getProjectBasePath(project).toString(), ComponentPrefix.GAV, logic);
+    MavenScanManager(Project project) {
+        super(project, Utils.getProjectBasePath(project).toString(), ComponentPrefix.GAV);
         getLog().info("Found Maven project: " + getProjectName());
         MavenProjectsManager.getInstance(project).addProjectsTreeListener(new MavenProjectsTreeListener());
     }

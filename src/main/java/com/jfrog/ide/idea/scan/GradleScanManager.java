@@ -11,7 +11,6 @@ import com.intellij.psi.PsiManager;
 import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.gradle.GradleTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
-import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.GradleGroovyInspection;
 import com.jfrog.ide.idea.inspections.GradleKotlinInspection;
 import com.jfrog.ide.idea.log.Logger;
@@ -44,8 +43,8 @@ public class GradleScanManager extends ScanManager {
      *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
      * @param basePath - The build.gradle or build.gradle.kts directory.
      */
-    GradleScanManager(Project project, String basePath, ScanLogic logic) throws IOException {
-        super(project, basePath, ComponentPrefix.GAV, logic);
+    GradleScanManager(Project project, String basePath) {
+        super(project, basePath, ComponentPrefix.GAV);
         getLog().info("Found Gradle project: " + getProjectName());
         Map<String, String> env = Maps.newHashMap(EnvironmentUtil.getEnvironmentMap());
         gradleTreeBuilder = new GradleTreeBuilder(Paths.get(basePath), env, getGradleExeAndJdk(env));
