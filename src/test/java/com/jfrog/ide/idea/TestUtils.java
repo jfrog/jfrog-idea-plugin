@@ -5,6 +5,9 @@ import com.intellij.psi.PsiFile;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.junit.Assert;
 
+import java.util.Enumeration;
+
+import static com.intellij.testFramework.UsefulTestCase.assertNotEmpty;
 import static org.gradle.internal.impldep.org.testng.Assert.assertNotNull;
 
 /**
@@ -36,5 +39,21 @@ public class TestUtils {
                 .orElse(null);
         assertNotNull(childNode, "Couldn't find node '" + childName + "' between " + node + ".");
         return childNode;
+    }
+
+    /**
+     * Assert all nodes in the tree, except the root, contain scopes.
+     *
+     * @param root - The root dependency tree node
+     */
+    public static void assertScopes(DependencyTree root) {
+        for (Enumeration<?> enumeration = root.depthFirstEnumeration(); enumeration.hasMoreElements(); ) {
+            DependencyTree child = (DependencyTree) enumeration.nextElement();
+            if (child.getParent() == null) {
+                // Skip the root node
+                continue;
+            }
+            assertNotEmpty(child.getScopes());
+        }
     }
 }
