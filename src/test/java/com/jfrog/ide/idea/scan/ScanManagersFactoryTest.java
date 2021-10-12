@@ -1,34 +1,46 @@
 package com.jfrog.ide.idea.scan;
 
-import com.intellij.testFramework.HeavyPlatformTestCase;
+import com.intellij.testFramework.builders.JavaModuleFixtureBuilder;
+import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
+import com.intellij.testFramework.fixtures.JavaTestFixtureFactory;
+import com.intellij.testFramework.fixtures.TestFixtureBuilder;
 import com.jfrog.ide.common.persistency.ScanCache;
 import com.jfrog.ide.common.scan.GraphScanLogic;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.utils.Utils;
+import junit.framework.TestCase;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import static com.intellij.testFramework.UsefulTestCase.assertContainsElements;
+import static com.intellij.testFramework.UsefulTestCase.assertOneOf;
 
 /**
  * @author yahavi
  **/
-public class ScanManagersFactoryTest extends HeavyPlatformTestCase {
+public class ScanManagersFactoryTest extends TestCase {
     private static final Path PROJECT_ROOT = Paths.get(".").toAbsolutePath().normalize().resolve(Paths.get("src", "test", "resources", "projects"));
+    private static final Path PROJECT1 = PROJECT_ROOT.resolve("project1");
+    private static final Path PROJECT2 = PROJECT_ROOT.resolve("project2");
+
     private ScanManagersFactory scanManagersFactory;
+    private IdeaProjectTestFixture myFixture;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        createTestProjectStructure(PROJECT_ROOT.toString());
-        scanManagersFactory = ScanManagersFactory.getInstance(getProject());
+        TestFixtureBuilder<IdeaProjectTestFixture> fixtureBuilder = JavaTestFixtureFactory.createFixtureBuilder(getName());
+        fixtureBuilder.addModule(JavaModuleFixtureBuilder.class).addContentRoot(PROJECT1.toString());
+        fixtureBuilder.addModule(JavaModuleFixtureBuilder.class).addContentRoot(PROJECT2.toString());
+
+        myFixture = fixtureBuilder.getFixture();
+        myFixture.setUp();
+        scanManagersFactory = ScanManagersFactory.getInstance(myFixture.getProject());
         scanManagersFactory.refreshScanManagers(Utils.ScanLogicType.GraphScan);
     }
 
@@ -58,14 +70,11 @@ public class ScanManagersFactoryTest extends HeavyPlatformTestCase {
         assertEquals(1, caches.stream().map(System::identityHashCode).distinct().count());
     }
 
-    public void testCreateScanPaths() throws IOException {
+    public void testCreateScanPaths() {
         // Create scan paths
         Set<Path> scanPaths = scanManagersFactory.createScanPaths(scanManagersFactory.scanManagers);
 
-        // Make sure all directories under the project base paths are included in the scan paths
-        try (Stream<Path> files = Files.walk(Utils.getProjectBasePath(getProject()))) {
-            Set<Path> expected = files.filter(file -> file.toFile().isDirectory()).collect(Collectors.toSet());
-            assertEquals(expected, scanPaths);
-        }
+        // Make sure project base path, all modules and submodule in path
+        assertContainsElements(scanPaths, Utils.getProjectBasePath(myFixture.getProject()), PROJECT1, PROJECT2, PROJECT2.resolve("subproject"));
     }
 }
