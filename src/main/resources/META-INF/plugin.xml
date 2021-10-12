@@ -12,9 +12,10 @@
 
     <change-notes>
         <![CDATA[
-          <li>Bug fix - Race condition in multi technology cases .</li>
-          <li>Bug fix - In some cases, changing excluded paths doesn't take effect when clicking on OK button.</li>
-          <li>Bug fix - Go - go.mod and *.go files of sub Go projects should be ignored during the scanning of a project.</li>
+          <li>Bug fix - In some cases, components returned from Xray without licenses. As a result, these nodes were filtered out.</li>
+          <li>Bug fix - In some cases, multi module projects were not scanned.</li>
+          <li>Bug fix - In some cases, in multi project/module, issues and licenses were missing in a quick scan.</li>
+          <li>Bug fix - Go - Read Go execution details from Go plugin settings.</li>
         ]]>
     </change-notes>
 
