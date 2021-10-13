@@ -21,6 +21,7 @@ import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.jfrog.build.extractor.scan.Scope;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import static com.jfrog.ide.common.log.Utils.logError;
@@ -39,11 +40,11 @@ public class PypiScanManager extends ScanManager {
      * @param project - Currently opened IntelliJ project. We'll use this project to retrieve project based services
      *                like {@link ConsistentFilterManager} and {@link ComponentsTree}.
      */
-    PypiScanManager(Project project, Sdk pythonSdk) {
-        super(project, pythonSdk.getHomePath(), ComponentPrefix.PYPI);
+    PypiScanManager(Project project, Sdk pythonSdk, ExecutorService executor) {
+        super(project, pythonSdk.getHomePath(), ComponentPrefix.PYPI, executor);
         this.pythonSdk = pythonSdk;
         getLog().info("Found PyPI SDK: " + getProjectName());
-        PyPackageUtil.runOnChangeUnderInterpreterPaths(pythonSdk, this.project, this::asyncScanAndUpdateResults);
+        PyPackageUtil.runOnChangeUnderInterpreterPaths(pythonSdk, this, this::asyncScanAndUpdateResults);
     }
 
     @Override

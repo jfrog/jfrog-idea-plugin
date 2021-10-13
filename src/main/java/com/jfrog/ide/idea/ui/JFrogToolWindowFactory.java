@@ -8,14 +8,13 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.jfrog.ide.idea.ci.CiManager;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
-import org.apache.commons.collections4.CollectionUtils;
+import com.jfrog.ide.idea.scan.ScanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
 import static com.jfrog.ide.idea.ui.configuration.JFrogProjectConfiguration.BUILDS_PATTERN_KEY;
-import static com.jfrog.ide.idea.utils.Utils.getScanLogicType;
 
 /**
  * @author yahavi
@@ -34,13 +33,11 @@ public class JFrogToolWindowFactory implements ToolWindowFactory {
     }
 
     private boolean isLocalProjectSupported(Project project) {
-        ScanManagersFactory scanManagersFactory = ScanManagersFactory.getInstance(project);
         try {
-            scanManagersFactory.refreshScanManagers(getScanLogicType());
-        } catch (IOException e) {
-            // Ignore
+            return ScanUtils.isLocalProjectSupported(project);
+        } catch (IOException ignored) {
+            return false;
         }
-        return CollectionUtils.isNotEmpty(ScanManagersFactory.getScanManagers(project));
     }
 
     private boolean isBuildsConfigured(Project project) {

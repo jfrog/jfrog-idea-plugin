@@ -2,15 +2,12 @@ package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.projectRoots.Sdk;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.persistency.ScanCache;
@@ -27,24 +24,28 @@ import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.jfrog.ide.common.log.Utils.logError;
+import static com.jfrog.ide.idea.scan.ScanUtils.createScanPaths;
 import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
 import static com.jfrog.ide.idea.utils.Utils.getScanLogicType;
 
 /**
  * Created by yahavi
  */
-public class ScanManagersFactory {
+public class ScanManagersFactory implements Disposable {
 
     Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
+    private final MessageBusConnection busConnection;
     private final Project project;
 
     public static ScanManagersFactory getInstance(@NotNull Project project) {
@@ -52,6 +53,7 @@ public class ScanManagersFactory {
     }
 
     private ScanManagersFactory(@NotNull Project project) {
+        this.busConnection = ApplicationManager.getApplication().getMessageBus().connect(this);
         this.project = project;
         registerOnChangeHandlers();
     }
@@ -61,10 +63,11 @@ public class ScanManagersFactory {
         return Sets.newHashSet(scanManagersFactory.scanManagers.values());
     }
 
+    /**
+     * When the excluded paths change, scan managers should be created or deleted.
+     * Therefore, we run startScan() which recreates the scan managers on refreshScanManagers().
+     */
     private void registerOnChangeHandlers() {
-        MessageBusConnection busConnection = ApplicationManager.getApplication().getMessageBus().connect();
-        // When the excluded paths change, scan managers should be created or deleted.
-        // Therefore, we run startScan() which recreates the scan managers on refreshScanManagers().
         busConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () -> startScan(true));
     }
 
@@ -85,12 +88,13 @@ public class ScanManagersFactory {
             Logger.getInstance().warn("Xray server is not configured.");
             return;
         }
+        ComponentsTree componentsTree = LocalComponentsTree.getInstance(project);
+        if (componentsTree == null) {
+            return;
+        }
+        ExecutorService executor = Executors.newFixedThreadPool(3);
         try {
-            ComponentsTree componentsTree = LocalComponentsTree.getInstance(project);
-            if (componentsTree == null) {
-                return;
-            }
-            refreshScanManagers(getScanLogicType());
+            refreshScanManagers(getScanLogicType(), executor);
             componentsTree.reset();
             NavigationService.clearNavigationMap(project);
             for (ScanManager scanManager : scanManagers.values()) {
@@ -100,8 +104,10 @@ public class ScanManagersFactory {
                     logError(Logger.getInstance(), "", e, !quickScan);
                 }
             }
-        } catch (IOException | RuntimeException e) {
+        } catch (IOException | RuntimeException | InterruptedException e) {
             logError(Logger.getInstance(), "", e, !quickScan);
+        } finally {
+            executor.shutdown();
         }
     }
 
@@ -118,7 +124,8 @@ public class ScanManagersFactory {
     /**
      * Scan projects, create new ScanManagers and delete unnecessary ones.
      */
-    public void refreshScanManagers(Utils.ScanLogicType scanLogicType) throws IOException {
+    public void refreshScanManagers(Utils.ScanLogicType scanLogicType, @Nullable ExecutorService executor) throws IOException, InterruptedException {
+        removeScanManagersListeners();
         Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
         int projectHash = Utils.getProjectIdentifier(project);
         ScanManager scanManager = this.scanManagers.get(projectHash);
@@ -127,33 +134,13 @@ public class ScanManagersFactory {
         } else {
             // Unlike other scan managers whereby we create them if the package descriptor exist, the Maven
             // scan manager is created if the Maven plugin is installed and there are Maven projects loaded.
-            createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.MAVEN, "");
+            createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.MAVEN, "", executor);
         }
-        Set<Path> scanPaths = createScanPaths(scanManagers);
-        createScanManagers(scanManagers, scanPaths);
-        createPypiScanManagerIfApplicable(scanManagers);
+        Set<Path> scanPaths = createScanPaths(scanManagers, project);
+        createScanManagers(scanManagers, scanPaths, executor);
+        createPypiScanManagerIfApplicable(scanManagers, executor);
         setScanLogic(scanManagers, scanLogicType);
         this.scanManagers = scanManagers;
-    }
-
-    /**
-     * Figure out the potential local paths required for the Xray scan.
-     * On these directories may be the projects that will be scanned.
-     *
-     * @return local scan paths
-     */
-    Set<Path> createScanPaths(Map<Integer, ScanManager> scanManagers) {
-        final Set<Path> paths = Sets.newHashSet();
-        paths.add(Utils.getProjectBasePath(project));
-        for (Module module : ModuleManager.getInstance(project).getModules()) {
-            VirtualFile modulePath = ProjectUtil.guessModuleDir(module);
-            if (modulePath != null) {
-                paths.add(modulePath.toNioPath());
-            }
-        }
-        scanManagers.values().stream().map(ScanManager::getProjectPaths).flatMap(Collection::stream).forEach(paths::add);
-        Logger.getInstance().debug("Scanning projects in the following paths: " + paths);
-        return paths;
     }
 
     /**
@@ -171,20 +158,20 @@ public class ScanManagersFactory {
         return new ComponentSummaryScanLogic(scanCache, logger);
     }
 
-    private void createScanManagers(Map<Integer, ScanManager> scanManagers, Set<Path> scanPaths) throws IOException {
+    private void createScanManagers(Map<Integer, ScanManager> scanManagers, Set<Path> scanPaths, ExecutorService executor) throws IOException {
         PackageFileFinder packageFileFinder = new PackageFileFinder(scanPaths, GlobalSettings.getInstance().getServerConfig().getExcludedPaths(), Logger.getInstance());
 
         // Create npm scan-managers.
         Set<String> packageJsonDirs = packageFileFinder.getNpmPackagesFilePairs();
-        createScanManagersForPackageDirs(packageJsonDirs, scanManagers, ScanManagerTypes.NPM);
+        createScanManagersForPackageDirs(packageJsonDirs, scanManagers, ScanManagerTypes.NPM, executor);
 
         // Create Gradle scan-managers.
         Set<String> buildGradleDirs = packageFileFinder.getBuildGradlePackagesFilePairs();
-        createScanManagersForPackageDirs(buildGradleDirs, scanManagers, ScanManagerTypes.GRADLE);
+        createScanManagersForPackageDirs(buildGradleDirs, scanManagers, ScanManagerTypes.GRADLE, executor);
 
         // Create Go scan-managers.
         Set<String> goModDirs = packageFileFinder.getGoPackagesFilePairs();
-        createScanManagersForPackageDirs(goModDirs, scanManagers, ScanManagerTypes.GO);
+        createScanManagersForPackageDirs(goModDirs, scanManagers, ScanManagerTypes.GO, executor);
     }
 
     /**
@@ -192,13 +179,13 @@ public class ScanManagersFactory {
      *
      * @param scanManagers - Scan managers list
      */
-    private void createPypiScanManagerIfApplicable(Map<Integer, ScanManager> scanManagers) {
+    private void createPypiScanManagerIfApplicable(Map<Integer, ScanManager> scanManagers, ExecutorService executor) {
         try {
             for (Sdk pythonSdk : PypiScanManager.getAllPythonSdks()) {
                 int projectHash = Utils.getProjectIdentifier(pythonSdk.getName(), pythonSdk.getHomePath());
                 ScanManager scanManager = this.scanManagers.get(projectHash);
                 if (scanManager == null) {
-                    scanManager = new PypiScanManager(project, pythonSdk);
+                    scanManager = new PypiScanManager(project, pythonSdk, executor);
                 }
                 scanManagers.put(projectHash, scanManager);
             }
@@ -207,14 +194,15 @@ public class ScanManagersFactory {
         }
     }
 
-    private void createScanManagersForPackageDirs(Set<String> packageDirs, Map<Integer, ScanManager> scanManagers, ScanManagerTypes type) {
+    private void createScanManagersForPackageDirs(Set<String> packageDirs, Map<Integer, ScanManager> scanManagers,
+                                                  ScanManagerTypes type, ExecutorService executor) {
         for (String dir : packageDirs) {
             int projectHash = Utils.getProjectIdentifier(dir, dir);
             ScanManager scanManager = scanManagers.get(projectHash);
             if (scanManager != null) {
                 scanManagers.put(projectHash, scanManager);
             } else {
-                createScanManagerIfApplicable(scanManagers, projectHash, type, dir);
+                createScanManagerIfApplicable(scanManagers, projectHash, type, dir, executor);
             }
         }
     }
@@ -263,22 +251,22 @@ public class ScanManagersFactory {
      * @param type         - Project type
      * @param dir          - Project dir
      */
-    private void createScanManagerIfApplicable(Map<Integer, ScanManager> scanManagers, int projectHash, ScanManagerTypes type, String dir) {
+    private void createScanManagerIfApplicable(Map<Integer, ScanManager> scanManagers, int projectHash, ScanManagerTypes type, String dir, ExecutorService executor) {
         try {
             switch (type) {
                 case MAVEN:
                     if (MavenScanManager.isApplicable(project)) {
-                        scanManagers.put(projectHash, new MavenScanManager(project));
+                        scanManagers.put(projectHash, new MavenScanManager(project, executor));
                     }
                     return;
                 case GRADLE:
-                    scanManagers.put(projectHash, new GradleScanManager(project, dir));
+                    scanManagers.put(projectHash, new GradleScanManager(project, dir, executor));
                     return;
                 case NPM:
-                    scanManagers.put(projectHash, new NpmScanManager(project, dir));
+                    scanManagers.put(projectHash, new NpmScanManager(project, dir, executor));
                     return;
                 case GO:
-                    scanManagers.put(projectHash, new GoScanManager(project, dir));
+                    scanManagers.put(projectHash, new GoScanManager(project, dir, executor));
             }
         } catch (NoClassDefFoundError noClassDefFoundError) {
             // The 'maven' or 'python' plugins are not installed.
@@ -287,5 +275,17 @@ public class ScanManagersFactory {
 
     private boolean isScanInProgress() {
         return scanManagers.values().stream().anyMatch(ScanManager::isScanInProgress);
+    }
+
+    /**
+     * Remove file system change listeners on each on of the scan managers.
+     */
+    private void removeScanManagersListeners() {
+        scanManagers.values().forEach(ScanManager::dispose);
+    }
+
+    @Override
+    public void dispose() {
+        busConnection.disconnect();
     }
 }

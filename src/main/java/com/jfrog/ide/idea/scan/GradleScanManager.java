@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import static com.jfrog.ide.common.log.Utils.logError;
 
@@ -45,8 +46,8 @@ public class GradleScanManager extends ScanManager {
      *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
      * @param basePath - The build.gradle or build.gradle.kts directory.
      */
-    GradleScanManager(Project project, String basePath) {
-        super(project, basePath, ComponentPrefix.GAV);
+    GradleScanManager(Project project, String basePath, ExecutorService executor) {
+        super(project, basePath, ComponentPrefix.GAV, executor);
         getLog().info("Found Gradle project: " + getProjectName());
         Map<String, String> env = Maps.newHashMap(EnvironmentUtil.getEnvironmentMap());
         gradleTreeBuilder = new GradleTreeBuilder(Paths.get(basePath), env, getGradleExeAndJdk(env));

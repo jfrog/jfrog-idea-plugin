@@ -85,7 +85,6 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
      */
     public void registerListeners() {
         super.registerListeners();
-        MessageBusConnection projectBusConnection = project.getMessageBus().connect();
         projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_FILTER_CHANGE, () -> ApplicationManager.getApplication().invokeLater(() -> {
             LocalComponentsTree.getInstance(project).applyFiltersForAllProjects();
             updateIssuesTable();

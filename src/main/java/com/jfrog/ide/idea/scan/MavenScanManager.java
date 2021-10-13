@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 /**
@@ -36,10 +37,10 @@ import java.util.stream.Collectors;
  */
 public class MavenScanManager extends ScanManager {
 
-    MavenScanManager(Project project) {
-        super(project, Utils.getProjectBasePath(project).toString(), ComponentPrefix.GAV);
+    MavenScanManager(Project project, ExecutorService executor) {
+        super(project, Utils.getProjectBasePath(project).toString(), ComponentPrefix.GAV, executor);
         getLog().info("Found Maven project: " + getProjectName());
-        MavenProjectsManager.getInstance(project).addProjectsTreeListener(new MavenProjectsTreeListener());
+        MavenProjectsManager.getInstance(project).addProjectsTreeListener(new MavenProjectsTreeListener(), this);
     }
 
     static boolean isApplicable(@NotNull Project project) {

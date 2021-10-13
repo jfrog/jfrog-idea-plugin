@@ -1,5 +1,6 @@
 package com.jfrog.ide.idea.scan;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.testFramework.builders.JavaModuleFixtureBuilder;
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture;
 import com.intellij.testFramework.fixtures.JavaTestFixtureFactory;
@@ -19,11 +20,13 @@ import java.util.Set;
 
 import static com.intellij.testFramework.UsefulTestCase.assertContainsElements;
 import static com.intellij.testFramework.UsefulTestCase.assertOneOf;
+import static com.jfrog.ide.idea.scan.ScanUtils.createScanPaths;
+import static com.jfrog.ide.idea.scan.ScanUtils.isLocalProjectSupported;
 
 /**
  * @author yahavi
  **/
-public class ScanManagersFactoryTest extends TestCase {
+public class ScanManagersTest extends TestCase {
     private static final Path PROJECT_ROOT = Paths.get(".").toAbsolutePath().normalize().resolve(Paths.get("src", "test", "resources", "projects"));
     private static final Path PROJECT1 = PROJECT_ROOT.resolve("project1");
     private static final Path PROJECT2 = PROJECT_ROOT.resolve("project2");
@@ -41,7 +44,13 @@ public class ScanManagersFactoryTest extends TestCase {
         myFixture = fixtureBuilder.getFixture();
         myFixture.setUp();
         scanManagersFactory = ScanManagersFactory.getInstance(myFixture.getProject());
-        scanManagersFactory.refreshScanManagers(Utils.ScanLogicType.GraphScan);
+        scanManagersFactory.refreshScanManagers(Utils.ScanLogicType.GraphScan, null);
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        tearDownFixture(myFixture);
+        super.tearDown();
     }
 
     public void testRefreshScanManagers() {
@@ -70,11 +79,34 @@ public class ScanManagersFactoryTest extends TestCase {
         assertEquals(1, caches.stream().map(System::identityHashCode).distinct().count());
     }
 
-    public void testCreateScanPaths() {
+    public void testIsLocalProjectSupported() throws Exception {
+        // Make sure isLocalProjectSupported return true on our project
+        assertTrue(isLocalProjectSupported(myFixture.getProject()));
+
+        // Make sure isLocalProjectSupported return false on a new project
+        IdeaProjectTestFixture newFixture = JavaTestFixtureFactory.createFixtureBuilder(getName()).getFixture();
+        newFixture.setUp();
+        try {
+            assertFalse(isLocalProjectSupported(newFixture.getProject()));
+        } finally {
+            tearDownFixture(newFixture);
+        }
+    }
+
+    public void testScanManagersScanPaths() {
         // Create scan paths
-        Set<Path> scanPaths = scanManagersFactory.createScanPaths(scanManagersFactory.scanManagers);
+        Set<Path> scanPaths = createScanPaths(scanManagersFactory.scanManagers, myFixture.getProject());
 
         // Make sure project base path, all modules and submodule in path
         assertContainsElements(scanPaths, Utils.getProjectBasePath(myFixture.getProject()), PROJECT1, PROJECT2, PROJECT2.resolve("subproject"));
+    }
+
+    private void tearDownFixture(IdeaProjectTestFixture fixture) {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            try {
+                fixture.tearDown();
+            } catch (Exception ignore) {
+            }
+        });
     }
 }
