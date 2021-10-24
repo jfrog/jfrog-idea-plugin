@@ -4,7 +4,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import com.jfrog.ide.idea.TestUtils;
-import org.jfrog.build.extractor.scan.GeneralInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 
 /**
@@ -43,23 +43,18 @@ public abstract class InspectionsTest extends LightJavaCodeInsightFixtureTestCas
         }
     }
 
-    public void createGeneralInfoTest(Object[][] dependencies) {
+    public void createComponentNameTest(Object[][] dependencies) {
         for (Object[] dependency : dependencies) {
             PsiElement element = TestUtils.getNonLeafElement(fileDescriptor, psiClass, (int) dependency[0]);
-            GeneralInfo generalInfo = inspection.createGeneralInfo(element);
-            Assert.assertNotNull(generalInfo);
-            Assert.assertEquals(generalInfoToString(createGeneralInfo(dependency)), generalInfoToString(generalInfo));
-            Assert.assertTrue(inspection.compareGeneralInfos(generalInfo, createGeneralInfo(dependency)));
+            String componentName = inspection.createComponentName(element);
+            Assert.assertNotNull(componentName);
+            String expectedGroupId = (String) dependency[1];
+            String expectedArtifactId = (String) dependency[2];
+            if (StringUtils.isBlank(expectedGroupId)) {
+                assertEquals(expectedArtifactId, componentName);
+            } else {
+                assertEquals(String.join(":", expectedGroupId, expectedArtifactId), componentName);
+            }
         }
-    }
-
-    GeneralInfo createGeneralInfo(Object[] dependency) {
-        return new GeneralInfo()
-                .groupId((String) dependency[1])
-                .artifactId((String) dependency[2]);
-    }
-
-    private String generalInfoToString(GeneralInfo generalInfo) {
-        return String.join(":", generalInfo.getGroupId(), generalInfo.getArtifactId());
     }
 }

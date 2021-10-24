@@ -39,7 +39,7 @@ public class Utils {
         GeneralInfo lhsGeneralInfo = lhs.getGeneralInfo();
         GeneralInfo rhsGeneralInfo = rhs.getGeneralInfo();
         return ObjectUtils.allNotNull(lhsGeneralInfo, rhsGeneralInfo) &&
-                StringUtils.equals(lhsGeneralInfo.getName(), rhsGeneralInfo.getName()) &&
+                StringUtils.equals(lhsGeneralInfo.getComponentId(), rhsGeneralInfo.getComponentId()) &&
                 StringUtils.equals(lhsGeneralInfo.getPath(), rhsGeneralInfo.getPath()) &&
                 StringUtils.equals(lhsGeneralInfo.getPkgType(), rhsGeneralInfo.getPkgType());
     }

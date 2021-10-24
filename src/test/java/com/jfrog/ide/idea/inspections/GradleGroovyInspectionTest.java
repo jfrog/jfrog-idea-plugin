@@ -37,6 +37,6 @@ public class GradleGroovyInspectionTest extends InspectionsTest {
     }
 
     public void testCreateGeneralInfo() {
-        createGeneralInfoTest(DEPENDENCIES);
+        createComponentNameTest(DEPENDENCIES);
     }
 }

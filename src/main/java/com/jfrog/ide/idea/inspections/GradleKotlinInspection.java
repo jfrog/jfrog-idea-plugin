@@ -7,7 +7,6 @@ import com.intellij.psi.PsiElementVisitor;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.psi.*;
-import org.jfrog.build.extractor.scan.GeneralInfo;
 
 import java.util.List;
 
@@ -71,15 +70,13 @@ public class GradleKotlinInspection extends GradleInspection {
     }
 
     @Override
-    GeneralInfo createGeneralInfo(PsiElement element) {
+    String createComponentName(PsiElement element) {
         List<KtValueArgument> argumentList = ((KtValueArgumentList) element).getArguments();
         String componentId = extractArgument(argumentList.get(0));
         if (argumentList.size() == 3) {
             componentId += ":" + extractArgument(argumentList.get(1)) + ":" + extractArgument(argumentList.get(2));
-        } else if (componentId.startsWith(":")) { // compile(project(':xyz'))
-            componentId += ":";
         }
-        return new GeneralInfo().componentId(componentId);
+        return super.createComponentName(componentId);
     }
 
     /**

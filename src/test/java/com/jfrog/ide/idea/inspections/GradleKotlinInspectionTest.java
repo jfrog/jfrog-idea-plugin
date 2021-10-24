@@ -36,6 +36,6 @@ public class GradleKotlinInspectionTest extends InspectionsTest {
     }
 
     public void testCreateGeneralInfo() {
-        createGeneralInfoTest(DEPENDENCIES);
+        createComponentNameTest(DEPENDENCIES);
     }
 }

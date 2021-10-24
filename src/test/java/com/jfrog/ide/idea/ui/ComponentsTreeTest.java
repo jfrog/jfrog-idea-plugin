@@ -95,9 +95,9 @@ public class ComponentsTreeTest extends TestCase {
         Assert.assertArrayEquals(actual, expected);
     }
 
-    private DependencyTree createNode(String name) {
-        GeneralInfo generalInfo = new GeneralInfo().name(name);
-        DependencyTree node = new DependencyTree(name);
+    private DependencyTree createNode(String componentId) {
+        GeneralInfo generalInfo = new GeneralInfo().componentId(componentId);
+        DependencyTree node = new DependencyTree(componentId);
         node.setGeneralInfo(generalInfo);
         return node;
     }

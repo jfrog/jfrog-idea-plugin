@@ -32,6 +32,6 @@ public class GoInspectionTest extends InspectionsTest {
     }
 
     public void testCreateGeneralInfo() {
-        createGeneralInfoTest(DEPENDENCIES);
+        createComponentNameTest(DEPENDENCIES);
     }
 }

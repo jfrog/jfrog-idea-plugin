@@ -24,6 +24,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.jfrog.ide.common.log.Utils.logError;
+import static com.jfrog.ide.common.utils.Utils.createComponentId;
 
 /**
  * @author yahavi
@@ -70,7 +71,7 @@ public class PypiScanManager extends ScanManager {
     private DependencyTree createRootNode() {
         DependencyTree rootNode = new DependencyTree(pythonSdk.getName());
         rootNode.setMetadata(true);
-        GeneralInfo generalInfo = new GeneralInfo().artifactId(pythonSdk.getName()).path(pythonSdk.getHomePath()).pkgType("pypi");
+        GeneralInfo generalInfo = new GeneralInfo().componentId(pythonSdk.getName()).path(pythonSdk.getHomePath()).pkgType("pypi");
         rootNode.setGeneralInfo(generalInfo);
         rootNode.setScopes(Sets.newHashSet(new Scope()));
         return rootNode;
@@ -151,11 +152,7 @@ public class PypiScanManager extends ScanManager {
      * @param type    - Dependency type
      */
     private void initDependencyNode(DependencyTree node, String name, String version, String path, String type) {
-        GeneralInfo generalInfo = new GeneralInfo()
-                .artifactId(name)
-                .version(version)
-                .path(path)
-                .pkgType(type);
+        GeneralInfo generalInfo = new GeneralInfo().path(path).pkgType(type).componentId(createComponentId(name, version));
         node.setGeneralInfo(generalInfo);
         node.setScopes(Sets.newHashSet(new Scope()));
     }
