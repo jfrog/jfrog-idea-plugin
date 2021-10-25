@@ -30,8 +30,6 @@ import org.jfrog.build.extractor.scan.GeneralInfo;
 
 import javax.swing.*;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -124,7 +122,7 @@ public class CiManager extends CiManagerBase {
         ProjectsMap.ProjectKey projectKey = null;
         if (buildGeneralInfo != null) {
             try {
-                BuildDependencyTree buildTree = loadBuildTree(buildGeneralInfo.getArtifactId(), buildGeneralInfo.getVersion());
+                BuildDependencyTree buildTree = loadBuildTree(buildGeneralInfo);
                 CiFilterManager.getInstance(project).collectsFiltersInformation(buildTree);
                 componentsTree.addScanResults(project.getName(), buildTree);
                 projectKey = ProjectsMap.createKey(project.getName(), buildTree.getGeneralInfo());
