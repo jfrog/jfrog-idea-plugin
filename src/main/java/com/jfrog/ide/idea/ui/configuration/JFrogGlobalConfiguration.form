@@ -275,7 +275,7 @@
         </constraints>
         <properties>
           <enabled value="false"/>
-          <text value="An optional project name in Artifactory. Used as a context for Xray scannig."/>
+          <text value="An optional project key in Artifactory. Used as a context for the Xray scanning and for the CI builds."/>
         </properties>
       </component>
       <component id="8c6e3" class="javax.swing.JLabel">

@@ -167,7 +167,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
 
             // Check connection.
             // This command will throw an exception if there is a connection or credentials issue.
-            artifactoryManager.searchArtifactsByAql(createAqlForBuildArtifacts("*"));
+            artifactoryManager.searchArtifactsByAql(createAqlForBuildArtifacts("*", "artifactory-build-info"));
 
             artifactoryConnectionResultsGesture.setSuccess();
             return "Successfully connected to Artifactory version: " + artifactoryManager.getVersion();
