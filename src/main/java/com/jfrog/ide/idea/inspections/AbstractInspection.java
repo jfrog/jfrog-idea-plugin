@@ -97,7 +97,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     abstract boolean isDependency(PsiElement element);
 
     /**
-     * Create general info from the Psi element. Called when isDependency(element) == true.
+     * Create a component name from the Psi element. Called when isDependency(element) == true.
      *
      * @param element - The Psi element in the package descriptor
      * @return GeneralInfo
@@ -112,7 +112,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * Multi project - Return the module containing the dependency within the projects.
      *
      * @param element       - The Psi element in the package descriptor
-     * @param componentName - Component name represents a dependency without version
+     * @param componentName - Component name representing a dependency without version
      * @return Set of modules containing the dependency or null if not found
      */
     abstract Set<DependencyTree> getModules(PsiElement element, String componentName);
@@ -155,7 +155,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         }
         String componentName = createComponentName(element);
         if (componentName == null) {
-            return null; // Creating the component name failed
+            return null; // Failed creating the component name
         }
         Set<DependencyTree> modules = getModules(element, componentName);
         if (modules == null) {
@@ -171,7 +171,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * Get the module dependency that matches to the input general info.
      *
      * @param module        - The dependency tree module
-     * @param componentName - Component name represents a dependency without version
+     * @param componentName - Component name representing a dependency without version
      * @return module dependencies that match to the input general info
      */
     private DependencyTree getModuleDependency(DependencyTree module, String componentName) {
@@ -262,7 +262,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * @param root          - The root of the dependency tree
      * @param project       - The project
      * @param modulesList   - List of all relevant modules
-     * @param componentName - Component name represents a dependency without version
+     * @param componentName - Component name representing a dependency without version
      * @return set of all modules containing the dependency stated in the general info
      */
     Set<DependencyTree> collectModules(DependencyTree root, Project project, List<?> modulesList, String componentName) {
@@ -285,7 +285,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * 3. The dependency is a level 2 dependency under the project node
      *
      * @param projectNode   - The project node
-     * @param componentName - Component name represents a dependency without version
+     * @param componentName - Component name representing a dependency without version
      * @return the nodes containing the dependency
      */
     private Set<DependencyTree> collectMultiModules(DependencyTree projectNode, String componentName) {
@@ -321,7 +321,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * Return true iff the node is a direct parent of the dependency.
      *
      * @param node          - The project node
-     * @param componentName - Component name represents a dependency without version
+     * @param componentName - Component name representing a dependency without version
      * @return true iff the node is a direct parent of the dependency
      */
     private boolean isParent(DependencyTree node, String componentName) {
@@ -335,7 +335,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * Compare the generated general info from the Psi element and the build info from the Dependency tree.
      *
      * @param generalInfo   - General info from the dependency tree
-     * @param componentName - Component name represents a dependency without version
+     * @param componentName - Component name representing a dependency without version
      * @return true if the general info matches the component name
      */
     boolean compareGeneralInfo(GeneralInfo generalInfo, String componentName) {
