@@ -28,9 +28,9 @@ public abstract class InspectionsTest extends LightJavaCodeInsightFixtureTestCas
         return "src/test/resources/inspections";
     }
 
-    public void isDependencyTest(Object[][] dependencies) {
-        for (Object[] dependency : dependencies) {
-            PsiElement element = TestUtils.getNonLeafElement(fileDescriptor, psiClass, (int) dependency[0]);
+    public void isDependencyTest(InspectionTestDependency[] dependencies) {
+        for (InspectionTestDependency dependency : dependencies) {
+            PsiElement element = TestUtils.getNonLeafElement(fileDescriptor, psiClass, dependency.offset);
             Assert.assertTrue("isDependency should be true on " + element.getText(),
                     inspection.isDependency(element));
         }
@@ -43,18 +43,35 @@ public abstract class InspectionsTest extends LightJavaCodeInsightFixtureTestCas
         }
     }
 
-    public void createComponentNameTest(Object[][] dependencies) {
-        for (Object[] dependency : dependencies) {
-            PsiElement element = TestUtils.getNonLeafElement(fileDescriptor, psiClass, (int) dependency[0]);
+    public void createComponentNameTest(InspectionTestDependency[] dependencies) {
+        for (InspectionTestDependency dependency : dependencies) {
+            PsiElement element = TestUtils.getNonLeafElement(fileDescriptor, psiClass, dependency.offset);
             String componentName = inspection.createComponentName(element);
             Assert.assertNotNull(componentName);
-            String expectedGroupId = (String) dependency[1];
-            String expectedArtifactId = (String) dependency[2];
+            String expectedGroupId = dependency.groupId;
+            String expectedArtifactId = dependency.artifactId;
             if (StringUtils.isBlank(expectedGroupId)) {
                 assertEquals(expectedArtifactId, componentName);
             } else {
                 assertEquals(String.join(":", expectedGroupId, expectedArtifactId), componentName);
             }
+        }
+    }
+
+    static class InspectionTestDependency {
+        private final String artifactId;
+        private final int offset;
+        private String groupId;
+
+        public InspectionTestDependency(int offset, String groupId, String artifactId) {
+            this.artifactId = artifactId;
+            this.groupId = groupId;
+            this.offset = offset;
+        }
+
+        public InspectionTestDependency(int offset, String artifactId) {
+            this.artifactId = artifactId;
+            this.offset = offset;
         }
     }
 }

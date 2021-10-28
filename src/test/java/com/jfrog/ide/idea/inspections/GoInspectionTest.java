@@ -8,11 +8,10 @@ import com.goide.vgo.mod.psi.VgoModuleSpec;
 public class GoInspectionTest extends InspectionsTest {
 
     private static final String PACKAGE_DESCRIPTOR = "go.mod";
-    private final Object[][] DEPENDENCIES = {
-        // offset, groupId, artifactId
-        {54, "", "github.com/jfrog/gocmd"},
-        {89, "", "github.com/jfrog/gofrog"},
-        {124, "", "github.com/jfrog/gogopowerrangers"}
+    private final InspectionTestDependency[] DEPENDENCIES = {
+            new InspectionTestDependency(54, "github.com/jfrog/gocmd"),
+            new InspectionTestDependency(89, "github.com/jfrog/gofrog"),
+            new InspectionTestDependency(124, "github.com/jfrog/gogopowerrangers")
     };
 
     private final int[] NON_DEPENDENCIES_POSITIONS = {176, 202};

@@ -10,13 +10,12 @@ public class GradleKotlinInspectionTest extends InspectionsTest {
     // We are setting 'build.groovy' instead pf 'build.gradle' since the testing FW doesn't identify 'build.gradle'
     // files as groovy-script.
     private static final String PACKAGE_DESCRIPTOR = "build.gradle.kts";
-    private final Object[][] DEPENDENCIES = {
-            // offset, groupId, artifactId
-            {96, "", "project"},
-            {119, "a", "b"},
-            {144, "d", "e"},
-            {147, "d", "e"},
-            {155, "d", "e"},
+    private final InspectionTestDependency[] DEPENDENCIES = {
+            new InspectionTestDependency(96, "project"),
+            new InspectionTestDependency(119, "a", "b"),
+            new InspectionTestDependency(144, "d", "e"),
+            new InspectionTestDependency(147, "d", "e"),
+            new InspectionTestDependency(155, "d", "e"),
     };
 
     private final int[] NON_DEPENDENCIES_POSITIONS = {273, 338};

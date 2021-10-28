@@ -336,7 +336,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      *
      * @param generalInfo   - General info from the dependency tree
      * @param componentName - Component name represents a dependency without version
-     * @return true if and only if 2 general infos considered equal
+     * @return true if the general info matches the component name
      */
     boolean compareGeneralInfo(GeneralInfo generalInfo, String componentName) {
         // Module name

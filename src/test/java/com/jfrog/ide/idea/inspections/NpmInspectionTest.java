@@ -8,11 +8,10 @@ import com.intellij.json.psi.JsonProperty;
 public class NpmInspectionTest extends InspectionsTest {
 
     private static final String PACKAGE_DESCRIPTOR = "package.json";
-    private final Object[][] DEPENDENCIES = {
-            // offset, groupId, artifactId
-            {67, "", "a"},
-            {82, "", "c"},
-            {128, "", "a"}
+    private final InspectionTestDependency[] DEPENDENCIES = {
+            new InspectionTestDependency(67, "a"),
+            new InspectionTestDependency(82, "c"),
+            new InspectionTestDependency(128, "a")
     };
 
     private final int[] NON_DEPENDENCIES_POSITIONS = {16, 36};
