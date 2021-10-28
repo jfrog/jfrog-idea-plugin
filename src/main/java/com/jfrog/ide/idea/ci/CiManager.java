@@ -30,8 +30,6 @@ import org.jfrog.build.extractor.scan.GeneralInfo;
 
 import javax.swing.*;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -79,7 +77,8 @@ public class CiManager extends CiManagerBase {
                         return;
                     }
                     String buildsPattern = propertiesComponent.getValue(BUILDS_PATTERN_KEY);
-                    buildCiTree(buildsPattern, new ProgressIndicatorImpl(indicator), () -> checkCanceled(indicator), shouldToast);
+                    buildCiTree(buildsPattern, GlobalSettings.getInstance().getServerConfig().getProject(),
+                            new ProgressIndicatorImpl(indicator), () -> checkCanceled(indicator), shouldToast);
                     CiFilterManager.getInstance(project).collectBuildsInformation(root);
                     loadFirstBuild();
                 } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
