@@ -18,6 +18,7 @@ import com.jfrog.ide.idea.utils.GoUtils;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Created by Bar Belity on 06/02/2020.
@@ -30,9 +31,10 @@ public class GoScanManager extends ScanManager {
      * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
      *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
      * @param basePath - The go.mod directory.
+     * @param executor - An executor that should limit the number of running tasks to 3
      */
-    GoScanManager(Project project, String basePath) {
-        super(project, basePath, ComponentPrefix.GO);
+    GoScanManager(Project project, String basePath, ExecutorService executor) {
+        super(project, basePath, ComponentPrefix.GO, executor);
         getLog().info("Found Go project: " + getProjectName());
         Map<String, String> env = Maps.newHashMap(EnvironmentUtil.getEnvironmentMap());
         String goExec = null;

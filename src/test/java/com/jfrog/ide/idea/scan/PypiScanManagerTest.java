@@ -9,6 +9,7 @@ import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.projectRoots.impl.ProjectJdkImpl;
 import com.intellij.testFramework.LightProjectDescriptor;
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
+import com.intellij.util.ConcurrencyUtil;
 import com.jetbrains.python.packaging.PyPackageManager;
 import com.jetbrains.python.packaging.PyPackageManagers;
 import com.jetbrains.python.sdk.PythonSdkType;
@@ -28,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.ExecutorService;
 
 import static com.jfrog.ide.idea.TestUtils.assertScopes;
 import static com.jfrog.ide.idea.TestUtils.getAndAssertChild;
@@ -43,6 +45,7 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String TRANSITIVE_DEPENDENCY_NAME = "anytree";
     private static final String TRANSITIVE_DEPENDENCY_VERSION = "2.8.0";
 
+    private ExecutorService executorService;
     private Sdk pythonSdk;
     private File tmpDir;
 
@@ -52,6 +55,7 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
         createVirtualEnv();
         resolvePythonSdk();
         installDependencyOnVirtualEnv();
+        executorService = ConcurrencyUtil.newSameThreadExecutorService();
     }
 
     @Override
@@ -60,6 +64,7 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
             FileUtils.deleteDirectory(tmpDir);
         }
         PyPackageManagers.getInstance().clearCache(pythonSdk);
+        executorService.shutdown();
         super.tearDown();
     }
 
@@ -102,7 +107,7 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
     }
 
     public void testBuildTree() throws IOException {
-        PypiScanManager pypiScanManager = new PypiScanManager(getProject(), pythonSdk);
+        PypiScanManager pypiScanManager = new PypiScanManager(getProject(), pythonSdk, executorService);
         pypiScanManager.setScanLogic(new ComponentSummaryScanLogic(new XrayScanCache(getProject().getName(), HOME_PATH.resolve("cache"), new NullLog()), new NullLog()));
         pypiScanManager.buildTree(false);
 

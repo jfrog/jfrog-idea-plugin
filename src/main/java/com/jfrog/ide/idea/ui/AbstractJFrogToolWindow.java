@@ -1,6 +1,7 @@
 package com.jfrog.ide.idea.ui;
 
 import com.google.common.collect.Lists;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
@@ -39,12 +40,14 @@ import static com.jfrog.ide.idea.ui.JFrogToolWindow.*;
 /**
  * @author yahavi
  */
-public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel {
+public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel implements Disposable {
 
     private final OnePixelSplitter rightHorizontalSplit;
-    ComponentIssuesTable issuesTable;
+    final MessageBusConnection projectBusConnection;
+    final MessageBusConnection appBusConnection;
     private final JComponent issuesPanel;
     final ComponentsTree componentsTree;
+    ComponentIssuesTable issuesTable;
     JScrollPane issuesDetailsScroll;
     JPanel issuesDetailsPanel;
     final Project project;
@@ -56,8 +59,10 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel {
      */
     public AbstractJFrogToolWindow(@NotNull Project project, boolean supported, ComponentsTree componentsTree) {
         super(true);
-        this.project = project;
+        this.projectBusConnection = project.getMessageBus().connect(this);
+        this.appBusConnection = ApplicationManager.getApplication().getMessageBus().connect(this);
         this.componentsTree = componentsTree;
+        this.project = project;
         JPanel toolbar = createActionToolbar();
 
         issuesPanel = createComponentsIssueDetailView();
@@ -225,9 +230,8 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel {
      * Register the issues tree listeners.
      */
     public void registerListeners() {
-        MessageBusConnection applicationBusConnection = ApplicationManager.getApplication().getMessageBus().connect();
         // Xray credentials were set listener
-        applicationBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () ->
+        appBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () ->
                 ApplicationManager.getApplication().invokeLater(this::onConfigurationChange));
 
         // Component selection listener
@@ -241,7 +245,15 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel {
             ApplicationManager.getApplication().invokeLater(() -> issuesDetailsScroll.getViewport().setViewPosition(new Point()));
         });
 
-        componentsTree.addOnProjectChangeListener(project.getMessageBus().connect());
+        componentsTree.addOnProjectChangeListener(projectBusConnection);
         componentsTree.addRightClickListener();
+    }
+
+    @Override
+    public void dispose() {
+        // Disconnect and release resources from the project bus connection
+        projectBusConnection.disconnect();
+        // Disconnect and release resources from the application bus connection
+        appBusConnection.disconnect();
     }
 }

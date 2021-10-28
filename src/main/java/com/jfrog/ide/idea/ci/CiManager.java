@@ -1,6 +1,7 @@
 package com.jfrog.ide.idea.ci;
 
 import com.intellij.ide.util.PropertiesComponent;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
@@ -45,18 +46,21 @@ import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
  * @author yahavi
  */
 @State(name = "CiState")
-public class CiManager extends CiManagerBase {
+public class CiManager extends CiManagerBase implements Disposable {
     private static final String LOAD_BUILD_FAIL_FMT = "Failed to load build '%s/%s'.";
 
     // Lock to prevent multiple simultaneous scans
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
-
+    private final MessageBusConnection projectBusConnection;
     private final PropertiesComponent propertiesComponent;
+    private final MessageBusConnection appBusConnection;
     private final Project project;
 
     private CiManager(@NotNull Project project) throws IOException {
         super(HOME_PATH.resolve("ci-cache"), project.getName(), Logger.getInstance(), GlobalSettings.getInstance().getServerConfig());
         this.propertiesComponent = PropertiesComponent.getInstance(project);
+        this.projectBusConnection = project.getMessageBus().connect(this);
+        this.appBusConnection = ApplicationManager.getApplication().getMessageBus().connect(this);
         this.project = project;
         registerOnChangeHandlers();
     }
@@ -181,10 +185,16 @@ public class CiManager extends CiManagerBase {
     }
 
     private void registerOnChangeHandlers() {
-        MessageBusConnection busConnection = ApplicationManager.getApplication().getMessageBus().connect();
-        busConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () -> asyncRefreshBuilds(true));
-        MessageBusConnection projectBusConnection = project.getMessageBus().connect();
+        appBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () -> asyncRefreshBuilds(true));
         projectBusConnection.subscribe(ApplicationEvents.ON_BUILDS_CONFIGURATION_CHANGE, () -> asyncRefreshBuilds(true));
         projectBusConnection.subscribe(BuildEvents.ON_SELECTED_BUILD, this::loadBuild);
+    }
+
+    @Override
+    public void dispose() {
+        // Disconnect and release resources from the project bus connection
+        projectBusConnection.disconnect();
+        // Disconnect and release resources from the application bus connection
+        appBusConnection.disconnect();
     }
 }

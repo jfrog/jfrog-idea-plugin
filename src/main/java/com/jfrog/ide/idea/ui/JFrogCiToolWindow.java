@@ -8,7 +8,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
-import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.common.ci.BuildGeneralInfo;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
@@ -112,7 +111,6 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
     @Override
     public void registerListeners() {
         super.registerListeners();
-        MessageBusConnection projectBusConnection = project.getMessageBus().connect();
         projectBusConnection.subscribe(ApplicationEvents.ON_CI_FILTER_CHANGE, () -> ApplicationManager.getApplication().invokeLater(() -> {
             CiComponentsTree.getInstance(project).applyFiltersForAllProjects();
             updateIssuesTable();

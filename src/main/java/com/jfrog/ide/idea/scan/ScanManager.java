@@ -8,6 +8,7 @@ import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ex.InspectionManagerEx;
 import com.intellij.codeInspection.ex.LocalInspectionToolWrapper;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -21,7 +22,9 @@ import com.intellij.openapi.vfs.newvfs.BulkFileListener;
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.messages.MessageBus;
+import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.log.ProgressIndicator;
+import com.jfrog.ide.common.log.Utils;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanManagerBase;
 import com.jfrog.ide.common.utils.ProjectsMap;
@@ -36,6 +39,7 @@ import com.jfrog.ide.idea.ui.filters.filtermanager.LocalFilterManager;
 import com.jfrog.xray.client.services.summary.Components;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.License;
@@ -47,6 +51,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jfrog.ide.common.log.Utils.logError;
@@ -54,8 +60,10 @@ import static com.jfrog.ide.common.log.Utils.logError;
 /**
  * Created by romang on 4/26/17.
  */
-public abstract class ScanManager extends ScanManagerBase {
+public abstract class ScanManager extends ScanManagerBase implements Disposable {
 
+    private final MessageBusConnection busConnection;
+    private final ExecutorService executor;
     protected Project project;
     String basePath;
 
@@ -64,14 +72,17 @@ public abstract class ScanManager extends ScanManagerBase {
 
     /**
      * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
-     *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
-     * @param basePath - Project base path.
-     * @param prefix   - Components prefix for xray scan, e.g. gav:// or npm://.
+     *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}
+     * @param basePath - Project base path
+     * @param prefix   - Components prefix for xray scan, e.g. gav:// or npm://
+     * @param executor - An executor that should limit the number of running tasks to 3
      */
-    ScanManager(@NotNull Project project, String basePath, ComponentPrefix prefix) {
+    ScanManager(@NotNull Project project, String basePath, ComponentPrefix prefix, ExecutorService executor) {
         super(basePath, Logger.getInstance(), GlobalSettings.getInstance().getServerConfig(), prefix);
-        this.project = project;
+        this.busConnection = project.getMessageBus().connect(this);
+        this.executor = executor;
         this.basePath = basePath;
+        this.project = project;
     }
 
     /**
@@ -99,8 +110,14 @@ public abstract class ScanManager extends ScanManagerBase {
 
     /**
      * Scan and update dependency components.
+     *
+     * @param quickScan - Quick scan or full scan
+     * @param indicator - The progress indicator
+     * @param latch     - The tasks run asynchronously. To make sure no more than 3 tasks are running concurrently,
+     *                  we count down the latch from 1 to 0 when the task ends. This operation signals to the
+     *                  executor service that it can get more tasks.
      */
-    private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator) {
+    private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator, CountDownLatch latch) {
         try {
             buildTree(!quickScan);
             scanAndCacheArtifacts(indicator, quickScan);
@@ -113,6 +130,7 @@ public abstract class ScanManager extends ScanManagerBase {
             logError(getLog(), "Xray Scan failed", e, !quickScan);
         } finally {
             scanInProgress.set(false);
+            latch.countDown();
         }
     }
 
@@ -123,6 +141,9 @@ public abstract class ScanManager extends ScanManagerBase {
         if (DumbService.isDumb(project)) { // If intellij is still indexing the project
             return;
         }
+        // The tasks run asynchronously. To make sure no more than 3 tasks are running concurrently,
+        // we use a count down latch that signals to that executor service that it can get more tasks.
+        CountDownLatch latch = new CountDownLatch(1);
         Task.Backgroundable scanAndUpdateTask = new Task.Backgroundable(null, "Xray: Scanning for vulnerabilities...") {
             @Override
             public void run(@NotNull com.intellij.openapi.progress.ProgressIndicator indicator) {
@@ -140,16 +161,35 @@ public abstract class ScanManager extends ScanManagerBase {
                     }
                     return;
                 }
-                scanAndUpdate(quickScan, new ProgressIndicatorImpl(indicator));
+                scanAndUpdate(quickScan, new ProgressIndicatorImpl(indicator), latch);
             }
         };
-        // The progress manager is only good for foreground threads.
-        if (SwingUtilities.isEventDispatchThread()) {
-            ProgressManager.getInstance().run(scanAndUpdateTask);
-        } else {
-            // Run the scan task when the thread is in the foreground.
-            ApplicationManager.getApplication().invokeLater(() -> ProgressManager.getInstance().run(scanAndUpdateTask));
-        }
+        submitTask(scanAndUpdateTask, latch, quickScan);
+    }
+
+    /**
+     * Submit an asynchronous task to the executor service.
+     *
+     * @param scanAndUpdateTask - The task to submit
+     * @param latch             - The countdown latch which make sure the executor service doesn't get more than 3 tasks
+     * @param quickScan         - Quick or full scan
+     */
+    private void submitTask(Task.Backgroundable scanAndUpdateTask, CountDownLatch latch, boolean quickScan) {
+        executor.submit(() -> {
+            // The progress manager is only good for foreground threads.
+            if (SwingUtilities.isEventDispatchThread()) {
+                scanAndUpdateTask.queue();
+            } else {
+                // Run the scan task when the thread is in the foreground.
+                ApplicationManager.getApplication().invokeLater(scanAndUpdateTask::queue);
+            }
+            try {
+                // Wait for scan to finish, to make sure the thread pool remain full
+                latch.await();
+            } catch (InterruptedException e) {
+                Utils.logError(getLog(), ExceptionUtils.getRootCauseMessage(e), e, !quickScan);
+            }
+        });
     }
 
     /**
@@ -255,7 +295,7 @@ public abstract class ScanManager extends ScanManagerBase {
      */
     protected void subscribeLaunchDependencyScanOnFileChangedEvents(String fileName) {
         String fileToSubscribe = Paths.get(basePath, fileName).toString();
-        project.getMessageBus().connect().subscribe(VirtualFileManager.VFS_CHANGES, new BulkFileListener() {
+        busConnection.subscribe(VirtualFileManager.VFS_CHANGES, new BulkFileListener() {
             @Override
             public void after(@NotNull List<? extends VFileEvent> events) {
                 for (VFileEvent event : events) {
@@ -266,5 +306,11 @@ public abstract class ScanManager extends ScanManagerBase {
                 }
             }
         });
+    }
+
+    @Override
+    public void dispose() {
+        // Disconnect and release resources from the bus connection
+        busConnection.disconnect();
     }
 }

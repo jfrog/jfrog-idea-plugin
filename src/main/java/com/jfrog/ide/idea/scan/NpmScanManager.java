@@ -15,6 +15,7 @@ import com.jfrog.ide.idea.ui.filters.filtermanager.ConsistentFilterManager;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Created by Yahav Itzhak on 13 Dec 2017.
@@ -27,9 +28,10 @@ public class NpmScanManager extends ScanManager {
      * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
      *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
      * @param basePath - The package.json directory.
+     * @param executor - An executor that should limit the number of running tasks to 3
      */
-    NpmScanManager(Project project, String basePath) {
-        super(project, basePath, ComponentPrefix.NPM);
+    NpmScanManager(Project project, String basePath, ExecutorService executor) {
+        super(project, basePath, ComponentPrefix.NPM, executor);
         getLog().info("Found npm project: " + getProjectName());
         npmTreeBuilder = new NpmTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap());
         subscribeLaunchDependencyScanOnFileChangedEvents("package-lock.json");
