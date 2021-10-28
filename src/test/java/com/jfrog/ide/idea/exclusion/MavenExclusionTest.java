@@ -11,6 +11,8 @@ import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.junit.Assert;
 
+import static com.jfrog.ide.common.utils.Utils.createComponentId;
+
 /**
  * Created by Bar Belity on 10/06/2020.
  */
@@ -132,11 +134,8 @@ public class MavenExclusionTest extends LightJavaCodeInsightFixtureTestCase {
 
     DependencyTree createDependencyTreeNode(String nodeValue, String pkgType) {
         DependencyTree node = new DependencyTree("node-" + nodeValue);
-        node.setGeneralInfo(new GeneralInfo()
-                .groupId("group-id-" + nodeValue)
-                .artifactId("artifact-id-" + nodeValue)
-                .version("version-" + nodeValue)
-                .pkgType(pkgType));
+        node.setGeneralInfo(new GeneralInfo().pkgType(pkgType)
+                .componentId(createComponentId("group-id-" + nodeValue, "artifact-id-" + nodeValue, "version-" + nodeValue)));
         return node;
     }
 

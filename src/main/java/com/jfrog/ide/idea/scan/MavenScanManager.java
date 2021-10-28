@@ -34,6 +34,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
+import static com.jfrog.ide.common.utils.Utils.createComponentId;
+
 /**
  * Created by romang on 3/2/17.
  */
@@ -72,7 +74,7 @@ public class MavenScanManager extends ScanManager {
         DependencyTree rootNode = new DependencyTree(project.getName());
         rootNode.setMetadata(true);
         MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject -> populateMavenModule(rootNode, rootMavenProject, Sets.newHashSet()));
-        GeneralInfo generalInfo = new GeneralInfo().artifactId(project.getName()).path(basePath).pkgType("maven");
+        GeneralInfo generalInfo = new GeneralInfo().componentId(project.getName()).path(basePath).pkgType("maven");
         rootNode.setGeneralInfo(generalInfo);
         if (rootNode.getChildren().size() == 1) {
             setScanResults((DependencyTree) rootNode.getChildAt(0));
@@ -138,11 +140,9 @@ public class MavenScanManager extends ScanManager {
     private DependencyTree populateMavenModuleNode(MavenProject mavenProject) {
         DependencyTree node = new DependencyTree(mavenProject.getMavenId().getArtifactId());
         MavenId mavenId = mavenProject.getMavenId();
-        node.setGeneralInfo(new GeneralInfo()
-                .groupId(mavenId.getGroupId())
-                .artifactId(mavenId.getArtifactId())
-                .version(mavenId.getVersion())
-                .pkgType("maven"));
+        node.setGeneralInfo(new GeneralInfo().pkgType("maven")
+                .componentId(createComponentId(mavenId.getGroupId(), mavenId.getArtifactId(), mavenId.getVersion())));
+
         return node;
     }
 

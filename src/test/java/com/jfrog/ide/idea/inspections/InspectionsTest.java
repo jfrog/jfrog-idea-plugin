@@ -4,7 +4,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import com.jfrog.ide.idea.TestUtils;
-import org.jfrog.build.extractor.scan.GeneralInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 
 /**
@@ -28,9 +28,9 @@ public abstract class InspectionsTest extends LightJavaCodeInsightFixtureTestCas
         return "src/test/resources/inspections";
     }
 
-    public void isDependencyTest(Object[][] dependencies) {
-        for (Object[] dependency : dependencies) {
-            PsiElement element = TestUtils.getNonLeafElement(fileDescriptor, psiClass, (int) dependency[0]);
+    public void isDependencyTest(InspectionTestDependency[] dependencies) {
+        for (InspectionTestDependency dependency : dependencies) {
+            PsiElement element = TestUtils.getNonLeafElement(fileDescriptor, psiClass, dependency.offset);
             Assert.assertTrue("isDependency should be true on " + element.getText(),
                     inspection.isDependency(element));
         }
@@ -43,23 +43,35 @@ public abstract class InspectionsTest extends LightJavaCodeInsightFixtureTestCas
         }
     }
 
-    public void createGeneralInfoTest(Object[][] dependencies) {
-        for (Object[] dependency : dependencies) {
-            PsiElement element = TestUtils.getNonLeafElement(fileDescriptor, psiClass, (int) dependency[0]);
-            GeneralInfo generalInfo = inspection.createGeneralInfo(element);
-            Assert.assertNotNull(generalInfo);
-            Assert.assertEquals(generalInfoToString(createGeneralInfo(dependency)), generalInfoToString(generalInfo));
-            Assert.assertTrue(inspection.compareGeneralInfos(generalInfo, createGeneralInfo(dependency)));
+    public void createComponentNameTest(InspectionTestDependency[] dependencies) {
+        for (InspectionTestDependency dependency : dependencies) {
+            PsiElement element = TestUtils.getNonLeafElement(fileDescriptor, psiClass, dependency.offset);
+            String componentName = inspection.createComponentName(element);
+            Assert.assertNotNull(componentName);
+            String expectedGroupId = dependency.groupId;
+            String expectedArtifactId = dependency.artifactId;
+            if (StringUtils.isBlank(expectedGroupId)) {
+                assertEquals(expectedArtifactId, componentName);
+            } else {
+                assertEquals(String.join(":", expectedGroupId, expectedArtifactId), componentName);
+            }
         }
     }
 
-    GeneralInfo createGeneralInfo(Object[] dependency) {
-        return new GeneralInfo()
-                .groupId((String) dependency[1])
-                .artifactId((String) dependency[2]);
-    }
+    static class InspectionTestDependency {
+        private final String artifactId;
+        private final int offset;
+        private String groupId;
 
-    private String generalInfoToString(GeneralInfo generalInfo) {
-        return String.join(":", generalInfo.getGroupId(), generalInfo.getArtifactId());
+        public InspectionTestDependency(int offset, String groupId, String artifactId) {
+            this.artifactId = artifactId;
+            this.groupId = groupId;
+            this.offset = offset;
+        }
+
+        public InspectionTestDependency(int offset, String artifactId) {
+            this.artifactId = artifactId;
+            this.offset = offset;
+        }
     }
 }

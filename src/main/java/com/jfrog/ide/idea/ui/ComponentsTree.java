@@ -20,6 +20,7 @@ import com.jfrog.ide.idea.ui.filters.filtermenu.FilterMenu;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependencyTree;
+import org.jfrog.build.extractor.scan.GeneralInfo;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;

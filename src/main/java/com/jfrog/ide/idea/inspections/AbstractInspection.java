@@ -102,7 +102,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * @param element - The Psi element in the package descriptor
      * @return GeneralInfo
      */
-    abstract GeneralInfo createGeneralInfo(PsiElement element);
+    abstract String createComponentName(PsiElement element);
 
     /**
      * Get the submodules containing the dependency in the Psi element. The result depends on the root project structure:
@@ -111,11 +111,11 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * Single project, multi module - Return the module contains the dependency.
      * Multi project - Return the module containing the dependency within the projects.
      *
-     * @param element     - The Psi element in the package descriptor
-     * @param generalInfo - The general info of the dependency
+     * @param element       - The Psi element in the package descriptor
+     * @param componentName - Component name represents a dependency without version
      * @return Set of modules containing the dependency or null if not found
      */
-    abstract Set<DependencyTree> getModules(PsiElement element, GeneralInfo generalInfo);
+    abstract Set<DependencyTree> getModules(PsiElement element, String componentName);
 
     /**
      * Determine whether to apply the inspection on the Psi element.
@@ -153,16 +153,16 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         if (!isShowInspection(element)) {
             return null; // Inspection is not needed for this element
         }
-        GeneralInfo generalInfo = createGeneralInfo(element);
-        if (generalInfo == null) {
-            return null; // Creating the general info failed
+        String componentName = createComponentName(element);
+        if (componentName == null) {
+            return null; // Creating the component name failed
         }
-        Set<DependencyTree> modules = getModules(element, generalInfo);
+        Set<DependencyTree> modules = getModules(element, componentName);
         if (modules == null) {
             return null; // No modules found for this element
         }
         return modules.stream()
-                .map(module -> getModuleDependency(module, generalInfo))
+                .map(module -> getModuleDependency(module, componentName))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
@@ -170,17 +170,17 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     /**
      * Get the module dependency that matches to the input general info.
      *
-     * @param module      - The dependency tree module
-     * @param generalInfo - The general info
+     * @param module        - The dependency tree module
+     * @param componentName - Component name represents a dependency without version
      * @return module dependencies that match to the input general info
      */
-    private DependencyTree getModuleDependency(DependencyTree module, GeneralInfo generalInfo) {
+    private DependencyTree getModuleDependency(DependencyTree module, String componentName) {
         for (DependencyTree dependency : module.getChildren()) {
             GeneralInfo childGeneralInfo = dependency.getGeneralInfo();
             if (childGeneralInfo == null) {
                 childGeneralInfo = new GeneralInfo().componentId(dependency.getUserObject().toString());
             }
-            if (compareGeneralInfos(generalInfo, childGeneralInfo)) {
+            if (compareGeneralInfo(childGeneralInfo, componentName)) {
                 return dependency;
             }
         }
@@ -259,13 +259,13 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * Get all submodules from the dependencies-tree which are containing the dependency element.
      * Currently in use for Gradle and Maven.
      *
-     * @param root        - The root of the dependency tree
-     * @param project     - The project
-     * @param modulesList - List of all relevant modules
-     * @param generalInfo - General info of the dependency
+     * @param root          - The root of the dependency tree
+     * @param project       - The project
+     * @param modulesList   - List of all relevant modules
+     * @param componentName - Component name represents a dependency without version
      * @return set of all modules containing the dependency stated in the general info
      */
-    Set<DependencyTree> collectModules(DependencyTree root, Project project, List<?> modulesList, GeneralInfo generalInfo) {
+    Set<DependencyTree> collectModules(DependencyTree root, Project project, List<?> modulesList, String componentName) {
         // Single project, single module
         if (modulesList.size() <= 1 && root.getGeneralInfo() != null) {
             return Sets.newHashSet(root);
@@ -275,7 +275,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         root = getProjectNode(root, project);
 
         // Multi modules
-        return collectMultiModules(root, generalInfo);
+        return collectMultiModules(root, componentName);
     }
 
     /**
@@ -284,11 +284,11 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * 2. The dependency is a direct dependency under the project node
      * 3. The dependency is a level 2 dependency under the project node
      *
-     * @param projectNode          - The project node
-     * @param generatedGeneralInfo - General info of the dependency
+     * @param projectNode   - The project node
+     * @param componentName - Component name represents a dependency without version
      * @return the nodes containing the dependency
      */
-    private Set<DependencyTree> collectMultiModules(DependencyTree projectNode, GeneralInfo generatedGeneralInfo) {
+    private Set<DependencyTree> collectMultiModules(DependencyTree projectNode, String componentName) {
         Set<DependencyTree> modules = Sets.newHashSet();
         for (DependencyTree child : projectNode.getChildren()) {
             Object userObject = child.getUserObject();
@@ -299,18 +299,18 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
             if (componentId.contains(":")) {
                 // Check if the dependency is a direct dependency under the project node
                 GeneralInfo generalInfo = new GeneralInfo().componentId(componentId);
-                if (compareGeneralInfos(generatedGeneralInfo, generalInfo)) {
+                if (compareGeneralInfo(generalInfo, componentName)) {
                     modules.add(projectNode);
                 }
             } else {
                 // Check if the dependency is a module under the project node
-                if (componentId.equals(generatedGeneralInfo.getArtifactId())) {
+                if (componentId.equals(componentName)) {
                     modules.add(projectNode);
                 }
             }
 
             // Check if the dependency is a level 2 dependency under the project node
-            if (isParent(child, generatedGeneralInfo)) {
+            if (isParent(child, componentName)) {
                 modules.add(child);
             }
         }
@@ -320,27 +320,31 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     /**
      * Return true iff the node is a direct parent of the dependency.
      *
-     * @param node        - The project node
-     * @param generalInfo - General info of the dependency
+     * @param node          - The project node
+     * @param componentName - Component name represents a dependency without version
      * @return true iff the node is a direct parent of the dependency
      */
-    private boolean isParent(DependencyTree node, GeneralInfo generalInfo) {
+    private boolean isParent(DependencyTree node, String componentName) {
         return node.getChildren().stream()
                 .map(DependencyTree::getGeneralInfo)
                 .filter(Objects::nonNull)
-                .anyMatch(childGeneralInfo -> compareGeneralInfos(generalInfo, childGeneralInfo));
+                .anyMatch(childGeneralInfo -> compareGeneralInfo(childGeneralInfo, componentName));
     }
 
     /**
      * Compare the generated general info from the Psi element and the build info from the Dependency tree.
-     * If groupId is empty, compare only artifactId.
      *
-     * @param generatedGeneralInfo - General info generated for the selected Psi element in the package descriptor
-     * @param generalInfo          - General info from the dependency tree
-     * @return true if and only if 2 general infos considered equal
+     * @param generalInfo   - General info from the dependency tree
+     * @param componentName - Component name represents a dependency without version
+     * @return true if the general info matches the component name
      */
-    boolean compareGeneralInfos(GeneralInfo generatedGeneralInfo, GeneralInfo generalInfo) {
-        return StringUtils.equals(generatedGeneralInfo.getArtifactId(), generalInfo.getArtifactId()) &&
-                StringUtils.equalsAny(generatedGeneralInfo.getGroupId(), generalInfo.getGroupId(), "");
+    boolean compareGeneralInfo(GeneralInfo generalInfo, String componentName) {
+        // Module name
+        if (StringUtils.countMatches(componentName, ":") == 0) {
+            return StringUtils.equals(generalInfo.getArtifactId(), componentName);
+        }
+        // Dependency
+        String childComponentId = StringUtils.substringBeforeLast(generalInfo.getComponentId(), ":");
+        return StringUtils.equals(componentName, childComponentId);
     }
 }

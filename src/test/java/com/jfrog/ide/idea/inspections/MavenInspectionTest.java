@@ -8,9 +8,8 @@ import com.intellij.psi.xml.XmlTag;
 public class MavenInspectionTest extends InspectionsTest {
 
     private static final String PACKAGE_DESCRIPTOR = "pom.xml";
-    private final Object[][] DEPENDENCIES = {
-            // offset, groupId, artifactId
-            {789, "a", "b"}
+    private final InspectionTestDependency[] DEPENDENCIES = {
+            new InspectionTestDependency(789, "a", "b")
     };
 
     private final int[] NON_DEPENDENCIES_POSITIONS = {397, 549, 766};
@@ -30,6 +29,6 @@ public class MavenInspectionTest extends InspectionsTest {
     }
 
     public void testCreateGeneralInfo() {
-        createGeneralInfoTest(DEPENDENCIES);
+        createComponentNameTest(DEPENDENCIES);
     }
 }

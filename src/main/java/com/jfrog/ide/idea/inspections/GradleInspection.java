@@ -6,9 +6,9 @@ import com.intellij.psi.PsiElement;
 import com.jfrog.ide.idea.scan.GradleScanManager;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.plugins.gradle.settings.GradleSettings;
 import org.jfrog.build.extractor.scan.DependencyTree;
-import org.jfrog.build.extractor.scan.GeneralInfo;
 
 import java.util.Collection;
 import java.util.List;
@@ -33,7 +33,7 @@ public abstract class GradleInspection extends AbstractInspection {
     }
 
     @Override
-    Set<DependencyTree> getModules(PsiElement element, GeneralInfo generalInfo) {
+    Set<DependencyTree> getModules(PsiElement element, String componentName) {
         Project project = element.getProject();
         DependencyTree root = getRootDependencyTree(element);
         List<String> gradleModules = getGradleModules(project);
@@ -42,7 +42,27 @@ public abstract class GradleInspection extends AbstractInspection {
         }
 
         // Collect the modules containing the dependency
-        return collectModules(root, project, gradleModules, generalInfo);
+        return collectModules(root, project, gradleModules, componentName);
+    }
+
+    /**
+     * Create component name from component ID in build.gradle or build.gradle.kts files.
+     * Some examples:
+     * compile project(':xyz') → xyz
+     * implementation('a:b:c') → a:b
+     * implementation('a:b') → a:b
+     *
+     * @param componentId - Component ID from the build.gradle or build.gradle.kts files
+     * @return component name.
+     */
+    String createComponentName(String componentId) {
+        // compile project(':xyz')
+        String componentName = StringUtils.removeStart(componentId, ":");
+        if (StringUtils.countMatches(componentName, ":") == 2) {
+            // implementation('a:b:c')
+            componentName = StringUtils.substringBeforeLast(componentName, ":");
+        }
+        return componentName;
     }
 
     /**

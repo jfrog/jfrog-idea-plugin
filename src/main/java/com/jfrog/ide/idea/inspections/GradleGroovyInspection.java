@@ -4,7 +4,7 @@ import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.groovy.lang.psi.GroovyElementVisitor;
 import org.jetbrains.plugins.groovy.lang.psi.GroovyPsiElementVisitor;
@@ -12,7 +12,6 @@ import org.jetbrains.plugins.groovy.lang.psi.api.statements.arguments.GrNamedArg
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.GrExpression;
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.literals.GrLiteral;
 import org.jetbrains.plugins.groovy.lang.psi.api.util.GrNamedArgumentsOwner;
-import org.jfrog.build.extractor.scan.GeneralInfo;
 
 import java.util.Objects;
 
@@ -49,9 +48,6 @@ public class GradleGroovyInspection extends GradleInspection {
 
     @Override
     PsiElement[] getTargetElements(PsiElement element) {
-        if (element.getParent() instanceof GrNamedArgument) {
-            return new PsiElement[]{element.getParent()};
-        }
         return new PsiElement[]{element};
     }
 
@@ -67,19 +63,14 @@ public class GradleGroovyInspection extends GradleInspection {
     }
 
     @Override
-    GeneralInfo createGeneralInfo(PsiElement element) {
+    String createComponentName(PsiElement element) {
         PsiElement parent = element.getParent();
         if (parent instanceof GrNamedArgument) {
             GrNamedArgumentsOwner namedArgument = (GrNamedArgumentsOwner) parent.getParent();
-            return new GeneralInfo()
-                    .groupId(extractExpresion(namedArgument, GRADLE_GROUP_KEY))
-                    .artifactId(extractExpresion(namedArgument, GRADLE_NAME_KEY));
+            return String.join(":", extractExpression(namedArgument, GRADLE_GROUP_KEY), extractExpression(namedArgument, GRADLE_NAME_KEY));
         }
         String componentId = getLiteralValue((GrLiteral) element);
-        if (componentId.startsWith(":")) { // compile project(':xyz')
-            componentId = componentId + ":";
-        }
-        return new GeneralInfo().componentId(componentId);
+        return super.createComponentName(componentId);
     }
 
     /**
@@ -89,7 +80,7 @@ public class GradleGroovyInspection extends GradleInspection {
      * @param name         - The name of the argument to extract
      * @return the value of the argument
      */
-    private String extractExpresion(GrNamedArgumentsOwner argumentList, String name) {
+    private String extractExpression(GrNamedArgumentsOwner argumentList, String name) {
         GrNamedArgument argument = argumentList.findNamedArgument(name);
         if (argument == null) {
             return "";

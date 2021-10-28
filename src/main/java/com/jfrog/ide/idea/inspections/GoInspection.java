@@ -13,7 +13,6 @@ import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependencyTree;
-import org.jfrog.build.extractor.scan.GeneralInfo;
 
 import java.util.Set;
 
@@ -67,7 +66,7 @@ public class GoInspection extends AbstractInspection {
     }
 
     @Override
-    Set<DependencyTree> getModules(PsiElement element, GeneralInfo generalInfo) {
+    Set<DependencyTree> getModules(PsiElement element, String componentName) {
         DependencyTree root = getRootDependencyTree(element);
         if (root == null) {
             return null;
@@ -76,7 +75,7 @@ public class GoInspection extends AbstractInspection {
     }
 
     @Override
-    GeneralInfo createGeneralInfo(PsiElement element) {
-        return new GeneralInfo().artifactId(element.getFirstChild().getText());
+    String createComponentName(PsiElement element) {
+        return element.getFirstChild().getText();
     }
 }

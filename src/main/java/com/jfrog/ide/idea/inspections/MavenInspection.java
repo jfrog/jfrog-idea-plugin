@@ -15,7 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
 import org.jfrog.build.extractor.scan.DependencyTree;
-import org.jfrog.build.extractor.scan.GeneralInfo;
 
 import java.util.Set;
 
@@ -84,17 +83,17 @@ public class MavenInspection extends AbstractInspection {
     }
 
     @Override
-    GeneralInfo createGeneralInfo(PsiElement element) {
+    String createComponentName(PsiElement element) {
         XmlTag groupId = ((XmlTagImpl) element).findFirstSubTag(MAVEN_GROUP_ID_TAG);
         XmlTag artifactId = ((XmlTagImpl) element).findFirstSubTag(MAVEN_ARTIFACT_ID_TAG);
         if (groupId == null || artifactId == null) {
             return null;
         }
-        return new GeneralInfo().groupId(groupId.getValue().getText()).artifactId(artifactId.getValue().getText());
+        return String.join(":", groupId.getValue().getText(), artifactId.getValue().getText());
     }
 
     @Override
-    Set<DependencyTree> getModules(PsiElement element, GeneralInfo generalInfo) {
+    Set<DependencyTree> getModules(PsiElement element, String componentName) {
         Project project = element.getProject();
         DependencyTree root = getRootDependencyTree(element);
         MavenProjectsManager mavenProjectsManager = MavenProjectsManager.getInstance(project);
@@ -103,6 +102,6 @@ public class MavenInspection extends AbstractInspection {
         }
 
         // Search for the relevant module
-        return collectModules(root, project, mavenProjectsManager.getProjects(), generalInfo);
+        return collectModules(root, project, mavenProjectsManager.getProjects(), componentName);
     }
 }
