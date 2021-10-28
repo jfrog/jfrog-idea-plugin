@@ -127,7 +127,7 @@ public class CiManager extends CiManagerBase implements Disposable {
         ProjectsMap.ProjectKey projectKey = null;
         if (buildGeneralInfo != null) {
             try {
-                BuildDependencyTree buildTree = loadBuildTree(buildGeneralInfo.getArtifactId(), buildGeneralInfo.getVersion());
+                BuildDependencyTree buildTree = loadBuildTree(buildGeneralInfo);
                 CiFilterManager.getInstance(project).collectsFiltersInformation(buildTree);
                 componentsTree.addScanResults(project.getName(), buildTree);
                 projectKey = ProjectsMap.createKey(project.getName(), buildTree.getGeneralInfo());
