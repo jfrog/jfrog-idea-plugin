@@ -57,8 +57,8 @@ public class ScanUtils {
     }
 
     /**
-     * Figure out the potential local paths required for the Xray scan.
-     * On these directories may be the projects that will be scanned.
+     * This method gets a set of modules from IDEA, and searches for projects to be scanned.
+     * It appends the root path of each module it finds into a set.
      *
      * @param scanManagers - Current scan managers
      * @param project      - The project
