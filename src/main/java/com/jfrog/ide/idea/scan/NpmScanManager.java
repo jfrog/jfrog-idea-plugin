@@ -28,6 +28,7 @@ public class NpmScanManager extends ScanManager {
      * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
      *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
      * @param basePath - The package.json directory.
+     * @param executor - An executor that should limit the number of running tasks to 3
      */
     NpmScanManager(Project project, String basePath, ExecutorService executor) {
         super(project, basePath, ComponentPrefix.NPM, executor);

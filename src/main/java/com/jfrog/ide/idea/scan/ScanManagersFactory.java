@@ -286,6 +286,7 @@ public class ScanManagersFactory implements Disposable {
 
     @Override
     public void dispose() {
+        // Disconnect and release resources from the bus connection
         busConnection.disconnect();
     }
 }

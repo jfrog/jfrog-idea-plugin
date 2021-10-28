@@ -31,6 +31,7 @@ public class GoScanManager extends ScanManager {
      * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
      *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
      * @param basePath - The go.mod directory.
+     * @param executor - An executor that should limit the number of running tasks to 3
      */
     GoScanManager(Project project, String basePath, ExecutorService executor) {
         super(project, basePath, ComponentPrefix.GO, executor);

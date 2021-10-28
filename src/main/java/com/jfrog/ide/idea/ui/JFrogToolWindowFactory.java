@@ -36,6 +36,8 @@ public class JFrogToolWindowFactory implements ToolWindowFactory {
         try {
             return ScanUtils.isLocalProjectSupported(project);
         } catch (IOException ignored) {
+            // If an IO exception occurred, the PackageFileFinder couldn't search for local projects.
+            // In that case, we assume the local project is not supported.
             return false;
         }
     }

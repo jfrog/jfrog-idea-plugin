@@ -72,9 +72,10 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
 
     /**
      * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
-     *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
-     * @param basePath - Project base path.
-     * @param prefix   - Components prefix for xray scan, e.g. gav:// or npm://.
+     *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}
+     * @param basePath - Project base path
+     * @param prefix   - Components prefix for xray scan, e.g. gav:// or npm://
+     * @param executor - An executor that should limit the number of running tasks to 3
      */
     ScanManager(@NotNull Project project, String basePath, ComponentPrefix prefix, ExecutorService executor) {
         super(basePath, Logger.getInstance(), GlobalSettings.getInstance().getServerConfig(), prefix);
@@ -109,6 +110,12 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
 
     /**
      * Scan and update dependency components.
+     *
+     * @param quickScan - Quick scan or full scan
+     * @param indicator - The progress indicator
+     * @param latch     - The tasks run asynchronously. To make sure no more than 3 tasks are running concurrently,
+     *                  we count down the latch from 1 to 0 when the task ends. This operation signals to the
+     *                  executor service that it can get more tasks.
      */
     private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator, CountDownLatch latch) {
         try {
@@ -134,6 +141,8 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
         if (DumbService.isDumb(project)) { // If intellij is still indexing the project
             return;
         }
+        // The tasks run asynchronously. To make sure no more than 3 tasks are running concurrently,
+        // we use a count down latch that signals to that executor service that it can get more tasks.
         CountDownLatch latch = new CountDownLatch(1);
         Task.Backgroundable scanAndUpdateTask = new Task.Backgroundable(null, "Xray: Scanning for vulnerabilities...") {
             @Override
@@ -158,6 +167,13 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
         submitTask(scanAndUpdateTask, latch, quickScan);
     }
 
+    /**
+     * Submit an asynchronous task to the executor service.
+     *
+     * @param scanAndUpdateTask - The task to submit
+     * @param latch             - The countdown latch which make sure the executor service doesn't get more than 3 tasks
+     * @param quickScan         - Quick or full scan
+     */
     private void submitTask(Task.Backgroundable scanAndUpdateTask, CountDownLatch latch, boolean quickScan) {
         executor.submit(() -> {
             // The progress manager is only good for foreground threads.
@@ -294,6 +310,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
 
     @Override
     public void dispose() {
+        // Disconnect and release resources from the bus connection
         busConnection.disconnect();
     }
 }

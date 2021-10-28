@@ -45,6 +45,7 @@ public class GradleScanManager extends ScanManager {
      * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
      *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
      * @param basePath - The build.gradle or build.gradle.kts directory.
+     * @param executor - An executor that should limit the number of running tasks to 3
      */
     GradleScanManager(Project project, String basePath, ExecutorService executor) {
         super(project, basePath, ComponentPrefix.GAV, executor);

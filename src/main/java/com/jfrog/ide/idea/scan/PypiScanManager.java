@@ -37,8 +37,10 @@ public class PypiScanManager extends ScanManager {
     }
 
     /**
-     * @param project - Currently opened IntelliJ project. We'll use this project to retrieve project based services
-     *                like {@link ConsistentFilterManager} and {@link ComponentsTree}.
+     * @param project   - Currently opened IntelliJ project. We'll use this project to retrieve project based services
+     *                  like {@link ConsistentFilterManager} and {@link ComponentsTree}.
+     * @param pythonSdk - The Python SDK
+     * @param executor  - An executor that should limit the number of running tasks to 3
      */
     PypiScanManager(Project project, Sdk pythonSdk, ExecutorService executor) {
         super(project, pythonSdk.getHomePath(), ComponentPrefix.PYPI, executor);

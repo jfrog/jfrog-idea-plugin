@@ -251,7 +251,9 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel impl
 
     @Override
     public void dispose() {
+        // Disconnect and release resources from the project bus connection
         projectBusConnection.disconnect();
+        // Disconnect and release resources from the application bus connection
         appBusConnection.disconnect();
     }
 }

@@ -191,7 +191,9 @@ public class CiManager extends CiManagerBase implements Disposable {
 
     @Override
     public void dispose() {
+        // Disconnect and release resources from the project bus connection
         projectBusConnection.disconnect();
+        // Disconnect and release resources from the application bus connection
         appBusConnection.disconnect();
     }
 }
