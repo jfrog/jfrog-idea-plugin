@@ -1,12 +1,13 @@
 package com.jfrog.ide.idea.ui.configuration;
 
 import com.google.common.collect.Lists;
+import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
-import com.intellij.ui.components.JBCheckBox;
-import com.intellij.ui.components.JBPasswordField;
-import com.intellij.ui.components.JBTextField;
+import com.intellij.ui.HyperlinkLabel;
+import com.intellij.ui.components.*;
 import com.intellij.util.messages.MessageBus;
+import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
 import com.jfrog.ide.idea.events.ApplicationEvents;
@@ -49,15 +50,17 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
 
     public static final String USER_AGENT = "jfrog-idea-plugin/" + JFrogGlobalConfiguration.class.getPackage().getImplementationVersion();
 
+    private JPanel advanced;
+    private JPanel connectionDetails;
+
     private ServerConfigImpl serverConfig;
     private JButton testConnectionButton;
     private JBPasswordField password;
-    private JLabel connectionResults;
+    private JBLabel connectionResults;
     private JBTextField excludedPaths;
     private JBTextField project;
     private JBTextField username;
     private JBTextField platformUrl;
-    private JPanel config;
     private JBCheckBox connectionDetailsFromEnv;
     private ConnectionRetriesSpinner connectionRetries;
     private ConnectionTimeoutSpinner connectionTimeout;
@@ -65,15 +68,28 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private JBTextField xrayUrl;
     private JBTextField artifactoryUrl;
     private JCheckBox setRtAndXraySeparately;
-    private JLabel xrayConnectionResults;
-    private JLabel artifactoryConnectionResults;
+    private JBLabel xrayConnectionResults;
+    private JBLabel artifactoryConnectionResults;
     private ConnectionResultsGesture connectionResultsGesture;
     private ConnectionResultsGesture artifactoryConnectionResultsGesture;
+    private HyperlinkLabel projectInstructions;
+    private HyperlinkLabel policyInstructions;
+    private HyperlinkLabel watchInstructions;
 
     public JFrogGlobalConfiguration() {
         initUrls();
         initTestConnection();
         initConnectionDetailsFromEnv();
+        initLinks();
+    }
+
+    @Nullable
+    @Override
+    public JComponent createComponent() {
+        JTabbedPane tabbedPane = new JBTabbedPane();
+        tabbedPane.add("Connection Details", connectionDetails);
+        tabbedPane.add("Advanced", advanced);
+        return tabbedPane;
     }
 
     private void initUrls() {
@@ -132,8 +148,8 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             Xray xrayClient = createXrayClient();
 
             setConnectionResults("Connecting to Xray...");
-            config.validate();
-            config.repaint();
+            connectionDetails.validate();
+            connectionDetails.repaint();
             Version xrayVersion = xrayClient.system().version();
 
             // Check version
@@ -162,8 +178,8 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         }
         try (ArtifactoryManager artifactoryManager = createArtifactoryManagerBuilder().build()) {
             setConnectionResults("Connecting to Artifactory...");
-            config.validate();
-            config.repaint();
+            connectionDetails.validate();
+            connectionDetails.repaint();
 
             // Check connection.
             // This command will throw an exception if there is a connection or credentials issue.
@@ -199,6 +215,19 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         });
     }
 
+    private void initLinks() {
+        initHyperlink(projectInstructions, "Create a <hyperlink>JFrog Project</hyperlink>, or obtain the relevant JFrog Project key.", "https://www.jfrog.com/confluence/display/JFROG/Projects");
+        initHyperlink(policyInstructions, "Create a <hyperlink>Policy</hyperlink> on JFrog Xray.", "https://www.jfrog.com/confluence/display/JFROG/Creating+Xray+Policies+and+Rules");
+        initHyperlink(watchInstructions, "Create a <hyperlink>Watch</hyperlink> on JFrog Xray and assign your Policy and Project as resources to it.", "https://www.jfrog.com/confluence/display/JFROG/Configuring+Xray+Watches");
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private void initHyperlink(HyperlinkLabel label, String text, String link) {
+        label.setTextWithHyperlink("    " + text);
+        label.addHyperlinkListener(l -> BrowserUtil.browse(link));
+        label.setForeground(UIUtil.getInactiveTextColor());
+    }
+
     private void setConnectionResults(String results) {
         if (results == null) {
             return;
@@ -216,12 +245,6 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     @Override
     public String getHelpTopic() {
         return "Setup page for JFrog Xray and Artifactory connection details.";
-    }
-
-    @Nullable
-    @Override
-    public JComponent createComponent() {
-        return config;
     }
 
     @Override
