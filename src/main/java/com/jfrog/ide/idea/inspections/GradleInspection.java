@@ -56,13 +56,12 @@ public abstract class GradleInspection extends AbstractInspection {
      * @return component name.
      */
     String createComponentName(String componentId) {
-        // compile project(':xyz')
-        String componentName = StringUtils.removeStart(componentId, ":");
-        if (StringUtils.countMatches(componentName, ":") == 2) {
+        if (StringUtils.countMatches(componentId, ":") == 2) {
             // implementation('a:b:c')
-            componentName = StringUtils.substringBeforeLast(componentName, ":");
+            return StringUtils.substringBeforeLast(componentId, ":");
         }
-        return componentName;
+        // compile project(':xyz')
+        return StringUtils.removeStart(componentId, ":");
     }
 
     /**
