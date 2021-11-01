@@ -313,7 +313,7 @@
             </constraints>
             <properties>
               <enabled value="false"/>
-              <text value="    Optionally use the Project field to allow the security and license compliance information displayed in"/>
+              <text value="    Optionally use the project key field to allow the security and license compliance information displayed"/>
             </properties>
           </component>
           <component id="ed918" class="javax.swing.JLabel">
@@ -324,7 +324,7 @@
             </constraints>
             <properties>
               <enabled value="false"/>
-              <text value="    IntelliJ IDEA, to reflect the Security Policies required by your organization. This is done as follows:"/>
+              <text value="    in IntelliJ IDEA, to reflect the security policies required by your organization. This is done as follows:"/>
             </properties>
           </component>
           <component id="f96a4" class="com.intellij.ui.HyperlinkLabel" binding="projectInstructions">
@@ -370,7 +370,7 @@
               <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="    Project name"/>
+              <text value="    Project key"/>
             </properties>
           </component>
           <component id="b50f7" class="com.intellij.ui.TitledSeparator">
@@ -386,7 +386,7 @@
               <grid row="9" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="JFrog Project"/>
+              <text value="Scan Policies"/>
             </properties>
           </component>
           <component id="52b21" class="com.intellij.ui.TitledSeparator">
