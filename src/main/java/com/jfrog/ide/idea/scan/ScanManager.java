@@ -113,11 +113,8 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
      *
      * @param quickScan - Quick scan or full scan
      * @param indicator - The progress indicator
-     * @param latch     - The tasks run asynchronously. To make sure no more than 3 tasks are running concurrently,
-     *                  we count down the latch from 1 to 0 when the task ends. This operation signals to the
-     *                  executor service that it can get more tasks.
      */
-    private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator, CountDownLatch latch) {
+    private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator) {
         try {
             buildTree(!quickScan);
             scanAndCacheArtifacts(indicator, quickScan);
@@ -130,7 +127,6 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
             logError(getLog(), "Xray Scan failed", e, !quickScan);
         } finally {
             scanInProgress.set(false);
-            latch.countDown();
         }
     }
 
@@ -161,21 +157,33 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
                     }
                     return;
                 }
-                scanAndUpdate(quickScan, new ProgressIndicatorImpl(indicator), latch);
+                scanAndUpdate(quickScan, new ProgressIndicatorImpl(indicator));
+            }
+
+            @Override
+            public void onFinished() {
+                latch.countDown();
             }
         };
-        submitTask(scanAndUpdateTask, latch, quickScan);
+        Runnable runnable = createRunnable(scanAndUpdateTask, latch, quickScan);
+        if (executor.isShutdown() || executor.isTerminated()) {
+            // Scan initiated by a change in the project descriptor
+            runnable.run();
+        } else {
+            // Scan initiated by opening IntelliJ, by user, or by changing the configuration
+            executor.submit(runnable);
+        }
     }
 
     /**
-     * Submit an asynchronous task to the executor service.
+     * Create a runnable to be submitted to the executor service, or run directly.
      *
      * @param scanAndUpdateTask - The task to submit
-     * @param latch             - The countdown latch which make sure the executor service doesn't get more than 3 tasks
+     * @param latch             - The countdown latch, which makes sure the executor service doesn't get more than 3 tasks
      * @param quickScan         - Quick or full scan
      */
-    private void submitTask(Task.Backgroundable scanAndUpdateTask, CountDownLatch latch, boolean quickScan) {
-        executor.submit(() -> {
+    private Runnable createRunnable(Task.Backgroundable scanAndUpdateTask, CountDownLatch latch, boolean quickScan) {
+        return () -> {
             // The progress manager is only good for foreground threads.
             if (SwingUtilities.isEventDispatchThread()) {
                 scanAndUpdateTask.queue();
@@ -189,7 +197,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
             } catch (InterruptedException e) {
                 Utils.logError(getLog(), ExceptionUtils.getRootCauseMessage(e), e, !quickScan);
             }
-        });
+        };
     }
 
     /**
