@@ -64,6 +64,10 @@ public class ComponentIssuesTable extends JBTable {
         severityCol.setPreferredWidth(severityCol.getPreferredWidth() / 2);
         tableWidth -= severityCol.getPreferredWidth();
 
+        TableColumn cveCol = getColumnModel().getColumn(CVE.ordinal());
+        cveCol.setPreferredWidth((int) (cveCol.getPreferredWidth() * 1.2));
+        tableWidth -= cveCol.getPreferredWidth();
+
         TableColumn fixedVersionsCol = getColumnModel().getColumn(FIXED_VERSIONS.ordinal());
         fixedVersionsCol.setPreferredWidth((int) (fixedVersionsCol.getPreferredWidth() * 1.3));
         tableWidth -= fixedVersionsCol.getPreferredWidth();

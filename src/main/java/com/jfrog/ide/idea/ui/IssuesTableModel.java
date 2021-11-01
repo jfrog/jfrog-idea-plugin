@@ -32,6 +32,7 @@ public class IssuesTableModel extends AbstractTableModel {
 
     public enum IssueColumn {
         SEVERITY("Severity"),
+        CVE("CVE"),
         COMPONENT("Component"),
         FIXED_VERSIONS("Fixed Versions"),
         SUMMARY("Summary");
@@ -76,6 +77,8 @@ public class IssuesTableModel extends AbstractTableModel {
         switch (issueColumn) {
             case SEVERITY:
                 return issue.getSeverity();
+            case CVE:
+                return issue.getCve();
             case SUMMARY:
                 return issue.getSummary();
             case COMPONENT:
