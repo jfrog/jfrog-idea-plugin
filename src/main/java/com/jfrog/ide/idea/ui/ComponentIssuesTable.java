@@ -31,6 +31,7 @@ public class ComponentIssuesTable extends JBTable {
 
     private static final List<RowSorter.SortKey> SORT_KEYS = Lists.newArrayList(
             new RowSorter.SortKey(SEVERITY.ordinal(), SortOrder.DESCENDING),
+            new RowSorter.SortKey(CVE.ordinal(), SortOrder.DESCENDING),
             new RowSorter.SortKey(COMPONENT.ordinal(), SortOrder.ASCENDING));
 
     ComponentIssuesTable() {
