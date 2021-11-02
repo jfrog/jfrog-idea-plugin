@@ -12,6 +12,7 @@
 
     <change-notes>
         <![CDATA[
+          <li>Show CVEs in component issue details.</li>
           <li>Performance improvements.</li>
           <li>Improve configuration page.</li>
           <li>Bugfix - Go - Scan failed on Go below 1.16.</li>
