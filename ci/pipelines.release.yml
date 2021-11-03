@@ -23,7 +23,7 @@ pipelines:
             - name: ideaReleaseGit
           integrations:
             - name: releases_temp
-            - name: github_generic
+            - name: github
         execution:
           onStart:
             - *UPDATE_COMMIT_STATUS
@@ -38,7 +38,7 @@ pipelines:
 
             # Configure git
             - git checkout master
-            - git remote set-url origin https://$int_github_generic_token@github.com/jfrog/jfrog-idea-plugin.git
+            - git remote set-url origin https://$int_github_token@github.com/jfrog/jfrog-idea-plugin.git
 
             # Make sure versions provided
             - echo "Checking variables"
