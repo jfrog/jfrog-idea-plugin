@@ -39,12 +39,12 @@ repositories {
     }
 }
 
-def buildInfoVersion = '2.31.1'
+def buildInfoVersion = '2.31.2'
 dependencies {
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-extractor', version: buildInfoVersion
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-client', version: buildInfoVersion
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-api', version: buildInfoVersion
-    implementation group: 'com.jfrog.xray.client', name: 'xray-client-java', version: '0.8.0'
+    implementation group: 'com.jfrog.xray.client', name: 'xray-client-java', version: '0.9.0'
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
     implementation group: 'org.jfrog.filespecs', name: 'file-specs-java', version: '1.1.0'
     implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: '1.7.2'
