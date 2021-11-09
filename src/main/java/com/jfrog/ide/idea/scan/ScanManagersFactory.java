@@ -84,6 +84,8 @@ public class ScanManagersFactory implements Disposable {
             Logger.getInstance().info("Previous scan still running...");
             return;
         }
+        // Try to load JFrog CLI config, only if the user hasn't config a server yet.
+        GlobalSettings.getInstance().loadConnectionDetailsFromJfrogCli();
         if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
             Logger.getInstance().warn("Xray server is not configured.");
             return;
