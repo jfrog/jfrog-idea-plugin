@@ -36,11 +36,13 @@ import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.ui.filters.filtermanager.ConsistentFilterManager;
 import com.jfrog.ide.idea.ui.filters.filtermanager.LocalFilterManager;
+import com.jfrog.ide.idea.utils.Utils;
 import com.jfrog.xray.client.services.summary.Components;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jfrog.build.extractor.usageReport.UsageReporter;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.License;
 import org.jfrog.build.extractor.scan.Scope;
@@ -112,9 +114,13 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
      */
     protected abstract LocalInspectionTool getInspectionTool();
 
-    protected void sendUsageReport() {
-        String packageType = getProjectPackageType();
-
+    protected void sendUsageReport(){
+        String packageType = getProjectPackageType() + "-deps";
+        try {
+            Utils.sendUsageReport(packageType);
+        } catch (IOException e) {
+            getLog().debug("Usage report failed: " + ExceptionUtils.getRootCauseMessage(e));
+        }
     }
 
     protected abstract String getProjectPackageType();
@@ -132,7 +138,6 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
             scanAndCacheArtifacts(indicator, quickScan);
             addXrayInfoToTree(getScanResults());
             setScanResults();
-            sendUsageReport();
             DumbService.getInstance(project).smartInvokeLater(this::runInspections);
         } catch (ProcessCanceledException e) {
             getLog().info("Xray scan was canceled");
@@ -140,6 +145,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
             logError(getLog(), "Xray Scan failed", e, !quickScan);
         } finally {
             scanInProgress.set(false);
+            sendUsageReport();
         }
     }
 

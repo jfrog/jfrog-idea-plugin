@@ -1,6 +1,8 @@
 package com.jfrog.ide.idea.utils;
 
 import com.google.common.base.Objects;
+import com.intellij.ide.plugins.PluginManagerCore;
+import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
@@ -15,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
+import org.jfrog.build.extractor.usageReport.UsageReporter;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -28,6 +31,9 @@ import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBui
 public class Utils {
 
     public static final Path HOME_PATH = Paths.get(System.getProperty("user.home"), ".jfrog-idea-plugin");
+    public static final String PRODUCT_ID = "idea-plugin/";
+    public static final String PLUGIN_ID = "org.jfrog.idea";
+
 
     public enum ScanLogicType {GraphScan, ComponentSummary}
 
@@ -77,5 +83,16 @@ public class Utils {
             return ScanLogicType.ComponentSummary;
         }
         throw new IOException("Unsupported JFrog Xray version.");
+    }
+
+    public static void sendUsageReport(String techName) throws IOException {
+        ServerConfig serverConfig =  GlobalSettings.getInstance().getServerConfig();
+        Logger log = Logger.getInstance();
+        String[] featureIdArray = new String[]{techName};
+        String pluginVersion = PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID)).getVersion();
+        UsageReporter usageReporter = new UsageReporter(PRODUCT_ID + pluginVersion, featureIdArray);
+        usageReporter.reportUsage(serverConfig.getArtifactoryUrl(), serverConfig.getUsername(), serverConfig.getPassword(), "", null,log);
+        log.debug("Usage info sent successfully.");
+
     }
 }
