@@ -26,6 +26,8 @@ import java.util.concurrent.ExecutorService;
 public class GoScanManager extends ScanManager {
 
     private final GoTreeBuilder goTreeBuilder;
+    private final String PKG_TYPE = "go";
+
 
     /**
      * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
@@ -66,5 +68,10 @@ public class GoScanManager extends ScanManager {
     @Override
     protected LocalInspectionTool getInspectionTool() {
         return new GoInspection();
+    }
+
+    @Override
+    protected String getProjectPackageType() {
+        return PKG_TYPE;
     }
 }
