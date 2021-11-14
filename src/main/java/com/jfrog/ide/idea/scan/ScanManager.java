@@ -63,7 +63,7 @@ import static com.jfrog.ide.common.log.Utils.logError;
 public abstract class ScanManager extends ScanManagerBase implements Disposable {
 
     private final MessageBusConnection busConnection;
-    private final ExecutorService executor;
+    private ExecutorService executor;
     protected Project project;
     String basePath;
 
@@ -83,6 +83,10 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
         this.executor = executor;
         this.basePath = basePath;
         this.project = project;
+    }
+
+    void setExecutor(ExecutorService executor) {
+        this.executor = executor;
     }
 
     /**

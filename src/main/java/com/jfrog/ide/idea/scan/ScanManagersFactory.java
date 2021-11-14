@@ -130,6 +130,8 @@ public class ScanManagersFactory implements Disposable {
         int projectHash = Utils.getProjectIdentifier(project);
         ScanManager scanManager = this.scanManagers.get(projectHash);
         if (scanManager != null) {
+            // Set the new executor on the old scan manager
+            scanManager.setExecutor(executor);
             scanManagers.put(projectHash, scanManager);
         } else {
             // Unlike other scan managers whereby we create them if the package descriptor exist, the Maven
