@@ -57,7 +57,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jfrog.ide.common.log.Utils.logError;
 
-
 /**
  * Created by romang on 4/26/17.
  */

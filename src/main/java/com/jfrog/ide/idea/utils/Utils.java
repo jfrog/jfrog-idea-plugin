@@ -1,6 +1,7 @@
 package com.jfrog.ide.idea.utils;
 
 import com.google.common.base.Objects;
+import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
@@ -33,7 +34,6 @@ public class Utils {
     public static final Path HOME_PATH = Paths.get(System.getProperty("user.home"), ".jfrog-idea-plugin");
     public static final String PRODUCT_ID = "idea-plugin/";
     public static final String PLUGIN_ID = "org.jfrog.idea";
-
 
     public enum ScanLogicType {GraphScan, ComponentSummary}
 
@@ -86,13 +86,19 @@ public class Utils {
     }
 
     public static void sendUsageReport(String techName) throws IOException {
-        ServerConfig serverConfig =  GlobalSettings.getInstance().getServerConfig();
+        ServerConfig serverConfig = GlobalSettings.getInstance().getServerConfig();
         Logger log = Logger.getInstance();
         String[] featureIdArray = new String[]{techName};
-        String pluginVersion = PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID)).getVersion();
+        IdeaPluginDescriptor jfrogPlugin = PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID));
+        if (jfrogPlugin == null) {
+            // In case we can't find the plugin version, do not send usage report.
+            log.debug("Usage report can't be sent. Unknown plugin version.");
+            return;
+        }
+        String pluginVersion = jfrogPlugin.getVersion();
         UsageReporter usageReporter = new UsageReporter(PRODUCT_ID + pluginVersion, featureIdArray);
-        usageReporter.reportUsage(serverConfig.getArtifactoryUrl(), serverConfig.getUsername(), serverConfig.getPassword(), "", null,log);
-        log.debug("Usage info sent successfully.");
+        usageReporter.reportUsage(serverConfig.getArtifactoryUrl(), serverConfig.getUsername(), serverConfig.getPassword(), "", null, log);
+        log.debug("Usage report sent successfully.");
 
     }
 }

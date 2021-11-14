@@ -25,7 +25,6 @@ public class NpmScanManager extends ScanManager {
     private final NpmTreeBuilder npmTreeBuilder;
     private final String PKG_TYPE = "npm";
 
-
     /**
      * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
      *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
