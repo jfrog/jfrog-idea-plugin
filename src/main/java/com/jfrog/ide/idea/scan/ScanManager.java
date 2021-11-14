@@ -24,7 +24,6 @@ import com.intellij.psi.PsiFile;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.log.ProgressIndicator;
-import com.jfrog.ide.common.log.Utils;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanManagerBase;
 import com.jfrog.ide.common.utils.ProjectsMap;
@@ -42,7 +41,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.build.extractor.usageReport.UsageReporter;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.License;
 import org.jfrog.build.extractor.scan.Scope;
@@ -58,6 +56,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jfrog.ide.common.log.Utils.logError;
+
 
 /**
  * Created by romang on 4/26/17.
@@ -114,7 +113,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
      */
     protected abstract LocalInspectionTool getInspectionTool();
 
-    protected void sendUsageReport(){
+    protected void sendUsageReport() {
         String packageType = getProjectPackageType() + "-deps";
         try {
             Utils.sendUsageReport(packageType);
@@ -214,7 +213,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
                 // Wait for scan to finish, to make sure the thread pool remain full
                 latch.await();
             } catch (InterruptedException e) {
-                Utils.logError(getLog(), ExceptionUtils.getRootCauseMessage(e), e, !quickScan);
+                logError(getLog(), ExceptionUtils.getRootCauseMessage(e), e, !quickScan);
             }
         };
     }

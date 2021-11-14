@@ -75,7 +75,7 @@ public class MavenScanManager extends ScanManager {
         DependencyTree rootNode = new DependencyTree(project.getName());
         rootNode.setMetadata(true);
         MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject -> populateMavenModule(rootNode, rootMavenProject, Sets.newHashSet()));
-        GeneralInfo generalInfo = new GeneralInfo().componentId(project.getName()).path(basePath).pkgType("maven");
+        GeneralInfo generalInfo = new GeneralInfo().componentId(project.getName()).path(basePath).pkgType(PKG_TYPE);
         rootNode.setGeneralInfo(generalInfo);
         if (rootNode.getChildren().size() == 1) {
             setScanResults((DependencyTree) rootNode.getChildAt(0));
