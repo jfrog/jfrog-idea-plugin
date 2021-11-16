@@ -113,17 +113,11 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
     protected abstract LocalInspectionTool getInspectionTool();
 
     protected void sendUsageReport() {
-        String packageType = getProjectPackageType() + "-deps";
-        try {
-            Utils.sendUsageReport(packageType);
-        } catch (IOException e) {
-            getLog().debug("Usage report failed: " + ExceptionUtils.getRootCauseMessage(e));
-        }
+        Utils.sendUsageReport(getProjectPackageType() + "-deps");
     }
 
     protected abstract String getProjectPackageType();
-
-
+    
     /**
      * Scan and update dependency components.
      *

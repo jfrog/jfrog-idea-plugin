@@ -28,7 +28,6 @@ public class GoScanManager extends ScanManager {
     private final GoTreeBuilder goTreeBuilder;
     private final String PKG_TYPE = "go";
 
-
     /**
      * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
      *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.

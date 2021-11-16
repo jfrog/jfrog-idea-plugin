@@ -202,10 +202,6 @@ public class CiManager extends CiManagerBase implements Disposable {
     }
 
     private void sendUsageReport() {
-        try {
-            Utils.sendUsageReport("ci");
-        } catch (IOException e) {
-            Logger.getInstance().debug("Usage report failed: " + ExceptionUtils.getRootCauseMessage(e));
-        }
+        Utils.sendUsageReport("ci");
     }
 }
