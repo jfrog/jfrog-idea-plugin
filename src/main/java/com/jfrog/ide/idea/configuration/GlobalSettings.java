@@ -213,7 +213,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
     }
 
     /**
-     * Determine whether should perform credentials migration or not.
+     * Determine whether we should perform credentials migration or not.
      *
      * @param xrayConfig - configurations read from 'jfrogConfig.xml'.
      * @return true if credentials are stored in file.
@@ -222,6 +222,11 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         return !isAnyBlank(xrayConfig.getUsername(), xrayConfig.getPassword());
     }
 
+    /**
+     * The plugin supports reading the JFrog connection details from JFrog CLI's configuration.
+     * This allows developers who already have JFrog CLI installed and configured,
+     * to have IDEA load the config automatically.
+     */
     public void loadConnectionDetailsFromJfrogCli() {
         // Try to read connection details using JFrog CLI only if no server is already configured.
         if (areXrayCredentialsSet()) {

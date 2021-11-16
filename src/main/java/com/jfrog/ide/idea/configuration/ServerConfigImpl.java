@@ -66,7 +66,6 @@ public class ServerConfigImpl implements ServerConfig {
     static final String PASSWORD_ENV = "JFROG_IDE_PASSWORD";
     static final String PROJECT_ENV = "JFROG_IDE_PROJECT";
 
-
     @Deprecated
     public static final String XRAY_SETTINGS_KEY = "com.jfrog.xray.idea";
     @Deprecated
@@ -177,6 +176,11 @@ public class ServerConfigImpl implements ServerConfig {
     @CheckForNull
     public String getPassword() {
         return password;
+    }
+
+    @Override
+    public String getAccessToken() {
+        return null;
     }
 
     public Credentials getCredentialsFromPasswordSafe() {
@@ -422,9 +426,9 @@ public class ServerConfigImpl implements ServerConfig {
     }
 
     /**
-     * Read connection details using installed JFrog CLI.
+     * Read the connection details from JFrog CLI's config. The configuration is read by executing JFrog CLI.
      * If no JFrog CLI server configuration was found or the config
-     * file is encrypt do nothing.
+     * file is encrypt, do nothing.
      *
      * @return true if connection details loaded from JFrog CLI default server.
      */
