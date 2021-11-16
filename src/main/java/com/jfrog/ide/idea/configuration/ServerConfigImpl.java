@@ -64,6 +64,7 @@ public class ServerConfigImpl implements ServerConfig {
     static final String XRAY_URL_ENV = "JFROG_IDE_XRAY_URL";
     static final String USERNAME_ENV = "JFROG_IDE_USERNAME";
     static final String PASSWORD_ENV = "JFROG_IDE_PASSWORD";
+    static final String ACCESS_TOKEN_ENV = "JFROG_IDE_ACCESS_TOKEN";
     static final String PROJECT_ENV = "JFROG_IDE_PROJECT";
 
     @Deprecated
@@ -81,6 +82,8 @@ public class ServerConfigImpl implements ServerConfig {
     private String username;
     @Tag
     private String password;
+    @Tag
+    private String accessToken;
     // JFrog project key to be used as context to Xray scan.
     @OptionTag
     private String project;
@@ -110,6 +113,7 @@ public class ServerConfigImpl implements ServerConfig {
         this.artifactoryUrl = builder.artifactoryUrl;
         this.username = builder.username;
         this.password = builder.password;
+        this.accessToken = builder.accessToken;
         this.project = builder.project;
         this.excludedPaths = builder.excludedPaths;
         this.connectionDetailsFromEnv = builder.connectionDetailsFromEnv;
@@ -120,11 +124,15 @@ public class ServerConfigImpl implements ServerConfig {
     }
 
     boolean isXrayConfigured() {
-        return !isAnyBlank(xrayUrl, username, password);
+        return isNotBlank(xrayUrl) && isAuthenticationConfigured();
     }
 
     boolean isArtifactoryConfigured() {
-        return !isAnyBlank(artifactoryUrl, username, password);
+        return isNotBlank(artifactoryUrl) && isAuthenticationConfigured();
+    }
+
+    boolean isAuthenticationConfigured() {
+        return isNoneBlank(username, password) || isNotBlank(accessToken);
     }
 
     @Override
@@ -139,6 +147,7 @@ public class ServerConfigImpl implements ServerConfig {
                 Objects.equals(getArtifactoryUrl(), other.getArtifactoryUrl()) &&
                 Objects.equals(getPassword(), other.getPassword()) &&
                 Objects.equals(getUsername(), other.getUsername()) &&
+                Objects.equals(getAccessToken(), other.getAccessToken()) &&
                 Objects.equals(getProject(), other.getProject()) &&
                 Objects.equals(getExcludedPaths(), other.getExcludedPaths()) &&
                 isConnectionDetailsFromEnv() == other.isConnectionDetailsFromEnv() &&
@@ -148,7 +157,7 @@ public class ServerConfigImpl implements ServerConfig {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getUrl(), getXrayUrl(), getArtifactoryUrl(), getPassword(), getUsername(), getProject(),
+        return Objects.hash(getUrl(), getXrayUrl(), getArtifactoryUrl(), getPassword(), getAccessToken(), getUsername(), getProject(),
                 getExcludedPaths(), isConnectionDetailsFromEnv(), getConnectionRetries(), getConnectionTimeout());
     }
 
@@ -180,7 +189,7 @@ public class ServerConfigImpl implements ServerConfig {
 
     @Override
     public String getAccessToken() {
-        return null;
+        return accessToken;
     }
 
     public Credentials getCredentialsFromPasswordSafe() {
@@ -188,7 +197,8 @@ public class ServerConfigImpl implements ServerConfig {
     }
 
     public void addCredentialsToPasswordSafe() {
-        Credentials credentials = new Credentials(getUsername(), getPassword());
+        String password = isNotBlank(accessToken) ? getAccessToken() : getPassword();
+        Credentials credentials = new Credentials(getUsername(), password);
         storeCredentialsInPasswordSafe(jfrogSettingsCredentialsKey, JFROG_SETTINGS_CREDENTIALS_KEY, credentials);
     }
 
@@ -354,12 +364,21 @@ public class ServerConfigImpl implements ServerConfig {
         this.password = password;
     }
 
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+
     void setCredentials(Credentials credentials) {
         if (credentials == null) {
             return;
         }
-        setUsername(credentials.getUserName());
-        setPassword(credentials.getPasswordAsString());
+        if (isNotBlank(credentials.getUserName())) {
+            setUsername(credentials.getUserName());
+            setPassword(credentials.getPasswordAsString());
+        } else {
+            setAccessToken(credentials.getPasswordAsString());
+        }
     }
 
     void setConnectionDetailsFromEnv(boolean connectionDetailsFromEnv) {
@@ -400,6 +419,7 @@ public class ServerConfigImpl implements ServerConfig {
         String legacyXrayUrlEnv = EnvironmentUtil.getValue(LEGACY_XRAY_URL_ENV);
         String usernameEnv = EnvironmentUtil.getValue(USERNAME_ENV);
         String passwordEnv = EnvironmentUtil.getValue(PASSWORD_ENV);
+        String accessTokenEnv = EnvironmentUtil.getValue(ACCESS_TOKEN_ENV);
         String projectEnv = EnvironmentUtil.getValue(PROJECT_ENV);
         if (isAnyBlank(usernameEnv, passwordEnv) || isAllBlank(platformUrlEnv, xrayUrlEnv, artifactoryUrlEnv, legacyXrayUrlEnv)) {
             setUrl("");
@@ -407,6 +427,7 @@ public class ServerConfigImpl implements ServerConfig {
             setArtifactoryUrl("");
             setUsername("");
             setPassword("");
+            setAccessToken("");
             return false;
         }
         if (isAllBlank(platformUrlEnv, xrayUrlEnv, artifactoryUrlEnv)) {
@@ -420,8 +441,12 @@ public class ServerConfigImpl implements ServerConfig {
         if (isNotBlank(projectEnv)) {
             setProject(projectEnv);
         }
-        setUsername(usernameEnv);
-        setPassword(passwordEnv);
+        if (isNotBlank(accessTokenEnv)) {
+            setAccessToken(accessTokenEnv);
+        } else {
+            setUsername(usernameEnv);
+            setPassword(passwordEnv);
+        }
         return true;
     }
 
@@ -443,8 +468,9 @@ public class ServerConfigImpl implements ServerConfig {
         String artifactoryUrlCli = cliServerConfig.getArtifactoryUrl();
         String usernameCli = cliServerConfig.getUsername();
         String passwordCli = cliServerConfig.getPassword();
+        String accessToken = cliServerConfig.getAccessToken();
 
-        if (isAnyBlank(usernameCli, passwordCli) || isAllBlank(platformUrlCLi, xrayUrlCli, artifactoryUrlCli)) {
+        if ((isAnyBlank(usernameCli, passwordCli) && isBlank(accessToken)) || isAllBlank(platformUrlCLi, xrayUrlCli, artifactoryUrlCli)) {
             return false;
         }
         setUrl(platformUrlCLi);
@@ -452,6 +478,7 @@ public class ServerConfigImpl implements ServerConfig {
         setArtifactoryUrl(artifactoryUrlCli);
         setUsername(usernameCli);
         setPassword(passwordCli);
+        setAccessToken(accessToken);
         return true;
     }
 
@@ -468,6 +495,7 @@ public class ServerConfigImpl implements ServerConfig {
         private String artifactoryUrl;
         private String username;
         private String password;
+        private String accessToken;
         private String excludedPaths;
         private String project;
         private boolean connectionDetailsFromEnv;
@@ -476,11 +504,6 @@ public class ServerConfigImpl implements ServerConfig {
 
         public ServerConfigImpl build() {
             return new ServerConfigImpl(this);
-        }
-
-        public Builder setUsername(@Nullable String username) {
-            this.username = username;
-            return this;
         }
 
         public Builder setUrl(String url) {
@@ -498,8 +521,18 @@ public class ServerConfigImpl implements ServerConfig {
             return this;
         }
 
+        public Builder setUsername(@Nullable String username) {
+            this.username = username;
+            return this;
+        }
+
         public Builder setPassword(@Nullable String password) {
             this.password = defaultString(password);
+            return this;
+        }
+
+        public Builder setAccessToken(@Nullable String accessToken) {
+            this.accessToken = accessToken;
             return this;
         }
 
