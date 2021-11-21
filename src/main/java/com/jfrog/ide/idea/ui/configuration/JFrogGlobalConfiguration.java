@@ -388,11 +388,9 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         if (isNotBlank(serverConfig.getAccessToken())) {
             accessToken.setText(serverConfig.getAccessToken());
             accessTokenRadioButton.setSelected(true);
-
         } else {
             username.setText(serverConfig.getUsername());
             password.setText(serverConfig.getPassword());
-            //usernamePasswordRadioButton.setSelected(true);
         }
         if (!isAllBlank(xrayUrl.getText(), artifactoryUrl.getText()) && isBlank(platformUrl.getText())) {
             setRtAndXraySeparately.getModel().setSelected(true);

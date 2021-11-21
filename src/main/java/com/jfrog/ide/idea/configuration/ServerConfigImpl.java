@@ -131,7 +131,7 @@ public class ServerConfigImpl implements ServerConfig {
         return isNotBlank(artifactoryUrl) && isAuthenticationConfigured();
     }
 
-    boolean isAuthenticationConfigured() {
+    private boolean isAuthenticationConfigured() {
         return isNoneBlank(username, password) || isNotBlank(accessToken);
     }
 
@@ -367,7 +367,6 @@ public class ServerConfigImpl implements ServerConfig {
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
     }
-
 
     void setCredentials(Credentials credentials) {
         if (credentials == null) {
