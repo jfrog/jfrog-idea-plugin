@@ -32,8 +32,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 
 import static com.jfrog.ide.idea.ui.configuration.Utils.migrateXrayConfigToPlatformConfig;
-import static org.apache.commons.lang3.StringUtils.isAnyBlank;
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 /**
  * @author yahavi
@@ -173,6 +172,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         setCommonConfigFields(serverConfig);
         this.serverConfig.setUsername(serverConfig.getUsername());
         this.serverConfig.setPassword(serverConfig.getPassword());
+        this.serverConfig.setAccessToken(serverConfig.getAccessToken());
         this.serverConfig.addCredentialsToPasswordSafe();
     }
 
@@ -207,6 +207,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
     private void migrateCredentialsFromFileToPasswordSafe(ServerConfigImpl serverConfig) {
         this.serverConfig.setUsername(serverConfig.getUsername());
         this.serverConfig.setPassword(serverConfig.getPassword());
+        this.serverConfig.setAccessToken(serverConfig.getAccessToken());
         this.serverConfig.addCredentialsToPasswordSafe();
         Application application = ApplicationManager.getApplication();
         application.invokeLater(application::saveSettings);
@@ -219,7 +220,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
      * @return true if credentials are stored in file.
      */
     private boolean shouldPerformCredentialsMigration(ServerConfigImpl xrayConfig) {
-        return !isAnyBlank(xrayConfig.getUsername(), xrayConfig.getPassword());
+        return isNoneBlank(xrayConfig.getUsername(), xrayConfig.getPassword());
     }
 
     /**
@@ -233,7 +234,8 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
             return;
         }
         try {
-            serverConfig.readConnectionDetailsFromJfrogCli();
+            String configured = serverConfig.readConnectionDetailsFromJfrogCli() ? "Successfully" : "Couldn't";
+            Logger.getInstance().info(configured + " config connection details from JFrog CLI");
         } catch (IOException exception) {
             Logger.getInstance().debug("Couldn't config connection details from JFrog CLI: " + ExceptionUtils.getRootCauseMessage(exception));
         }

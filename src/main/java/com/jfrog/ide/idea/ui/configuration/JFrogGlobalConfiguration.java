@@ -75,11 +75,15 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private HyperlinkLabel projectInstructions;
     private HyperlinkLabel policyInstructions;
     private HyperlinkLabel watchInstructions;
+    private JRadioButton usernamePasswordRadioButton;
+    private JRadioButton accessTokenRadioButton;
+    private JPasswordField accessToken;
 
     public JFrogGlobalConfiguration() {
         initUrls();
         initTestConnection();
         initConnectionDetailsFromEnv();
+        initAuthenticationMethod();
         initLinks();
     }
 
@@ -194,7 +198,8 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     }
 
     private void initConnectionDetailsFromEnv() {
-        List<JComponent> effectedComponents = Lists.newArrayList(setRtAndXraySeparately, platformUrl, username, password);
+        List<JComponent> effectedComponents = Lists.newArrayList(setRtAndXraySeparately, platformUrl, username, password, accessToken,
+                accessTokenRadioButton, usernamePasswordRadioButton);
         connectionDetailsFromEnv.addItemListener(e -> {
             JBCheckBox cb = (JBCheckBox) e.getSource();
             if (cb.isSelected()) {
@@ -205,6 +210,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
                 updateConnectionDetailsTextFields();
             } else {
                 effectedComponents.forEach(field -> field.setEnabled(true));
+                initAuthMethodSelection();
                 // Restore connection details if original settings were inserted manually.
                 // This will prevent losing data after checking/unchecking the checkbox.
                 ServerConfigImpl oldConfig = GlobalSettings.getInstance().getServerConfig();
@@ -213,6 +219,46 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
                 }
             }
         });
+    }
+
+    private void initAuthenticationMethod() {
+        initAuthMethodSelection();
+        accessTokenRadioButton.addItemListener(e -> {
+            JRadioButton accessTokenButton = (JRadioButton) e.getSource();
+            ServerConfigImpl oldConfig = GlobalSettings.getInstance().getServerConfig();
+
+            if (accessTokenButton.isSelected()) {
+                accessToken.setEnabled(true);
+                username.setText("");
+                password.setText("");
+                username.setEnabled(false);
+                password.setEnabled(false);
+                // Restore connection details if original settings were inserted manually.
+                // This will prevent losing data after checking/unchecking the checkbox.
+                if (oldConfig != null && isNotBlank(oldConfig.getAccessToken())) {
+                    reset();
+                }
+            } else {
+                username.setEnabled(true);
+                password.setEnabled(true);
+                accessToken.setText("");
+                accessToken.setEnabled(false);
+                // Restore connection details if original settings were inserted manually.
+                // This will prevent losing data after checking/unchecking the checkbox.
+                if (oldConfig != null && isNoneBlank(oldConfig.getUsername(), oldConfig.getPassword())) {
+                    reset();
+                }
+            }
+        });
+    }
+
+    private void initAuthMethodSelection() {
+        boolean isAccessMode = isNotBlank(new String(accessToken.getPassword()));
+        usernamePasswordRadioButton.setSelected(!isAccessMode);
+        accessTokenRadioButton.setSelected(isAccessMode);
+        accessToken.setEnabled(isAccessMode);
+        username.setEnabled(!isAccessMode);
+        password.setEnabled(!isAccessMode);
     }
 
     private void initLinks() {
@@ -255,6 +301,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
                 .setXrayUrl(xrayUrl.getText())
                 .setUsername(username.getText())
                 .setPassword(String.valueOf(password.getPassword()))
+                .setAccessToken(String.valueOf(accessToken.getPassword()))
                 .setExcludedPaths(excludedPaths.getText())
                 .setProject(project.getText())
                 .setConnectionDetailsFromEnv(connectionDetailsFromEnv.isSelected())
@@ -286,6 +333,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
                 .setUrl(urlStr)
                 .setUserName(trim(username.getText()))
                 .setPassword(String.valueOf(password.getPassword()))
+                .setAccessToken(String.valueOf(accessToken.getPassword()))
                 .setUserAgent(USER_AGENT)
                 .setInsecureTls(serverConfig.isInsecureTls())
                 .setSslContext(serverConfig.getSslContext())
@@ -300,6 +348,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
                 .setServerUrl(urlStr)
                 .setUsername(serverConfig.getUsername())
                 .setPassword(serverConfig.getPassword())
+                .setAccessToken(serverConfig.getAccessToken())
                 .setProxyConfiguration(serverConfig.getProxyConfForTargetUrl(urlStr))
                 .setLog(Logger.getInstance())
                 .setSslContext(serverConfig.isInsecureTls() ?
@@ -336,8 +385,13 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         platformUrl.setText(serverConfig.getUrl());
         xrayUrl.setText(serverConfig.getXrayUrl());
         artifactoryUrl.setText(serverConfig.getArtifactoryUrl());
-        username.setText(serverConfig.getUsername());
-        password.setText(serverConfig.getPassword());
+        if (isNotBlank(serverConfig.getAccessToken())) {
+            accessToken.setText(serverConfig.getAccessToken());
+            accessTokenRadioButton.setSelected(true);
+        } else {
+            username.setText(serverConfig.getUsername());
+            password.setText(serverConfig.getPassword());
+        }
         if (!isAllBlank(xrayUrl.getText(), artifactoryUrl.getText()) && isBlank(platformUrl.getText())) {
             setRtAndXraySeparately.getModel().setSelected(true);
             setRtAndXraySeparately.getModel().setPressed(true);

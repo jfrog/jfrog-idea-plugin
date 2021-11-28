@@ -150,6 +150,10 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
                 if (project.isDisposed()) {
                     return;
                 }
+                if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
+                    getLog().warn("Xray server is not configured.");
+                    return;
+                }
                 // Prevent multiple simultaneous scans
                 if (!scanInProgress.compareAndSet(false, true)) {
                     if (!quickScan) {
