@@ -150,10 +150,6 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
                 if (project.isDisposed()) {
                     return;
                 }
-                if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
-                    getLog().warn("Xray server is not configured.");
-                    return;
-                }
                 // Prevent multiple simultaneous scans
                 if (!scanInProgress.compareAndSet(false, true)) {
                     if (!quickScan) {
@@ -206,7 +202,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
 
     /**
      * Returns all project modules locations as Paths.
-     * Other scanners such as npm will use this paths in order to find modules.
+     * Other scanners such as npm will use these paths in order to find modules.
      *
      * @return all project modules locations as Paths
      */
@@ -286,7 +282,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
     protected void checkCanceled() {
         if (project.isOpen()) {
             // The project is closed if we are in test mode.
-            // In tests we can't check if the user canceled the scan, since we don't have the ProgressManager service.
+            // In tests, we can't check if the user canceled the scan, since we don't have the ProgressManager service.
             ProgressManager.checkCanceled();
         }
     }

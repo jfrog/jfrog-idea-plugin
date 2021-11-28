@@ -27,6 +27,8 @@ import com.intellij.util.net.ssl.CertificateManager;
 import com.intellij.util.xmlb.annotations.OptionTag;
 import com.intellij.util.xmlb.annotations.Tag;
 import com.intellij.util.xmlb.annotations.Transient;
+import com.jfrog.ide.common.configuration.JfrogCliDriver;
+import com.jfrog.ide.common.configuration.JfrogCliServerConfig;
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.idea.ui.configuration.ConnectionRetriesSpinner;
 import com.jfrog.ide.idea.ui.configuration.ConnectionTimeoutSpinner;
@@ -37,6 +39,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import javax.net.ssl.SSLContext;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.PasswordAuthentication;
 import java.net.Proxy;
@@ -173,6 +176,11 @@ public class ServerConfigImpl implements ServerConfig {
     @CheckForNull
     public String getPassword() {
         return password;
+    }
+
+    @Override
+    public String getAccessToken() {
+        return null;
     }
 
     public Credentials getCredentialsFromPasswordSafe() {
@@ -414,6 +422,36 @@ public class ServerConfigImpl implements ServerConfig {
         }
         setUsername(usernameEnv);
         setPassword(passwordEnv);
+        return true;
+    }
+
+    /**
+     * Read the connection details from JFrog CLI's config. The configuration is read by executing JFrog CLI.
+     * If no JFrog CLI server configuration was found or the config
+     * file is encrypt, do nothing.
+     *
+     * @return true if connection details loaded from JFrog CLI default server.
+     */
+    public boolean readConnectionDetailsFromJfrogCli() throws IOException {
+        JfrogCliDriver driver = new JfrogCliDriver(EnvironmentUtil.getEnvironmentMap());
+        if (!driver.isJfrogCliInstalled()) {
+            return false;
+        }
+        JfrogCliServerConfig cliServerConfig = driver.getServerConfig();
+        String platformUrlCLi = cliServerConfig.getUrl();
+        String xrayUrlCli = cliServerConfig.getXrayUrl();
+        String artifactoryUrlCli = cliServerConfig.getArtifactoryUrl();
+        String usernameCli = cliServerConfig.getUsername();
+        String passwordCli = cliServerConfig.getPassword();
+
+        if (isAnyBlank(usernameCli, passwordCli) || isAllBlank(platformUrlCLi, xrayUrlCli, artifactoryUrlCli)) {
+            return false;
+        }
+        setUrl(platformUrlCLi);
+        setXrayUrl(xrayUrlCli);
+        setArtifactoryUrl(artifactoryUrlCli);
+        setUsername(usernameCli);
+        setPassword(passwordCli);
         return true;
     }
 

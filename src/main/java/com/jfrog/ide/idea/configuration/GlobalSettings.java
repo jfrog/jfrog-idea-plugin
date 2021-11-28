@@ -25,7 +25,11 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import com.jfrog.ide.idea.log.Logger;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
 
 import static com.jfrog.ide.idea.ui.configuration.Utils.migrateXrayConfigToPlatformConfig;
 import static org.apache.commons.lang3.StringUtils.isAnyBlank;
@@ -209,12 +213,29 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
     }
 
     /**
-     * Determine whether should perform credentials migration or not.
+     * Determine whether we should perform credentials migration or not.
      *
      * @param xrayConfig - configurations read from 'jfrogConfig.xml'.
      * @return true if credentials are stored in file.
      */
     private boolean shouldPerformCredentialsMigration(ServerConfigImpl xrayConfig) {
         return !isAnyBlank(xrayConfig.getUsername(), xrayConfig.getPassword());
+    }
+
+    /**
+     * The plugin supports reading the JFrog connection details from JFrog CLI's configuration.
+     * This allows developers who already have JFrog CLI installed and configured,
+     * to have IDEA load the config automatically.
+     */
+    public void loadConnectionDetailsFromJfrogCli() {
+        // Try to read connection details using JFrog CLI only if no server is already configured.
+        if (areXrayCredentialsSet()) {
+            return;
+        }
+        try {
+            serverConfig.readConnectionDetailsFromJfrogCli();
+        } catch (IOException exception) {
+            Logger.getInstance().debug("Couldn't config connection details from JFrog CLI: " + ExceptionUtils.getRootCauseMessage(exception));
+        }
     }
 }
