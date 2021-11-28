@@ -32,6 +32,7 @@ import static com.jfrog.ide.common.utils.Utils.createComponentId;
  */
 public class PypiScanManager extends ScanManager {
     private final Sdk pythonSdk;
+    private final String PKG_TYPE = "pypi";
 
     static List<Sdk> getAllPythonSdks() {
         return PythonSdkUtil.getAllSdks();
@@ -168,5 +169,10 @@ public class PypiScanManager extends ScanManager {
     @Override
     protected LocalInspectionTool getInspectionTool() {
         return null;
+    }
+
+    @Override
+    protected String getProjectPackageType() {
+        return PKG_TYPE;
     }
 }

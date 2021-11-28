@@ -38,6 +38,7 @@ import static com.jfrog.ide.common.log.Utils.logError;
  */
 public class GradleScanManager extends ScanManager {
 
+    private final String PKG_TYPE = "gradle";
     private final GradleTreeBuilder gradleTreeBuilder;
     private boolean kotlin;
 
@@ -73,6 +74,11 @@ public class GradleScanManager extends ScanManager {
     @Override
     protected LocalInspectionTool getInspectionTool() {
         return kotlin ? new GradleKotlinInspection() : new GradleGroovyInspection();
+    }
+
+    @Override
+    protected String getProjectPackageType() {
+        return PKG_TYPE;
     }
 
     @Override

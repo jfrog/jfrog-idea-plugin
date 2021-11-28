@@ -1,6 +1,9 @@
 package com.jfrog.ide.idea.utils;
 
 import com.google.common.base.Objects;
+import com.intellij.ide.plugins.IdeaPluginDescriptor;
+import com.intellij.ide.plugins.PluginManagerCore;
+import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
@@ -8,13 +11,16 @@ import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.scan.ComponentSummaryScanLogic;
 import com.jfrog.ide.common.scan.GraphScanLogic;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
+import com.jfrog.ide.idea.configuration.ServerConfigImpl;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.xray.client.impl.XrayClient;
 import com.jfrog.xray.client.services.system.Version;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
+import org.jfrog.build.extractor.usageReport.UsageReporter;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -28,6 +34,8 @@ import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBui
 public class Utils {
 
     public static final Path HOME_PATH = Paths.get(System.getProperty("user.home"), ".jfrog-idea-plugin");
+    public static final String PRODUCT_ID = "jfrog-idea-plugin/";
+    public static final String PLUGIN_ID = "org.jfrog.idea";
 
     public enum ScanLogicType {GraphScan, ComponentSummary}
 
@@ -77,5 +85,29 @@ public class Utils {
             return ScanLogicType.ComponentSummary;
         }
         throw new IOException("Unsupported JFrog Xray version.");
+    }
+
+    public static void sendUsageReport(String techName) {
+        ServerConfigImpl serverConfig = GlobalSettings.getInstance().getServerConfig();
+        Logger log = Logger.getInstance();
+        if(!serverConfig.isArtifactoryConfigured()){
+            log.debug("Usage report can't be sent. Artifactory is not configured.");
+            return;
+        }
+        String[] featureIdArray = new String[]{techName};
+        IdeaPluginDescriptor jfrogPlugin = PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID));
+        if (jfrogPlugin == null) {
+            // In case we can't find the plugin version, do not send usage report.
+            log.debug("Usage report can't be sent. Unknown plugin version.");
+            return;
+        }
+        String pluginVersion = jfrogPlugin.getVersion();
+        UsageReporter usageReporter = new UsageReporter(PRODUCT_ID + pluginVersion, featureIdArray);
+        try {
+            usageReporter.reportUsage(serverConfig.getArtifactoryUrl(), serverConfig.getUsername(), serverConfig.getPassword(), "", null, log);
+        } catch (IOException e) {
+            log.debug("Usage report failed: " + ExceptionUtils.getRootCauseMessage(e));
+        }
+        log.debug("Usage report sent successfully.");
     }
 }

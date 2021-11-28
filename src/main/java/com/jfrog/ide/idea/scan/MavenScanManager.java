@@ -40,6 +40,7 @@ import static com.jfrog.ide.common.utils.Utils.createComponentId;
  * Created by romang on 3/2/17.
  */
 public class MavenScanManager extends ScanManager {
+    private final String PKG_TYPE = "maven";
 
     /**
      * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
@@ -74,7 +75,7 @@ public class MavenScanManager extends ScanManager {
         DependencyTree rootNode = new DependencyTree(project.getName());
         rootNode.setMetadata(true);
         MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject -> populateMavenModule(rootNode, rootMavenProject, Sets.newHashSet()));
-        GeneralInfo generalInfo = new GeneralInfo().componentId(project.getName()).path(basePath).pkgType("maven");
+        GeneralInfo generalInfo = new GeneralInfo().componentId(project.getName()).path(basePath).pkgType(PKG_TYPE);
         rootNode.setGeneralInfo(generalInfo);
         if (rootNode.getChildren().size() == 1) {
             setScanResults((DependencyTree) rootNode.getChildAt(0));
@@ -93,6 +94,11 @@ public class MavenScanManager extends ScanManager {
     @Override
     protected LocalInspectionTool getInspectionTool() {
         return new MavenInspection();
+    }
+
+    @Override
+    protected String getProjectPackageType() {
+        return PKG_TYPE;
     }
 
     private void addSubmodules(DependencyTree mavenNode, MavenProject mavenProject, Set<String> added) {

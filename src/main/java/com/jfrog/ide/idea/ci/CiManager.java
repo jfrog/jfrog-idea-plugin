@@ -24,7 +24,9 @@ import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
 import com.jfrog.ide.idea.ui.CiComponentsTree;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.filters.filtermanager.CiFilterManager;
+import com.jfrog.ide.idea.utils.Utils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
@@ -85,6 +87,7 @@ public class CiManager extends CiManagerBase implements Disposable {
                             new ProgressIndicatorImpl(indicator), () -> checkCanceled(indicator), shouldToast);
                     CiFilterManager.getInstance(project).collectBuildsInformation(root);
                     loadFirstBuild();
+                    sendUsageReport();
                 } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
                     logError(Logger.getInstance(), "Failed to refresh builds", e, shouldToast);
                 } finally {
@@ -196,5 +199,9 @@ public class CiManager extends CiManagerBase implements Disposable {
         projectBusConnection.disconnect();
         // Disconnect and release resources from the application bus connection
         appBusConnection.disconnect();
+    }
+
+    private void sendUsageReport() {
+        Utils.sendUsageReport("ci");
     }
 }

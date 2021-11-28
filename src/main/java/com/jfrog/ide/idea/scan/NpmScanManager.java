@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutorService;
 public class NpmScanManager extends ScanManager {
 
     private final NpmTreeBuilder npmTreeBuilder;
+    private final String PKG_TYPE = "npm";
 
     /**
      * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
@@ -56,6 +57,11 @@ public class NpmScanManager extends ScanManager {
     @Override
     protected LocalInspectionTool getInspectionTool() {
         return new NpmInspection();
+    }
+
+    @Override
+    protected String getProjectPackageType() {
+        return PKG_TYPE;
     }
 }
 

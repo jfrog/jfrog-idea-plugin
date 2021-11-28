@@ -24,7 +24,6 @@ import com.intellij.psi.PsiFile;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.log.ProgressIndicator;
-import com.jfrog.ide.common.log.Utils;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanManagerBase;
 import com.jfrog.ide.common.utils.ProjectsMap;
@@ -36,6 +35,7 @@ import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.ui.filters.filtermanager.ConsistentFilterManager;
 import com.jfrog.ide.idea.ui.filters.filtermanager.LocalFilterManager;
+import com.jfrog.ide.idea.utils.Utils;
 import com.jfrog.xray.client.services.summary.Components;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -112,6 +112,12 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
      */
     protected abstract LocalInspectionTool getInspectionTool();
 
+    protected void sendUsageReport() {
+        Utils.sendUsageReport(getProjectPackageType() + "-deps");
+    }
+
+    protected abstract String getProjectPackageType();
+    
     /**
      * Scan and update dependency components.
      *
@@ -131,6 +137,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
             logError(getLog(), "Xray Scan failed", e, !quickScan);
         } finally {
             scanInProgress.set(false);
+            sendUsageReport();
         }
     }
 
@@ -199,7 +206,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
                 // Wait for scan to finish, to make sure the thread pool remain full
                 latch.await();
             } catch (InterruptedException e) {
-                Utils.logError(getLog(), ExceptionUtils.getRootCauseMessage(e), e, !quickScan);
+                logError(getLog(), ExceptionUtils.getRootCauseMessage(e), e, !quickScan);
             }
         };
     }

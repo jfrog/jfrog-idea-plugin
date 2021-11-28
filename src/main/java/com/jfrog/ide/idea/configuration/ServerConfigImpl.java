@@ -123,11 +123,11 @@ public class ServerConfigImpl implements ServerConfig {
         this.xraySettingsCredentialsKey = builder.xraySettingsCredentialsKey;
     }
 
-    boolean isXrayConfigured() {
+    public boolean isXrayConfigured() {
         return isNotBlank(xrayUrl) && isAuthenticationConfigured();
     }
 
-    boolean isArtifactoryConfigured() {
+    public boolean isArtifactoryConfigured() {
         return isNotBlank(artifactoryUrl) && isAuthenticationConfigured();
     }
 
