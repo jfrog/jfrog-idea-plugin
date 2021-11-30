@@ -117,7 +117,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
     }
 
     protected abstract String getProjectPackageType();
-    
+
     /**
      * Scan and update dependency components.
      *
@@ -176,13 +176,12 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
                 latch.countDown();
             }
         };
-        Runnable runnable = createRunnable(scanAndUpdateTask, latch, quickScan);
         if (executor.isShutdown() || executor.isTerminated()) {
             // Scan initiated by a change in the project descriptor
-            runnable.run();
+            createRunnable(scanAndUpdateTask, null, quickScan).run();
         } else {
             // Scan initiated by opening IntelliJ, by user, or by changing the configuration
-            executor.submit(runnable);
+            executor.submit(createRunnable(scanAndUpdateTask, latch, quickScan));
         }
     }
 
@@ -190,7 +189,9 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
      * Create a runnable to be submitted to the executor service, or run directly.
      *
      * @param scanAndUpdateTask - The task to submit
-     * @param latch             - The countdown latch, which makes sure the executor service doesn't get more than 3 tasks
+     * @param latch             - The countdown latch, which makes sure the executor service doesn't get more than 3 tasks.
+     *                          If null, the scan was initiated by a change in the project descriptor and the executor
+     *                          service is terminated. In this case, there is no requirement to wait.
      * @param quickScan         - Quick or full scan
      */
     private Runnable createRunnable(Task.Backgroundable scanAndUpdateTask, CountDownLatch latch, boolean quickScan) {
@@ -204,7 +205,9 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
             }
             try {
                 // Wait for scan to finish, to make sure the thread pool remain full
-                latch.await();
+                if (latch != null) {
+                    latch.await();
+                }
             } catch (InterruptedException e) {
                 logError(getLog(), ExceptionUtils.getRootCauseMessage(e), e, !quickScan);
             }
