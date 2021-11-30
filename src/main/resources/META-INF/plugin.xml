@@ -12,13 +12,11 @@
 
     <change-notes>
         <![CDATA[
-          <li>Show CVEs in component issue details.</li>
-          <li>Performance improvements.</li>
-          <li>Improve configuration page.</li>
-          <li>Bugfix - Go - Scan failed on Go below 1.16.</li>
-          <li>Bugfix - CI view - JFrog project was ignored.</li>
-          <li>Bugfix - CI view - Builds names with ':' returned errors.</li>
-          <li>Bugfix - CI view - Long build names returned errors.</li>
+          <li>Allow reading connection details from the JFrog CLI configuration.</li>
+          <li>Add access token support.</li>
+          <li>Add Usage Report.</li>
+          <li>Bugfix - Go, Maven, and npm - in some cases dependency scanning may freeze.</li>
+          <li>Bugfix - Too many excluded paths log messages.</li>
         ]]>
     </change-notes>
 
