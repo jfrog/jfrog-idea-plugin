@@ -5,6 +5,7 @@ import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.ui.HyperlinkLabel;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
+import com.intellij.util.ui.JBDimension;
 import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.idea.ui.configuration.JFrogGlobalConfiguration;
 import org.jfrog.build.extractor.scan.DependencyTree;
@@ -40,10 +41,39 @@ public class ComponentUtils {
 
     @SuppressWarnings("UnstableApiUsage")
     public static JComponent createNoCredentialsView() {
-        HyperlinkLabel link = new HyperlinkLabel();
-        link.setTextWithHyperlink("To use this section of the JFrog Plugin, please <hyperlink>configure</hyperlink> your JFrog platform details.");
-        link.addHyperlinkListener(e -> ShowSettingsUtil.getInstance().showSettingsDialog(null, JFrogGlobalConfiguration.class));
-        return createUnsupportedPanel(link);
+        JPanel noCredentialsPanel = new JBPanel<>();
+        noCredentialsPanel.setLayout(new BoxLayout(noCredentialsPanel, BoxLayout.PAGE_AXIS));
+
+        // "Thank you for installing the JFrog plugin"
+        HyperlinkLabel thanksLabel = new HyperlinkLabel();
+        thanksLabel.setText("Thank you for installing the JFrog plugin.");
+        addCenteredHyperlinkLabel(noCredentialsPanel, thanksLabel);
+
+        // "If you already have a JFrog environment, please configure its connection details."
+        HyperlinkLabel configLink = new HyperlinkLabel();
+        configLink.setTextWithHyperlink("If you already have a JFrog environment, please<hyperlink>configure</hyperlink> its connection details.");
+        configLink.addHyperlinkListener(e -> ShowSettingsUtil.getInstance().showSettingsDialog(null, JFrogGlobalConfiguration.class));
+        addCenteredHyperlinkLabel(noCredentialsPanel, configLink);
+
+        // "Don't have JFrog environment? Get one for FREE"
+        HyperlinkLabel getFreeLink = new HyperlinkLabel();
+        getFreeLink.setTextWithHyperlink("Don't have JFrog environment?<hyperlink>Get one for FREE</hyperlink>");
+        getFreeLink.addHyperlinkListener(e -> BrowserUtil.browse("https://www.jfrog.com/confluence/display/JFROG/JFrog+IntelliJ+IDEA+Plugin#JFrogIntelliJIDEAPlugin-SetUpaFREEJFrogEnvironmentintheCloud"));
+        addCenteredHyperlinkLabel(noCredentialsPanel, getFreeLink);
+
+        return createUnsupportedPanel(noCredentialsPanel);
+    }
+
+    /**
+     * Add centered HyperlinkLabel to the input panel.
+     *
+     * @param panel          - The input panel
+     * @param hyperlinkLabel - The hyperlink label
+     */
+    private static void addCenteredHyperlinkLabel(JPanel panel, HyperlinkLabel hyperlinkLabel) {
+        hyperlinkLabel.setMaximumSize(new JBDimension((int) hyperlinkLabel.getPreferredSize().getWidth(), (int) hyperlinkLabel.getPreferredSize().getHeight()));
+        hyperlinkLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(hyperlinkLabel);
     }
 
     @SuppressWarnings("UnstableApiUsage")
