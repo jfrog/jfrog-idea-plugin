@@ -71,7 +71,7 @@ public class ComponentUtils {
      * @param hyperlinkLabel - The hyperlink label
      */
     private static void addCenteredHyperlinkLabel(JPanel panel, HyperlinkLabel hyperlinkLabel) {
-        hyperlinkLabel.setMaximumSize(new JBDimension((int) hyperlinkLabel.getPreferredSize().getWidth(), (int) hyperlinkLabel.getPreferredSize().getHeight()));
+        hyperlinkLabel.setMaximumSize(hyperlinkLabel.getPreferredSize());
         hyperlinkLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(hyperlinkLabel);
     }
