@@ -55,9 +55,9 @@ public class ComponentUtils {
         configLink.addHyperlinkListener(e -> ShowSettingsUtil.getInstance().showSettingsDialog(null, JFrogGlobalConfiguration.class));
         addCenteredHyperlinkLabel(noCredentialsPanel, configLink);
 
-        // "Don't have JFrog environment? Get one for FREE"
+        // "Don't have a JFrog environment? Get one for FREE"
         HyperlinkLabel getFreeLink = new HyperlinkLabel();
-        getFreeLink.setTextWithHyperlink("Don't have JFrog environment?<hyperlink>Get one for FREE</hyperlink>");
+        getFreeLink.setTextWithHyperlink("Don't have a JFrog environment?<hyperlink>Get one for FREE</hyperlink>");
         getFreeLink.addHyperlinkListener(e -> BrowserUtil.browse("https://www.jfrog.com/confluence/display/JFROG/JFrog+IntelliJ+IDEA+Plugin#JFrogIntelliJIDEAPlugin-SetUpaFREEJFrogEnvironmentintheCloud"));
         addCenteredHyperlinkLabel(noCredentialsPanel, getFreeLink);
 
