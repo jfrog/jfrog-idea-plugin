@@ -1,5 +1,6 @@
 package com.jfrog.ide.idea.inspections;
 
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.externalSystem.settings.ExternalProjectSettings;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
  * @author yahavi
  */
 public abstract class GradleInspection extends AbstractInspection {
+    private int lastAnnotatedLine;
 
     public GradleInspection(String packageDescriptorName) {
         super(packageDescriptorName);
@@ -43,6 +45,18 @@ public abstract class GradleInspection extends AbstractInspection {
 
         // Collect the modules containing the dependency
         return collectModules(root, project, gradleModules, componentName);
+    }
+
+    @Override
+    boolean showAnnotationIcon(PsiElement element) {
+        Document document = element.getContainingFile().getViewProvider().getDocument();
+        boolean showAnnotationIcon = true;
+        if (document != null) {
+            int currentLine = document.getLineNumber(element.getTextOffset());
+            showAnnotationIcon = currentLine != lastAnnotatedLine;
+            lastAnnotatedLine = currentLine;
+        }
+        return showAnnotationIcon;
     }
 
     /**

@@ -1,7 +1,7 @@
 package com.jfrog.ide.idea.inspections;
 
+import com.intellij.lang.annotation.AnnotationBuilder;
 import com.intellij.lang.annotation.AnnotationHolder;
-import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.psi.PsiElement;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.Issue;
@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static com.intellij.lang.annotation.HighlightSeverity.INFORMATION;
 
 /**
  * @author yahavi
@@ -24,43 +26,30 @@ public class AnnotationUtils {
      *
      * @param annotationHolder - The annotations will be registered in this container
      * @param dependency       - The dependency tree node correlated to the element
-     * @param elements         - The elements to apply the annotations.
+     * @param elements         - The elements to apply the annotations
+     * @param showIcon         - True if should add annotation icon
      */
-    static void registerAnnotation(AnnotationHolder annotationHolder, DependencyTree dependency, PsiElement[] elements) {
-        HighlightSeverity problemHighlightType = getHighlightSeverity(dependency);
+    static void registerAnnotation(AnnotationHolder annotationHolder, DependencyTree dependency, PsiElement[] elements, boolean showIcon) {
         String licensesString = getLicensesString(dependency);
         String topIssue = getTopIssueString(dependency);
+        AnnotationIconRenderer iconRenderer = showIcon ? new AnnotationIconRenderer(dependency, topIssue) : null;
         Arrays.stream(elements)
                 .filter(Objects::nonNull)
                 .forEach(element -> {
                     try {
-                        annotationHolder.newAnnotation(problemHighlightType, topIssue).range(element).create();
-                        annotationHolder.newAnnotation(problemHighlightType, licensesString).range(element).create();
+                        AnnotationBuilder builder = annotationHolder.newAnnotation(INFORMATION, topIssue).range(element);
+                        if (showIcon) {
+                            iconRenderer.setProject(element.getProject());
+                            builder = builder.gutterIconRenderer(iconRenderer);
+                        }
+                        builder.create();
+                        annotationHolder.newAnnotation(INFORMATION, licensesString).range(element).create();
                     } catch (IllegalArgumentException e) {
                         // Exception is thrown when the element we register the annotation for is out of bound of the
                         // containing element exists in the provided annotationHolder.
                         // This scenario may occur during a gradle-inspections.
                     }
                 });
-    }
-
-    /**
-     * Get the severity of the dependency tree node.
-     *
-     * @param node - The dependency tree node
-     * @return the severity of the dependency tree node
-     */
-    private static HighlightSeverity getHighlightSeverity(DependencyTree node) {
-        switch (node.getTopIssue().getSeverity()) {
-            case High:
-            case Critical:
-                return HighlightSeverity.ERROR; // Red underline
-            case Low:
-            case Medium:
-                return HighlightSeverity.WEAK_WARNING; // White underline
-            default: // Normal, information, unknown and pending
-                return HighlightSeverity.INFORMATION; // No underline
-        }
     }
 
     /**
