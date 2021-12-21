@@ -47,7 +47,6 @@ public class Utils {
         GeneralInfo lhsGeneralInfo = lhs.getGeneralInfo();
         GeneralInfo rhsGeneralInfo = rhs.getGeneralInfo();
         return ObjectUtils.allNotNull(lhsGeneralInfo, rhsGeneralInfo) &&
-                StringUtils.equals(lhsGeneralInfo.getComponentId(), rhsGeneralInfo.getComponentId()) &&
                 StringUtils.equals(lhsGeneralInfo.getPath(), rhsGeneralInfo.getPath()) &&
                 StringUtils.equals(lhsGeneralInfo.getPkgType(), rhsGeneralInfo.getPkgType());
     }
@@ -90,7 +89,7 @@ public class Utils {
     public static void sendUsageReport(String techName) {
         ServerConfigImpl serverConfig = GlobalSettings.getInstance().getServerConfig();
         Logger log = Logger.getInstance();
-        if(!serverConfig.isArtifactoryConfigured()){
+        if (!serverConfig.isArtifactoryConfigured()) {
             log.debug("Usage report can't be sent. Artifactory is not configured.");
             return;
         }

@@ -147,7 +147,8 @@ public class MavenScanManager extends ScanManager {
         DependencyTree node = new DependencyTree(mavenProject.getMavenId().getArtifactId());
         MavenId mavenId = mavenProject.getMavenId();
         node.setGeneralInfo(new GeneralInfo().pkgType("maven")
-                .componentId(createComponentId(mavenId.getGroupId(), mavenId.getArtifactId(), mavenId.getVersion())));
+                .componentId(createComponentId(mavenId.getGroupId(), mavenId.getArtifactId(), mavenId.getVersion()))
+                .path(mavenProject.getPath()));
 
         return node;
     }
