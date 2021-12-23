@@ -34,7 +34,7 @@ public class GradleGroovyInspection extends GradleInspection {
         return new GroovyPsiElementVisitor(new GroovyElementVisitor() {
             @Override
             public void visitLiteralExpression(@NotNull GrLiteral literal) {
-                GradleGroovyInspection.this.visitElement(holder, literal);
+                GradleGroovyInspection.this.visitElement(holder, literal, isOnTheFly);
             }
         });
     }
