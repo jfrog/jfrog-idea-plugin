@@ -67,7 +67,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     void visitElement(AnnotationHolder annotationHolder, PsiElement element) {
         List<DependencyTree> dependencies = getDependencies(element);
         if (CollectionUtils.isNotEmpty(dependencies)) {
-            AnnotationUtils.registerAnnotation(annotationHolder, dependencies.get(0), getTargetElements(element));
+            AnnotationUtils.registerAnnotation(annotationHolder, dependencies.get(0), getTargetElements(element), showAnnotationIcon(element));
         }
     }
 
@@ -116,6 +116,16 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * @return Set of modules containing the dependency or null if not found
      */
     abstract Set<DependencyTree> getModules(PsiElement element, String componentName);
+
+    /**
+     * Override this method to determine whether to display multiple annotation icons in the same line.
+     *
+     * @param element - The Psi element in the package descriptor
+     * @return true if should show annotation icon.
+     */
+    boolean showAnnotationIcon(PsiElement element) {
+        return true;
+    }
 
     /**
      * Determine whether to apply the inspection on the Psi element.
