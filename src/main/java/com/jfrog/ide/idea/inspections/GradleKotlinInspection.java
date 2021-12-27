@@ -32,7 +32,7 @@ public class GradleKotlinInspection extends GradleInspection {
         return new KtVisitor<Void, Void>() {
             @Override
             public Void visitValueArgumentList(@NotNull KtValueArgumentList list, Void data) {
-                GradleKotlinInspection.this.visitElement(holder, list);
+                GradleKotlinInspection.this.visitElement(holder, list, isOnTheFly);
                 return null;
             }
         };

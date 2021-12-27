@@ -41,7 +41,7 @@ public class MavenInspection extends AbstractInspection {
             @Override
             public void visitXmlTag(XmlTag element) {
                 super.visitElement(element);
-                MavenInspection.this.visitElement(holder, element);
+                MavenInspection.this.visitElement(holder, element, isOnTheFly);
             }
         };
     }

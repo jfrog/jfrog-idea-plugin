@@ -32,7 +32,7 @@ public class NpmInspection extends AbstractInspection {
             @Override
             public void visitProperty(@NotNull JsonProperty element) {
                 super.visitProperty(element);
-                NpmInspection.this.visitElement(holder, element);
+                NpmInspection.this.visitElement(holder, element, isOnTheFly);
             }
         };
     }
