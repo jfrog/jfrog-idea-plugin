@@ -45,8 +45,8 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      *
      * @param problemsHolder - The "Show in dependency tree" option will be registered in this container.
      * @param element        - The Psi element in the package descriptor
-     * @param isOnTheFly     - True if the inspection triggered by opening a package descriptor file.
-     *                       False if the inspection triggered manually by clicking on "Code | Inspect Code".
+     * @param isOnTheFly     - True if the inspection was triggered by opening a package descriptor file.
+     *                       False if the inspection was triggered manually by clicking on "Code | Inspect Code".
      */
     void visitElement(ProblemsHolder problemsHolder, PsiElement element, boolean isOnTheFly) {
         if (!isOnTheFly) {
