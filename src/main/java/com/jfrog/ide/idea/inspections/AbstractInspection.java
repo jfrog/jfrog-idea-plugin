@@ -118,7 +118,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     abstract Set<DependencyTree> getModules(PsiElement element, String componentName);
 
     /**
-     * Override this method to avoid displaying multiple annotation icons in the same line.
+     * Override this method to determine whether to display multiple annotation icons in the same line.
      *
      * @param element - The Psi element in the package descriptor
      * @return true if should show annotation icon.
