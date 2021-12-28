@@ -12,11 +12,16 @@
 
     <change-notes>
         <![CDATA[
-          <li>Allow reading connection details from the JFrog CLI configuration.</li>
-          <li>Add access token support.</li>
-          <li>Add Usage Report.</li>
-          <li>Bugfix - Go, Maven, and npm - in some cases dependency scanning may freeze.</li>
-          <li>Bugfix - Too many excluded paths log messages.</li>
+          <li>Show severity icons near the dependencies in the package descriptor file.</li>
+          <li>Allow building Go dependency tree in case of compilation errors.</li>
+          <li>Improve welcome view.</li>
+          <li>Bug fix - Issues with the same component and summary are deduped.</li>
+          <li>Bug fix - Empty meaningless issues appear in some cases.</li>
+          <li>Bug fix - When a project key is provided, all licenses marked as violated.</li>
+          <li>Bug fix - When a project key is provided, licenses contain no link.</li>
+          <li>Bug fix - Meaningless records in the problems view.</li>
+          <li>Bug fix - Soft refresh in a Maven project may cause duplication in project tree view.</li>
+          <li>Bug fix - Code inspection throws an exception.</li>
         ]]>
     </change-notes>
 
