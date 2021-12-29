@@ -1,9 +1,9 @@
 resources:
-  - name: ideaSnapshotGit
+  - name: jfrogIdeaPluginSnapshotGit
     type: GitRepo
     configuration:
       path: jfrog/jfrog-idea-plugin
-      gitProvider: github
+      gitProvider: il_automation
       buildOn:
         pullRequestCreate: true
       branches:
@@ -11,10 +11,10 @@ resources:
       cancelPendingRunsOn:
         pullRequestUpdate: true
 
-  - name: ideaReleaseGit
+  - name: jfrogIdeaPluginReleaseGit
     type: GitRepo
     configuration:
       path: jfrog/jfrog-idea-plugin
-      gitProvider: github
+      gitProvider: il_automation
       buildOn:
         commit: false
