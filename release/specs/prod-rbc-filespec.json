@@ -1,7 +1,7 @@
 {
   "files": [
     {
-      "pattern": "ecosys-oss-release-local/(com/jfrog/ide/jfrog-idea-plugin/${version}/jfrog-idea-plugin-*)",
+      "pattern": "ecosys-oss-release-local/(com/jfrog/ide/idea/${version}/jfrog-*)",
       "target": "oss-release-local/{1}"
     }
   ]

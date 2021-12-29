@@ -1,7 +1,7 @@
 {
   "files": [
     {
-      "pattern": "ecosys-oss-snapshot-local/(com/jfrog/ide/jfrog-idea-plugin/*/jfrog-idea-plugin-*)",
+      "pattern": "ecosys-oss-snapshot-local/(com/jfrog/ide/idea/*/jfrog-*)",
       "target": "oss-snapshot-local/{1}"
     }
   ]

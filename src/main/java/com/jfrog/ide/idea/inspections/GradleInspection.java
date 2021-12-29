@@ -62,9 +62,9 @@ public abstract class GradleInspection extends AbstractInspection {
     /**
      * Create component name from component ID in build.gradle or build.gradle.kts files.
      * Some examples:
-     * compile project(':xyz') → xyz
-     * implementation('a:b:c') → a:b
-     * implementation('a:b') → a:b
+     * compile project(':xyz') > xyz
+     * implementation('a:b:c') > a:b
+     * implementation('a:b') > a:b
      *
      * @param componentId - Component ID from the build.gradle or build.gradle.kts files
      * @return component name.
