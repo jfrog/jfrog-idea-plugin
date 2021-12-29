@@ -22,6 +22,7 @@ pipelines:
           integrations:
             - name: il_automation
             - name: entplus_deployer
+            - name: jetbrains
         execution:
           onExecute:
             - cd $res_jfrogIdeaPluginReleaseGit_resourcePath
@@ -46,7 +47,7 @@ pipelines:
             - curl -fL https://getcli.jfrog.io/v2-jf | sh && chmod +x jf
             - ./jf c rm --quiet
             - ./jf c add internal --url=$int_entplus_deployer_url --user=$int_entplus_deployer_user --password=$int_entplus_deployer_apikey
-            - ./jf gradlec --use-wrapper --repo-resolve ecosys-maven-remote --repo-deploy ecosys-oss-release-local --deploy-maven-desc
+            - ./jf gradlec --use-wrapper --repo-resolve ecosys-maven-remote --repo-deploy ecosys-oss-release-local --deploy-maven-desc --deploy-ivy-desc=false
 
             # Run audit
             - ./jf ag --project $JFROG_CLI_BUILD_PROJECT
@@ -71,6 +72,9 @@ pipelines:
             # Distribute release bundle
             - ./jf ds rbc jfrog-idea-plugin $NEXT_VERSION --spec=./release/specs/prod-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
             - ./jf ds rbd jfrog-idea-plugin $NEXT_VERSION --site="releases.jfrog.io" --sync
+
+            # Upload to Jetbrains marketplace
+            - curl -i --header "Authorization: Bearer $int_jetbrains_token" -F pluginId=9834 -F file=./build/distributions/JFrog-$version.zip https://plugins.jetbrains.com/plugin/uploadPlugin
 
             # Update next development version
             - sed -i "s/\(currentVersion=\).*\$/\1${NEXT_DEVELOPMENT_VERSION}/" gradle.properties
