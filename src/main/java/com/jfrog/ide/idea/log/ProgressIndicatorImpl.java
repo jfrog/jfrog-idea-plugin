@@ -24,4 +24,9 @@ public class ProgressIndicatorImpl implements com.jfrog.ide.common.log.ProgressI
     public void setIndeterminate(boolean indeterminate) {
         indicator.setIndeterminate(true);
     }
+
+    @Override
+    public void setText(String text) {
+        indicator.setText(text);
+    }
 }
