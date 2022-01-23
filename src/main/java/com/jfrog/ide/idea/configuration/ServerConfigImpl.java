@@ -84,6 +84,8 @@ public class ServerConfigImpl implements ServerConfig {
     private String password;
     @Tag
     private String accessToken;
+    @Tag
+    private PolicyType policyType;
     // JFrog project key to be used as context to Xray scan.
     @OptionTag
     private String project;
@@ -117,6 +119,7 @@ public class ServerConfigImpl implements ServerConfig {
         this.username = builder.username;
         this.password = builder.password;
         this.accessToken = builder.accessToken;
+        this.policyType = builder.policyType;
         this.project = builder.project;
         this.watch = builder.watch;
         this.excludedPaths = builder.excludedPaths;
@@ -152,7 +155,9 @@ public class ServerConfigImpl implements ServerConfig {
                 Objects.equals(getPassword(), other.getPassword()) &&
                 Objects.equals(getUsername(), other.getUsername()) &&
                 Objects.equals(getAccessToken(), other.getAccessToken()) &&
+                Objects.equals(getPolicyType(), other.getPolicyType()) &&
                 Objects.equals(getProject(), other.getProject()) &&
+                Objects.equals(getWatch(), other.getWatch()) &&
                 Objects.equals(getExcludedPaths(), other.getExcludedPaths()) &&
                 isConnectionDetailsFromEnv() == other.isConnectionDetailsFromEnv() &&
                 getConnectionRetries() == other.getConnectionRetries() &&
@@ -233,6 +238,11 @@ public class ServerConfigImpl implements ServerConfig {
     }
 
     @Override
+    public PolicyType getPolicyType() {
+        return this.policyType;
+    }
+
+    @Override
     public String getProject() {
         return trimToEmpty(this.project);
     }
@@ -270,8 +280,16 @@ public class ServerConfigImpl implements ServerConfig {
         this.excludedPaths = excludedPaths;
     }
 
+    void setPolicyType(PolicyType policyType) {
+        this.policyType = policyType;
+    }
+
     void setProject(String project) {
         this.project = project;
+    }
+
+    void setWatch(String watch) {
+        this.watch = watch;
     }
 
     /**
@@ -506,6 +524,7 @@ public class ServerConfigImpl implements ServerConfig {
         private String password;
         private String accessToken;
         private String excludedPaths;
+        private PolicyType policyType;
         private String project;
         private String watch;
         private boolean connectionDetailsFromEnv;
@@ -548,6 +567,11 @@ public class ServerConfigImpl implements ServerConfig {
 
         public Builder setExcludedPaths(@Nullable String excludedPaths) {
             this.excludedPaths = excludedPaths;
+            return this;
+        }
+
+        public Builder setPolicyType(PolicyType policyType) {
+            this.policyType = policyType;
             return this;
         }
 

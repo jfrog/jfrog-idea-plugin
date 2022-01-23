@@ -68,7 +68,7 @@ public class ScanManagersFactory implements Disposable {
      * Therefore, we run startScan() which recreates the scan managers on refreshScanManagers().
      */
     private void registerOnChangeHandlers() {
-        busConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () -> startScan(true));
+        busConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () -> startScan(false));
     }
 
     /**

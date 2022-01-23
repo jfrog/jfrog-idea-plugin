@@ -32,7 +32,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 
 import static com.jfrog.ide.idea.ui.configuration.Utils.migrateXrayConfigToPlatformConfig;
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 
 /**
  * @author yahavi
@@ -66,7 +67,9 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
     public GlobalSettings getState() {
         ServerConfigImpl serverConfig = new ServerConfigImpl();
         serverConfig.setExcludedPaths(this.serverConfig.getExcludedPaths());
+        serverConfig.setPolicyType(this.serverConfig.getPolicyType());
         serverConfig.setProject(this.serverConfig.getProject());
+        serverConfig.setWatch(this.serverConfig.getWatch());
         serverConfig.setConnectionDetailsFromEnv(this.serverConfig.isConnectionDetailsFromEnv());
         serverConfig.setConnectionRetries(this.serverConfig.getConnectionRetries());
         serverConfig.setConnectionTimeout(this.serverConfig.getConnectionTimeout());
@@ -181,7 +184,9 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         this.serverConfig.setXrayUrl(serverConfig.getXrayUrl());
         this.serverConfig.setArtifactoryUrl(serverConfig.getArtifactoryUrl());
         this.serverConfig.setExcludedPaths(serverConfig.getExcludedPaths());
+        this.serverConfig.setPolicyType(serverConfig.getPolicyType());
         this.serverConfig.setProject(serverConfig.getProject());
+        this.serverConfig.setWatch(serverConfig.getWatch());
         this.serverConfig.setConnectionDetailsFromEnv(serverConfig.isConnectionDetailsFromEnv());
         this.serverConfig.setConnectionRetries(serverConfig.getConnectionRetries());
         this.serverConfig.setConnectionTimeout(serverConfig.getConnectionTimeout());
