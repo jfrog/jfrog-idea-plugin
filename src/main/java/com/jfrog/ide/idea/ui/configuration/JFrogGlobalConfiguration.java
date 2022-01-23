@@ -50,8 +50,9 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
 
     public static final String USER_AGENT = "jfrog-idea-plugin/" + JFrogGlobalConfiguration.class.getPackage().getImplementationVersion();
 
-    private JPanel advanced;
     private JPanel connectionDetails;
+    private JPanel settings;
+    private JPanel advanced;
 
     private ServerConfigImpl serverConfig;
     private JButton testConnectionButton;
@@ -92,6 +93,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     public JComponent createComponent() {
         JTabbedPane tabbedPane = new JBTabbedPane();
         tabbedPane.add("Connection Details", connectionDetails);
+        tabbedPane.add("Settings", settings);
         tabbedPane.add("Advanced", advanced);
         return tabbedPane;
     }
@@ -398,5 +400,9 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             xrayUrl.setEnabled(true);
             artifactoryUrl.setEnabled(true);
         }
+    }
+
+    private void createUIComponents() {
+        // TODO: place custom component creation code here
     }
 }

@@ -87,6 +87,9 @@ public class ServerConfigImpl implements ServerConfig {
     // JFrog project key to be used as context to Xray scan.
     @OptionTag
     private String project;
+    // JFrog watch to be used as context to Xray scan.
+    @OptionTag
+    private String watch;
     // Pattern of project paths to exclude from Xray scanning for npm
     @Tag
     private String excludedPaths;
@@ -115,6 +118,7 @@ public class ServerConfigImpl implements ServerConfig {
         this.password = builder.password;
         this.accessToken = builder.accessToken;
         this.project = builder.project;
+        this.watch = builder.watch;
         this.excludedPaths = builder.excludedPaths;
         this.connectionDetailsFromEnv = builder.connectionDetailsFromEnv;
         this.connectionRetries = builder.connectionRetries;
@@ -228,8 +232,14 @@ public class ServerConfigImpl implements ServerConfig {
         return defaultIfBlank(this.excludedPaths, DEFAULT_EXCLUSIONS);
     }
 
+    @Override
     public String getProject() {
         return trimToEmpty(this.project);
+    }
+
+    @Override
+    public String getWatch() {
+        return trimToEmpty(this.watch);
     }
 
     @Override
@@ -497,6 +507,7 @@ public class ServerConfigImpl implements ServerConfig {
         private String accessToken;
         private String excludedPaths;
         private String project;
+        private String watch;
         private boolean connectionDetailsFromEnv;
         private int connectionRetries;
         private int connectionTimeout;
@@ -542,6 +553,11 @@ public class ServerConfigImpl implements ServerConfig {
 
         public Builder setProject(@Nullable String project) {
             this.project = project;
+            return this;
+        }
+
+        public Builder setWatch(@Nullable String watch) {
+            this.watch = watch;
             return this;
         }
 
