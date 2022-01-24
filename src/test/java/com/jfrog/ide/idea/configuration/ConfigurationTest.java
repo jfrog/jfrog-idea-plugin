@@ -86,7 +86,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
         assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
         assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
         assertEquals(JFROG_PROJECT, actualServerConfig.getProject());
-        assertEquals(WATCH, actualServerConfig.getWatch());
+        assertEquals(WATCH, actualServerConfig.getWatches());
     }
 
     /**
@@ -108,10 +108,10 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
         assertEquals(PolicyType.PROJECT, actualServerConfig.getPolicyType());
 
         // Check "watch" policy type
-        serverConfig = new ServerConfigImpl.Builder().setPolicyType(PolicyType.WATCH).build();
+        serverConfig = new ServerConfigImpl.Builder().setPolicyType(PolicyType.WATCHES).build();
         globalSettings.setServerConfig(serverConfig);
         actualServerConfig = globalSettings.getServerConfig();
-        assertEquals(PolicyType.WATCH, actualServerConfig.getPolicyType());
+        assertEquals(PolicyType.WATCHES, actualServerConfig.getPolicyType());
     }
 
     /**
@@ -324,7 +324,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
                 .setConnectionTimeout(CONNECTION_TIMEOUT)
                 .setExcludedPaths(EXCLUDED_PATHS)
                 .setProject(JFROG_PROJECT)
-                .setWatch(WATCH)
+                .setWatches(WATCH)
                 .build();
     }
 

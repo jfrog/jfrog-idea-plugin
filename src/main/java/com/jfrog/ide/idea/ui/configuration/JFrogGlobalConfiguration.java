@@ -19,7 +19,6 @@ import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.impl.XrayClientBuilder;
 import com.jfrog.xray.client.services.system.Version;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.conn.ssl.TrustAllStrategy;
@@ -63,7 +62,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private JBLabel connectionResults;
     private JBTextField excludedPaths;
     private JBTextField project;
-    private JBTextField watch;
+    private JBTextField watches;
     private JBTextField username;
     private JBTextField platformUrl;
     private JBCheckBox connectionDetailsFromEnv;
@@ -89,7 +88,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     // Scan policies
     private JRadioButton showAllPoliciesRadioButton;
     private JRadioButton showAccordingToProjectRadioButton;
-    private JRadioButton showAccordingToWatchRadioButton;
+    private JRadioButton showAccordingToWatchesRadioButton;
 
     public JFrogGlobalConfiguration() {
         initUrls();
@@ -191,7 +190,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     }
 
     private String checkArtifactoryConnection() {
-        if (StringUtils.isBlank(artifactoryUrl.getText())) {
+        if (isBlank(artifactoryUrl.getText())) {
             return null;
         }
         try (ArtifactoryManager artifactoryManager = createArtifactoryManagerBuilder().build()) {
@@ -276,12 +275,12 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     }
 
     private void initPolicy() {
-        showAccordingToWatchRadioButton.addChangeListener(e -> {
-            if (showAccordingToWatchRadioButton.isSelected()) {
-                watch.setEnabled(true);
-                watch.setText(serverConfig.getWatch());
+        showAccordingToWatchesRadioButton.addChangeListener(e -> {
+            if (showAccordingToWatchesRadioButton.isSelected()) {
+                watches.setEnabled(true);
+                watches.setText(serverConfig.getWatches());
             } else {
-                watch.setEnabled(false);
+                watches.setEnabled(false);
             }
         });
     }
@@ -323,8 +322,8 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         ServerConfig.PolicyType policyType = ServerConfig.PolicyType.VULNERABILITIES;
         if (showAccordingToProjectRadioButton.isSelected()) {
             policyType = ServerConfig.PolicyType.PROJECT;
-        } else if (showAccordingToWatchRadioButton.isSelected()) {
-            policyType = ServerConfig.PolicyType.WATCH;
+        } else if (showAccordingToWatchesRadioButton.isSelected()) {
+            policyType = ServerConfig.PolicyType.WATCHES;
         }
         serverConfig = new ServerConfigImpl.Builder()
                 .setUrl(platformUrl.getText())
@@ -336,7 +335,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
                 .setExcludedPaths(excludedPaths.getText())
                 .setPolicyType(policyType)
                 .setProject(project.getText())
-                .setWatch(watch.getText())
+                .setWatches(watches.getText())
                 .setConnectionDetailsFromEnv(connectionDetailsFromEnv.isSelected())
                 .setConnectionRetries(connectionRetries.getNumber())
                 .setConnectionTimeout(connectionTimeout.getNumber())
@@ -347,7 +346,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
 
     @Override
     public void apply() throws ConfigurationException {
-        validateConfig();
+        ConfigVerificationUtils.validateGlobalConfig(serverConfig.getPolicyType(), serverConfig.getProject(), serverConfig.getWatches());
         GlobalSettings globalSettings = GlobalSettings.getInstance();
         globalSettings.updateConfig(serverConfig);
         MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
@@ -359,15 +358,6 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     @Override
     public void reset() {
         loadConfig();
-    }
-
-    private void validateConfig() throws ConfigurationException {
-        if (serverConfig.getPolicyType() == ServerConfig.PolicyType.PROJECT && StringUtils.isBlank(serverConfig.getProject())) {
-            throw new ConfigurationException("Project key must be configured");
-        }
-        if (serverConfig.getPolicyType() == ServerConfig.PolicyType.WATCH && StringUtils.isBlank(serverConfig.getWatch())) {
-            throw new ConfigurationException("Watch must be configured");
-        }
     }
 
     private Xray createXrayClient() {
@@ -404,6 +394,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         xrayUrl.getEmptyText().setText("Example: https://acme.jfrog.io/xray");
         artifactoryUrl.getEmptyText().setText("Example: https://acme.jfrog.io/artifactory");
         excludedPaths.setInputVerifier(new ExclusionsVerifier(excludedPaths));
+        watches.getEmptyText().setText("Example: watch-1,watch-2");
         connectionResults.setText("");
 
         serverConfig = GlobalSettings.getInstance().getServerConfig();
@@ -412,7 +403,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             updatePolicyTextFields();
             excludedPaths.setText(serverConfig.getExcludedPaths());
             project.setText(serverConfig.getProject());
-            watch.setText(serverConfig.getWatch());
+            watches.setText(serverConfig.getWatches());
             connectionRetries.setValue(serverConfig.getConnectionRetries());
             connectionTimeout.setValue(serverConfig.getConnectionTimeout());
             connectionDetailsFromEnv.setSelected(serverConfig.isConnectionDetailsFromEnv());
@@ -421,7 +412,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             excludedPaths.setText(DEFAULT_EXCLUSIONS);
             showAllPoliciesRadioButton.setSelected(true);
             project.setText("");
-            watch.setText("");
+            watches.setText("");
             connectionDetailsFromEnv.setSelected(false);
             connectionRetries.setValue(ConnectionRetriesSpinner.RANGE.initial);
             connectionTimeout.setValue(ConnectionTimeoutSpinner.RANGE.initial);
@@ -449,22 +440,18 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
 
     private void updatePolicyTextFields() {
         switch (ObjectUtils.defaultIfNull(serverConfig.getPolicyType(), ServerConfig.PolicyType.VULNERABILITIES)) {
-            case WATCH:
-                showAccordingToWatchRadioButton.setSelected(true);
-                watch.setEnabled(true);
-                watch.setText(serverConfig.getWatch());
+            case WATCHES:
+                showAccordingToWatchesRadioButton.setSelected(true);
+                watches.setEnabled(true);
+                watches.setText(serverConfig.getWatches());
                 return;
             case PROJECT:
                 showAccordingToProjectRadioButton.setSelected(true);
-                watch.setEnabled(false);
+                watches.setEnabled(false);
                 return;
             case VULNERABILITIES:
                 showAllPoliciesRadioButton.setSelected(true);
-                watch.setEnabled(false);
+                watches.setEnabled(false);
         }
-    }
-
-    private void createUIComponents() {
-        // TODO: place custom component creation code here
     }
 }

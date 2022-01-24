@@ -278,7 +278,7 @@
           </component>
         </children>
       </grid>
-      <grid id="eca9a" binding="settings" layout-manager="GridLayoutManager" row-count="15" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="eca9a" binding="settings" layout-manager="GridLayoutManager" row-count="16" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <tabbedpane title="Settings"/>
@@ -368,7 +368,7 @@
           </component>
           <vspacer id="2a357">
             <constraints>
-              <grid row="14" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false">
+              <grid row="15" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false">
                 <preferred-size width="293" height="14"/>
               </grid>
             </constraints>
@@ -397,15 +397,15 @@
               <text value="Show according to Project"/>
             </properties>
           </component>
-          <component id="b204b" class="javax.swing.JRadioButton" binding="showAccordingToWatchRadioButton">
+          <component id="b204b" class="javax.swing.JRadioButton" binding="showAccordingToWatchesRadioButton">
             <constraints>
               <grid row="13" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Show according to Watch"/>
+              <text value="Show according to Watches"/>
             </properties>
           </component>
-          <component id="90a38" class="com.intellij.ui.components.JBTextField" binding="watch">
+          <component id="90a38" class="com.intellij.ui.components.JBTextField" binding="watches">
             <constraints>
               <grid row="13" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="133" height="30"/>
@@ -413,7 +413,7 @@
             </constraints>
             <properties>
               <text value=""/>
-              <toolTipText value="Name of the Xray watch. Used for context to Xray scanning."/>
+              <toolTipText value="A comma separated list of Xray watches. Used for context to Xray scanning."/>
             </properties>
           </component>
           <component id="449ce" class="javax.swing.JLabel">
@@ -441,6 +441,17 @@
             <properties>
               <enabled value="false"/>
               <text value="    Follow these steps if you’d like to set a project:"/>
+            </properties>
+          </component>
+          <component id="4fca0" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="14" column="1" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                <preferred-size width="133" height="16"/>
+              </grid>
+            </constraints>
+            <properties>
+              <enabled value="false"/>
+              <text value=" A comma separated list of Xray watches."/>
             </properties>
           </component>
         </children>

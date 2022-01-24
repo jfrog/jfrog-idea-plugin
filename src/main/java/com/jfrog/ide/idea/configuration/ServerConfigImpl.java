@@ -89,9 +89,9 @@ public class ServerConfigImpl implements ServerConfig {
     // JFrog project key to be used as context to Xray scan.
     @OptionTag
     private String project;
-    // JFrog watch to be used as context to Xray scan.
+    // A comma separated list of Xray watches to be used as context to Xray scan.
     @OptionTag
-    private String watch;
+    private String watches;
     // Pattern of project paths to exclude from Xray scanning for npm
     @Tag
     private String excludedPaths;
@@ -121,7 +121,7 @@ public class ServerConfigImpl implements ServerConfig {
         this.accessToken = builder.accessToken;
         this.policyType = builder.policyType;
         this.project = builder.project;
-        this.watch = builder.watch;
+        this.watches = builder.watches;
         this.excludedPaths = builder.excludedPaths;
         this.connectionDetailsFromEnv = builder.connectionDetailsFromEnv;
         this.connectionRetries = builder.connectionRetries;
@@ -157,7 +157,7 @@ public class ServerConfigImpl implements ServerConfig {
                 Objects.equals(getAccessToken(), other.getAccessToken()) &&
                 Objects.equals(getPolicyType(), other.getPolicyType()) &&
                 Objects.equals(getProject(), other.getProject()) &&
-                Objects.equals(getWatch(), other.getWatch()) &&
+                Objects.equals(getWatches(), other.getWatches()) &&
                 Objects.equals(getExcludedPaths(), other.getExcludedPaths()) &&
                 isConnectionDetailsFromEnv() == other.isConnectionDetailsFromEnv() &&
                 getConnectionRetries() == other.getConnectionRetries() &&
@@ -248,8 +248,8 @@ public class ServerConfigImpl implements ServerConfig {
     }
 
     @Override
-    public String getWatch() {
-        return trimToEmpty(this.watch);
+    public String getWatches() {
+        return trimToEmpty(this.watches);
     }
 
     @Override
@@ -288,8 +288,8 @@ public class ServerConfigImpl implements ServerConfig {
         this.project = project;
     }
 
-    void setWatch(String watch) {
-        this.watch = watch;
+    void setWatches(String watches) {
+        this.watches = watches;
     }
 
     /**
@@ -526,7 +526,7 @@ public class ServerConfigImpl implements ServerConfig {
         private String excludedPaths;
         private PolicyType policyType;
         private String project;
-        private String watch;
+        private String watches;
         private boolean connectionDetailsFromEnv;
         private int connectionRetries;
         private int connectionTimeout;
@@ -580,8 +580,8 @@ public class ServerConfigImpl implements ServerConfig {
             return this;
         }
 
-        public Builder setWatch(@Nullable String watch) {
-            this.watch = watch;
+        public Builder setWatches(@Nullable String watches) {
+            this.watches = watches;
             return this;
         }
 
