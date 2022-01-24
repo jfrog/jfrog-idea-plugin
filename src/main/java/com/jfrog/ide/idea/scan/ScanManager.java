@@ -37,8 +37,8 @@ import com.jfrog.ide.idea.ui.filters.filtermanager.ConsistentFilterManager;
 import com.jfrog.ide.idea.ui.filters.filtermanager.LocalFilterManager;
 import com.jfrog.ide.idea.utils.Utils;
 import com.jfrog.xray.client.services.summary.Components;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependencyTree;
@@ -126,8 +126,11 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
      */
     private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator) {
         try {
+            indicator.setText("1/3: Building dependency tree");
             buildTree(!quickScan);
+            indicator.setText("2/3: Xray scanning project dependencies");
             scanAndCacheArtifacts(indicator, quickScan);
+            indicator.setText("3/3: Finalizing");
             addXrayInfoToTree(getScanResults());
             setScanResults();
             DumbService.getInstance(project).smartInvokeLater(this::runInspections);
@@ -151,7 +154,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
         // The tasks run asynchronously. To make sure no more than 3 tasks are running concurrently,
         // we use a count down latch that signals to that executor service that it can get more tasks.
         CountDownLatch latch = new CountDownLatch(1);
-        Task.Backgroundable scanAndUpdateTask = new Task.Backgroundable(null, "Xray: Scanning for vulnerabilities...") {
+        Task.Backgroundable scanAndUpdateTask = new Task.Backgroundable(null, getTaskTitle()) {
             @Override
             public void run(@NotNull com.intellij.openapi.progress.ProgressIndicator indicator) {
                 if (project.isDisposed()) {
@@ -183,6 +186,16 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
             // Scan initiated by opening IntelliJ, by user, or by changing the configuration
             executor.submit(createRunnable(scanAndUpdateTask, latch, quickScan));
         }
+    }
+
+    /**
+     * Get text to display in the task progress.
+     *
+     * @return text to display in the task progress.
+     */
+    private String getTaskTitle() {
+        String relativePath = Utils.getProjectBasePath(project).relativize(Paths.get(basePath)).toString();
+        return "Xray scanning " + StringUtils.defaultIfBlank(relativePath, project.getName());
     }
 
     /**
