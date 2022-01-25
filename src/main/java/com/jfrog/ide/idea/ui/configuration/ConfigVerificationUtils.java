@@ -48,7 +48,7 @@ public class ConfigVerificationUtils {
                 throw new ConfigurationException("Watch can't be empty");
             }
             if (illegalCharactersExist(part)) {
-                throw new ConfigurationException("Illegal characters in watches pattern");
+                throw new ConfigurationException("Illegal characters in watch: " + part);
             }
         }
     }
