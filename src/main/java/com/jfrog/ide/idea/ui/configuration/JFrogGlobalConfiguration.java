@@ -86,9 +86,9 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private JRadioButton accessTokenRadioButton;
 
     // Scan policies
-    private JRadioButton showAllPoliciesRadioButton;
-    private JRadioButton showAccordingToProjectRadioButton;
-    private JRadioButton showAccordingToWatchesRadioButton;
+    private JRadioButton allVulnerabilitiesRadioButton;
+    private JRadioButton accordingToProjectRadioButton;
+    private JRadioButton accordingToWatchesRadioButton;
 
     public JFrogGlobalConfiguration() {
         initUrls();
@@ -275,8 +275,8 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     }
 
     private void initPolicy() {
-        showAccordingToWatchesRadioButton.addChangeListener(e -> {
-            if (showAccordingToWatchesRadioButton.isSelected()) {
+        accordingToWatchesRadioButton.addChangeListener(e -> {
+            if (accordingToWatchesRadioButton.isSelected()) {
                 watches.setEnabled(true);
                 watches.setText(serverConfig.getWatches());
             } else {
@@ -320,9 +320,9 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     @Override
     public boolean isModified() {
         ServerConfig.PolicyType policyType = ServerConfig.PolicyType.VULNERABILITIES;
-        if (showAccordingToProjectRadioButton.isSelected()) {
+        if (accordingToProjectRadioButton.isSelected()) {
             policyType = ServerConfig.PolicyType.PROJECT;
-        } else if (showAccordingToWatchesRadioButton.isSelected()) {
+        } else if (accordingToWatchesRadioButton.isSelected()) {
             policyType = ServerConfig.PolicyType.WATCHES;
         }
         serverConfig = new ServerConfigImpl.Builder()
@@ -410,7 +410,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         } else {
             clearText(platformUrl, xrayUrl, artifactoryUrl, username, password);
             excludedPaths.setText(DEFAULT_EXCLUSIONS);
-            showAllPoliciesRadioButton.setSelected(true);
+            allVulnerabilitiesRadioButton.setSelected(true);
             project.setText("");
             watches.setText("");
             connectionDetailsFromEnv.setSelected(false);
@@ -441,16 +441,16 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private void updatePolicyTextFields() {
         switch (ObjectUtils.defaultIfNull(serverConfig.getPolicyType(), ServerConfig.PolicyType.VULNERABILITIES)) {
             case WATCHES:
-                showAccordingToWatchesRadioButton.setSelected(true);
+                accordingToWatchesRadioButton.setSelected(true);
                 watches.setEnabled(true);
                 watches.setText(serverConfig.getWatches());
                 return;
             case PROJECT:
-                showAccordingToProjectRadioButton.setSelected(true);
+                accordingToProjectRadioButton.setSelected(true);
                 watches.setEnabled(false);
                 return;
             case VULNERABILITIES:
-                showAllPoliciesRadioButton.setSelected(true);
+                allVulnerabilitiesRadioButton.setSelected(true);
                 watches.setEnabled(false);
         }
     }
