@@ -29,7 +29,7 @@
         </constraints>
         <properties>
           <text value=""/>
-          <toolTipText value="Example: http://myjfrog.acme.org/xray"/>
+          <toolTipText value="A wildcards pattern, to match the name of builds published to Artifactory."/>
         </properties>
       </component>
       <component id="9b39e" class="javax.swing.JLabel">

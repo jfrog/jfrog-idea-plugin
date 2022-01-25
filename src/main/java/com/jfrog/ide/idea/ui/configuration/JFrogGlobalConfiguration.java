@@ -4,10 +4,12 @@ import com.google.common.collect.Lists;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
+import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.ui.HyperlinkLabel;
 import com.intellij.ui.components.*;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.ui.UIUtil;
+import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
 import com.jfrog.ide.idea.events.ApplicationEvents;
@@ -16,7 +18,7 @@ import com.jfrog.ide.idea.ui.components.ConnectionResultsGesture;
 import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.impl.XrayClientBuilder;
 import com.jfrog.xray.client.services.system.Version;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.conn.ssl.TrustAllStrategy;
@@ -50,8 +52,9 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
 
     public static final String USER_AGENT = "jfrog-idea-plugin/" + JFrogGlobalConfiguration.class.getPackage().getImplementationVersion();
 
-    private JPanel advanced;
     private JPanel connectionDetails;
+    private JPanel settings;
+    private JPanel advanced;
 
     private ServerConfigImpl serverConfig;
     private JButton testConnectionButton;
@@ -59,6 +62,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private JBLabel connectionResults;
     private JBTextField excludedPaths;
     private JBTextField project;
+    private JBTextField watches;
     private JBTextField username;
     private JBTextField platformUrl;
     private JBCheckBox connectionDetailsFromEnv;
@@ -75,15 +79,23 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private HyperlinkLabel projectInstructions;
     private HyperlinkLabel policyInstructions;
     private HyperlinkLabel watchInstructions;
+    private JBPasswordField accessToken;
+
+    // Authentication types
     private JRadioButton usernamePasswordRadioButton;
     private JRadioButton accessTokenRadioButton;
-    private JPasswordField accessToken;
+
+    // Scan policies
+    private JRadioButton allVulnerabilitiesRadioButton;
+    private JRadioButton accordingToProjectRadioButton;
+    private JRadioButton accordingToWatchesRadioButton;
 
     public JFrogGlobalConfiguration() {
         initUrls();
         initTestConnection();
         initConnectionDetailsFromEnv();
         initAuthenticationMethod();
+        initPolicy();
         initLinks();
     }
 
@@ -92,6 +104,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     public JComponent createComponent() {
         JTabbedPane tabbedPane = new JBTabbedPane();
         tabbedPane.add("Connection Details", connectionDetails);
+        tabbedPane.add("Settings", settings);
         tabbedPane.add("Advanced", advanced);
         return tabbedPane;
     }
@@ -177,7 +190,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     }
 
     private String checkArtifactoryConnection() {
-        if (StringUtils.isBlank(artifactoryUrl.getText())) {
+        if (isBlank(artifactoryUrl.getText())) {
             return null;
         }
         try (ArtifactoryManager artifactoryManager = createArtifactoryManagerBuilder().build()) {
@@ -261,6 +274,17 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         password.setEnabled(!isAccessMode);
     }
 
+    private void initPolicy() {
+        accordingToWatchesRadioButton.addChangeListener(e -> {
+            if (accordingToWatchesRadioButton.isSelected()) {
+                watches.setEnabled(true);
+                watches.setText(serverConfig.getWatches());
+            } else {
+                watches.setEnabled(false);
+            }
+        });
+    }
+
     private void initLinks() {
         initHyperlink(projectInstructions, "Create a <hyperlink>JFrog Project</hyperlink>, or obtain the relevant JFrog Project key.", "https://www.jfrog.com/confluence/display/JFROG/Projects");
         initHyperlink(policyInstructions, "Create a <hyperlink>Policy</hyperlink> on JFrog Xray.", "https://www.jfrog.com/confluence/display/JFROG/Creating+Xray+Policies+and+Rules");
@@ -295,6 +319,12 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
 
     @Override
     public boolean isModified() {
+        ServerConfig.PolicyType policyType = ServerConfig.PolicyType.VULNERABILITIES;
+        if (accordingToProjectRadioButton.isSelected()) {
+            policyType = ServerConfig.PolicyType.PROJECT;
+        } else if (accordingToWatchesRadioButton.isSelected()) {
+            policyType = ServerConfig.PolicyType.WATCHES;
+        }
         serverConfig = new ServerConfigImpl.Builder()
                 .setUrl(platformUrl.getText())
                 .setArtifactoryUrl(artifactoryUrl.getText())
@@ -303,7 +333,9 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
                 .setPassword(String.valueOf(password.getPassword()))
                 .setAccessToken(String.valueOf(accessToken.getPassword()))
                 .setExcludedPaths(excludedPaths.getText())
+                .setPolicyType(policyType)
                 .setProject(project.getText())
+                .setWatches(watches.getText())
                 .setConnectionDetailsFromEnv(connectionDetailsFromEnv.isSelected())
                 .setConnectionRetries(connectionRetries.getNumber())
                 .setConnectionTimeout(connectionTimeout.getNumber())
@@ -313,7 +345,8 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     }
 
     @Override
-    public void apply() {
+    public void apply() throws ConfigurationException {
+        ConfigVerificationUtils.validateGlobalConfig(serverConfig.getPolicyType(), serverConfig.getProject(), serverConfig.getWatches());
         GlobalSettings globalSettings = GlobalSettings.getInstance();
         globalSettings.updateConfig(serverConfig);
         MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
@@ -361,20 +394,25 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         xrayUrl.getEmptyText().setText("Example: https://acme.jfrog.io/xray");
         artifactoryUrl.getEmptyText().setText("Example: https://acme.jfrog.io/artifactory");
         excludedPaths.setInputVerifier(new ExclusionsVerifier(excludedPaths));
+        watches.getEmptyText().setText("Example: watch-1,watch-2");
         connectionResults.setText("");
 
         serverConfig = GlobalSettings.getInstance().getServerConfig();
         if (serverConfig != null) {
             updateConnectionDetailsTextFields();
+            updatePolicyTextFields();
             excludedPaths.setText(serverConfig.getExcludedPaths());
             project.setText(serverConfig.getProject());
+            watches.setText(serverConfig.getWatches());
             connectionRetries.setValue(serverConfig.getConnectionRetries());
             connectionTimeout.setValue(serverConfig.getConnectionTimeout());
             connectionDetailsFromEnv.setSelected(serverConfig.isConnectionDetailsFromEnv());
         } else {
             clearText(platformUrl, xrayUrl, artifactoryUrl, username, password);
             excludedPaths.setText(DEFAULT_EXCLUSIONS);
+            allVulnerabilitiesRadioButton.setSelected(true);
             project.setText("");
+            watches.setText("");
             connectionDetailsFromEnv.setSelected(false);
             connectionRetries.setValue(ConnectionRetriesSpinner.RANGE.initial);
             connectionTimeout.setValue(ConnectionTimeoutSpinner.RANGE.initial);
@@ -397,6 +435,23 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             setRtAndXraySeparately.getModel().setPressed(true);
             xrayUrl.setEnabled(true);
             artifactoryUrl.setEnabled(true);
+        }
+    }
+
+    private void updatePolicyTextFields() {
+        switch (ObjectUtils.defaultIfNull(serverConfig.getPolicyType(), ServerConfig.PolicyType.VULNERABILITIES)) {
+            case WATCHES:
+                accordingToWatchesRadioButton.setSelected(true);
+                watches.setEnabled(true);
+                watches.setText(serverConfig.getWatches());
+                return;
+            case PROJECT:
+                accordingToProjectRadioButton.setSelected(true);
+                watches.setEnabled(false);
+                return;
+            case VULNERABILITIES:
+                allVulnerabilitiesRadioButton.setSelected(true);
+                watches.setEnabled(false);
         }
     }
 }

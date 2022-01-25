@@ -84,9 +84,14 @@ public class ServerConfigImpl implements ServerConfig {
     private String password;
     @Tag
     private String accessToken;
+    @Tag
+    private PolicyType policyType;
     // JFrog project key to be used as context to Xray scan.
     @OptionTag
     private String project;
+    // A comma separated list of Xray watches to be used as context to Xray scan.
+    @OptionTag
+    private String watches;
     // Pattern of project paths to exclude from Xray scanning for npm
     @Tag
     private String excludedPaths;
@@ -114,7 +119,9 @@ public class ServerConfigImpl implements ServerConfig {
         this.username = builder.username;
         this.password = builder.password;
         this.accessToken = builder.accessToken;
+        this.policyType = builder.policyType;
         this.project = builder.project;
+        this.watches = builder.watches;
         this.excludedPaths = builder.excludedPaths;
         this.connectionDetailsFromEnv = builder.connectionDetailsFromEnv;
         this.connectionRetries = builder.connectionRetries;
@@ -148,7 +155,9 @@ public class ServerConfigImpl implements ServerConfig {
                 Objects.equals(getPassword(), other.getPassword()) &&
                 Objects.equals(getUsername(), other.getUsername()) &&
                 Objects.equals(getAccessToken(), other.getAccessToken()) &&
+                Objects.equals(getPolicyType(), other.getPolicyType()) &&
                 Objects.equals(getProject(), other.getProject()) &&
+                Objects.equals(getWatches(), other.getWatches()) &&
                 Objects.equals(getExcludedPaths(), other.getExcludedPaths()) &&
                 isConnectionDetailsFromEnv() == other.isConnectionDetailsFromEnv() &&
                 getConnectionRetries() == other.getConnectionRetries() &&
@@ -228,8 +237,19 @@ public class ServerConfigImpl implements ServerConfig {
         return defaultIfBlank(this.excludedPaths, DEFAULT_EXCLUSIONS);
     }
 
+    @Override
+    public PolicyType getPolicyType() {
+        return this.policyType;
+    }
+
+    @Override
     public String getProject() {
         return trimToEmpty(this.project);
+    }
+
+    @Override
+    public String getWatches() {
+        return trimToEmpty(this.watches);
     }
 
     @Override
@@ -260,8 +280,16 @@ public class ServerConfigImpl implements ServerConfig {
         this.excludedPaths = excludedPaths;
     }
 
+    void setPolicyType(PolicyType policyType) {
+        this.policyType = policyType;
+    }
+
     void setProject(String project) {
         this.project = project;
+    }
+
+    void setWatches(String watches) {
+        this.watches = watches;
     }
 
     /**
@@ -496,7 +524,9 @@ public class ServerConfigImpl implements ServerConfig {
         private String password;
         private String accessToken;
         private String excludedPaths;
+        private PolicyType policyType;
         private String project;
+        private String watches;
         private boolean connectionDetailsFromEnv;
         private int connectionRetries;
         private int connectionTimeout;
@@ -540,8 +570,18 @@ public class ServerConfigImpl implements ServerConfig {
             return this;
         }
 
+        public Builder setPolicyType(PolicyType policyType) {
+            this.policyType = policyType;
+            return this;
+        }
+
         public Builder setProject(@Nullable String project) {
             this.project = project;
+            return this;
+        }
+
+        public Builder setWatches(@Nullable String watches) {
+            this.watches = watches;
             return this;
         }
 

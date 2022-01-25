@@ -250,7 +250,7 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="89090" class="javax.swing.JPasswordField" binding="accessToken" default-binding="true">
+              <component id="89090" class="com.intellij.ui.components.JBPasswordField" binding="accessToken" default-binding="true">
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                     <preferred-size width="150" height="-1"/>
@@ -278,7 +278,209 @@
           </component>
         </children>
       </grid>
-      <grid id="b5e9b" binding="advanced" layout-manager="GridLayoutManager" row-count="17" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="eca9a" binding="settings" layout-manager="GridLayoutManager" row-count="16" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <tabbedpane title="Settings"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="f3e60" class="com.intellij.ui.TitledSeparator">
+            <constraints>
+              <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="JFrog Project"/>
+            </properties>
+          </component>
+          <component id="e3a1d" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="3" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                <preferred-size width="133" height="16"/>
+              </grid>
+            </constraints>
+            <properties>
+              <enabled value="false"/>
+              <text value="    Optionally use the project key field to allow the security and license compliance information displayed"/>
+            </properties>
+          </component>
+          <component id="88b43" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="4" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                <preferred-size width="133" height="16"/>
+              </grid>
+            </constraints>
+            <properties>
+              <enabled value="false"/>
+              <text value="    in IntelliJ IDEA, to reflect the security policies required by your organization."/>
+            </properties>
+          </component>
+          <component id="29da7" class="com.intellij.ui.components.JBTextField" binding="project">
+            <constraints>
+              <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="133" height="30"/>
+              </grid>
+            </constraints>
+            <properties>
+              <text value=""/>
+              <toolTipText value="Name of the Artifactory project. Used for context to Xray scanning."/>
+            </properties>
+          </component>
+          <component id="fcf75" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="1" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                <preferred-size width="109" height="16"/>
+              </grid>
+            </constraints>
+            <properties>
+              <text value="    Project key"/>
+            </properties>
+          </component>
+          <hspacer id="cf763">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+          </hspacer>
+          <component id="dbbb3" class="com.intellij.ui.HyperlinkLabel" binding="projectInstructions">
+            <constraints>
+              <grid row="7" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value=""/>
+            </properties>
+          </component>
+          <component id="6282" class="com.intellij.ui.HyperlinkLabel" binding="policyInstructions">
+            <constraints>
+              <grid row="8" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value=""/>
+            </properties>
+          </component>
+          <component id="b8be8" class="com.intellij.ui.HyperlinkLabel" binding="watchInstructions">
+            <constraints>
+              <grid row="9" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value=""/>
+            </properties>
+          </component>
+          <vspacer id="2a357">
+            <constraints>
+              <grid row="15" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false">
+                <preferred-size width="293" height="14"/>
+              </grid>
+            </constraints>
+          </vspacer>
+          <component id="f2e0a" class="com.intellij.ui.TitledSeparator">
+            <constraints>
+              <grid row="10" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Scanning Policy"/>
+            </properties>
+          </component>
+          <component id="6e971" class="javax.swing.JRadioButton" binding="allVulnerabilitiesRadioButton">
+            <constraints>
+              <grid row="11" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="All vulnerabilities"/>
+            </properties>
+          </component>
+          <component id="f6c62" class="javax.swing.JRadioButton" binding="accordingToProjectRadioButton">
+            <constraints>
+              <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="According to Project"/>
+            </properties>
+          </component>
+          <component id="b204b" class="javax.swing.JRadioButton" binding="accordingToWatchesRadioButton">
+            <constraints>
+              <grid row="13" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="According to Watches"/>
+            </properties>
+          </component>
+          <component id="90a38" class="com.intellij.ui.components.JBTextField" binding="watches">
+            <constraints>
+              <grid row="13" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="133" height="30"/>
+              </grid>
+            </constraints>
+            <properties>
+              <text value=""/>
+              <toolTipText value="A comma separated list of Xray watches. Used for context to Xray scanning."/>
+            </properties>
+          </component>
+          <component id="449ce" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="5" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                <preferred-size width="133" height="16"/>
+              </grid>
+            </constraints>
+            <properties>
+              <enabled value="false"/>
+              <text value="    Also, the CI view will show only builds associated with this project."/>
+            </properties>
+          </component>
+          <hspacer id="91322">
+            <constraints>
+              <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+          </hspacer>
+          <component id="36f3c" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="6" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                <preferred-size width="133" height="16"/>
+              </grid>
+            </constraints>
+            <properties>
+              <enabled value="false"/>
+              <text value="    Follow these steps if you’d like to set a project:"/>
+            </properties>
+          </component>
+          <component id="4fca0" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="14" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                <preferred-size width="133" height="16"/>
+              </grid>
+            </constraints>
+            <properties>
+              <enabled value="false"/>
+              <text value=" A comma separated list of Xray watches."/>
+            </properties>
+          </component>
+          <component id="7a43" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="12" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                <preferred-size width="133" height="30"/>
+              </grid>
+            </constraints>
+            <properties>
+              <enabled value="false"/>
+              <focusable value="false"/>
+              <text value=""/>
+            </properties>
+          </component>
+          <component id="42ee4" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="11" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                <preferred-size width="133" height="30"/>
+              </grid>
+            </constraints>
+            <properties>
+              <enabled value="false"/>
+              <focusable value="false"/>
+              <text value=""/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <grid id="b5e9b" binding="advanced" layout-manager="GridLayoutManager" row-count="10" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <tabbedpane title="Advanced"/>
@@ -302,7 +504,7 @@
           </component>
           <component id="a1d59" class="com.intellij.ui.components.JBTextField" binding="excludedPaths">
             <constraints>
-              <grid row="5" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false">
+              <grid row="5" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="133" height="30"/>
               </grid>
             </constraints>
@@ -344,99 +546,12 @@
               <text value="    This is supported only by Gradle, npm and Go projects."/>
             </properties>
           </component>
-          <component id="c23ec" class="com.intellij.ui.components.JBTextField" binding="project">
-            <constraints>
-              <grid row="10" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false">
-                <preferred-size width="133" height="30"/>
-              </grid>
-            </constraints>
-            <properties>
-              <text value=""/>
-              <toolTipText value="Name of Artifactory project. Used for context to Xray scanning."/>
-            </properties>
-          </component>
-          <component id="a7d1e" class="javax.swing.JLabel">
-            <constraints>
-              <grid row="11" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
-                <preferred-size width="133" height="16"/>
-              </grid>
-            </constraints>
-            <properties>
-              <enabled value="false"/>
-              <text value="    Optionally use the project key field to allow the security and license compliance information displayed"/>
-            </properties>
-          </component>
-          <component id="ed918" class="javax.swing.JLabel">
-            <constraints>
-              <grid row="12" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
-                <preferred-size width="133" height="16"/>
-              </grid>
-            </constraints>
-            <properties>
-              <enabled value="false"/>
-              <text value="    in IntelliJ IDEA, to reflect the security policies required by your organization. This is done as follows:"/>
-            </properties>
-          </component>
-          <component id="f96a4" class="com.intellij.ui.HyperlinkLabel" binding="projectInstructions">
-            <constraints>
-              <grid row="13" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
-                <preferred-size width="133" height="16"/>
-              </grid>
-            </constraints>
-            <properties>
-              <enabled value="true"/>
-              <text value=""/>
-            </properties>
-          </component>
-          <component id="56a19" class="com.intellij.ui.HyperlinkLabel" binding="policyInstructions">
-            <constraints>
-              <grid row="14" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
-                <preferred-size width="133" height="16"/>
-              </grid>
-            </constraints>
-            <properties>
-              <enabled value="true"/>
-              <text value=""/>
-            </properties>
-          </component>
-          <component id="91349" class="com.intellij.ui.HyperlinkLabel" binding="watchInstructions">
-            <constraints>
-              <grid row="15" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
-                <preferred-size width="133" height="16"/>
-              </grid>
-            </constraints>
-            <properties>
-              <enabled value="true"/>
-              <text value=""/>
-            </properties>
-          </component>
-          <hspacer id="4cdb6">
-            <constraints>
-              <grid row="5" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-            </constraints>
-          </hspacer>
-          <component id="bba68" class="javax.swing.JLabel">
-            <constraints>
-              <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="    Project key"/>
-            </properties>
-          </component>
           <component id="b50f7" class="com.intellij.ui.TitledSeparator">
             <constraints>
               <grid row="4" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Scan Options"/>
-            </properties>
-          </component>
-          <component id="ae0b8" class="com.intellij.ui.TitledSeparator">
-            <constraints>
-              <grid row="9" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="Scan Policies"/>
             </properties>
           </component>
           <component id="52b21" class="com.intellij.ui.TitledSeparator">
@@ -491,7 +606,9 @@
           </component>
           <hspacer id="3db93">
             <constraints>
-              <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="477" height="11"/>
+              </grid>
             </constraints>
           </hspacer>
           <hspacer id="580e8">
@@ -501,11 +618,16 @@
           </hspacer>
           <vspacer id="1a765">
             <constraints>
-              <grid row="16" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false">
+              <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false">
                 <preferred-size width="109" height="14"/>
               </grid>
             </constraints>
           </vspacer>
+          <hspacer id="4cdb6">
+            <constraints>
+              <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="2" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+          </hspacer>
         </children>
       </grid>
     </children>
@@ -514,6 +636,11 @@
     <group name="authenticationMethod">
       <member id="6f374"/>
       <member id="aff26"/>
+    </group>
+    <group name="policy">
+      <member id="6e971"/>
+      <member id="f6c62"/>
+      <member id="b204b"/>
     </group>
   </buttonGroups>
 </form>

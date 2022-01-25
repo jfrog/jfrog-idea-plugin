@@ -25,6 +25,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
     private static final int CONNECTION_RETRIES = 5;
     private static final String PASSWORD = "prince";
     private static final String USERNAME = "diana";
+    private static final String WATCH = "heimdall";
 
     @Override
     protected void setUp() throws Exception {
@@ -85,6 +86,32 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
         assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
         assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
         assertEquals(JFROG_PROJECT, actualServerConfig.getProject());
+        assertEquals(WATCH, actualServerConfig.getWatches());
+    }
+
+    /**
+     * Test policy types in the GlobalSettings.
+     */
+    public void testPolicyType() {
+        GlobalSettings globalSettings = new GlobalSettings();
+
+        // Check "vulnerabilities" policy type
+        ServerConfigImpl serverConfig = new ServerConfigImpl.Builder().setPolicyType(PolicyType.VULNERABILITIES).build();
+        globalSettings.setServerConfig(serverConfig);
+        ServerConfigImpl actualServerConfig = globalSettings.getServerConfig();
+        assertEquals(PolicyType.VULNERABILITIES, actualServerConfig.getPolicyType());
+
+        // Check "project" policy type
+        serverConfig = new ServerConfigImpl.Builder().setPolicyType(PolicyType.PROJECT).build();
+        globalSettings.setServerConfig(serverConfig);
+        actualServerConfig = globalSettings.getServerConfig();
+        assertEquals(PolicyType.PROJECT, actualServerConfig.getPolicyType());
+
+        // Check "watch" policy type
+        serverConfig = new ServerConfigImpl.Builder().setPolicyType(PolicyType.WATCHES).build();
+        globalSettings.setServerConfig(serverConfig);
+        actualServerConfig = globalSettings.getServerConfig();
+        assertEquals(PolicyType.WATCHES, actualServerConfig.getPolicyType());
     }
 
     /**
@@ -297,6 +324,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
                 .setConnectionTimeout(CONNECTION_TIMEOUT)
                 .setExcludedPaths(EXCLUDED_PATHS)
                 .setProject(JFROG_PROJECT)
+                .setWatches(WATCH)
                 .build();
     }
 
