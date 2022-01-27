@@ -5,7 +5,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
-import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.events.ApplicationEvents;
@@ -40,6 +39,11 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     }
 
     @Override
+    String getComponentsTreeTitle() {
+        return " Dependencies (Issues #)";
+    }
+
+    @Override
     IssueFilterMenu createIssueFilterMenu() {
         return new LocalIssueFilterMenu(project);
     }
@@ -61,17 +65,17 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
     @SuppressWarnings("DialogTitleCapitalization")
     @Override
-    JComponent createComponentsDetailsView(boolean supported) {
+    JComponent createMoreInfoView(boolean supported) {
         if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
             return ComponentUtils.createNoCredentialsView();
         }
-        JLabel title = new JBLabel(" Component Details");
+        JLabel title = new JBLabel(" More Info");
         title.setFont(title.getFont().deriveFont(TITLE_FONT_SIZE));
 
-        issuesDetailsPanel = new JBPanel<>(new BorderLayout()).withBackground(UIUtil.getTableBackground());
+        moreInfoPanel = new JBPanel<>(new BorderLayout()).withBackground(UIUtil.getTableBackground());
         String panelText = supported ? ComponentUtils.SELECT_COMPONENT_TEXT : ComponentUtils.UNSUPPORTED_TEXT;
-        issuesDetailsPanel.add(ComponentUtils.createDisabledTextLabel(panelText), BorderLayout.CENTER);
-        issuesDetailsScroll = ScrollPaneFactory.createScrollPane(issuesDetailsPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        moreInfoPanel.add(ComponentUtils.createDisabledTextLabel(panelText), BorderLayout.CENTER);
+        issuesDetailsScroll = ScrollPaneFactory.createScrollPane(moreInfoPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         return new TitledPane(JSplitPane.VERTICAL_SPLIT, TITLE_LABEL_SIZE, title, issuesDetailsScroll);
     }
 

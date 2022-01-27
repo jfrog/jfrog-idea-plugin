@@ -6,8 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.Issue;
 
 import javax.swing.table.AbstractTableModel;
-import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,10 +30,8 @@ public class IssuesTableModel extends AbstractTableModel {
 
     public enum IssueColumn {
         SEVERITY("Severity"),
-        CVE("CVE"),
-        COMPONENT("Component"),
-        FIXED_VERSIONS("Fixed Versions"),
-        SUMMARY("Summary");
+        ISSUE_ID("ID"),
+        COMPONENT("Component");
 
         private final String name;
 
@@ -77,15 +73,10 @@ public class IssuesTableModel extends AbstractTableModel {
         switch (issueColumn) {
             case SEVERITY:
                 return issue.getSeverity();
-            case CVE:
-                return issue.getCve();
-            case SUMMARY:
-                return issue.getSummary();
+            case ISSUE_ID:
+                return issue.getIssueId();
             case COMPONENT:
                 return issue.getComponent();
-            case FIXED_VERSIONS:
-                List<String> fixedVersions = issue.getFixedVersions() == null ? Collections.emptyList() : issue.getFixedVersions();
-                return StringUtils.defaultIfEmpty(String.join(", ", fixedVersions), "[]");
         }
         return "N/A";
     }

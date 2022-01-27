@@ -5,7 +5,7 @@ import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.ui.HyperlinkLabel;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
-import com.intellij.util.ui.JBDimension;
+import com.intellij.util.ui.JBInsets;
 import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.idea.ui.configuration.JFrogGlobalConfiguration;
 import org.jfrog.build.extractor.scan.DependencyTree;
@@ -29,6 +29,7 @@ public class ComponentUtils {
         jTextArea.setLineWrap(lineWrap);
         jTextArea.setWrapStyleWord(true);
         jTextArea.setBackground(UIUtil.getTableBackground());
+        jTextArea.setMargin(new JBInsets(2, 2, 2, 2));
         return jTextArea;
     }
 
@@ -97,5 +98,12 @@ public class ComponentUtils {
     public static String getPathSearchString(TreePath path) {
         DependencyTree node = (DependencyTree) path.getLastPathComponent();
         return node == null ? "" : node.toString();
+    }
+
+    public static void replaceAndUpdateUI(JPanel panel, JComponent component, Object constraint) {
+        panel.removeAll();
+        panel.add(component, constraint);
+        panel.validate();
+        panel.repaint();
     }
 }
