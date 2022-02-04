@@ -78,7 +78,7 @@ public class IssuesTableModel extends AbstractTableModel {
             case SEVERITY:
                 return issue.getSeverity();
             case CVE:
-                return issue.getCve();
+                return issue.getCves().get(0).getCveId();
             case SUMMARY:
                 return issue.getSummary();
             case COMPONENT:

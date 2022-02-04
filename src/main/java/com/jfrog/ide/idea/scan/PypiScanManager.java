@@ -14,7 +14,7 @@ import com.jetbrains.python.packaging.pipenv.PyPipEnvPackageManager;
 import com.jetbrains.python.sdk.PythonSdkUtil;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.idea.ui.ComponentsTree;
-import com.jfrog.ide.idea.ui.filters.filtermanager.ConsistentFilterManager;
+import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import org.apache.commons.collections4.CollectionUtils;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;

@@ -1,4 +1,4 @@
-package com.jfrog.ide.idea.ui.filters.filtermenu;
+package com.jfrog.ide.idea.ui.menus.filtermenu;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.util.messages.Topic;

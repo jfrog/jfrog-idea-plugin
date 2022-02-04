@@ -5,13 +5,13 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.ScrollPaneFactory;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
-import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.ui.components.TitledPane;
-import com.jfrog.ide.idea.ui.filters.filtermanager.LocalFilterManager;
-import com.jfrog.ide.idea.ui.filters.filtermenu.*;
+import com.jfrog.ide.idea.ui.export.ExportMenu;
+import com.jfrog.ide.idea.ui.menus.filtermanager.LocalFilterManager;
+import com.jfrog.ide.idea.ui.menus.filtermenu.*;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependencyTree;
@@ -56,7 +56,12 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
     @Override
     public JPanel createActionToolbar() {
-        return createComponentsTreePanel(true);
+        JPanel toolbarPanel = createComponentsTreePanel(true);
+        // Add export menu
+        ExportMenu exportMenu = new ExportMenu(project);
+        componentsTree.addFilterMenu(exportMenu);
+        toolbarPanel.add(exportMenu.getMenuButton());
+        return toolbarPanel;
     }
 
     @SuppressWarnings("DialogTitleCapitalization")

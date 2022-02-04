@@ -1,12 +1,12 @@
 package com.jfrog.ide.idea.ui.components;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.ui.JBPopupMenu;
 import com.intellij.ui.ClickListener;
 import com.intellij.ui.RoundedLineBorder;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
-import com.jfrog.ide.idea.ui.filters.filtermenu.FilterMenu;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -22,21 +22,21 @@ import static com.jfrog.ide.idea.ui.configuration.Utils.setInactiveForegroundCol
 /**
  * Created by Yahav Itzhak on 22 Nov 2017.
  */
-public class FilterButton extends JPanel {
+public class MenuButton extends JPanel {
     private static final int GAP_BEFORE_ARROW = 3;
     private static final int BORDER_SIZE = 2;
     private JLabel myNameLabel;
-    private final FilterMenu<?> filterMenu;
+    private final JBPopupMenu filterMenu;
     private boolean filterEnabled;
 
-    public FilterButton(FilterMenu<?> filterMenu, String myName, String toolTip) {
+    public MenuButton(JBPopupMenu filterMenu, String myName, String toolTip, Icon icon) {
         this.filterMenu = filterMenu;
-        initUi(myName, toolTip);
+        myNameLabel = new JBLabel(myName);
+        myNameLabel.setIcon(icon);
+        initUi(toolTip);
     }
 
-    private void initUi(String myName, String toolTip) {
-        myNameLabel = new JBLabel(myName);
-        myNameLabel.setIcon(AllIcons.General.Filter);
+    private void initUi(String toolTip) {
         JLabel arrow = new JBLabel(AllIcons.Ide.Statusbar_arrows);
         setToolTipText(toolTip);
         setInactiveForegroundColor(myNameLabel);

@@ -33,8 +33,8 @@ import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
-import com.jfrog.ide.idea.ui.filters.filtermanager.ConsistentFilterManager;
-import com.jfrog.ide.idea.ui.filters.filtermanager.LocalFilterManager;
+import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
+import com.jfrog.ide.idea.ui.menus.filtermanager.LocalFilterManager;
 import com.jfrog.ide.idea.utils.Utils;
 import com.jfrog.xray.client.services.summary.Components;
 import org.apache.commons.lang3.ArrayUtils;
@@ -283,6 +283,30 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
             return Sets.newHashSet();
         }
         return collectAllScopes((DependencyTree) getScanResults().getRoot());
+    }
+
+    /**
+     * Return true if the scan results contain any issues.
+     *
+     * @return true if the scan results contain any issues.
+     */
+    public boolean isContainIssues() {
+        if (getScanResults() == null) {
+            return false;
+        }
+        return !getScanResults().getIssues().isEmpty();
+    }
+
+    /**
+     * Return true if the scan results contain any violated licenses.
+     *
+     * @return true if the scan results contain any violated licenses.
+     */
+    public boolean isContainViolatedLicenses() {
+        if (getScanResults() == null) {
+            return false;
+        }
+        return !getScanResults().getViolatedLicenses().isEmpty();
     }
 
     /**

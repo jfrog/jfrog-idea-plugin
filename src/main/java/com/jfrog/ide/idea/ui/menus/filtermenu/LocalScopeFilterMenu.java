@@ -1,11 +1,11 @@
-package com.jfrog.ide.idea.ui.filters.filtermenu;
+package com.jfrog.ide.idea.ui.menus.filtermenu;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.util.messages.Topic;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
-import com.jfrog.ide.idea.ui.filters.filtermanager.LocalFilterManager;
+import com.jfrog.ide.idea.ui.menus.filtermanager.LocalFilterManager;
 import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.Scope;
@@ -33,11 +33,11 @@ public class LocalScopeFilterMenu extends ScopeFilterMenu {
 
         // Hide the button if there are no scopes - for example in Go projects
         if (selectedScopes.size() == 1 && selectedScopes.containsKey(new Scope())) {
-            filterButton.setVisible(false);
+            menuButton.setVisible(false);
             return;
         }
-        if (!filterButton.isVisible()) {
-            filterButton.setVisible(true);
+        if (!menuButton.isVisible()) {
+            menuButton.setVisible(true);
         }
 
         // Add checkboxes and triggers

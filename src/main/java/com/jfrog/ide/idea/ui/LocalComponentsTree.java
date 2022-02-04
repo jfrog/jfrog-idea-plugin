@@ -8,7 +8,7 @@ import com.jfrog.ide.common.filter.FilterManager;
 import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.events.ProjectEvents;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
-import com.jfrog.ide.idea.ui.filters.filtermanager.LocalFilterManager;
+import com.jfrog.ide.idea.ui.menus.filtermanager.LocalFilterManager;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependencyTree;
 
@@ -37,6 +37,7 @@ public class LocalComponentsTree extends ComponentsTree {
         FilterManager filterManager = LocalFilterManager.getInstance(this.project);
         DependencyTree filteredRoot = filterManager.applyFilters(project);
         filteredRoot.setIssues(filteredRoot.processTreeIssues());
+        filteredRoot.setViolatedLicenses(filteredRoot.processTreeViolatedLicenses());
         appendProjectWhenReady(filteredRoot);
         DumbService.getInstance(this.project).smartInvokeLater(() -> ScanManagersFactory.getInstance(this.project).runInspectionsForAllScanManagers());
     }
