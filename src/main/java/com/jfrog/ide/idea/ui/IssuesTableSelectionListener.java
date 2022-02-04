@@ -13,7 +13,6 @@ import java.awt.event.MouseEvent;
 import java.util.Objects;
 
 import static com.jfrog.ide.idea.ui.IssuesTableModel.IssueColumn.COMPONENT;
-import static com.jfrog.ide.idea.ui.IssuesTableModel.IssueColumn.ISSUE_ID;
 import static com.jfrog.ide.idea.ui.utils.ComponentUtils.replaceAndUpdateUI;
 
 /**
@@ -41,11 +40,7 @@ class IssuesTableSelectionListener extends MouseAdapter {
         if (impactedNode == null) {
             return;
         }
-        Issue selectedIssue = getSelectedIssue(impactedNode, selectedRow);
-        if (selectedIssue == null) {
-            return;
-        }
-
+        Issue selectedIssue = issuesTable.getIssueAt(selectedRow);
         if (SwingUtilities.isLeftMouseButton(e)) {
             doLeftClickButtonEvent(selectedIssue, impactedNode);
         } else if (SwingUtilities.isRightMouseButton(e)) {
@@ -83,19 +78,6 @@ class IssuesTableSelectionListener extends MouseAdapter {
                 .filter(Objects::nonNull)
                 .findAny()
                 .orElse(null);
-    }
-
-    /**
-     * Extract the issue selected in the table from the dependency tree.
-     *
-     * @param impactedNode - The impacted node
-     * @return the issue selected in the table.
-     */
-    private Issue getSelectedIssue(DependencyTree impactedNode, int selectedRow) {
-        String selectedIssueStr = (String) issuesTable.getValueAt(selectedRow, ISSUE_ID.ordinal());
-        return impactedNode.getIssues().stream()
-                .filter(issue -> StringUtils.equals(issue.getIssueId(), selectedIssueStr))
-                .findAny().orElse(null);
     }
 
     /**

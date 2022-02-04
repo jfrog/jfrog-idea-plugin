@@ -6,6 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.Issue;
 
 import javax.swing.table.AbstractTableModel;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,8 +32,8 @@ public class IssuesTableModel extends AbstractTableModel {
 
     public enum IssueColumn {
         SEVERITY("Severity"),
-        ISSUE_ID("ID"),
-        COMPONENT("Component");
+        COMPONENT("Impacted Component"),
+        FIXED_VERSIONS("Fixed Versions");
 
         private final String name;
 
@@ -69,15 +71,26 @@ public class IssuesTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int col) {
         IssueColumn issueColumn = IssueColumn.valueOf(IssueColumn.values()[col].toString());
-        Issue issue = (Issue) issues.toArray()[row];
+        Issue issue = getIssueAt(row);
         switch (issueColumn) {
             case SEVERITY:
                 return issue.getSeverity();
-            case ISSUE_ID:
-                return issue.getIssueId();
             case COMPONENT:
                 return issue.getComponent();
+            case FIXED_VERSIONS:
+                List<String> fixedVersions = issue.getFixedVersions() == null ? Collections.emptyList() : issue.getFixedVersions();
+                return StringUtils.defaultIfEmpty(String.join(", ", fixedVersions), "[]");
         }
         return "N/A";
+    }
+
+    /**
+     * Get the issue at the input row.
+     *
+     * @param row - The row number
+     * @return the issue of the input row.
+     */
+    Issue getIssueAt(int row) {
+        return (Issue) issues.toArray()[row];
     }
 }

@@ -1,12 +1,10 @@
 package com.jfrog.ide.idea.ui.components;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.ui.HyperlinkLabel;
-import com.intellij.ui.components.JBPanel;
-import com.intellij.util.ui.JBDimension;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
+import org.jdesktop.swingx.JXCollapsiblePane;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,28 +18,38 @@ import static com.jfrog.ide.idea.utils.Utils.isValidUrl;
  * @author yahavi
  **/
 public class ReferencesPane extends JPanel {
-    private final JButton collapseExpandButton = new JButton();
-    private final Icon collapseIcon = AllIcons.Actions.MoveUp;
-    private final Icon expandIcon = AllIcons.Actions.MoveDown;
-    private final JPanel references = new JBPanel<>();
-    private boolean collapsed;
+    private final JXCollapsiblePane references = new JXCollapsiblePane(JXCollapsiblePane.Direction.DOWN);
 
     public ReferencesPane(List<String> references) {
         super(new GridBagLayout());
-        initReferences(references);
-        initButton();
-        setCollapsed(true);
+        GridBagConstraints constraints = createConstraints();
+        initButton(constraints);
+        constraints.gridy++;
+        initReferences(references, constraints);
         setFocusable(false);
         setBackground(UIUtil.getTableBackground());
     }
 
     /**
+     * Create the grid bag constraints for the button and the references panel.
+     *
+     * @return grid bag constraints.
+     */
+    private GridBagConstraints createConstraints() {
+        return new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
+                GridBagConstraints.WEST, GridBagConstraints.NONE,
+                JBUI.insets(-5, 0, 0, -5), 0, 0);
+    }
+
+    /**
      * Init the references panel according to the input list of references.
      *
-     * @param references - The references list
+     * @param references  - The references list
+     * @param constraints - The grib bag constraints
      */
     @SuppressWarnings("UnstableApiUsage")
-    private void initReferences(List<String> references) {
+    private void initReferences(List<String> references, GridBagConstraints constraints) {
+        this.references.setCollapsed(true);
         for (String reference : references) {
             if (!isValidUrl(reference)) {
                 continue;
@@ -51,44 +59,23 @@ public class ReferencesPane extends JPanel {
             referenceLabel.addHyperlinkListener(e -> BrowserUtil.browse(reference));
             this.references.add(referenceLabel);
         }
-        this.references.setLayout(new GridLayout(0, 1));
+        add(this.references, constraints);
     }
 
     /**
      * Init the collapse-expand button.
-     */
-    private void initButton() {
-        Dimension buttonDimension = new JBDimension(expandIcon.getIconWidth(), expandIcon.getIconHeight());
-
-        collapseExpandButton.setOpaque(false);
-        collapseExpandButton.setBorderPainted(false);
-        collapseExpandButton.setSize(buttonDimension);
-        collapseExpandButton.setPreferredSize(buttonDimension);
-        collapseExpandButton.setMinimumSize(buttonDimension);
-        collapseExpandButton.setMaximumSize(buttonDimension);
-        collapseExpandButton.addActionListener(e -> setCollapsed(!collapsed));
-        add(collapseExpandButton, new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0,
-                GridBagConstraints.WEST, GridBagConstraints.NONE,
-                JBUI.insets(-5, 0, 0, -5), 0, 0));
-    }
-
-    /**
-     * Collapse or expand the references section.
      *
-     * @param collapsed - True to collapse, false to expand
+     * @param constraints - The grib bag constraints
      */
-    private void setCollapsed(boolean collapsed) {
-        if (collapsed) {
-            remove(references);
-        } else {
-            add(references, new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH, JBUI.emptyInsets(), 0, 0));
-        }
-        collapseExpandButton.setIcon(collapsed ? expandIcon : collapseIcon);
-        collapseExpandButton.setToolTipText(collapsed ? "Show references" : "Hide references");
+    private void initButton(GridBagConstraints constraints) {
+        JButton collapseExpandButton = new JButton(references.getActionMap().get(JXCollapsiblePane.TOGGLE_ACTION));
+        collapseExpandButton.setText("Show/Hide References");
+        collapseExpandButton.setBorderPainted(false);
 
-        this.collapsed = collapsed;
-        revalidate();
-        repaint();
+        Action toggleAction = references.getActionMap().get(JXCollapsiblePane.TOGGLE_ACTION);
+        toggleAction.putValue(JXCollapsiblePane.COLLAPSE_ICON, UIManager.getIcon("Tree.expandedIcon"));
+        toggleAction.putValue(JXCollapsiblePane.EXPAND_ICON, UIManager.getIcon("Tree.collapsedIcon"));
+
+        add(collapseExpandButton, constraints);
     }
 }

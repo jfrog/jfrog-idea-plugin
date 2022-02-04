@@ -29,9 +29,8 @@ import org.jfrog.build.extractor.scan.Issue;
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.jfrog.ide.idea.ui.JFrogToolWindow.*;
@@ -44,7 +43,6 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel impl
     private final OnePixelSplitter rightVerticalSplit;
     final MessageBusConnection projectBusConnection;
     final MessageBusConnection appBusConnection;
-    private final JComponent issuesPanel;
     final ComponentsTree componentsTree;
     ComponentIssuesTable issuesTable;
     JScrollPane issuesDetailsScroll;
@@ -64,7 +62,7 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel impl
         this.project = project;
         JPanel toolbar = createActionToolbar();
 
-        issuesPanel = createComponentsIssueDetailView();
+        JComponent issuesPanel = createComponentsIssueDetailView();
 
         OnePixelSplitter leftVerticalSplit = new OnePixelSplitter(false, 0.5f);
         leftVerticalSplit.setFirstComponent(createComponentsTreeView());
@@ -192,7 +190,7 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel impl
         issuesTable = new ComponentIssuesTable();
         JScrollPane tableScroll = ScrollPaneFactory.createScrollPane(issuesTable, SideBorder.ALL);
         tableScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-        JLabel title = new JBLabel(" Issues");
+        JLabel title = new JBLabel(" Vulnerabilities");
         title.setFont(title.getFont().deriveFont(TITLE_FONT_SIZE));
         return new TitledPane(JSplitPane.VERTICAL_SPLIT, TITLE_LABEL_SIZE, title, tableScroll);
     }
@@ -229,8 +227,8 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel impl
      */
     public void onConfigurationChange() {
         rightVerticalSplit.setSecondComponent(createMoreInfoView(true));
-        issuesPanel.validate();
-        issuesPanel.repaint();
+        issuesTable.updateIssuesTable(new HashSet<>(), new LinkedList<>());
+        issuesTable.addTableSelectionListener(moreInfoPanel);
     }
 
     /**

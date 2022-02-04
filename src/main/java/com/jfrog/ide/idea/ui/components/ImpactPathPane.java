@@ -12,7 +12,6 @@ import org.jfrog.build.extractor.scan.Severity;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.tree.TreeNode;
 import java.awt.*;
 import java.util.Stack;
 
@@ -35,9 +34,11 @@ public class ImpactPathPane extends JComponent {
      */
     private Stack<String> extractImpactedPath(DependencyTree impactedNode) {
         Stack<String> rootImpactPath = new Stack<>();
-        for (TreeNode node = impactedNode; node.getParent() != null; node = node.getParent()) {
+        for (DependencyTree node = impactedNode; node.getParent() != null && !node.isMetadata();
+             node = (DependencyTree) node.getParent()) {
             rootImpactPath.add(node.toString());
         }
+
         return rootImpactPath;
     }
 
@@ -51,20 +52,20 @@ public class ImpactPathPane extends JComponent {
         GridBagConstraints constraints = createConstraints();
         Color borderColor = getBorderColor(severity);
         while (!impactPath.isEmpty()) {
-            // Add arrow label
-            JLabel arrowLabel = createArrowLabel(borderColor);
-            add(arrowLabel, constraints);
-            constraints.gridy++;
-
             // Add component label
             JLabel componentLabel = createComponentLabel(borderColor, impactPath.pop());
             add(componentLabel, constraints);
             constraints.gridy++;
 
-            // Set icon and emphasize the last element
             if (impactPath.isEmpty()) {
+                // Set icon and emphasize the last element
                 componentLabel.setIcon(IconUtils.load(StringUtils.lowerCase(severity.name())));
                 componentLabel.setFont(JBFont.label().asBold());
+            } else {
+                // Add arrow label
+                JLabel arrowLabel = createArrowLabel(borderColor);
+                add(arrowLabel, constraints);
+                constraints.gridy++;
             }
         }
     }

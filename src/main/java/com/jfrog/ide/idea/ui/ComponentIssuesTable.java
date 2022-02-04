@@ -11,6 +11,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.awt.event.MouseListener;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -23,10 +24,10 @@ import static com.jfrog.ide.idea.ui.IssuesTableModel.IssueColumn.*;
  */
 public class ComponentIssuesTable extends JBTable {
     private List<DependencyTree> selectedNodes = Lists.newArrayList();
+    private MouseListener mouseListener;
 
     private static final List<RowSorter.SortKey> SORT_KEYS = Lists.newArrayList(
             new RowSorter.SortKey(SEVERITY.ordinal(), SortOrder.DESCENDING),
-            new RowSorter.SortKey(ISSUE_ID.ordinal(), SortOrder.DESCENDING),
             new RowSorter.SortKey(COMPONENT.ordinal(), SortOrder.ASCENDING));
 
     ComponentIssuesTable() {
@@ -54,7 +55,11 @@ public class ComponentIssuesTable extends JBTable {
      * @param moreInfoPanel - The more info panel
      */
     public void addTableSelectionListener(JPanel moreInfoPanel) {
-        addMouseListener(new IssuesTableSelectionListener(moreInfoPanel, this));
+        if (mouseListener != null) {
+            removeMouseListener(mouseListener);
+        }
+        mouseListener = new IssuesTableSelectionListener(moreInfoPanel, this);
+        addMouseListener(mouseListener);
     }
 
     /**
@@ -80,14 +85,25 @@ public class ComponentIssuesTable extends JBTable {
         severityCol.setPreferredWidth(severityCol.getPreferredWidth() / 2);
         tableWidth -= severityCol.getPreferredWidth();
 
-        TableColumn cveCol = getColumnModel().getColumn(ISSUE_ID.ordinal());
-        cveCol.setPreferredWidth((int) (cveCol.getPreferredWidth() * 1.6));
-        tableWidth -= cveCol.getPreferredWidth();
+        TableColumn fixedVersionsCol = getColumnModel().getColumn(FIXED_VERSIONS.ordinal());
+        fixedVersionsCol.setPreferredWidth((fixedVersionsCol.getPreferredWidth() * 3));
+        tableWidth -= fixedVersionsCol.getPreferredWidth();
 
         getColumnModel().getColumn(COMPONENT.ordinal()).setPreferredWidth(tableWidth);
     }
 
     public List<DependencyTree> getSelectedNodes() {
         return selectedNodes;
+    }
+
+    /**
+     * Get the issue at the input row.
+     *
+     * @param row - The row number
+     * @return the issue of the input row.
+     */
+    Issue getIssueAt(int row) {
+        IssuesTableModel model = (IssuesTableModel) getModel();
+        return model.getIssueAt(convertRowIndexToModel(row));
     }
 }
