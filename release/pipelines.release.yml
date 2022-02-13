@@ -44,13 +44,13 @@ pipelines:
             - test -n "$NEXT_DEVELOPMENT_VERSION" -a "$NEXT_DEVELOPMENT_VERSION" != "0.0.x-SNAPSHOT"
 
             # Configure JFrog CLI
-            - curl -fL https://getcli.jfrog.io/v2-jf | sh && chmod +x jf
-            - ./jf c rm --quiet
-            - ./jf c add internal --url=$int_entplus_deployer_url --user=$int_entplus_deployer_user --password=$int_entplus_deployer_apikey
-            - ./jf gradlec --use-wrapper --repo-resolve ecosys-maven-remote --repo-deploy ecosys-oss-release-local --deploy-maven-desc --deploy-ivy-desc=false
+            - curl -fL https://install-cli.jfrog.io | sh
+            - jf c rm --quiet
+            - jf c add internal --url=$int_entplus_deployer_url --user=$int_entplus_deployer_user --password=$int_entplus_deployer_apikey
+            - jf gradlec --use-wrapper --repo-resolve ecosys-maven-remote --repo-deploy ecosys-oss-release-local --deploy-maven-desc --deploy-ivy-desc=false
 
             # Run audit
-            - ./jf ag --project $JFROG_CLI_BUILD_PROJECT
+            - jf ag
 
             # Update version
             - sed -i "s/\(currentVersion=\).*\$/\1${NEXT_VERSION}/" gradle.properties
@@ -65,13 +65,13 @@ pipelines:
               JFROG_CLI_BUILD_NAME=$JFROG_CLI_BUILD_NAME
               JFROG_CLI_BUILD_NUMBER=$JFROG_CLI_BUILD_NUMBER
               JFROG_CLI_BUILD_PROJECT=$JFROG_CLI_BUILD_PROJECT
-              ./jf gradle clean build -x test artifactoryPublish
-            - ./jf rt bag && ./jf rt bce
-            - ./jf rt bp
+              jf gradle clean build -x test artifactoryPublish
+            - jf rt bag && jf rt bce
+            - jf rt bp
 
             # Distribute release bundle
-            - ./jf ds rbc jfrog-idea-plugin $NEXT_VERSION --spec=./release/specs/prod-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
-            - ./jf ds rbd jfrog-idea-plugin $NEXT_VERSION --site="releases.jfrog.io" --sync
+            - jf ds rbc jfrog-idea-plugin $NEXT_VERSION --spec=./release/specs/prod-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
+            - jf ds rbd jfrog-idea-plugin $NEXT_VERSION --site="releases.jfrog.io" --sync
 
             # Upload to Jetbrains marketplace
             - curl -i --header "Authorization:Bearer $int_jetbrains_token" -F pluginId=9834 -F file=./build/distributions/JFrog-$NEXT_VERSION.zip https://plugins.jetbrains.com/plugin/uploadPlugin

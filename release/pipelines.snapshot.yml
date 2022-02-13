@@ -31,16 +31,16 @@ pipelines:
             - export JFROG_CLI_BUILD_PROJECT=ecosys
 
             # Configure JFrog CLI
-            - curl -fL https://getcli.jfrog.io/v2-jf | sh && chmod +x jf
-            - ./jf c rm --quiet
-            - ./jf c add internal --url=$int_entplus_deployer_url --user=$int_entplus_deployer_user --password=$int_entplus_deployer_apikey
-            - ./jf gradlec --use-wrapper --repo-resolve ecosys-maven-remote --repo-deploy ecosys-oss-snapshot-local --deploy-maven-desc --deploy-ivy-desc=false
+            - curl -fL https://install-cli.jfrog.io | sh
+            - jf c rm --quiet
+            - jf c add internal --url=$int_entplus_deployer_url --user=$int_entplus_deployer_user --password=$int_entplus_deployer_apikey
+            - jf gradlec --use-wrapper --repo-resolve ecosys-maven-remote --repo-deploy ecosys-oss-snapshot-local --deploy-maven-desc --deploy-ivy-desc=false
 
             # Run audit
-            - ./jf ag --project $JFROG_CLI_BUILD_PROJECT
+            - jf audit
 
             # Delete former snapshots to make sure the release bundle will not contain the same artifacts
-            - ./jf rt del "ecosys-oss-snapshot-local/com/jfrog/ide/jfrog-idea-plugin/*" --quiet
+            - jf rt del "ecosys-oss-snapshot-local/com/jfrog/ide/jfrog-idea-plugin/*" --quiet
 
             # Run test, build and publish snapshot
             - >
@@ -48,17 +48,14 @@ pipelines:
               JFROG_CLI_BUILD_NAME=$JFROG_CLI_BUILD_NAME
               JFROG_CLI_BUILD_NUMBER=$JFROG_CLI_BUILD_NUMBER
               JFROG_CLI_BUILD_PROJECT=$JFROG_CLI_BUILD_PROJECT
-              ./jf gradle clean build -x test artifactoryPublish
-            - ./jf rt bag && ./jf rt bce
-            - ./jf rt bp
+              jf gradle clean build -x test artifactoryPublish
+            - jf rt bag && jf rt bce
+            - jf rt bp
 
             # Distribute release bundle
-            - ./jf ds rbc jfrog-idea-plugin-snapshot $run_number --spec=./release/specs/dev-rbc-filespec.json --sign
-            - ./jf ds rbd jfrog-idea-plugin-snapshot $run_number --site="releases.jfrog.io" --sync
+            - jf ds rbc jfrog-idea-plugin-snapshot $run_number --spec=./release/specs/dev-rbc-filespec.json --sign
+            - jf ds rbd jfrog-idea-plugin-snapshot $run_number --site="releases.jfrog.io" --sync
 
           onComplete:
-            # Show tests in the *Tests* tab
-            - save_tests $res_jfrogIdeaPluginSnapshotGit_resourcePath/build/test-results/test/
-
             # Save gradle cache
             - add_cache_files $res_jfrogIdeaPluginSnapshotGit_resourcePath/.gradle gradle_cache

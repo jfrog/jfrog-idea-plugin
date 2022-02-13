@@ -97,7 +97,7 @@ class IssuesTableSelectionListener extends MouseAdapter {
      * @param selectedIssue - The selected issue
      */
     private void doRightClickButtonEvent(MouseEvent mouseEvent, Issue selectedIssue) {
-        if (StringUtils.isBlank(selectedIssue.getIgnoreUrl())) {
+        if (StringUtils.isBlank(selectedIssue.getIgnoreRuleUrl())) {
             return;
         }
         JPopupMenu popupMenu = new JBPopupMenu();

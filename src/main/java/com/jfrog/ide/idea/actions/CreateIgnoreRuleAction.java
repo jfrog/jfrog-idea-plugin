@@ -22,6 +22,6 @@ public class CreateIgnoreRuleAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        BrowserUtil.browse(selectedIssue.getIgnoreUrl());
+        BrowserUtil.browse(selectedIssue.getIgnoreRuleUrl());
     }
 }
