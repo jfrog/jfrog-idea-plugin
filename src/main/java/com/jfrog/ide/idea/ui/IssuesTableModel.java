@@ -32,10 +32,8 @@ public class IssuesTableModel extends AbstractTableModel {
 
     public enum IssueColumn {
         SEVERITY("Severity"),
-        CVE("CVE"),
-        COMPONENT("Component"),
-        FIXED_VERSIONS("Fixed Versions"),
-        SUMMARY("Summary");
+        COMPONENT("Impacted Component"),
+        FIXED_VERSIONS("Fixed Versions");
 
         private final String name;
 
@@ -73,14 +71,10 @@ public class IssuesTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int col) {
         IssueColumn issueColumn = IssueColumn.valueOf(IssueColumn.values()[col].toString());
-        Issue issue = (Issue) issues.toArray()[row];
+        Issue issue = getIssueAt(row);
         switch (issueColumn) {
             case SEVERITY:
                 return issue.getSeverity();
-            case CVE:
-                return issue.getCves().get(0).getCveId();
-            case SUMMARY:
-                return issue.getSummary();
             case COMPONENT:
                 return issue.getComponent();
             case FIXED_VERSIONS:
@@ -88,5 +82,15 @@ public class IssuesTableModel extends AbstractTableModel {
                 return StringUtils.defaultIfEmpty(String.join(", ", fixedVersions), "[]");
         }
         return "N/A";
+    }
+
+    /**
+     * Get the issue at the input row.
+     *
+     * @param row - The row number
+     * @return the issue of the input row.
+     */
+    Issue getIssueAt(int row) {
+        return (Issue) issues.toArray()[row];
     }
 }

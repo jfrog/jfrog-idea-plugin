@@ -36,7 +36,7 @@ public class IssuesTableCellRenderer extends DefaultTableCellRenderer {
     private static void editSeverityColumn(DefaultTableCellRenderer cellRenderer, Object value) {
         cellRenderer.setIcon(IconUtils.load(value.toString()));
         cellRenderer.setOpaque(true);
-        cellRenderer.setToolTipText(value.toString());
+        cellRenderer.setToolTipText("Top issue severity: " + value + ". Click to display more details.");
         cellRenderer.setText("");
         cellRenderer.setHorizontalAlignment(JLabel.CENTER);
     }
@@ -45,7 +45,7 @@ public class IssuesTableCellRenderer extends DefaultTableCellRenderer {
         // As row order may change due to sorting, get actual row index.
         int actualRow = table.getRowSorter().convertRowIndexToModel(row);
 
-        Set<String> components = ((IssuesTableModel)table.getModel()).getComponents();
+        Set<String> components = ((IssuesTableModel) table.getModel()).getComponents();
         String currentComponent = (String) table.getModel().getValueAt(actualRow, IssuesTableModel.IssueColumn.COMPONENT.ordinal());
         if (components.contains(currentComponent)) {
             Font bold = cellRenderer.getFont().deriveFont(Font.BOLD);

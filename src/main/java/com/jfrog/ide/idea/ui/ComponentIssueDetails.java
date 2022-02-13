@@ -7,6 +7,8 @@ import org.jfrog.build.extractor.scan.Issue;
 import javax.swing.*;
 import java.awt.*;
 
+import static com.jfrog.ide.idea.ui.utils.ComponentUtils.replaceAndUpdateUI;
+
 /**
  * @author yahavi
  */

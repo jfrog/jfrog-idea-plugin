@@ -1,10 +1,8 @@
 package com.jfrog.ide.idea.ui;
 
 import com.google.common.collect.Lists;
-import com.intellij.icons.AllIcons;
-import com.intellij.openapi.ui.JBPopupMenu;
 import com.intellij.ui.table.JBTable;
-import org.apache.commons.lang3.StringUtils;
+import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.Issue;
 import org.jfrog.build.extractor.scan.Severity;
 
@@ -12,15 +10,12 @@ import javax.swing.*;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import java.awt.*;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import javax.swing.tree.DefaultMutableTreeNode;
+import java.awt.event.MouseListener;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.jfrog.ide.idea.ui.IssuesTableModel.IssueColumn.*;
 
@@ -28,10 +23,11 @@ import static com.jfrog.ide.idea.ui.IssuesTableModel.IssueColumn.*;
  * @author yahavi
  */
 public class ComponentIssuesTable extends JBTable {
+    private List<DependencyTree> selectedNodes = Lists.newArrayList();
+    private MouseListener mouseListener;
 
     private static final List<RowSorter.SortKey> SORT_KEYS = Lists.newArrayList(
             new RowSorter.SortKey(SEVERITY.ordinal(), SortOrder.DESCENDING),
-            new RowSorter.SortKey(CVE.ordinal(), SortOrder.DESCENDING),
             new RowSorter.SortKey(COMPONENT.ordinal(), SortOrder.ASCENDING));
 
     ComponentIssuesTable() {
@@ -40,16 +36,30 @@ public class ComponentIssuesTable extends JBTable {
         setDefaultRenderer(Object.class, new IssuesTableCellRenderer());
         getTableHeader().setReorderingAllowed(false);
         setAutoResizeMode(AUTO_RESIZE_OFF);
-        setRightClickMenu();
     }
 
-    public void updateIssuesTable(Set<Issue> issueSet, Set<String> selectedComponents) {
-        TableModel model = new IssuesTableModel(issueSet, selectedComponents);
-        TableRowSorter<TableModel> sorter = createTableRowSorter(model, selectedComponents);
+    public void updateIssuesTable(Set<Issue> selectedIssue, List<DependencyTree> selectedNodes) {
+        this.selectedNodes = selectedNodes;
+        Set<String> selectedNodeNames = selectedNodes.stream().map(DefaultMutableTreeNode::toString).collect(Collectors.toSet());
+        TableModel model = new IssuesTableModel(selectedIssue, selectedNodeNames);
+        TableRowSorter<TableModel> sorter = createTableRowSorter(model, selectedNodeNames);
         setModel(model);
         setRowSorter(sorter);
         resizeTableColumns();
         resizeAndRepaint();
+    }
+
+    /**
+     * Add mouse click listener on the issues table.
+     *
+     * @param moreInfoPanel - The more info panel
+     */
+    public void addTableSelectionListener(JPanel moreInfoPanel) {
+        if (mouseListener != null) {
+            removeMouseListener(mouseListener);
+        }
+        mouseListener = new IssuesTableSelectionListener(moreInfoPanel, this);
+        addMouseListener(mouseListener);
     }
 
     /**
@@ -75,51 +85,25 @@ public class ComponentIssuesTable extends JBTable {
         severityCol.setPreferredWidth(severityCol.getPreferredWidth() / 2);
         tableWidth -= severityCol.getPreferredWidth();
 
-        TableColumn cveCol = getColumnModel().getColumn(CVE.ordinal());
-        cveCol.setPreferredWidth((int) (cveCol.getPreferredWidth() * 1.6));
-        tableWidth -= cveCol.getPreferredWidth();
-
         TableColumn fixedVersionsCol = getColumnModel().getColumn(FIXED_VERSIONS.ordinal());
-        fixedVersionsCol.setPreferredWidth((int) (fixedVersionsCol.getPreferredWidth() * 1.3));
+        fixedVersionsCol.setPreferredWidth((fixedVersionsCol.getPreferredWidth() * 3));
         tableWidth -= fixedVersionsCol.getPreferredWidth();
 
-        getColumnModel().getColumn(SUMMARY.ordinal()).setPreferredWidth((int) (tableWidth * 0.7));
-        getColumnModel().getColumn(COMPONENT.ordinal()).setPreferredWidth((int) (tableWidth * 0.3));
+        getColumnModel().getColumn(COMPONENT.ordinal()).setPreferredWidth(tableWidth);
     }
 
-    private void setRightClickMenu() {
-        JPopupMenu popupMenu = new JBPopupMenu();
-        popupMenu.setFocusable(false);
-        popupMenu.add(new CopyCve());
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                int row = rowAtPoint(e.getPoint());
-                if (row < 0 || row >= getRowCount()) {
-                    // Click outside the table
-                    return;
-                }
-                if (e.getButton() == MouseEvent.BUTTON3) {
-                    // Select row on right click
-                    setRowSelectionInterval(row, row);
-                    if (StringUtils.isNotBlank((String) getValueAt(getSelectedRow(), CVE.ordinal()))) {
-                        // Popup menu if CVE exist
-                        popupMenu.show(e.getComponent(), e.getX(), e.getY());
-                    }
-                }
-            }
-        });
+    public List<DependencyTree> getSelectedNodes() {
+        return selectedNodes;
     }
 
-    public class CopyCve extends AbstractAction {
-        public CopyCve() {
-            super("Copy CVE", AllIcons.Actions.Copy);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
-            cb.setContents(new StringSelection((String) getValueAt(getSelectedRow(), CVE.ordinal())), null);
-        }
+    /**
+     * Get the issue at the input row.
+     *
+     * @param row - The row number
+     * @return the issue of the input row.
+     */
+    Issue getIssueAt(int row) {
+        IssuesTableModel model = (IssuesTableModel) getModel();
+        return model.getIssueAt(convertRowIndexToModel(row));
     }
 }
