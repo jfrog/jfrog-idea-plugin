@@ -59,5 +59,4 @@ public class IssueDetails extends MoreInfoPanel {
     private void addImpactPath(DependencyTree impactedNode, Severity severity) {
         addComponent("Impact path", new ImpactPathPane(impactedNode, severity));
     }
-
 }

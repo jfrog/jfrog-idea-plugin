@@ -36,10 +36,9 @@ public class MoreInfoPanel extends JPanel {
     }
 
     protected void addText(String header, String text) {
-        if (StringUtils.isBlank(text)) {
-            return;
+        if (StringUtils.isNotBlank(text)) {
+            addComponent(header, createJTextArea(text, true));
         }
-        addComponent(header, createJTextArea(text, true));
     }
 
     protected JLabel createHeaderLabel(String title) {
