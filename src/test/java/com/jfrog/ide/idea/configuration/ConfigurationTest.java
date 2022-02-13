@@ -3,7 +3,6 @@ package com.jfrog.ide.idea.configuration;
 import com.intellij.credentialStore.Credentials;
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import com.intellij.util.EnvironmentUtil;
-import com.jfrog.ide.idea.ui.configuration.Utils;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
@@ -112,35 +111,6 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
         globalSettings.setServerConfig(serverConfig);
         actualServerConfig = globalSettings.getServerConfig();
         assertEquals(PolicyType.WATCHES, actualServerConfig.getPolicyType());
-    }
-
-    /**
-     * Test set server config in the GlobalSettings with migration from file to PasswordSafe.
-     */
-    public void testSetServerConfigCredentialsMigration() {
-        // Create overriding server config
-        GlobalSettings globalSettings = new GlobalSettings();
-        ServerConfigImpl overrideServerConfig = createServerConfig(true, true);
-        globalSettings.setServerConfig(overrideServerConfig);
-
-        // Check that the server in the global settings was overridden.
-        ServerConfigImpl actualServerConfig = globalSettings.getServerConfig();
-        assertFalse(actualServerConfig.isConnectionDetailsFromEnv());
-        assertEquals(PLATFORM_URL, actualServerConfig.getUrl());
-        assertEquals(XRAY_URL, actualServerConfig.getXrayUrl());
-        assertEquals(ARTIFACTORY_URL, actualServerConfig.getArtifactoryUrl());
-        assertEquals(USERNAME, actualServerConfig.getUsername());
-        assertEquals(PASSWORD, actualServerConfig.getPassword());
-        assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
-        assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
-        assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
-        assertEquals(JFROG_PROJECT, actualServerConfig.getProject());
-
-        // Check credential were migrated to PasswordSafe
-        Credentials credentials = actualServerConfig.getCredentialsFromPasswordSafe();
-        assertNotNull(credentials);
-        assertEquals(USERNAME, credentials.getUserName());
-        assertEquals(PASSWORD, credentials.getPasswordAsString());
     }
 
     /**
@@ -254,8 +224,6 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
         // Create overriding server config
         GlobalSettings globalSettings = new GlobalSettings();
         XrayServerConfigImpl xrayServerConfig = createLegacyServerConfig();
-        xrayServerConfig.setUsername(USERNAME);
-        xrayServerConfig.setPassword(PASSWORD);
         globalSettings.setXrayConfig(xrayServerConfig);
 
         // Check that the xrayServerConfig was migrated to serverConfig
@@ -264,45 +232,9 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
         assertEquals(PLATFORM_URL, actualServerConfig.getUrl());
         assertEquals(XRAY_URL, actualServerConfig.getXrayUrl());
         assertEquals(ARTIFACTORY_URL, actualServerConfig.getArtifactoryUrl());
-        assertEquals(USERNAME, actualServerConfig.getUsername());
-        assertEquals(PASSWORD, actualServerConfig.getPassword());
         assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
         assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
         assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
-
-        // Make sure credentials migrated PasswordSafe
-        Credentials credentials = actualServerConfig.getCredentialsFromPasswordSafe();
-        assertEquals(USERNAME, credentials.getUserName());
-        assertEquals(PASSWORD, credentials.getPasswordAsString());
-    }
-
-    @SuppressWarnings("deprecation")
-    public void testMigrateXrayConfigFromPasswordSafe() {
-        // Create overriding server config
-        GlobalSettings globalSettings = new GlobalSettings();
-        XrayServerConfigImpl xrayServerConfig = createLegacyServerConfig();
-        Credentials credentials = new Credentials(USERNAME, PASSWORD);
-        Utils.storeCredentialsInPasswordSafe(XRAY_SETTINGS_CREDENTIALS_KEY, xrayServerConfig.getUrl(), credentials);
-        globalSettings.setXrayConfig(xrayServerConfig);
-
-        // Check that the xrayServerConfig was migrated to serverConfig
-        ServerConfigImpl actualServerConfig = globalSettings.getServerConfig();
-        assertFalse(actualServerConfig.isConnectionDetailsFromEnv());
-        assertEquals(PLATFORM_URL, actualServerConfig.getUrl());
-        assertEquals(XRAY_URL, actualServerConfig.getXrayUrl());
-        assertEquals(ARTIFACTORY_URL, actualServerConfig.getArtifactoryUrl());
-        assertEquals(USERNAME, actualServerConfig.getUsername());
-        assertEquals(PASSWORD, actualServerConfig.getPassword());
-        assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
-        assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
-        assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
-
-        // Make sure credentials migrated in PasswordSafe
-        credentials = Utils.retrieveCredentialsFromPasswordSafe(XRAY_SETTINGS_CREDENTIALS_KEY, xrayServerConfig.getUrl());
-        assertNull(credentials);
-        credentials = actualServerConfig.getCredentialsFromPasswordSafe();
-        assertEquals(USERNAME, credentials.getUserName());
-        assertEquals(PASSWORD, credentials.getPasswordAsString());
     }
 
     /**

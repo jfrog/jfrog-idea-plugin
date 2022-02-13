@@ -19,7 +19,6 @@
  */
 package com.jfrog.ide.idea.configuration;
 
-import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
@@ -33,7 +32,6 @@ import java.io.IOException;
 
 import static com.jfrog.ide.idea.ui.configuration.Utils.migrateXrayConfigToPlatformConfig;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 
 /**
  * @author yahavi
@@ -143,11 +141,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
 
         // Load configuration from state.
         setCommonConfigFields(serverConfig);
-        if (shouldPerformCredentialsMigration(serverConfig)) {
-            migrateCredentialsFromFileToPasswordSafe(serverConfig);
-        } else {
-            this.serverConfig.setCredentials(serverConfig.getCredentialsFromPasswordSafe());
-        }
+        this.serverConfig.setCredentials(serverConfig.getCredentialsFromPasswordSafe());
     }
 
     /**
@@ -200,32 +194,6 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
 
     public boolean areArtifactoryCredentialsSet() {
         return serverConfig != null && serverConfig.isArtifactoryConfigured();
-    }
-
-    /**
-     * Perform credentials migration from file to PasswordSafe.
-     * If credentials were stored on file, set the new values from it, save to PasswordSafe
-     * and persist configuration to file.
-     *
-     * @param serverConfig - configurations read from 'jfrogConfig.xml'.
-     */
-    private void migrateCredentialsFromFileToPasswordSafe(ServerConfigImpl serverConfig) {
-        this.serverConfig.setUsername(serverConfig.getUsername());
-        this.serverConfig.setPassword(serverConfig.getPassword());
-        this.serverConfig.setAccessToken(serverConfig.getAccessToken());
-        this.serverConfig.addCredentialsToPasswordSafe();
-        Application application = ApplicationManager.getApplication();
-        application.invokeLater(application::saveSettings);
-    }
-
-    /**
-     * Determine whether we should perform credentials migration or not.
-     *
-     * @param xrayConfig - configurations read from 'jfrogConfig.xml'.
-     * @return true if credentials are stored in file.
-     */
-    private boolean shouldPerformCredentialsMigration(ServerConfigImpl xrayConfig) {
-        return isNoneBlank(xrayConfig.getUsername(), xrayConfig.getPassword());
     }
 
     /**
