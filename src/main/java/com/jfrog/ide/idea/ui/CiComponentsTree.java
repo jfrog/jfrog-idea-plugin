@@ -7,8 +7,8 @@ import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.filter.FilterManager;
 import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.events.ProjectEvents;
-import com.jfrog.ide.idea.ui.filters.builds.BuildsMenu;
-import com.jfrog.ide.idea.ui.filters.filtermanager.CiFilterManager;
+import com.jfrog.ide.idea.ui.menus.builds.BuildsMenu;
+import com.jfrog.ide.idea.ui.menus.filtermanager.CiFilterManager;
 import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependencyTree;
@@ -71,6 +71,7 @@ public class CiComponentsTree extends ComponentsTree {
         FilterManager filterManager = CiFilterManager.getInstance(this.project);
         DependencyTree filteredRoot = filterManager.applyFilters(project);
         filteredRoot.setIssues(filteredRoot.processTreeIssues());
+        filteredRoot.setViolatedLicenses(filteredRoot.processTreeViolatedLicenses());
         appendProjectWhenReady(filteredRoot);
     }
 }

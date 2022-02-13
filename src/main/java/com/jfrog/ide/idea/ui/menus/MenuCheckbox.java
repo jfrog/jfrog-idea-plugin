@@ -1,4 +1,4 @@
-package com.jfrog.ide.idea.ui.filters;
+package com.jfrog.ide.idea.ui.menus;
 
 import com.intellij.ui.components.JBCheckBoxMenuItem;
 

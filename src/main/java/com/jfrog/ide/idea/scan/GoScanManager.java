@@ -12,7 +12,7 @@ import com.jfrog.ide.common.go.GoTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.idea.inspections.GoInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
-import com.jfrog.ide.idea.ui.filters.filtermanager.ConsistentFilterManager;
+import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import com.jfrog.ide.idea.utils.GoUtils;
 
 import java.io.IOException;

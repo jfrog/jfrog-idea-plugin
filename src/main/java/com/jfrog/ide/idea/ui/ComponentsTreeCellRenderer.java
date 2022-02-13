@@ -1,7 +1,6 @@
 package com.jfrog.ide.idea.ui;
 
 import com.intellij.ui.render.LabelBasedRenderer;
-import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.idea.ui.utils.IconUtils;
 import org.apache.commons.lang.StringUtils;

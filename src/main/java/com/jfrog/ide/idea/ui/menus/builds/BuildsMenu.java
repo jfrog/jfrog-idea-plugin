@@ -1,9 +1,9 @@
-package com.jfrog.ide.idea.ui.filters.builds;
+package com.jfrog.ide.idea.ui.menus.builds;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBPopupMenu;
 import com.intellij.ui.ComboboxSpeedSearch;
-import com.jfrog.ide.idea.ui.filters.filtermanager.CiFilterManager;
+import com.jfrog.ide.idea.ui.menus.filtermanager.CiFilterManager;
 
 /**
  * Created by Yahav Itzhak on 22 Nov 2017.

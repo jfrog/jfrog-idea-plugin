@@ -1,12 +1,13 @@
-package com.jfrog.ide.idea.ui.filters.filtermenu;
+package com.jfrog.ide.idea.ui.menus.filtermenu;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.JBPopupMenu;
 import com.jfrog.ide.idea.Syncable;
-import com.jfrog.ide.idea.ui.components.FilterButton;
-import com.jfrog.ide.idea.ui.filters.MenuCheckbox;
-import com.jfrog.ide.idea.ui.filters.SelectAllCheckbox;
-import com.jfrog.ide.idea.ui.filters.SelectionCheckbox;
+import com.jfrog.ide.idea.ui.components.MenuButton;
+import com.jfrog.ide.idea.ui.menus.MenuCheckbox;
+import com.jfrog.ide.idea.ui.menus.SelectAllCheckbox;
+import com.jfrog.ide.idea.ui.menus.SelectionCheckbox;
+import com.jfrog.ide.idea.ui.menus.ToolbarPopupMenu;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -20,24 +21,22 @@ import java.util.Map;
 /**
  * Created by Yahav Itzhak on 22 Nov 2017.
  */
-public abstract class FilterMenu<FilterType> extends JBPopupMenu implements Syncable {
+public abstract class FilterMenu<FilterType> extends ToolbarPopupMenu implements Syncable {
 
     private final SelectAllCheckbox<FilterType> selectAllCheckbox = new SelectAllCheckbox<>(getSyncEvent());
     private final List<SelectionCheckbox<FilterType>> checkBoxMenuItems = Lists.newArrayList();
-    protected FilterButton filterButton;
-    protected Project project;
 
     protected FilterMenu(@NotNull Project project, String name, String tooltip) {
-        this.project = project;
-        this.filterButton = new FilterButton(this, name, tooltip);
+        super(project, name, tooltip, AllIcons.General.Filter);
     }
 
+    @Override
     public void refresh() {
-        filterButton.indicateFilterEnable(checkBoxMenuItems.stream().anyMatch(checkBoxMenuItem -> !checkBoxMenuItem.isSelected()));
+        menuButton.indicateFilterEnable(checkBoxMenuItems.stream().anyMatch(checkBoxMenuItem -> !checkBoxMenuItem.isSelected()));
     }
 
-    public FilterButton getFilterButton() {
-        return filterButton;
+    public MenuButton getFilterButton() {
+        return menuButton;
     }
 
     /**

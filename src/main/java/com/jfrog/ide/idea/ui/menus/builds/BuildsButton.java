@@ -1,4 +1,4 @@
-package com.jfrog.ide.idea.ui.filters.builds;
+package com.jfrog.ide.idea.ui.menus.builds;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.Disposable;
@@ -11,7 +11,7 @@ import com.jfrog.ide.idea.ci.CiManager;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.events.BuildEvents;
 import com.jfrog.ide.idea.log.Logger;
-import com.jfrog.ide.idea.ui.filters.filtermanager.CiFilterManager;
+import com.jfrog.ide.idea.ui.menus.filtermanager.CiFilterManager;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;

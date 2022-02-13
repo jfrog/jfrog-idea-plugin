@@ -12,7 +12,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.idea.inspections.MavenInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
-import com.jfrog.ide.idea.ui.filters.filtermanager.ConsistentFilterManager;
+import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.model.MavenArtifact;

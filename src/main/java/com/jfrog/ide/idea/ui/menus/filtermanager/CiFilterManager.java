@@ -1,4 +1,4 @@
-package com.jfrog.ide.idea.ui.filters.filtermanager;
+package com.jfrog.ide.idea.ui.menus.filtermanager;
 
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;

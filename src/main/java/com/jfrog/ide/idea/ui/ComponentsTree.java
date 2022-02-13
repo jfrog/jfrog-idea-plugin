@@ -16,7 +16,7 @@ import com.jfrog.ide.idea.exclusion.ExclusionUtils;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.navigation.NavigationTarget;
-import com.jfrog.ide.idea.ui.filters.filtermenu.FilterMenu;
+import com.jfrog.ide.idea.ui.menus.ToolbarPopupMenu;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependencyTree;
@@ -42,7 +42,7 @@ public abstract class ComponentsTree extends Tree {
     private static final String SHOW_IN_PROJECT_DESCRIPTOR = "Show in project descriptor";
     private static final String EXCLUDE_DEPENDENCY = "Exclude dependency";
 
-    private final List<FilterMenu<?>> filterMenus = new ArrayList<>();
+    private final List<ToolbarPopupMenu> toolbarPopupMenus = new ArrayList<>();
     private final JBPopupMenu popupMenu = new JBPopupMenu();
     ProjectsMap projects = new ProjectsMap();
 
@@ -57,7 +57,7 @@ public abstract class ComponentsTree extends Tree {
     }
 
     public void populateTree(DependencyTree root) {
-        filterMenus.forEach(FilterMenu::refresh);
+        toolbarPopupMenus.forEach(ToolbarPopupMenu::refresh);
         setModel(new DefaultTreeModel(root));
         validate();
         repaint();
@@ -68,8 +68,8 @@ public abstract class ComponentsTree extends Tree {
         setModel(null);
     }
 
-    public void addFilterMenu(FilterMenu<?> filterMenu) {
-        this.filterMenus.add(filterMenu);
+    public void addFilterMenu(ToolbarPopupMenu filterMenu) {
+        this.toolbarPopupMenus.add(filterMenu);
     }
 
     public void addScanResults(String projectName, DependencyTree dependencyTree) {
