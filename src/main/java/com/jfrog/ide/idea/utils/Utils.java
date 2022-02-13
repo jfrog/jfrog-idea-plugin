@@ -23,6 +23,9 @@ import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.jfrog.build.extractor.usageReport.UsageReporter;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -108,5 +111,20 @@ public class Utils {
             log.debug("Usage report failed: " + ExceptionUtils.getRootCauseMessage(e));
         }
         log.debug("Usage report sent successfully.");
+    }
+
+    /**
+     * Return true if the input URL is valid.
+     *
+     * @param urlStr - The URL to check
+     * @return true if the input URL is valid.
+     */
+    public static boolean isValidUrl(String urlStr) {
+        try {
+            new URL(urlStr).toURI();
+            return true;
+        } catch (URISyntaxException | MalformedURLException e) {
+            return false;
+        }
     }
 }

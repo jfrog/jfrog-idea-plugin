@@ -33,7 +33,7 @@ public class ComponentsTreeCellRenderer extends LabelBasedRenderer.Tree {
             cellRenderer.setText(scanTreeNode + " (" + scanTreeNode.getIssueCount() + ")");
         }
 
-        if (scanTreeNode.isLicenseViolating()) {
+        if (!scanTreeNode.getViolatedLicenses().isEmpty()) {
             cellRenderer.setForeground(UIUtil.getErrorForeground());
         }
 

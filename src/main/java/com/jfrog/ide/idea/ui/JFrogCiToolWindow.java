@@ -55,6 +55,11 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
     }
 
     @Override
+    String getComponentsTreeTitle() {
+        return " Build Components (Issues #)";
+    }
+
+    @Override
     IssueFilterMenu createIssueFilterMenu() {
         return new CiIssueFilterMenu(project);
     }
@@ -71,16 +76,16 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
 
     @SuppressWarnings("DialogTitleCapitalization")
     @Override
-    JComponent createComponentsDetailsView(boolean supported) {
+    JComponent createMoreInfoView(boolean supported) {
         if (!GlobalSettings.getInstance().areArtifactoryCredentialsSet()) {
             return ComponentUtils.createNoCredentialsView();
         }
-        JLabel title = new JBLabel(" Component Details");
+        JLabel title = new JBLabel(" More Info");
         title.setFont(title.getFont().deriveFont(TITLE_FONT_SIZE));
 
-        issuesDetailsPanel = new JBPanel<>(new BorderLayout()).withBackground(UIUtil.getTableBackground());
-        issuesDetailsPanel.add(supported ? createDisabledTextLabel(SELECT_COMPONENT_TEXT) : createNoBuildsView(), BorderLayout.CENTER);
-        issuesDetailsScroll = ScrollPaneFactory.createScrollPane(issuesDetailsPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        moreInfoPanel = new JBPanel<>(new BorderLayout()).withBackground(UIUtil.getTableBackground());
+        moreInfoPanel.add(supported ? createDisabledTextLabel(SELECT_COMPONENT_TEXT) : createNoBuildsView(), BorderLayout.CENTER);
+        issuesDetailsScroll = ScrollPaneFactory.createScrollPane(moreInfoPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         return new TitledPane(JSplitPane.VERTICAL_SPLIT, TITLE_LABEL_SIZE, title, issuesDetailsScroll);
     }
 

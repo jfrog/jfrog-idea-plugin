@@ -27,12 +27,10 @@ import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.Issue;
 
 import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.jfrog.ide.idea.ui.JFrogToolWindow.*;
@@ -42,14 +40,13 @@ import static com.jfrog.ide.idea.ui.JFrogToolWindow.*;
  */
 public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel implements Disposable {
 
-    private final OnePixelSplitter rightHorizontalSplit;
+    private final OnePixelSplitter rightVerticalSplit;
     final MessageBusConnection projectBusConnection;
     final MessageBusConnection appBusConnection;
-    private final JComponent issuesPanel;
     final ComponentsTree componentsTree;
     ComponentIssuesTable issuesTable;
     JScrollPane issuesDetailsScroll;
-    JPanel issuesDetailsPanel;
+    JPanel moreInfoPanel;
     final Project project;
 
     /**
@@ -65,34 +62,44 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel impl
         this.project = project;
         JPanel toolbar = createActionToolbar();
 
-        issuesPanel = createComponentsIssueDetailView();
-        rightHorizontalSplit = new OnePixelSplitter(true, 0.55f);
-        rightHorizontalSplit.setFirstComponent(createComponentsDetailsView(supported));
-        rightHorizontalSplit.setSecondComponent(issuesPanel);
+        JComponent issuesPanel = createComponentsIssueDetailView();
 
-        OnePixelSplitter centralVerticalSplit = new OnePixelSplitter(false, 0.20f);
-        centralVerticalSplit.setFirstComponent(createComponentsTreeView());
-        centralVerticalSplit.setSecondComponent(rightHorizontalSplit);
+        OnePixelSplitter leftVerticalSplit = new OnePixelSplitter(false, 0.5f);
+        leftVerticalSplit.setFirstComponent(createComponentsTreeView());
+        leftVerticalSplit.setSecondComponent(issuesPanel);
+
+        rightVerticalSplit = new OnePixelSplitter(false, 0.6f);
+        rightVerticalSplit.setVisible(false);
+        rightVerticalSplit.setFirstComponent(leftVerticalSplit);
+        rightVerticalSplit.setSecondComponent(createMoreInfoView(supported));
 
         setToolbar(toolbar);
-        setContent(centralVerticalSplit);
+        setContent(rightVerticalSplit);
         registerListeners();
     }
 
     /**
      * Create the action toolbar. That is the top toolbar.
-     * * @return the action toolbar
+     *
+     * @return the action toolbar
      */
     abstract JPanel createActionToolbar();
 
     /**
-     * Create the component details view. That is the top right details panel.
+     * Get "Dependencies (Issues #)" or "Components (Issues #)", according to the view.
+     *
+     * @return components tree title
+     */
+    abstract String getComponentsTreeTitle();
+
+    /**
+     * Create the more info view. That is the right panel.
      *
      * @param supported - True if the current opened project is supported by the plugin.
      *                  If now, show the "Unsupported project type" message.
-     * @return the component details view
+     * @return the more info view
      */
-    abstract JComponent createComponentsDetailsView(boolean supported);
+    abstract JComponent createMoreInfoView(boolean supported);
 
     /**
      * Get issues to display in the issues table.
@@ -163,7 +170,7 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel impl
      */
     private JComponent createComponentsTreeView() {
         JPanel componentsTreePanel = new JBPanel<>(new BorderLayout()).withBackground(UIUtil.getTableBackground());
-        JLabel componentsTreeTitle = new JBLabel(" Component (Issues #)");
+        JLabel componentsTreeTitle = new JBLabel(getComponentsTreeTitle());
         componentsTreeTitle.setFont(componentsTreeTitle.getFont().deriveFont(TITLE_FONT_SIZE));
         componentsTreePanel.add(componentsTreeTitle, BorderLayout.LINE_START);
         JPanel treePanel = new JBPanel<>(new GridLayout()).withBackground(UIUtil.getTableBackground());
@@ -179,12 +186,11 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel impl
      *
      * @return the issues details panel
      */
-    @SuppressWarnings("DialogTitleCapitalization")
     private JComponent createComponentsIssueDetailView() {
         issuesTable = new ComponentIssuesTable();
         JScrollPane tableScroll = ScrollPaneFactory.createScrollPane(issuesTable, SideBorder.ALL);
         tableScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-        JLabel title = new JBLabel(" Component Issues Details");
+        JLabel title = new JBLabel(" Vulnerabilities");
         title.setFont(title.getFont().deriveFont(TITLE_FONT_SIZE));
         return new TitledPane(JSplitPane.VERTICAL_SPLIT, TITLE_LABEL_SIZE, title, tableScroll);
     }
@@ -194,8 +200,7 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel impl
      */
     public void updateIssuesTable() {
         List<DependencyTree> selectedNodes = getSelectedNodes();
-        Set<String> selectedNodeNames = selectedNodes.stream().map(DefaultMutableTreeNode::toString).collect(Collectors.toSet());
-        issuesTable.updateIssuesTable(getIssuesToDisplay(selectedNodes), selectedNodeNames);
+        issuesTable.updateIssuesTable(getIssuesToDisplay(selectedNodes), selectedNodes);
     }
 
     /**
@@ -221,9 +226,9 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel impl
      * Called after a change in the credentials.
      */
     public void onConfigurationChange() {
-        rightHorizontalSplit.setFirstComponent(createComponentsDetailsView(true));
-        issuesPanel.validate();
-        issuesPanel.repaint();
+        rightVerticalSplit.setSecondComponent(createMoreInfoView(true));
+        issuesTable.updateIssuesTable(new HashSet<>(), new LinkedList<>());
+        issuesTable.addTableSelectionListener(moreInfoPanel);
     }
 
     /**
@@ -240,11 +245,12 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel impl
             if (e == null || e.getNewLeadSelectionPath() == null) {
                 return;
             }
-            ComponentIssueDetails.createIssuesDetailsView(issuesDetailsPanel, (DependencyTree) e.getNewLeadSelectionPath().getLastPathComponent());
+            ComponentIssueDetails.createIssuesDetailsView(moreInfoPanel, (DependencyTree) e.getNewLeadSelectionPath().getLastPathComponent());
             // Scroll back to the beginning of the scrollable panel
             ApplicationManager.getApplication().invokeLater(() -> issuesDetailsScroll.getViewport().setViewPosition(new Point()));
         });
 
+        issuesTable.addTableSelectionListener(moreInfoPanel);
         componentsTree.addOnProjectChangeListener(projectBusConnection);
         componentsTree.addRightClickListener();
     }

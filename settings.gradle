@@ -1,1 +1,4 @@
 rootProject.name = 'idea'
+
+includeBuild '../ide-plugins-common'
+includeBuild '../xray-client-java'
