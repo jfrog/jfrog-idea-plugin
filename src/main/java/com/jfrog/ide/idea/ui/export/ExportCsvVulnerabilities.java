@@ -23,10 +23,9 @@ class ExportCsvVulnerabilities extends ExportCsv {
     public void actionPerformed(ActionEvent e) {
         try {
             Exporter csvExporter = createCsvExporter(project);
-            if (csvExporter == null) {
-                return;
+            if (csvExporter != null) {
+                exportIfNeeded(project, csvExporter.generateVulnerabilitiesReport(), DEFAULT_VULNERABILITIES_FILE_NAME);
             }
-            exportIfNeeded(project, csvExporter.generateVulnerabilitiesReport(), DEFAULT_VULNERABILITIES_FILE_NAME);
         } catch (Exception exception) {
             Logger.getInstance().error(ExceptionUtils.getRootCauseMessage(exception), exception);
         }

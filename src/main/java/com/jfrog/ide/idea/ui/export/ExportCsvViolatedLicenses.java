@@ -23,10 +23,9 @@ class ExportCsvViolatedLicenses extends ExportCsv {
     public void actionPerformed(ActionEvent e) {
         try {
             Exporter csvExporter = createCsvExporter(project);
-            if (csvExporter == null) {
-                return;
+            if (csvExporter != null) {
+                exportIfNeeded(project, csvExporter.generateViolatedLicensesReport(), DEFAULT_VIOLATED_LICENSES_FILE_NAME);
             }
-            exportIfNeeded(project, csvExporter.generateViolatedLicensesReport(), DEFAULT_VIOLATED_LICENSES_FILE_NAME);
         } catch (Exception exception) {
             Logger.getInstance().error(ExceptionUtils.getRootCauseMessage(exception), exception);
         }

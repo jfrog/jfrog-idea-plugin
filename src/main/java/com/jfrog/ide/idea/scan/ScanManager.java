@@ -291,10 +291,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
      * @return true if the scan results contain any issues.
      */
     public boolean isContainIssues() {
-        if (getScanResults() == null) {
-            return false;
-        }
-        return !getScanResults().getIssues().isEmpty();
+        return getScanResults() != null && !getScanResults().getIssues().isEmpty();
     }
 
     /**
@@ -303,10 +300,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
      * @return true if the scan results contain any violated licenses.
      */
     public boolean isContainViolatedLicenses() {
-        if (getScanResults() == null) {
-            return false;
-        }
-        return !getScanResults().getViolatedLicenses().isEmpty();
+        return getScanResults() != null && !getScanResults().getViolatedLicenses().isEmpty();
     }
 
     /**
