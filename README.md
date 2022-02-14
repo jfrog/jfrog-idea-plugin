@@ -1,6 +1,13 @@
+[![JFrog CLI](readme_image.png)](#readme)
+
+<div align="center">
+
+# JFrog Idea Plugin 
+
 [![Build status](https://github.com/jfrog/jfrog-idea-plugin/actions/workflows/test.yml/badge.svg)](https://github.com/jfrog/jfrog-idea-plugin/actions/workflows/test.yml)
 [![Marketplace](https://img.shields.io/jetbrains/plugin/v/9834-jfrog)](https://plugins.jetbrains.com/plugin/9834-jfrog)
-# JFrog Idea Plugin 
+
+</div>
 
 JFrog IntelliJ IDEA plugin adds JFrog Xray scanning of Maven, Gradle, Go, Npm, and PyPI project dependencies to your IntelliJ IDEA.
 To learn how to use JFrog IntelliJ IDEA plugin, please visit the [JFrog IntelliJ IDEA Plugin User Guide](https://www.jfrog.com/confluence/display/XRAY/IDE+Integration).
