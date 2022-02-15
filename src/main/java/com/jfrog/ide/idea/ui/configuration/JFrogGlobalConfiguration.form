@@ -197,7 +197,7 @@
             <properties>
               <enabled value="false"/>
               <foreground color="-4473925"/>
-              <text value="Load connection details from the JFROG_IDE_URL, JFROG_IDE_USERNAME,"/>
+              <text value="Load connection details from the JFROG_IDE_PLATFORM_URL, JFROG_IDE_USERNAME,"/>
             </properties>
           </component>
           <component id="23de2" class="com.intellij.ui.components.JBCheckBox" binding="connectionDetailsFromEnv">
