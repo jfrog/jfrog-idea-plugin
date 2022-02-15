@@ -1,4 +1,4 @@
-[![JFrog CLI](readme_image.png)](#readme)
+[![](readme_image.png)](#readme)
 
 <div align="center">
 
