@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 /**
@@ -50,7 +51,8 @@ public class ScanUtils {
 
         // Check if npm, Gradle, or Go projects exist
         Set<Path> scanPaths = createScanPaths(Maps.newHashMap(), project);
-        PackageFileFinder packageFileFinder = new PackageFileFinder(scanPaths, GlobalSettings.getInstance().getServerConfig().getExcludedPaths(), Logger.getInstance());
+        Path basePath = getProjectBasePath(project);
+        PackageFileFinder packageFileFinder = new PackageFileFinder(scanPaths, basePath, GlobalSettings.getInstance().getServerConfig().getExcludedPaths(), Logger.getInstance());
         return isNotEmpty(packageFileFinder.getNpmPackagesFilePairs()) ||
                 isNotEmpty(packageFileFinder.getBuildGradlePackagesFilePairs()) ||
                 isNotEmpty(packageFileFinder.getGoPackagesFilePairs());

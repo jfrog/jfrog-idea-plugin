@@ -36,8 +36,7 @@ import java.util.concurrent.Executors;
 
 import static com.jfrog.ide.common.log.Utils.logError;
 import static com.jfrog.ide.idea.scan.ScanUtils.createScanPaths;
-import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
-import static com.jfrog.ide.idea.utils.Utils.getScanLogicType;
+import static com.jfrog.ide.idea.utils.Utils.*;
 
 /**
  * Created by yahavi
@@ -163,7 +162,9 @@ public class ScanManagersFactory implements Disposable {
     }
 
     private void createScanManagers(Map<Integer, ScanManager> scanManagers, Set<Path> scanPaths, ExecutorService executor) throws IOException {
-        PackageFileFinder packageFileFinder = new PackageFileFinder(scanPaths, GlobalSettings.getInstance().getServerConfig().getExcludedPaths(), Logger.getInstance());
+        Path basePath = getProjectBasePath(project);
+        PackageFileFinder packageFileFinder = new PackageFileFinder(scanPaths, basePath,
+                GlobalSettings.getInstance().getServerConfig().getExcludedPaths(), Logger.getInstance());
 
         // Create npm scan-managers.
         Set<String> packageJsonDirs = packageFileFinder.getNpmPackagesFilePairs();
