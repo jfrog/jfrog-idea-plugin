@@ -12,12 +12,8 @@
 
     <change-notes>
         <![CDATA[
-          <li>Introduce new UI.</li>
-          <li>Introduce export to CSV.</li>
-          <li>Improved progress indicator.</li>
-          <li>Support providing Xray watches.</li>
-          <li>Allow creating an Ignore Rule on a vulnerability.</li>
-          <li>Bug fix - dependencies and artifacts without a license in the CI view are hidden.</li>
+          <li>Bug fix - Fix compatibility issue in 2021.2.4</li>
+          <li>Bug fix - Fix generate CSV in multi-project configuration</li>
         ]]>
     </change-notes>
 
