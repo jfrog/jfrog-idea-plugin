@@ -24,7 +24,7 @@ class ExportCsvVulnerabilities extends ExportCsv {
         try {
             Exporter csvExporter = createCsvExporter(project);
             if (csvExporter != null) {
-                exportIfNeeded(project, csvExporter.generateVulnerabilitiesReport(), DEFAULT_VULNERABILITIES_FILE_NAME);
+                new ExportCsvAction(project, DEFAULT_VULNERABILITIES_FILE_NAME, csvExporter.generateVulnerabilitiesReport()).openDialog();
             }
         } catch (Exception exception) {
             Logger.getInstance().error(ExceptionUtils.getRootCauseMessage(exception), exception);
