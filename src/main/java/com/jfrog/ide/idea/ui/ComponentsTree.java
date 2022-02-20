@@ -104,6 +104,7 @@ public abstract class ComponentsTree extends Tree {
             DependencyTree newRoot = filteredRoot;
             if (!Utils.areRootNodesEqual(root, filteredRoot)) {
                 newRoot = new DependencyTree();
+                newRoot.setMetadata(true);
                 newRoot.add(root);
                 newRoot.add(filteredRoot);
             }
