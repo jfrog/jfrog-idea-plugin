@@ -8,6 +8,7 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
+import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.persistency.ScanCache;
@@ -20,8 +21,6 @@ import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.navigation.NavigationService;
-import com.jfrog.ide.idea.ui.ComponentsTree;
-import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -84,20 +83,15 @@ public class ScanManagersFactory implements Disposable {
             Logger.getInstance().info("Previous scan still running...");
             return;
         }
-        // Try to load JFrog CLI config, only if the user hasn't config a server yet.
-        GlobalSettings.getInstance().loadConnectionDetailsFromJfrogCli();
-        if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
-            Logger.getInstance().warn("Xray server is not configured.");
+
+        if (!refreshConnection()) {
             return;
         }
-        ComponentsTree componentsTree = LocalComponentsTree.getInstance(project);
-        if (componentsTree == null) {
-            return;
-        }
+
+        project.getMessageBus().syncPublisher(ApplicationEvents.ON_SCAN_LOCAL_STARTED).update();
         ExecutorService executor = Executors.newFixedThreadPool(3);
         try {
             refreshScanManagers(getScanLogicType(), executor);
-            componentsTree.reset();
             NavigationService.clearNavigationMap(project);
             for (ScanManager scanManager : scanManagers.values()) {
                 try {
@@ -111,6 +105,21 @@ public class ScanManagersFactory implements Disposable {
         } finally {
             executor.shutdown();
         }
+    }
+
+    private boolean refreshConnection() {
+        GlobalSettings globalSettings = GlobalSettings.getInstance();
+        if (!globalSettings.areXrayCredentialsSet()) {
+            // Try to load JFrog CLI config, only if the user hasn't config a server yet.
+            if (!globalSettings.loadConnectionDetailsFromJfrogCli()) {
+                Logger.getInstance().warn("Xray server is not configured.");
+            } else {
+                MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
+                messageBus.syncPublisher(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE).update();
+            }
+            return false;
+        }
+        return true;
     }
 
     /**

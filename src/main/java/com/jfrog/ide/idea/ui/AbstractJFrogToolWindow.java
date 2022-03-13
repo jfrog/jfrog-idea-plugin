@@ -29,8 +29,9 @@ import org.jfrog.build.extractor.scan.Issue;
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.List;
-import java.util.*;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.jfrog.ide.idea.ui.JFrogToolWindow.*;
@@ -227,7 +228,7 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel impl
      */
     public void onConfigurationChange() {
         rightVerticalSplit.setSecondComponent(createMoreInfoView(true));
-        issuesTable.updateIssuesTable(new HashSet<>(), new LinkedList<>());
+        resetViews();
         issuesTable.addTableSelectionListener(moreInfoPanel);
     }
 
@@ -253,6 +254,18 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel impl
         issuesTable.addTableSelectionListener(moreInfoPanel);
         componentsTree.addOnProjectChangeListener(projectBusConnection);
         componentsTree.addRightClickListener();
+    }
+
+    /**
+     * Clear the component tree and the issues table.
+     */
+    void resetViews() {
+        if (componentsTree != null) {
+            componentsTree.reset();
+        }
+        if (issuesTable != null) {
+            issuesTable.reset();
+        }
     }
 
     @Override

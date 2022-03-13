@@ -12,9 +12,7 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.event.MouseListener;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.jfrog.ide.idea.ui.IssuesTableModel.IssueColumn.*;
@@ -36,6 +34,10 @@ public class ComponentIssuesTable extends JBTable {
         setDefaultRenderer(Object.class, new IssuesTableCellRenderer());
         getTableHeader().setReorderingAllowed(false);
         setAutoResizeMode(AUTO_RESIZE_OFF);
+    }
+
+    public void reset() {
+        updateIssuesTable(new HashSet<>(), new ArrayList<>());
     }
 
     public void updateIssuesTable(Set<Issue> selectedIssue, List<DependencyTree> selectedNodes) {

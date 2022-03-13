@@ -120,6 +120,7 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
             CiComponentsTree.getInstance(project).applyFiltersForAllProjects();
             updateIssuesTable();
         }));
+        projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_CI_STARTED, () -> ApplicationManager.getApplication().invokeLater(this::resetViews));
         projectBusConnection.subscribe(BuildEvents.ON_SELECTED_BUILD, this::setBuildDetails);
         projectBusConnection.subscribe(ApplicationEvents.ON_BUILDS_CONFIGURATION_CHANGE, () -> ApplicationManager.getApplication().invokeLater(this::onConfigurationChange));
     }
