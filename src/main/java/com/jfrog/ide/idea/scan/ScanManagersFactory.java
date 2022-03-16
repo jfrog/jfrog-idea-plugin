@@ -35,8 +35,7 @@ import java.util.concurrent.Executors;
 
 import static com.jfrog.ide.common.log.Utils.logError;
 import static com.jfrog.ide.idea.scan.ScanUtils.createScanPaths;
-import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
-import static com.jfrog.ide.idea.utils.Utils.getScanLogicType;
+import static com.jfrog.ide.idea.utils.Utils.*;
 
 /**
  * Created by yahavi
@@ -172,8 +171,19 @@ public class ScanManagersFactory implements Disposable {
         return new ComponentSummaryScanLogic(scanCache, logger);
     }
 
+    /**
+     * Create npm, Gradle, and Go scan managers.
+     *
+     * @param scanManagers - The scan managers map including the scan manager
+     *                     of the current project or an empty map, for a fresh start
+     * @param scanPaths    - Potentials paths for scanning for package descriptor files
+     * @param executor     - The thread pool
+     * @throws IOException in case of any I/O error during the search for the actual package descriptor files.
+     */
     private void createScanManagers(Map<Integer, ScanManager> scanManagers, Set<Path> scanPaths, ExecutorService executor) throws IOException {
-        PackageFileFinder packageFileFinder = new PackageFileFinder(scanPaths, GlobalSettings.getInstance().getServerConfig().getExcludedPaths(), Logger.getInstance());
+        Path basePath = getProjectBasePath(project);
+        PackageFileFinder packageFileFinder = new PackageFileFinder(scanPaths, basePath,
+                GlobalSettings.getInstance().getServerConfig().getExcludedPaths(), Logger.getInstance());
 
         // Create npm scan-managers.
         Set<String> packageJsonDirs = packageFileFinder.getNpmPackagesFilePairs();
