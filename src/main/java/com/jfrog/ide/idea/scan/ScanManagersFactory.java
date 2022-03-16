@@ -79,12 +79,14 @@ public class ScanManagersFactory implements Disposable {
         if (DumbService.isDumb(project)) { // If intellij is still indexing the project
             return;
         }
+
         if (isScanInProgress()) {
             Logger.getInstance().info("Previous scan still running...");
             return;
         }
 
-        if (!refreshConnection()) {
+        if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
+            tryConnectionDetailsFromJfrogCli();
             return;
         }
 
@@ -107,19 +109,18 @@ public class ScanManagersFactory implements Disposable {
         }
     }
 
-    private boolean refreshConnection() {
+    /**
+     * Load connection details From JFrog CLI configuration. If credentials loaded successfully, trigger a new scan.
+     */
+    private void tryConnectionDetailsFromJfrogCli() {
         GlobalSettings globalSettings = GlobalSettings.getInstance();
-        if (!globalSettings.areXrayCredentialsSet()) {
-            // Try to load JFrog CLI config, only if the user hasn't config a server yet.
-            if (!globalSettings.loadConnectionDetailsFromJfrogCli()) {
-                Logger.getInstance().warn("Xray server is not configured.");
-            } else {
-                MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
-                messageBus.syncPublisher(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE).update();
-            }
-            return false;
+        if (!globalSettings.loadConnectionDetailsFromJfrogCli()) {
+            Logger.getInstance().warn("Xray server is not configured.");
+            return;
         }
-        return true;
+        // Send the ON_CONFIGURATION_DETAILS_CHANGE event that updates the UI panels and triggers a new Xray scan
+        MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
+        messageBus.syncPublisher(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE).update();
     }
 
     /**
