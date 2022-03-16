@@ -161,6 +161,15 @@ public class ScanManagersFactory implements Disposable {
         return new ComponentSummaryScanLogic(scanCache, logger);
     }
 
+    /**
+     * Create npm, Gradle, and Go scan managers.
+     *
+     * @param scanManagers - The scan managers map including the scan manager
+     *                     of the current project or an empty map, for a fresh start
+     * @param scanPaths    - Potentials paths for scanning for package descriptor files
+     * @param executor     - The thread pool
+     * @throws IOException in case of any I/O error during the search for the actual package descriptor files.
+     */
     private void createScanManagers(Map<Integer, ScanManager> scanManagers, Set<Path> scanPaths, ExecutorService executor) throws IOException {
         Path basePath = getProjectBasePath(project);
         PackageFileFinder packageFileFinder = new PackageFileFinder(scanPaths, basePath,
