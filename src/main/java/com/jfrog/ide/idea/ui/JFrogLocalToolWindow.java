@@ -99,5 +99,6 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             LocalComponentsTree.getInstance(project).applyFiltersForAllProjects();
             updateIssuesTable();
         }));
+        projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_LOCAL_STARTED, () -> ApplicationManager.getApplication().invokeLater(this::resetViews));
     }
 }

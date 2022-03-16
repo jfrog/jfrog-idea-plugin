@@ -200,17 +200,19 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
      * The plugin supports reading the JFrog connection details from JFrog CLI's configuration.
      * This allows developers who already have JFrog CLI installed and configured,
      * to have IDEA load the config automatically.
+     *
+     * @return true if connection details from CLI were loaded.
      */
-    public void loadConnectionDetailsFromJfrogCli() {
-        // Try to read connection details using JFrog CLI only if no server is already configured.
-        if (areXrayCredentialsSet()) {
-            return;
-        }
+    public boolean loadConnectionDetailsFromJfrogCli() {
         try {
-            String configured = serverConfig.readConnectionDetailsFromJfrogCli() ? "Successfully" : "Couldn't";
-            Logger.getInstance().info(configured + " config connection details from JFrog CLI");
+            if (serverConfig.readConnectionDetailsFromJfrogCli()) {
+                Logger.getInstance().info("Successfully loaded config connection details from JFrog CLI");
+                return true;
+            }
         } catch (IOException exception) {
-            Logger.getInstance().debug("Couldn't config connection details from JFrog CLI: " + ExceptionUtils.getRootCauseMessage(exception));
+            Logger.getInstance().warn(ExceptionUtils.getRootCauseMessage(exception));
         }
+        Logger.getInstance().debug("Couldn't load config connection details from JFrog CLI");
+        return false;
     }
 }

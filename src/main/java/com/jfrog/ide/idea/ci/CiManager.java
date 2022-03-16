@@ -81,6 +81,7 @@ public class CiManager extends CiManagerBase implements Disposable {
                     if (project.isDisposed()) {
                         return;
                     }
+                    project.getMessageBus().syncPublisher(ApplicationEvents.ON_SCAN_CI_STARTED).update();
                     String buildsPattern = propertiesComponent.getValue(BUILDS_PATTERN_KEY);
                     buildCiTree(buildsPattern, GlobalSettings.getInstance().getServerConfig().getProject(),
                             new ProgressIndicatorImpl(indicator), () -> checkCanceled(indicator), shouldToast);
