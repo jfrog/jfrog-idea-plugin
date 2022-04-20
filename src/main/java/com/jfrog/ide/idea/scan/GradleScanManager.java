@@ -2,7 +2,9 @@ package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Maps;
 import com.intellij.codeInspection.LocalInspectionTool;
+import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -52,6 +54,8 @@ public class GradleScanManager extends ScanManager {
         super(project, basePath, ComponentPrefix.GAV, executor);
         getLog().info("Found Gradle project: " + getProjectName());
         Map<String, String> env = Maps.newHashMap(EnvironmentUtil.getEnvironmentMap());
+        Path pluginLibDir = PluginManagerCore.getPlugin(PluginId.findId("org.jfrog.idea")).getPluginPath().resolve("lib");
+        env.put("pluginLibDir", pluginLibDir.toAbsolutePath().toString());
         gradleTreeBuilder = new GradleTreeBuilder(Paths.get(basePath), env, getGradleExeAndJdk(env));
     }
 
