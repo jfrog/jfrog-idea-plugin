@@ -5,7 +5,7 @@
 
     <description><![CDATA[
       The JFrog plugin adds JFrog Xray scanning of Maven, Gradle, Go, npm, and PyPI project dependencies to your IDE.
-      The plugin allows developers to see valuable information about the status of their code by continuously scanning it locally with JFrog Xray.
+      The plugin allows developers to see security vulnerabilities and license violations within their code by continuously scanning it locally with JFrog Xray.
       Since version 1.8.0, the plugin also allows developers to track the status of the code while it is being built, tested and scanned on the CI server.
       The plugin is compatible with IntelliJ IDEA, WebStorm, GoLand, PyCharm, and Android Studio.
     ]]></description>
