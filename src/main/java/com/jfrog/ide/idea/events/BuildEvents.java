@@ -12,7 +12,7 @@ public interface BuildEvents {
     Topic<BuildEvents> ON_SELECTED_BUILD = Topic.create("Build selected", BuildEvents.class);
 
     /**
-     * Called when the the selected build is modified.
+     * Called when the selected build is modified.
      */
     void update(BuildGeneralInfo generalInfo);
 }
