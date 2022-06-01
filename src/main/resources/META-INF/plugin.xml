@@ -12,8 +12,14 @@
 
     <change-notes>
         <![CDATA[
-          <li>Bug fix - Fix compatibility issue in 2021.2.4</li>
-          <li>Bug fix - Fix generate CSV in multi-project configuration</li>
+          <li>npm - Allow scanning projects without node_modules</li>
+          <li>Go - Allow missing modules in Go</li>
+          <li>Bugfix - In some cases, the cache doesn't work</li>
+          <li>Bugfix - Reading credentials from JFrog CLI doesn't initiate the "More Info" panel</li>
+          <li>Bugfix - Starting a new scan doesn't reset the dependency tree and the issues table</li>
+          <li>Bugfix - Root project should not be excluded from scanning</li>
+          <li>Bugfix - Running AQL with wrong credentials logs uninformative message</li>
+          <li>Bugfix - CI - Stackoverflow when there is a loop in the tree</li>
         ]]>
     </change-notes>
 
