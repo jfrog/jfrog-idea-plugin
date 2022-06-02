@@ -7,6 +7,8 @@ import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.Issue;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -20,7 +22,7 @@ import static com.jfrog.ide.idea.ui.utils.ComponentUtils.replaceAndUpdateUI;
  *
  * @author yahavi
  **/
-class IssuesTableSelectionListener extends MouseAdapter {
+class IssuesTableSelectionListener extends MouseAdapter implements ListSelectionListener {
     private final ComponentIssuesTable issuesTable;
     private final JPanel detailsPanel;
 
@@ -29,8 +31,16 @@ class IssuesTableSelectionListener extends MouseAdapter {
         this.issuesTable = issuesTable;
     }
 
+    /**
+     * Show the "Create Ignore Rule" button after right-click on a violation.
+     *
+     * @param e - The mouse event
+     */
     @Override
     public void mousePressed(MouseEvent e) {
+        if (!SwingUtilities.isRightMouseButton(e)) {
+            return;
+        }
         int selectedRow = getSelectedRow(e);
         if (selectedRow == -1) {
             return;
@@ -41,25 +51,40 @@ class IssuesTableSelectionListener extends MouseAdapter {
             return;
         }
         Issue selectedIssue = issuesTable.getIssueAt(selectedRow);
-        if (SwingUtilities.isLeftMouseButton(e)) {
-            doLeftClickButtonEvent(selectedIssue, impactedNode);
-        } else if (SwingUtilities.isRightMouseButton(e)) {
-            doRightClickButtonEvent(e, selectedIssue);
-        }
+        doRightClickButtonEvent(e, selectedIssue);
     }
 
     /**
-     * Get the selected row if the user clicked on the right or the left mouse buttons.
+     * Display the issue details view after selecting it by mouse or by keyboard.
+     *
+     * @param e - The selection event
+     */
+    @Override
+    public void valueChanged(ListSelectionEvent e) {
+        if (e.getValueIsAdjusting()) {
+            return;
+        }
+        int selectedRow = ((ListSelectionModel) e.getSource()).getMinSelectionIndex();
+        if (selectedRow == -1) {
+            return;
+        }
+        DependencyTree impactedNode = getImpactedNode(selectedRow);
+        if (impactedNode == null) {
+            return;
+        }
+        Issue selectedIssue = issuesTable.getIssueAt(selectedRow);
+        replaceAndUpdateUI(detailsPanel, new IssueDetails(selectedIssue, impactedNode), BorderLayout.NORTH);
+    }
+
+    /**
+     * Get the selected row in the table or -1 if no row selected.
      *
      * @param event - The mouse click event
-     * @return the selected row.
+     * @return the selected row or -1.
      */
     private int getSelectedRow(MouseEvent event) {
         int row = issuesTable.rowAtPoint(event.getPoint());
         if (row < 0 || row >= issuesTable.getRowCount()) {
-            return -1;
-        }
-        if (SwingUtilities.isMiddleMouseButton(event)) {
             return -1;
         }
         return row;
@@ -78,16 +103,6 @@ class IssuesTableSelectionListener extends MouseAdapter {
                 .filter(Objects::nonNull)
                 .findAny()
                 .orElse(null);
-    }
-
-    /**
-     * Display the issue view after a left click on an issue.
-     *
-     * @param selectedIssue - The selected issue
-     * @param impactedNode  - The impacted node
-     */
-    private void doLeftClickButtonEvent(Issue selectedIssue, DependencyTree impactedNode) {
-        replaceAndUpdateUI(detailsPanel, new IssueDetails(selectedIssue, impactedNode), BorderLayout.NORTH);
     }
 
     /**
