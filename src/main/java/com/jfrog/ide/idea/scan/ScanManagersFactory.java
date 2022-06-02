@@ -188,7 +188,11 @@ public class ScanManagersFactory implements Disposable {
         PackageFileFinder packageFileFinder = new PackageFileFinder(scanPaths, basePath,
                 GlobalSettings.getInstance().getServerConfig().getExcludedPaths(), Logger.getInstance());
 
-        // Create npm scan-managers.
+        // Create yarn scan-managers.
+        Set<String> yarnLockDirs = packageFileFinder.getNpmPackagesFilePairs();
+        createScanManagersForPackageDirs(yarnLockDirs, scanManagers, ScanManagerTypes.YARN, executor);
+
+        // Create npm scan-managers only if yarn.lock files wasn't found.
         Set<String> packageJsonDirs = packageFileFinder.getNpmPackagesFilePairs();
         createScanManagersForPackageDirs(packageJsonDirs, scanManagers, ScanManagerTypes.NPM, executor);
 
@@ -269,7 +273,8 @@ public class ScanManagersFactory implements Disposable {
         MAVEN,
         GRADLE,
         NPM,
-        GO
+        GO,
+        YARN
     }
 
     /**
@@ -284,21 +289,31 @@ public class ScanManagersFactory implements Disposable {
      */
     private void createScanManagerIfApplicable(Map<Integer, ScanManager> scanManagers, int projectHash, ScanManagerTypes type, String dir, ExecutorService executor) {
         try {
+            ScanManager scanManager;
             switch (type) {
                 case MAVEN:
                     if (MavenScanManager.isApplicable(project)) {
-                        scanManagers.put(projectHash, new MavenScanManager(project, executor));
+                        scanManager = new MavenScanManager(project, executor);
+                    } else {
+                        return;
                     }
-                    return;
+                    break;
                 case GRADLE:
-                    scanManagers.put(projectHash, new GradleScanManager(project, dir, executor));
-                    return;
+                    scanManager = new GradleScanManager(project, dir, executor);
+                    break;
+                case YARN:
+                    scanManager = new YarnScanManager(project, dir, executor);
+                    break;
                 case NPM:
-                    scanManagers.put(projectHash, new NpmScanManager(project, dir, executor));
-                    return;
+                    scanManager = new NpmScanManager(project, dir, executor);
+                    break;
                 case GO:
-                    scanManagers.put(projectHash, new GoScanManager(project, dir, executor));
+                    scanManager = new GoScanManager(project, dir, executor);
+                    break;
+                default:
+                    return;
             }
+            scanManagers.put(projectHash, scanManager);
         } catch (NoClassDefFoundError noClassDefFoundError) {
             // The 'maven' or 'python' plugins are not installed.
         }
