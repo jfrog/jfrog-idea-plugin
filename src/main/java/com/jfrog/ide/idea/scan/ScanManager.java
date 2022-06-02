@@ -194,7 +194,14 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
      * @return text to display in the task progress.
      */
     private String getTaskTitle() {
-        String relativePath = Utils.getProjectBasePath(project).relativize(Paths.get(basePath)).toString();
+        Path projectBasePath = Utils.getProjectBasePath(project);
+        Path wsBasePath = Paths.get(basePath);
+        String relativePath = "";
+        if (projectBasePath.isAbsolute() != wsBasePath.isAbsolute()) {
+            // If one of the path is relative and the other one is absolute, the following exception is thrown:
+            // IllegalArgumentException: 'other' is different type of Path
+            relativePath = projectBasePath.relativize(wsBasePath).toString();
+        }
         return "Xray scanning " + StringUtils.defaultIfBlank(relativePath, project.getName());
     }
 
