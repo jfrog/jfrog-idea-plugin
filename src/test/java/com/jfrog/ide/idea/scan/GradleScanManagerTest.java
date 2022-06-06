@@ -79,7 +79,7 @@ public class GradleScanManagerTest extends HeavyPlatformTestCase {
         assertTrue(results.isMetadata());
         assertEquals(Paths.get(globalProjectDir).getFileName().toString(), results.getUserObject());
         assertScopes(results);
-        assertEquals(5, results.getChildCount());
+        assertEquals(3, results.getChildCount());
 
         // Check module dependency
         DependencyTree moduleNode = getAndAssertChild(results, "shared");
@@ -89,6 +89,6 @@ public class GradleScanManagerTest extends HeavyPlatformTestCase {
         // Check dependency
         DependencyTree dependencyNode = getAndAssertChild(moduleNode, "junit:junit:4.7");
         assertFalse(dependencyNode.isMetadata());
-        assertContainsElements(dependencyNode.getScopes(), new Scope("Compile"), new Scope("Runtime"));
+        assertContainsElements(dependencyNode.getScopes(), new Scope("TestImplementation"), new Scope("TestRuntimeClasspath"), new Scope("TestCompileClasspath"));
     }
 }
