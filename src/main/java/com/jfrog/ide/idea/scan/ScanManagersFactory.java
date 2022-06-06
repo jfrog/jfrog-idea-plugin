@@ -5,11 +5,14 @@ import com.google.common.collect.Sets;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
+import com.jetbrains.python.sdk.PythonSdkUtil;
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.persistency.ScanCache;
 import com.jfrog.ide.common.persistency.XrayScanCache;
@@ -205,7 +208,11 @@ public class ScanManagersFactory implements Disposable {
      */
     private void createPypiScanManagerIfApplicable(Map<Integer, ScanManager> scanManagers, ExecutorService executor) {
         try {
-            for (Sdk pythonSdk : PypiScanManager.getAllPythonSdks()) {
+            for (Module module : ModuleManager.getInstance(project).getModules()) {
+                Sdk pythonSdk = PythonSdkUtil.findPythonSdk(module);
+                if (pythonSdk == null) {
+                    continue;
+                }
                 int projectHash = Utils.getProjectIdentifier(pythonSdk.getName(), pythonSdk.getHomePath());
                 ScanManager scanManager = this.scanManagers.get(projectHash);
                 if (scanManager == null) {
