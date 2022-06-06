@@ -11,7 +11,6 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.tree.DefaultMutableTreeNode;
-import java.awt.event.MouseListener;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,7 +21,7 @@ import static com.jfrog.ide.idea.ui.IssuesTableModel.IssueColumn.*;
  */
 public class ComponentIssuesTable extends JBTable {
     private List<DependencyTree> selectedNodes = Lists.newArrayList();
-    private MouseListener mouseListener;
+    private IssuesTableSelectionListener selectionListener;
 
     private static final List<RowSorter.SortKey> SORT_KEYS = Lists.newArrayList(
             new RowSorter.SortKey(SEVERITY.ordinal(), SortOrder.DESCENDING),
@@ -34,6 +33,7 @@ public class ComponentIssuesTable extends JBTable {
         setDefaultRenderer(Object.class, new IssuesTableCellRenderer());
         getTableHeader().setReorderingAllowed(false);
         setAutoResizeMode(AUTO_RESIZE_OFF);
+        setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 
     public void reset() {
@@ -57,11 +57,13 @@ public class ComponentIssuesTable extends JBTable {
      * @param moreInfoPanel - The more info panel
      */
     public void addTableSelectionListener(JPanel moreInfoPanel) {
-        if (mouseListener != null) {
-            removeMouseListener(mouseListener);
+        if (selectionListener != null) {
+            removeMouseListener(selectionListener);
+            getSelectionModel().removeListSelectionListener(selectionListener);
         }
-        mouseListener = new IssuesTableSelectionListener(moreInfoPanel, this);
-        addMouseListener(mouseListener);
+        selectionListener = new IssuesTableSelectionListener(moreInfoPanel, this);
+        addMouseListener(selectionListener);
+        getSelectionModel().addListSelectionListener(selectionListener);
     }
 
     /**

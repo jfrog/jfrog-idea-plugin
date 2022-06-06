@@ -42,7 +42,7 @@ repositories {
     }
 }
 
-def buildInfoVersion = '2.35.0'
+def buildInfoVersion = '2.36.3'
 dependencies {
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-extractor', version: buildInfoVersion
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-client', version: buildInfoVersion

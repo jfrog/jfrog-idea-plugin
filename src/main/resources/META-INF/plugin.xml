@@ -5,15 +5,21 @@
 
     <description><![CDATA[
       The JFrog plugin adds JFrog Xray scanning of Maven, Gradle, Go, npm, and PyPI project dependencies to your IDE.
-      The plugin allows developers to see valuable information about the status of their code by continuously scanning it locally with JFrog Xray.
+      The plugin allows developers to see security vulnerabilities and license violations within their code by continuously scanning it locally with JFrog Xray.
       Since version 1.8.0, the plugin also allows developers to track the status of the code while it is being built, tested and scanned on the CI server.
       The plugin is compatible with IntelliJ IDEA, WebStorm, GoLand, PyCharm, and Android Studio.
     ]]></description>
 
     <change-notes>
         <![CDATA[
-          <li>Bug fix - Fix compatibility issue in 2021.2.4</li>
-          <li>Bug fix - Fix generate CSV in multi-project configuration</li>
+          <li>npm - Allow scanning projects without node_modules</li>
+          <li>Go - Allow missing modules in Go</li>
+          <li>Bugfix - In some cases, the cache doesn't work</li>
+          <li>Bugfix - Reading credentials from JFrog CLI doesn't initiate the "More Info" panel</li>
+          <li>Bugfix - Starting a new scan doesn't reset the dependency tree and the issues table</li>
+          <li>Bugfix - Root project should not be excluded from scanning</li>
+          <li>Bugfix - Running AQL with wrong credentials logs uninformative message</li>
+          <li>Bugfix - CI - Stackoverflow when there is a loop in the tree</li>
         ]]>
     </change-notes>
 
