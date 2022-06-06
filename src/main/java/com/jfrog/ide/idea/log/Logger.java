@@ -57,7 +57,8 @@ public class Logger implements Log {
      */
     @Override
     public void error(String message) {
-        ideaLogger.error(message);
+        // We log to IntelliJ log in "warn" log level to avoid popup annoying fatal errors
+        ideaLogger.warn(message);
         NotificationType notificationType = NotificationType.ERROR;
         popupBalloon(message, notificationType);
         log(ERROR_TITLE, message, notificationType);
@@ -72,7 +73,8 @@ public class Logger implements Log {
      */
     @Override
     public void error(String message, Throwable t) {
-        ideaLogger.error(message, t);
+        // We log to IntelliJ log in "warn" log level to avoid popup annoying fatal errors
+        ideaLogger.warn(message, t);
         NotificationType notificationType = NotificationType.ERROR;
         popupBalloon(message, notificationType);
         String title = StringUtils.defaultIfBlank(t.getMessage(), ERROR_TITLE);
