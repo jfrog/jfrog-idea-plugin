@@ -202,7 +202,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
             // IllegalArgumentException: 'other' is different type of Path
             relativePath = projectBasePath.relativize(wsBasePath).toString();
         }
-        return "Xray scanning " + StringUtils.defaultIfBlank(relativePath, project.getName());
+        return "JFrog Xray scanning " + StringUtils.defaultIfBlank(relativePath, project.getName());
     }
 
     /**
