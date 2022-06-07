@@ -189,10 +189,10 @@ public class ScanManagersFactory implements Disposable {
                 GlobalSettings.getInstance().getServerConfig().getExcludedPaths(), Logger.getInstance());
 
         // Create yarn scan-managers.
-        Set<String> yarnLockDirs = packageFileFinder.getNpmPackagesFilePairs();
+        Set<String> yarnLockDirs = packageFileFinder.getYarnPackagesFilePairs();
         createScanManagersForPackageDirs(yarnLockDirs, scanManagers, ScanManagerTypes.YARN, executor);
 
-        // Create npm scan-managers only if yarn.lock files wasn't found.
+        // Create npm scan-managers.
         Set<String> packageJsonDirs = packageFileFinder.getNpmPackagesFilePairs();
         createScanManagersForPackageDirs(packageJsonDirs, scanManagers, ScanManagerTypes.NPM, executor);
 

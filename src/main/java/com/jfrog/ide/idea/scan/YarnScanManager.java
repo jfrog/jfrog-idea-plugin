@@ -9,6 +9,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.npm.NpmTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.common.yarn.YarnTreeBuilder;
 import com.jfrog.ide.idea.inspections.NpmInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
@@ -22,7 +23,7 @@ import java.util.concurrent.ExecutorService;
  */
 public class YarnScanManager extends ScanManager {
 
-    private final NpmTreeBuilder yarnTreeBuilder;
+    private final YarnTreeBuilder yarnTreeBuilder;
     private final String PKG_TYPE = "yarn";
 
     /**
@@ -34,7 +35,7 @@ public class YarnScanManager extends ScanManager {
     YarnScanManager(Project project, String basePath, ExecutorService executor) {
         super(project, basePath, ComponentPrefix.NPM, executor);
         getLog().info("Found yarn project: " + getProjectName());
-        yarnTreeBuilder = new NpmTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap());
+        yarnTreeBuilder = new YarnTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap());
         subscribeLaunchDependencyScanOnFileChangedEvents("yarn.lock");
     }
 
