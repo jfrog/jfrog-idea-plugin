@@ -124,7 +124,7 @@ public class CiManager extends CiManagerBase implements Disposable {
      *
      * @param buildGeneralInfo - The build general info
      */
-    public void loadBuild(GeneralInfo buildGeneralInfo) {
+    public void loadBuild(BuildGeneralInfo buildGeneralInfo) {
         ComponentsTree componentsTree = CiComponentsTree.getInstance(project);
         componentsTree.reset();
         ProjectsMap.ProjectKey projectKey = null;
@@ -135,7 +135,7 @@ public class CiManager extends CiManagerBase implements Disposable {
                 componentsTree.addScanResults(project.getName(), buildTree);
                 projectKey = ProjectsMap.createKey(project.getName(), buildTree.getGeneralInfo());
             } catch (IOException | ParseException | IllegalArgumentException e) {
-                Logger.getInstance().error(String.format(LOAD_BUILD_FAIL_FMT, buildGeneralInfo.getArtifactId(), buildGeneralInfo.getVersion()), e);
+                Logger.getInstance().error(String.format(LOAD_BUILD_FAIL_FMT, buildGeneralInfo.getBuildName(), buildGeneralInfo.getBuildNumber()), e);
             }
         }
         MessageBus projectMessageBus = project.getMessageBus();
