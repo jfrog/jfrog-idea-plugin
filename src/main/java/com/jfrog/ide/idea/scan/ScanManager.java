@@ -197,7 +197,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
         Path projectBasePath = Utils.getProjectBasePath(project);
         Path wsBasePath = Paths.get(basePath);
         String relativePath = "";
-        if (projectBasePath.isAbsolute() != wsBasePath.isAbsolute()) {
+        if (projectBasePath.isAbsolute() == wsBasePath.isAbsolute()) {
             // If one of the path is relative and the other one is absolute, the following exception is thrown:
             // IllegalArgumentException: 'other' is different type of Path
             relativePath = projectBasePath.relativize(wsBasePath).toString();
