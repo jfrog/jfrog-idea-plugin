@@ -12,13 +12,8 @@
 
     <change-notes>
         <![CDATA[
-          <li>Gradle - Improve projects scanning</li>
-          <li>yarn   - Add support for yarn v1 </li>
-          <li>Python - Show only dependencies of the selected interpreter  </li>
-          <li>Bugfix - Allow selecting issues using the keyboard arrows </li>
-          <li>Bugfix - IllegalArgumentException in some scenarios </li>
-          <li>Bugfix - Avoid popup on fatal errors</li>
-          <li>Bugfix - CI - handle build number with colon</li>
+          <li>Bugfix - Gradle scan may fail with "Illegal base64 character"</li>
+          <li>Bugfix - Fix title in progressbar</li>
         ]]>
     </change-notes>
 
