@@ -1,7 +1,6 @@
 package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Sets;
-import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.execution.ExecutionException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
@@ -13,6 +12,7 @@ import com.jetbrains.python.packaging.PyRequirement;
 import com.jetbrains.python.packaging.pipenv.PyPipEnvPackageManager;
 import com.jetbrains.python.sdk.PythonSdkUtil;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import org.apache.commons.collections4.CollectionUtils;
@@ -167,7 +167,7 @@ public class PypiScanManager extends ScanManager {
     }
 
     @Override
-    protected LocalInspectionTool getInspectionTool() {
+    protected AbstractInspection getInspectionTool() {
         return null;
     }
 

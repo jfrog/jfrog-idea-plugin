@@ -34,9 +34,15 @@ import java.util.stream.Collectors;
 public abstract class AbstractInspection extends LocalInspectionTool implements Annotator {
 
     private final String packageDescriptorName;
+    // True if the code inspection was automatically triggered after an Xray scan using InspectionEngine.runInspectionOnFile(...).
+    private boolean afterScan;
 
     AbstractInspection(String packageDescriptorName) {
         this.packageDescriptorName = packageDescriptorName;
+    }
+
+    public void setAfterScan(boolean afterScan) {
+        this.afterScan = afterScan;
     }
 
     /**
@@ -49,7 +55,8 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      *                       False if the inspection was triggered manually by clicking on "Code | Inspect Code".
      */
     void visitElement(ProblemsHolder problemsHolder, PsiElement element, boolean isOnTheFly) {
-        if (!isOnTheFly) {
+        if (!afterScan && !isOnTheFly) {
+            // Code inspection was triggered manually by clicking on "Code | Inspect Code".
             return;
         }
         List<DependencyTree> dependencies = getDependencies(element);
