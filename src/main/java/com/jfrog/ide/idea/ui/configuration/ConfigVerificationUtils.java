@@ -54,6 +54,6 @@ public class ConfigVerificationUtils {
     }
 
     private static boolean illegalCharactersExist(String str) {
-        return !str.matches("[\\w-]*");
+        return !str.matches("[\\w-.]*");
     }
 }
