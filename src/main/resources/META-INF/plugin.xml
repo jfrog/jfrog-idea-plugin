@@ -12,8 +12,9 @@
 
     <change-notes>
         <![CDATA[
-          <li>Bugfix - Gradle scan may fail with "Illegal base64 character"</li>
-          <li>Bugfix - Fix title in progressbar</li>
+          <li>Bugfix - Code inspection does not run after an Xray scan</li>
+          <li>Bugfix - Illegal chars error when using a watch with period</li>
+          <li>Bugfix - Fix tooltips for URLs in configuration</li>
         ]]>
     </change-notes>
 
