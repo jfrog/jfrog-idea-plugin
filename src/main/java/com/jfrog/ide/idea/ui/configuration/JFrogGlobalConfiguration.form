@@ -48,7 +48,7 @@
             </constraints>
             <properties>
               <text value=""/>
-              <toolTipText value="Example: http://myjfrog.acme.org/xray"/>
+              <toolTipText value="Example: https://acme.jfrog.io"/>
             </properties>
           </component>
           <component id="a8f26" class="javax.swing.JLabel">
@@ -133,7 +133,7 @@
             </constraints>
             <properties>
               <text value=""/>
-              <toolTipText value="Example: http://myjfrog.acme.org/xray"/>
+              <toolTipText value="Example: https://acme.jfrog.io/xray"/>
             </properties>
           </component>
           <component id="a6009" class="javax.swing.JLabel">
@@ -156,7 +156,7 @@
             <properties>
               <horizontalAlignment value="10"/>
               <text value=""/>
-              <toolTipText value="Example: http://myjfrog.acme.org/xray"/>
+              <toolTipText value="Example: https://acme.jfrog.io/artifactory"/>
             </properties>
           </component>
           <component id="cad10" class="com.intellij.ui.components.JBLabel" binding="artifactoryConnectionResults">
