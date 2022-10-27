@@ -1,7 +1,6 @@
 package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Sets;
-import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.ide.highlighter.XmlFileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
@@ -10,6 +9,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.MavenInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
@@ -92,7 +92,7 @@ public class MavenScanManager extends ScanManager {
     }
 
     @Override
-    protected LocalInspectionTool getInspectionTool() {
+    protected AbstractInspection getInspectionTool() {
         return new MavenInspection();
     }
 

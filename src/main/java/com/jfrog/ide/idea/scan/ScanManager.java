@@ -29,6 +29,7 @@ import com.jfrog.ide.common.scan.ScanManagerBase;
 import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.events.ProjectEvents;
+import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
 import com.jfrog.ide.idea.ui.ComponentsTree;
@@ -110,7 +111,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
      *
      * @return the Inspection tool corresponding to the scan-manager type.
      */
-    protected abstract LocalInspectionTool getInspectionTool();
+    protected abstract AbstractInspection getInspectionTool();
 
     protected void sendUsageReport() {
         Utils.sendUsageReport(getProjectPackageType() + "-deps");
@@ -260,7 +261,8 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
         }
         InspectionManagerEx inspectionManagerEx = (InspectionManagerEx) InspectionManager.getInstance(project);
         GlobalInspectionContext context = inspectionManagerEx.createNewGlobalContext(false);
-        LocalInspectionTool localInspectionTool = getInspectionTool();
+        AbstractInspection localInspectionTool = getInspectionTool();
+        localInspectionTool.setAfterScan(true);
         for (PsiFile descriptor : projectDescriptors) {
             // Run inspection on descriptor.
             InspectionEngine.runInspectionOnFile(descriptor, new LocalInspectionToolWrapper(localInspectionTool), context);

@@ -1,6 +1,5 @@
 package com.jfrog.ide.idea.scan;
 
-import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -9,6 +8,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.npm.NpmTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.NpmInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
@@ -55,7 +55,7 @@ public class NpmScanManager extends ScanManager {
     }
 
     @Override
-    protected LocalInspectionTool getInspectionTool() {
+    protected AbstractInspection getInspectionTool() {
         return new NpmInspection();
     }
 
@@ -64,4 +64,3 @@ public class NpmScanManager extends ScanManager {
         return PKG_TYPE;
     }
 }
-

@@ -1,7 +1,6 @@
 package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Maps;
-import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.extensions.PluginId;
@@ -13,6 +12,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.gradle.GradleTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.GradleGroovyInspection;
 import com.jfrog.ide.idea.inspections.GradleKotlinInspection;
 import com.jfrog.ide.idea.log.Logger;
@@ -76,7 +76,7 @@ public class GradleScanManager extends ScanManager {
     }
 
     @Override
-    protected LocalInspectionTool getInspectionTool() {
+    protected AbstractInspection getInspectionTool() {
         return kotlin ? new GradleKotlinInspection() : new GradleGroovyInspection();
     }
 
