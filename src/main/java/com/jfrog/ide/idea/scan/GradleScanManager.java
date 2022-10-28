@@ -2,7 +2,7 @@ package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Maps;
 import com.intellij.ide.plugins.PluginManagerCore;
-import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -119,17 +119,23 @@ public class GradleScanManager extends ScanManager {
             logError(getLog(), "Couldn't retrieve Gradle project settings. Hint - make sure the Gradle project was properly imported.", false);
             return null;
         }
-        GradleInstallationManager gradleInstallationManager = ServiceManager.getService(GradleInstallationManager.class);
+        GradleInstallationManager gradleInstallationManager = ApplicationManager.getApplication().getService(GradleInstallationManager.class);
+
+        // Set JAVA_HOME
+        String javaHome = gradleInstallationManager.getGradleJvmPath(project, projectSettings.getExternalProjectPath());
+        if (StringUtils.isNotBlank(javaHome)) {
+            getLog().info("Using Java home: " + javaHome);
+            env.put("JAVA_HOME", javaHome);
+        }
+
         File gradleHome = gradleInstallationManager.getGradleHome(project, projectSettings.getExternalProjectPath());
         if (gradleHome != null) {
-            // Gradle seems to set properly, try to set JAVA_HOME environment variable.
-            String javaHome = gradleInstallationManager.getGradleJvmPath(project, projectSettings.getExternalProjectPath());
-            if (StringUtils.isNotBlank(javaHome)) {
-                getLog().info("Using Java home: " + javaHome);
-                env.put("JAVA_HOME", javaHome);
-            }
             return gradleHome;
         }
+        if (StringUtils.isNotBlank(projectSettings.getGradleHome())) {
+            return new File(projectSettings.getGradleHome());
+        }
+
         // Gradle wasn't set properly
         if (isMisconfigurationError(projectSettings.getExternalProjectPath())) {
             Logger.addOpenSettingsLink("It looks like Gradle home was not properly set in your project. " +

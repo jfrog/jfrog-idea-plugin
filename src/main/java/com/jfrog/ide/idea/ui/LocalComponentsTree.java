@@ -1,6 +1,5 @@
 package com.jfrog.ide.idea.ui;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.messages.MessageBusConnection;
@@ -21,7 +20,7 @@ public class LocalComponentsTree extends ComponentsTree {
     }
 
     public static LocalComponentsTree getInstance(@NotNull Project project) {
-        return ServiceManager.getService(project, LocalComponentsTree.class);
+        return project.getService(LocalComponentsTree.class);
     }
 
     @Override

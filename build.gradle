@@ -1,26 +1,19 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
+plugins {
+    id "org.jetbrains.intellij" version "1.9.0"
+    id "java"
+    id "maven-publish"
 }
 
-plugins {
-    id "org.jetbrains.intellij" version "0.7.3"
-}
+group 'com.jfrog.ide'
+version currentVersion
 
 sourceCompatibility = 1.11
 targetCompatibility = 1.11
 
-apply plugin: 'idea'
-apply plugin: 'org.jetbrains.intellij'
-apply plugin: 'java'
-
-def sandboxVersion = 'IU-2020.3.2'
 intellij {
-    version sandboxVersion
-    plugins = ['gradle', 'maven', 'Groovy', 'properties', 'java', 'Kotlin', 'org.jetbrains.plugins.go:203.5981.155', 'Pythonid:203.5981.165']
-    pluginName 'JFrog'
-    updateSinceUntilBuild = false
+    version = sandboxVersion
+    plugins = ['gradle', 'maven', 'Groovy', 'properties', 'java', 'Kotlin', 'org.jetbrains.plugins.go:213.5744.18', 'Pythonid:213.5744.18']
+    pluginName = 'JFrog'
 }
 
 runPluginVerifier {
@@ -69,14 +62,7 @@ test {
     }
 }
 
-jar {
-    manifest {
-        attributes 'Implementation-Version': currentVersion
-    }
+tasks.withType(JavaCompile) {
+    options.deprecation = true
+    options.encoding = "UTF-8"
 }
-
-compileJava { options.encoding = "UTF-8" }
-compileTestJava { options.encoding = "UTF-8" }
-
-group 'com.jfrog.ide'
-version currentVersion // Plugin version

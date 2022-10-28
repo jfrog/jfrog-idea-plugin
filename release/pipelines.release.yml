@@ -50,7 +50,7 @@ pipelines:
             - jf gradlec --use-wrapper --repo-resolve ecosys-maven-remote --repo-deploy ecosys-oss-release-local --deploy-maven-desc --deploy-ivy-desc=false
 
             # Run audit
-            - jf ag
+            - jf audit
 
             # Update version
             - sed -i "s/\(currentVersion=\).*\$/\1${NEXT_VERSION}/" gradle.properties
@@ -74,7 +74,7 @@ pipelines:
             - jf ds rbd jfrog-idea-plugin $NEXT_VERSION --site="releases.jfrog.io" --sync
 
             # Upload to Jetbrains marketplace
-            - curl -i --header "Authorization:Bearer $int_jetbrains_token" -F pluginId=9834 -F file=@build/distributions/JFrog-$NEXT_VERSION.zip https://plugins.jetbrains.com/plugin/uploadPlugin
+            - ./gradlew publishPlugin -Dorg.gradle.project.intellijPublishToken=$int_jetbrains_token
 
             # Update next development version
             - sed -i "s/\(currentVersion=\).*\$/\1${NEXT_DEVELOPMENT_VERSION}/" gradle.properties

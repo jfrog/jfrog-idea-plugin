@@ -3,7 +3,6 @@ package com.jfrog.ide.idea.ci;
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressManager;
@@ -28,7 +27,6 @@ import com.jfrog.ide.idea.utils.Utils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependencyTree;
-import org.jfrog.build.extractor.scan.GeneralInfo;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -67,7 +65,7 @@ public class CiManager extends CiManagerBase implements Disposable {
     }
 
     public static CiManager getInstance(@NotNull Project project) {
-        return ServiceManager.getService(project, CiManager.class);
+        return project.getService(CiManager.class);
     }
 
     public void asyncRefreshBuilds(boolean shouldToast) {

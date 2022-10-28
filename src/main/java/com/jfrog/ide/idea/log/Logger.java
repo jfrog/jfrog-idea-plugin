@@ -1,12 +1,15 @@
 package com.jfrog.ide.idea.log;
 
 import com.intellij.notification.*;
-import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.plexus.util.ExceptionUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.util.Log;
 
 /**
@@ -24,7 +27,7 @@ public class Logger implements Log {
     private static final String ERROR_TITLE = "JFrog Xray scan failed";
 
     public static Logger getInstance() {
-        return ServiceManager.getService(Logger.class);
+        return ApplicationManager.getApplication().getService(Logger.class);
     }
 
     private Logger() {
@@ -85,7 +88,7 @@ public class Logger implements Log {
         if (StringUtils.isBlank(details)) {
             details = title;
         }
-        Notifications.Bus.notify(EVENT_LOG_NOTIFIER.createNotification(title, prependPrefix(details, notificationType), notificationType, null));
+        Notifications.Bus.notify(EVENT_LOG_NOTIFIER.createNotification(title, prependPrefix(details, notificationType), notificationType));
     }
 
     private static void popupBalloon(String content, NotificationType notificationType) {
@@ -95,7 +98,7 @@ public class Logger implements Log {
         if (StringUtils.isBlank(content)) {
             content = ERROR_TITLE;
         }
-        Notification notification = BALLOON_NOTIFIER.createNotification(ERROR_TITLE, content, notificationType, null);
+        Notification notification = BALLOON_NOTIFIER.createNotification(ERROR_TITLE, content, notificationType);
         lastNotification = notification;
         Notifications.Bus.notify(notification);
     }
@@ -121,7 +124,13 @@ public class Logger implements Log {
      * @param configurable - IDEA settings to open
      */
     public static void addOpenSettingsLink(String details, Project project, Class<? extends Configurable> configurable) {
-        EVENT_LOG_NOTIFIER.createNotification(INFORMATION_TITLE, prependPrefix(details, NotificationType.INFORMATION), NotificationType.INFORMATION,
-                ((notification, event) -> ShowSettingsUtil.getInstance().showSettingsDialog(project, configurable))).notify(project);
+        EVENT_LOG_NOTIFIER.createNotification(INFORMATION_TITLE, prependPrefix(details, NotificationType.INFORMATION), NotificationType.INFORMATION)
+                .addAction(new AnAction() {
+                    @Override
+                    public void actionPerformed(@NotNull AnActionEvent e) {
+                        ShowSettingsUtil.getInstance().showSettingsDialog(project, configurable);
+                    }
+                })
+                .notify(project);
     }
 }

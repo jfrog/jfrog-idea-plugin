@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.DumbService;
@@ -50,7 +49,7 @@ public class ScanManagersFactory implements Disposable {
     private final Project project;
 
     public static ScanManagersFactory getInstance(@NotNull Project project) {
-        return ServiceManager.getService(project, ScanManagersFactory.class);
+        return project.getService(ScanManagersFactory.class);
     }
 
     private ScanManagersFactory(@NotNull Project project) {

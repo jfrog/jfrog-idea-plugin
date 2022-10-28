@@ -2,8 +2,10 @@ package com.jfrog.ide.idea.scan;
 
 import com.intellij.testFramework.HeavyPlatformTestCase;
 import com.intellij.util.ConcurrencyUtil;
+import com.jfrog.ide.common.gradle.GradleDriver;
 import com.jfrog.ide.common.scan.GraphScanLogic;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.plugins.gradle.service.project.open.GradleProjectImportUtil;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.scan.DependencyTree;
@@ -49,22 +51,24 @@ public class GradleScanManagerTest extends HeavyPlatformTestCase {
         return tempProjectDir;
     }
 
-    public void testGetGradleWrapperExeAndJdk() {
+    public void testGetGradleWrapperExeAndJdk() throws IOException {
         GradleProjectImportUtil.linkAndRefreshGradleProject(wrapperProjectDir, getProject());
         GradleScanManager gradleScanManager = new GradleScanManager(getProject(), wrapperProjectDir, executorService);
         Map<String, String> env = new HashMap<>();
         String gradleExe = gradleScanManager.getGradleExeAndJdk(env);
         assertEquals(System.getenv("JAVA_HOME"), env.get("JAVA_HOME"));
-        assertNotNull(gradleExe);
+        assertTrue(StringUtils.contains(gradleExe, "wrapper"));
+        new GradleDriver(gradleExe, null).verifyGradleInstalled();
     }
 
-    public void testGetGradleGlobalExeAndJdk() {
+    public void testGetGradleGlobalExeAndJdk() throws IOException {
         GradleProjectImportUtil.linkAndRefreshGradleProject(globalProjectDir, getProject());
         GradleScanManager gradleScanManager = new GradleScanManager(getProject(), globalProjectDir, executorService);
         Map<String, String> env = new HashMap<>();
         String gradleExe = gradleScanManager.getGradleExeAndJdk(env);
         assertEquals(System.getenv("JAVA_HOME"), env.get("JAVA_HOME"));
         assertNotNull(gradleExe);
+        new GradleDriver(gradleExe, null).verifyGradleInstalled();
     }
 
     public void testBuildTree() throws IOException {

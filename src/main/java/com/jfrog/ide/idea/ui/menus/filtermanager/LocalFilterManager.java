@@ -1,6 +1,5 @@
 package com.jfrog.ide.idea.ui.menus.filtermanager;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.messages.Topic;
@@ -18,7 +17,7 @@ public class LocalFilterManager extends ConsistentFilterManager {
     }
 
     public static LocalFilterManager getInstance(@NotNull Project project) {
-        return ServiceManager.getService(project, LocalFilterManager.class);
+        return project.getService(LocalFilterManager.class);
     }
 
     @Override

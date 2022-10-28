@@ -1,6 +1,5 @@
 package com.jfrog.ide.idea.ui.menus.filtermanager;
 
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.messages.Topic;
@@ -21,7 +20,7 @@ public class CiFilterManager extends ConsistentFilterManager {
     }
 
     public static CiFilterManager getInstance(@NotNull Project project) {
-        return ServiceManager.getService(project, CiFilterManager.class);
+        return project.getService(CiFilterManager.class);
     }
 
     public void collectBuildsInformation(DependencyTree root) {

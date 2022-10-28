@@ -1,7 +1,6 @@
 package com.jfrog.ide.idea.ui;
 
 import com.intellij.ide.util.PropertiesComponent;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
@@ -26,7 +25,7 @@ public class JFrogToolWindowFactory implements ToolWindowFactory {
         boolean localProjectSupported = isLocalProjectSupported(project);
         boolean buildsConfigured = isBuildsConfigured(project);
         DumbService.getInstance(project).runWhenSmart(() -> {
-            ServiceManager.getService(project, JFrogToolWindow.class).initToolWindow(toolWindow, project, localProjectSupported, buildsConfigured);
+            project.getService(JFrogToolWindow.class).initToolWindow(toolWindow, project, localProjectSupported, buildsConfigured);
             ScanManagersFactory.getInstance(project).startScan(true);
             CiManager.getInstance(project).asyncRefreshBuilds(true);
         });
