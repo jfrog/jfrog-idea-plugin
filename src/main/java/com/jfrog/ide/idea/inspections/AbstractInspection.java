@@ -65,7 +65,9 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         }
         NavigationService navigationService = NavigationService.getInstance(element.getProject());
         for (DependencyTree dependency : dependencies) {
-            InspectionUtils.registerProblem(problemsHolder, dependency, getTargetElements(element), dependencies.size());
+            if (isOnTheFly) {
+                InspectionUtils.registerProblem(problemsHolder, dependency, getTargetElements(element), dependencies.size());
+            }
             navigationService.addNavigation(dependency, element);
         }
     }
