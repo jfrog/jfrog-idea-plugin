@@ -12,9 +12,7 @@
 
     <change-notes>
         <![CDATA[
-          <li>Bugfix - Code inspection does not run after an Xray scan</li>
-          <li>Bugfix - Illegal chars error when using a watch with period</li>
-          <li>Bugfix - Fix tooltips for URLs in configuration</li>
+          <li>Bugfix - Fix exception from Inspector</li>
         ]]>
     </change-notes>
 
