@@ -1,7 +1,6 @@
 package com.jfrog.ide.idea.ui;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.filter.FilterManager;
@@ -24,7 +23,7 @@ public class CiComponentsTree extends ComponentsTree {
     }
 
     public static CiComponentsTree getInstance(@NotNull Project project) {
-        return ServiceManager.getService(project, CiComponentsTree.class);
+        return project.getService(CiComponentsTree.class);
     }
 
     public void setBuildsMenu(BuildsMenu buildsMenu) {

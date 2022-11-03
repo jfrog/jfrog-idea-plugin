@@ -1,7 +1,6 @@
 package com.jfrog.ide.idea.navigation;
 
 import com.google.common.collect.Maps;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.FileViewProvider;
@@ -24,7 +23,7 @@ public class NavigationService {
     private final Map<DependencyTree, Set<NavigationTarget>> navigationMap = Maps.newHashMap();
 
     public static NavigationService getInstance(@NotNull Project project) {
-        return ServiceManager.getService(project, NavigationService.class);
+        return project.getService(NavigationService.class);
     }
 
     /**

@@ -6,6 +6,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.jfrog.ide.common.scan.ComponentPrefix;
@@ -29,6 +30,7 @@ import org.jfrog.build.extractor.scan.Scope;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -88,7 +90,9 @@ public class MavenScanManager extends ScanManager {
     protected PsiFile[] getProjectDescriptors() {
         // As project can contain sub-projects, look for all 'pom.xml' files under it.
         GlobalSearchScope scope = GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.projectScope(project), XmlFileType.INSTANCE);
-        return FilenameIndex.getFilesByName(project, "pom.xml", scope);
+        Collection<VirtualFile> allPoms = FilenameIndex.getVirtualFilesByName("pom.xml", scope);
+        PsiManager psiManager = PsiManager.getInstance(project);
+        return allPoms.stream().map(psiManager::findFile).toArray(PsiFile[]::new);
     }
 
     @Override
