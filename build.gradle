@@ -76,3 +76,7 @@ publishing {
         }
     }
 }
+
+publishPlugin {
+    token = System.getenv("JETBRAINS_TOKEN")
+}

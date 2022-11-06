@@ -56,8 +56,6 @@ pipelines:
             - sed -i "s/\(currentVersion=\).*\$/\1${NEXT_VERSION}/" gradle.properties
             - git commit -am "[artifactory-release] Release version ${NEXT_VERSION} [skipRun]" --allow-empty
             - git tag ${NEXT_VERSION}
-            - git push
-            - git push --tags
 
             # Run build and publish
             - >
@@ -74,9 +72,10 @@ pipelines:
             - jf ds rbd jfrog-idea-plugin $NEXT_VERSION --site="releases.jfrog.io" --sync
 
             # Upload to Jetbrains marketplace
-            - ./gradlew publishPlugin -Dorg.gradle.project.intellijPublishToken=$int_jetbrains_token
+            - env -i JETBRAINS_TOKEN=$int_jetbrains_token ./gradlew publishPlugin
 
             # Update next development version
             - sed -i "s/\(currentVersion=\).*\$/\1${NEXT_DEVELOPMENT_VERSION}/" gradle.properties
-            - git commit -am "[artifactory-release] Next development version [skipRun]"
+            - git commit -am "[jfrog-release] Next development version [skipRun]"
             - git push
+            - git push --tags
