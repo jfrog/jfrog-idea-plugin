@@ -14,6 +14,7 @@ intellij {
     version = sandboxVersion
     plugins = ['gradle', 'maven', 'Groovy', 'properties', 'java', 'Kotlin', 'org.jetbrains.plugins.go:213.5744.18', 'Pythonid:213.5744.18']
     pluginName = 'JFrog'
+    updateSinceUntilBuild = false
 }
 
 runPluginVerifier {
@@ -65,4 +66,13 @@ test {
 tasks.withType(JavaCompile) {
     options.deprecation = true
     options.encoding = "UTF-8"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact buildPlugin
+        }
+    }
 }
