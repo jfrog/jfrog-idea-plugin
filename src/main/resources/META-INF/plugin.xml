@@ -12,7 +12,7 @@
 
     <change-notes>
         <![CDATA[
-          <li>Bugfix - Fix exception from Inspector</li>
+          <li>Bugfix - Unable to configure the plugin</li>
         ]]>
     </change-notes>
 
