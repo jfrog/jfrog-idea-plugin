@@ -24,6 +24,8 @@ jobs:
           distribution: "temurin"
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: 6.9.3
 
       - uses: jfrog/frogbot@v2
         env:
