@@ -122,13 +122,14 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
     /**
      * Scan and update dependency components.
      *
-     * @param quickScan - Quick scan or full scan
-     * @param indicator - The progress indicator
+     * @param quickScan   - Quick scan or full scan
+     * @param shouldToast - True to enable showing balloons logs.
+     * @param indicator   - The progress indicator
      */
-    private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator) {
+    private void scanAndUpdate(boolean quickScan, boolean shouldToast, ProgressIndicator indicator) {
         try {
             indicator.setText("1/3: Building dependency tree");
-            buildTree(!quickScan);
+            buildTree(!shouldToast);
             indicator.setText("2/3: Xray scanning project dependencies");
             scanAndCacheArtifacts(indicator, quickScan);
             indicator.setText("3/3: Finalizing");
@@ -138,7 +139,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
         } catch (ProcessCanceledException e) {
             getLog().info("Xray scan was canceled");
         } catch (Exception e) {
-            logError(getLog(), "Xray Scan failed", e, !quickScan);
+            logError(getLog(), "Xray Scan failed", e, !shouldToast);
         } finally {
             scanInProgress.set(false);
             sendUsageReport();
@@ -147,8 +148,11 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
 
     /**
      * Launch async dependency scan.
+     *
+     * @param quickScan   - True to allow usage of the scan cache.
+     * @param shouldToast - True to enable showing balloons logs.
      */
-    void asyncScanAndUpdateResults(boolean quickScan) {
+    void asyncScanAndUpdateResults(boolean quickScan, boolean shouldToast) {
         if (DumbService.isDumb(project)) { // If intellij is still indexing the project
             return;
         }
@@ -167,12 +171,12 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
                 }
                 // Prevent multiple simultaneous scans
                 if (!scanInProgress.compareAndSet(false, true)) {
-                    if (!quickScan) {
+                    if (!shouldToast) {
                         getLog().info("Scan already in progress");
                     }
                     return;
                 }
-                scanAndUpdate(quickScan, new ProgressIndicatorImpl(indicator));
+                scanAndUpdate(quickScan, shouldToast, new ProgressIndicatorImpl(indicator));
             }
 
             @Override
@@ -182,10 +186,10 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
         };
         if (executor.isShutdown() || executor.isTerminated()) {
             // Scan initiated by a change in the project descriptor
-            createRunnable(scanAndUpdateTask, null, quickScan).run();
+            createRunnable(scanAndUpdateTask, null, shouldToast).run();
         } else {
             // Scan initiated by opening IntelliJ, by user, or by changing the configuration
-            executor.submit(createRunnable(scanAndUpdateTask, latch, quickScan));
+            executor.submit(createRunnable(scanAndUpdateTask, latch, shouldToast));
         }
     }
 
@@ -213,9 +217,9 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
      * @param latch             - The countdown latch, which makes sure the executor service doesn't get more than 3 tasks.
      *                          If null, the scan was initiated by a change in the project descriptor and the executor
      *                          service is terminated. In this case, there is no requirement to wait.
-     * @param quickScan         - Quick or full scan
+     * @param shouldToast       - True to enable showing balloons logs.
      */
-    private Runnable createRunnable(Task.Backgroundable scanAndUpdateTask, CountDownLatch latch, boolean quickScan) {
+    private Runnable createRunnable(Task.Backgroundable scanAndUpdateTask, CountDownLatch latch, boolean shouldToast) {
         return () -> {
             // The progress manager is only good for foreground threads.
             if (SwingUtilities.isEventDispatchThread()) {
@@ -230,7 +234,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
                     latch.await();
                 }
             } catch (InterruptedException e) {
-                logError(getLog(), ExceptionUtils.getRootCauseMessage(e), e, !quickScan);
+                logError(getLog(), ExceptionUtils.getRootCauseMessage(e), e, !shouldToast);
             }
         };
     }
@@ -251,7 +255,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
      * Launch async dependency scan.
      */
     void asyncScanAndUpdateResults() {
-        asyncScanAndUpdateResults(true);
+        asyncScanAndUpdateResults(true, false);
     }
 
     void runInspections() {
