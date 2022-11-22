@@ -26,6 +26,9 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: '3.x'
+      # Install JFrog CLI for ConnectionDetailsFromCliTest
+      - name: Install JFrog CLI
+        run: curl -fL https://install-cli.jfrog.io | sh
 
       # Run tests
       - name: Tests on macOS, Linux

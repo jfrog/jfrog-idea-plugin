@@ -24,20 +24,20 @@ import static org.junit.Assert.assertEquals;
 public class ConnectionDetailsFromCliTest {
 
     private final String[] cliParameters;
-    private final Exception exception;
-    private final boolean expected;
+    private final Exception expectedException;
+    private final boolean shouldSuccess;
 
-    public ConnectionDetailsFromCliTest(String[] cliParameters, Exception exception, boolean expected) {
+    public ConnectionDetailsFromCliTest(String[] cliParameters, Exception expectedException, boolean shouldSuccess) {
         this.cliParameters = cliParameters;
-        this.exception = exception;
-        this.expected = expected;
+        this.expectedException = expectedException;
+        this.shouldSuccess = shouldSuccess;
     }
 
     @Parameterized.Parameters
     public static Collection<Object[]> dataProvider() {
         return Arrays.asList(new Object[][]{
                 // No JFrog CLI config
-                {null, new IOException("jfrog config export command failed. That might be happen if you haven't config any CLI server yet or using the config encryption feature."), false},
+                {null, new IOException("'jfrog config export' command failed. That might be happen if you haven't config any CLI server yet or using the config encryption feature."), false},
 
                 // URLs without credentials
                 {new String[]{"c", "add", "--xray-url=http://127.0.0.1"}, null, false},
@@ -77,10 +77,10 @@ public class ConnectionDetailsFromCliTest {
 
             // Check results
             ServerConfigImpl serverConfig = new ServerConfigImpl();
-            if (exception != null) {
-                Assert.assertThrows(exception.getMessage(), exception.getClass(), serverConfig::readConnectionDetailsFromJfrogCli);
+            if (expectedException != null) {
+                Assert.assertThrows(expectedException.getMessage(), expectedException.getClass(), serverConfig::readConnectionDetailsFromJfrogCli);
             } else {
-                assertEquals(expected, serverConfig.readConnectionDetailsFromJfrogCli());
+                assertEquals(shouldSuccess, serverConfig.readConnectionDetailsFromJfrogCli());
             }
         } finally {
             FileUtils.forceDelete(jfrogCliHome.toFile());
