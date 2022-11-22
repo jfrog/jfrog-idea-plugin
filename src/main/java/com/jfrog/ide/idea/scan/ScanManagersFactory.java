@@ -101,11 +101,11 @@ public class ScanManagersFactory implements Disposable {
                 try {
                     scanManager.asyncScanAndUpdateResults(quickScan, shouldToast);
                 } catch (RuntimeException e) {
-                    logError(Logger.getInstance(), "", e, !shouldToast);
+                    logError(Logger.getInstance(), "", e, shouldToast);
                 }
             }
         } catch (IOException | RuntimeException | InterruptedException e) {
-            logError(Logger.getInstance(), "", e, !shouldToast);
+            logError(Logger.getInstance(), "", e, shouldToast);
         } finally {
             executor.shutdown();
         }

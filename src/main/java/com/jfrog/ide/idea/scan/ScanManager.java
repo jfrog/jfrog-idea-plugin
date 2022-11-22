@@ -129,7 +129,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
     private void scanAndUpdate(boolean quickScan, boolean shouldToast, ProgressIndicator indicator) {
         try {
             indicator.setText("1/3: Building dependency tree");
-            buildTree(!shouldToast);
+            buildTree(shouldToast);
             indicator.setText("2/3: Xray scanning project dependencies");
             scanAndCacheArtifacts(indicator, quickScan);
             indicator.setText("3/3: Finalizing");
@@ -139,7 +139,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
         } catch (ProcessCanceledException e) {
             getLog().info("Xray scan was canceled");
         } catch (Exception e) {
-            logError(getLog(), "Xray Scan failed", e, !shouldToast);
+            logError(getLog(), "Xray Scan failed", e, shouldToast);
         } finally {
             scanInProgress.set(false);
             sendUsageReport();
@@ -171,7 +171,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
                 }
                 // Prevent multiple simultaneous scans
                 if (!scanInProgress.compareAndSet(false, true)) {
-                    if (!shouldToast) {
+                    if (shouldToast) {
                         getLog().info("Scan already in progress");
                     }
                     return;
@@ -234,7 +234,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
                     latch.await();
                 }
             } catch (InterruptedException e) {
-                logError(getLog(), ExceptionUtils.getRootCauseMessage(e), e, !shouldToast);
+                logError(getLog(), ExceptionUtils.getRootCauseMessage(e), e, shouldToast);
             }
         };
     }
