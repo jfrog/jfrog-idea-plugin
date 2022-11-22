@@ -490,17 +490,17 @@ public class ServerConfigImpl implements ServerConfig {
             return false;
         }
         JfrogCliServerConfig cliServerConfig = driver.getServerConfig();
-        String platformUrlCLi = cliServerConfig.getUrl();
+        String platformUrlCli = cliServerConfig.getUrl();
         String xrayUrlCli = cliServerConfig.getXrayUrl();
         String artifactoryUrlCli = cliServerConfig.getArtifactoryUrl();
         String usernameCli = cliServerConfig.getUsername();
         String passwordCli = cliServerConfig.getPassword();
         String accessToken = cliServerConfig.getAccessToken();
 
-        if ((isAnyBlank(usernameCli, passwordCli) && isBlank(accessToken)) || isAllBlank(platformUrlCLi, xrayUrlCli, artifactoryUrlCli)) {
+        if ((isAnyBlank(usernameCli, passwordCli) && isBlank(accessToken)) || isAnyBlank(platformUrlCli, xrayUrlCli, artifactoryUrlCli)) {
             return false;
         }
-        setUrl(platformUrlCLi);
+        setUrl(platformUrlCli);
         setXrayUrl(xrayUrlCli);
         setArtifactoryUrl(artifactoryUrlCli);
         setUsername(usernameCli);
