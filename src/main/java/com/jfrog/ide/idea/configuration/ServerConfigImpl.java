@@ -497,7 +497,7 @@ public class ServerConfigImpl implements ServerConfig {
         String passwordCli = cliServerConfig.getPassword();
         String accessToken = cliServerConfig.getAccessToken();
 
-        if ((isAnyBlank(usernameCli, passwordCli) && isBlank(accessToken)) || isAllBlank(platformUrlCLi, xrayUrlCli, artifactoryUrlCli)) {
+        if ((isAnyBlank(usernameCli, passwordCli) && isBlank(accessToken)) || isAnyBlank(xrayUrlCli, artifactoryUrlCli)) {
             return false;
         }
         setUrl(platformUrlCLi);
