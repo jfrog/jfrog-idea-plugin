@@ -8,7 +8,7 @@ import com.intellij.ui.JBIntSpinner;
  */
 public class ConnectionTimeoutSpinner extends JBIntSpinner {
 
-    public static final UINumericRange RANGE = new UINumericRange(60, 10, 3600);
+    public static final UINumericRange RANGE = new UINumericRange(300, 10, 3600);
 
     public ConnectionTimeoutSpinner() {
         super(RANGE);
