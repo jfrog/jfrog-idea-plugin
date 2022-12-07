@@ -1,11 +1,15 @@
 package com.jfrog.ide.idea.ui;
 
+import com.google.common.collect.Lists;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.ui.OnePixelSplitter;
 import com.intellij.ui.ScrollPaneFactory;
+import com.intellij.ui.SideBorder;
+import com.intellij.ui.TreeSpeedSearch;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.UIUtil;
@@ -25,14 +29,16 @@ import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.Issue;
 
 import javax.swing.*;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import static com.jfrog.ide.idea.ui.JFrogToolWindow.TITLE_FONT_SIZE;
-import static com.jfrog.ide.idea.ui.JFrogToolWindow.TITLE_LABEL_SIZE;
+import static com.jfrog.ide.idea.ui.JFrogToolWindow.*;
 import static com.jfrog.ide.idea.ui.utils.ComponentUtils.*;
 import static org.apache.commons.lang3.StringUtils.isAnyBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -49,13 +55,32 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
     private LinkButton seeMore;
     private JLabel branch;
     private JLabel commit;
+    private final OnePixelSplitter rightVerticalSplit;
+    ComponentIssuesTable issuesTable;
+    JScrollPane issuesDetailsScroll;
+    JPanel moreInfoPanel;
 
     public JFrogCiToolWindow(@NotNull Project project, boolean buildsConfigured) {
-        super(project, buildsConfigured, CiComponentsTree.getInstance(project));
+        super(project, CiComponentsTree.getInstance(project));
+        JPanel toolbar = createActionToolbar();
+
+        JComponent issuesPanel = createComponentsIssueDetailView();
+
+        OnePixelSplitter leftVerticalSplit = new OnePixelSplitter(false, 0.5f);
+        leftVerticalSplit.setFirstComponent(createComponentsTreeView());
+        leftVerticalSplit.setSecondComponent(issuesPanel);
+
+        rightVerticalSplit = new OnePixelSplitter(false, 0.6f);
+        rightVerticalSplit.setVisible(false);
+        rightVerticalSplit.setFirstComponent(leftVerticalSplit);
+        rightVerticalSplit.setSecondComponent(createMoreInfoView(buildsConfigured));
+
+        setToolbar(toolbar);
+        setContent(rightVerticalSplit);
+        registerListeners();
     }
 
-    @Override
-    String getComponentsTreeTitle() {
+    private String getComponentsTreeTitle() {
         return " Build Components (Issues #)";
     }
 
@@ -74,8 +99,14 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
         return new CiScopeFilterMenu(project);
     }
 
+    /**
+     * Create the more info view. That is the right panel.
+     *
+     * @param supported - True if the current opened project is supported by the plugin.
+     *                  If now, show the "Unsupported project type" message.
+     * @return the more info view
+     */
     @SuppressWarnings("DialogTitleCapitalization")
-    @Override
     JComponent createMoreInfoView(boolean supported) {
         if (!GlobalSettings.getInstance().areArtifactoryCredentialsSet()) {
             return ComponentUtils.createNoCredentialsView();
@@ -113,9 +144,25 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
         return CiFilterManager.getInstance(project).getFilteredScanIssues(selectedNodes);
     }
 
-    @Override
     public void registerListeners() {
-        super.registerListeners();
+        // Xray credentials were set listener
+        appBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () ->
+                ApplicationManager.getApplication().invokeLater(this::onConfigurationChange));
+
+        // Component selection listener
+        componentsTree.addTreeSelectionListener(e -> {
+            updateIssuesTable();
+            if (e == null || e.getNewLeadSelectionPath() == null) {
+                return;
+            }
+            ComponentIssueDetails.createIssuesDetailsView(moreInfoPanel, (DependencyTree) e.getNewLeadSelectionPath().getLastPathComponent());
+            // Scroll back to the beginning of the scrollable panel
+            ApplicationManager.getApplication().invokeLater(() -> issuesDetailsScroll.getViewport().setViewPosition(new Point()));
+        });
+
+        issuesTable.addTableSelectionListener(moreInfoPanel);
+        componentsTree.addOnProjectChangeListener(projectBusConnection);
+        componentsTree.addRightClickListener();
         projectBusConnection.subscribe(ApplicationEvents.ON_CI_FILTER_CHANGE, () -> ApplicationManager.getApplication().invokeLater(() -> {
             CiComponentsTree.getInstance(project).applyFiltersForAllProjects();
             updateIssuesTable();
@@ -221,5 +268,82 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
         }
         label.setText(message);
         label.setIcon(icon);
+    }
+
+    /**
+     * Called after a change in the credentials.
+     */
+    @Override
+    public void onConfigurationChange() {
+        rightVerticalSplit.setSecondComponent(createMoreInfoView(true));
+        super.onConfigurationChange();
+        issuesTable.addTableSelectionListener(moreInfoPanel);
+    }
+
+    /**
+     * Create the components tree panel.
+     *
+     * @return the components tree panel
+     */
+    private JComponent createComponentsTreeView() {
+        JPanel componentsTreePanel = new JBPanel<>(new BorderLayout()).withBackground(UIUtil.getTableBackground());
+        JLabel componentsTreeTitle = new JBLabel(getComponentsTreeTitle());
+        componentsTreeTitle.setFont(componentsTreeTitle.getFont().deriveFont(TITLE_FONT_SIZE));
+        componentsTreePanel.add(componentsTreeTitle, BorderLayout.LINE_START);
+        JPanel treePanel = new JBPanel<>(new GridLayout()).withBackground(UIUtil.getTableBackground());
+        TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(componentsTree, ComponentUtils::getPathSearchString, true);
+        treePanel.add(treeSpeedSearch.getComponent(), BorderLayout.WEST);
+        JScrollPane treeScrollPane = ScrollPaneFactory.createScrollPane(treePanel);
+        treeScrollPane.getVerticalScrollBar().setUnitIncrement(SCROLL_BAR_SCROLLING_UNITS);
+        return new TitledPane(JSplitPane.VERTICAL_SPLIT, TITLE_LABEL_SIZE, componentsTreePanel, treeScrollPane);
+    }
+
+    /**
+     * Return the selected nodes in the dependency tree.
+     *
+     * @return the selected nodes in the dependency tree
+     */
+    List<DependencyTree> getSelectedNodes() {
+        if (componentsTree.getModel() == null) {
+            return Lists.newArrayList();
+        }
+        // If no node selected - Return the root
+        if (componentsTree.getSelectionPaths() == null) {
+            return Lists.newArrayList((DependencyTree) componentsTree.getModel().getRoot());
+        }
+        return Arrays.stream(componentsTree.getSelectionPaths())
+                .map(TreePath::getLastPathComponent)
+                .map(obj -> (DependencyTree) obj)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Update the issues table according to the user choice in the dependency tree.
+     */
+    public void updateIssuesTable() {
+        List<DependencyTree> selectedNodes = getSelectedNodes();
+        issuesTable.updateIssuesTable(getIssuesToDisplay(selectedNodes), selectedNodes);
+    }
+
+    /**
+     * Create the issues details panel. That is the bottom right issues table.
+     *
+     * @return the issues details panel
+     */
+    private JComponent createComponentsIssueDetailView() {
+        issuesTable = new ComponentIssuesTable();
+        JScrollPane tableScroll = ScrollPaneFactory.createScrollPane(issuesTable, SideBorder.ALL);
+        tableScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+        JLabel title = new JBLabel(" Vulnerabilities");
+        title.setFont(title.getFont().deriveFont(TITLE_FONT_SIZE));
+        return new TitledPane(JSplitPane.VERTICAL_SPLIT, TITLE_LABEL_SIZE, title, tableScroll);
+    }
+
+    @Override
+    void resetViews() {
+        super.resetViews();
+        if (issuesTable != null) {
+            issuesTable.reset();
+        }
     }
 }
