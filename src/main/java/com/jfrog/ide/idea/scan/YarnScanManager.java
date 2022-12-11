@@ -12,6 +12,7 @@ import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.NpmInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
+import org.jfrog.build.extractor.scan.DependencyTree;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -35,12 +36,11 @@ public class YarnScanManager extends ScanManager {
         super(project, basePath, ComponentPrefix.NPM, executor);
         getLog().info("Found yarn project: " + getProjectName());
         yarnTreeBuilder = new YarnTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap());
-        subscribeLaunchDependencyScanOnFileChangedEvents("yarn.lock");
     }
 
     @Override
-    protected void buildTree(boolean shouldToast) throws IOException {
-        setScanResults(yarnTreeBuilder.buildTree(getLog(), shouldToast));
+    protected DependencyTree buildTree(boolean shouldToast) throws IOException {
+        return yarnTreeBuilder.buildTree(getLog(), shouldToast);
     }
 
     @Override

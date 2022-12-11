@@ -52,7 +52,6 @@ public class MavenScanManager extends ScanManager {
     MavenScanManager(Project project, ExecutorService executor) {
         super(project, Utils.getProjectBasePath(project).toString(), ComponentPrefix.GAV, executor);
         getLog().info("Found Maven project: " + getProjectName());
-        MavenProjectsManager.getInstance(project).addProjectsTreeListener(new MavenProjectsTreeListener(), this);
     }
 
     static boolean isApplicable(@NotNull Project project) {
@@ -73,17 +72,16 @@ public class MavenScanManager extends ScanManager {
     }
 
     @Override
-    protected void buildTree(boolean shouldToast) {
+    protected DependencyTree buildTree(boolean shouldToast) {
         DependencyTree rootNode = new DependencyTree(project.getName());
         rootNode.setMetadata(true);
         MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject -> populateMavenModule(rootNode, rootMavenProject, Sets.newHashSet()));
         GeneralInfo generalInfo = new GeneralInfo().componentId(project.getName()).path(basePath).pkgType(PKG_TYPE);
         rootNode.setGeneralInfo(generalInfo);
         if (rootNode.getChildren().size() == 1) {
-            setScanResults((DependencyTree) rootNode.getChildAt(0));
-        } else {
-            setScanResults(rootNode);
+            return (DependencyTree) rootNode.getChildAt(0);
         }
+        return rootNode;
     }
 
     @Override
@@ -165,23 +163,12 @@ public class MavenScanManager extends ScanManager {
         if (setScopes) {
             currentNode.setScopes(Sets.newHashSet(new Scope(mavenArtifact.getScope())));
         }
-        populateDependencyTreeNode(currentNode);
+        // TODO: remove?
+//        populateDependencyTreeNode(currentNode);
         mavenArtifactNode.getDependencies()
                 .stream()
                 .filter(dependencyTree -> addedInSubTree.add(dependencyTree.getArtifact().getDisplayStringForLibraryName()))
                 .forEach(childrenArtifactNode -> updateChildrenNodes(currentNode, childrenArtifactNode, addedInSubTree, false));
         parentNode.add(currentNode);
-    }
-
-    /**
-     * Maven projects tree listener for scanning artifacts on dependencies changes.
-     */
-
-    private final class MavenProjectsTreeListener implements MavenProjectsTree.Listener {
-        @Override
-        public void projectResolved(@NotNull Pair<MavenProject, MavenProjectChanges> projectWithChanges,
-                                    NativeMavenProjectHolder nativeMavenProject) {
-            asyncScanAndUpdateResults();
-        }
     }
 }

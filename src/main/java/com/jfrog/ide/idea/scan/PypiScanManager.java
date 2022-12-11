@@ -48,11 +48,12 @@ public class PypiScanManager extends ScanManager {
         super(project, pythonSdk.getHomePath(), ComponentPrefix.PYPI, executor);
         this.pythonSdk = pythonSdk;
         getLog().info("Found PyPI SDK: " + getProjectName());
-        PyPackageUtil.runOnChangeUnderInterpreterPaths(pythonSdk, this, this::asyncScanAndUpdateResults);
+        // TODO: can be removed?
+//        PyPackageUtil.runOnChangeUnderInterpreterPaths(pythonSdk, this, this::asyncScanAndUpdateResults);
     }
 
     @Override
-    protected void buildTree(boolean shouldToast) {
+    protected DependencyTree buildTree(boolean shouldToast) {
         DependencyTree rootNode = createRootNode();
         initDependencyNode(rootNode, pythonSdk.getName(), "", pythonSdk.getHomePath(), "pypi");
 
@@ -64,7 +65,7 @@ public class PypiScanManager extends ScanManager {
         if (rootNode.getChildren().size() == 1) {
             rootNode = (DependencyTree) rootNode.getChildAt(0);
         }
-        setScanResults(rootNode);
+        return rootNode;
     }
 
     /**

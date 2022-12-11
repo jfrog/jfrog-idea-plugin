@@ -26,6 +26,9 @@ import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanManagerBase;
+import com.jfrog.ide.common.tree.Artifact;
+import com.jfrog.ide.common.tree.DescriptorFileTreeNode;
+import com.jfrog.ide.common.tree.License;
 import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.events.ProjectEvents;
@@ -35,7 +38,6 @@ import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
-import com.jfrog.ide.idea.ui.menus.filtermanager.LocalFilterManager;
 import com.jfrog.ide.idea.utils.Utils;
 import com.jfrog.xray.client.services.summary.Components;
 import org.apache.commons.lang3.ArrayUtils;
@@ -43,15 +45,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependencyTree;
-import org.jfrog.build.extractor.scan.License;
 import org.jfrog.build.extractor.scan.Scope;
 
 import javax.swing.*;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -65,6 +65,8 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
 
     private final MessageBusConnection busConnection;
     private ExecutorService executor;
+    // TODO: remove if used only in scanAndUpdate.
+    private Collection<Artifact> depScanResults;
     protected Project project;
     String basePath;
 
@@ -96,7 +98,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
      *
      * @param shouldToast - True if should pop up a balloon when an error occurs.
      */
-    protected abstract void buildTree(boolean shouldToast) throws IOException;
+    protected abstract DependencyTree buildTree(boolean shouldToast) throws IOException;
 
     /**
      * Return all project descriptors under the scan-manager project, which need to be inspected by the corresponding {@link LocalInspectionTool}.
@@ -122,20 +124,27 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
     /**
      * Scan and update dependency components.
      *
-     * @param quickScan   - Quick scan or full scan
      * @param shouldToast - True to enable showing balloons logs.
      * @param indicator   - The progress indicator
      */
-    private void scanAndUpdate(boolean quickScan, boolean shouldToast, ProgressIndicator indicator) {
+    private void scanAndUpdate(boolean shouldToast, ProgressIndicator indicator) {
         try {
             indicator.setText("1/3: Building dependency tree");
-            buildTree(shouldToast);
+            DependencyTree dependencyTree = buildTree(shouldToast);
             indicator.setText("2/3: Xray scanning project dependencies");
-            scanAndCacheArtifacts(indicator, quickScan);
+            Map<String, Artifact> results = scanArtifacts(indicator, dependencyTree);
             indicator.setText("3/3: Finalizing");
-            addXrayInfoToTree(getScanResults());
-            setScanResults();
-            DumbService.getInstance(project).smartInvokeLater(this::runInspections);
+            // TODO: convert results to tree, and save it to cache!
+            // TODO: set descriptor file path
+            depScanResults = results.values();
+            DescriptorFileTreeNode fileTreeNode = new DescriptorFileTreeNode("path/to/descriptor/file");
+            fileTreeNode.addDependencies(depScanResults);
+            // TODO: this method will also convert the tree to the new format:
+//            BasicTreeNode descriptorNode = createDescriptorNode();
+            setScanResults(fileTreeNode, dependencyTree.getGeneralInfo().getPath());
+
+            // TODO: uncomment
+//            DumbService.getInstance(project).smartInvokeLater(this::runInspections);
         } catch (ProcessCanceledException e) {
             getLog().info("Xray scan was canceled");
         } catch (Exception e) {
@@ -149,10 +158,9 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
     /**
      * Launch async dependency scan.
      *
-     * @param quickScan   - True to allow usage of the scan cache.
      * @param shouldToast - True to enable showing balloons logs.
      */
-    void asyncScanAndUpdateResults(boolean quickScan, boolean shouldToast) {
+    void asyncScanAndUpdateResults(boolean shouldToast) {
         if (DumbService.isDumb(project)) { // If intellij is still indexing the project
             return;
         }
@@ -176,7 +184,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
                     }
                     return;
                 }
-                scanAndUpdate(quickScan, shouldToast, new ProgressIndicatorImpl(indicator));
+                scanAndUpdate(shouldToast, new ProgressIndicatorImpl(indicator));
             }
 
             @Override
@@ -251,13 +259,6 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
         return paths;
     }
 
-    /**
-     * Launch async dependency scan.
-     */
-    void asyncScanAndUpdateResults() {
-        asyncScanAndUpdateResults(true, false);
-    }
-
     void runInspections() {
         PsiFile[] projectDescriptors = getProjectDescriptors();
         if (ArrayUtils.isEmpty(projectDescriptors)) {
@@ -269,7 +270,12 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
         localInspectionTool.setAfterScan(true);
         for (PsiFile descriptor : projectDescriptors) {
             // Run inspection on descriptor.
-            InspectionEngine.runInspectionOnFile(descriptor, new LocalInspectionToolWrapper(localInspectionTool), context);
+            try {
+                InspectionEngine.runInspectionOnFile(descriptor, new LocalInspectionToolWrapper(localInspectionTool), context);
+                // TODO: remove the try/catch
+            } catch (Exception e) {
+                Logger.getInstance().error("Inspection failed", e);
+            }
             FileEditor[] editors = FileEditorManager.getInstance(project).getAllEditors(descriptor.getVirtualFile());
             if (!ArrayUtils.isEmpty(editors)) {
                 // Refresh descriptor highlighting only if it is already opened.
@@ -279,60 +285,18 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
     }
 
     /**
-     * @return all licenses available from the current scan results.
-     */
-    public Set<License> getAllLicenses() {
-        if (getScanResults() == null) {
-            return Sets.newHashSet();
-        }
-        return collectAllLicenses((DependencyTree) getScanResults().getRoot());
-    }
-
-    /**
-     * @return all scopes available from the current scan results.
-     */
-    public Set<Scope> getAllScopes() {
-        if (getScanResults() == null) {
-            return Sets.newHashSet();
-        }
-        return collectAllScopes((DependencyTree) getScanResults().getRoot());
-    }
-
-    /**
-     * Return true if the scan results contain any issues.
-     *
-     * @return true if the scan results contain any issues.
-     */
-    public boolean isContainIssues() {
-        return getScanResults() != null && !getScanResults().getIssues().isEmpty();
-    }
-
-    /**
-     * Return true if the scan results contain any violated licenses.
-     *
-     * @return true if the scan results contain any violated licenses.
-     */
-    public boolean isContainViolatedLicenses() {
-        return getScanResults() != null && !getScanResults().getViolatedLicenses().isEmpty();
-    }
-
-    /**
      * filter scan components tree model according to the user filters and sort the issues tree.
      */
-    private void setScanResults() {
-        DependencyTree scanResults = getScanResults();
-        if (scanResults == null) {
+    private void setScanResults(DescriptorFileTreeNode fileTreeNode, String projectPath) {
+        // TODO: make sure that it's null, if there are no violations
+        if (fileTreeNode == null) {
             return;
         }
-        if (!scanResults.isLeaf()) {
-            LocalFilterManager.getInstance(project).collectsFiltersInformation(scanResults);
-        }
-        ProjectsMap.ProjectKey projectKey = ProjectsMap.createKey(getProjectName(),
-                scanResults.getGeneralInfo());
+        ProjectsMap.ProjectKey projectKey = ProjectsMap.createKey(getProjectName(), projectPath);
         MessageBus projectMessageBus = project.getMessageBus();
 
-        ComponentsTree componentsTree = LocalComponentsTree.getInstance(project);
-        componentsTree.addScanResults(getProjectName(), scanResults);
+        LocalComponentsTree componentsTree = LocalComponentsTree.getInstance(project);
+        componentsTree.addScanResults(getProjectName(), fileTreeNode);
         projectMessageBus.syncPublisher(ProjectEvents.ON_SCAN_PROJECT_CHANGE).update(projectKey);
     }
 
@@ -351,27 +315,6 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
 
     public String getProjectPath() {
         return this.basePath;
-    }
-
-    /**
-     * Subscribe ScanManager for VFS-change events.
-     * Perform dependencies scan and update tree after the provided file has changed.
-     *
-     * @param fileName - file to track for changes.
-     */
-    protected void subscribeLaunchDependencyScanOnFileChangedEvents(String fileName) {
-        String fileToSubscribe = Paths.get(basePath, fileName).toString();
-        busConnection.subscribe(VirtualFileManager.VFS_CHANGES, new BulkFileListener() {
-            @Override
-            public void after(@NotNull List<? extends VFileEvent> events) {
-                for (VFileEvent event : events) {
-                    String filePath = event.getPath();
-                    if (StringUtils.equals(filePath, fileToSubscribe)) {
-                        asyncScanAndUpdateResults();
-                    }
-                }
-            }
-        });
     }
 
     @Override

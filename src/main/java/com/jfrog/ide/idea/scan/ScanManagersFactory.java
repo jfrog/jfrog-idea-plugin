@@ -15,7 +15,6 @@ import com.jetbrains.python.sdk.PythonSdkUtil;
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.persistency.ScanCache;
 import com.jfrog.ide.common.persistency.XrayScanCache;
-import com.jfrog.ide.common.scan.ComponentSummaryScanLogic;
 import com.jfrog.ide.common.scan.GraphScanLogic;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.common.utils.PackageFileFinder;
@@ -55,7 +54,6 @@ public class ScanManagersFactory implements Disposable {
     private ScanManagersFactory(@NotNull Project project) {
         this.busConnection = ApplicationManager.getApplication().getMessageBus().connect(this);
         this.project = project;
-        registerOnChangeHandlers();
     }
 
     public static Set<ScanManager> getScanManagers(@NotNull Project project) {
@@ -64,20 +62,11 @@ public class ScanManagersFactory implements Disposable {
     }
 
     /**
-     * When the excluded paths change, scan managers should be created or deleted.
-     * Therefore, we run startScan() which recreates the scan managers on refreshScanManagers().
-     */
-    private void registerOnChangeHandlers() {
-        busConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () -> startScan(false, true));
-    }
-
-    /**
      * Start an Xray scan for all projects.
      *
-     * @param quickScan   - True to allow usage of the scan cache.
      * @param shouldToast - True to enable showing balloons logs.
      */
-    public void startScan(boolean quickScan, boolean shouldToast) {
+    public void startScan(boolean shouldToast) {
         if (DumbService.isDumb(project)) { // If intellij is still indexing the project
             return;
         }
@@ -99,7 +88,7 @@ public class ScanManagersFactory implements Disposable {
             NavigationService.clearNavigationMap(project);
             for (ScanManager scanManager : scanManagers.values()) {
                 try {
-                    scanManager.asyncScanAndUpdateResults(quickScan, shouldToast);
+                    scanManager.asyncScanAndUpdateResults(shouldToast);
                 } catch (RuntimeException e) {
                     logError(Logger.getInstance(), "", e, shouldToast);
                 }
@@ -143,11 +132,13 @@ public class ScanManagersFactory implements Disposable {
         Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
         int projectHash = Utils.getProjectIdentifier(project);
         ScanManager scanManager = this.scanManagers.get(projectHash);
+        // TODO: why do we do that? Why don't we just use scanPaths below? And why do we do that only for Maven projects?
         if (scanManager != null) {
             // Set the new executor on the old scan manager
             scanManager.setExecutor(executor);
             scanManagers.put(projectHash, scanManager);
         } else {
+            // TODO: why not using the pom.xml like other project types?
             // Unlike other scan managers whereby we create them if the package descriptor exist, the Maven
             // scan manager is created if the Maven plugin is installed and there are Maven projects loaded.
             createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.MAVEN, "", executor);
@@ -167,11 +158,9 @@ public class ScanManagersFactory implements Disposable {
      * @param logger    - The logger
      * @return Xray scan logic
      */
+    // TODO: unused parameters
     private ScanLogic createScanLogic(Utils.ScanLogicType type, ScanCache scanCache, Logger logger) {
-        if (type == Utils.ScanLogicType.GraphScan) {
-            return new GraphScanLogic(scanCache, logger);
-        }
-        return new ComponentSummaryScanLogic(scanCache, logger);
+        return new GraphScanLogic(logger);
     }
 
     /**

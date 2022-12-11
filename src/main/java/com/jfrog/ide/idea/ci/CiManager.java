@@ -123,7 +123,7 @@ public class CiManager extends CiManagerBase implements Disposable {
      * @param buildGeneralInfo - The build general info
      */
     public void loadBuild(BuildGeneralInfo buildGeneralInfo) {
-        ComponentsTree componentsTree = CiComponentsTree.getInstance(project);
+        CiComponentsTree componentsTree = CiComponentsTree.getInstance(project);
         componentsTree.reset();
         ProjectsMap.ProjectKey projectKey = null;
         if (buildGeneralInfo != null) {

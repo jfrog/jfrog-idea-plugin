@@ -14,6 +14,7 @@ import com.jfrog.ide.idea.inspections.GoInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import com.jfrog.ide.idea.utils.GoUtils;
+import org.jfrog.build.extractor.scan.DependencyTree;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -45,12 +46,11 @@ public class GoScanManager extends ScanManager {
             getLog().warn("Go plugin is not installed. Install it to get a better experience.");
         }
         goTreeBuilder = new GoTreeBuilder(goExec, Paths.get(basePath), env, getLog());
-        subscribeLaunchDependencyScanOnFileChangedEvents("go.sum");
     }
 
     @Override
-    protected void buildTree(boolean shouldToast) throws IOException {
-        setScanResults(goTreeBuilder.buildTree());
+    protected DependencyTree buildTree(boolean shouldToast) throws IOException {
+        return goTreeBuilder.buildTree();
     }
 
     @Override

@@ -25,6 +25,7 @@ import org.jetbrains.plugins.gradle.service.settings.GradleConfigurable;
 import org.jetbrains.plugins.gradle.settings.DistributionType;
 import org.jetbrains.plugins.gradle.settings.GradleProjectSettings;
 import org.jetbrains.plugins.gradle.settings.GradleSettings;
+import org.jfrog.build.extractor.scan.DependencyTree;
 
 import java.io.File;
 import java.io.IOException;
@@ -86,8 +87,8 @@ public class GradleScanManager extends ScanManager {
     }
 
     @Override
-    protected void buildTree(boolean shouldToast) throws IOException {
-        setScanResults(gradleTreeBuilder.buildTree(getLog()));
+    protected DependencyTree buildTree(boolean shouldToast) throws IOException {
+        return gradleTreeBuilder.buildTree(getLog());
     }
 
     /**

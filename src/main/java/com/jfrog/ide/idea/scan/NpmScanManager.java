@@ -12,6 +12,7 @@ import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.NpmInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
+import org.jfrog.build.extractor.scan.DependencyTree;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -35,12 +36,11 @@ public class NpmScanManager extends ScanManager {
         super(project, basePath, ComponentPrefix.NPM, executor);
         getLog().info("Found npm project: " + getProjectName());
         npmTreeBuilder = new NpmTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap());
-        subscribeLaunchDependencyScanOnFileChangedEvents("package-lock.json");
     }
 
     @Override
-    protected void buildTree(boolean shouldToast) throws IOException {
-        setScanResults(npmTreeBuilder.buildTree(getLog(), shouldToast));
+    protected DependencyTree buildTree(boolean shouldToast) throws IOException {
+        return npmTreeBuilder.buildTree(getLog(), shouldToast);
     }
 
     @Override
