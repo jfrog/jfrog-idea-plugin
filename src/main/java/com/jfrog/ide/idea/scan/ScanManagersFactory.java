@@ -132,13 +132,11 @@ public class ScanManagersFactory implements Disposable {
         Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
         int projectHash = Utils.getProjectIdentifier(project);
         ScanManager scanManager = this.scanManagers.get(projectHash);
-        // TODO: why do we do that? Why don't we just use scanPaths below? And why do we do that only for Maven projects?
         if (scanManager != null) {
             // Set the new executor on the old scan manager
             scanManager.setExecutor(executor);
             scanManagers.put(projectHash, scanManager);
         } else {
-            // TODO: why not using the pom.xml like other project types?
             // Unlike other scan managers whereby we create them if the package descriptor exist, the Maven
             // scan manager is created if the Maven plugin is installed and there are Maven projects loaded.
             createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.MAVEN, "", executor);

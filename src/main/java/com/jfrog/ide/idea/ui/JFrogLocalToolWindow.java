@@ -5,9 +5,7 @@ import com.intellij.openapi.actionSystem.Constraints;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.ui.OnePixelSplitter;
-import com.intellij.ui.ScrollPaneFactory;
-import com.intellij.ui.TreeSpeedSearch;
+import com.intellij.ui.*;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.jcef.JBCefApp;
 import com.intellij.ui.jcef.JBCefBrowser;
@@ -26,6 +24,7 @@ import org.cef.handler.CefLoadHandlerAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -40,16 +39,14 @@ import static com.jfrog.ide.idea.ui.JFrogToolWindow.*;
 public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     JBCefBrowserBase browser;
     JBCefJSQuery routerQuery;
+    OnePixelSplitter verticalSplit;
 
     /**
      * @param project   - Currently opened IntelliJ project
      */
     public JFrogLocalToolWindow(@NotNull Project project) {
         super(project, LocalComponentsTree.getInstance(project));
-
-        JPanel toolbar = createActionToolbar();
         browser = new JBCefBrowser();
-
         routerQuery = JBCefJSQuery.create(browser);
         routerQuery.addHandler((String message) -> {
             // TODO: change
@@ -59,12 +56,18 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
         initVulnerabilityInfoBrowser();
 
-        OnePixelSplitter leftVerticalSplit = new OnePixelSplitter(false, 0.4f);
-        leftVerticalSplit.setFirstComponent(createComponentsTreeView());
-        leftVerticalSplit.setSecondComponent(browser.getComponent());
+        JPanel toolbar = createActionToolbar();
+        toolbar.setBorder(IdeBorderFactory.createBorder(SideBorder.BOTTOM));
+        JPanel leftPanel = new JBPanel<>(new BorderLayout());
+        leftPanel.add(toolbar, BorderLayout.PAGE_START);
+        leftPanel.add(createComponentsTreeView());
 
-        setToolbar(toolbar);
-        setContent(leftVerticalSplit);
+        verticalSplit = new OnePixelSplitter(false, 0.4f);
+        verticalSplit.setFirstComponent(leftPanel);
+        // TODO: remove?
+//        verticalSplit.setSecondComponent(browser.getComponent());
+
+        setContent(verticalSplit);
 
         registerListeners();
     }
@@ -88,8 +91,11 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         componentsTree.addTreeSelectionListener(e -> {
             // TODO: add tree selection logic here
             if (e == null || e.getNewLeadSelectionPath() == null) {
+                // TODO: consider removing this and only allow closing the webview through the close button
+                verticalSplit.setSecondComponent(null);
                 return;
             }
+            verticalSplit.setSecondComponent(browser.getComponent());
         });
 
         componentsTree.addOnProjectChangeListener(projectBusConnection);
@@ -159,6 +165,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     private JComponent createComponentsTreeView() {
         JPanel treePanel = new JBPanel<>(new GridLayout()).withBackground(UIUtil.getTableBackground());
         TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(componentsTree, ComponentUtils::getPathSearchString, true);
+        treeSpeedSearch.getComponent().getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         treePanel.add(treeSpeedSearch.getComponent(), BorderLayout.WEST);
         JScrollPane treeScrollPane = ScrollPaneFactory.createScrollPane(treePanel);
         treeScrollPane.getVerticalScrollBar().setUnitIncrement(SCROLL_BAR_SCROLLING_UNITS);
