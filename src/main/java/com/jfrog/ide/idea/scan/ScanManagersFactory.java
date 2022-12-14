@@ -2,7 +2,6 @@ package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
@@ -10,7 +9,6 @@ import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.util.messages.MessageBus;
-import com.intellij.util.messages.MessageBusConnection;
 import com.jetbrains.python.sdk.PythonSdkUtil;
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.persistency.ScanCache;
@@ -41,10 +39,9 @@ import static com.jfrog.ide.idea.utils.Utils.*;
 /**
  * Created by yahavi
  */
-public class ScanManagersFactory implements Disposable {
+public class ScanManagersFactory {
 
     Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
-    private final MessageBusConnection busConnection;
     private final Project project;
 
     public static ScanManagersFactory getInstance(@NotNull Project project) {
@@ -52,7 +49,6 @@ public class ScanManagersFactory implements Disposable {
     }
 
     private ScanManagersFactory(@NotNull Project project) {
-        this.busConnection = ApplicationManager.getApplication().getMessageBus().connect(this);
         this.project = project;
     }
 
@@ -128,19 +124,8 @@ public class ScanManagersFactory implements Disposable {
      * Scan projects, create new ScanManagers and delete unnecessary ones.
      */
     public void refreshScanManagers(Utils.ScanLogicType scanLogicType, @Nullable ExecutorService executor) throws IOException, InterruptedException {
-        removeScanManagersListeners();
         Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
-        int projectHash = Utils.getProjectIdentifier(project);
-        ScanManager scanManager = this.scanManagers.get(projectHash);
-        if (scanManager != null) {
-            // Set the new executor on the old scan manager
-            scanManager.setExecutor(executor);
-            scanManagers.put(projectHash, scanManager);
-        } else {
-            // Unlike other scan managers whereby we create them if the package descriptor exist, the Maven
-            // scan manager is created if the Maven plugin is installed and there are Maven projects loaded.
-            createScanManagerIfApplicable(scanManagers, projectHash, ScanManagerTypes.MAVEN, "", executor);
-        }
+        createMavenScanManagerIfApplicable(scanManagers, executor);
         Set<Path> scanPaths = createScanPaths(scanManagers, project);
         createScanManagers(scanManagers, scanPaths, executor);
         createPypiScanManagerIfApplicable(scanManagers, executor);
@@ -193,6 +178,34 @@ public class ScanManagersFactory implements Disposable {
     }
 
     /**
+     * Create MavenScanManager if this is a Maven project.
+     *
+     * @param scanManagers - Scan managers list
+     */
+    private void createMavenScanManagerIfApplicable(Map<Integer, ScanManager> scanManagers, ExecutorService executor) {
+        int projectHash = Utils.getModuleIdentifier(project);
+        ScanManager scanManager = this.scanManagers.get(projectHash);
+
+        // Check if a ScanManager for this project already exists
+        if (scanManager != null) {
+            // Set the new executor on the old scan manager
+            scanManager.setExecutor(executor);
+            scanManagers.put(projectHash, scanManager);
+        } else {
+            // Unlike other scan managers whereby we create them if the package descriptor exist, the Maven
+            // scan manager is created if the Maven plugin is installed and there are Maven projects loaded.
+            try {
+                if (MavenScanManager.isApplicable(project)) {
+                    scanManager = new MavenScanManager(project, executor);
+                    scanManagers.put(projectHash, scanManager);
+                }
+            } catch (NoClassDefFoundError noClassDefFoundError) {
+                // The Maven plugin is not installed.
+            }
+        }
+    }
+
+    /**
      * Create PypiScanManager for each Python SDK configured.
      *
      * @param scanManagers - Scan managers list
@@ -204,7 +217,7 @@ public class ScanManagersFactory implements Disposable {
                 if (pythonSdk == null) {
                     continue;
                 }
-                int projectHash = Utils.getProjectIdentifier(pythonSdk.getName(), pythonSdk.getHomePath());
+                int projectHash = Utils.getModuleIdentifier(pythonSdk.getName(), pythonSdk.getHomePath());
                 ScanManager scanManager = this.scanManagers.get(projectHash);
                 if (scanManager == null) {
                     scanManager = new PypiScanManager(project, pythonSdk, executor);
@@ -219,7 +232,7 @@ public class ScanManagersFactory implements Disposable {
     private void createScanManagersForPackageDirs(Set<String> packageDirs, Map<Integer, ScanManager> scanManagers,
                                                   ScanManagerTypes type, ExecutorService executor) {
         for (String dir : packageDirs) {
-            int projectHash = Utils.getProjectIdentifier(dir, dir);
+            int projectHash = Utils.getModuleIdentifier(dir, dir);
             ScanManager scanManager = scanManagers.get(projectHash);
             if (scanManager != null) {
                 scanManagers.put(projectHash, scanManager);
@@ -257,7 +270,6 @@ public class ScanManagersFactory implements Disposable {
     }
 
     private enum ScanManagerTypes {
-        MAVEN,
         GRADLE,
         NPM,
         GO,
@@ -275,51 +287,27 @@ public class ScanManagersFactory implements Disposable {
      * @param dir          - Project dir
      */
     private void createScanManagerIfApplicable(Map<Integer, ScanManager> scanManagers, int projectHash, ScanManagerTypes type, String dir, ExecutorService executor) {
-        try {
-            ScanManager scanManager;
-            switch (type) {
-                case MAVEN:
-                    if (MavenScanManager.isApplicable(project)) {
-                        scanManager = new MavenScanManager(project, executor);
-                    } else {
-                        return;
-                    }
-                    break;
-                case GRADLE:
-                    scanManager = new GradleScanManager(project, dir, executor);
-                    break;
-                case YARN:
-                    scanManager = new YarnScanManager(project, dir, executor);
-                    break;
-                case NPM:
-                    scanManager = new NpmScanManager(project, dir, executor);
-                    break;
-                case GO:
-                    scanManager = new GoScanManager(project, dir, executor);
-                    break;
-                default:
-                    return;
-            }
-            scanManagers.put(projectHash, scanManager);
-        } catch (NoClassDefFoundError noClassDefFoundError) {
-            // The 'maven' or 'python' plugins are not installed.
+        ScanManager scanManager;
+        switch (type) {
+            case GRADLE:
+                scanManager = new GradleScanManager(project, dir, executor);
+                break;
+            case YARN:
+                scanManager = new YarnScanManager(project, dir, executor);
+                break;
+            case NPM:
+                scanManager = new NpmScanManager(project, dir, executor);
+                break;
+            case GO:
+                scanManager = new GoScanManager(project, dir, executor);
+                break;
+            default:
+                return;
         }
+        scanManagers.put(projectHash, scanManager);
     }
 
     private boolean isScanInProgress() {
         return scanManagers.values().stream().anyMatch(ScanManager::isScanInProgress);
-    }
-
-    /**
-     * Remove file system change listeners on each on of the scan managers.
-     */
-    private void removeScanManagersListeners() {
-        scanManagers.values().forEach(ScanManager::dispose);
-    }
-
-    @Override
-    public void dispose() {
-        // Disconnect and release resources from the bus connection
-        busConnection.disconnect();
     }
 }

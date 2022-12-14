@@ -56,9 +56,7 @@ import static com.jfrog.ide.common.log.Utils.logError;
 /**
  * Created by romang on 4/26/17.
  */
-public abstract class ScanManager extends ScanManagerBase implements Disposable {
-
-    private final MessageBusConnection busConnection;
+public abstract class ScanManager extends ScanManagerBase {
     private ExecutorService executor;
     // TODO: remove if used only in scanAndUpdate.
     private Collection<Artifact> depScanResults;
@@ -77,7 +75,6 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
      */
     ScanManager(@NotNull Project project, String basePath, ComponentPrefix prefix, ExecutorService executor) {
         super(basePath, Logger.getInstance(), GlobalSettings.getInstance().getServerConfig(), prefix);
-        this.busConnection = project.getMessageBus().connect(this);
         this.executor = executor;
         this.basePath = basePath;
         this.project = project;
@@ -310,11 +307,5 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
 
     public String getProjectPath() {
         return this.basePath;
-    }
-
-    @Override
-    public void dispose() {
-        // Disconnect and release resources from the bus connection
-        busConnection.disconnect();
     }
 }
