@@ -68,16 +68,15 @@ public class ScanManagersFactory implements Disposable {
      * Therefore, we run startScan() which recreates the scan managers on refreshScanManagers().
      */
     private void registerOnChangeHandlers() {
-        busConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () -> startScan(false, true));
+        busConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () -> startScan(false));
     }
 
     /**
      * Start an Xray scan for all projects.
      *
-     * @param quickScan   - True to allow usage of the scan cache.
-     * @param shouldToast - True to enable showing balloons logs.
+     * @param quickScan - True to allow usage of the scan cache.
      */
-    public void startScan(boolean quickScan, boolean shouldToast) {
+    public void startScan(boolean quickScan) {
         if (DumbService.isDumb(project)) { // If intellij is still indexing the project
             return;
         }
@@ -99,13 +98,13 @@ public class ScanManagersFactory implements Disposable {
             NavigationService.clearNavigationMap(project);
             for (ScanManager scanManager : scanManagers.values()) {
                 try {
-                    scanManager.asyncScanAndUpdateResults(quickScan, shouldToast);
+                    scanManager.asyncScanAndUpdateResults(quickScan);
                 } catch (RuntimeException e) {
-                    logError(Logger.getInstance(), "", e, shouldToast);
+                    logError(Logger.getInstance(), "", e, !quickScan);
                 }
             }
         } catch (IOException | RuntimeException | InterruptedException e) {
-            logError(Logger.getInstance(), "", e, shouldToast);
+            logError(Logger.getInstance(), "", e, !quickScan);
         } finally {
             executor.shutdown();
         }
