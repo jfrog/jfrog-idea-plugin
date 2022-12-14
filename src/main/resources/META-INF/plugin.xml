@@ -46,7 +46,7 @@
         <projectService serviceImplementation="com.jfrog.ide.idea.ui.CiComponentsTree"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.ui.JFrogToolWindow"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.navigation.NavigationService"/>
-        <toolWindow id="JFrog" anchor="bottom" icon="/icons/jfrog_icon.png"
+        <toolWindow id="JFrog" anchor="right" icon="/icons/jfrog_icon.png"
                     factoryClass="com.jfrog.ide.idea.ui.JFrogToolWindowFactory" canCloseContents="false"/>
         <notificationGroup id="JFrogBalloon" displayType="NONE" isLogByDefault="false"/>
         <notificationGroup id="JFrogLog" displayType="NONE" isLogByDefault="true"/>
