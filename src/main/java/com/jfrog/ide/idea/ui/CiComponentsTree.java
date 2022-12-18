@@ -46,7 +46,6 @@ public class CiComponentsTree extends ComponentsTree {
         buildsMenu.refresh();
     }
 
-    @Override
     public void addOnProjectChangeListener(MessageBusConnection busConnection) {
         busConnection.subscribe(ProjectEvents.ON_SCAN_CI_CHANGE, this::applyFilters);
     }

@@ -58,12 +58,14 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
     private JLabel branch;
     private JLabel commit;
     private final OnePixelSplitter rightVerticalSplit;
+    final CiComponentsTree componentsTree;
     ComponentIssuesTable issuesTable;
     JScrollPane issuesDetailsScroll;
     JPanel moreInfoPanel;
 
     public JFrogCiToolWindow(@NotNull Project project, boolean buildsConfigured) {
-        super(project, CiComponentsTree.getInstance(project));
+        super(project);
+        this.componentsTree = CiComponentsTree.getInstance(project);
         JPanel toolbar = createActionToolbar();
 
         JComponent issuesPanel = createComponentsIssueDetailView();
@@ -383,7 +385,9 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
 
     @Override
     void resetViews() {
-        super.resetViews();
+        if (componentsTree != null) {
+            componentsTree.reset();
+        }
         if (issuesTable != null) {
             issuesTable.reset();
         }

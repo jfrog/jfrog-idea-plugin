@@ -57,8 +57,6 @@ public abstract class ComponentsTree extends Tree {
         this.toolbarPopupMenus.add(filterMenu);
     }
 
-    public abstract void addOnProjectChangeListener(MessageBusConnection busConnection);
-
     public abstract void applyFiltersForAllProjects();
 
     public void addRightClickListener() {

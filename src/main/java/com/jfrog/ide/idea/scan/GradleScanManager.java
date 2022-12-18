@@ -29,6 +29,7 @@ import org.jfrog.build.extractor.scan.DependencyTree;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -39,7 +40,7 @@ import static com.jfrog.ide.common.log.Utils.logError;
 /**
  * Created by Yahav Itzhak on 9 Nov 2017.
  */
-public class GradleScanManager extends ScanManager {
+public class GradleScanManager extends SingleDescriptorScanManager {
 
     private final String PKG_TYPE = "gradle";
     private final GradleTreeBuilder gradleTreeBuilder;
@@ -54,6 +55,13 @@ public class GradleScanManager extends ScanManager {
     GradleScanManager(Project project, String basePath, ExecutorService executor) {
         super(project, basePath, ComponentPrefix.GAV, executor);
         getLog().info("Found Gradle project: " + getProjectName());
+        Path dirPath = Paths.get(this.basePath);
+        Path buildGradleKotlinPath = dirPath.resolve("build.gradle.kts");
+        if (Files.exists(buildGradleKotlinPath)) {
+            descriptorFilePath = buildGradleKotlinPath.toString();
+        } else {
+            descriptorFilePath = dirPath.resolve("build.gradle").toString();
+        }
         Map<String, String> env = Maps.newHashMap(EnvironmentUtil.getEnvironmentMap());
         Path pluginLibDir = PluginManagerCore.getPlugin(PluginId.findId("org.jfrog.idea")).getPluginPath().resolve("lib");
         env.put("pluginLibDir", pluginLibDir.toAbsolutePath().toString());

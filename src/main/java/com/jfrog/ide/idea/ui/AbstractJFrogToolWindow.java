@@ -18,19 +18,15 @@ import java.awt.*;
 public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel implements Disposable {
     final MessageBusConnection projectBusConnection;
     final MessageBusConnection appBusConnection;
-    final ComponentsTree componentsTree;
     final Project project;
 
-    // TODO: fix comment
     /**
      * @param project   - Currently opened IntelliJ project
-     * @param componentsTree - .
      */
-    public AbstractJFrogToolWindow(@NotNull Project project, ComponentsTree componentsTree) {
+    public AbstractJFrogToolWindow(@NotNull Project project) {
         super(true);
         this.projectBusConnection = project.getMessageBus().connect(this);
         this.appBusConnection = ApplicationManager.getApplication().getMessageBus().connect(this);
-        this.componentsTree = componentsTree;
         this.project = project;
     }
 
@@ -40,6 +36,11 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel impl
      * @return the action toolbar
      */
     abstract JPanel createActionToolbar();
+
+    /**
+     * Clear the component tree.
+     */
+    abstract void resetViews();
 
     JPanel createJFrogToolbar(ActionGroup actionGroup) {
         ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar("JFrog toolbar", actionGroup, true);
@@ -54,15 +55,6 @@ public abstract class AbstractJFrogToolWindow extends SimpleToolWindowPanel impl
      */
     public void onConfigurationChange() {
         resetViews();
-    }
-
-    /**
-     * Clear the component tree.
-     */
-    void resetViews() {
-        if (componentsTree != null) {
-            componentsTree.reset();
-        }
     }
 
     @Override

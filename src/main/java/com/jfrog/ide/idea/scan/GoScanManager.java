@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * Created by Bar Belity on 06/02/2020.
  */
-public class GoScanManager extends ScanManager {
+public class GoScanManager extends SingleDescriptorScanManager {
 
     private final GoTreeBuilder goTreeBuilder;
     private final String PKG_TYPE = "go";
@@ -36,7 +36,7 @@ public class GoScanManager extends ScanManager {
      * @param executor - An executor that should limit the number of running tasks to 3
      */
     GoScanManager(Project project, String basePath, ExecutorService executor) {
-        super(project, basePath, ComponentPrefix.GO, executor);
+        super(project, basePath, ComponentPrefix.GO, executor, Paths.get(basePath, "go.mod").toString());
         getLog().info("Found Go project: " + getProjectName());
         Map<String, String> env = Maps.newHashMap(EnvironmentUtil.getEnvironmentMap());
         String goExec = null;
@@ -55,8 +55,7 @@ public class GoScanManager extends ScanManager {
 
     @Override
     protected PsiFile[] getProjectDescriptors() {
-        String goModPath = Paths.get(basePath, "go.mod").toString();
-        VirtualFile file = LocalFileSystem.getInstance().findFileByPath(goModPath);
+        VirtualFile file = LocalFileSystem.getInstance().findFileByPath(descriptorFilePath);
         if (file == null) {
             return null;
         }

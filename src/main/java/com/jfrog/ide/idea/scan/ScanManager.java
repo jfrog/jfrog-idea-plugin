@@ -8,7 +8,6 @@ import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ex.InspectionManagerEx;
 import com.intellij.codeInspection.ex.LocalInspectionToolWrapper;
-import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -18,16 +17,12 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
-import com.intellij.util.messages.MessageBus;
-import com.intellij.util.messages.MessageBusConnection;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanManagerBase;
 import com.jfrog.ide.common.tree.Artifact;
-import com.jfrog.ide.common.tree.DescriptorFileTreeNode;
-import com.jfrog.ide.common.utils.ProjectsMap;
+import com.jfrog.ide.common.tree.FileTreeNode;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
-import com.jfrog.ide.idea.events.ProjectEvents;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
@@ -58,8 +53,6 @@ import static com.jfrog.ide.common.log.Utils.logError;
  */
 public abstract class ScanManager extends ScanManagerBase {
     private ExecutorService executor;
-    // TODO: remove if used only in scanAndUpdate.
-    private Collection<Artifact> depScanResults;
     protected Project project;
     String basePath;
 
@@ -113,6 +106,8 @@ public abstract class ScanManager extends ScanManagerBase {
 
     protected abstract String getProjectPackageType();
 
+    protected abstract List<FileTreeNode> groupArtifactsToDescriptorNodes(Collection<Artifact> depScanResults);
+
     /**
      * Scan and update dependency components.
      *
@@ -128,12 +123,9 @@ public abstract class ScanManager extends ScanManagerBase {
             indicator.setText("3/3: Finalizing");
             // TODO: convert results to tree, and save it to cache!
             // TODO: set descriptor file path
-            depScanResults = results.values();
-            DescriptorFileTreeNode fileTreeNode = new DescriptorFileTreeNode("path/to/descriptor/file");
-            fileTreeNode.addDependencies(depScanResults);
+            List<FileTreeNode> fileTreeNodes = groupArtifactsToDescriptorNodes(results.values());
             // TODO: this method will also convert the tree to the new format:
-//            BasicTreeNode descriptorNode = createDescriptorNode();
-            setScanResults(fileTreeNode, dependencyTree.getGeneralInfo().getPath());
+            addScanResults(fileTreeNodes);
 
             // TODO: uncomment
 //            DumbService.getInstance(project).smartInvokeLater(this::runInspections);
@@ -279,17 +271,13 @@ public abstract class ScanManager extends ScanManagerBase {
     /**
      * filter scan components tree model according to the user filters and sort the issues tree.
      */
-    private void setScanResults(DescriptorFileTreeNode fileTreeNode, String projectPath) {
+    private void addScanResults(List<FileTreeNode> fileTreeNodes) {
         // TODO: make sure that it's null, if there are no violations
-        if (fileTreeNode == null) {
+        if (fileTreeNodes.isEmpty()) {
             return;
         }
-        ProjectsMap.ProjectKey projectKey = ProjectsMap.createKey(getProjectName(), projectPath);
-        MessageBus projectMessageBus = project.getMessageBus();
-
         LocalComponentsTree componentsTree = LocalComponentsTree.getInstance(project);
-        componentsTree.addScanResults(getProjectName(), fileTreeNode);
-        projectMessageBus.syncPublisher(ProjectEvents.ON_SCAN_PROJECT_CHANGE).update(projectKey);
+        componentsTree.addScanResults(fileTreeNodes);
     }
 
     @Override

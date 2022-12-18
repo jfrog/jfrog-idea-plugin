@@ -10,6 +10,9 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.common.tree.Artifact;
+import com.jfrog.ide.common.tree.DescriptorFileTreeNode;
+import com.jfrog.ide.common.tree.FileTreeNode;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.MavenInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
@@ -30,9 +33,7 @@ import org.jfrog.build.extractor.scan.Scope;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
@@ -170,5 +171,12 @@ public class MavenScanManager extends ScanManager {
                 .filter(dependencyTree -> addedInSubTree.add(dependencyTree.getArtifact().getDisplayStringForLibraryName()))
                 .forEach(childrenArtifactNode -> updateChildrenNodes(currentNode, childrenArtifactNode, addedInSubTree, false));
         parentNode.add(currentNode);
+    }
+
+    @Override
+    protected List<FileTreeNode> groupArtifactsToDescriptorNodes(Collection<Artifact> depScanResults) {
+        DescriptorFileTreeNode fileTreeNode = new DescriptorFileTreeNode(depScanResults.stream().findFirst().get().getGeneralInfo().getPath());
+        fileTreeNode.addDependencies(depScanResults);
+        return Arrays.asList(fileTreeNode);
     }
 }

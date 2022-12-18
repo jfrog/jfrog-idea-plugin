@@ -53,12 +53,12 @@ public class Utils {
                 StringUtils.equals(lhsGeneralInfo.getPkgType(), rhsGeneralInfo.getPkgType());
     }
 
-    public static int getProjectIdentifier(String name, String path) {
+    public static int getModuleIdentifier(String name, String path) {
         return Objects.hashCode(name, path);
     }
 
     public static int getProjectIdentifier(Project project) {
-        return getProjectIdentifier(project.getName(), project.getBasePath());
+        return getModuleIdentifier(project.getName(), project.getBasePath());
     }
 
     public static void focusJFrogToolWindow(Project project) {

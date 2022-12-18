@@ -21,7 +21,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * Created by Yahav Itzhak on 13 Dec 2017.
  */
-public class NpmScanManager extends ScanManager {
+public class NpmScanManager extends SingleDescriptorScanManager {
 
     private final NpmTreeBuilder npmTreeBuilder;
     private final String PKG_TYPE = "npm";
@@ -33,7 +33,7 @@ public class NpmScanManager extends ScanManager {
      * @param executor - An executor that should limit the number of running tasks to 3
      */
     NpmScanManager(Project project, String basePath, ExecutorService executor) {
-        super(project, basePath, ComponentPrefix.NPM, executor);
+        super(project, basePath, ComponentPrefix.NPM, executor, Paths.get(basePath, "package.json").toString());
         getLog().info("Found npm project: " + getProjectName());
         npmTreeBuilder = new NpmTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap());
     }
@@ -45,8 +45,7 @@ public class NpmScanManager extends ScanManager {
 
     @Override
     protected PsiFile[] getProjectDescriptors() {
-        String packageJsonPath = Paths.get(basePath, "package.json").toString();
-        VirtualFile file = LocalFileSystem.getInstance().findFileByPath(packageJsonPath);
+        VirtualFile file = LocalFileSystem.getInstance().findFileByPath(descriptorFilePath);
         if (file == null) {
             return null;
         }
