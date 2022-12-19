@@ -106,7 +106,7 @@ public abstract class ScanManager extends ScanManagerBase {
 
     protected abstract String getProjectPackageType();
 
-    protected abstract List<FileTreeNode> groupArtifactsToDescriptorNodes(Collection<Artifact> depScanResults);
+    protected abstract List<FileTreeNode> groupArtifactsToDescriptorNodes(Collection<Artifact> depScanResults, Map<String, List<DependencyTree>> depMap);
 
     /**
      * Scan and update dependency components.
@@ -121,10 +121,10 @@ public abstract class ScanManager extends ScanManagerBase {
             indicator.setText("2/3: Xray scanning project dependencies");
             Map<String, Artifact> results = scanArtifacts(indicator, dependencyTree);
             indicator.setText("3/3: Finalizing");
+            Map<String, List<DependencyTree>> depMap = new HashMap<>();
+            mapDependencyTree(depMap, dependencyTree);
             // TODO: convert results to tree, and save it to cache!
-            // TODO: set descriptor file path
-            List<FileTreeNode> fileTreeNodes = groupArtifactsToDescriptorNodes(results.values());
-            // TODO: this method will also convert the tree to the new format:
+            List<FileTreeNode> fileTreeNodes = groupArtifactsToDescriptorNodes(results.values(), depMap);
             addScanResults(fileTreeNodes);
 
             // TODO: uncomment
@@ -136,6 +136,16 @@ public abstract class ScanManager extends ScanManagerBase {
         } finally {
             scanInProgress.set(false);
             sendUsageReport();
+        }
+    }
+
+    private void mapDependencyTree(Map<String, List<DependencyTree>> depMap, DependencyTree root) {
+        if (!depMap.containsKey(root.getComponentId())) {
+            depMap.put(root.getComponentId(), new ArrayList<>());
+        }
+        depMap.get(root.getComponentId()).add(root);
+        for (DependencyTree child : root.getChildren()) {
+            mapDependencyTree(depMap, child);
         }
     }
 

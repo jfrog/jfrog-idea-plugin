@@ -183,7 +183,7 @@ public class ScanManagersFactory {
      * @param scanManagers - Scan managers list
      */
     private void createMavenScanManagerIfApplicable(Map<Integer, ScanManager> scanManagers, ExecutorService executor) {
-        int projectHash = Utils.getModuleIdentifier(project);
+        int projectHash = Utils.getProjectIdentifier(project);
         ScanManager scanManager = this.scanManagers.get(projectHash);
 
         // Check if a ScanManager for this project already exists

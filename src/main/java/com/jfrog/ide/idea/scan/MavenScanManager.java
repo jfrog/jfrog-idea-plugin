@@ -44,6 +44,7 @@ import static com.jfrog.ide.common.utils.Utils.createComponentId;
  */
 public class MavenScanManager extends ScanManager {
     private final String PKG_TYPE = "maven";
+    private final String POM_FILE_NAME = "pom.xml";
 
     /**
      * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
@@ -174,9 +175,25 @@ public class MavenScanManager extends ScanManager {
     }
 
     @Override
-    protected List<FileTreeNode> groupArtifactsToDescriptorNodes(Collection<Artifact> depScanResults) {
-        DescriptorFileTreeNode fileTreeNode = new DescriptorFileTreeNode(depScanResults.stream().findFirst().get().getGeneralInfo().getPath());
-        fileTreeNode.addDependencies(depScanResults);
-        return Arrays.asList(fileTreeNode);
+    protected List<FileTreeNode> groupArtifactsToDescriptorNodes(Collection<Artifact> depScanResults, Map<String, List<DependencyTree>> depMap) {
+        Map<String, DescriptorFileTreeNode> treeNodeMap = new HashMap<>();
+        for (Artifact artifact : depScanResults) {
+            for (DependencyTree dep : depMap.get(artifact.getGeneralInfo().getComponentId())) {
+                DependencyTree currDep = dep;
+                while (currDep != null) {
+                    if (currDep.getGeneralInfo() != null) {
+                        String pomPath = currDep.getGeneralInfo().getPath();
+                        if (pomPath != null && pomPath.endsWith(POM_FILE_NAME)) {
+                            if (!treeNodeMap.containsKey(currDep.getGeneralInfo().getPath())) {
+                                treeNodeMap.put(pomPath, new DescriptorFileTreeNode(pomPath));
+                            }
+                            treeNodeMap.get(pomPath).addDependency(artifact);
+                        }
+                    }
+                    currDep = (DependencyTree) currDep.getParent();
+                }
+            }
+        }
+        return new ArrayList<>(treeNodeMap.values());
     }
 }

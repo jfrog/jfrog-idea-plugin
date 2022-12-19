@@ -8,10 +8,12 @@ import com.jfrog.ide.common.tree.FileTreeNode;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import org.jetbrains.annotations.NotNull;
+import org.jfrog.build.extractor.scan.DependencyTree;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 public abstract class SingleDescriptorScanManager extends ScanManager {
@@ -41,7 +43,8 @@ public abstract class SingleDescriptorScanManager extends ScanManager {
         this(project, basePath, prefix, executor, "");
     }
 
-    protected List<FileTreeNode> groupArtifactsToDescriptorNodes(Collection<Artifact> depScanResults) {
+    @Override
+    protected List<FileTreeNode> groupArtifactsToDescriptorNodes(Collection<Artifact> depScanResults, Map<String, List<DependencyTree>> depMap) {
         DescriptorFileTreeNode fileTreeNode = new DescriptorFileTreeNode(descriptorFilePath);
         fileTreeNode.addDependencies(depScanResults);
         return Arrays.asList(fileTreeNode);
