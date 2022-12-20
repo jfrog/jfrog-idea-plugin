@@ -7,7 +7,6 @@ import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.psi.PsiFile;
 import com.jetbrains.python.packaging.PyPackage;
 import com.jetbrains.python.packaging.PyPackageManager;
-import com.jetbrains.python.packaging.PyPackageUtil;
 import com.jetbrains.python.packaging.PyRequirement;
 import com.jetbrains.python.packaging.pipenv.PyPipEnvPackageManager;
 import com.jetbrains.python.sdk.PythonSdkUtil;
@@ -46,6 +45,7 @@ public class PypiScanManager extends SingleDescriptorScanManager {
      */
     PypiScanManager(Project project, Sdk pythonSdk, ExecutorService executor) {
         super(project, pythonSdk.getHomePath(), ComponentPrefix.PYPI, executor, pythonSdk.getHomePath());
+        scanner = new SourceCodeScannerManager(project,"python");
         this.pythonSdk = pythonSdk;
         getLog().info("Found PyPI SDK: " + getProjectName());
     }

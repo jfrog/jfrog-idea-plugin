@@ -25,6 +25,9 @@ import com.jfrog.ide.common.tree.DependencyNode;
 import com.jfrog.ide.common.tree.FileTreeNode;
 import com.jfrog.ide.common.tree.ImpactTreeNode;
 import com.jfrog.ide.common.tree.IssueNode;
+import com.jfrog.ide.common.tree.Issue;
+import com.jfrog.ide.common.tree.DescriptorFileTreeNode;
+import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.log.Logger;
@@ -46,7 +49,9 @@ import javax.swing.tree.TreeNode;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -68,6 +73,8 @@ public abstract class ScanManager {
 
     // Lock to prevent multiple simultaneous scans
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
+
+    protected SourceCodeScannerManager scanner;
 
     /**
      * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services

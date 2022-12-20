@@ -29,16 +29,23 @@ public abstract class ScanBinaryExecutor {
 
     protected final String BINARY_NAME;
 
+    protected boolean shouldExecute;
+
     ScanBinaryExecutor(String scanType, String binaryName) {
         SCAN_TYPE = scanType;
         BINARY_NAME = binaryName;
-        commandExecutor = new CommandExecutor(BINARIES_DIR.resolve(BINARY_NAME).toString(), Maps.newHashMap());
+        var binaryPath = BINARIES_DIR.resolve(BINARY_NAME);
+        commandExecutor = new CommandExecutor(binaryPath.toString(), Maps.newHashMap());
+        shouldExecute = Files.exists(binaryPath);
     }
 
 
     abstract List<JfrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder) throws IOException, InterruptedException;
 
     protected List<JfrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args, boolean eos) throws IOException, InterruptedException {
+        if (!shouldExecute) {
+            return List.of();
+        }
         var outputTempDir = Files.createTempDirectory("");
         var outputFilePath = Files.createTempFile(outputTempDir, "", ".sarif");
         // TODO: Remove this variable after JFrog security team unified output and sarif-output vars

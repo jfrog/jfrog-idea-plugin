@@ -27,7 +27,7 @@ public class ApplicabilityAnnotator extends ExternalAnnotator<PsiFile, List<Jfro
 
 
     @NotNull
-    private static final HighlightSeverity HIGHLIGHT_TYPE = HighlightSeverity.WEAK_WARNING;
+    private static final HighlightSeverity HIGHLIGHT_TYPE = HighlightSeverity.WARNING;
 
     @Nullable
     @Override
@@ -52,6 +52,7 @@ public class ApplicabilityAnnotator extends ExternalAnnotator<PsiFile, List<Jfro
     }
 
     @Override
+    //
     public void apply(@NotNull PsiFile file, List<JfrogSecurityWarning> warnings, @NotNull AnnotationHolder holder) {
         var filePath = "file://" + file.getVirtualFile().getPath();
         warnings.stream().filter(warning -> warning.getFilePath().equals(filePath)).forEach(warning -> {
@@ -59,7 +60,7 @@ public class ApplicabilityAnnotator extends ExternalAnnotator<PsiFile, List<Jfro
             int endOffset = StringUtil.lineColToOffset(file.getText(), warning.getLineEnd(), warning.getColEnd());
 
             TextRange range = new TextRange(startOffset, endOffset);
-            holder.newAnnotation(HIGHLIGHT_TYPE, warning.getReason())
+            holder.newAnnotation(HIGHLIGHT_TYPE, "\uD83D\uDC38 JFrog: "+ warning.getReason())
                     .range(range)
                     .create();
         });
