@@ -1,7 +1,10 @@
+import java.nio.file.Paths
+
 plugins {
     id "org.jetbrains.intellij" version "1.10.0-SNAPSHOT"
     id "java"
     id "maven-publish"
+    id "de.undercouch.download" version "5.3.0"
 }
 
 group 'com.jfrog.ide'
@@ -65,9 +68,34 @@ test {
     }
 }
 
-tasks.withType(JavaCompile) {
+def webViewVersion = '0.1.5'
+def webviewFileName = 'jfrog-ide-webview-' + webViewVersion + '.tgz'
+tasks.register('downloadWebview', Download) {
+    src 'https://releases.jfrog.io/artifactory/ide-webview-npm/jfrog-ide-webview/-/' + webviewFileName
+    dest buildDir
+    onlyIfModified true
+    finalizedBy('verifyWebview')
+}
+
+tasks.register('verifyWebview', Verify) {
+    src new File(buildDir, webviewFileName)
+    algorithm 'SHA-512'
+    checksum 'b2015294714222de1efa2490e9d1b8d36fd82aa79a4d04fd0821c07da8799eb85d45f1dedede2366da71b2d91f6277e31ce7befc9c4cbe2229b437d731fc7689'
+    finalizedBy('extractWebview')
+}
+
+tasks.register('extractWebview', Copy) {
+    from tarTree(new File(buildDir, webviewFileName))
+    into Paths.get('src', 'main', 'resources', 'webview').toFile()
+    eachFile {
+        path = path.replace('package/', '');
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
     options.deprecation = true
     options.encoding = "UTF-8"
+    dependsOn('downloadWebview')
 }
 
 publishing {
