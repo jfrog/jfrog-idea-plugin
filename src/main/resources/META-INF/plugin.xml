@@ -12,7 +12,10 @@
 
     <change-notes>
         <![CDATA[
-          <li>Bugfix - Unable to configure the plugin</li>
+          <li>Remove duplicated components in payload to JFrog Xray</li>
+          <li>Increase default connection timeout to 5 minutes</li>
+          <li>Bug - Missing Xray scan results in CI mode</li>
+          <li>Bug - Stackoverflow when reading credentials from CLI</li>
         ]]>
     </change-notes>
 
