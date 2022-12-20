@@ -14,8 +14,8 @@
         <![CDATA[
           <li>Remove duplicated components in payload to JFrog Xray</li>
           <li>Increase default connection timeout to 5 minutes</li>
-          <li>Bugfix - Missing Xray scan results in CI mode</li>
-          <li>Bugfix - Stackoverflow when reading credentials from CLI</li>
+          <li>Bug - Missing Xray scan results in CI mode</li>
+          <li>Bug - Stackoverflow when reading credentials from CLI</li>
         ]]>
     </change-notes>
 
