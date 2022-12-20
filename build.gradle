@@ -90,6 +90,7 @@ tasks.register('extractWebview', Copy) {
     eachFile {
         path = path.replace('package/', '');
     }
+    exclude '**/README.md'
 }
 
 tasks.withType(JavaCompile).configureEach {
