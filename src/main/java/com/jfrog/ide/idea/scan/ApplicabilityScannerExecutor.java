@@ -17,6 +17,11 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
         super(SCAN_TYPE, SCANNER_BINARY_NAME);
     }
 
+    @Override
+    List<String> getSupportedLanguages() {
+        return List.of("python","npm");
+    }
+
     public List<JfrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder) throws IOException, InterruptedException {
         return super.execute(inputFileBuilder, List.of("scan"),false);
     }

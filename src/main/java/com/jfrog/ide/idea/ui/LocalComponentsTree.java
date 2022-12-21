@@ -11,12 +11,16 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.tree.MutableTreeNode;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author yahavi
  */
 public class LocalComponentsTree extends ComponentsTree {
-    List<FileTreeNode> fileNodes = new ArrayList<>();
+    Map<String, FileTreeNode> fileNodes = new HashMap<>();
 
     public LocalComponentsTree(@NotNull Project project) {
         super(project);
@@ -27,20 +31,42 @@ public class LocalComponentsTree extends ComponentsTree {
         return project.getService(LocalComponentsTree.class);
     }
 
+    public FileTreeNode getFileNode(@NotNull String filePath) {
+        return fileNodes.get(filePath);
+    }
+
     private void appendProjectWhenReady(FileTreeNode filteredRoot) {
         ApplicationManager.getApplication().invokeLater(() -> appendProject(filteredRoot));
     }
 
     @Override
     public void reset() {
-        fileNodes = new ArrayList<>();
+        fileNodes = new HashMap<>();
         super.reset();
+    }
+
+    @Override
+    public void applyFiltersForAllProjects() {
+        setModel(null);
+        // TODO: I added the reset here, but it might not be the right solution, and i'm not even sure if it's needed. If it's removed or moved from here, pay attention to the commented code in addOrReplace below.
+        reset();
+        for (FileTreeNode node : fileNodes.values()) {
+            appendProjectWhenReady(node);
+        }
     }
 
     public void addScanResults(List<FileTreeNode> fileTreeNodes) {
         for (FileTreeNode node : fileTreeNodes) {
-            fileNodes.add(node);
-            appendProjectWhenReady(node);
+            var fileNode = fileNodes.get(node.getPath().toString());
+            if (fileNode != null) {
+                List newChildren = Collections.list(fileNode.children());
+                for (var child : newChildren) {
+                    fileNode.add((MutableTreeNode) child);
+                }
+            } else {
+                fileNodes.put(node.getPath().toString(), node);
+                appendProjectWhenReady(node);
+            }
         }
     }
 

@@ -31,6 +31,8 @@ public abstract class ScanBinaryExecutor {
 
     protected boolean shouldExecute;
 
+    abstract List<String> getSupportedLanguages();
+
     ScanBinaryExecutor(String scanType, String binaryName) {
         SCAN_TYPE = scanType;
         BINARY_NAME = binaryName;

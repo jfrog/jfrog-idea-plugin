@@ -6,13 +6,20 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.common.log.ProgressIndicator;
+import com.jfrog.ide.common.tree.DescriptorFileTreeNode;
+import com.jfrog.ide.common.tree.FileTreeNode;
+import com.jfrog.ide.common.tree.IssueTreeNode;
+import com.jfrog.ide.idea.inspections.JfrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -23,6 +30,8 @@ public class SourceCodeScannerManager {
 
     private Eos eos = new Eos();
     private ApplicabilityScannerExecutor applicability = new ApplicabilityScannerExecutor();
+
+    private List<JfrogSecurityWarning> scanResults;
 
     protected Project project;
     protected String codeBaseLanguage;
@@ -47,7 +56,7 @@ public class SourceCodeScannerManager {
                     return;
                 }
                 try {
-                    scanAndUpdate(new ProgressIndicatorImpl(indicator));
+                    scanAndUpdate(new ProgressIndicatorImpl(indicator), shouldToast);
                 } catch (IOException | InterruptedException | NullPointerException e) {
                     logError(Logger.getInstance(), "Failed to scan source code", e, shouldToast);
                 } finally {
@@ -71,10 +80,48 @@ public class SourceCodeScannerManager {
      *
      * @param indicator - The progress indicator
      */
-    private void scanAndUpdate(ProgressIndicator indicator) throws IOException, InterruptedException {
-        indicator.setText("1/2: Applicability Scan");
-        var applicabilityResults = applicability.execute(new ScanConfig.Builder().root(project.getBasePath()));
-        indicator.setText("2/2: Eos Scan");
-        var eosResults = eos.execute(new ScanConfig.Builder().language(codeBaseLanguage).roots(List.of(project.getBasePath())));
+    public void scanAndUpdate(ProgressIndicator indicator, boolean shouldToast) throws IOException, InterruptedException {
+        if (project.isDisposed()) {
+            return;
+        }
+        // Prevent multiple simultaneous scans
+        if (!scanInProgress.compareAndSet(false, true)) {
+            return;
+        }
+        scanResults = new ArrayList<>();
+        try {
+            if (applicability.getSupportedLanguages().contains(codeBaseLanguage)) {
+                indicator.setText("Applicability Scan");
+                indicator.setFraction(0.25);
+                var applicabilityResults = applicability.execute(new ScanConfig.Builder().root(project.getBasePath()));
+                scanResults.addAll(applicabilityResults);
+            }
+            if (eos.getSupportedLanguages().contains(codeBaseLanguage)) {
+                indicator.setText("Eos Scan");
+                indicator.setFraction(0.5);
+                var eosResults = eos.execute(new ScanConfig.Builder().language(codeBaseLanguage).roots(List.of(project.getBasePath())));
+                scanResults.addAll(eosResults);
+            }
+        } catch (IOException | InterruptedException |
+                 NullPointerException e) {
+            logError(Logger.getInstance(), "Failed to scan source code", e, shouldToast);
+        } finally {
+            scanInProgress.set(false);
+            indicator.setFraction(1);
+        }
+    }
+
+    public List<FileTreeNode> getResults() {
+        var results = new HashMap<String, DescriptorFileTreeNode>();
+        for (JfrogSecurityWarning warning : scanResults) {
+            var filePath = StringUtils.removeStart(warning.getFilePath(), "file://");
+            var fileNode = results.get(filePath);
+            if (fileNode == null) {
+                fileNode = new DescriptorFileTreeNode(filePath);
+                results.put(filePath, fileNode);
+            }
+            fileNode.addDependency(new IssueTreeNode(warning.getName(), warning.getLineStart() + 1, warning.getColStart()));
+        }
+        return new ArrayList<>(results.values());
     }
 }

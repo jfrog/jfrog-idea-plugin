@@ -49,9 +49,7 @@ import javax.swing.tree.TreeNode;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -162,6 +160,10 @@ public abstract class ScanManager {
             createImpactPaths(results, depMap, dependencyTree);
             List<FileTreeNode> fileTreeNodes = groupDependenciesToDescriptorNodes(results.values(), depMap);
             addScanResults(fileTreeNodes);
+            // Source Code Scan
+            scanner.scanAndUpdate(indicator,shouldToast);
+            addScanResults(scanner.getResults());
+            
         } catch (ProcessCanceledException e) {
             log.info("Xray scan was canceled");
         } catch (Exception e) {
