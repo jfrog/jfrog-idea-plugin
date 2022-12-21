@@ -178,16 +178,18 @@ public class MavenScanManager extends ScanManager {
     protected List<FileTreeNode> groupArtifactsToDescriptorNodes(Collection<Artifact> depScanResults, Map<String, List<DependencyTree>> depMap) {
         Map<String, DescriptorFileTreeNode> treeNodeMap = new HashMap<>();
         for (Artifact artifact : depScanResults) {
+            Map<String, Boolean> addedDescriptors = new HashMap<>();
             for (DependencyTree dep : depMap.get(artifact.getGeneralInfo().getComponentId())) {
                 DependencyTree currDep = dep;
                 while (currDep != null) {
                     if (currDep.getGeneralInfo() != null) {
                         String pomPath = currDep.getGeneralInfo().getPath();
-                        if (pomPath != null && pomPath.endsWith(POM_FILE_NAME)) {
+                        if (pomPath != null && pomPath.endsWith(POM_FILE_NAME) && !addedDescriptors.containsKey(pomPath)) {
                             if (!treeNodeMap.containsKey(currDep.getGeneralInfo().getPath())) {
                                 treeNodeMap.put(pomPath, new DescriptorFileTreeNode(pomPath));
                             }
                             treeNodeMap.get(pomPath).addDependency(artifact);
+                            addedDescriptors.put(pomPath, true);
                         }
                     }
                     currDep = (DependencyTree) currDep.getParent();
@@ -195,5 +197,10 @@ public class MavenScanManager extends ScanManager {
             }
         }
         return new ArrayList<>(treeNodeMap.values());
+    }
+
+    @Override
+    public String getPackageType() {
+        return "Maven";
     }
 }

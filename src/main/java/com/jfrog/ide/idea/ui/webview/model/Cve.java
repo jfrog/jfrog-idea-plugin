@@ -4,18 +4,19 @@ import java.io.Serializable;
 
 public class Cve implements Serializable {
     String id;
-    String cvssV2Vector;
     String cvssV2Score;
+    String cvssV2Vector;
     String cvssV3Score;
     String cvssV3Vector;
+    ApplicableDetails applicableData;
 
     public Cve() {
     }
 
-    public Cve(String id, String cvssV2Vector, String cvssV2Score, String cvssV3Score, String cvssV3Vector) {
+    public Cve(String id, String cvssV2Score, String cvssV2Vector, String cvssV3Score, String cvssV3Vector) {
         this.id = id;
-        this.cvssV2Vector = cvssV2Vector;
         this.cvssV2Score = cvssV2Score;
+        this.cvssV2Vector = cvssV2Vector;
         this.cvssV3Score = cvssV3Score;
         this.cvssV3Vector = cvssV3Vector;
     }

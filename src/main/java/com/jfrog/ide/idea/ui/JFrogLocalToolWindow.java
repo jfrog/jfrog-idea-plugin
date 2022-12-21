@@ -12,6 +12,8 @@ import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.ui.jcef.JBCefBrowserBase;
 import com.intellij.ui.jcef.JBCefJSQuery;
 import com.intellij.util.ui.UIUtil;
+import com.jfrog.ide.common.tree.Artifact;
+import com.jfrog.ide.common.tree.ImpactTreeNode;
 import com.jfrog.ide.common.tree.Issue;
 import com.jfrog.ide.common.tree.IssueOrLicense;
 import com.jfrog.ide.idea.actions.CollapseAllAction;
@@ -20,17 +22,12 @@ import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.ui.jcef.message.MessagePacker;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
+import com.jfrog.ide.idea.ui.webview.model.*;
 import org.apache.commons.io.FileUtils;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.handler.CefLoadHandlerAdapter;
-import com.jfrog.ide.idea.ui.webview.model.Cve;
-import com.jfrog.ide.idea.ui.webview.model.DependencyPage;
-import com.jfrog.ide.idea.ui.webview.model.ImpactedPath;
-import com.jfrog.ide.idea.ui.webview.model.JfrogResearchSeverityReason;
-import com.jfrog.ide.idea.ui.webview.model.License;
-import com.jfrog.ide.idea.ui.webview.model.Reference;
-import com.jfrog.ide.idea.ui.webview.model.ResearchInfo;
+import com.jfrog.ide.idea.ui.webview.model.ExtendedInformation;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -40,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 import static com.jfrog.ide.idea.ui.JFrogToolWindow.*;
 
@@ -194,44 +192,173 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
     private void updateIssueOrLicenseInWebview(IssueOrLicense issueOrLicense) {
         if (issueOrLicense instanceof Issue) {
-            Issue selectedIssue = (Issue) issueOrLicense;
-            // TODO: this should be sent after the page is first loaded!
-            messagePacker.send("DEPENDENCY", new DependencyPage(
-                    selectedIssue.getTitle(),
-                    selectedIssue.getComponent(),
-                    "type",
-                    "version-1.2.3",
-                    selectedIssue.getSeverity().name(),
-                    new License("license"),
-                    "Summary-details",
-                    new String[]{"1", "2"},
-                    new String[]{"3", "4"},
-                    new Reference[]{new Reference("reference-name", "www.reference.com")},
-                    new Cve(
-                            selectedIssue.getCve().getCveId(),
-                            "1",
-                            selectedIssue.getCve().getCvssV1(),
-                            selectedIssue.getCve().getCvssV2(),
-                            "4"
-                    ),
-                    new ImpactedPath("path-name-1", new ImpactedPath[]{new ImpactedPath("sub-path-2", new ImpactedPath[]{})}),
-                    new ResearchInfo(
-                            "Insufficient validation in the json-schema package leads to prototype pollution",
-                            "[JSON Schema](https://json-schema.org/) is a vocabulary that using for annotation and validation of JSON documents. It has 20M downloads per week for his [npm](https://www.npmjs.com/package/json-schema) repository.\r\n\r\n[Schema Validation](https://python-jsonschema.readthedocs.io/en/stable/validate/) is a process which validates an instance under a given schema, one of the way for validation is using the `validate()` method.\r\n\r\nAn attacker can cause a prototype pollution when sending a crafted schema to the `validate` or `checkPropertyChange` methods (1st or 2nd argument).\r\n\r\nThe prototype pollution vulnerability was discovered in the `checkObj()` function which does not validate the object type properly, allowing a remote attacker to pollute the object space using the `__proto__` attribute and cause the process to crash or cause a malicious object to pass validation. In case the attacker succeed to corrupt an object that supposed to be evaluated then he can execute arbitrary code on the affected system.\r\n\r\nA PoC can be seen in the [json-schema](https://github.com/kriszyp/json-schema/blob/master/test/tests.js) testing code:\r\n```js\r\nprototypePollution: function() {\r\n        console.log(\'testing\')\r\n        const instance = JSON.parse(`\r\n        {\r\n        \"$schema\":{\r\n            \"type\": \"object\",\r\n            \"properties\":{\r\n            \"__proto__\": {\r\n                \"type\": \"object\",\r\n                \r\n                \"properties\":{\r\n                \"polluted\": {\r\n                    \"type\": \"string\",\r\n                    \"default\": \"polluted\"\r\n                }\r\n                }\r\n            }\r\n            },\r\n            \"__proto__\": {}\r\n        }\r\n        }`);\r\n\r\n        const a = {};\r\n        validate(instance);\r\n        assert.equal(a.polluted, undefined);\r\n    }\r\n```",
-                            "Low",
-                            "##### Development mitigation\\n\\nAdd the `Object.freeze(Object.prototype);` directive once at the beginning of your main JS source code file (ex. `index.js`), preferably after all your `require` directives. This will prevent any changes to the prototype object, thus completely negating prototype pollution attacks.",
-                            new JfrogResearchSeverityReason[]{new JfrogResearchSeverityReason(
-                                    "The issue has an exploit published",
-                                    "A public PoC demonstrated prototype pollution",
-                                    "false"
-                            ), new JfrogResearchSeverityReason(
-                                    "The impact of exploiting the issue depends on the context of surrounding software. A severe impact such as RCE is not guaranteed.",
-                                    "A prototype pollution attack allows the attacker to inject new properties to all JavaScript objects (but not set existing properties).\\r\\nTherefore, the impact of a prototype pollution attack depends on the way the JavaScript code uses any object properties after the attack is triggered.\\r\\nUsually, a DoS attack is possible since invalid properties quickly lead to an exception being thrown. In more severe cases, RCE may be achievable.",
-                                    "true"
-                            )}
-                    )
-            ));
+            Issue issue = (Issue) issueOrLicense;
+            messagePacker.send("DEPENDENCY", convertIssueToDepPage(issue));
+        } else {
+            com.jfrog.ide.common.tree.License license = (com.jfrog.ide.common.tree.License) issueOrLicense;
+            messagePacker.send("DEPENDENCY", convertLicenseToDepPage(license));
         }
+    }
+
+    private DependencyPage convertIssueToDepPage(Issue issue) {
+        ExtendedInformation extendedInformation = null;
+        if (issue.getResearchInfo() != null) {
+            com.jfrog.ide.common.tree.ResearchInfo issueResearchInfo = issue.getResearchInfo();
+            JfrogResearchSeverityReason[] severityReasons = Arrays.stream(issueResearchInfo.getSeverityReasons()).map(severityReason -> new JfrogResearchSeverityReason(severityReason.getName(), severityReason.getDescription(), severityReason.isPositive())).toArray(JfrogResearchSeverityReason[]::new);
+            extendedInformation = new ExtendedInformation(issueResearchInfo.getShortDescription(), issueResearchInfo.getFullDescription(), issueResearchInfo.getSeverity().name(), issueResearchInfo.getRemediation(), severityReasons);
+        }
+        Artifact dependency = issue.getParentArtifact();
+        return new DependencyPage(
+                issue.getIssueId(),
+                dependency.getGeneralInfo().getArtifactId(),
+                dependency.getGeneralInfo().getPkgType(),
+                dependency.getGeneralInfo().getVersion(),
+                issue.getSeverity().name(),
+                new License(dependency.getLicenseName(), "license-link"),
+                issue.getSummary(),
+                convertVersionRanges(issue.getFixedVersions()),
+                convertVersionRanges(issue.getInfectedVersions()),
+                new Reference[]{new Reference("www.reference.com", "reference-name")},
+                new Cve(
+                        issue.getCve().getCveId(),
+                        issue.getCve().getCvssV2Score(),
+                        issue.getCve().getCvssV2Vector(),
+                        issue.getCve().getCvssV3Score(),
+                        issue.getCve().getCvssV3Vector()
+                ),
+                convertImpactPath(dependency.getImpactPaths()),
+                issue.getLastUpdated(),
+                extendedInformation
+        );
+    }
+
+    private DependencyPage convertLicenseToDepPage(com.jfrog.ide.common.tree.License license) {
+        Artifact dependency = license.getParentArtifact();
+        return new DependencyPage(
+                license.getName(),
+                dependency.getGeneralInfo().getArtifactId(),
+                dependency.getGeneralInfo().getPkgType(),
+                dependency.getGeneralInfo().getVersion(),
+                license.getSeverity().name(),
+                null,
+                null,
+                null,
+                new String[0],
+                new Reference[]{new Reference("www.reference.com", "reference-name")},
+                new Cve(null, null, null, null, null),
+                convertImpactPath(dependency.getImpactPaths()),
+                license.getLastUpdated(),
+                null
+        );
+    }
+
+    private ImpactedPath convertImpactPath(ImpactTreeNode impactTreeNode) {
+        ImpactedPath[] children = new ImpactedPath[impactTreeNode.getChildren().size()];
+        for (int childIndex = 0; childIndex < children.length; childIndex++) {
+            children[childIndex] = convertImpactPath(impactTreeNode.getChildren().get(childIndex));
+        }
+        return new ImpactedPath(removeComponentIdPrefix(impactTreeNode.getName()), children);
+    }
+
+    private String removeComponentIdPrefix(String compId) {
+        final String prefixSeparator = "://";
+        int prefixIndex = compId.indexOf(prefixSeparator);
+        if (prefixIndex == -1) {
+            return compId;
+        }
+        return compId.substring(prefixIndex + prefixSeparator.length());
+    }
+
+    // TODO: move this and the other conversion methods to another class
+    private String[] convertVersionRanges(java.util.List<String> xrayVerRanges) {
+        if (xrayVerRanges == null) {
+            return new String[0];
+        }
+        return xrayVerRanges.stream().map(s -> convertVersionRange(s)).toArray(String[]::new);
+    }
+
+    private String convertVersionRange(String xrayVerRange) {
+        final char upInclude = ']';
+        final char upNotInclude = ')';
+        final char downInclude = '[';
+        final char downNotInclude = '(';
+
+        final String lt = "<";
+        final String lte = "≤";
+        final String gt = ">";
+        final String gte = "≥";
+        final String versionPlacer = "version";
+        final String allVersions = "All versions";
+
+        boolean containsLeft = false;
+        boolean containsRight = false;
+
+        String[] parts = xrayVerRange.split(",");
+        if (parts.length != 2) {
+            if (parts.length == 1) {
+                String singleVer = parts[0];
+                if (singleVer.charAt(0) == downInclude && singleVer.charAt(singleVer.length() - 1) == upInclude) {
+                    // Remove [ and ]
+                    return singleVer.substring(1, singleVer.length() - 1);
+                }
+            }
+            // Cannot convert
+            return xrayVerRange;
+        }
+
+        String leftSide = parts[0];
+        String rightSide = parts[1];
+        if (leftSide.charAt(0) == downInclude) {
+            containsLeft = true;
+        } else if (leftSide.charAt(0) != downNotInclude) {
+            // Cannot convert
+            return xrayVerRange;
+        }
+        if (rightSide.charAt(rightSide.length() - 1) == upInclude) {
+            containsRight = true;
+        } else if (rightSide.charAt(rightSide.length() - 1) != upNotInclude) {
+            // Cannot convert
+            return xrayVerRange;
+        }
+
+        // Remove [
+        String leftVer = leftSide.substring(1).trim();
+        // Remove ]
+        String rightVer = rightSide.substring(0, rightSide.length() - 1).trim();
+        boolean leftEmpty = leftVer.isEmpty();
+        boolean rightEmpty = rightVer.isEmpty();
+
+        if (leftEmpty && rightEmpty) {
+            return allVersions;
+        }
+        if (leftEmpty) {
+            if (containsRight) {
+                return lte + " " + rightVer;
+            }
+            return lt + " " + rightVer;
+        }
+        if (rightEmpty) {
+            if (containsLeft) {
+                return gte + " " + leftVer;
+            }
+            return gt + " " + leftVer;
+        }
+
+        // Left and right sides are not empty
+        String res = leftVer + " ";
+        if (containsLeft) {
+            res += lte;
+        } else {
+            res += lt;
+        }
+        res += " " + versionPlacer + " ";
+        if (containsRight) {
+            res += lte;
+        } else {
+            res += lt;
+        }
+        res += " " + rightVer;
+        return res;
     }
 
     /**

@@ -176,4 +176,9 @@ public class PypiScanManager extends SingleDescriptorScanManager {
     protected String getProjectPackageType() {
         return PKG_TYPE;
     }
+
+    @Override
+    public String getPackageType() {
+        return "PyPI";
+    }
 }

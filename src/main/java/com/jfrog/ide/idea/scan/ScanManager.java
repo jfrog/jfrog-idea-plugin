@@ -17,11 +17,14 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
+import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.scan.ComponentPrefix;
-import com.jfrog.ide.common.scan.ScanManagerBase;
+import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.common.tree.Artifact;
 import com.jfrog.ide.common.tree.FileTreeNode;
+import com.jfrog.ide.common.tree.ImpactTreeNode;
+import com.jfrog.ide.common.tree.Issue;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.log.Logger;
@@ -35,9 +38,11 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jfrog.build.api.util.Log;
 import org.jfrog.build.extractor.scan.DependencyTree;
 
 import javax.swing.*;
+import javax.swing.tree.TreeNode;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -51,7 +56,12 @@ import static com.jfrog.ide.common.log.Utils.logError;
 /**
  * Created by romang on 4/26/17.
  */
-public abstract class ScanManager extends ScanManagerBase {
+public abstract class ScanManager {
+    private ServerConfig serverConfig;
+    private ComponentPrefix prefix;
+    private ScanLogic scanLogic;
+    private String projectName;
+    private Log log;
     private ExecutorService executor;
     protected Project project;
     String basePath;
@@ -67,7 +77,10 @@ public abstract class ScanManager extends ScanManagerBase {
      * @param executor - An executor that should limit the number of running tasks to 3
      */
     ScanManager(@NotNull Project project, String basePath, ComponentPrefix prefix, ExecutorService executor) {
-        super(basePath, Logger.getInstance(), GlobalSettings.getInstance().getServerConfig(), prefix);
+        this.serverConfig = GlobalSettings.getInstance().getServerConfig();
+        this.projectName = basePath;
+        this.prefix = prefix;
+        this.log = Logger.getInstance();
         this.executor = executor;
         this.basePath = basePath;
         this.project = project;
@@ -108,6 +121,8 @@ public abstract class ScanManager extends ScanManagerBase {
 
     protected abstract List<FileTreeNode> groupArtifactsToDescriptorNodes(Collection<Artifact> depScanResults, Map<String, List<DependencyTree>> depMap);
 
+    public abstract String getPackageType();
+
     /**
      * Scan and update dependency components.
      *
@@ -119,10 +134,19 @@ public abstract class ScanManager extends ScanManagerBase {
             indicator.setText("1/3: Building dependency tree");
             DependencyTree dependencyTree = buildTree(shouldToast);
             indicator.setText("2/3: Xray scanning project dependencies");
-            Map<String, Artifact> results = scanArtifacts(indicator, dependencyTree);
+            log.debug("Start scan for '" + projectName + "'.");
+            Map<String, Artifact> results = scanLogic.scanArtifacts(dependencyTree, serverConfig, indicator, prefix, this::checkCanceled);
             indicator.setText("3/3: Finalizing");
+            if (results == null) {
+                log.debug("Wasn't able to scan '" + projectName + "'.");
+                return;
+            }
             Map<String, List<DependencyTree>> depMap = new HashMap<>();
             mapDependencyTree(depMap, dependencyTree);
+
+            Map<String, List<Issue>> issuesMap = mapIssuesByCve(results);
+
+            createImpactPaths(results, depMap, dependencyTree);
             // TODO: convert results to tree, and save it to cache!
             List<FileTreeNode> fileTreeNodes = groupArtifactsToDescriptorNodes(results.values(), depMap);
             addScanResults(fileTreeNodes);
@@ -130,9 +154,9 @@ public abstract class ScanManager extends ScanManagerBase {
             // TODO: uncomment
 //            DumbService.getInstance(project).smartInvokeLater(this::runInspections);
         } catch (ProcessCanceledException e) {
-            getLog().info("Xray scan was canceled");
+            log.info("Xray scan was canceled");
         } catch (Exception e) {
-            logError(getLog(), "Xray Scan failed", e, shouldToast);
+            logError(log, "Xray Scan failed", e, shouldToast);
         } finally {
             scanInProgress.set(false);
             sendUsageReport();
@@ -147,6 +171,59 @@ public abstract class ScanManager extends ScanManagerBase {
         for (DependencyTree child : root.getChildren()) {
             mapDependencyTree(depMap, child);
         }
+    }
+
+    /**
+     * Maps all the issues (vulnerabilities and security violations) by their CVE IDs.
+     * Issues without a CVE ID are ignored.
+     *
+     * @param results - scan results mapped by dependencies.
+     * @return a map of CVE IDs to lists of issues with them.
+     */
+    private Map<String, List<Issue>> mapIssuesByCve(Map<String, Artifact> results) {
+        Map<String, List<Issue>> issues = new HashMap<>();
+        for (Artifact dep : results.values()) {
+            for (TreeNode node : Collections.list(dep.children())) {
+                if (!(node instanceof Issue)) {
+                    continue;
+                }
+                Issue issue = (Issue) node;
+                if (issue.getCve() == null || issue.getCve().getCveId() == null || issue.getCve().getCveId().isEmpty()) {
+                    continue;
+                }
+                if (!issues.containsKey(issue.getCve().getCveId())) {
+                    issues.put(issue.getCve().getCveId(), new ArrayList<>());
+                }
+                issues.get(issue.getCve().getCveId()).add(issue);
+            }
+        }
+        return issues;
+    }
+
+    private void createImpactPaths(Map<String, Artifact> dependencies, Map<String, List<DependencyTree>> depMap, DependencyTree root) {
+        for (Map.Entry<String, Artifact> depEntry : dependencies.entrySet()) {
+            Map<DependencyTree, ImpactTreeNode> impactTreeNodes = new HashMap<>();
+            for (DependencyTree depTree : depMap.get(depEntry.getKey())) {
+                addImpactPath(impactTreeNodes, depTree);
+            }
+            depEntry.getValue().setImpactPaths(impactTreeNodes.get(root));
+        }
+    }
+
+    private ImpactTreeNode addImpactPath(Map<DependencyTree, ImpactTreeNode> impactTreeNodes, DependencyTree depTreeNode) {
+        if (impactTreeNodes.containsKey(depTreeNode)) {
+            return impactTreeNodes.get(depTreeNode);
+        }
+        ImpactTreeNode parentImpactTreeNode = null;
+        if (depTreeNode.getParent() != null) {
+            parentImpactTreeNode = addImpactPath(impactTreeNodes, (DependencyTree) depTreeNode.getParent());
+        }
+        ImpactTreeNode currImpactTreeNode = new ImpactTreeNode(depTreeNode.getComponentId());
+        if (parentImpactTreeNode != null) {
+            parentImpactTreeNode.getChildren().add(currImpactTreeNode);
+        }
+        impactTreeNodes.put(depTreeNode, currImpactTreeNode);
+        return currImpactTreeNode;
     }
 
     /**
@@ -167,14 +244,14 @@ public abstract class ScanManager extends ScanManagerBase {
                 if (project.isDisposed()) {
                     return;
                 }
-                if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
-                    getLog().warn("Xray server is not configured.");
+                if (!GlobalSettings.getInstance().areXrayCredentialsSet()) { // TODO: shouldn't this check be before the scan?
+                    log.warn("Xray server is not configured.");
                     return;
                 }
                 // Prevent multiple simultaneous scans
                 if (!scanInProgress.compareAndSet(false, true)) {
                     if (shouldToast) {
-                        getLog().info("Scan already in progress");
+                        log.info("Scan already in progress");
                     }
                     return;
                 }
@@ -236,7 +313,7 @@ public abstract class ScanManager extends ScanManagerBase {
                     latch.await();
                 }
             } catch (InterruptedException e) {
-                logError(getLog(), ExceptionUtils.getRootCauseMessage(e), e, shouldToast);
+                logError(log, ExceptionUtils.getRootCauseMessage(e), e, shouldToast);
             }
         };
     }
@@ -290,7 +367,6 @@ public abstract class ScanManager extends ScanManagerBase {
         componentsTree.addScanResults(fileTreeNodes);
     }
 
-    @Override
     protected void checkCanceled() {
         if (project.isOpen()) {
             // The project is closed if we are in test mode.
@@ -305,5 +381,17 @@ public abstract class ScanManager extends ScanManagerBase {
 
     public String getProjectPath() {
         return this.basePath;
+    }
+
+    public void setScanLogic(ScanLogic scanLogic) {
+        this.scanLogic = scanLogic;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public Log getLog() {
+        return log;
     }
 }

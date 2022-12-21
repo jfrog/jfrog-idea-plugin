@@ -2,7 +2,7 @@ package com.jfrog.ide.idea.ui.webview.model;
 
 import java.io.Serializable;
 
-public class ResearchInfo implements Serializable {
+public class ExtendedInformation implements Serializable {
 
     String shortDescription;
     String fullDescription;
@@ -10,10 +10,10 @@ public class ResearchInfo implements Serializable {
     String remediation;
     JfrogResearchSeverityReason[] jfrogResearchSeverityReason;
 
-    public ResearchInfo() {
+    public ExtendedInformation() {
     }
     
-    public ResearchInfo(String shortDescription, String fullDescription, String jfrogResearchSeverity, String remediation, JfrogResearchSeverityReason[] jfrogResearchSeverityReason) {
+    public ExtendedInformation(String shortDescription, String fullDescription, String jfrogResearchSeverity, String remediation, JfrogResearchSeverityReason[] jfrogResearchSeverityReason) {
         this.shortDescription = shortDescription;
         this.fullDescription = fullDescription;
         this.jfrogResearchSeverity = jfrogResearchSeverity;

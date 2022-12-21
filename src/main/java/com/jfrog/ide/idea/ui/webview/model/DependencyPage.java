@@ -4,23 +4,49 @@ import java.io.Serializable;
 
 public class DependencyPage implements Serializable {
     String id;
-    String name;
+    String component;
     String type;
     String version;
     String severity;
-    License license;
+    License[] license;
     String summary;
     String[] fixedVersion;
     String[] infectedVersion;
     Reference[] references;
     Cve cve;
     ImpactedPath impactedPath;
+    String[] watchName;
+    String edited;
+    ExtendedInformation extendedInformation;
 
-    public License getLicense() {
+    public DependencyPage() {
+    }
+
+    public DependencyPage(String id, String component, String type, String version, String severity, License license,
+                          String summary, String[] fixedVersion, String[] infectedVersion, Reference[] references,
+                          Cve cve, ImpactedPath impactedPath, String edited, ExtendedInformation extendedInformation) {
+        this.id = id;
+        this.component = component;
+        this.type = type;
+        this.version = version;
+        this.severity = severity;
+        // TODO: handle multiple licenses
+        this.license = new License[]{license};
+        this.summary = summary;
+        this.fixedVersion = fixedVersion;
+        this.infectedVersion = infectedVersion;
+        this.references = references;
+        this.cve = cve;
+        this.impactedPath = impactedPath;
+        this.edited = edited;
+        this.extendedInformation = extendedInformation;
+    }
+
+    public License[] getLicense() {
         return license;
     }
 
-    public void setLicense(License license) {
+    public void setLicense(License[] license) {
         this.license = license;
     }
 
@@ -56,33 +82,15 @@ public class DependencyPage implements Serializable {
         this.impactedPath = impactedPath;
     }
 
-    public ResearchInfo getResearchInfo() {
-        return researchInfo;
+    public ExtendedInformation getExtendedInformation() {
+        return extendedInformation;
     }
 
-    public void setResearchInfo(ResearchInfo researchInfo) {
-        this.researchInfo = researchInfo;
+    public void setExtendedInformation(ExtendedInformation extendedInformation) {
+        this.extendedInformation = extendedInformation;
     }
 
-    ResearchInfo researchInfo;
-    public DependencyPage() {
-    }
 
-    public DependencyPage(String id, String name, String type, String version, String severity, License license, String summary, String[] fixedVersion, String[] infectedVersion, Reference[] references, Cve cve, ImpactedPath impactedPath, ResearchInfo researchInfo) {
-        this.id = id;
-        this.name = name;
-        this.type = type;
-        this.version = version;
-        this.severity = severity;
-        this.license = license;
-        this.summary = summary;
-        this.fixedVersion = fixedVersion;
-        this.infectedVersion = infectedVersion;
-        this.references = references;
-        this.cve = cve;
-        this.impactedPath = impactedPath;
-        this.researchInfo = researchInfo;
-    }
 
     public Cve getCve() {
         return cve;
@@ -101,12 +109,12 @@ public class DependencyPage implements Serializable {
         this.id = id;
     }
     
-    public String getName() {
-        return name;
+    public String getComponent() {
+        return component;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setComponent(String component) {
+        this.component = component;
     }
 
     public String getType() {

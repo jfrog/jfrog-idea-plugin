@@ -136,14 +136,14 @@ public class ScanManagersFactory {
     /**
      * Create the scan logic according to the input type.
      *
-     * @param type      - GraphScan or ComponentSummary
-     * @param scanCache - The scan cache
-     * @param logger    - The logger
+     * @param type    - GraphScan or ComponentSummary
+     * @param pkgType - package type name
+     * @param logger  - logger
      * @return Xray scan logic
      */
     // TODO: unused parameters
-    private ScanLogic createScanLogic(Utils.ScanLogicType type, ScanCache scanCache, Logger logger) {
-        return new GraphScanLogic(logger);
+    private ScanLogic createScanLogic(Utils.ScanLogicType type, String pkgType, Logger logger) {
+        return new GraphScanLogic(pkgType, logger);
     }
 
     /**
@@ -250,10 +250,9 @@ public class ScanManagersFactory {
      * @param scanManagers - The scan managers before Xray scan
      * @throws IOException in case of any I/O error.
      */
-    private void setScanLogic(Map<Integer, ScanManager> scanManagers, Utils.ScanLogicType scanLogicType) throws IOException {
-        ScanCache scanCache = createXrayScanCache();
+    private void setScanLogic(Map<Integer, ScanManager> scanManagers, Utils.ScanLogicType scanLogicType) {
         Logger logger = Logger.getInstance();
-        scanManagers.values().forEach(manager -> manager.setScanLogic(createScanLogic(scanLogicType, scanCache, logger)));
+        scanManagers.values().forEach(manager -> manager.setScanLogic(createScanLogic(scanLogicType, manager.getPackageType(), logger)));
     }
 
     /**

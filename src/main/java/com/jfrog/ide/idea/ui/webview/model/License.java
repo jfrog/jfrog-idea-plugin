@@ -4,10 +4,13 @@ import java.io.Serializable;
 
 public class License implements Serializable {
     String name;
+    String link;
 
-    public License(String name) {
+    public License(String name, String link) {
         this.name = name;
+        this.link = link;
     }
+
     public License() {
     }
 
@@ -15,7 +18,7 @@ public class License implements Serializable {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getLink() {
+        return link;
     }
 }

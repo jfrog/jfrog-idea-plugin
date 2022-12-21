@@ -62,4 +62,9 @@ public class NpmScanManager extends SingleDescriptorScanManager {
     protected String getProjectPackageType() {
         return PKG_TYPE;
     }
+
+    @Override
+    public String getPackageType() {
+        return "npm";
+    }
 }

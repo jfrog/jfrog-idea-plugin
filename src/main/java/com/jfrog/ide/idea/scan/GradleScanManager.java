@@ -95,6 +95,11 @@ public class GradleScanManager extends SingleDescriptorScanManager {
     }
 
     @Override
+    public String getPackageType() {
+        return "Gradle";
+    }
+
+    @Override
     protected DependencyTree buildTree(boolean shouldToast) throws IOException {
         return gradleTreeBuilder.buildTree(getLog());
     }

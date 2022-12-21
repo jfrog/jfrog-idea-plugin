@@ -5,12 +5,12 @@ import java.io.Serializable;
 public class JfrogResearchSeverityReason implements Serializable {
     String name;
     String description;
-    String isPositive;
+    boolean isPositive;
 
     public JfrogResearchSeverityReason() {
     }
     
-    public JfrogResearchSeverityReason(String name, String description, String isPositive) {
+    public JfrogResearchSeverityReason(String name, String description, boolean isPositive) {
         this.name = name;
         this.description = description;
         this.isPositive = isPositive;
@@ -32,7 +32,7 @@ public class JfrogResearchSeverityReason implements Serializable {
         this.description = description;
     }
 
-    public String getIsPositive() {
+    public boolean getIsPositive() {
         return isPositive;
     }
 

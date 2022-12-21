@@ -11,12 +11,11 @@ function Container() {
 
     if (dependencyData?.id) {
         return (<>
-            {JSON.stringify(dependencyData)}
-            <App data={dependencyData} PanelType={pageType} />;
+            <App data={dependencyData} PanelType={pageType} />
             </>)
 
     }
-    return  <App  PanelType={PageType.Empty} />;
+    return <App PanelType={PageType.Empty} />;
 }
 
 export default Container;

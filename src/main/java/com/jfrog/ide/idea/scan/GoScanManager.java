@@ -72,4 +72,9 @@ public class GoScanManager extends SingleDescriptorScanManager {
     protected String getProjectPackageType() {
         return PKG_TYPE;
     }
+
+    @Override
+    public String getPackageType() {
+        return "Go";
+    }
 }
