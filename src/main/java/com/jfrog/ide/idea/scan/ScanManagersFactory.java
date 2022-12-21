@@ -60,10 +60,12 @@ public class ScanManagersFactory {
     /**
      * Start an Xray scan for all projects.
      *
+     * @param quickScan   - True to allow usage of the scan cache.
      * @param shouldToast - True to enable showing balloons logs.
      */
     public void startScan(boolean shouldToast) {
-        if (DumbService.isDumb(project)) { // If intellij is still indexing the project
+        public void startScan(boolean quickScan) {
+            if (DumbService.isDumb(project)) { // If intellij is still indexing the project
             return;
         }
 
@@ -84,13 +86,19 @@ public class ScanManagersFactory {
             NavigationService.clearNavigationMap(project);
             for (ScanManager scanManager : scanManagers.values()) {
                 try {
+                    // TODO: choose the right one
                     scanManager.asyncScanAndUpdateResults(shouldToast);
+                    scanManager.asyncScanAndUpdateResults(quickScan);
                 } catch (RuntimeException e) {
+                    // TODO: choose the right one
                     logError(Logger.getInstance(), "", e, shouldToast);
+                    logError(Logger.getInstance(), "", e, !quickScan);
                 }
             }
         } catch (IOException | RuntimeException | InterruptedException e) {
+            // TODO: choose the right one
             logError(Logger.getInstance(), "", e, shouldToast);
+            logError(Logger.getInstance(), "", e, !quickScan);
         } finally {
             executor.shutdown();
         }
