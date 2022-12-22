@@ -144,12 +144,27 @@ public class DependencyPage implements Serializable {
         this.severity = severity;
     }
 
-
     public String[] getFixedVersion() {
         return fixedVersion;
     }
 
     public void setFixedVersion(String[] fixedVersion) {
         this.fixedVersion = fixedVersion;
+    }
+
+    public String[] getWatchName() {
+        return watchName;
+    }
+
+    public void setWatchName(String[] watchName) {
+        this.watchName = watchName;
+    }
+
+    public String getEdited() {
+        return edited;
+    }
+
+    public void setEdited(String edited) {
+        this.edited = edited;
     }
 }

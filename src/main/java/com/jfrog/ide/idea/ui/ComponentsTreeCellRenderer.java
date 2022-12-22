@@ -38,18 +38,24 @@ public class ComponentsTreeCellRenderer extends HighlightableCellRenderer {
             cellRenderer.setIcon(IconUtils.load(StringUtils.lowerCase(scanTreeNode.getIcon())));
         }
 
-        if (!(scanTreeNode instanceof FileTreeNode)) {
-            setText(scanTreeNode.getTitle());
-            return cellRenderer;
+        String text = scanTreeNode.getTitle();
+        int subtitleLength = 0;
+        if (scanTreeNode.getSubtitle() != null && !scanTreeNode.getSubtitle().isEmpty()) {
+            subtitleLength = scanTreeNode.getSubtitle().length();
+            text += " " + scanTreeNode.getSubtitle();
         }
-        String text = scanTreeNode.getTitle() + " " + scanTreeNode.getSubtitle();
         setText(text);
 
-        // Set title style
-        cellRenderer.addHighlighter(0, scanTreeNode.getTitle().length(), titleStyle);
+        if (scanTreeNode instanceof FileTreeNode) {
+            // Set title style
+            cellRenderer.addHighlighter(0, scanTreeNode.getTitle().length(), titleStyle);
+        }
 
-        // Set subtitle style
-        cellRenderer.addHighlighter(text.length() - scanTreeNode.getSubtitle().length(), text.length(), subtitleStyle);
+        if (subtitleLength > 0) {
+            // Set subtitle style
+            cellRenderer.addHighlighter(text.length() - subtitleLength, text.length(), subtitleStyle);
+        }
+
         return cellRenderer;
     }
 }
