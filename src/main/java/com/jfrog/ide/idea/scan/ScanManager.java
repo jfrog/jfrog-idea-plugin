@@ -26,8 +26,6 @@ import com.jfrog.ide.common.tree.FileTreeNode;
 import com.jfrog.ide.common.tree.ImpactTreeNode;
 import com.jfrog.ide.common.tree.IssueNode;
 import com.jfrog.ide.common.tree.Issue;
-import com.jfrog.ide.common.tree.DescriptorFileTreeNode;
-import com.jfrog.ide.common.utils.ProjectsMap;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.log.Logger;
@@ -161,9 +159,9 @@ public abstract class ScanManager {
             List<FileTreeNode> fileTreeNodes = groupDependenciesToDescriptorNodes(results.values(), depMap);
             addScanResults(fileTreeNodes);
             // Source Code Scan
-            scanner.scanAndUpdate(indicator,shouldToast);
-            addScanResults(scanner.getResults());
-            
+            scanner.scanAndUpdate(indicator);
+            addScanResults(scanner.getResults(issuesMap));
+
         } catch (ProcessCanceledException e) {
             log.info("Xray scan was canceled");
         } catch (Exception e) {

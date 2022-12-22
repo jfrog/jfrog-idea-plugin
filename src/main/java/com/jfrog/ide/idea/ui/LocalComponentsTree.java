@@ -31,9 +31,6 @@ public class LocalComponentsTree extends ComponentsTree {
         return project.getService(LocalComponentsTree.class);
     }
 
-    public FileTreeNode getFileNode(@NotNull String filePath) {
-        return fileNodes.get(filePath);
-    }
 
     private void appendProjectWhenReady(FileTreeNode filteredRoot) {
         ApplicationManager.getApplication().invokeLater(() -> appendProject(filteredRoot));
