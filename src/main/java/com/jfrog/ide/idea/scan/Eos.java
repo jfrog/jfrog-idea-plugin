@@ -23,7 +23,7 @@ public class Eos extends ScanBinaryExecutor {
     }
 
     public List<JfrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder) throws IOException, InterruptedException {
-        return super.execute(inputFileBuilder, List.of("analyze", "config"),true);
+        return super.execute(inputFileBuilder, List.of("analyze", "config"));
     }
 
 }

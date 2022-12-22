@@ -44,18 +44,13 @@ public abstract class ScanBinaryExecutor {
 
     abstract List<JfrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder) throws IOException, InterruptedException;
 
-    protected List<JfrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args, boolean eos) throws IOException, InterruptedException {
+    protected List<JfrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args) throws IOException, InterruptedException {
         if (!shouldExecute) {
             return List.of();
         }
         var outputTempDir = Files.createTempDirectory("");
         var outputFilePath = Files.createTempFile(outputTempDir, "", ".sarif");
-        // TODO: Remove this variable after JFrog security team unified output and sarif-output vars
-        if (eos) {
-            inputFileBuilder.output(outputFilePath.toString());
-        } else {
-            inputFileBuilder.sarifOutput(outputFilePath.toString());
-        }
+        inputFileBuilder.output(outputFilePath.toString());
         inputFileBuilder.scanType(SCAN_TYPE);
         var inputFile = createTempRunInputFile(new ScansConfig(List.of(inputFileBuilder.Build())));
         args = new ArrayList<>(args);

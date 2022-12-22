@@ -23,7 +23,7 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
     }
 
     public List<JfrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder) throws IOException, InterruptedException {
-        return super.execute(inputFileBuilder, List.of("scan"),false);
+        return super.execute(inputFileBuilder, List.of("scan"));
     }
 
 }

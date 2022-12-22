@@ -44,7 +44,7 @@ public class ApplicabilityAnnotator extends ExternalAnnotator<PsiFile, List<Jfro
 
         try {
             warnings = executor.execute(new ScanConfig.Builder()
-                    .root(projectDir));
+                    .roots(List.of(projectDir)));
         } catch (IOException | InterruptedException | NullPointerException e) {
             logError(Logger.getInstance(), e.getMessage(), false);
         }
@@ -60,12 +60,11 @@ public class ApplicabilityAnnotator extends ExternalAnnotator<PsiFile, List<Jfro
             int endOffset = StringUtil.lineColToOffset(file.getText(), warning.getLineEnd(), warning.getColEnd());
 
             TextRange range = new TextRange(startOffset, endOffset);
-            holder.newAnnotation(HIGHLIGHT_TYPE, "\uD83D\uDC38 JFrog ["+warning.getName()+"]: "+ warning.getReason())
+            holder.newAnnotation(HIGHLIGHT_TYPE, "\uD83D\uDC38 JFrog [" + warning.getName() + "]: " + warning.getReason())
                     .range(range)
                     .create();
         });
     }
-
 
 
 }

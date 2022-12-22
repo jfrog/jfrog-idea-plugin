@@ -136,7 +136,7 @@ public abstract class ScanManager {
     /**
      * Scan and update dependency components.
      *
-     * @param indicator   - The progress indicator
+     * @param indicator - The progress indicator
      */
     private void scanAndUpdate(ProgressIndicator indicator) {
         try {
@@ -159,7 +159,7 @@ public abstract class ScanManager {
             List<FileTreeNode> fileTreeNodes = groupDependenciesToDescriptorNodes(results.values(), depMap);
             addScanResults(fileTreeNodes);
             // Source Code Scan
-            scanner.scanAndUpdate(indicator);
+            scanner.scanAndUpdate(indicator, List.copyOf(issuesMap.keySet()));
             addScanResults(scanner.getResults(issuesMap));
 
         } catch (ProcessCanceledException e) {
@@ -251,7 +251,7 @@ public abstract class ScanManager {
      * Launch async dependency scan.
      */
     void asyncScanAndUpdateResults() {
-            if (DumbService.isDumb(project)) { // If intellij is still indexing the project
+        if (DumbService.isDumb(project)) { // If intellij is still indexing the project
             return;
         }
         // The tasks run asynchronously. To make sure no more than 3 tasks are running concurrently,

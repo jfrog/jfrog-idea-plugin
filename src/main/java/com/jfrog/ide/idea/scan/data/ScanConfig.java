@@ -22,14 +22,8 @@ public class ScanConfig {
     private String language;
     @JsonProperty("roots")
     private List<String> roots;
-    // TODO temp var until those two fields unified.
-    @JsonProperty("root-directory")
-    private String root;
     @JsonProperty("output")
     private String output;
-    // TODO temp var until those two fields unified.
-    @JsonProperty("sarif-output-file")
-    private String sarifOutput;
     @JsonProperty("grep-disable")
     private Boolean grepDisable;
 
@@ -49,8 +43,6 @@ public class ScanConfig {
         this.output = builder.output;
         this.cves = builder.cves;
         this.grepDisable = builder.grepDisable;
-        this.root = builder.root;
-        this.sarifOutput = builder.sarifOutput;
         this.skippedFolders = builder.skippedFolders;
     }
 
@@ -107,11 +99,7 @@ public class ScanConfig {
         private String scanType;
         private String language;
         private List<String> roots;
-        // TODO temp var until those two fields unified.
-        private String root;
         private String output;
-        // TODO temp var until those two fields unified.
-        private String sarifOutput;
         private Boolean grepDisable;
         private List<String> cves;
         private List<String> skippedFolders;
@@ -134,18 +122,8 @@ public class ScanConfig {
             return this;
         }
 
-        public Builder root(String root) {
-            this.root = root;
-            return this;
-        }
-
         public Builder output(String output) {
             this.output = output;
-            return this;
-        }
-
-        public Builder sarifOutput(String sarifOutput) {
-            this.sarifOutput = sarifOutput;
             return this;
         }
 
