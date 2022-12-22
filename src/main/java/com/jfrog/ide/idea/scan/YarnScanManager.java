@@ -39,8 +39,8 @@ public class YarnScanManager extends SingleDescriptorScanManager {
     }
 
     @Override
-    protected DependencyTree buildTree(boolean shouldToast) throws IOException {
-        return yarnTreeBuilder.buildTree(getLog(), shouldToast);
+    protected DependencyTree buildTree() throws IOException {
+        return yarnTreeBuilder.buildTree(getLog());
     }
 
     @Override

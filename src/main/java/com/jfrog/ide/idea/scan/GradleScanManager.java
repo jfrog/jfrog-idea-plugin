@@ -100,7 +100,7 @@ public class GradleScanManager extends SingleDescriptorScanManager {
     }
 
     @Override
-    protected DependencyTree buildTree(boolean shouldToast) throws IOException {
+    protected DependencyTree buildTree() throws IOException {
         return gradleTreeBuilder.buildTree(getLog());
     }
 

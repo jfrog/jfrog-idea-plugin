@@ -39,8 +39,8 @@ public class NpmScanManager extends SingleDescriptorScanManager {
     }
 
     @Override
-    protected DependencyTree buildTree(boolean shouldToast) throws IOException {
-        return npmTreeBuilder.buildTree(getLog(), shouldToast);
+    protected DependencyTree buildTree() throws IOException {
+        return npmTreeBuilder.buildTree(getLog());
     }
 
     @Override

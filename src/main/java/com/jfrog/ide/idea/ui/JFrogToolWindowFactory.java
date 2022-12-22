@@ -22,8 +22,8 @@ public class JFrogToolWindowFactory implements ToolWindowFactory {
         boolean buildsConfigured = isBuildsConfigured(project);
         DumbService.getInstance(project).runWhenSmart(() -> {
             project.getService(JFrogToolWindow.class).initToolWindow(toolWindow, project, buildsConfigured);
-            ScanManagersFactory.getInstance(project).startScan(true);
-            CiManager.getInstance(project).asyncRefreshBuilds(true);
+            ScanManagersFactory.getInstance(project).startScan();
+            CiManager.getInstance(project).asyncRefreshBuilds();
         });
     }
 

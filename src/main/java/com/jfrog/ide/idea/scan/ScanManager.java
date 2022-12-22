@@ -94,10 +94,8 @@ public abstract class ScanManager {
     /**
      * Collect and return {@link Components} to be scanned by JFrog Xray.
      * Implementation should be project type specific.
-     *
-     * @param shouldToast - True if should pop up a balloon when an error occurs.
      */
-    protected abstract DependencyTree buildTree(boolean shouldToast) throws IOException;
+    protected abstract DependencyTree buildTree() throws IOException;
 
     /**
      * Return all project descriptors under the scan-manager project, which need to be inspected by the corresponding {@link LocalInspectionTool}.
@@ -128,13 +126,12 @@ public abstract class ScanManager {
     /**
      * Scan and update dependency components.
      *
-     * @param shouldToast - True to enable showing balloons logs.
      * @param indicator   - The progress indicator
      */
-    private void scanAndUpdate(boolean shouldToast, ProgressIndicator indicator) {
+    private void scanAndUpdate(ProgressIndicator indicator) {
         try {
             indicator.setText("1/3: Building dependency tree");
-            DependencyTree dependencyTree = buildTree(shouldToast);
+            DependencyTree dependencyTree = buildTree();
             indicator.setText("2/3: Xray scanning project dependencies");
             log.debug("Start scan for '" + projectName + "'.");
             Map<String, Artifact> results = scanLogic.scanArtifacts(dependencyTree, serverConfig, indicator, prefix, this::checkCanceled);
@@ -158,9 +155,7 @@ public abstract class ScanManager {
         } catch (ProcessCanceledException e) {
             log.info("Xray scan was canceled");
         } catch (Exception e) {
-            // TODO: choose which to remain
-            logError(getLog(), "Xray Scan failed", e, !quickScan);
-            logError(log, "Xray Scan failed", e, shouldToast);
+            logError(log, "Xray Scan failed", e, true);
         } finally {
             scanInProgress.set(false);
             sendUsageReport();
@@ -233,9 +228,7 @@ public abstract class ScanManager {
     /**
      * Launch async dependency scan.
      */
-    void asyncScanAndUpdateResults(boolean shouldToast) {
-    void asyncScanAndUpdateResults(boolean quickScan) {
-
+    void asyncScanAndUpdateResults() {
             if (DumbService.isDumb(project)) { // If intellij is still indexing the project
             return;
         }
@@ -254,13 +247,10 @@ public abstract class ScanManager {
                 }
                 // Prevent multiple simultaneous scans
                 if (!scanInProgress.compareAndSet(false, true)) {
-                    if (shouldToast) {
-                    if (!quickScan) {
-                        log.info("Scan already in progress");
-                    }
+                    log.info("Scan already in progress");
                     return;
                 }
-                scanAndUpdate(quickScan, shouldToast, new ProgressIndicatorImpl(indicator));
+                scanAndUpdate(new ProgressIndicatorImpl(indicator));
             }
 
             @Override
@@ -270,14 +260,10 @@ public abstract class ScanManager {
         };
         if (executor.isShutdown() || executor.isTerminated()) {
             // Scan initiated by a change in the project descriptor
-            createRunnable(scanAndUpdateTask, null, shouldToast).run();
-            createRunnable(scanAndUpdateTask, null, quickScan).run();
+            createRunnable(scanAndUpdateTask, null).run();
         } else {
             // Scan initiated by opening IntelliJ, by user, or by changing the configuration
-                // TODO: choose
-            executor.submit(createRunnable(scanAndUpdateTask, latch, shouldToast));
-                executor.submit(createRunnable(scanAndUpdateTask, latch, quickScan));
-
+            executor.submit(createRunnable(scanAndUpdateTask, latch));
         }
     }
 
@@ -298,8 +284,6 @@ public abstract class ScanManager {
         return "JFrog Xray scanning " + StringUtils.defaultIfBlank(relativePath, project.getName());
     }
 
-    kkk
-    // TODO: fix comment!!
     /**
      * Create a runnable to be submitted to the executor service, or run directly.
      *
@@ -307,11 +291,8 @@ public abstract class ScanManager {
      * @param latch             - The countdown latch, which makes sure the executor service doesn't get more than 3 tasks.
      *                          If null, the scan was initiated by a change in the project descriptor and the executor
      *                          service is terminated. In this case, there is no requirement to wait.
-     * @param shouldToast       - True to enable showing balloons logs.
-     * @param quickScan         - Quick or full scan
      */
-    private Runnable createRunnable(Task.Backgroundable scanAndUpdateTask, CountDownLatch latch, boolean quickScan) {
-    private Runnable createRunnable(Task.Backgroundable scanAndUpdateTask, CountDownLatch latch, boolean shouldToast) {
+    private Runnable createRunnable(Task.Backgroundable scanAndUpdateTask, CountDownLatch latch) {
         return () -> {
             // The progress manager is only good for foreground threads.
             if (SwingUtilities.isEventDispatchThread()) {
@@ -326,9 +307,7 @@ public abstract class ScanManager {
                     latch.await();
                 }
             } catch (InterruptedException e) {
-                // TODO: choose which to remain
-                logError(log, ExceptionUtils.getRootCauseMessage(e), e, shouldToast);
-                logError(getLog(), ExceptionUtils.getRootCauseMessage(e), e, !quickScan);
+                logError(log, ExceptionUtils.getRootCauseMessage(e), e, true);
             }
         };
     }

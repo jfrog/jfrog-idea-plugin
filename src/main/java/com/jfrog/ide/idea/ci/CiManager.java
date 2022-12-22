@@ -68,7 +68,7 @@ public class CiManager extends CiManagerBase implements Disposable {
         return project.getService(CiManager.class);
     }
 
-    public void asyncRefreshBuilds(boolean shouldToast) {
+    public void asyncRefreshBuilds() {
         if (!scanPreconditionsMet()) {
             return;
         }
@@ -82,12 +82,12 @@ public class CiManager extends CiManagerBase implements Disposable {
                     project.getMessageBus().syncPublisher(ApplicationEvents.ON_SCAN_CI_STARTED).update();
                     String buildsPattern = propertiesComponent.getValue(BUILDS_PATTERN_KEY);
                     buildCiTree(buildsPattern, GlobalSettings.getInstance().getServerConfig().getProject(),
-                            new ProgressIndicatorImpl(indicator), () -> checkCanceled(indicator), shouldToast);
+                            new ProgressIndicatorImpl(indicator), () -> checkCanceled(indicator));
                     CiFilterManager.getInstance(project).collectBuildsInformation(root);
                     loadFirstBuild();
                     sendUsageReport();
                 } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
-                    logError(Logger.getInstance(), "Failed to refresh builds", e, shouldToast);
+                    logError(Logger.getInstance(), "Failed to refresh builds", e, true);
                 } finally {
                     scanInProgress.set(false);
                 }
@@ -186,8 +186,8 @@ public class CiManager extends CiManagerBase implements Disposable {
     }
 
     private void registerOnChangeHandlers() {
-        appBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () -> asyncRefreshBuilds(true));
-        projectBusConnection.subscribe(ApplicationEvents.ON_BUILDS_CONFIGURATION_CHANGE, () -> asyncRefreshBuilds(true));
+        appBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () -> asyncRefreshBuilds());
+        projectBusConnection.subscribe(ApplicationEvents.ON_BUILDS_CONFIGURATION_CHANGE, () -> asyncRefreshBuilds());
         projectBusConnection.subscribe(BuildEvents.ON_SELECTED_BUILD, this::loadBuild);
     }
 

@@ -53,14 +53,14 @@ public class PypiScanManager extends SingleDescriptorScanManager {
     }
 
     @Override
-    protected DependencyTree buildTree(boolean shouldToast) {
+    protected DependencyTree buildTree() {
         DependencyTree rootNode = createRootNode();
         initDependencyNode(rootNode, pythonSdk.getName(), "", pythonSdk.getHomePath(), "pypi");
 
         try {
             rootNode.add(createSdkDependencyTree(pythonSdk));
         } catch (ExecutionException e) {
-            logError(getLog(), "", e, shouldToast);
+            logError(getLog(), "", e, true);
         }
         if (rootNode.getChildren().size() == 1) {
             rootNode = (DependencyTree) rootNode.getChildAt(0);

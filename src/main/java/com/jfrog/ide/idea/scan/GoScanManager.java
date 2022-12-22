@@ -49,7 +49,7 @@ public class GoScanManager extends SingleDescriptorScanManager {
     }
 
     @Override
-    protected DependencyTree buildTree(boolean shouldToast) throws IOException {
+    protected DependencyTree buildTree() throws IOException {
         return goTreeBuilder.buildTree();
     }
 
