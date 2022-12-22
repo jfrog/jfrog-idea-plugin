@@ -24,7 +24,8 @@ public class DependencyPage implements Serializable {
 
     public DependencyPage(String id, String component, String type, String version, String severity, License license,
                           String summary, String[] fixedVersion, String[] infectedVersion, Reference[] references,
-                          Cve cve, ImpactedPath impactedPath, String edited, ExtendedInformation extendedInformation) {
+                          Cve cve, ImpactedPath impactedPath, String[] watchName, String edited,
+                          ExtendedInformation extendedInformation) {
         this.id = id;
         this.component = component;
         this.type = type;
@@ -38,6 +39,7 @@ public class DependencyPage implements Serializable {
         this.references = references;
         this.cve = cve;
         this.impactedPath = impactedPath;
+        this.watchName = watchName;
         this.edited = edited;
         this.extendedInformation = extendedInformation;
     }

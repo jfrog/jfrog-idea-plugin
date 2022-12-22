@@ -227,6 +227,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
                         issue.getCve().getCvssV3Vector()
                 ),
                 convertImpactPath(dependency.getImpactPaths()),
+                issue.getWatchNames().toArray(new String[0]),
                 issue.getLastUpdated(),
                 extendedInformation
         );
@@ -240,13 +241,14 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
                 dependency.getGeneralInfo().getPkgType(),
                 dependency.getGeneralInfo().getVersion(),
                 license.getSeverity().name(),
-                null,
+                new License("", ""), // TODO: remove after
                 null,
                 null,
                 new String[0],
                 new Reference[]{new Reference("www.reference.com", "reference-name")},
                 new Cve(null, null, null, null, null),
                 convertImpactPath(dependency.getImpactPaths()),
+                license.getWatchNames().toArray(new String[0]),
                 license.getLastUpdated(),
                 null
         );
