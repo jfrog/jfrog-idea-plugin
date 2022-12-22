@@ -1,13 +1,14 @@
 package com.jfrog.ide.idea.ui;
 
-import com.intellij.ui.render.LabelBasedRenderer;
+import com.intellij.openapi.editor.markup.TextAttributes;
+import com.intellij.ui.HighlightableCellRenderer;
+import com.intellij.util.ui.JBFont;
 import com.intellij.util.ui.UIUtil;
+import com.jfrog.ide.common.tree.FileTreeNode;
+import com.jfrog.ide.common.tree.SubtitledTreeNode;
 import com.jfrog.ide.idea.ui.utils.IconUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.build.extractor.scan.DependencyTree;
-import org.jfrog.build.extractor.scan.Issue;
-import org.jfrog.build.extractor.scan.Severity;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,27 +16,40 @@ import java.awt.*;
 /**
  * Created by Yahav Itzhak on 22 Nov 2017.
  */
-public class ComponentsTreeCellRenderer extends LabelBasedRenderer.Tree {
+public class ComponentsTreeCellRenderer extends HighlightableCellRenderer {
+
+    private static final TextAttributes titleStyle = new TextAttributes();
+    private static final TextAttributes subtitleStyle = new TextAttributes();
+
+    static {
+        titleStyle.setFontType(JBFont.BOLD);
+        subtitleStyle.setForegroundColor(UIUtil.getInactiveTextColor());
+    }
 
     @Override
     public @NotNull Component getTreeCellRendererComponent(@NotNull JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-        LabelBasedRenderer.Tree cellRenderer = (LabelBasedRenderer.Tree) super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
-        DependencyTree scanTreeNode = (DependencyTree) value;
-
-        // Set icon
-        Issue topIssue = scanTreeNode.getTopIssue();
-        cellRenderer.setIcon(IconUtils.load(StringUtils.lowerCase(topIssue.getSeverity().toString())));
-
-        // Add issues-count to tree node. We make sure the issues count is shown only on trees scanned by Xray,
-        // by showing it only when the severity level is higher than unknown.
-        if (scanTreeNode.getIssueCount() > 0 && topIssue.getSeverity().isHigherThan(Severity.Unknown)) {
-            cellRenderer.setText(scanTreeNode + " (" + scanTreeNode.getIssueCount() + ")");
+        HighlightableCellRenderer cellRenderer = (HighlightableCellRenderer) super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+        if (!(value instanceof SubtitledTreeNode)) {
+            return this;
         }
 
-        if (!scanTreeNode.getViolatedLicenses().isEmpty()) {
-            cellRenderer.setForeground(UIUtil.getErrorForeground());
+        SubtitledTreeNode scanTreeNode = (SubtitledTreeNode) value;
+        if (scanTreeNode.getIcon() != null) {
+            cellRenderer.setIcon(IconUtils.load(StringUtils.lowerCase(scanTreeNode.getIcon())));
         }
 
+        if (!(scanTreeNode instanceof FileTreeNode)) {
+            setText(scanTreeNode.getTitle());
+            return cellRenderer;
+        }
+        String text = scanTreeNode.getTitle() + " " + scanTreeNode.getSubtitle();
+        setText(text);
+
+        // Set title style
+        cellRenderer.addHighlighter(0, scanTreeNode.getTitle().length(), titleStyle);
+
+        // Set subtitle style
+        cellRenderer.addHighlighter(text.length() - scanTreeNode.getSubtitle().length(), text.length(), subtitleStyle);
         return cellRenderer;
     }
 }
