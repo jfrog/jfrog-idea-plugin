@@ -36,40 +36,6 @@ public class SourceCodeScannerManager {
         this.codeBaseLanguage = codeBaseLanguage.toString().toLowerCase();
     }
 
-//    public void asyncScanAndUpdateResults() {
-//        if (DumbService.isDumb(project)) { // If intellij is still indexing the project
-//            return;
-//        }
-//        Task.Backgroundable scanAndUpdateTask = new Task.Backgroundable(null, "JFrog source code scanning:") {
-//            @Override
-//            public void run(@NotNull com.intellij.openapi.progress.ProgressIndicator indicator) {
-//                if (project.isDisposed()) {
-//                    return;
-//                }
-//                // Prevent multiple simultaneous scans
-//                if (!scanInProgress.compareAndSet(false, true)) {
-//                    return;
-//                }
-//                try {
-//                    scanAndUpdate(new ProgressIndicatorImpl(indicator), issuesMap.keySet());
-//                } catch (IOException | InterruptedException | NullPointerException e) {
-//                    logError(Logger.getInstance(), "Failed to scan source code", e, true);
-//                } finally {
-//                    scanInProgress.set(false);
-//                    indicator.setFraction(1);
-//                }
-//            }
-//
-//        };
-//        // The progress manager is only good for foreground threads.
-//        if (SwingUtilities.isEventDispatchThread()) {
-//            ProgressManager.getInstance().run(scanAndUpdateTask);
-//        } else {
-//            // Run the scan task when the thread is in the foreground.
-//            ApplicationManager.getApplication().invokeLater(() -> ProgressManager.getInstance().run(scanAndUpdateTask));
-//        }
-//    }
-
     /**
      * Source code scan and update components.
      *
@@ -126,5 +92,9 @@ public class SourceCodeScannerManager {
             }
         }
         return new ArrayList<>(results.values());
+    }
+
+    public List<JfrogSecurityWarning> getScanResults() {
+        return scanResults != null ? new ArrayList<>(scanResults) : new ArrayList<>();
     }
 }

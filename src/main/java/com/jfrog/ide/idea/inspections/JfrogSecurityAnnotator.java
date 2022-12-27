@@ -7,24 +7,17 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiFile;
-import com.jfrog.ide.idea.log.Logger;
-import com.jfrog.ide.idea.scan.ApplicabilityScannerExecutor;
-import com.jfrog.ide.idea.scan.data.ScanConfig;
+import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.jfrog.ide.common.log.Utils.logError;
 
 /**
  * @author Tal Arian
  */
-public class ApplicabilityAnnotator extends ExternalAnnotator<PsiFile, List<JfrogSecurityWarning>> {
-    private final ApplicabilityScannerExecutor executor = new ApplicabilityScannerExecutor();
-
+public class JfrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<JfrogSecurityWarning>> {
 
     @NotNull
     private static final HighlightSeverity HIGHLIGHT_TYPE = HighlightSeverity.WARNING;
@@ -32,23 +25,16 @@ public class ApplicabilityAnnotator extends ExternalAnnotator<PsiFile, List<Jfro
     @Nullable
     @Override
     public PsiFile collectInformation(@NotNull PsiFile file, @NotNull Editor editor, boolean hasErrors) {
-        //
         return file;
     }
 
     @Nullable
     @Override
     public List<JfrogSecurityWarning> doAnnotate(PsiFile file) {
-        List<JfrogSecurityWarning> warnings = new ArrayList<>();
-        String projectDir = file.getProject().getBasePath();
-
-        try {
-            warnings = executor.execute(new ScanConfig.Builder()
-                    .roots(List.of(projectDir)));
-        } catch (IOException | InterruptedException | NullPointerException e) {
-            logError(Logger.getInstance(), e.getMessage(), false);
-        }
-        return warnings;
+        var scanManager = ScanManagersFactory.getScanManagers(file.getProject()).stream()
+                .findAny()
+                .orElse(null);
+        return scanManager != null ? scanManager.getSourceCodeScanResults() : new ArrayList<>();
     }
 
     @Override
@@ -68,8 +54,3 @@ public class ApplicabilityAnnotator extends ExternalAnnotator<PsiFile, List<Jfro
 
 
 }
-
-//            PackageFileFinder packageFileFinder = new PackageFileFinder(Set.of(projectDirPath), projectDirPath,
-//                    "", new NullLog());
-
-//     .skippedFolders(packageFileFinder.getExcludedDirectories())
