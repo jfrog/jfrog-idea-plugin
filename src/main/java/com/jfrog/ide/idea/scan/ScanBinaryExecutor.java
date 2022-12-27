@@ -68,7 +68,7 @@ public abstract class ScanBinaryExecutor {
         return parseOutputSarif(outputFilePath);
     }
 
-    private List<JfrogSecurityWarning> parseOutputSarif(Path outputFile) throws IOException {
+    protected List<JfrogSecurityWarning> parseOutputSarif(Path outputFile) throws IOException {
         List<JfrogSecurityWarning> warnings = new ArrayList<>();
         ObjectMapper om = new ObjectMapper(new JsonFactory());
         Output output = om.readValue(outputFile.toFile(), Output.class);
@@ -76,7 +76,7 @@ public abstract class ScanBinaryExecutor {
         return warnings;
     }
 
-    private Path createTempRunInputFile(ScansConfig scanInput) throws IOException {
+    protected Path createTempRunInputFile(ScansConfig scanInput) throws IOException {
         ObjectMapper om = new ObjectMapper(new YAMLFactory());
         var tempDir = Files.createTempDirectory("");
         var inputPath = Files.createTempFile(tempDir, "", ".yaml");

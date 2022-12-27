@@ -88,6 +88,7 @@ public abstract class ScanManager {
         this.executor = executor;
         this.basePath = basePath;
         this.project = project;
+        this.scanner = new SourceCodeScannerManager(project,"");
     }
 
     void setExecutor(ExecutorService executor) {
