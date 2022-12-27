@@ -57,30 +57,6 @@ public class Output {
     }
 
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Output.class.getName()).append('@').append(Integer.toHexString(System.identityHashCode(this))).append('[');
-        sb.append("runs");
-        sb.append('=');
-        sb.append(((this.runs == null)?"<null>":this.runs));
-        sb.append(',');
-        sb.append("version");
-        sb.append('=');
-        sb.append(((this.version == null)?"<null>":this.version));
-        sb.append(',');
-        sb.append("$schema");
-        sb.append('=');
-        sb.append(((this.$schema == null)?"<null>":this.$schema));
-        sb.append(',');
-        if (sb.charAt((sb.length()- 1)) == ',') {
-            sb.setCharAt((sb.length()- 1), ']');
-        } else {
-            sb.append(']');
-        }
-        return sb.toString();
-    }
-
-    @Override
     public int hashCode() {
         int result = 1;
         result = ((result* 31)+((this.$schema == null)? 0 :this.$schema.hashCode()));

@@ -31,22 +31,6 @@ public class ThreadFlow {
     }
 
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(ThreadFlow.class.getName()).append('@').append(Integer.toHexString(System.identityHashCode(this))).append('[');
-        sb.append("locations");
-        sb.append('=');
-        sb.append(((this.locations == null) ? "<null>" : this.locations));
-        sb.append(',');
-        if (sb.charAt((sb.length() - 1)) == ',') {
-            sb.setCharAt((sb.length() - 1), ']');
-        } else {
-            sb.append(']');
-        }
-        return sb.toString();
-    }
-
-    @Override
     public int hashCode() {
         int result = 1;
         result = ((result * 31) + ((this.locations == null) ? 0 : this.locations.hashCode()));

@@ -8,9 +8,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import javax.annotation.processing.Generated;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-        "driver"
-})
+@JsonPropertyOrder({"driver"})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Generated("jsonschema2pojo")
 public class Tool {
@@ -26,22 +24,6 @@ public class Tool {
     @JsonProperty("driver")
     public void setDriver(Driver driver) {
         this.driver = driver;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Tool.class.getName()).append('@').append(Integer.toHexString(System.identityHashCode(this))).append('[');
-        sb.append("driver");
-        sb.append('=');
-        sb.append(((this.driver == null) ? "<null>" : this.driver));
-        sb.append(',');
-        if (sb.charAt((sb.length() - 1)) == ',') {
-            sb.setCharAt((sb.length() - 1), ']');
-        } else {
-            sb.append(']');
-        }
-        return sb.toString();
     }
 
     @Override

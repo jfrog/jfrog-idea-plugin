@@ -29,22 +29,6 @@ public class Location {
     }
 
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Location.class.getName()).append('@').append(Integer.toHexString(System.identityHashCode(this))).append('[');
-        sb.append("physicalLocation");
-        sb.append('=');
-        sb.append(((this.physicalLocation == null)?"<null>":this.physicalLocation));
-        sb.append(',');
-        if (sb.charAt((sb.length()- 1)) == ',') {
-            sb.setCharAt((sb.length()- 1), ']');
-        } else {
-            sb.append(']');
-        }
-        return sb.toString();
-    }
-
-    @Override
     public int hashCode() {
         int result = 1;
         result = ((result* 31)+((this.physicalLocation == null)? 0 :this.physicalLocation.hashCode()));

@@ -9,11 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-    "tool",
-    "invocations",
-    "results"
-})
+@JsonPropertyOrder({"tool", "invocations", "results"})
 @Generated("jsonschema2pojo")
 public class Run {
 
@@ -55,35 +51,11 @@ public class Run {
     }
 
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Run.class.getName()).append('@').append(Integer.toHexString(System.identityHashCode(this))).append('[');
-        sb.append("tool");
-        sb.append('=');
-        sb.append(((this.tool == null)?"<null>":this.tool));
-        sb.append(',');
-        sb.append("invocations");
-        sb.append('=');
-        sb.append(((this.invocations == null)?"<null>":this.invocations));
-        sb.append(',');
-        sb.append("results");
-        sb.append('=');
-        sb.append(((this.results == null)?"<null>":this.results));
-        sb.append(',');
-        if (sb.charAt((sb.length()- 1)) == ',') {
-            sb.setCharAt((sb.length()- 1), ']');
-        } else {
-            sb.append(']');
-        }
-        return sb.toString();
-    }
-
-    @Override
     public int hashCode() {
         int result = 1;
-        result = ((result* 31)+((this.results == null)? 0 :this.results.hashCode()));
-        result = ((result* 31)+((this.tool == null)? 0 :this.tool.hashCode()));
-        result = ((result* 31)+((this.invocations == null)? 0 :this.invocations.hashCode()));
+        result = ((result * 31) + ((this.results == null) ? 0 : this.results.hashCode()));
+        result = ((result * 31) + ((this.tool == null) ? 0 : this.tool.hashCode()));
+        result = ((result * 31) + ((this.invocations == null) ? 0 : this.invocations.hashCode()));
         return result;
     }
 
@@ -96,7 +68,7 @@ public class Run {
             return false;
         }
         Run rhs = ((Run) other);
-        return ((((this.results == rhs.results)||((this.results!= null)&&this.results.equals(rhs.results)))&&((this.tool == rhs.tool)||((this.tool!= null)&&this.tool.equals(rhs.tool))))&&((this.invocations == rhs.invocations)||((this.invocations!= null)&&this.invocations.equals(rhs.invocations))));
+        return ((((this.results == rhs.results) || ((this.results != null) && this.results.equals(rhs.results))) && ((this.tool == rhs.tool) || ((this.tool != null) && this.tool.equals(rhs.tool)))) && ((this.invocations == rhs.invocations) || ((this.invocations != null) && this.invocations.equals(rhs.invocations))));
     }
 
 }

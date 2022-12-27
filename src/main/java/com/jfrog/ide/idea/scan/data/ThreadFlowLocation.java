@@ -8,9 +8,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import javax.annotation.processing.Generated;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-        "location"
-})
+@JsonPropertyOrder({"location"})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Generated("jsonschema2pojo")
 public class ThreadFlowLocation {
@@ -26,22 +24,6 @@ public class ThreadFlowLocation {
     @JsonProperty("location")
     public void setLocation(Location location) {
         this.location = location;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(ThreadFlowLocation.class.getName()).append('@').append(Integer.toHexString(System.identityHashCode(this))).append('[');
-        sb.append("location");
-        sb.append('=');
-        sb.append(((this.location == null) ? "<null>" : this.location));
-        sb.append(',');
-        if (sb.charAt((sb.length() - 1)) == ',') {
-            sb.setCharAt((sb.length() - 1), ']');
-        } else {
-            sb.append(']');
-        }
-        return sb.toString();
     }
 
     @Override

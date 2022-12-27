@@ -11,7 +11,7 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "threadFlows"
+        "threadFlows"
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Generated("jsonschema2pojo")
@@ -31,25 +31,9 @@ public class CodeFlow {
     }
 
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(CodeFlow.class.getName()).append('@').append(Integer.toHexString(System.identityHashCode(this))).append('[');
-        sb.append("threadFlows");
-        sb.append('=');
-        sb.append(((this.threadFlows == null)?"<null>":this.threadFlows));
-        sb.append(',');
-        if (sb.charAt((sb.length()- 1)) == ',') {
-            sb.setCharAt((sb.length()- 1), ']');
-        } else {
-            sb.append(']');
-        }
-        return sb.toString();
-    }
-
-    @Override
     public int hashCode() {
         int result = 1;
-        result = ((result* 31)+((this.threadFlows == null)? 0 :this.threadFlows.hashCode()));
+        result = ((result * 31) + ((this.threadFlows == null) ? 0 : this.threadFlows.hashCode()));
         return result;
     }
 
@@ -62,7 +46,7 @@ public class CodeFlow {
             return false;
         }
         CodeFlow rhs = ((CodeFlow) other);
-        return ((this.threadFlows == rhs.threadFlows)||((this.threadFlows!= null)&&this.threadFlows.equals(rhs.threadFlows)));
+        return ((this.threadFlows == rhs.threadFlows) || ((this.threadFlows != null) && this.threadFlows.equals(rhs.threadFlows)));
     }
 
 }

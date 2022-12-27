@@ -9,7 +9,7 @@ import javax.annotation.processing.Generated;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "text"
+        "text"
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Generated("jsonschema2pojo")
@@ -29,25 +29,9 @@ public class Message {
     }
 
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Message.class.getName()).append('@').append(Integer.toHexString(System.identityHashCode(this))).append('[');
-        sb.append("text");
-        sb.append('=');
-        sb.append(((this.text == null)?"<null>":this.text));
-        sb.append(',');
-        if (sb.charAt((sb.length()- 1)) == ',') {
-            sb.setCharAt((sb.length()- 1), ']');
-        } else {
-            sb.append(']');
-        }
-        return sb.toString();
-    }
-
-    @Override
     public int hashCode() {
         int result = 1;
-        result = ((result* 31)+((this.text == null)? 0 :this.text.hashCode()));
+        result = ((result * 31) + ((this.text == null) ? 0 : this.text.hashCode()));
         return result;
     }
 
@@ -60,7 +44,7 @@ public class Message {
             return false;
         }
         Message rhs = ((Message) other);
-        return ((this.text == rhs.text)||((this.text!= null)&&this.text.equals(rhs.text)));
+        return ((this.text == rhs.text) || ((this.text != null) && this.text.equals(rhs.text)));
     }
 
 }

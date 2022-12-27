@@ -8,10 +8,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import javax.annotation.processing.Generated;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-    "artifactLocation",
-    "region"
-})
+@JsonPropertyOrder({"artifactLocation", "region"})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Generated("jsonschema2pojo")
 public class PhysicalLocation {
@@ -42,30 +39,10 @@ public class PhysicalLocation {
     }
 
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(PhysicalLocation.class.getName()).append('@').append(Integer.toHexString(System.identityHashCode(this))).append('[');
-        sb.append("artifactLocation");
-        sb.append('=');
-        sb.append(((this.artifactLocation == null)?"<null>":this.artifactLocation));
-        sb.append(',');
-        sb.append("region");
-        sb.append('=');
-        sb.append(((this.region == null)?"<null>":this.region));
-        sb.append(',');
-        if (sb.charAt((sb.length()- 1)) == ',') {
-            sb.setCharAt((sb.length()- 1), ']');
-        } else {
-            sb.append(']');
-        }
-        return sb.toString();
-    }
-
-    @Override
     public int hashCode() {
         int result = 1;
-        result = ((result* 31)+((this.region == null)? 0 :this.region.hashCode()));
-        result = ((result* 31)+((this.artifactLocation == null)? 0 :this.artifactLocation.hashCode()));
+        result = ((result * 31) + ((this.region == null) ? 0 : this.region.hashCode()));
+        result = ((result * 31) + ((this.artifactLocation == null) ? 0 : this.artifactLocation.hashCode()));
         return result;
     }
 
@@ -78,7 +55,7 @@ public class PhysicalLocation {
             return false;
         }
         PhysicalLocation rhs = ((PhysicalLocation) other);
-        return (((this.region == rhs.region)||((this.region!= null)&&this.region.equals(rhs.region)))&&((this.artifactLocation == rhs.artifactLocation)||((this.artifactLocation!= null)&&this.artifactLocation.equals(rhs.artifactLocation))));
+        return (((this.region == rhs.region) || ((this.region != null) && this.region.equals(rhs.region))) && ((this.artifactLocation == rhs.artifactLocation) || ((this.artifactLocation != null) && this.artifactLocation.equals(rhs.artifactLocation))));
     }
 
 }

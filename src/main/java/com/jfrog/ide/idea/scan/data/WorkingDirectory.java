@@ -8,9 +8,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import javax.annotation.processing.Generated;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-        "uri"
-})
+@JsonPropertyOrder({"uri"})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Generated("jsonschema2pojo")
 public class WorkingDirectory {
@@ -26,22 +24,6 @@ public class WorkingDirectory {
     @JsonProperty("uri")
     public void setUri(String uri) {
         this.uri = uri;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(WorkingDirectory.class.getName()).append('@').append(Integer.toHexString(System.identityHashCode(this))).append('[');
-        sb.append("uri");
-        sb.append('=');
-        sb.append(((this.uri == null) ? "<null>" : this.uri));
-        sb.append(',');
-        if (sb.charAt((sb.length() - 1)) == ',') {
-            sb.setCharAt((sb.length() - 1), ']');
-        } else {
-            sb.append(']');
-        }
-        return sb.toString();
     }
 
     @Override

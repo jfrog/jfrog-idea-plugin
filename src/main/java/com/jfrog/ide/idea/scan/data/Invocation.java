@@ -10,11 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-    "executionSuccessful",
-    "arguments",
-    "workingDirectory"
-})
+@JsonPropertyOrder({"executionSuccessful", "arguments", "workingDirectory"})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Generated("jsonschema2pojo")
 public class Invocation {
@@ -57,35 +53,11 @@ public class Invocation {
     }
 
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Invocation.class.getName()).append('@').append(Integer.toHexString(System.identityHashCode(this))).append('[');
-        sb.append("executionSuccessful");
-        sb.append('=');
-        sb.append(((this.executionSuccessful == null)?"<null>":this.executionSuccessful));
-        sb.append(',');
-        sb.append("arguments");
-        sb.append('=');
-        sb.append(((this.arguments == null)?"<null>":this.arguments));
-        sb.append(',');
-        sb.append("workingDirectory");
-        sb.append('=');
-        sb.append(((this.workingDirectory == null)?"<null>":this.workingDirectory));
-        sb.append(',');
-        if (sb.charAt((sb.length()- 1)) == ',') {
-            sb.setCharAt((sb.length()- 1), ']');
-        } else {
-            sb.append(']');
-        }
-        return sb.toString();
-    }
-
-    @Override
     public int hashCode() {
         int result = 1;
-        result = ((result* 31)+((this.arguments == null)? 0 :this.arguments.hashCode()));
-        result = ((result* 31)+((this.executionSuccessful == null)? 0 :this.executionSuccessful.hashCode()));
-        result = ((result* 31)+((this.workingDirectory == null)? 0 :this.workingDirectory.hashCode()));
+        result = ((result * 31) + ((this.arguments == null) ? 0 : this.arguments.hashCode()));
+        result = ((result * 31) + ((this.executionSuccessful == null) ? 0 : this.executionSuccessful.hashCode()));
+        result = ((result * 31) + ((this.workingDirectory == null) ? 0 : this.workingDirectory.hashCode()));
         return result;
     }
 
@@ -98,7 +70,7 @@ public class Invocation {
             return false;
         }
         Invocation rhs = ((Invocation) other);
-        return ((((this.arguments == rhs.arguments)||((this.arguments!= null)&&this.arguments.equals(rhs.arguments)))&&((this.executionSuccessful == rhs.executionSuccessful)||((this.executionSuccessful!= null)&&this.executionSuccessful.equals(rhs.executionSuccessful))))&&((this.workingDirectory == rhs.workingDirectory)||((this.workingDirectory!= null)&&this.workingDirectory.equals(rhs.workingDirectory))));
+        return ((((this.arguments == rhs.arguments) || ((this.arguments != null) && this.arguments.equals(rhs.arguments))) && ((this.executionSuccessful == rhs.executionSuccessful) || ((this.executionSuccessful != null) && this.executionSuccessful.equals(rhs.executionSuccessful)))) && ((this.workingDirectory == rhs.workingDirectory) || ((this.workingDirectory != null) && this.workingDirectory.equals(rhs.workingDirectory))));
     }
 
 }

@@ -28,21 +28,6 @@ public class ArtifactLocation {
         this.uri = uri;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(ArtifactLocation.class.getName()).append('@').append(Integer.toHexString(System.identityHashCode(this))).append('[');
-        sb.append("uri");
-        sb.append('=');
-        sb.append(((this.uri == null)?"<null>":this.uri));
-        sb.append(',');
-        if (sb.charAt((sb.length()- 1)) == ',') {
-            sb.setCharAt((sb.length()- 1), ']');
-        } else {
-            sb.append(']');
-        }
-        return sb.toString();
-    }
 
     @Override
     public int hashCode() {
