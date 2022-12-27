@@ -1,12 +1,13 @@
 <idea-plugin>
     <depends>com.intellij.modules.platform</depends>
     <extensions defaultExtensionNs="com.intellij">
-        <localInspection language="vgo"
-                         displayName="Show in dependency tree"
-                         groupBundle="messages.InspectionsBundle"
-                         groupKey="group.names.probable.bugs"
-                         enabledByDefault="true"
-                         implementationClass="com.jfrog.ide.idea.inspections.GoInspection"/>
-        <annotator language="vgo" implementationClass="com.jfrog.ide.idea.inspections.GoInspection"/>
+        <!-- TODO: uncomment -->
+<!--        <localInspection language="vgo"-->
+<!--                         displayName="Show in dependency tree"-->
+<!--                         groupBundle="messages.InspectionsBundle"-->
+<!--                         groupKey="group.names.probable.bugs"-->
+<!--                         enabledByDefault="true"-->
+<!--                         implementationClass="com.jfrog.ide.idea.inspections.GoInspection"/>-->
+<!--        <annotator language="vgo" implementationClass="com.jfrog.ide.idea.inspections.GoInspection"/>-->
     </extensions>
 </idea-plugin>

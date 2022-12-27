@@ -90,7 +90,6 @@ public abstract class ScanManager {
         this.executor = executor;
     }
 
-    // TODO: arguments were changed?
     /**
      * Collect and return {@link Components} to be scanned by JFrog Xray.
      * Implementation should be project type specific.
@@ -122,7 +121,6 @@ public abstract class ScanManager {
 
     public abstract String getPackageType();
 
-    // TODO: shouldToast was removed in master!!!!
     /**
      * Scan and update dependency components.
      *
@@ -138,6 +136,10 @@ public abstract class ScanManager {
             indicator.setText("3/3: Finalizing");
             if (results == null) {
                 log.debug("Wasn't able to scan '" + projectName + "'.");
+                return;
+            }
+            if (results.size() == 0) {
+                // TODO: handle no violations/vulnerabilities
                 return;
             }
             Map<String, List<DependencyTree>> depMap = new HashMap<>();
@@ -241,7 +243,8 @@ public abstract class ScanManager {
                 if (project.isDisposed()) {
                     return;
                 }
-                if (!GlobalSettings.getInstance().areXrayCredentialsSet()) { // TODO: shouldn't this check be before the scan?
+                // TODO: shouldn't this check be before the scan starts?
+                if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
                     log.warn("Xray server is not configured.");
                     return;
                 }
@@ -353,7 +356,6 @@ public abstract class ScanManager {
      * filter scan components tree model according to the user filters and sort the issues tree.
      */
     private void addScanResults(List<FileTreeNode> fileTreeNodes) {
-        // TODO: make sure that it's null, if there are no violations
         if (fileTreeNodes.isEmpty()) {
             return;
         }

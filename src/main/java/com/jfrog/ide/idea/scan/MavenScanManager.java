@@ -165,8 +165,6 @@ public class MavenScanManager extends ScanManager {
         if (setScopes) {
             currentNode.setScopes(Sets.newHashSet(new Scope(mavenArtifact.getScope())));
         }
-        // TODO: remove?
-//        populateDependencyTreeNode(currentNode);
         mavenArtifactNode.getDependencies()
                 .stream()
                 .filter(dependencyTree -> addedInSubTree.add(dependencyTree.getArtifact().getDisplayStringForLibraryName()))

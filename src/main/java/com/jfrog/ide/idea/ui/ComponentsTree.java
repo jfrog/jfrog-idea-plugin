@@ -57,8 +57,6 @@ public abstract class ComponentsTree extends Tree {
         this.toolbarPopupMenus.add(filterMenu);
     }
 
-    public abstract void applyFiltersForAllProjects();
-
     public void addRightClickListener() {
         MouseListener mouseListener = new MouseAdapter() {
             @Override

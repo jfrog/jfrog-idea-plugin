@@ -139,7 +139,6 @@ public class ScanManagersFactory {
      * @param logger  - logger
      * @return Xray scan logic
      */
-    // TODO: unused parameters
     private ScanLogic createScanLogic(Utils.ScanLogicType type, String pkgType, Logger logger) {
         return new GraphScanLogic(pkgType, logger);
     }

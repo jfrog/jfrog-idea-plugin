@@ -11,7 +11,7 @@ function Container() {
 
     if (dependencyData?.id) {
         return (<>
-            <App data={dependencyData} PanelType={pageType} />
+            <App dependencyPageData={dependencyData} PanelType={pageType} />
             </>)
 
     }

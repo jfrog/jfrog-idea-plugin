@@ -1,11 +1,12 @@
 <idea-plugin>
     <extensions defaultExtensionNs="com.intellij">
-        <localInspection language="XML"
-                         displayName="Show in dependency tree"
-                         groupBundle="messages.InspectionsBundle"
-                         groupKey="group.names.probable.bugs"
-                         enabledByDefault="true"
-                         implementationClass="com.jfrog.ide.idea.inspections.MavenInspection"/>
-        <annotator language="XML" implementationClass="com.jfrog.ide.idea.inspections.MavenInspection"/>
+        <!-- TODO: uncomment -->
+<!--        <localInspection language="XML"-->
+<!--                         displayName="Show in dependency tree"-->
+<!--                         groupBundle="messages.InspectionsBundle"-->
+<!--                         groupKey="group.names.probable.bugs"-->
+<!--                         enabledByDefault="true"-->
+<!--                         implementationClass="com.jfrog.ide.idea.inspections.MavenInspection"/>-->
+<!--        <annotator language="XML" implementationClass="com.jfrog.ide.idea.inspections.MavenInspection"/>-->
     </extensions>
 </idea-plugin>

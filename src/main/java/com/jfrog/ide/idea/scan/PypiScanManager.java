@@ -48,8 +48,6 @@ public class PypiScanManager extends SingleDescriptorScanManager {
         super(project, pythonSdk.getHomePath(), ComponentPrefix.PYPI, executor, pythonSdk.getHomePath());
         this.pythonSdk = pythonSdk;
         getLog().info("Found PyPI SDK: " + getProjectName());
-        // TODO: can be removed?
-//        PyPackageUtil.runOnChangeUnderInterpreterPaths(pythonSdk, this, this::asyncScanAndUpdateResults);
     }
 
     @Override

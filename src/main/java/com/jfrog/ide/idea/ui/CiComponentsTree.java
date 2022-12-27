@@ -65,8 +65,6 @@ public class CiComponentsTree extends ComponentsTree {
      *
      * @param projectKey - The project to apply the filters.
      */
-// TODO: remove?
-    //    @Override
     public void applyFilters(ProjectsMap.ProjectKey projectKey) {
         if (projectKey == null) {
             reset();
@@ -90,7 +88,6 @@ public class CiComponentsTree extends ComponentsTree {
         super.reset();
     }
 
-    @Override
     public void applyFiltersForAllProjects() {
         setModel(null);
         for (Map.Entry<ProjectsMap.ProjectKey, DependencyTree> entry : projects.entrySet()) {

@@ -12,8 +12,7 @@ import java.util.Map;
 /**
  * Created by Yahav Itzhak on 22 Nov 2017.
  */
-public class IssueFilterMenu extends FilterMenu<Severity> {
-
+public abstract class IssueFilterMenu extends FilterMenu<Severity> {
     public static final String TOOLTIP = "Select severities to show";
     public static final String NAME = "Severity";
 
@@ -21,10 +20,5 @@ public class IssueFilterMenu extends FilterMenu<Severity> {
         super(project, NAME, TOOLTIP);
         Map<Severity, Boolean> severitiesFilters = filterManager.getSelectedSeverities();
         addComponents(severitiesFilters, false);
-    }
-
-    @Override
-    public Topic<ApplicationEvents> getSyncEvent() {
-        return ApplicationEvents.ON_SCAN_FILTER_CHANGE;
     }
 }

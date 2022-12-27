@@ -102,7 +102,7 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
      *
      * @return licenses filter menu
      */
-    FilterMenu createLicenseFilterMenu() {
+    LicenseFilterMenu createLicenseFilterMenu() {
         return new CiLicenseFilterMenu(project);
     }
 
@@ -165,8 +165,7 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
         toolbarPanel.add(issueFilterMenu.getFilterButton());
 
         // Add licenses filter
-        // TODO: consider this change
-        FilterMenu licenseFilterMenu = createLicenseFilterMenu();
+        LicenseFilterMenu licenseFilterMenu = createLicenseFilterMenu();
         componentsTree.addFilterMenu(licenseFilterMenu);
         toolbarPanel.add(licenseFilterMenu.getFilterButton());
 

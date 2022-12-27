@@ -22,7 +22,7 @@ public class DependencyPage implements Serializable {
     public DependencyPage() {
     }
 
-    public DependencyPage(String id, String component, String type, String version, String severity, License license,
+    public DependencyPage(String id, String component, String type, String version, String severity, License[] license,
                           String summary, String[] fixedVersion, String[] infectedVersion, Reference[] references,
                           Cve cve, ImpactedPath impactedPath, String[] watchName, String edited,
                           ExtendedInformation extendedInformation) {
@@ -31,8 +31,7 @@ public class DependencyPage implements Serializable {
         this.type = type;
         this.version = version;
         this.severity = severity;
-        // TODO: handle multiple licenses
-        this.license = new License[]{license};
+        this.license = license;
         this.summary = summary;
         this.fixedVersion = fixedVersion;
         this.infectedVersion = infectedVersion;
