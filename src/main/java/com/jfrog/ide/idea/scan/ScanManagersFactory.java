@@ -12,7 +12,6 @@ import com.intellij.util.messages.MessageBus;
 import com.jetbrains.python.sdk.PythonSdkUtil;
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.persistency.ScanCache;
-import com.jfrog.ide.common.persistency.XrayScanCache;
 import com.jfrog.ide.common.scan.GraphScanLogic;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.common.utils.PackageFileFinder;
