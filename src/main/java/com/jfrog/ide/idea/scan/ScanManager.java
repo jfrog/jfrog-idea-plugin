@@ -139,7 +139,7 @@ public abstract class ScanManager {
                 return;
             }
             if (results.size() == 0) {
-                // TODO: handle no violations/vulnerabilities
+                // No violations/vulnerabilities
                 return;
             }
             Map<String, List<DependencyTree>> depMap = new HashMap<>();
@@ -148,7 +148,6 @@ public abstract class ScanManager {
             Map<String, List<Issue>> issuesMap = mapIssuesByCve(results);
 
             createImpactPaths(results, depMap, dependencyTree);
-            // TODO: convert results to tree, and save it to cache!
             List<FileTreeNode> fileTreeNodes = groupArtifactsToDescriptorNodes(results.values(), depMap);
             addScanResults(fileTreeNodes);
 
@@ -243,7 +242,6 @@ public abstract class ScanManager {
                 if (project.isDisposed()) {
                     return;
                 }
-                // TODO: shouldn't this check be before the scan starts?
                 if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
                     log.warn("Xray server is not configured.");
                     return;
@@ -338,12 +336,7 @@ public abstract class ScanManager {
         localInspectionTool.setAfterScan(true);
         for (PsiFile descriptor : projectDescriptors) {
             // Run inspection on descriptor.
-            try {
-                InspectionEngine.runInspectionOnFile(descriptor, new LocalInspectionToolWrapper(localInspectionTool), context);
-                // TODO: remove the try/catch
-            } catch (Exception e) {
-                Logger.getInstance().error("Inspection failed", e);
-            }
+            InspectionEngine.runInspectionOnFile(descriptor, new LocalInspectionToolWrapper(localInspectionTool), context);
             FileEditor[] editors = FileEditorManager.getInstance(project).getAllEditors(descriptor.getVirtualFile());
             if (!ArrayUtils.isEmpty(editors)) {
                 // Refresh descriptor highlighting only if it is already opened.

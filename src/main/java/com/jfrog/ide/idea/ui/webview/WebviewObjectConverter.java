@@ -191,7 +191,6 @@ public class WebviewObjectConverter {
 
     private static Reference[] convertReferences(List<String> xrayReferences) {
         if (xrayReferences == null) {
-            // TODO: working?
             return null;
         }
         Reference[] converted = new Reference[xrayReferences.size()];
