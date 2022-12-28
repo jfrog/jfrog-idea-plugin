@@ -96,8 +96,6 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             updateIssueOrLicenseInWebview(selectedIssue);
             verticalSplit.setSecondComponent(browser.getComponent());
         });
-        // TODO: make the context menu work again
-//        componentsTree.addRightClickListener();
         projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_LOCAL_STARTED, () -> ApplicationManager.getApplication().invokeLater(this::resetViews));
     }
 
