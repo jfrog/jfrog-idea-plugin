@@ -150,9 +150,6 @@ public abstract class ScanManager {
             createImpactPaths(results, depMap, dependencyTree);
             List<FileTreeNode> fileTreeNodes = groupArtifactsToDescriptorNodes(results.values(), depMap);
             addScanResults(fileTreeNodes);
-
-            // TODO: uncomment
-//            DumbService.getInstance(project).smartInvokeLater(this::runInspections);
         } catch (ProcessCanceledException e) {
             log.info("Xray scan was canceled");
         } catch (Exception e) {
