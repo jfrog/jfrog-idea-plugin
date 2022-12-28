@@ -6,6 +6,7 @@ import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import org.jetbrains.annotations.NotNull;
@@ -46,9 +47,12 @@ public class JfrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<Jfro
             int endOffset = StringUtil.lineColToOffset(file.getText(), warning.getLineEnd(), warning.getColEnd());
 
             TextRange range = new TextRange(startOffset, endOffset);
-            holder.newAnnotation(HIGHLIGHT_TYPE, "\uD83D\uDC38 JFrog [" + warning.getName() + "]: " + warning.getReason())
-                    .range(range)
-                    .create();
+            var document = PsiDocumentManager.getInstance(file.getProject()).getDocument(file);
+            var lineText = document.getText(range);
+            if (lineText != null && lineText.contains(warning.getLineSnippet()))
+                holder.newAnnotation(HIGHLIGHT_TYPE, "\uD83D\uDC38 JFrog [" + warning.getName() + "]: " + warning.getReason())
+                        .range(range)
+                        .create();
         });
     }
 

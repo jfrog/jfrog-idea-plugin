@@ -12,7 +12,8 @@ import javax.annotation.processing.Generated;
         "endColumn",
         "endLine",
         "startColumn",
-        "startLine"
+        "startLine",
+        "snippet"
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Generated("jsonschema2pojo")
@@ -26,6 +27,9 @@ public class Region {
     private Integer startColumn;
     @JsonProperty("startLine")
     private Integer startLine;
+    @JsonProperty("snippet")
+
+    private Message snippet;
 
     @JsonProperty("endColumn")
     public Integer getEndColumn() {
@@ -67,6 +71,16 @@ public class Region {
         this.startLine = startLine;
     }
 
+    @JsonProperty("snippet")
+    public Message getSnippet() {
+        return snippet;
+    }
+
+    @JsonProperty("snippet")
+    public void setSnippet(Message snippet) {
+        this.snippet = snippet;
+    }
+
     @Override
     public int hashCode() {
         int result = 1;
@@ -74,6 +88,7 @@ public class Region {
         result = ((result * 31) + ((this.endColumn == null) ? 0 : this.endColumn.hashCode()));
         result = ((result * 31) + ((this.startColumn == null) ? 0 : this.startColumn.hashCode()));
         result = ((result * 31) + ((this.startLine == null) ? 0 : this.startLine.hashCode()));
+        result = ((result * 31) + ((this.snippet == null) ? 0 : this.snippet.hashCode()));
         return result;
     }
 
@@ -86,7 +101,7 @@ public class Region {
             return false;
         }
         Region rhs = ((Region) other);
-        return (((((this.endLine == rhs.endLine) || ((this.endLine != null) && this.endLine.equals(rhs.endLine))) && ((this.endColumn == rhs.endColumn) || ((this.endColumn != null) && this.endColumn.equals(rhs.endColumn)))) && ((this.startColumn == rhs.startColumn) || ((this.startColumn != null) && this.startColumn.equals(rhs.startColumn)))) && ((this.startLine == rhs.startLine) || ((this.startLine != null) && this.startLine.equals(rhs.startLine))));
+        return (((((this.endLine == rhs.endLine) || ((this.endLine != null) && this.endLine.equals(rhs.endLine))) && ((this.endColumn == rhs.endColumn) || ((this.endColumn != null) && this.endColumn.equals(rhs.endColumn)))) && ((this.startColumn == rhs.startColumn) || ((this.startColumn != null) && this.startColumn.equals(rhs.startColumn)))) && ((this.startLine == rhs.startLine) || ((this.startLine != null) && this.startLine.equals(rhs.startLine))) && ((this.snippet == rhs.snippet) || ((this.snippet != null) && this.snippet.equals(rhs.snippet))));
     }
 
 }

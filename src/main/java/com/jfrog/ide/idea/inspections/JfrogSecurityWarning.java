@@ -10,7 +10,7 @@ public class JfrogSecurityWarning {
     private final int colEnd;
     private final String reason;
     private final String filePath;
-
+    private final String lineSnippet;
     private final String name;
 
 
@@ -19,7 +19,8 @@ public class JfrogSecurityWarning {
             int colStart, int lineEnd,
             int colEnd, String reason,
             String filePath,
-            String name
+            String name,
+            String lineSnippet
     ) {
         this.lineStart = lineStart;
         this.colStart = colStart;
@@ -28,6 +29,7 @@ public class JfrogSecurityWarning {
         this.reason = reason;
         this.filePath = filePath;
         this.name = name;
+        this.lineSnippet = lineSnippet;
     }
 
     public JfrogSecurityWarning(SarifResult result) {
@@ -37,7 +39,8 @@ public class JfrogSecurityWarning {
                 result.getLocations().get(0).getPhysicalLocation().getRegion().getEndColumn(),
                 result.getMessage().getText(),
                 StringUtils.removeStart(result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri(), "file://"),
-                result.getRuleId());
+                result.getRuleId(),
+                result.getLocations().get(0).getPhysicalLocation().getRegion().getSnippet().getText());
     }
 
     public int getLineStart() {
@@ -69,4 +72,7 @@ public class JfrogSecurityWarning {
         return name;
     }
 
+    public String getLineSnippet() {
+        return lineSnippet;
+    }
 }

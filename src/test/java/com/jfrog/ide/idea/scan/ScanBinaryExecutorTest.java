@@ -66,10 +66,10 @@ public class ScanBinaryExecutorTest extends TestCase {
             assertEquals("file://examples/applic-demo/../applic-demo/index.js", parsedOutput.get(1).getFilePath());
             assertEquals("The vulnerable function protobufjs.load is called", parsedOutput.get(0).getReason());
             assertEquals("The vulnerable function protobufjs.parse is called.", parsedOutput.get(1).getReason());
-            assertEquals(19, parsedOutput.get(0).getLineStart());
-            assertEquals(17, parsedOutput.get(1).getLineStart());
-            assertEquals(19, parsedOutput.get(0).getLineEnd());
-            assertEquals(21, parsedOutput.get(1).getLineEnd());
+            assertEquals(20, parsedOutput.get(0).getLineStart());
+            assertEquals(18, parsedOutput.get(1).getLineStart());
+            assertEquals(20, parsedOutput.get(0).getLineEnd());
+            assertEquals(22, parsedOutput.get(1).getLineEnd());
             assertEquals(0, parsedOutput.get(0).getColStart());
             assertEquals(0, parsedOutput.get(1).getColStart());
             assertEquals(17, parsedOutput.get(0).getColEnd());
