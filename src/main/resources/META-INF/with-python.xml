@@ -2,6 +2,6 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.python-pro-capable</depends>
     <extensions defaultExtensionNs="com.intellij">
-        <externalAnnotator language="Python" implementationClass="com.jfrog.ide.idea.inspections.JfrogSecurityAnnotator"/>
+        <externalAnnotator language="Python" implementationClass="com.jfrog.ide.idea.inspections.JFrogSecurityAnnotator"/>
     </extensions>
 </idea-plugin>

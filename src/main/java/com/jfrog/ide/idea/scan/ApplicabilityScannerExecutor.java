@@ -1,6 +1,6 @@
 package com.jfrog.ide.idea.scan;
 
-import com.jfrog.ide.idea.inspections.JfrogSecurityWarning;
+import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
 
 import java.io.IOException;
@@ -19,7 +19,7 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
         SUPPORTED_LANGUAGES = List.of("python", "js");
     }
 
-    public List<JfrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder) throws IOException, InterruptedException {
+    public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder) throws IOException, InterruptedException {
         return super.execute(inputFileBuilder, SCANNER_ARGS);
     }
 

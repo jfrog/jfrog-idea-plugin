@@ -6,7 +6,7 @@ import com.jfrog.ide.common.tree.DescriptorFileTreeNode;
 import com.jfrog.ide.common.tree.FileTreeNode;
 import com.jfrog.ide.common.tree.Issue;
 import com.jfrog.ide.common.tree.ApplicableIssue;
-import com.jfrog.ide.idea.inspections.JfrogSecurityWarning;
+import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
 import org.apache.commons.lang.StringUtils;
@@ -27,7 +27,7 @@ public class SourceCodeScannerManager {
     private final Eos eos = new Eos();
     private final ApplicabilityScannerExecutor applicability = new ApplicabilityScannerExecutor();
 
-    private List<JfrogSecurityWarning> scanResults;
+    private List<JFrogSecurityWarning> scanResults;
 
     protected Project project;
     protected String codeBaseLanguage;
@@ -56,13 +56,13 @@ public class SourceCodeScannerManager {
             if (applicability.getSupportedLanguages().contains(codeBaseLanguage)) {
                 indicator.setText("Applicability Scan");
                 indicator.setFraction(0.25);
-                List<JfrogSecurityWarning> applicabilityResults = applicability.execute(new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).cves(cves));
+                List<JFrogSecurityWarning> applicabilityResults = applicability.execute(new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).cves(cves));
                 scanResults.addAll(applicabilityResults);
             }
             if (eos.getSupportedLanguages().contains(codeBaseLanguage)) {
                 indicator.setText("Eos Scan");
                 indicator.setFraction(0.5);
-                List<JfrogSecurityWarning> eosResults = eos.execute(new ScanConfig.Builder().language(codeBaseLanguage).roots(List.of(getProjectBasePath(project).toString())));
+                List<JFrogSecurityWarning> eosResults = eos.execute(new ScanConfig.Builder().language(codeBaseLanguage).roots(List.of(getProjectBasePath(project).toString())));
                 scanResults.addAll(eosResults);
             }
         } catch (IOException | InterruptedException |
@@ -76,7 +76,7 @@ public class SourceCodeScannerManager {
 
     public List<FileTreeNode> getResults(Map<String, List<Issue>> issuesMap) {
         HashMap<String, DescriptorFileTreeNode> results = new HashMap<String, DescriptorFileTreeNode>();
-        for (JfrogSecurityWarning warning : scanResults) {
+        for (JFrogSecurityWarning warning : scanResults) {
             DescriptorFileTreeNode fileNode = results.get(warning.getFilePath());
             if (fileNode == null) {
                 fileNode = new DescriptorFileTreeNode(warning.getFilePath());
@@ -94,7 +94,7 @@ public class SourceCodeScannerManager {
         return new ArrayList<>(results.values());
     }
 
-    public List<JfrogSecurityWarning> getScanResults() {
+    public List<JFrogSecurityWarning> getScanResults() {
         return scanResults != null ? new ArrayList<>(scanResults) : new ArrayList<>();
     }
 }

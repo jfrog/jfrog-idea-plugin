@@ -2,7 +2,7 @@ package com.jfrog.ide.idea.scan;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
-import com.jfrog.ide.idea.inspections.JfrogSecurityWarning;
+import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.data.Output;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
@@ -43,9 +43,9 @@ public abstract class ScanBinaryExecutor {
     }
 
 
-    abstract List<JfrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder) throws IOException, InterruptedException;
+    abstract List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder) throws IOException, InterruptedException;
 
-    protected List<JfrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args) throws IOException, InterruptedException {
+    protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args) throws IOException, InterruptedException {
         if (!shouldExecute) {
             return List.of();
         }
@@ -81,11 +81,11 @@ public abstract class ScanBinaryExecutor {
         return SUPPORTED_LANGUAGES;
     }
 
-    List<JfrogSecurityWarning> parseOutputSarif(Path outputFile) throws IOException {
-        List<JfrogSecurityWarning> warnings = new ArrayList<>();
+    List<JFrogSecurityWarning> parseOutputSarif(Path outputFile) throws IOException {
+        List<JFrogSecurityWarning> warnings = new ArrayList<>();
         ObjectMapper om = createMapper();
         Output output = om.readValue(outputFile.toFile(), Output.class);
-        output.getRuns().forEach(run -> run.getResults().forEach(result -> warnings.add(new JfrogSecurityWarning(result))));
+        output.getRuns().forEach(run -> run.getResults().forEach(result -> warnings.add(new JFrogSecurityWarning(result))));
         return warnings;
     }
 

@@ -1,5 +1,5 @@
 <idea-plugin>
     <extensions defaultExtensionNs="com.intellij">
-        <externalAnnotator language="JAVA" implementationClass="com.jfrog.ide.idea.inspections.JfrogSecurityAnnotator"/>
+        <externalAnnotator language="JAVA" implementationClass="com.jfrog.ide.idea.inspections.JFrogSecurityAnnotator"/>
     </extensions>
 </idea-plugin>

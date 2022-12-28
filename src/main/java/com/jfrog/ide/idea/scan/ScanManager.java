@@ -28,7 +28,7 @@ import com.jfrog.ide.common.tree.IssueNode;
 import com.jfrog.ide.common.tree.Issue;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
-import com.jfrog.ide.idea.inspections.JfrogSecurityWarning;
+import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
 import com.jfrog.ide.idea.ui.ComponentsTree;
@@ -407,7 +407,7 @@ public abstract class ScanManager {
         return log;
     }
 
-    public List<JfrogSecurityWarning> getSourceCodeScanResults() {
+    public List<JFrogSecurityWarning> getSourceCodeScanResults() {
         return this.scanner.getScanResults();
     }
 

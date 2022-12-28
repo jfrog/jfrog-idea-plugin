@@ -19,11 +19,11 @@ import java.util.List;
 
 /**
  * General Annotator for JFrog security source code issues (for Example: applicable CVE)
- * The annotator receives the JfrogSecurityWarning data from the most recent scan.
+ * The annotator receives the JFrogSecurityWarning data from the most recent scan.
  *
  * @author Tal Arian
  */
-public class JfrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<JfrogSecurityWarning>> {
+public class JFrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<JFrogSecurityWarning>> {
 
     @NotNull
     private static final HighlightSeverity HIGHLIGHT_TYPE = HighlightSeverity.WARNING;
@@ -36,7 +36,7 @@ public class JfrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<Jfro
 
     @Nullable
     @Override
-    public List<JfrogSecurityWarning> doAnnotate(PsiFile file) {
+    public List<JFrogSecurityWarning> doAnnotate(PsiFile file) {
         ScanManager scanManager = ScanManagersFactory.getScanManagers(file.getProject()).stream()
                 .findAny()
                 .orElse(null);
@@ -44,7 +44,7 @@ public class JfrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<Jfro
     }
 
     @Override
-    public void apply(@NotNull PsiFile file, List<JfrogSecurityWarning> warnings, @NotNull AnnotationHolder holder) {
+    public void apply(@NotNull PsiFile file, List<JFrogSecurityWarning> warnings, @NotNull AnnotationHolder holder) {
         String filePath = file.getVirtualFile().getPath();
         warnings.stream().filter(warning -> warning.getFilePath().equals(filePath)).forEach(warning -> {
             int startOffset = StringUtil.lineColToOffset(file.getText(), warning.getLineStart(), warning.getColStart());

@@ -4,7 +4,7 @@ import com.jfrog.ide.idea.scan.data.Region;
 import com.jfrog.ide.idea.scan.data.SarifResult;
 import org.apache.commons.lang.StringUtils;
 
-public class JfrogSecurityWarning {
+public class JFrogSecurityWarning {
     private final int lineStart;
     private final int colStart;
     private final int lineEnd;
@@ -14,7 +14,7 @@ public class JfrogSecurityWarning {
     private final String lineSnippet;
     private final String name;
 
-    public JfrogSecurityWarning(
+    public JFrogSecurityWarning(
             int lineStart,
             int colStart, int lineEnd,
             int colEnd, String reason,
@@ -32,7 +32,7 @@ public class JfrogSecurityWarning {
         this.lineSnippet = lineSnippet;
     }
 
-    public JfrogSecurityWarning(SarifResult result) {
+    public JFrogSecurityWarning(SarifResult result) {
         this(getFirstRegion(result).getStartLine() - 1,
                 getFirstRegion(result).getStartColumn(),
                 getFirstRegion(result).getEndLine() - 1,

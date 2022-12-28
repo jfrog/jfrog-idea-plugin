@@ -1,7 +1,7 @@
 package com.jfrog.ide.idea.scan;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jfrog.ide.idea.inspections.JfrogSecurityWarning;
+import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
 import com.jfrog.ide.idea.scan.data.ScansConfig;
 import junit.framework.TestCase;
@@ -49,7 +49,7 @@ public class ScanBinaryExecutorTest extends TestCase {
     }
 
     public void testSarifParser() throws IOException {
-        List<JfrogSecurityWarning> parsedOutput = scanner.parseOutputSarif(TEST_DEMO_OUTPUT);
+        List<JFrogSecurityWarning> parsedOutput = scanner.parseOutputSarif(TEST_DEMO_OUTPUT);
         assertEquals(2, parsedOutput.size());
         assertEquals("applic_CVE-2022-25878", parsedOutput.get(0).getName());
         assertEquals("CVE-2022-25978", parsedOutput.get(1).getName());

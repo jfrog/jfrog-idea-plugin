@@ -61,7 +61,7 @@
                          enabledByDefault="true"
                          implementationClass="com.jfrog.ide.idea.inspections.NpmInspection"/>
         <annotator language="JSON" implementationClass="com.jfrog.ide.idea.inspections.NpmInspection"/>
-        <externalAnnotator language="JavaScript" implementationClass="com.jfrog.ide.idea.inspections.JfrogSecurityAnnotator"/>
+        <externalAnnotator language="JavaScript" implementationClass="com.jfrog.ide.idea.inspections.JFrogSecurityAnnotator"/>
     </extensions>
 
     <actions>
