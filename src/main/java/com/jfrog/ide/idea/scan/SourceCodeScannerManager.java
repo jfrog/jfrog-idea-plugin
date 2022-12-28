@@ -62,7 +62,7 @@ public class SourceCodeScannerManager {
             if (eos.getSupportedLanguages().contains(codeBaseLanguage)) {
                 indicator.setText("Eos Scan");
                 indicator.setFraction(0.5);
-                var eosResults = eos.execute(new ScanConfig.Builder().language(codeBaseLanguage).roots(List.of(getProjectBasePath(project).toString())));
+                List<JfrogSecurityWarning> eosResults = eos.execute(new ScanConfig.Builder().language(codeBaseLanguage).roots(List.of(getProjectBasePath(project).toString())));
                 scanResults.addAll(eosResults);
             }
         } catch (IOException | InterruptedException |
@@ -75,15 +75,15 @@ public class SourceCodeScannerManager {
     }
 
     public List<FileTreeNode> getResults(Map<String, List<Issue>> issuesMap) {
-        var results = new HashMap<String, DescriptorFileTreeNode>();
+        HashMap<String, DescriptorFileTreeNode> results = new HashMap<String, DescriptorFileTreeNode>();
         for (JfrogSecurityWarning warning : scanResults) {
-            var fileNode = results.get(warning.getFilePath());
+            DescriptorFileTreeNode fileNode = results.get(warning.getFilePath());
             if (fileNode == null) {
                 fileNode = new DescriptorFileTreeNode(warning.getFilePath());
                 results.put(warning.getFilePath(), fileNode);
             }
-            var cve = StringUtils.removeStart(warning.getName(), "applic_");
-            var issues = issuesMap.get(cve);
+            String cve = StringUtils.removeStart(warning.getName(), "applic_");
+            List<Issue> issues = issuesMap.get(cve);
             if (issues != null) {
                 fileNode.addDependency(new ApplicableIssue(cve, warning.getLineStart(), warning.getColStart(), warning.getFilePath(), issues.get(0)));
                 for (Issue issue : issues) {

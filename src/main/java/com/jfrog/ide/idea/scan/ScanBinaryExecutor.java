@@ -9,6 +9,7 @@ import com.jfrog.ide.idea.scan.data.ScanConfig;
 import com.jfrog.ide.idea.scan.data.ScansConfig;
 import org.apache.commons.io.FileUtils;
 import org.jfrog.build.extractor.executor.CommandExecutor;
+import org.jfrog.build.extractor.executor.CommandResults;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -59,9 +60,9 @@ public abstract class ScanBinaryExecutor {
             args = new ArrayList<>(args);
             args.add(inputFile.toString());
 
-            var log = Logger.getInstance();
+            Logger log = Logger.getInstance();
             // Execute the external process
-            var commandResults = this.commandExecutor.exeCommand(outputTempDir.toFile(), args, null, log);
+            CommandResults commandResults = this.commandExecutor.exeCommand(outputTempDir.toFile(), args, null, log);
             if (!commandResults.isOk()) {
                 throw new IOException(commandResults.getErr());
             }

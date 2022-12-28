@@ -1,5 +1,7 @@
 package com.jfrog.ide.idea.scan;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jfrog.ide.idea.inspections.JfrogSecurityWarning;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
 import com.jfrog.ide.idea.scan.data.ScansConfig;
 import junit.framework.TestCase;
@@ -21,11 +23,11 @@ public class ScanBinaryExecutorTest extends TestCase {
 
 
     public void testInputBuilder() throws IOException {
-        var inputFileBuilder = new ScanConfig.Builder();
+        ScanConfig.Builder inputFileBuilder = new ScanConfig.Builder();
         Path inputPath = null;
-        var testOutput = "file/location\\out.sarif";
-        var testLanguage = "Go";
-        var testRoots = List.of("a", "b", "c");
+        String testOutput = "file/location\\out.sarif";
+        String testLanguage = "Go";
+        List<String> testRoots = List.of("a", "b", "c");
 
         inputFileBuilder.scanType(scanner.SCAN_TYPE);
         inputFileBuilder.output(testOutput);
@@ -33,7 +35,7 @@ public class ScanBinaryExecutorTest extends TestCase {
         inputFileBuilder.roots(testRoots);
         try {
             inputPath = scanner.createTempRunInputFile(new ScansConfig(List.of(inputFileBuilder.Build())));
-            var inputFile = readScansConfigYAML(inputPath);
+            ScansConfig inputFile = readScansConfigYAML(inputPath);
             assertNotNull(inputFile);
             assertEquals(1, inputFile.getScans().size());
             assertEquals(testOutput, inputFile.getScans().get(0).getOutput());
@@ -47,7 +49,7 @@ public class ScanBinaryExecutorTest extends TestCase {
     }
 
     public void testSarifParser() throws IOException {
-        var parsedOutput = scanner.parseOutputSarif(TEST_DEMO_OUTPUT);
+        List<JfrogSecurityWarning> parsedOutput = scanner.parseOutputSarif(TEST_DEMO_OUTPUT);
         assertEquals(2, parsedOutput.size());
         assertEquals("applic_CVE-2022-25878", parsedOutput.get(0).getName());
         assertEquals("CVE-2022-25978", parsedOutput.get(1).getName());
@@ -66,7 +68,7 @@ public class ScanBinaryExecutorTest extends TestCase {
     }
 
     private ScansConfig readScansConfigYAML(Path inputPath) throws IOException {
-        var mapper = createYAMLMapper();
+        ObjectMapper mapper = createYAMLMapper();
         return mapper.readValue(inputPath.toFile(), ScansConfig.class);
     }
 }

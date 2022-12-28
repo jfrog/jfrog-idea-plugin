@@ -50,7 +50,7 @@ public class LocalComponentsTree extends ComponentsTree {
 
     public void addScanResults(List<FileTreeNode> fileTreeNodes) {
         for (FileTreeNode node : fileTreeNodes) {
-            var fileNode = fileNodes.get(Arrays.toString(node.getPath()));
+            FileTreeNode fileNode = fileNodes.get(Arrays.toString(node.getPath()));
             if (fileNode != null) {
                 Enumeration<TreeNode> children = fileNode.children();
                 while (children.hasMoreElements()) {

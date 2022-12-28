@@ -7,7 +7,10 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.pom.Navigatable;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.ui.*;
 import com.intellij.ui.components.JBPanel;
@@ -170,16 +173,16 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
     private void navigateToFile(ApplicableIssue node) {
         ApplicationManager.getApplication().invokeLater(() -> {
-            var sourceCodeFile = LocalFileSystem.getInstance().findFileByIoFile(new File(node.getFilePath()));
+            VirtualFile sourceCodeFile = LocalFileSystem.getInstance().findFileByIoFile(new File(node.getFilePath()));
             if (sourceCodeFile == null) {
                 return;
             }
-            var targetFile = PsiManager.getInstance(project).findFile(sourceCodeFile);
+            PsiFile targetFile = PsiManager.getInstance(project).findFile(sourceCodeFile);
             if (targetFile == null) {
                 return;
             }
-            var lineOffset = StringUtil.lineColToOffset(targetFile.getText(), node.getRow(), node.getCol());
-            var element = targetFile.findElementAt(lineOffset);
+            int lineOffset = StringUtil.lineColToOffset(targetFile.getText(), node.getRow(), node.getCol());
+            PsiElement element = targetFile.findElementAt(lineOffset);
             if (element instanceof Navigatable) {
                 ((Navigatable) element).navigate(true);
             } else targetFile.navigate(true);
