@@ -252,19 +252,6 @@ public class ScanManagersFactory {
         scanManagers.values().forEach(manager -> manager.setScanLogic(createScanLogic(scanLogicType, manager.getPackageType(), logger)));
     }
 
-    /**
-     * Create the scan cache object and the directories needed for it.
-     *
-     * @return scan cache.
-     * @throws IOException in cace of any I/O error.
-     */
-    private ScanCache createXrayScanCache() throws IOException {
-        Files.createDirectories(HOME_PATH);
-        Logger log = Logger.getInstance();
-        ServerConfig server = GlobalSettings.getInstance().getServerConfig();
-        return new XrayScanCache(project.getName() + server.getProject(), HOME_PATH.resolve("cache"), log);
-    }
-
     private enum ScanManagerTypes {
         GRADLE,
         NPM,
