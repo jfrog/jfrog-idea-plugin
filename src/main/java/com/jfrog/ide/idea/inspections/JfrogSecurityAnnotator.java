@@ -40,7 +40,7 @@ public class JfrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<Jfro
     @Override
     //
     public void apply(@NotNull PsiFile file, List<JfrogSecurityWarning> warnings, @NotNull AnnotationHolder holder) {
-        var filePath = "file://" + file.getVirtualFile().getPath();
+        var filePath = file.getVirtualFile().getPath();
         warnings.stream().filter(warning -> warning.getFilePath().equals(filePath)).forEach(warning -> {
             int startOffset = StringUtil.lineColToOffset(file.getText(), warning.getLineStart(), warning.getColStart());
             int endOffset = StringUtil.lineColToOffset(file.getText(), warning.getLineEnd(), warning.getColEnd());

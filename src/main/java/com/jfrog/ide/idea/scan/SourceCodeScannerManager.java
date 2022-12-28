@@ -5,7 +5,7 @@ import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.tree.DescriptorFileTreeNode;
 import com.jfrog.ide.common.tree.FileTreeNode;
 import com.jfrog.ide.common.tree.Issue;
-import com.jfrog.ide.common.tree.IssueTreeNode;
+import com.jfrog.ide.common.tree.ApplicableIssue;
 import com.jfrog.ide.idea.inspections.JfrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
@@ -76,16 +76,15 @@ public class SourceCodeScannerManager {
     public List<FileTreeNode> getResults(Map<String, List<Issue>> issuesMap) {
         var results = new HashMap<String, DescriptorFileTreeNode>();
         for (JfrogSecurityWarning warning : scanResults) {
-            var filePath = StringUtils.removeStart(warning.getFilePath(), "file://");
-            var fileNode = results.get(filePath);
+            var fileNode = results.get(warning.getFilePath());
             if (fileNode == null) {
-                fileNode = new DescriptorFileTreeNode(filePath);
-                results.put(filePath, fileNode);
+                fileNode = new DescriptorFileTreeNode(warning.getFilePath());
+                results.put(warning.getFilePath(), fileNode);
             }
             var cve = StringUtils.removeStart(warning.getName(), "applic_");
             var issues = issuesMap.get(cve);
             if (issues != null) {
-                fileNode.addDependency(new IssueTreeNode(cve, warning.getLineStart() + 1, warning.getColStart(), issues.get(0)));
+                fileNode.addDependency(new ApplicableIssue(cve, warning.getLineStart(), warning.getColStart(), warning.getFilePath(), issues.get(0)));
                 for (var issue : issues) {
                     // TODO: Add applicable scan info to the Issue object.
                 }

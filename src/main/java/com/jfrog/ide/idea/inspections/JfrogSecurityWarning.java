@@ -1,6 +1,7 @@
 package com.jfrog.ide.idea.inspections;
 
 import com.jfrog.ide.idea.scan.data.SarifResult;
+import org.apache.commons.lang.StringUtils;
 
 public class JfrogSecurityWarning {
     private final int lineStart;
@@ -34,7 +35,8 @@ public class JfrogSecurityWarning {
                 result.getLocations().get(0).getPhysicalLocation().getRegion().getStartColumn(),
                 result.getLocations().get(0).getPhysicalLocation().getRegion().getEndLine() - 1,
                 result.getLocations().get(0).getPhysicalLocation().getRegion().getEndColumn(),
-                result.getMessage().getText(), result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri(),
+                result.getMessage().getText(),
+                StringUtils.removeStart(result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri(), "file://"),
                 result.getRuleId());
     }
 
