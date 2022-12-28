@@ -1,40 +1,33 @@
 package com.jfrog.ide.idea.scan.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import javax.annotation.processing.Generated;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
         "threadFlows"
 })
-@JsonIgnoreProperties(ignoreUnknown = true)
-@Generated("jsonschema2pojo")
 public class CodeFlow {
 
     @JsonProperty("threadFlows")
-    private List<ThreadFlow> threadFlows = new ArrayList<ThreadFlow>();
+    private List<ThreadFlow> threadFlows = new ArrayList<>();
 
-    @JsonProperty("threadFlows")
+    @SuppressWarnings("UnusedReturnValue")
     public List<ThreadFlow> getThreadFlows() {
         return threadFlows;
     }
 
-    @JsonProperty("threadFlows")
+    @SuppressWarnings("UnusedReturnValue")
     public void setThreadFlows(List<ThreadFlow> threadFlows) {
         this.threadFlows = threadFlows;
     }
 
     @Override
     public int hashCode() {
-        int result = 1;
-        result = ((result * 31) + ((this.threadFlows == null) ? 0 : this.threadFlows.hashCode()));
-        return result;
+        return Objects.hash(threadFlows);
     }
 
     @Override
@@ -42,11 +35,11 @@ public class CodeFlow {
         if (other == this) {
             return true;
         }
-        if ((other instanceof CodeFlow) == false) {
+        if (!(other instanceof CodeFlow)) {
             return false;
         }
         CodeFlow rhs = ((CodeFlow) other);
-        return ((this.threadFlows == rhs.threadFlows) || ((this.threadFlows != null) && this.threadFlows.equals(rhs.threadFlows)));
+        return (Objects.equals(this.threadFlows, rhs.threadFlows));
     }
 
 }

@@ -1,16 +1,11 @@
 package com.jfrog.ide.idea.scan.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import javax.annotation.processing.Generated;
+import java.util.Objects;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"artifactLocation", "region"})
-@JsonIgnoreProperties(ignoreUnknown = true)
-@Generated("jsonschema2pojo")
 public class PhysicalLocation {
 
     @JsonProperty("artifactLocation")
@@ -18,32 +13,25 @@ public class PhysicalLocation {
     @JsonProperty("region")
     private Region region;
 
-    @JsonProperty("artifactLocation")
     public ArtifactLocation getArtifactLocation() {
         return artifactLocation;
     }
-
-    @JsonProperty("artifactLocation")
+    @SuppressWarnings("UnusedReturnValue")
     public void setArtifactLocation(ArtifactLocation artifactLocation) {
         this.artifactLocation = artifactLocation;
     }
 
-    @JsonProperty("region")
     public Region getRegion() {
         return region;
     }
-
-    @JsonProperty("region")
+    @SuppressWarnings("UnusedReturnValue")
     public void setRegion(Region region) {
         this.region = region;
     }
 
     @Override
     public int hashCode() {
-        int result = 1;
-        result = ((result * 31) + ((this.region == null) ? 0 : this.region.hashCode()));
-        result = ((result * 31) + ((this.artifactLocation == null) ? 0 : this.artifactLocation.hashCode()));
-        return result;
+        return Objects.hash(region, artifactLocation);
     }
 
     @Override
@@ -51,11 +39,11 @@ public class PhysicalLocation {
         if (other == this) {
             return true;
         }
-        if ((other instanceof PhysicalLocation) == false) {
+        if (!(other instanceof PhysicalLocation)) {
             return false;
         }
         PhysicalLocation rhs = ((PhysicalLocation) other);
-        return (((this.region == rhs.region) || ((this.region != null) && this.region.equals(rhs.region))) && ((this.artifactLocation == rhs.artifactLocation) || ((this.artifactLocation != null) && this.artifactLocation.equals(rhs.artifactLocation))));
+        return ((Objects.equals(this.region, rhs.region)) && (Objects.equals(this.artifactLocation, rhs.artifactLocation)));
     }
 
 }

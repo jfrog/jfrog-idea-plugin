@@ -1,39 +1,30 @@
 package com.jfrog.ide.idea.scan.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import javax.annotation.processing.Generated;
+import java.util.Objects;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "uri"
+        "uri"
 })
-@JsonIgnoreProperties(ignoreUnknown = true)
-@Generated("jsonschema2pojo")
 public class ArtifactLocation {
 
     @JsonProperty("uri")
     private String uri;
 
-    @JsonProperty("uri")
     public String getUri() {
         return uri;
     }
 
-    @JsonProperty("uri")
+    @SuppressWarnings("UnusedReturnValue")
     public void setUri(String uri) {
         this.uri = uri;
     }
 
-
     @Override
     public int hashCode() {
-        int result = 1;
-        result = ((result* 31)+((this.uri == null)? 0 :this.uri.hashCode()));
-        return result;
+        return Objects.hash(uri);
     }
 
     @Override
@@ -41,11 +32,10 @@ public class ArtifactLocation {
         if (other == this) {
             return true;
         }
-        if ((other instanceof ArtifactLocation) == false) {
+        if (!(other instanceof ArtifactLocation)) {
             return false;
         }
         ArtifactLocation rhs = ((ArtifactLocation) other);
-        return ((this.uri == rhs.uri)||((this.uri!= null)&&this.uri.equals(rhs.uri)));
+        return (Objects.equals(this.uri, rhs.uri));
     }
-
 }

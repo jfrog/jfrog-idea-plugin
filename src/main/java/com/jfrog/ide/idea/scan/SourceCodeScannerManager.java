@@ -19,12 +19,13 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jfrog.ide.common.log.Utils.logError;
+import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
 
 public class SourceCodeScannerManager {
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
 
-    private Eos eos = new Eos();
-    private ApplicabilityScannerExecutor applicability = new ApplicabilityScannerExecutor();
+    private final Eos eos = new Eos();
+    private final ApplicabilityScannerExecutor applicability = new ApplicabilityScannerExecutor();
 
     private List<JfrogSecurityWarning> scanResults;
 
@@ -33,7 +34,7 @@ public class SourceCodeScannerManager {
 
     public SourceCodeScannerManager(Project project, String codeBaseLanguage) {
         this.project = project;
-        this.codeBaseLanguage = codeBaseLanguage.toString().toLowerCase();
+        this.codeBaseLanguage = codeBaseLanguage.toLowerCase();
     }
 
     /**
@@ -42,7 +43,7 @@ public class SourceCodeScannerManager {
      * @param indicator - The progress indicator
      * @param cves      - white list of cves to scan
      */
-    public void scanAndUpdate(ProgressIndicator indicator, List<String> cves) throws IOException, InterruptedException {
+    public void scanAndUpdate(ProgressIndicator indicator, List<String> cves) {
         if (project.isDisposed()) {
             return;
         }
@@ -55,13 +56,13 @@ public class SourceCodeScannerManager {
             if (applicability.getSupportedLanguages().contains(codeBaseLanguage)) {
                 indicator.setText("Applicability Scan");
                 indicator.setFraction(0.25);
-                var applicabilityResults = applicability.execute(new ScanConfig.Builder().roots(List.of(project.getBasePath())).cves(cves));
+                List<JfrogSecurityWarning> applicabilityResults = applicability.execute(new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).cves(cves));
                 scanResults.addAll(applicabilityResults);
             }
             if (eos.getSupportedLanguages().contains(codeBaseLanguage)) {
                 indicator.setText("Eos Scan");
                 indicator.setFraction(0.5);
-                var eosResults = eos.execute(new ScanConfig.Builder().language(codeBaseLanguage).roots(List.of(project.getBasePath())));
+                var eosResults = eos.execute(new ScanConfig.Builder().language(codeBaseLanguage).roots(List.of(getProjectBasePath(project).toString())));
                 scanResults.addAll(eosResults);
             }
         } catch (IOException | InterruptedException |
@@ -85,7 +86,7 @@ public class SourceCodeScannerManager {
             var issues = issuesMap.get(cve);
             if (issues != null) {
                 fileNode.addDependency(new ApplicableIssue(cve, warning.getLineStart(), warning.getColStart(), warning.getFilePath(), issues.get(0)));
-                for (var issue : issues) {
+                for (Issue issue : issues) {
                     // TODO: Add applicable scan info to the Issue object.
                 }
             }

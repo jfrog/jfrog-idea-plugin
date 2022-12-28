@@ -1,22 +1,11 @@
 package com.jfrog.ide.idea.scan.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import javax.annotation.processing.Generated;
+import java.util.Objects;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-        "endColumn",
-        "endLine",
-        "startColumn",
-        "startLine",
-        "snippet"
-})
-@JsonIgnoreProperties(ignoreUnknown = true)
-@Generated("jsonschema2pojo")
+@JsonPropertyOrder({"endColumn", "endLine", "startColumn", "startLine", "snippet"})
 public class Region {
 
     @JsonProperty("endColumn")
@@ -31,65 +20,54 @@ public class Region {
 
     private Message snippet;
 
-    @JsonProperty("endColumn")
     public Integer getEndColumn() {
         return endColumn;
     }
 
-    @JsonProperty("endColumn")
+    @SuppressWarnings("UnusedReturnValue")
     public void setEndColumn(Integer endColumn) {
         this.endColumn = endColumn;
     }
 
-    @JsonProperty("endLine")
     public Integer getEndLine() {
         return endLine;
     }
 
-    @JsonProperty("endLine")
+    @SuppressWarnings("UnusedReturnValue")
     public void setEndLine(Integer endLine) {
         this.endLine = endLine;
     }
 
-    @JsonProperty("startColumn")
     public Integer getStartColumn() {
         return startColumn;
     }
 
-    @JsonProperty("startColumn")
+    @SuppressWarnings("UnusedReturnValue")
     public void setStartColumn(Integer startColumn) {
         this.startColumn = startColumn;
     }
 
-    @JsonProperty("startLine")
     public Integer getStartLine() {
         return startLine;
     }
 
-    @JsonProperty("startLine")
+    @SuppressWarnings("UnusedReturnValue")
     public void setStartLine(Integer startLine) {
         this.startLine = startLine;
     }
 
-    @JsonProperty("snippet")
     public Message getSnippet() {
         return snippet;
     }
 
-    @JsonProperty("snippet")
+    @SuppressWarnings("UnusedReturnValue")
     public void setSnippet(Message snippet) {
         this.snippet = snippet;
     }
 
     @Override
     public int hashCode() {
-        int result = 1;
-        result = ((result * 31) + ((this.endLine == null) ? 0 : this.endLine.hashCode()));
-        result = ((result * 31) + ((this.endColumn == null) ? 0 : this.endColumn.hashCode()));
-        result = ((result * 31) + ((this.startColumn == null) ? 0 : this.startColumn.hashCode()));
-        result = ((result * 31) + ((this.startLine == null) ? 0 : this.startLine.hashCode()));
-        result = ((result * 31) + ((this.snippet == null) ? 0 : this.snippet.hashCode()));
-        return result;
+        return Objects.hash(endLine, endColumn, startColumn, startLine, snippet);
     }
 
     @Override
@@ -97,11 +75,11 @@ public class Region {
         if (other == this) {
             return true;
         }
-        if ((other instanceof Region) == false) {
+        if (!(other instanceof Region)) {
             return false;
         }
         Region rhs = ((Region) other);
-        return (((((this.endLine == rhs.endLine) || ((this.endLine != null) && this.endLine.equals(rhs.endLine))) && ((this.endColumn == rhs.endColumn) || ((this.endColumn != null) && this.endColumn.equals(rhs.endColumn)))) && ((this.startColumn == rhs.startColumn) || ((this.startColumn != null) && this.startColumn.equals(rhs.startColumn)))) && ((this.startLine == rhs.startLine) || ((this.startLine != null) && this.startLine.equals(rhs.startLine))) && ((this.snippet == rhs.snippet) || ((this.snippet != null) && this.snippet.equals(rhs.snippet))));
+        return ((((Objects.equals(this.endLine, rhs.endLine)) && (Objects.equals(this.endColumn, rhs.endColumn))) && (Objects.equals(this.startColumn, rhs.startColumn))) && (Objects.equals(this.startLine, rhs.startLine)) && (Objects.equals(this.snippet, rhs.snippet)));
     }
 
 }

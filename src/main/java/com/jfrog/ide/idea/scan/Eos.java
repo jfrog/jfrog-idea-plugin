@@ -12,18 +12,15 @@ import java.util.List;
 public class Eos extends ScanBinaryExecutor {
     private static final String SCAN_TYPE = "analyze-codebase";
     private static final String SCANNER_BINARY_NAME = "Eos";
+    private static final List<String> SCANNER_ARGS = List.of("analyze", "config");
 
     public Eos() {
         super(SCAN_TYPE, SCANNER_BINARY_NAME);
-    }
-
-    @Override
-    List<String> getSupportedLanguages() {
-        return List.of("python");
+        SUPPORTED_LANGUAGES = List.of("python");
     }
 
     public List<JfrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder) throws IOException, InterruptedException {
-        return super.execute(inputFileBuilder, List.of("analyze", "config"));
+        return super.execute(inputFileBuilder, SCANNER_ARGS);
     }
 
 }

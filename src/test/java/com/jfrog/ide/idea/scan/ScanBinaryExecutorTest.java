@@ -1,7 +1,5 @@
 package com.jfrog.ide.idea.scan;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
 import com.jfrog.ide.idea.scan.data.ScansConfig;
 import junit.framework.TestCase;
@@ -12,22 +10,17 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
+import static com.jfrog.ide.common.utils.Utils.createYAMLMapper;
+
 /**
  * @author tala
  **/
 public class ScanBinaryExecutorTest extends TestCase {
-    private ScanBinaryExecutor scanner;
+    private final ScanBinaryExecutor scanner = new ApplicabilityScannerExecutor();
     private final Path TEST_DEMO_OUTPUT = new File("src/test/resources/sarif/demo_output.sarif").toPath();
 
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        scanner = new ApplicabilityScannerExecutor();
-
-    }
-
-    public void testInputBuilder() {
+    public void testInputBuilder() throws IOException {
         var inputFileBuilder = new ScanConfig.Builder();
         Path inputPath = null;
         var testOutput = "file/location\\out.sarif";
@@ -46,9 +39,6 @@ public class ScanBinaryExecutorTest extends TestCase {
             assertEquals(testOutput, inputFile.getScans().get(0).getOutput());
             assertEquals(testLanguage, inputFile.getScans().get(0).getLanguage());
             assertEquals(testRoots, inputFile.getScans().get(0).getRoots());
-
-        } catch (Exception e) {
-            assertNull(e);
         } finally {
             if (inputPath != null) {
                 FileUtils.deleteQuietly(inputPath.toFile());
@@ -56,35 +46,27 @@ public class ScanBinaryExecutorTest extends TestCase {
         }
     }
 
-    public void testSarifParser() {
-        try {
-            var parsedOutput = scanner.parseOutputSarif(TEST_DEMO_OUTPUT);
-            assertEquals(2, parsedOutput.size());
-            assertEquals("applic_CVE-2022-25878", parsedOutput.get(0).getName());
-            assertEquals("CVE-2022-25978", parsedOutput.get(1).getName());
-            assertEquals("examples/applic-demo/../applic-demo/index.js", parsedOutput.get(0).getFilePath());
-            assertEquals("file://examples/applic-demo/../applic-demo/index.js", parsedOutput.get(1).getFilePath());
-            assertEquals("The vulnerable function protobufjs.load is called", parsedOutput.get(0).getReason());
-            assertEquals("The vulnerable function protobufjs.parse is called.", parsedOutput.get(1).getReason());
-            assertEquals(20, parsedOutput.get(0).getLineStart());
-            assertEquals(18, parsedOutput.get(1).getLineStart());
-            assertEquals(20, parsedOutput.get(0).getLineEnd());
-            assertEquals(22, parsedOutput.get(1).getLineEnd());
-            assertEquals(0, parsedOutput.get(0).getColStart());
-            assertEquals(0, parsedOutput.get(1).getColStart());
-            assertEquals(17, parsedOutput.get(0).getColEnd());
-            assertEquals(73, parsedOutput.get(1).getColEnd());
-
-        } catch (IOException e) {
-            assertNull(e);
-        }
-
+    public void testSarifParser() throws IOException {
+        var parsedOutput = scanner.parseOutputSarif(TEST_DEMO_OUTPUT);
+        assertEquals(2, parsedOutput.size());
+        assertEquals("applic_CVE-2022-25878", parsedOutput.get(0).getName());
+        assertEquals("CVE-2022-25978", parsedOutput.get(1).getName());
+        assertEquals("examples/applic-demo/../applic-demo/index.js", parsedOutput.get(0).getFilePath());
+        assertEquals("file://examples/applic-demo/../applic-demo/index.js", parsedOutput.get(1).getFilePath());
+        assertEquals("The vulnerable function protobufjs.load is called", parsedOutput.get(0).getReason());
+        assertEquals("The vulnerable function protobufjs.parse is called.", parsedOutput.get(1).getReason());
+        assertEquals(20, parsedOutput.get(0).getLineStart());
+        assertEquals(18, parsedOutput.get(1).getLineStart());
+        assertEquals(20, parsedOutput.get(0).getLineEnd());
+        assertEquals(22, parsedOutput.get(1).getLineEnd());
+        assertEquals(0, parsedOutput.get(0).getColStart());
+        assertEquals(0, parsedOutput.get(1).getColStart());
+        assertEquals(17, parsedOutput.get(0).getColEnd());
+        assertEquals(73, parsedOutput.get(1).getColEnd());
     }
 
     private ScansConfig readScansConfigYAML(Path inputPath) throws IOException {
-        var mapper = new ObjectMapper(new YAMLFactory());
+        var mapper = createYAMLMapper();
         return mapper.readValue(inputPath.toFile(), ScansConfig.class);
     }
-
-
 }

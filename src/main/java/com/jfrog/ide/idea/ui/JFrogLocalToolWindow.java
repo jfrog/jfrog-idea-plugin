@@ -175,6 +175,9 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
                 return;
             }
             var targetFile = PsiManager.getInstance(project).findFile(sourceCodeFile);
+            if (targetFile == null) {
+                return;
+            }
             var lineOffset = StringUtil.lineColToOffset(targetFile.getText(), node.getRow(), node.getCol());
             var element = targetFile.findElementAt(lineOffset);
             if (element instanceof Navigatable) {
@@ -182,7 +185,6 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             } else targetFile.navigate(true);
         });
     }
-
 
     /**
      * Clear the component tree.

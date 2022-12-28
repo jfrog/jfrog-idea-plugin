@@ -1,20 +1,11 @@
 package com.jfrog.ide.idea.scan.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-        "type",
-        "language",
-        "roots",
-        "output"
-})
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonPropertyOrder({"type", "language", "roots", "output"})
 public class ScanConfig {
     @JsonProperty("type")
     private String scanType;
@@ -46,49 +37,39 @@ public class ScanConfig {
         this.skippedFolders = builder.skippedFolders;
     }
 
-    @JsonProperty("type")
-
+    @SuppressWarnings("UnusedReturnValue")
     public String getScanType() {
         return scanType;
     }
 
-    @JsonProperty("type")
-
+    @SuppressWarnings("UnusedReturnValue")
     public void setScanType(String scanType) {
         this.scanType = scanType;
     }
-
-    @JsonProperty("language")
 
     public String getLanguage() {
         return language;
     }
 
-    @JsonProperty("language")
-
     public void setLanguage(String language) {
         this.language = language;
     }
-
-    @JsonProperty("roots")
 
     public List<String> getRoots() {
         return roots;
     }
 
-    @JsonProperty("roots")
+    @SuppressWarnings("UnusedReturnValue")
 
     public void setRoots(List<String> roots) {
         this.roots = roots;
     }
 
-    @JsonProperty("output")
-
     public String getOutput() {
         return output;
     }
 
-    @JsonProperty("output")
+    @SuppressWarnings("UnusedReturnValue")
 
     public void setOutput(String output) {
         this.output = output;
@@ -127,6 +108,7 @@ public class ScanConfig {
             return this;
         }
 
+        @SuppressWarnings("UnusedReturnValue")
         public Builder grepDisable(Boolean grepDisable) {
             this.grepDisable = grepDisable;
             return this;
@@ -137,6 +119,7 @@ public class ScanConfig {
             return this;
         }
 
+        @SuppressWarnings("UnusedReturnValue")
         public Builder skippedFolders(List<String> skippedFolders) {
             this.skippedFolders = skippedFolders;
             return this;

@@ -88,7 +88,7 @@ public abstract class ScanManager {
         this.executor = executor;
         this.basePath = basePath;
         this.project = project;
-        this.scanner = new SourceCodeScannerManager(project,"");
+        this.scanner = new SourceCodeScannerManager(project, getCodeBaseLanguage());
     }
 
     void setExecutor(ExecutorService executor) {
@@ -409,5 +409,19 @@ public abstract class ScanManager {
 
     public List<JfrogSecurityWarning> getSourceCodeScanResults() {
         return this.scanner.getScanResults();
+    }
+
+    private String getCodeBaseLanguage() {
+        switch (getPackageType().toLowerCase()) {
+            case "npm":
+                return "js";
+            case "pip":
+                return "python";
+            case "maven":
+            case "gradle":
+                return "java";
+            default:
+                return "";
+        }
     }
 }

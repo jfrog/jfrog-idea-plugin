@@ -110,6 +110,7 @@ public class ScanManagersTest extends TestCase {
             }
         });
     }
+
     public void testSourceCodeScanNoBinaries() {
         Collection<ScanManager> scanManagers = scanManagersFactory.scanManagers.values();
         assertNotEmpty(scanManagers);
@@ -118,9 +119,8 @@ public class ScanManagersTest extends TestCase {
                 scanManager.scanner.scanAndUpdate(new ProgressIndicatorMock(), new ArrayList<>());
                 assertEmpty(scanManager.getSourceCodeScanResults());
             } catch (Exception e) {
-                assertNull(e);
+                fail(e.getMessage());
             }
         });
-
     }
 }

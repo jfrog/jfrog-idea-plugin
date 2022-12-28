@@ -12,18 +12,15 @@ import java.util.List;
 public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
     private static final String SCAN_TYPE = "analyze-applicability";
     private static final String SCANNER_BINARY_NAME = "applicability_scanner";
+    private static final List<String> SCANNER_ARGS = List.of("scan");
 
     public ApplicabilityScannerExecutor() {
         super(SCAN_TYPE, SCANNER_BINARY_NAME);
-    }
-
-    @Override
-    List<String> getSupportedLanguages() {
-        return List.of("python","npm");
+        SUPPORTED_LANGUAGES = List.of("python", "js");
     }
 
     public List<JfrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder) throws IOException, InterruptedException {
-        return super.execute(inputFileBuilder, List.of("scan"));
+        return super.execute(inputFileBuilder, SCANNER_ARGS);
     }
 
 }

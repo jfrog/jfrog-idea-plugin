@@ -9,12 +9,9 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import java.util.ArrayList;
-import java.util.List;
 import javax.swing.tree.MutableTreeNode;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import javax.swing.tree.TreeNode;
+import java.util.*;
 
 /**
  * @author yahavi
@@ -30,7 +27,6 @@ public class LocalComponentsTree extends ComponentsTree {
     public static LocalComponentsTree getInstance(@NotNull Project project) {
         return project.getService(LocalComponentsTree.class);
     }
-
 
     private void appendProjectWhenReady(FileTreeNode filteredRoot) {
         ApplicationManager.getApplication().invokeLater(() -> appendProject(filteredRoot));
@@ -54,14 +50,14 @@ public class LocalComponentsTree extends ComponentsTree {
 
     public void addScanResults(List<FileTreeNode> fileTreeNodes) {
         for (FileTreeNode node : fileTreeNodes) {
-            var fileNode = fileNodes.get(node.getPath().toString());
+            var fileNode = fileNodes.get(Arrays.toString(node.getPath()));
             if (fileNode != null) {
-                List newChildren = Collections.list(fileNode.children());
-                for (var child : newChildren) {
-                    fileNode.add((MutableTreeNode) child);
+                Enumeration<TreeNode> children = fileNode.children();
+                while (children.hasMoreElements()) {
+                    fileNode.add((MutableTreeNode) children.nextElement());
                 }
             } else {
-                fileNodes.put(node.getPath().toString(), node);
+                fileNodes.put(Arrays.toString(node.getPath()), node);
                 appendProjectWhenReady(node);
             }
         }

@@ -1,62 +1,50 @@
 package com.jfrog.ide.idea.scan.data;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.apache.commons.collections4.CollectionUtils;
 
-import javax.annotation.processing.Generated;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"tool", "invocations", "results"})
-@Generated("jsonschema2pojo")
 public class Run {
 
     @JsonProperty("tool")
     private Tool tool;
     @JsonProperty("invocations")
-    private List<Invocation> invocations = new ArrayList<Invocation>();
+    private List<Invocation> invocations = new ArrayList<>();
     @JsonProperty("results")
-    private List<SarifResult> results = new ArrayList<SarifResult>();
+    private List<SarifResult> results = new ArrayList<>();
 
-    @JsonProperty("tool")
     public Tool getTool() {
         return tool;
     }
 
-    @JsonProperty("tool")
     public void setTool(Tool tool) {
         this.tool = tool;
     }
 
-    @JsonProperty("invocations")
     public List<Invocation> getInvocations() {
         return invocations;
     }
 
-    @JsonProperty("invocations")
     public void setInvocations(List<Invocation> invocations) {
         this.invocations = invocations;
     }
 
-    @JsonProperty("results")
     public List<SarifResult> getResults() {
         return results;
     }
 
-    @JsonProperty("results")
     public void setResults(List<SarifResult> results) {
         this.results = results;
     }
 
     @Override
     public int hashCode() {
-        int result = 1;
-        result = ((result * 31) + ((this.results == null) ? 0 : this.results.hashCode()));
-        result = ((result * 31) + ((this.tool == null) ? 0 : this.tool.hashCode()));
-        result = ((result * 31) + ((this.invocations == null) ? 0 : this.invocations.hashCode()));
-        return result;
+        return Objects.hash(results, tool, invocations);
     }
 
     @Override
@@ -64,11 +52,11 @@ public class Run {
         if (other == this) {
             return true;
         }
-        if ((other instanceof Run) == false) {
+        if (!(other instanceof Run)) {
             return false;
         }
         Run rhs = ((Run) other);
-        return ((((this.results == rhs.results) || ((this.results != null) && this.results.equals(rhs.results))) && ((this.tool == rhs.tool) || ((this.tool != null) && this.tool.equals(rhs.tool)))) && ((this.invocations == rhs.invocations) || ((this.invocations != null) && this.invocations.equals(rhs.invocations))));
+        return (((CollectionUtils.isEqualCollection(this.results, rhs.results)) && (Objects.equals(this.tool, rhs.tool))) && (CollectionUtils.isEqualCollection(this.invocations, rhs.invocations)));
     }
 
 }

@@ -1,36 +1,29 @@
 package com.jfrog.ide.idea.scan.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import javax.annotation.processing.Generated;
+import java.util.Objects;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"driver"})
-@JsonIgnoreProperties(ignoreUnknown = true)
-@Generated("jsonschema2pojo")
 public class Tool {
 
     @JsonProperty("driver")
     private Driver driver;
 
-    @JsonProperty("driver")
+    @SuppressWarnings("UnusedReturnValue")
     public Driver getDriver() {
         return driver;
     }
 
-    @JsonProperty("driver")
+    @SuppressWarnings("UnusedReturnValue")
     public void setDriver(Driver driver) {
         this.driver = driver;
     }
 
     @Override
     public int hashCode() {
-        int result = 1;
-        result = ((result * 31) + ((this.driver == null) ? 0 : this.driver.hashCode()));
-        return result;
+        return Objects.hash(driver);
     }
 
     @Override
@@ -38,11 +31,11 @@ public class Tool {
         if (other == this) {
             return true;
         }
-        if ((other instanceof Tool) == false) {
+        if (!(other instanceof Tool)) {
             return false;
         }
         Tool rhs = ((Tool) other);
-        return ((this.driver == rhs.driver) || ((this.driver != null) && this.driver.equals(rhs.driver)));
+        return (Objects.equals(this.driver, rhs.driver));
     }
 
 }

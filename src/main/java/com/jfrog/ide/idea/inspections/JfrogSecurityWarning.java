@@ -1,5 +1,6 @@
 package com.jfrog.ide.idea.inspections;
 
+import com.jfrog.ide.idea.scan.data.Region;
 import com.jfrog.ide.idea.scan.data.SarifResult;
 import org.apache.commons.lang.StringUtils;
 
@@ -12,7 +13,6 @@ public class JfrogSecurityWarning {
     private final String filePath;
     private final String lineSnippet;
     private final String name;
-
 
     public JfrogSecurityWarning(
             int lineStart,
@@ -33,14 +33,14 @@ public class JfrogSecurityWarning {
     }
 
     public JfrogSecurityWarning(SarifResult result) {
-        this(result.getLocations().get(0).getPhysicalLocation().getRegion().getStartLine() - 1,
-                result.getLocations().get(0).getPhysicalLocation().getRegion().getStartColumn(),
-                result.getLocations().get(0).getPhysicalLocation().getRegion().getEndLine() - 1,
-                result.getLocations().get(0).getPhysicalLocation().getRegion().getEndColumn(),
+        this(getFirstRegion(result).getStartLine() - 1,
+                getFirstRegion(result).getStartColumn(),
+                getFirstRegion(result).getEndLine() - 1,
+                getFirstRegion(result).getEndColumn(),
                 result.getMessage().getText(),
                 StringUtils.removeStart(result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri(), "file://"),
                 result.getRuleId(),
-                result.getLocations().get(0).getPhysicalLocation().getRegion().getSnippet().getText());
+                getFirstRegion(result).getSnippet().getText());
     }
 
     public int getLineStart() {
@@ -59,7 +59,6 @@ public class JfrogSecurityWarning {
         return colEnd;
     }
 
-
     public String getReason() {
         return reason;
     }
@@ -74,5 +73,9 @@ public class JfrogSecurityWarning {
 
     public String getLineSnippet() {
         return lineSnippet;
+    }
+
+    private static Region getFirstRegion(SarifResult result) {
+        return result.getLocations().get(0).getPhysicalLocation().getRegion();
     }
 }

@@ -1,40 +1,32 @@
 package com.jfrog.ide.idea.scan.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.apache.commons.collections4.CollectionUtils;
 
-import javax.annotation.processing.Generated;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-        "locations"
-})
-@JsonIgnoreProperties(ignoreUnknown = true)
-@Generated("jsonschema2pojo")
+@JsonPropertyOrder({"locations"})
 public class ThreadFlow {
 
     @JsonProperty("locations")
-    private List<ThreadFlowLocation> locations = new ArrayList<ThreadFlowLocation>();
+    private List<ThreadFlowLocation> locations = new ArrayList<>();
 
     @JsonProperty("locations")
     public List<ThreadFlowLocation> getLocations() {
         return locations;
     }
 
-    @JsonProperty("locations")
+    @SuppressWarnings("UnusedReturnValue")
     public void setLocations(List<ThreadFlowLocation> locations) {
         this.locations = locations;
     }
 
     @Override
     public int hashCode() {
-        int result = 1;
-        result = ((result * 31) + ((this.locations == null) ? 0 : this.locations.hashCode()));
-        return result;
+        return Objects.hash(locations);
     }
 
     @Override
@@ -42,11 +34,11 @@ public class ThreadFlow {
         if (other == this) {
             return true;
         }
-        if ((other instanceof ThreadFlow) == false) {
+        if (!(other instanceof ThreadFlow)) {
             return false;
         }
         ThreadFlow rhs = ((ThreadFlow) other);
-        return ((this.locations == rhs.locations) || ((this.locations != null) && this.locations.equals(rhs.locations)));
+        return (CollectionUtils.isEqualCollection(this.locations, rhs.locations));
     }
 
 }

@@ -1,64 +1,56 @@
 package com.jfrog.ide.idea.scan.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.apache.commons.collections4.CollectionUtils;
 
-import javax.annotation.processing.Generated;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"executionSuccessful", "arguments", "workingDirectory"})
-@JsonIgnoreProperties(ignoreUnknown = true)
-@Generated("jsonschema2pojo")
 public class Invocation {
 
     @JsonProperty("executionSuccessful")
     private Boolean executionSuccessful;
     @JsonProperty("arguments")
-    private List<String> arguments = new ArrayList<String>();
+    private List<String> arguments = new ArrayList<>();
     @JsonProperty("workingDirectory")
     private WorkingDirectory workingDirectory;
 
-    @JsonProperty("executionSuccessful")
+    @SuppressWarnings("UnusedReturnValue")
     public Boolean getExecutionSuccessful() {
         return executionSuccessful;
     }
 
-    @JsonProperty("executionSuccessful")
+    @SuppressWarnings("UnusedReturnValue")
     public void setExecutionSuccessful(Boolean executionSuccessful) {
         this.executionSuccessful = executionSuccessful;
     }
 
-    @JsonProperty("arguments")
+    @SuppressWarnings("UnusedReturnValue")
     public List<String> getArguments() {
         return arguments;
     }
 
-    @JsonProperty("arguments")
+    @SuppressWarnings("UnusedReturnValue")
     public void setArguments(List<String> arguments) {
         this.arguments = arguments;
     }
 
-    @JsonProperty("workingDirectory")
+    @SuppressWarnings("UnusedReturnValue")
     public WorkingDirectory getWorkingDirectory() {
         return workingDirectory;
     }
 
-    @JsonProperty("workingDirectory")
+    @SuppressWarnings("UnusedReturnValue")
     public void setWorkingDirectory(WorkingDirectory workingDirectory) {
         this.workingDirectory = workingDirectory;
     }
 
     @Override
     public int hashCode() {
-        int result = 1;
-        result = ((result * 31) + ((this.arguments == null) ? 0 : this.arguments.hashCode()));
-        result = ((result * 31) + ((this.executionSuccessful == null) ? 0 : this.executionSuccessful.hashCode()));
-        result = ((result * 31) + ((this.workingDirectory == null) ? 0 : this.workingDirectory.hashCode()));
-        return result;
+        return Objects.hash(arguments, executionSuccessful, workingDirectory);
     }
 
     @Override
@@ -66,11 +58,11 @@ public class Invocation {
         if (other == this) {
             return true;
         }
-        if ((other instanceof Invocation) == false) {
+        if (!(other instanceof Invocation)) {
             return false;
         }
         Invocation rhs = ((Invocation) other);
-        return ((((this.arguments == rhs.arguments) || ((this.arguments != null) && this.arguments.equals(rhs.arguments))) && ((this.executionSuccessful == rhs.executionSuccessful) || ((this.executionSuccessful != null) && this.executionSuccessful.equals(rhs.executionSuccessful)))) && ((this.workingDirectory == rhs.workingDirectory) || ((this.workingDirectory != null) && this.workingDirectory.equals(rhs.workingDirectory))));
+        return (((CollectionUtils.isEqualCollection(this.arguments, rhs.arguments)) && (Objects.equals(this.executionSuccessful, rhs.executionSuccessful))) && (Objects.equals(this.workingDirectory, rhs.workingDirectory)));
     }
 
 }
