@@ -2,7 +2,6 @@ package com.jfrog.ide.idea.ui;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
-import com.jfrog.ide.common.tree.BaseTreeNode;
 import com.jfrog.ide.common.tree.FileTreeNode;
 import com.jfrog.ide.idea.ui.menus.ToolbarPopupMenu;
 import org.jetbrains.annotations.NotNull;

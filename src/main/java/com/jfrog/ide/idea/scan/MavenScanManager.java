@@ -186,7 +186,10 @@ public class MavenScanManager extends ScanManager {
                             if (!treeNodeMap.containsKey(currDep.getGeneralInfo().getPath())) {
                                 treeNodeMap.put(pomPath, new DescriptorFileTreeNode(pomPath));
                             }
-                            treeNodeMap.get(pomPath).addDependency(artifact);
+                            // Each dependency might be a child of more than one POM file, but Artifact is a tree node, so it can have only one parent.
+                            // The solution for this is to clone the dependency before adding it as a child of the POM.
+                            Artifact clonedDep = (Artifact) artifact.clone();
+                            treeNodeMap.get(pomPath).addDependency(clonedDep);
                             addedDescriptors.put(pomPath, true);
                         }
                     }
