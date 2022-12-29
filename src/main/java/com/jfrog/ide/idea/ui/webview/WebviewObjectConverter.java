@@ -1,9 +1,5 @@
 package com.jfrog.ide.idea.ui.webview;
 
-import com.jfrog.ide.common.tree.DependencyNode;
-import com.jfrog.ide.common.tree.ImpactTreeNode;
-import com.jfrog.ide.common.tree.IssueNode;
-import com.jfrog.ide.common.tree.LicenseViolationNode;
 import com.jfrog.ide.common.tree.*;
 import com.jfrog.ide.idea.ui.webview.model.Cve;
 import com.jfrog.ide.idea.ui.webview.model.License;
@@ -12,7 +8,6 @@ import com.jfrog.ide.idea.ui.webview.model.Cve;
 import com.jfrog.ide.idea.ui.webview.model.License;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,12 +29,14 @@ public class WebviewObjectConverter {
             licenses = dependency.getLicenses().stream().map(depLicense -> new License(depLicense.getName(), depLicense.getMoreInfoUrl())).toArray(License[]::new);
         }
         ApplicableDetails applicableDetails = null;
-        if (issue.getApplicableIssues() != null) {
-            List<ApplicableIssue> applicableIssues = issue.getApplicableIssues();
+        if (issueNode.getApplicableIssues() != null) {
+            List<ApplicableIssueNode> applicableIssues = issueNode.getApplicableIssues();
             if (applicableIssues.size() > 0) {
-                List<Evidence> evidences = new ArrayList<>();
-                for (ApplicableIssue applicableIssue : applicableIssues) {
-                    evidences.add(new Evidence(applicableIssue.getReason(), applicableIssue.getFilePath(), applicableIssue.getLineSnippet()));
+                Evidence[] evidences = new Evidence[applicableIssues.size()];
+                int i = 0;
+                for (ApplicableIssueNode applicableIssue : applicableIssues) {
+                    evidences[i] = new Evidence(applicableIssue.getReason(), applicableIssue.getFilePath(), applicableIssue.getLineSnippet());
+                    i++;
                 }
                 applicableDetails = new ApplicableDetails(true, evidences, null);
             }

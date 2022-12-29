@@ -18,10 +18,10 @@ import com.intellij.ui.jcef.JBCefApp;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.ui.jcef.JBCefBrowserBase;
 import com.intellij.util.ui.UIUtil;
-import com.jfrog.ide.common.tree.ApplicableIssue;
-import com.jfrog.ide.common.tree.Issue;
-import com.jfrog.ide.common.tree.LicenseViolation;
-import com.jfrog.ide.common.tree.VulnerabilityOrViolation;
+import com.jfrog.ide.common.tree.ApplicableIssueNode;
+import com.jfrog.ide.common.tree.IssueNode;
+import com.jfrog.ide.common.tree.LicenseViolationNode;
+import com.jfrog.ide.common.tree.VulnerabilityOrViolationNode;
 import com.jfrog.ide.idea.actions.CollapseAllAction;
 import com.jfrog.ide.idea.actions.ExpandAllAction;
 import com.jfrog.ide.idea.events.ApplicationEvents;
@@ -161,8 +161,8 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         if (vulnerabilityOrViolation instanceof IssueNode) {
             IssueNode issue = (IssueNode) vulnerabilityOrViolation;
             messagePacker.send(DEPENDENCY_TYPE, WebviewObjectConverter.convertIssueToDepPage(issue));
-        } else if (vulnerabilityOrViolation instanceof ApplicableIssue) {
-            ApplicableIssue node = (ApplicableIssue) vulnerabilityOrViolation;
+        } else if (vulnerabilityOrViolation instanceof ApplicableIssueNode) {
+            ApplicableIssueNode node = (ApplicableIssueNode) vulnerabilityOrViolation;
             messagePacker.send(DEPENDENCY_TYPE, WebviewObjectConverter.convertIssueToDepPage(node.getIssue()));
             navigateToFile(node);
         } else if (vulnerabilityOrViolation instanceof LicenseViolationNode) {
@@ -171,7 +171,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         }
     }
 
-    private void navigateToFile(ApplicableIssue node) {
+    private void navigateToFile(ApplicableIssueNode node) {
         ApplicationManager.getApplication().invokeLater(() -> {
             VirtualFile sourceCodeFile = LocalFileSystem.getInstance().findFileByIoFile(new File(node.getFilePath()));
             if (sourceCodeFile == null) {

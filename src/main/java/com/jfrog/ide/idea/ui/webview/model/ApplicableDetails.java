@@ -1,7 +1,6 @@
 package com.jfrog.ide.idea.ui.webview.model;
 
 import java.io.Serializable;
-import java.util.List;
 
 public class ApplicableDetails implements Serializable {
     public boolean getIsApplicable() {
@@ -12,11 +11,11 @@ public class ApplicableDetails implements Serializable {
         isApplicable = applicable;
     }
 
-    public List<Evidence> getEvidence() {
+    public Evidence[] getEvidence() {
         return evidence;
     }
 
-    public void setEvidence(List<Evidence> evidence) {
+    public void setEvidence(Evidence[] evidence) {
         this.evidence = evidence;
     }
 

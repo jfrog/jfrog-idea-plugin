@@ -38,7 +38,6 @@ public class LocalComponentsTree extends ComponentsTree {
         super.reset();
     }
 
-    @Override
     public void applyFiltersForAllProjects() {
         setModel(null);
         // TODO: I added the reset here, but it might not be the right solution, and i'm not even sure if it's needed. If it's removed or moved from here, pay attention to the commented code in addOrReplace below.

@@ -25,7 +25,6 @@ import com.jfrog.ide.common.tree.DependencyNode;
 import com.jfrog.ide.common.tree.FileTreeNode;
 import com.jfrog.ide.common.tree.ImpactTreeNode;
 import com.jfrog.ide.common.tree.IssueNode;
-import com.jfrog.ide.common.tree.Issue;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;

@@ -22,7 +22,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
@@ -31,7 +30,8 @@ import java.util.concurrent.Executors;
 
 import static com.jfrog.ide.common.log.Utils.logError;
 import static com.jfrog.ide.idea.scan.ScanUtils.createScanPaths;
-import static com.jfrog.ide.idea.utils.Utils.*;
+import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
+import static com.jfrog.ide.idea.utils.Utils.getScanLogicType;
 
 /**
  * Created by yahavi
