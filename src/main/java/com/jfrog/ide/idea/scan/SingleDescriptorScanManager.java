@@ -43,6 +43,14 @@ public abstract class SingleDescriptorScanManager extends ScanManager {
         this(project, basePath, prefix, executor, "");
     }
 
+    /**
+     * Groups a collection of DependencyNodes by the descriptor files of the modules that depend on them.
+     * The returned DependencyNodes inside the FileTreeNodes are references of the ones in depScanResults.
+     *
+     * @param depScanResults - collection of DependencyNodes.
+     * @param depMap - a map of DependencyTree objects by their component ID.
+     * @return A list of FileTreeNodes (that are all DescriptorFileTreeNodes) having the DependencyNodes as their children.
+     */
     @Override
     protected List<FileTreeNode> groupDependenciesToDescriptorNodes(Collection<DependencyNode> depScanResults, Map<String, List<DependencyTree>> depMap) {
         DescriptorFileTreeNode fileTreeNode = new DescriptorFileTreeNode(descriptorFilePath);

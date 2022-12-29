@@ -117,6 +117,15 @@ public abstract class ScanManager {
 
     protected abstract String getProjectPackageType();
 
+    /**
+     * Groups a collection of DependencyNodes by the descriptor files of the modules that depend on them.
+     * The returned DependencyNodes inside the FileTreeNodes might be clones of the ones in depScanResults, but it's not
+     * guaranteed.
+     *
+     * @param depScanResults - collection of DependencyNodes.
+     * @param depMap - a map of DependencyTree objects by their component ID.
+     * @return A list of FileTreeNodes (that are all DescriptorFileTreeNodes) having the DependencyNodes as their children.
+     */
     protected abstract List<FileTreeNode> groupDependenciesToDescriptorNodes(Collection<DependencyNode> depScanResults, Map<String, List<DependencyTree>> depMap);
 
     public abstract String getPackageType();
