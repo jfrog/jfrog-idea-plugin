@@ -23,7 +23,6 @@ import org.apache.commons.io.FileUtils;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.handler.CefLoadHandlerAdapter;
-import com.jfrog.ide.idea.ui.webview.model.ExtendedInformation;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -44,7 +43,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     JBCefBrowserBase browser;
     OnePixelSplitter verticalSplit;
     MessagePacker messagePacker;
-    VulnerabilityOrViolation selectedIssue;
+    VulnerabilityOrViolationNode selectedIssue;
 
     /**
      * @param project   - Currently opened IntelliJ project
@@ -87,12 +86,12 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
         // Component selection listener
         componentsTree.addTreeSelectionListener(e -> {
-            if (e == null || e.getNewLeadSelectionPath() == null || !(e.getNewLeadSelectionPath().getLastPathComponent() instanceof VulnerabilityOrViolation)) {
+            if (e == null || e.getNewLeadSelectionPath() == null || !(e.getNewLeadSelectionPath().getLastPathComponent() instanceof VulnerabilityOrViolationNode)) {
                 verticalSplit.setSecondComponent(null);
                 return;
             }
 
-            selectedIssue = (VulnerabilityOrViolation) e.getNewLeadSelectionPath().getLastPathComponent();
+            selectedIssue = (VulnerabilityOrViolationNode) e.getNewLeadSelectionPath().getLastPathComponent();
             updateIssueOrLicenseInWebview(selectedIssue);
             verticalSplit.setSecondComponent(browser.getComponent());
         });
@@ -148,12 +147,12 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         return treeScrollPane;
     }
 
-    private void updateIssueOrLicenseInWebview(VulnerabilityOrViolation vulnerabilityOrViolation) {
-        if (vulnerabilityOrViolation instanceof Issue) {
-            Issue issue = (Issue) vulnerabilityOrViolation;
-            messagePacker.send("DEPENDENCY", WebviewObjectConverter.convertIssueToDepPage(issue));
+    private void updateIssueOrLicenseInWebview(VulnerabilityOrViolationNode vulnerabilityOrViolation) {
+        if (vulnerabilityOrViolation instanceof IssueNode) {
+            IssueNode issueNode = (IssueNode) vulnerabilityOrViolation;
+            messagePacker.send("DEPENDENCY", WebviewObjectConverter.convertIssueToDepPage(issueNode));
         } else {
-            LicenseViolation license = (LicenseViolation) vulnerabilityOrViolation;
+            LicenseViolationNode license = (LicenseViolationNode) vulnerabilityOrViolation;
             messagePacker.send("DEPENDENCY", WebviewObjectConverter.convertLicenseToDepPage(license));
         }
     }

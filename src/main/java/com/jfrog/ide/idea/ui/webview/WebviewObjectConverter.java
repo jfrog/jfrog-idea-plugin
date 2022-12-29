@@ -2,25 +2,25 @@ package com.jfrog.ide.idea.ui.webview;
 
 import com.jfrog.ide.common.tree.DependencyNode;
 import com.jfrog.ide.common.tree.ImpactTreeNode;
-import com.jfrog.ide.common.tree.Issue;
-import com.jfrog.ide.common.tree.LicenseViolation;
+import com.jfrog.ide.common.tree.IssueNode;
+import com.jfrog.ide.common.tree.LicenseViolationNode;
 import com.jfrog.ide.idea.ui.webview.model.*;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class WebviewObjectConverter {
-    public static DependencyPage convertIssueToDepPage(Issue issue) {
+    public static DependencyPage convertIssueToDepPage(IssueNode issueNode) {
         ExtendedInformation extendedInformation = null;
-        if (issue.getResearchInfo() != null) {
-            com.jfrog.ide.common.tree.ResearchInfo issueResearchInfo = issue.getResearchInfo();
+        if (issueNode.getResearchInfo() != null) {
+            com.jfrog.ide.common.tree.ResearchInfo issueResearchInfo = issueNode.getResearchInfo();
             JfrogResearchSeverityReason[] severityReasons = Arrays.stream(issueResearchInfo.getSeverityReasons()).map(severityReason -> new JfrogResearchSeverityReason(severityReason.getName(), severityReason.getDescription(), severityReason.isPositive())).toArray(JfrogResearchSeverityReason[]::new);
             extendedInformation = new ExtendedInformation(issueResearchInfo.getShortDescription(), issueResearchInfo.getFullDescription(), issueResearchInfo.getSeverity().name(), issueResearchInfo.getRemediation(), severityReasons);
         }
-        DependencyNode dependency = issue.getParentArtifact();
+        DependencyNode dependency = issueNode.getParentArtifact();
         String[] watchNames = null;
-        if (issue.getWatchNames() != null) {
-            watchNames = issue.getWatchNames().toArray(new String[0]);
+        if (issueNode.getWatchNames() != null) {
+            watchNames = issueNode.getWatchNames().toArray(new String[0]);
         }
         License[] licenses = null;
         if (dependency.getLicenses() != null) {
@@ -32,31 +32,31 @@ public class WebviewObjectConverter {
             }
         }
         return new DependencyPage(
-                issue.getIssueId(),
+                issueNode.getIssueId(),
                 dependency.getGeneralInfo().getArtifactId(),
                 dependency.getGeneralInfo().getPkgType(),
                 dependency.getGeneralInfo().getVersion(),
-                issue.getSeverity().name(),
+                issueNode.getSeverity().name(),
                 licenses,
-                issue.getSummary(),
-                convertVersionRanges(issue.getFixedVersions()),
-                convertVersionRanges(issue.getInfectedVersions()),
-                convertReferences(issue.getReferences()),
+                issueNode.getSummary(),
+                convertVersionRanges(issueNode.getFixedVersions()),
+                convertVersionRanges(issueNode.getInfectedVersions()),
+                convertReferences(issueNode.getReferences()),
                 new Cve(
-                        issue.getCve().getCveId(),
-                        issue.getCve().getCvssV2Score(),
-                        issue.getCve().getCvssV2Vector(),
-                        issue.getCve().getCvssV3Score(),
-                        issue.getCve().getCvssV3Vector()
+                        issueNode.getCve().getCveId(),
+                        issueNode.getCve().getCvssV2Score(),
+                        issueNode.getCve().getCvssV2Vector(),
+                        issueNode.getCve().getCvssV3Score(),
+                        issueNode.getCve().getCvssV3Vector()
                 ),
                 convertImpactPath(dependency.getImpactPaths()),
                 watchNames,
-                issue.getLastUpdated(),
+                issueNode.getLastUpdated(),
                 extendedInformation
         );
     }
 
-    public static DependencyPage convertLicenseToDepPage(LicenseViolation license) {
+    public static DependencyPage convertLicenseToDepPage(LicenseViolationNode license) {
         DependencyNode dependency = license.getParentArtifact();
         String[] watchNames = null;
         if (license.getWatchNames() != null) {

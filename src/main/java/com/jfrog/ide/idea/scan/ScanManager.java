@@ -24,7 +24,7 @@ import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.common.tree.DependencyNode;
 import com.jfrog.ide.common.tree.FileTreeNode;
 import com.jfrog.ide.common.tree.ImpactTreeNode;
-import com.jfrog.ide.common.tree.Issue;
+import com.jfrog.ide.common.tree.IssueNode;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.log.Logger;
@@ -145,7 +145,7 @@ public abstract class ScanManager {
             Map<String, List<DependencyTree>> depMap = new HashMap<>();
             mapDependencyTree(depMap, dependencyTree);
 
-            Map<String, List<Issue>> issuesMap = mapIssuesByCve(results);
+            Map<String, List<IssueNode>> issuesMap = mapIssuesByCve(results);
 
             createImpactPaths(results, depMap, dependencyTree);
             List<FileTreeNode> fileTreeNodes = groupDependenciesToDescriptorNodes(results.values(), depMap);
@@ -177,21 +177,21 @@ public abstract class ScanManager {
      * @param results - scan results mapped by dependencies.
      * @return a map of CVE IDs to lists of issues with them.
      */
-    private Map<String, List<Issue>> mapIssuesByCve(Map<String, DependencyNode> results) {
-        Map<String, List<Issue>> issues = new HashMap<>();
+    private Map<String, List<IssueNode>> mapIssuesByCve(Map<String, DependencyNode> results) {
+        Map<String, List<IssueNode>> issues = new HashMap<>();
         for (DependencyNode dep : results.values()) {
             for (TreeNode node : Collections.list(dep.children())) {
-                if (!(node instanceof Issue)) {
+                if (!(node instanceof IssueNode)) {
                     continue;
                 }
-                Issue issue = (Issue) node;
-                if (issue.getCve() == null || issue.getCve().getCveId() == null || issue.getCve().getCveId().isEmpty()) {
+                IssueNode issueNode = (IssueNode) node;
+                if (issueNode.getCve() == null || issueNode.getCve().getCveId() == null || issueNode.getCve().getCveId().isEmpty()) {
                     continue;
                 }
-                if (!issues.containsKey(issue.getCve().getCveId())) {
-                    issues.put(issue.getCve().getCveId(), new ArrayList<>());
+                if (!issues.containsKey(issueNode.getCve().getCveId())) {
+                    issues.put(issueNode.getCve().getCveId(), new ArrayList<>());
                 }
-                issues.get(issue.getCve().getCveId()).add(issue);
+                issues.get(issueNode.getCve().getCveId()).add(issueNode);
             }
         }
         return issues;

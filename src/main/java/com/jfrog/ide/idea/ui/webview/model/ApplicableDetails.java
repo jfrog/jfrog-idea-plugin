@@ -4,16 +4,12 @@ import java.io.Serializable;
 
 public class ApplicableDetails implements Serializable {
     boolean isApplicable;
-    String applicableFixReason;
-    String filePathEvidence;
-    String codeEvidence;
+    Evidence[] evidence;
     String searchTarget;
 
-    public ApplicableDetails(boolean isApplicable, String applicableFixReason, String filePathEvidence, String codeEvidence, String searchTarget) {
+    public ApplicableDetails(boolean isApplicable, Evidence[] evidence, String searchTarget) {
         this.isApplicable = isApplicable;
-        this.applicableFixReason = applicableFixReason;
-        this.filePathEvidence = filePathEvidence;
-        this.codeEvidence = codeEvidence;
+        this.evidence = evidence;
         this.searchTarget = searchTarget;
     }
 }
