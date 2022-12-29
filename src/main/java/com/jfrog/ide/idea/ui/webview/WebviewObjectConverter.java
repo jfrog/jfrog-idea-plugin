@@ -1,6 +1,6 @@
 package com.jfrog.ide.idea.ui.webview;
 
-import com.jfrog.ide.common.tree.Artifact;
+import com.jfrog.ide.common.tree.DependencyNode;
 import com.jfrog.ide.common.tree.ImpactTreeNode;
 import com.jfrog.ide.common.tree.Issue;
 import com.jfrog.ide.common.tree.LicenseViolation;
@@ -17,7 +17,7 @@ public class WebviewObjectConverter {
             JfrogResearchSeverityReason[] severityReasons = Arrays.stream(issueResearchInfo.getSeverityReasons()).map(severityReason -> new JfrogResearchSeverityReason(severityReason.getName(), severityReason.getDescription(), severityReason.isPositive())).toArray(JfrogResearchSeverityReason[]::new);
             extendedInformation = new ExtendedInformation(issueResearchInfo.getShortDescription(), issueResearchInfo.getFullDescription(), issueResearchInfo.getSeverity().name(), issueResearchInfo.getRemediation(), severityReasons);
         }
-        Artifact dependency = issue.getParentArtifact();
+        DependencyNode dependency = issue.getParentArtifact();
         String[] watchNames = null;
         if (issue.getWatchNames() != null) {
             watchNames = issue.getWatchNames().toArray(new String[0]);
@@ -57,7 +57,7 @@ public class WebviewObjectConverter {
     }
 
     public static DependencyPage convertLicenseToDepPage(LicenseViolation license) {
-        Artifact dependency = license.getParentArtifact();
+        DependencyNode dependency = license.getParentArtifact();
         String[] watchNames = null;
         if (license.getWatchNames() != null) {
             watchNames = license.getWatchNames().toArray(new String[0]);

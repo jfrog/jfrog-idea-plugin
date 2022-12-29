@@ -21,7 +21,7 @@ import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
-import com.jfrog.ide.common.tree.Artifact;
+import com.jfrog.ide.common.tree.DependencyNode;
 import com.jfrog.ide.common.tree.FileTreeNode;
 import com.jfrog.ide.common.tree.ImpactTreeNode;
 import com.jfrog.ide.common.tree.Issue;
@@ -117,7 +117,7 @@ public abstract class ScanManager {
 
     protected abstract String getProjectPackageType();
 
-    protected abstract List<FileTreeNode> groupArtifactsToDescriptorNodes(Collection<Artifact> depScanResults, Map<String, List<DependencyTree>> depMap);
+    protected abstract List<FileTreeNode> groupDependenciesToDescriptorNodes(Collection<DependencyNode> depScanResults, Map<String, List<DependencyTree>> depMap);
 
     public abstract String getPackageType();
 
@@ -132,7 +132,7 @@ public abstract class ScanManager {
             DependencyTree dependencyTree = buildTree();
             indicator.setText("2/3: Xray scanning project dependencies");
             log.debug("Start scan for '" + projectName + "'.");
-            Map<String, Artifact> results = scanLogic.scanArtifacts(dependencyTree, serverConfig, indicator, prefix, this::checkCanceled);
+            Map<String, DependencyNode> results = scanLogic.scanArtifacts(dependencyTree, serverConfig, indicator, prefix, this::checkCanceled);
             indicator.setText("3/3: Finalizing");
             if (results == null) {
                 log.debug("Wasn't able to scan '" + projectName + "'.");
@@ -148,7 +148,7 @@ public abstract class ScanManager {
             Map<String, List<Issue>> issuesMap = mapIssuesByCve(results);
 
             createImpactPaths(results, depMap, dependencyTree);
-            List<FileTreeNode> fileTreeNodes = groupArtifactsToDescriptorNodes(results.values(), depMap);
+            List<FileTreeNode> fileTreeNodes = groupDependenciesToDescriptorNodes(results.values(), depMap);
             addScanResults(fileTreeNodes);
         } catch (ProcessCanceledException e) {
             log.info("Xray scan was canceled");
@@ -177,9 +177,9 @@ public abstract class ScanManager {
      * @param results - scan results mapped by dependencies.
      * @return a map of CVE IDs to lists of issues with them.
      */
-    private Map<String, List<Issue>> mapIssuesByCve(Map<String, Artifact> results) {
+    private Map<String, List<Issue>> mapIssuesByCve(Map<String, DependencyNode> results) {
         Map<String, List<Issue>> issues = new HashMap<>();
-        for (Artifact dep : results.values()) {
+        for (DependencyNode dep : results.values()) {
             for (TreeNode node : Collections.list(dep.children())) {
                 if (!(node instanceof Issue)) {
                     continue;
@@ -197,8 +197,8 @@ public abstract class ScanManager {
         return issues;
     }
 
-    private void createImpactPaths(Map<String, Artifact> dependencies, Map<String, List<DependencyTree>> depMap, DependencyTree root) {
-        for (Map.Entry<String, Artifact> depEntry : dependencies.entrySet()) {
+    private void createImpactPaths(Map<String, DependencyNode> dependencies, Map<String, List<DependencyTree>> depMap, DependencyTree root) {
+        for (Map.Entry<String, DependencyNode> depEntry : dependencies.entrySet()) {
             Map<DependencyTree, ImpactTreeNode> impactTreeNodes = new HashMap<>();
             for (DependencyTree depTree : depMap.get(depEntry.getKey())) {
                 addImpactPath(impactTreeNodes, depTree);

@@ -3,14 +3,13 @@ package com.jfrog.ide.idea.scan;
 import com.google.common.collect.Sets;
 import com.intellij.ide.highlighter.XmlFileType;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.jfrog.ide.common.scan.ComponentPrefix;
-import com.jfrog.ide.common.tree.Artifact;
+import com.jfrog.ide.common.tree.DependencyNode;
 import com.jfrog.ide.common.tree.DescriptorFileTreeNode;
 import com.jfrog.ide.common.tree.FileTreeNode;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
@@ -23,10 +22,7 @@ import org.jetbrains.idea.maven.model.MavenArtifact;
 import org.jetbrains.idea.maven.model.MavenArtifactNode;
 import org.jetbrains.idea.maven.model.MavenId;
 import org.jetbrains.idea.maven.project.MavenProject;
-import org.jetbrains.idea.maven.project.MavenProjectChanges;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
-import org.jetbrains.idea.maven.project.MavenProjectsTree;
-import org.jetbrains.idea.maven.server.NativeMavenProjectHolder;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.jfrog.build.extractor.scan.Scope;
@@ -173,11 +169,11 @@ public class MavenScanManager extends ScanManager {
     }
 
     @Override
-    protected List<FileTreeNode> groupArtifactsToDescriptorNodes(Collection<Artifact> depScanResults, Map<String, List<DependencyTree>> depMap) {
+    protected List<FileTreeNode> groupDependenciesToDescriptorNodes(Collection<DependencyNode> depScanResults, Map<String, List<DependencyTree>> depMap) {
         Map<String, DescriptorFileTreeNode> treeNodeMap = new HashMap<>();
-        for (Artifact artifact : depScanResults) {
+        for (DependencyNode dependencyNode : depScanResults) {
             Map<String, Boolean> addedDescriptors = new HashMap<>();
-            for (DependencyTree dep : depMap.get(artifact.getGeneralInfo().getComponentId())) {
+            for (DependencyTree dep : depMap.get(dependencyNode.getGeneralInfo().getComponentId())) {
                 DependencyTree currDep = dep;
                 while (currDep != null) {
                     if (currDep.getGeneralInfo() != null) {
@@ -188,7 +184,7 @@ public class MavenScanManager extends ScanManager {
                             }
                             // Each dependency might be a child of more than one POM file, but Artifact is a tree node, so it can have only one parent.
                             // The solution for this is to clone the dependency before adding it as a child of the POM.
-                            Artifact clonedDep = (Artifact) artifact.clone();
+                            DependencyNode clonedDep = (DependencyNode) dependencyNode.clone();
                             treeNodeMap.get(pomPath).addDependency(clonedDep);
                             addedDescriptors.put(pomPath, true);
                         }

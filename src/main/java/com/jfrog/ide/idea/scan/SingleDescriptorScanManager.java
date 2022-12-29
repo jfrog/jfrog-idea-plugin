@@ -2,7 +2,7 @@ package com.jfrog.ide.idea.scan;
 
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.common.scan.ComponentPrefix;
-import com.jfrog.ide.common.tree.Artifact;
+import com.jfrog.ide.common.tree.DependencyNode;
 import com.jfrog.ide.common.tree.DescriptorFileTreeNode;
 import com.jfrog.ide.common.tree.FileTreeNode;
 import com.jfrog.ide.idea.ui.ComponentsTree;
@@ -44,7 +44,7 @@ public abstract class SingleDescriptorScanManager extends ScanManager {
     }
 
     @Override
-    protected List<FileTreeNode> groupArtifactsToDescriptorNodes(Collection<Artifact> depScanResults, Map<String, List<DependencyTree>> depMap) {
+    protected List<FileTreeNode> groupDependenciesToDescriptorNodes(Collection<DependencyNode> depScanResults, Map<String, List<DependencyTree>> depMap) {
         DescriptorFileTreeNode fileTreeNode = new DescriptorFileTreeNode(descriptorFilePath);
         fileTreeNode.addDependencies(depScanResults);
         return Arrays.asList(fileTreeNode);
