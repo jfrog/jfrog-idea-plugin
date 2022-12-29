@@ -26,16 +26,16 @@ import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
  */
 public abstract class ScanBinaryExecutor {
 
-    protected List<String> SUPPORTED_LANGUAGES;
+    protected List<String> supportedLanguages;
 
-    final String SCAN_TYPE;
+    final String scanType;
     private static final Path BINARIES_DIR = HOME_PATH.resolve("dependencies").resolve("jfrog-security");
-    private final CommandExecutor commandExecutor;
     private final String BINARY_NAME;
+    private final CommandExecutor commandExecutor;
     private boolean shouldExecute;
 
     ScanBinaryExecutor(String scanType, String binaryName) {
-        SCAN_TYPE = scanType;
+        this.scanType = scanType;
         BINARY_NAME = binaryName;
         Path binaryPath = BINARIES_DIR.resolve(BINARY_NAME);
         commandExecutor = new CommandExecutor(binaryPath.toString(), Maps.newHashMap());
@@ -55,7 +55,7 @@ public abstract class ScanBinaryExecutor {
             outputTempDir = Files.createTempDirectory("");
             Path outputFilePath = Files.createTempFile(outputTempDir, "", ".sarif");
             inputFileBuilder.output(outputFilePath.toString());
-            inputFileBuilder.scanType(SCAN_TYPE);
+            inputFileBuilder.scanType(scanType);
             inputFile = createTempRunInputFile(new ScansConfig(List.of(inputFileBuilder.Build())));
             args = new ArrayList<>(args);
             args.add(inputFile.toString());
@@ -78,7 +78,7 @@ public abstract class ScanBinaryExecutor {
     }
 
     protected List<String> getSupportedLanguages() {
-        return SUPPORTED_LANGUAGES;
+        return supportedLanguages;
     }
 
     List<JFrogSecurityWarning> parseOutputSarif(Path outputFile) throws IOException {

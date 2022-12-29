@@ -16,7 +16,7 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
 
     public ApplicabilityScannerExecutor() {
         super(SCAN_TYPE, SCANNER_BINARY_NAME);
-        SUPPORTED_LANGUAGES = List.of("python", "js");
+        supportedLanguages = List.of("python", "js");
     }
 
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder) throws IOException, InterruptedException {

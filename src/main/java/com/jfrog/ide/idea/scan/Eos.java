@@ -16,7 +16,7 @@ public class Eos extends ScanBinaryExecutor {
 
     public Eos() {
         super(SCAN_TYPE, SCANNER_BINARY_NAME);
-        SUPPORTED_LANGUAGES = List.of("python");
+        supportedLanguages = List.of("python");
     }
 
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder) throws IOException, InterruptedException {

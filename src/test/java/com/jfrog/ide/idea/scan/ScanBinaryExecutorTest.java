@@ -29,7 +29,7 @@ public class ScanBinaryExecutorTest extends TestCase {
         String testLanguage = "Go";
         List<String> testRoots = List.of("a", "b", "c");
 
-        inputFileBuilder.scanType(scanner.SCAN_TYPE);
+        inputFileBuilder.scanType(scanner.scanType);
         inputFileBuilder.output(testOutput);
         inputFileBuilder.language(testLanguage);
         inputFileBuilder.roots(testRoots);
