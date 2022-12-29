@@ -2,10 +2,9 @@ package com.jfrog.ide.idea.scan;
 
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.common.log.ProgressIndicator;
-import com.jfrog.ide.common.tree.DescriptorFileTreeNode;
+import com.jfrog.ide.common.tree.ApplicableIssue;
 import com.jfrog.ide.common.tree.FileTreeNode;
 import com.jfrog.ide.common.tree.Issue;
-import com.jfrog.ide.common.tree.ApplicableIssue;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
@@ -75,19 +74,20 @@ public class SourceCodeScannerManager {
     }
 
     public List<FileTreeNode> getResults(Map<String, List<Issue>> issuesMap) {
-        HashMap<String, DescriptorFileTreeNode> results = new HashMap<String, DescriptorFileTreeNode>();
+        HashMap<String, FileTreeNode> results = new HashMap<>();
         for (JFrogSecurityWarning warning : scanResults) {
-            DescriptorFileTreeNode fileNode = results.get(warning.getFilePath());
+            FileTreeNode fileNode = results.get(warning.getFilePath());
             if (fileNode == null) {
-                fileNode = new DescriptorFileTreeNode(warning.getFilePath());
+                fileNode = new FileTreeNode(warning.getFilePath());
                 results.put(warning.getFilePath(), fileNode);
             }
             String cve = StringUtils.removeStart(warning.getName(), "applic_");
             List<Issue> issues = issuesMap.get(cve);
             if (issues != null) {
-                fileNode.addDependency(new ApplicableIssue(cve, warning.getLineStart(), warning.getColStart(), warning.getFilePath(), issues.get(0)));
+                ApplicableIssue applicableIssue = new ApplicableIssue(cve, warning.getLineStart(), warning.getColStart(), warning.getFilePath(), warning.getReason(), warning.getLineSnippet(), issues.get(0));
+                fileNode.addDependency(applicableIssue);
                 for (Issue issue : issues) {
-                    // TODO: Add applicable scan info to the Issue object.
+                    issue.AddApplicableIssues(applicableIssue);
                 }
             }
         }

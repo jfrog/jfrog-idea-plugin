@@ -1,11 +1,18 @@
 package com.jfrog.ide.idea.ui.webview;
 
+import com.jfrog.ide.common.tree.DependencyNode;
+import com.jfrog.ide.common.tree.ImpactTreeNode;
+import com.jfrog.ide.common.tree.IssueNode;
+import com.jfrog.ide.common.tree.LicenseViolationNode;
 import com.jfrog.ide.common.tree.*;
+import com.jfrog.ide.idea.ui.webview.model.Cve;
+import com.jfrog.ide.idea.ui.webview.model.License;
 import com.jfrog.ide.idea.ui.webview.model.*;
 import com.jfrog.ide.idea.ui.webview.model.Cve;
 import com.jfrog.ide.idea.ui.webview.model.License;
 import org.apache.commons.lang.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,6 +33,17 @@ public class WebviewObjectConverter {
         if (dependency.getLicenses() != null) {
             licenses = dependency.getLicenses().stream().map(depLicense -> new License(depLicense.getName(), depLicense.getMoreInfoUrl())).toArray(License[]::new);
         }
+        ApplicableDetails applicableDetails = null;
+        if (issue.getApplicableIssues() != null) {
+            List<ApplicableIssue> applicableIssues = issue.getApplicableIssues();
+            if (applicableIssues.size() > 0) {
+                List<Evidence> evidences = new ArrayList<>();
+                for (ApplicableIssue applicableIssue : applicableIssues) {
+                    evidences.add(new Evidence(applicableIssue.getReason(), applicableIssue.getFilePath(), applicableIssue.getLineSnippet()));
+                }
+                applicableDetails = new ApplicableDetails(true, evidences, null);
+            }
+        }
         return new DependencyPage(
                 issueNode.getIssueId(),
                 dependency.getGeneralInfo().getArtifactId(),
@@ -37,7 +55,7 @@ public class WebviewObjectConverter {
                 convertVersionRanges(issueNode.getFixedVersions()),
                 convertVersionRanges(issueNode.getInfectedVersions()),
                 convertReferences(issueNode.getReferences()),
-                convertCve(issueNode.getCve()),
+                convertCve(issueNode.getCve(), applicableDetails),
                 convertImpactPath(dependency.getImpactPaths()),
                 watchNames,
                 issueNode.getLastUpdated(),
@@ -62,7 +80,7 @@ public class WebviewObjectConverter {
                 null,
                 null,
                 convertReferences(license.getReferences()),
-                new Cve(null, null, null, null, null),
+                new Cve(null, null, null, null, null, null),
                 convertImpactPath(dependency.getImpactPaths()),
                 watchNames,
                 license.getLastUpdated(),
@@ -75,13 +93,14 @@ public class WebviewObjectConverter {
         return new ImpactedPath(removeComponentIdPrefix(impactTreeNode.getName()), children);
     }
 
-    private static Cve convertCve(com.jfrog.ide.common.tree.Cve cve) {
+    private static Cve convertCve(com.jfrog.ide.common.tree.Cve cve, ApplicableDetails applicableDetails) {
         return new Cve(
             cve.getCveId(),
             cve.getCvssV2Score(),
             cve.getCvssV2Vector(),
             cve.getCvssV3Score(),
-            cve.getCvssV3Vector()
+            cve.getCvssV3Vector(),
+            applicableDetails
         );
     }
 

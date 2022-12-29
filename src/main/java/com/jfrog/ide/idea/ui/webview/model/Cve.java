@@ -13,12 +13,13 @@ public class Cve implements Serializable {
     public Cve() {
     }
 
-    public Cve(String id, String cvssV2Score, String cvssV2Vector, String cvssV3Score, String cvssV3Vector) {
+    public Cve(String id, String cvssV2Score, String cvssV2Vector, String cvssV3Score, String cvssV3Vector, ApplicableDetails applicableData) {
         this.id = id;
         this.cvssV2Score = cvssV2Score;
         this.cvssV2Vector = cvssV2Vector;
         this.cvssV3Score = cvssV3Score;
         this.cvssV3Vector = cvssV3Vector;
+        this.applicableData = applicableData;
     }
 
     public String getId() {
@@ -60,5 +61,13 @@ public class Cve implements Serializable {
 
     public void setCvssV3Vector(String cvssV3Vector) {
         this.cvssV3Vector = cvssV3Vector;
+    }
+
+    public ApplicableDetails getApplicableData() {
+        return applicableData;
+    }
+
+    public void setApplicableData(ApplicableDetails applicableData) {
+        this.applicableData = applicableData;
     }
 }
