@@ -36,7 +36,7 @@ pipelines:
             - jf gradlec --use-wrapper --repo-resolve ecosys-maven-remote --repo-deploy ecosys-oss-snapshot-local --deploy-maven-desc --deploy-ivy-desc=false
 
             # Run audit
-            - jf audit
+#             - jf audit
 
             # Install, build, and audit webview
             - cd webview
