@@ -2,6 +2,7 @@ package com.jfrog.ide.idea.ui.jcef.message;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.intellij.ui.jcef.JBCefBrowserBase;
+import com.jfrog.ide.idea.log.Logger;
 
 import static com.jfrog.ide.idea.ui.jcef.message.PackedMessage.IDE_SEND_FUNCTION_NAME;
 
@@ -17,7 +18,7 @@ public class MessagePacker implements MessagePipe {
             String raw = MessagePipeSupport.Pack(type, data);
             this.send(raw);
         } catch (JsonProcessingException e) {
-            System.out.println(e.getMessage());
+            Logger.getInstance().error(e.getMessage());
         }
     }
 

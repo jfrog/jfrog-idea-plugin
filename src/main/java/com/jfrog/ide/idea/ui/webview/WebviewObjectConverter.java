@@ -1,10 +1,10 @@
 package com.jfrog.ide.idea.ui.webview;
 
-import com.jfrog.ide.common.tree.DependencyNode;
-import com.jfrog.ide.common.tree.ImpactTreeNode;
-import com.jfrog.ide.common.tree.IssueNode;
-import com.jfrog.ide.common.tree.LicenseViolationNode;
+import com.jfrog.ide.common.tree.*;
 import com.jfrog.ide.idea.ui.webview.model.*;
+import com.jfrog.ide.idea.ui.webview.model.Cve;
+import com.jfrog.ide.idea.ui.webview.model.License;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,7 +13,7 @@ public class WebviewObjectConverter {
     public static DependencyPage convertIssueToDepPage(IssueNode issueNode) {
         ExtendedInformation extendedInformation = null;
         if (issueNode.getResearchInfo() != null) {
-            com.jfrog.ide.common.tree.ResearchInfo issueResearchInfo = issueNode.getResearchInfo();
+            ResearchInfo issueResearchInfo = issueNode.getResearchInfo();
             JfrogResearchSeverityReason[] severityReasons = Arrays.stream(issueResearchInfo.getSeverityReasons()).map(severityReason -> new JfrogResearchSeverityReason(severityReason.getName(), severityReason.getDescription(), severityReason.isPositive())).toArray(JfrogResearchSeverityReason[]::new);
             extendedInformation = new ExtendedInformation(issueResearchInfo.getShortDescription(), issueResearchInfo.getFullDescription(), issueResearchInfo.getSeverity().name(), issueResearchInfo.getRemediation(), severityReasons);
         }
@@ -24,12 +24,7 @@ public class WebviewObjectConverter {
         }
         License[] licenses = null;
         if (dependency.getLicenses() != null) {
-            List<com.jfrog.ide.common.tree.License> depLicenses = dependency.getLicenses();
-            licenses = new License[depLicenses.size()];
-            for (int licIndex = 0; licIndex < licenses.length; licIndex++) {
-                com.jfrog.ide.common.tree.License depLicense = depLicenses.get(licIndex);
-                licenses[licIndex] = new License(depLicense.getName(), depLicense.getMoreInfoUrl());
-            }
+            licenses = dependency.getLicenses().stream().map(depLicense -> new License(depLicense.getName(), depLicense.getMoreInfoUrl())).toArray(License[]::new);
         }
         return new DependencyPage(
                 issueNode.getIssueId(),
@@ -42,13 +37,7 @@ public class WebviewObjectConverter {
                 convertVersionRanges(issueNode.getFixedVersions()),
                 convertVersionRanges(issueNode.getInfectedVersions()),
                 convertReferences(issueNode.getReferences()),
-                new Cve(
-                        issueNode.getCve().getCveId(),
-                        issueNode.getCve().getCvssV2Score(),
-                        issueNode.getCve().getCvssV2Vector(),
-                        issueNode.getCve().getCvssV3Score(),
-                        issueNode.getCve().getCvssV3Vector()
-                ),
+                convertCve(issueNode.getCve()),
                 convertImpactPath(dependency.getImpactPaths()),
                 watchNames,
                 issueNode.getLastUpdated(),
@@ -82,27 +71,29 @@ public class WebviewObjectConverter {
     }
 
     private static ImpactedPath convertImpactPath(ImpactTreeNode impactTreeNode) {
-        ImpactedPath[] children = new ImpactedPath[impactTreeNode.getChildren().size()];
-        for (int childIndex = 0; childIndex < children.length; childIndex++) {
-            children[childIndex] = convertImpactPath(impactTreeNode.getChildren().get(childIndex));
-        }
+        ImpactedPath[] children = impactTreeNode.getChildren().stream().map(WebviewObjectConverter::convertImpactPath).toArray(ImpactedPath[]::new);
         return new ImpactedPath(removeComponentIdPrefix(impactTreeNode.getName()), children);
     }
 
+    private static Cve convertCve(com.jfrog.ide.common.tree.Cve cve) {
+        return new Cve(
+            cve.getCveId(),
+            cve.getCvssV2Score(),
+            cve.getCvssV2Vector(),
+            cve.getCvssV3Score(),
+            cve.getCvssV3Vector()
+        );
+    }
+
     private static String removeComponentIdPrefix(String compId) {
-        final String prefixSeparator = "://";
-        int prefixIndex = compId.indexOf(prefixSeparator);
-        if (prefixIndex == -1) {
-            return compId;
-        }
-        return compId.substring(prefixIndex + prefixSeparator.length());
+        return StringUtils.substringAfter(compId, "://");
     }
 
     private static String[] convertVersionRanges(List<String> xrayVerRanges) {
         if (xrayVerRanges == null) {
             return new String[0];
         }
-        return xrayVerRanges.stream().map(s -> convertVersionRange(s)).toArray(String[]::new);
+        return xrayVerRanges.stream().map(WebviewObjectConverter::convertVersionRange).toArray(String[]::new);
     }
 
     private static String convertVersionRange(String xrayVerRange) {
@@ -122,18 +113,20 @@ public class WebviewObjectConverter {
         boolean containsRight = false;
 
         String[] parts = xrayVerRange.split(",");
-        if (parts.length != 2) {
-            if (parts.length == 1) {
-                String singleVer = parts[0];
-                if (singleVer.charAt(0) == downInclude && singleVer.charAt(singleVer.length() - 1) == upInclude) {
-                    // Remove [ and ]
-                    return singleVer.substring(1, singleVer.length() - 1);
-                }
+        if (parts.length == 1) {
+            String singleVer = parts[0];
+            if (singleVer.charAt(0) == downInclude && singleVer.charAt(singleVer.length() - 1) == upInclude) {
+                // Remove [ and ]
+                return singleVer.substring(1, singleVer.length() - 1);
             }
+        }
+
+        if (parts.length != 2) {
             // Cannot convert
             return xrayVerRange;
         }
 
+        // Parse both parts of the version range
         String leftSide = parts[0];
         String rightSide = parts[1];
         if (leftSide.charAt(0) == downInclude) {
@@ -193,21 +186,15 @@ public class WebviewObjectConverter {
         if (xrayReferences == null) {
             return null;
         }
-        Reference[] converted = new Reference[xrayReferences.size()];
-        for (int refIndex = 0; refIndex < converted.length; refIndex++) {
-            String xrRef = xrayReferences.get(refIndex);
-            // Check if the resource is just a link or if it's in this format: [title](link)
+        return xrayReferences.stream().map(xrRef -> {
             if (!xrRef.startsWith("[")) {
-                converted[refIndex] = new Reference(xrRef, null);
-                continue;
+                return new Reference(xrRef, null);
             }
             String[] parts = xrRef.split("]\\(");
             if (parts.length != 2 || !parts[1].endsWith(")")) {
-                converted[refIndex] = new Reference(xrRef, null);
-                continue;
+                return new Reference(xrRef, null);
             }
-            converted[refIndex] = new Reference(parts[1].substring(0, parts[1].length() - 1), parts[0].substring(1));
-        }
-        return converted;
+            return new Reference(parts[1].substring(0, parts[1].length() - 1), parts[0].substring(1));
+        }).toArray(Reference[]::new);
     }
 }

@@ -57,11 +57,11 @@ import static com.jfrog.ide.common.log.Utils.logError;
  * Created by romang on 4/26/17.
  */
 public abstract class ScanManager {
-    private ServerConfig serverConfig;
-    private ComponentPrefix prefix;
+    private final ServerConfig serverConfig;
+    private final ComponentPrefix prefix;
+    private final String projectName;
+    private final Log log;
     private ScanLogic scanLogic;
-    private String projectName;
-    private Log log;
     private ExecutorService executor;
     protected Project project;
     String basePath;
@@ -143,12 +143,8 @@ public abstract class ScanManager {
             log.debug("Start scan for '" + projectName + "'.");
             Map<String, DependencyNode> results = scanLogic.scanArtifacts(dependencyTree, serverConfig, indicator, prefix, this::checkCanceled);
             indicator.setText("3/3: Finalizing");
-            if (results == null) {
-                log.debug("Wasn't able to scan '" + projectName + "'.");
-                return;
-            }
-            if (results.size() == 0) {
-                // No violations/vulnerabilities
+            if (results == null || results.isEmpty()) {
+                // No violations/vulnerabilities or no components to scan or an error was thrown
                 return;
             }
             Map<String, List<DependencyTree>> depMap = new HashMap<>();
@@ -169,10 +165,14 @@ public abstract class ScanManager {
         }
     }
 
+    /**
+     * Maps a DependencyTree and its children (direct and indirect) by their component IDs.
+     *
+     * @param depMap - a Map that the entries will be added to. This Map must be initialized.
+     * @param root   - the DependencyTree to map.
+     */
     private void mapDependencyTree(Map<String, List<DependencyTree>> depMap, DependencyTree root) {
-        if (!depMap.containsKey(root.getComponentId())) {
-            depMap.put(root.getComponentId(), new ArrayList<>());
-        }
+        depMap.putIfAbsent(root.getComponentId(), new ArrayList<>());
         depMap.get(root.getComponentId()).add(root);
         for (DependencyTree child : root.getChildren()) {
             mapDependencyTree(depMap, child);
@@ -189,23 +189,31 @@ public abstract class ScanManager {
     private Map<String, List<IssueNode>> mapIssuesByCve(Map<String, DependencyNode> results) {
         Map<String, List<IssueNode>> issues = new HashMap<>();
         for (DependencyNode dep : results.values()) {
-            for (TreeNode node : Collections.list(dep.children())) {
+            Enumeration<TreeNode> treeNodeEnumeration = dep.children();
+            while (treeNodeEnumeration.hasMoreElements()) {
+                TreeNode node = treeNodeEnumeration.nextElement();
                 if (!(node instanceof IssueNode)) {
                     continue;
                 }
                 IssueNode issueNode = (IssueNode) node;
-                if (issueNode.getCve() == null || issueNode.getCve().getCveId() == null || issueNode.getCve().getCveId().isEmpty()) {
+                String cveId = issueNode.getCve().getCveId();
+                if (issueNode.getCve() == null || StringUtils.isBlank(cveId)) {
                     continue;
                 }
-                if (!issues.containsKey(issueNode.getCve().getCveId())) {
-                    issues.put(issueNode.getCve().getCveId(), new ArrayList<>());
-                }
-                issues.get(issueNode.getCve().getCveId()).add(issueNode);
+                issues.putIfAbsent(cveId, new ArrayList<>());
+                issues.get(cveId).add(issueNode);
             }
         }
         return issues;
     }
 
+    /**
+     * Builds impact paths for DependencyNode objects.
+     *
+     * @param dependencies - a map of component IDs and the DependencyNode object matching each of them.
+     * @param depMap - a map of component IDs and lists of DependencyTree objects matching each of them.
+     * @param root - the DependencyTree object of the root component of the project/module.
+     */
     private void createImpactPaths(Map<String, DependencyNode> dependencies, Map<String, List<DependencyTree>> depMap, DependencyTree root) {
         for (Map.Entry<String, DependencyNode> depEntry : dependencies.entrySet()) {
             Map<DependencyTree, ImpactTreeNode> impactTreeNodes = new HashMap<>();

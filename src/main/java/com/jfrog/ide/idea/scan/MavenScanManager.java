@@ -17,6 +17,7 @@ import com.jfrog.ide.idea.inspections.MavenInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import com.jfrog.ide.idea.utils.Utils;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.model.MavenArtifact;
 import org.jetbrains.idea.maven.model.MavenArtifactNode;
@@ -173,7 +174,7 @@ public class MavenScanManager extends ScanManager {
      * The returned DependencyNodes inside the FileTreeNodes are clones of the ones in depScanResults.
      *
      * @param depScanResults - collection of DependencyNodes.
-     * @param depMap - a map of DependencyTree objects by their component ID.
+     * @param depMap         - a map of DependencyTree objects by their component ID.
      * @return A list of FileTreeNodes (that are all DescriptorFileTreeNodes) having the DependencyNodes as their children.
      */
     @Override
@@ -186,10 +187,9 @@ public class MavenScanManager extends ScanManager {
                 while (currDep != null) {
                     if (currDep.getGeneralInfo() != null) {
                         String pomPath = currDep.getGeneralInfo().getPath();
-                        if (pomPath != null && pomPath.endsWith(POM_FILE_NAME) && !addedDescriptors.containsKey(pomPath)) {
-                            if (!treeNodeMap.containsKey(currDep.getGeneralInfo().getPath())) {
-                                treeNodeMap.put(pomPath, new DescriptorFileTreeNode(pomPath));
-                            }
+                        if (StringUtils.endsWith(pomPath, POM_FILE_NAME) && !addedDescriptors.containsKey(pomPath)) {
+                            treeNodeMap.putIfAbsent(pomPath, new DescriptorFileTreeNode(pomPath));
+
                             // Each dependency might be a child of more than one POM file, but Artifact is a tree node, so it can have only one parent.
                             // The solution for this is to clone the dependency before adding it as a child of the POM.
                             DependencyNode clonedDep = (DependencyNode) dependencyNode.clone();

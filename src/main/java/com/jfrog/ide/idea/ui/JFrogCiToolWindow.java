@@ -49,8 +49,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * @author yahavi
  **/
 public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
-
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd MMM yyyy HH:mm:ss");
+    private static final String SELECT_COMPONENT_TEXT = "Select component or issue for more details.";
     private LinkButton linkButton;
     private JLabel buildStarted;
     private JLabel buildStatus;
@@ -89,7 +89,7 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
     }
 
     /**
-     * Create CI or local issues filter menu
+     * Create CI issues filter menu
      *
      * @return issues filter menu
      */
@@ -98,7 +98,7 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
     }
 
     /**
-     * Create CI or local licenses filter menu
+     * Create CI licenses filter menu
      *
      * @return licenses filter menu
      */
@@ -107,7 +107,7 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
     }
 
     /**
-     * Create CI or local scopes filter menu
+     * Create CI scopes filter menu
      *
      * @return scopes filter menu
      */

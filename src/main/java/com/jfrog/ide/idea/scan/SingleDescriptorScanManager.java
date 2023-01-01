@@ -10,7 +10,6 @@ import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependencyTree;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +54,6 @@ public abstract class SingleDescriptorScanManager extends ScanManager {
     protected List<FileTreeNode> groupDependenciesToDescriptorNodes(Collection<DependencyNode> depScanResults, Map<String, List<DependencyTree>> depMap) {
         DescriptorFileTreeNode fileTreeNode = new DescriptorFileTreeNode(descriptorFilePath);
         fileTreeNode.addDependencies(depScanResults);
-        return Arrays.asList(fileTreeNode);
+        return List.of(fileTreeNode);
     }
 }

@@ -244,7 +244,6 @@ public class ScanManagersFactory {
      * On the other hand, the scan cache map is a single map shared between all scanners.
      *
      * @param scanManagers - The scan managers before Xray scan
-     * @throws IOException in case of any I/O error.
      */
     private void setScanLogic(Map<Integer, ScanManager> scanManagers, Utils.ScanLogicType scanLogicType) {
         Logger logger = Logger.getInstance();

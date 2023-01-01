@@ -39,6 +39,7 @@ import static com.jfrog.ide.idea.ui.JFrogToolWindow.*;
  * @author yahavi
  */
 public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
+    final static String DEPENDENCY_TYPE = "DEPENDENCY";
     final LocalComponentsTree componentsTree;
     JBCefBrowserBase browser;
     OnePixelSplitter verticalSplit;
@@ -150,10 +151,10 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     private void updateIssueOrLicenseInWebview(VulnerabilityOrViolationNode vulnerabilityOrViolation) {
         if (vulnerabilityOrViolation instanceof IssueNode) {
             IssueNode issueNode = (IssueNode) vulnerabilityOrViolation;
-            messagePacker.send("DEPENDENCY", WebviewObjectConverter.convertIssueToDepPage(issueNode));
+            messagePacker.send(DEPENDENCY_TYPE, WebviewObjectConverter.convertIssueToDepPage(issueNode));
         } else {
             LicenseViolationNode license = (LicenseViolationNode) vulnerabilityOrViolation;
-            messagePacker.send("DEPENDENCY", WebviewObjectConverter.convertLicenseToDepPage(license));
+            messagePacker.send(DEPENDENCY_TYPE, WebviewObjectConverter.convertLicenseToDepPage(license));
         }
     }
 

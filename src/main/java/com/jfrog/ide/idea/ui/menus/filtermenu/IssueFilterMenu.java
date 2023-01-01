@@ -1,9 +1,7 @@
 package com.jfrog.ide.idea.ui.menus.filtermenu;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.util.messages.Topic;
 import com.jfrog.ide.common.filter.FilterManager;
-import com.jfrog.ide.idea.events.ApplicationEvents;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.Severity;
 

@@ -8,5 +8,5 @@ public interface MessagePipe {
     /**
      * Sends raw message with type [type] and content [data] to the other end.
      */
-    public void send(String type, Object data);
+    void send(String type, Object data);
 }
