@@ -5,14 +5,16 @@ import com.jfrog.ide.idea.scan.data.SarifResult;
 import org.apache.commons.lang.StringUtils;
 
 public class JFrogSecurityWarning {
-    private final int lineStart;
-    private final int colStart;
-    private final int lineEnd;
-    private final int colEnd;
-    private final String reason;
-    private final String filePath;
-    private final String lineSnippet;
+    private int lineStart;
+    private int colStart;
+    private int lineEnd;
+    private int colEnd;
+    private String reason;
+    private String filePath;
+    private String lineSnippet;
     private final String name;
+
+    private final boolean isApplicable;
 
     public JFrogSecurityWarning(
             int lineStart,
@@ -30,6 +32,7 @@ public class JFrogSecurityWarning {
         this.filePath = filePath;
         this.name = name;
         this.lineSnippet = lineSnippet;
+        this.isApplicable = true;
     }
 
     public JFrogSecurityWarning(SarifResult result) {
@@ -41,6 +44,14 @@ public class JFrogSecurityWarning {
                 StringUtils.removeStart(result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri(), "file://"),
                 result.getRuleId(),
                 getFirstRegion(result).getSnippet().getText());
+    }
+
+    public JFrogSecurityWarning(
+            String name,
+            Boolean isApplicable
+    ) {
+        this.name = name;
+        this.isApplicable = isApplicable;
     }
 
     public int getLineStart() {
@@ -73,6 +84,10 @@ public class JFrogSecurityWarning {
 
     public String getLineSnippet() {
         return lineSnippet;
+    }
+
+    public boolean isApplicable() {
+        return this.isApplicable;
     }
 
     private static Region getFirstRegion(SarifResult result) {

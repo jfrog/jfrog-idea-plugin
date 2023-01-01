@@ -81,12 +81,16 @@ public abstract class ScanBinaryExecutor {
         return supportedLanguages;
     }
 
-    List<JFrogSecurityWarning> parseOutputSarif(Path outputFile) throws IOException {
+    protected List<JFrogSecurityWarning> parseOutputSarif(Path outputFile) throws IOException {
+        Output output = getOutputObj(outputFile);
         List<JFrogSecurityWarning> warnings = new ArrayList<>();
-        ObjectMapper om = createMapper();
-        Output output = om.readValue(outputFile.toFile(), Output.class);
         output.getRuns().forEach(run -> run.getResults().forEach(result -> warnings.add(new JFrogSecurityWarning(result))));
         return warnings;
+    }
+
+    protected Output getOutputObj(Path outputFile) throws IOException {
+        ObjectMapper om = createMapper();
+        return om.readValue(outputFile.toFile(), Output.class);
     }
 
     Path createTempRunInputFile(ScansConfig scanInput) throws IOException {

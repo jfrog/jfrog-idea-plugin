@@ -77,17 +77,25 @@ public class SourceCodeScannerManager {
         HashMap<String, FileTreeNode> results = new HashMap<>();
         for (JFrogSecurityWarning warning : scanResults) {
             FileTreeNode fileNode = results.get(warning.getFilePath());
-            if (fileNode == null) {
+            if (fileNode == null && warning.isApplicable()) {
                 fileNode = new FileTreeNode(warning.getFilePath());
                 results.put(warning.getFilePath(), fileNode);
             }
             String cve = StringUtils.removeStart(warning.getName(), "applic_");
             List<IssueNode> issues = issuesMap.get(cve);
             if (issues != null) {
-                ApplicableIssueNode applicableIssue = new ApplicableIssueNode(cve, warning.getLineStart(), warning.getColStart(), warning.getFilePath(), warning.getReason(), warning.getLineSnippet(), issues.get(0));
-                fileNode.addDependency(applicableIssue);
-                for (IssueNode issue : issues) {
-                    issue.AddApplicableIssues(applicableIssue);
+                if (warning.isApplicable()) {
+                    ApplicableIssueNode applicableIssue = new ApplicableIssueNode(cve, warning.getLineStart(), warning.getColStart(), warning.getFilePath(), warning.getReason(), warning.getLineSnippet(), issues.get(0));
+                    fileNode.addDependency(applicableIssue);
+                    for (IssueNode issue : issues) {
+                        issue.AddApplicableIssues(applicableIssue);
+                        issue.setApplicable(true);
+                    }
+                } else {
+                    // Mark non applicable issues
+                    for (IssueNode issue : issues) {
+                        issue.setApplicable(false);
+                    }
                 }
             }
         }

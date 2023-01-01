@@ -29,16 +29,21 @@ public class WebviewObjectConverter {
             licenses = dependency.getLicenses().stream().map(depLicense -> new License(depLicense.getName(), depLicense.getMoreInfoUrl())).toArray(License[]::new);
         }
         ApplicableDetails applicableDetails = null;
-        if (issueNode.getApplicableIssues() != null) {
-            List<ApplicableIssueNode> applicableIssues = issueNode.getApplicableIssues();
-            if (applicableIssues.size() > 0) {
-                Evidence[] evidences = new Evidence[applicableIssues.size()];
-                int i = 0;
-                for (ApplicableIssueNode applicableIssue : applicableIssues) {
-                    evidences[i] = new Evidence(applicableIssue.getReason(), applicableIssue.getFilePath(), applicableIssue.getLineSnippet());
-                    i++;
+        if (issueNode.isApplicable() != null) {
+            if (issueNode.getApplicableIssues() != null) {
+                List<ApplicableIssueNode> applicableIssues = issueNode.getApplicableIssues();
+                if (applicableIssues.size() > 0) {
+                    Evidence[] evidences = new Evidence[applicableIssues.size()];
+                    int i = 0;
+                    for (ApplicableIssueNode applicableIssue : applicableIssues) {
+                        evidences[i] = new Evidence(applicableIssue.getReason(), applicableIssue.getFilePath(), applicableIssue.getLineSnippet());
+                        i++;
+                    }
+                    applicableDetails = new ApplicableDetails(true, evidences, null);
                 }
-                applicableDetails = new ApplicableDetails(true, evidences, null);
+                // If we know the issue is not applicable, adds the relevant ApplicableDetails.
+            } else if (!issueNode.isApplicable()) {
+                applicableDetails = new ApplicableDetails(false, null, null);
             }
         }
         return new DependencyPage(

@@ -14,12 +14,12 @@ public class ThreadFlow {
     @JsonProperty("locations")
     private List<ThreadFlowLocation> locations = new ArrayList<>();
 
-    @JsonProperty("locations")
+    @SuppressWarnings({"unused"})
     public List<ThreadFlowLocation> getLocations() {
         return locations;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("unused")
     public void setLocations(List<ThreadFlowLocation> locations) {
         this.locations = locations;
     }

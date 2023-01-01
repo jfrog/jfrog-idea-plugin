@@ -2,6 +2,7 @@ package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +40,7 @@ public class CodeFlow {
             return false;
         }
         CodeFlow rhs = ((CodeFlow) other);
-        return (Objects.equals(this.threadFlows, rhs.threadFlows));
+        return (CollectionUtils.isEqualCollection(this.threadFlows, rhs.threadFlows));
     }
 
 }
