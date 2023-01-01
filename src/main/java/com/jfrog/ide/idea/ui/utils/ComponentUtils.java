@@ -8,7 +8,6 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.util.ui.JBInsets;
 import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.idea.ui.configuration.JFrogGlobalConfiguration;
-import org.jfrog.build.extractor.scan.DependencyTree;
 
 import javax.swing.*;
 import javax.swing.tree.TreePath;
@@ -18,10 +17,6 @@ import java.awt.*;
  * Created by romang on 5/7/17.
  */
 public class ComponentUtils {
-
-    public static final String UNSUPPORTED_TEXT = "Unsupported project type, currently only Maven, Gradle, Go, npm, and PyPI projects are supported.";
-    public static final String SELECT_COMPONENT_TEXT = "Select component or issue for more details.";
-
     public static JTextArea createJTextArea(String text, boolean lineWrap) {
         JTextArea jTextArea = new JTextArea(text);
         jTextArea.setOpaque(true);
@@ -96,8 +91,7 @@ public class ComponentUtils {
     }
 
     public static String getPathSearchString(TreePath path) {
-        DependencyTree node = (DependencyTree) path.getLastPathComponent();
-        return node == null ? "" : node.toString();
+        return path.getLastPathComponent().toString();
     }
 
     public static void replaceAndUpdateUI(JPanel panel, JComponent component, Object constraint) {

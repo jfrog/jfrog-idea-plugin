@@ -9,7 +9,6 @@ import com.jfrog.ide.common.utils.ProjectsMap;
  * @author yahavi
  */
 public interface ProjectEvents {
-    Topic<ProjectEvents> ON_SCAN_PROJECT_CHANGE = Topic.create("Scan changed", ProjectEvents.class);
     Topic<ProjectEvents> ON_SCAN_CI_CHANGE = Topic.create("CI changed", ProjectEvents.class);
 
     /**

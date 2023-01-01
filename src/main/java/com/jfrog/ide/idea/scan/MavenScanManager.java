@@ -3,36 +3,34 @@ package com.jfrog.ide.idea.scan;
 import com.google.common.collect.Sets;
 import com.intellij.ide.highlighter.XmlFileType;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.common.tree.DependencyNode;
+import com.jfrog.ide.common.tree.DescriptorFileTreeNode;
+import com.jfrog.ide.common.tree.FileTreeNode;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.MavenInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import com.jfrog.ide.idea.utils.Utils;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.model.MavenArtifact;
 import org.jetbrains.idea.maven.model.MavenArtifactNode;
 import org.jetbrains.idea.maven.model.MavenId;
 import org.jetbrains.idea.maven.project.MavenProject;
-import org.jetbrains.idea.maven.project.MavenProjectChanges;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
-import org.jetbrains.idea.maven.project.MavenProjectsTree;
-import org.jetbrains.idea.maven.server.NativeMavenProjectHolder;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.jfrog.build.extractor.scan.Scope;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
@@ -43,6 +41,7 @@ import static com.jfrog.ide.common.utils.Utils.createComponentId;
  */
 public class MavenScanManager extends ScanManager {
     private final String PKG_TYPE = "maven";
+    private final String POM_FILE_NAME = "pom.xml";
 
     /**
      * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
@@ -52,7 +51,6 @@ public class MavenScanManager extends ScanManager {
     MavenScanManager(Project project, ExecutorService executor) {
         super(project, Utils.getProjectBasePath(project).toString(), ComponentPrefix.GAV, executor);
         getLog().info("Found Maven project: " + getProjectName());
-        MavenProjectsManager.getInstance(project).addProjectsTreeListener(new MavenProjectsTreeListener(), this);
     }
 
     static boolean isApplicable(@NotNull Project project) {
@@ -73,17 +71,16 @@ public class MavenScanManager extends ScanManager {
     }
 
     @Override
-    protected void buildTree(boolean shouldToast) {
+    protected DependencyTree buildTree() {
         DependencyTree rootNode = new DependencyTree(project.getName());
         rootNode.setMetadata(true);
         MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject -> populateMavenModule(rootNode, rootMavenProject, Sets.newHashSet()));
         GeneralInfo generalInfo = new GeneralInfo().componentId(project.getName()).path(basePath).pkgType(PKG_TYPE);
         rootNode.setGeneralInfo(generalInfo);
         if (rootNode.getChildren().size() == 1) {
-            setScanResults((DependencyTree) rootNode.getChildAt(0));
-        } else {
-            setScanResults(rootNode);
+            return (DependencyTree) rootNode.getChildAt(0);
         }
+        return rootNode;
     }
 
     @Override
@@ -165,7 +162,6 @@ public class MavenScanManager extends ScanManager {
         if (setScopes) {
             currentNode.setScopes(Sets.newHashSet(new Scope(mavenArtifact.getScope())));
         }
-        populateDependencyTreeNode(currentNode);
         mavenArtifactNode.getDependencies()
                 .stream()
                 .filter(dependencyTree -> addedInSubTree.add(dependencyTree.getArtifact().getDisplayStringForLibraryName()))
@@ -174,14 +170,42 @@ public class MavenScanManager extends ScanManager {
     }
 
     /**
-     * Maven projects tree listener for scanning artifacts on dependencies changes.
+     * Groups a collection of DependencyNodes by the descriptor files of the modules that depend on them.
+     * The returned DependencyNodes inside the FileTreeNodes are clones of the ones in depScanResults.
+     *
+     * @param depScanResults - collection of DependencyNodes.
+     * @param depMap         - a map of DependencyTree objects by their component ID.
+     * @return A list of FileTreeNodes (that are all DescriptorFileTreeNodes) having the DependencyNodes as their children.
      */
+    @Override
+    protected List<FileTreeNode> groupDependenciesToDescriptorNodes(Collection<DependencyNode> depScanResults, Map<String, List<DependencyTree>> depMap) {
+        Map<String, DescriptorFileTreeNode> treeNodeMap = new HashMap<>();
+        for (DependencyNode dependencyNode : depScanResults) {
+            Map<String, Boolean> addedDescriptors = new HashMap<>();
+            for (DependencyTree dep : depMap.get(dependencyNode.getGeneralInfo().getComponentId())) {
+                DependencyTree currDep = dep;
+                while (currDep != null) {
+                    if (currDep.getGeneralInfo() != null) {
+                        String pomPath = currDep.getGeneralInfo().getPath();
+                        if (StringUtils.endsWith(pomPath, POM_FILE_NAME) && !addedDescriptors.containsKey(pomPath)) {
+                            treeNodeMap.putIfAbsent(pomPath, new DescriptorFileTreeNode(pomPath));
 
-    private final class MavenProjectsTreeListener implements MavenProjectsTree.Listener {
-        @Override
-        public void projectResolved(@NotNull Pair<MavenProject, MavenProjectChanges> projectWithChanges,
-                                    NativeMavenProjectHolder nativeMavenProject) {
-            asyncScanAndUpdateResults();
+                            // Each dependency might be a child of more than one POM file, but Artifact is a tree node, so it can have only one parent.
+                            // The solution for this is to clone the dependency before adding it as a child of the POM.
+                            DependencyNode clonedDep = (DependencyNode) dependencyNode.clone();
+                            treeNodeMap.get(pomPath).addDependency(clonedDep);
+                            addedDescriptors.put(pomPath, true);
+                        }
+                    }
+                    currDep = (DependencyTree) currDep.getParent();
+                }
+            }
         }
+        return new ArrayList<>(treeNodeMap.values());
+    }
+
+    @Override
+    public String getPackageType() {
+        return "Maven";
     }
 }

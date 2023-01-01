@@ -17,7 +17,6 @@ public interface ApplicationEvents {
     Topic<ApplicationEvents> ON_BUILDS_CONFIGURATION_CHANGE = Topic.create("Builds configuration changed", ApplicationEvents.class);
 
     // Filter changed
-    Topic<ApplicationEvents> ON_SCAN_FILTER_CHANGE = Topic.create("Scan issues changed", ApplicationEvents.class);
     Topic<ApplicationEvents> ON_CI_FILTER_CHANGE = Topic.create("CI issues changed", ApplicationEvents.class);
 
     /**

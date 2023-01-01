@@ -8,7 +8,6 @@ import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ex.InspectionManagerEx;
 import com.intellij.codeInspection.ex.LocalInspectionToolWrapper;
-import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -17,41 +16,37 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFileManager;
-import com.intellij.openapi.vfs.newvfs.BulkFileListener;
-import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
 import com.intellij.psi.PsiFile;
-import com.intellij.util.messages.MessageBus;
-import com.intellij.util.messages.MessageBusConnection;
+import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.scan.ComponentPrefix;
-import com.jfrog.ide.common.scan.ScanManagerBase;
-import com.jfrog.ide.common.utils.ProjectsMap;
+import com.jfrog.ide.common.scan.ScanLogic;
+import com.jfrog.ide.common.tree.DependencyNode;
+import com.jfrog.ide.common.tree.FileTreeNode;
+import com.jfrog.ide.common.tree.ImpactTreeNode;
+import com.jfrog.ide.common.tree.IssueNode;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
-import com.jfrog.ide.idea.events.ProjectEvents;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
-import com.jfrog.ide.idea.ui.menus.filtermanager.LocalFilterManager;
 import com.jfrog.ide.idea.utils.Utils;
 import com.jfrog.xray.client.services.summary.Components;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jfrog.build.api.util.Log;
 import org.jfrog.build.extractor.scan.DependencyTree;
-import org.jfrog.build.extractor.scan.License;
-import org.jfrog.build.extractor.scan.Scope;
 
 import javax.swing.*;
+import javax.swing.tree.TreeNode;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -61,9 +56,12 @@ import static com.jfrog.ide.common.log.Utils.logError;
 /**
  * Created by romang on 4/26/17.
  */
-public abstract class ScanManager extends ScanManagerBase implements Disposable {
-
-    private final MessageBusConnection busConnection;
+public abstract class ScanManager {
+    private final ServerConfig serverConfig;
+    private final ComponentPrefix prefix;
+    private final String projectName;
+    private final Log log;
+    private ScanLogic scanLogic;
     private ExecutorService executor;
     protected Project project;
     String basePath;
@@ -79,8 +77,10 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
      * @param executor - An executor that should limit the number of running tasks to 3
      */
     ScanManager(@NotNull Project project, String basePath, ComponentPrefix prefix, ExecutorService executor) {
-        super(basePath, Logger.getInstance(), GlobalSettings.getInstance().getServerConfig(), prefix);
-        this.busConnection = project.getMessageBus().connect(this);
+        this.serverConfig = GlobalSettings.getInstance().getServerConfig();
+        this.projectName = basePath;
+        this.prefix = prefix;
+        this.log = Logger.getInstance();
         this.executor = executor;
         this.basePath = basePath;
         this.project = project;
@@ -93,10 +93,8 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
     /**
      * Collect and return {@link Components} to be scanned by JFrog Xray.
      * Implementation should be project type specific.
-     *
-     * @param shouldToast - True if should pop up a balloon when an error occurs.
      */
-    protected abstract void buildTree(boolean shouldToast) throws IOException;
+    protected abstract DependencyTree buildTree() throws IOException;
 
     /**
      * Return all project descriptors under the scan-manager project, which need to be inspected by the corresponding {@link LocalInspectionTool}.
@@ -120,25 +118,47 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
     protected abstract String getProjectPackageType();
 
     /**
+     * Groups a collection of DependencyNodes by the descriptor files of the modules that depend on them.
+     * The returned DependencyNodes inside the FileTreeNodes might be clones of the ones in depScanResults, but it's not
+     * guaranteed.
+     *
+     * @param depScanResults - collection of DependencyNodes.
+     * @param depMap - a map of DependencyTree objects by their component ID.
+     * @return A list of FileTreeNodes (that are all DescriptorFileTreeNodes) having the DependencyNodes as their children.
+     */
+    protected abstract List<FileTreeNode> groupDependenciesToDescriptorNodes(Collection<DependencyNode> depScanResults, Map<String, List<DependencyTree>> depMap);
+
+    public abstract String getPackageType();
+
+    /**
      * Scan and update dependency components.
      *
-     * @param quickScan - Quick scan or full scan
-     * @param indicator - The progress indicator
+     * @param indicator   - The progress indicator
      */
-    private void scanAndUpdate(boolean quickScan, ProgressIndicator indicator) {
+    private void scanAndUpdate(ProgressIndicator indicator) {
         try {
             indicator.setText("1/3: Building dependency tree");
-            buildTree(!quickScan);
+            DependencyTree dependencyTree = buildTree();
             indicator.setText("2/3: Xray scanning project dependencies");
-            scanAndCacheArtifacts(indicator, quickScan);
+            log.debug("Start scan for '" + projectName + "'.");
+            Map<String, DependencyNode> results = scanLogic.scanArtifacts(dependencyTree, serverConfig, indicator, prefix, this::checkCanceled);
             indicator.setText("3/3: Finalizing");
-            addXrayInfoToTree(getScanResults());
-            setScanResults();
-            DumbService.getInstance(project).smartInvokeLater(this::runInspections);
+            if (results == null || results.isEmpty()) {
+                // No violations/vulnerabilities or no components to scan or an error was thrown
+                return;
+            }
+            Map<String, List<DependencyTree>> depMap = new HashMap<>();
+            mapDependencyTree(depMap, dependencyTree);
+
+            Map<String, List<IssueNode>> issuesMap = mapIssuesByCve(results);
+
+            createImpactPaths(results, depMap, dependencyTree);
+            List<FileTreeNode> fileTreeNodes = groupDependenciesToDescriptorNodes(results.values(), depMap);
+            addScanResults(fileTreeNodes);
         } catch (ProcessCanceledException e) {
-            getLog().info("Xray scan was canceled");
+            log.info("Xray scan was canceled");
         } catch (Exception e) {
-            logError(getLog(), "Xray Scan failed", e, !quickScan);
+            logError(log, "Xray Scan failed", e, true);
         } finally {
             scanInProgress.set(false);
             sendUsageReport();
@@ -146,10 +166,85 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
     }
 
     /**
+     * Maps a DependencyTree and its children (direct and indirect) by their component IDs.
+     *
+     * @param depMap - a Map that the entries will be added to. This Map must be initialized.
+     * @param root   - the DependencyTree to map.
+     */
+    private void mapDependencyTree(Map<String, List<DependencyTree>> depMap, DependencyTree root) {
+        depMap.putIfAbsent(root.getComponentId(), new ArrayList<>());
+        depMap.get(root.getComponentId()).add(root);
+        for (DependencyTree child : root.getChildren()) {
+            mapDependencyTree(depMap, child);
+        }
+    }
+
+    /**
+     * Maps all the issues (vulnerabilities and security violations) by their CVE IDs.
+     * Issues without a CVE ID are ignored.
+     *
+     * @param results - scan results mapped by dependencies.
+     * @return a map of CVE IDs to lists of issues with them.
+     */
+    private Map<String, List<IssueNode>> mapIssuesByCve(Map<String, DependencyNode> results) {
+        Map<String, List<IssueNode>> issues = new HashMap<>();
+        for (DependencyNode dep : results.values()) {
+            Enumeration<TreeNode> treeNodeEnumeration = dep.children();
+            while (treeNodeEnumeration.hasMoreElements()) {
+                TreeNode node = treeNodeEnumeration.nextElement();
+                if (!(node instanceof IssueNode)) {
+                    continue;
+                }
+                IssueNode issueNode = (IssueNode) node;
+                String cveId = issueNode.getCve().getCveId();
+                if (issueNode.getCve() == null || StringUtils.isBlank(cveId)) {
+                    continue;
+                }
+                issues.putIfAbsent(cveId, new ArrayList<>());
+                issues.get(cveId).add(issueNode);
+            }
+        }
+        return issues;
+    }
+
+    /**
+     * Builds impact paths for DependencyNode objects.
+     *
+     * @param dependencies - a map of component IDs and the DependencyNode object matching each of them.
+     * @param depMap - a map of component IDs and lists of DependencyTree objects matching each of them.
+     * @param root - the DependencyTree object of the root component of the project/module.
+     */
+    private void createImpactPaths(Map<String, DependencyNode> dependencies, Map<String, List<DependencyTree>> depMap, DependencyTree root) {
+        for (Map.Entry<String, DependencyNode> depEntry : dependencies.entrySet()) {
+            Map<DependencyTree, ImpactTreeNode> impactTreeNodes = new HashMap<>();
+            for (DependencyTree depTree : depMap.get(depEntry.getKey())) {
+                addImpactPath(impactTreeNodes, depTree);
+            }
+            depEntry.getValue().setImpactPaths(impactTreeNodes.get(root));
+        }
+    }
+
+    private ImpactTreeNode addImpactPath(Map<DependencyTree, ImpactTreeNode> impactTreeNodes, DependencyTree depTreeNode) {
+        if (impactTreeNodes.containsKey(depTreeNode)) {
+            return impactTreeNodes.get(depTreeNode);
+        }
+        ImpactTreeNode parentImpactTreeNode = null;
+        if (depTreeNode.getParent() != null) {
+            parentImpactTreeNode = addImpactPath(impactTreeNodes, (DependencyTree) depTreeNode.getParent());
+        }
+        ImpactTreeNode currImpactTreeNode = new ImpactTreeNode(depTreeNode.getComponentId());
+        if (parentImpactTreeNode != null) {
+            parentImpactTreeNode.getChildren().add(currImpactTreeNode);
+        }
+        impactTreeNodes.put(depTreeNode, currImpactTreeNode);
+        return currImpactTreeNode;
+    }
+
+    /**
      * Launch async dependency scan.
      */
-    void asyncScanAndUpdateResults(boolean quickScan) {
-        if (DumbService.isDumb(project)) { // If intellij is still indexing the project
+    void asyncScanAndUpdateResults() {
+            if (DumbService.isDumb(project)) { // If intellij is still indexing the project
             return;
         }
         // The tasks run asynchronously. To make sure no more than 3 tasks are running concurrently,
@@ -162,17 +257,15 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
                     return;
                 }
                 if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
-                    getLog().warn("Xray server is not configured.");
+                    log.warn("Xray server is not configured.");
                     return;
                 }
                 // Prevent multiple simultaneous scans
                 if (!scanInProgress.compareAndSet(false, true)) {
-                    if (!quickScan) {
-                        getLog().info("Scan already in progress");
-                    }
+                    log.info("Scan already in progress");
                     return;
                 }
-                scanAndUpdate(quickScan, new ProgressIndicatorImpl(indicator));
+                scanAndUpdate(new ProgressIndicatorImpl(indicator));
             }
 
             @Override
@@ -182,10 +275,10 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
         };
         if (executor.isShutdown() || executor.isTerminated()) {
             // Scan initiated by a change in the project descriptor
-            createRunnable(scanAndUpdateTask, null, quickScan).run();
+            createRunnable(scanAndUpdateTask, null).run();
         } else {
             // Scan initiated by opening IntelliJ, by user, or by changing the configuration
-            executor.submit(createRunnable(scanAndUpdateTask, latch, quickScan));
+            executor.submit(createRunnable(scanAndUpdateTask, latch));
         }
     }
 
@@ -213,9 +306,8 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
      * @param latch             - The countdown latch, which makes sure the executor service doesn't get more than 3 tasks.
      *                          If null, the scan was initiated by a change in the project descriptor and the executor
      *                          service is terminated. In this case, there is no requirement to wait.
-     * @param quickScan         - Quick or full scan
      */
-    private Runnable createRunnable(Task.Backgroundable scanAndUpdateTask, CountDownLatch latch, boolean quickScan) {
+    private Runnable createRunnable(Task.Backgroundable scanAndUpdateTask, CountDownLatch latch) {
         return () -> {
             // The progress manager is only good for foreground threads.
             if (SwingUtilities.isEventDispatchThread()) {
@@ -230,7 +322,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
                     latch.await();
                 }
             } catch (InterruptedException e) {
-                logError(getLog(), ExceptionUtils.getRootCauseMessage(e), e, !quickScan);
+                logError(log, ExceptionUtils.getRootCauseMessage(e), e, true);
             }
         };
     }
@@ -245,13 +337,6 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
         Set<Path> paths = Sets.newHashSet();
         paths.add(Paths.get(basePath));
         return paths;
-    }
-
-    /**
-     * Launch async dependency scan.
-     */
-    void asyncScanAndUpdateResults() {
-        asyncScanAndUpdateResults(true);
     }
 
     void runInspections() {
@@ -275,64 +360,16 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
     }
 
     /**
-     * @return all licenses available from the current scan results.
-     */
-    public Set<License> getAllLicenses() {
-        if (getScanResults() == null) {
-            return Sets.newHashSet();
-        }
-        return collectAllLicenses((DependencyTree) getScanResults().getRoot());
-    }
-
-    /**
-     * @return all scopes available from the current scan results.
-     */
-    public Set<Scope> getAllScopes() {
-        if (getScanResults() == null) {
-            return Sets.newHashSet();
-        }
-        return collectAllScopes((DependencyTree) getScanResults().getRoot());
-    }
-
-    /**
-     * Return true if the scan results contain any issues.
-     *
-     * @return true if the scan results contain any issues.
-     */
-    public boolean isContainIssues() {
-        return getScanResults() != null && !getScanResults().getIssues().isEmpty();
-    }
-
-    /**
-     * Return true if the scan results contain any violated licenses.
-     *
-     * @return true if the scan results contain any violated licenses.
-     */
-    public boolean isContainViolatedLicenses() {
-        return getScanResults() != null && !getScanResults().getViolatedLicenses().isEmpty();
-    }
-
-    /**
      * filter scan components tree model according to the user filters and sort the issues tree.
      */
-    private void setScanResults() {
-        DependencyTree scanResults = getScanResults();
-        if (scanResults == null) {
+    private void addScanResults(List<FileTreeNode> fileTreeNodes) {
+        if (fileTreeNodes.isEmpty()) {
             return;
         }
-        if (!scanResults.isLeaf()) {
-            LocalFilterManager.getInstance(project).collectsFiltersInformation(scanResults);
-        }
-        ProjectsMap.ProjectKey projectKey = ProjectsMap.createKey(getProjectName(),
-                scanResults.getGeneralInfo());
-        MessageBus projectMessageBus = project.getMessageBus();
-
-        ComponentsTree componentsTree = LocalComponentsTree.getInstance(project);
-        componentsTree.addScanResults(getProjectName(), scanResults);
-        projectMessageBus.syncPublisher(ProjectEvents.ON_SCAN_PROJECT_CHANGE).update(projectKey);
+        LocalComponentsTree componentsTree = LocalComponentsTree.getInstance(project);
+        componentsTree.addScanResults(fileTreeNodes);
     }
 
-    @Override
     protected void checkCanceled() {
         if (project.isOpen()) {
             // The project is closed if we are in test mode.
@@ -349,30 +386,15 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
         return this.basePath;
     }
 
-    /**
-     * Subscribe ScanManager for VFS-change events.
-     * Perform dependencies scan and update tree after the provided file has changed.
-     *
-     * @param fileName - file to track for changes.
-     */
-    protected void subscribeLaunchDependencyScanOnFileChangedEvents(String fileName) {
-        String fileToSubscribe = Paths.get(basePath, fileName).toString();
-        busConnection.subscribe(VirtualFileManager.VFS_CHANGES, new BulkFileListener() {
-            @Override
-            public void after(@NotNull List<? extends VFileEvent> events) {
-                for (VFileEvent event : events) {
-                    String filePath = event.getPath();
-                    if (StringUtils.equals(filePath, fileToSubscribe)) {
-                        asyncScanAndUpdateResults();
-                    }
-                }
-            }
-        });
+    public void setScanLogic(ScanLogic scanLogic) {
+        this.scanLogic = scanLogic;
     }
 
-    @Override
-    public void dispose() {
-        // Disconnect and release resources from the bus connection
-        busConnection.disconnect();
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public Log getLog() {
+        return log;
     }
 }

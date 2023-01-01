@@ -30,7 +30,7 @@ import static com.jfrog.ide.common.utils.Utils.createComponentId;
 /**
  * @author yahavi
  */
-public class PypiScanManager extends ScanManager {
+public class PypiScanManager extends SingleDescriptorScanManager {
     private final Sdk pythonSdk;
     private final String PKG_TYPE = "pypi";
 
@@ -45,26 +45,25 @@ public class PypiScanManager extends ScanManager {
      * @param executor  - An executor that should limit the number of running tasks to 3
      */
     PypiScanManager(Project project, Sdk pythonSdk, ExecutorService executor) {
-        super(project, pythonSdk.getHomePath(), ComponentPrefix.PYPI, executor);
+        super(project, pythonSdk.getHomePath(), ComponentPrefix.PYPI, executor, pythonSdk.getHomePath());
         this.pythonSdk = pythonSdk;
         getLog().info("Found PyPI SDK: " + getProjectName());
-        PyPackageUtil.runOnChangeUnderInterpreterPaths(pythonSdk, this, this::asyncScanAndUpdateResults);
     }
 
     @Override
-    protected void buildTree(boolean shouldToast) {
+    protected DependencyTree buildTree() {
         DependencyTree rootNode = createRootNode();
         initDependencyNode(rootNode, pythonSdk.getName(), "", pythonSdk.getHomePath(), "pypi");
 
         try {
             rootNode.add(createSdkDependencyTree(pythonSdk));
         } catch (ExecutionException e) {
-            logError(getLog(), "", e, shouldToast);
+            logError(getLog(), "", e, true);
         }
         if (rootNode.getChildren().size() == 1) {
             rootNode = (DependencyTree) rootNode.getChildAt(0);
         }
-        setScanResults(rootNode);
+        return rootNode;
     }
 
     /**
@@ -174,5 +173,10 @@ public class PypiScanManager extends ScanManager {
     @Override
     protected String getProjectPackageType() {
         return PKG_TYPE;
+    }
+
+    @Override
+    public String getPackageType() {
+        return "PyPI";
     }
 }

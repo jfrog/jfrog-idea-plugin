@@ -19,6 +19,6 @@ public class BaseTreeImpl extends ComponentsTree {
     }
 
     @Override
-    public void applyFilters(ProjectsMap.ProjectKey projectName) {
+    public void applyFiltersForAllProjects() {
     }
 }

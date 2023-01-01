@@ -12,6 +12,7 @@ import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.NpmInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
+import org.jfrog.build.extractor.scan.DependencyTree;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -20,7 +21,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * Created by Yahav Itzhak on 13 Dec 2017.
  */
-public class NpmScanManager extends ScanManager {
+public class NpmScanManager extends SingleDescriptorScanManager {
 
     private final NpmTreeBuilder npmTreeBuilder;
     private final String PKG_TYPE = "npm";
@@ -32,21 +33,19 @@ public class NpmScanManager extends ScanManager {
      * @param executor - An executor that should limit the number of running tasks to 3
      */
     NpmScanManager(Project project, String basePath, ExecutorService executor) {
-        super(project, basePath, ComponentPrefix.NPM, executor);
+        super(project, basePath, ComponentPrefix.NPM, executor, Paths.get(basePath, "package.json").toString());
         getLog().info("Found npm project: " + getProjectName());
         npmTreeBuilder = new NpmTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap());
-        subscribeLaunchDependencyScanOnFileChangedEvents("package-lock.json");
     }
 
     @Override
-    protected void buildTree(boolean shouldToast) throws IOException {
-        setScanResults(npmTreeBuilder.buildTree(getLog(), shouldToast));
+    protected DependencyTree buildTree() throws IOException {
+        return npmTreeBuilder.buildTree(getLog());
     }
 
     @Override
     protected PsiFile[] getProjectDescriptors() {
-        String packageJsonPath = Paths.get(basePath, "package.json").toString();
-        VirtualFile file = LocalFileSystem.getInstance().findFileByPath(packageJsonPath);
+        VirtualFile file = LocalFileSystem.getInstance().findFileByPath(descriptorFilePath);
         if (file == null) {
             return null;
         }
@@ -62,5 +61,10 @@ public class NpmScanManager extends ScanManager {
     @Override
     protected String getProjectPackageType() {
         return PKG_TYPE;
+    }
+
+    @Override
+    public String getPackageType() {
+        return "npm";
     }
 }

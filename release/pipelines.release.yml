@@ -4,10 +4,9 @@ pipelines:
       runtime:
         type: image
         image:
-          auto:
-            language: java
-            versions:
-              - "11"
+          custom:
+            name: releases-docker.jfrog.io/jfrog-ecosystem-integration-env
+            tag: 1.10.1
       environmentVariables:
         readOnly:
           NEXT_VERSION: 0.0.0
@@ -51,6 +50,12 @@ pipelines:
 
             # Run audit
             - jf audit
+
+            # Install, build, and audit webview
+            - cd webview
+            - npm i && npm run build
+            - jf audit
+            - cd ..
 
             # Update version
             - sed -i "s/\(currentVersion=\).*\$/\1${NEXT_VERSION}/" gradle.properties

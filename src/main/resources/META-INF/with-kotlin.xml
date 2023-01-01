@@ -1,11 +1,1 @@
-<idea-plugin>
-    <extensions defaultExtensionNs="com.intellij">
-        <localInspection language="kotlin"
-                         displayName="Show in dependency tree"
-                         groupBundle="messages.InspectionsBundle"
-                         groupKey="group.names.probable.bugs"
-                         enabledByDefault="true"
-                         implementationClass="com.jfrog.ide.idea.inspections.GradleKotlinInspection"/>
-        <annotator language="kotlin" implementationClass="com.jfrog.ide.idea.inspections.GradleKotlinInspection"/>
-    </extensions>
-</idea-plugin>
+<idea-plugin/>

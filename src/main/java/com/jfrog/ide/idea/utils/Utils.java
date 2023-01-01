@@ -8,7 +8,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.jfrog.ide.common.configuration.ServerConfig;
-import com.jfrog.ide.common.scan.ComponentSummaryScanLogic;
 import com.jfrog.ide.common.scan.GraphScanLogic;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
@@ -40,7 +39,7 @@ public class Utils {
     public static final String PRODUCT_ID = "jfrog-idea-plugin/";
     public static final String PLUGIN_ID = "org.jfrog.idea";
 
-    public enum ScanLogicType {GraphScan, ComponentSummary}
+    public enum ScanLogicType {GraphScan}
 
     public static Path getProjectBasePath(Project project) {
         return project.getBasePath() != null ? Paths.get(project.getBasePath()) : Paths.get(".");
@@ -54,12 +53,12 @@ public class Utils {
                 StringUtils.equals(lhsGeneralInfo.getPkgType(), rhsGeneralInfo.getPkgType());
     }
 
-    public static int getProjectIdentifier(String name, String path) {
+    public static int getModuleIdentifier(String name, String path) {
         return Objects.hashCode(name, path);
     }
 
     public static int getProjectIdentifier(Project project) {
-        return getProjectIdentifier(project.getName(), project.getBasePath());
+        return getModuleIdentifier(project.getName(), project.getBasePath());
     }
 
     public static void focusJFrogToolWindow(Project project) {
@@ -82,9 +81,6 @@ public class Utils {
 
         if (GraphScanLogic.isSupportedInXrayVersion(xrayVersion)) {
             return ScanLogicType.GraphScan;
-        }
-        if (ComponentSummaryScanLogic.isSupportedInXrayVersion(xrayVersion)) {
-            return ScanLogicType.ComponentSummary;
         }
         throw new IOException("Unsupported JFrog Xray version.");
     }

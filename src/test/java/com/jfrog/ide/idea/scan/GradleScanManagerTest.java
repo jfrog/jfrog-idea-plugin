@@ -75,7 +75,7 @@ public class GradleScanManagerTest extends HeavyPlatformTestCase {
         GradleProjectImportUtil.linkAndRefreshGradleProject(globalProjectDir, getProject());
         GradleScanManager gradleScanManager = new GradleScanManager(getProject(), globalProjectDir, executorService);
         gradleScanManager.setScanLogic(new GraphScanLogic(null, new NullLog()));
-        gradleScanManager.buildTree(false);
+        gradleScanManager.buildTree();
 
         // Run and check scan results
         DependencyTree results = gradleScanManager.getScanResults();

@@ -37,7 +37,7 @@ public class MenuButton extends JPanel {
     }
 
     private void initUi(String toolTip) {
-        JLabel arrow = new JBLabel(AllIcons.Ide.Statusbar_arrows);
+        JLabel arrow = new JBLabel(AllIcons.General.ArrowDown);
         setToolTipText(toolTip);
         setInactiveForegroundColor(myNameLabel);
         setBorder(createUnfocusedBorder());

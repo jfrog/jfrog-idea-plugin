@@ -10,9 +10,9 @@ import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.ui.utils.IconUtils;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.build.extractor.scan.DependencyTree;
 
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  * Adds the yellow bulb action - "Show in dependency tree".
@@ -21,10 +21,10 @@ import javax.swing.*;
  */
 public class ShowInDependencyTree implements LocalQuickFix, Iconable, HighPriorityAction {
 
-    private final DependencyTree node;
+    private final DefaultMutableTreeNode node;
     private final String description;
 
-    public ShowInDependencyTree(DependencyTree node, String description) {
+    public ShowInDependencyTree(DefaultMutableTreeNode node, String description) {
         this.node = node;
         this.description = description;
     }
