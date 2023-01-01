@@ -1,14 +1,12 @@
 package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@JsonPropertyOrder({"tool", "invocations", "results"})
 public class Run {
 
     @JsonProperty("tool")
@@ -22,14 +20,17 @@ public class Run {
         return tool;
     }
 
+    @SuppressWarnings({"unused"})
     public void setTool(Tool tool) {
         this.tool = tool;
     }
 
+    @SuppressWarnings({"unused"})
     public List<Invocation> getInvocations() {
         return invocations;
     }
 
+    @SuppressWarnings({"unused"})
     public void setInvocations(List<Invocation> invocations) {
         this.invocations = invocations;
     }

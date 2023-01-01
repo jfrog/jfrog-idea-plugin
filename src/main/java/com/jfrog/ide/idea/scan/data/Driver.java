@@ -1,16 +1,11 @@
 package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
 import java.util.Objects;
 
-@JsonPropertyOrder({
-        "name",
-        "rules"
-})
 public class Driver {
 
     @JsonProperty("name")

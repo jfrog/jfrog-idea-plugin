@@ -1,19 +1,12 @@
 package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@JsonPropertyOrder({
-        "message",
-        "locations",
-        "ruleId",
-        "codeFlows"
-})
 public class SarifResult {
 
     @JsonProperty("message")
@@ -36,7 +29,7 @@ public class SarifResult {
     public List<Location> getLocations() {
         return locations;
     }
-
+    @SuppressWarnings({"unused"})
     public void setLocations(List<Location> locations) {
         this.locations = locations;
     }
@@ -44,15 +37,15 @@ public class SarifResult {
     public String getRuleId() {
         return ruleId;
     }
-
+    @SuppressWarnings({"unused"})
     public void setRuleId(String ruleId) {
         this.ruleId = ruleId;
     }
-
+    @SuppressWarnings({"unused"})
     public List<CodeFlow> getCodeFlows() {
         return codeFlows;
     }
-
+    @SuppressWarnings({"unused"})
     public void setCodeFlows(List<CodeFlow> codeFlows) {
         this.codeFlows = codeFlows;
     }

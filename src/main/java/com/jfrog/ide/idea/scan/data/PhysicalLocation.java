@@ -1,11 +1,8 @@
 package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.util.Objects;
-
-@JsonPropertyOrder({"artifactLocation", "region"})
 public class PhysicalLocation {
 
     @JsonProperty("artifactLocation")
@@ -16,7 +13,8 @@ public class PhysicalLocation {
     public ArtifactLocation getArtifactLocation() {
         return artifactLocation;
     }
-    @SuppressWarnings("UnusedReturnValue")
+
+    @SuppressWarnings("unused")
     public void setArtifactLocation(ArtifactLocation artifactLocation) {
         this.artifactLocation = artifactLocation;
     }
@@ -24,7 +22,8 @@ public class PhysicalLocation {
     public Region getRegion() {
         return region;
     }
-    @SuppressWarnings("UnusedReturnValue")
+
+    @SuppressWarnings("unused")
     public void setRegion(Region region) {
         this.region = region;
     }

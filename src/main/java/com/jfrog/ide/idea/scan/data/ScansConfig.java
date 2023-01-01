@@ -1,18 +1,14 @@
 package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.util.List;
 
-@JsonPropertyOrder({
-        "scans",
-})
 public class ScansConfig {
     @JsonProperty("scans")
     private List<ScanConfig> scans;
 
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("unused")
     public ScansConfig() {
     }
 
@@ -24,7 +20,7 @@ public class ScansConfig {
         return scans;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("unused")
     public void setScans(List<ScanConfig> scans) {
         this.scans = scans;
     }

@@ -1,11 +1,9 @@
 package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.util.Objects;
 
-@JsonPropertyOrder({"id", "shortDescription"})
 public class Rule {
 
     @JsonProperty("id")
@@ -23,13 +21,11 @@ public class Rule {
     }
 
     @SuppressWarnings({"unused"})
-
     public Message getShortDescription() {
         return shortDescription;
     }
 
     @SuppressWarnings({"unused"})
-
     public void setShortDescription(Message shortDescription) {
         this.shortDescription = shortDescription;
     }

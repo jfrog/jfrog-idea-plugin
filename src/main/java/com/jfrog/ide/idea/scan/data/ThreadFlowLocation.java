@@ -1,24 +1,20 @@
 package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.util.Objects;
 
-@JsonPropertyOrder({"location"})
 public class ThreadFlowLocation {
 
     @JsonProperty("location")
     private Location location;
 
-    @SuppressWarnings("UnusedReturnValue")
-
+    @SuppressWarnings("unused")
     public Location getLocation() {
         return location;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
-
+    @SuppressWarnings("unused")
     public void setLocation(Location location) {
         this.location = location;
     }

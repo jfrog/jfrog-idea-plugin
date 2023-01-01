@@ -1,13 +1,9 @@
 package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.util.Objects;
 
-@JsonPropertyOrder({
-        "physicalLocation"
-})
 public class Location {
 
     @JsonProperty("physicalLocation")
@@ -17,7 +13,7 @@ public class Location {
         return physicalLocation;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("unused")
     public void setPhysicalLocation(PhysicalLocation physicalLocation) {
         this.physicalLocation = physicalLocation;
     }

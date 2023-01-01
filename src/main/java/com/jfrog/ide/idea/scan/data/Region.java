@@ -1,11 +1,9 @@
 package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.util.Objects;
 
-@JsonPropertyOrder({"endColumn", "endLine", "startColumn", "startLine", "snippet"})
 public class Region {
 
     @JsonProperty("endColumn")
@@ -24,7 +22,7 @@ public class Region {
         return endColumn;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("unused")
     public void setEndColumn(Integer endColumn) {
         this.endColumn = endColumn;
     }
@@ -33,7 +31,7 @@ public class Region {
         return endLine;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("unused")
     public void setEndLine(Integer endLine) {
         this.endLine = endLine;
     }
@@ -42,7 +40,7 @@ public class Region {
         return startColumn;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("unused")
     public void setStartColumn(Integer startColumn) {
         this.startColumn = startColumn;
     }
@@ -51,7 +49,7 @@ public class Region {
         return startLine;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("unused")
     public void setStartLine(Integer startLine) {
         this.startLine = startLine;
     }
@@ -60,7 +58,7 @@ public class Region {
         return snippet;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("unused")
     public void setSnippet(Message snippet) {
         this.snippet = snippet;
     }

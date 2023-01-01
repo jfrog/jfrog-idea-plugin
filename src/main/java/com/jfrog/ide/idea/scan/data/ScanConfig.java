@@ -1,11 +1,9 @@
 package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.util.List;
 
-@JsonPropertyOrder({"type", "language", "roots", "output"})
 public class ScanConfig {
     @JsonProperty("type")
     private String scanType;
@@ -24,6 +22,7 @@ public class ScanConfig {
     @JsonProperty("skipped-folders")
     private List<String> skippedFolders;
 
+    @SuppressWarnings("unused")
     ScanConfig() {
     }
 
@@ -37,12 +36,12 @@ public class ScanConfig {
         this.skippedFolders = builder.skippedFolders;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("unused")
     public String getScanType() {
         return scanType;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("unused")
     public void setScanType(String scanType) {
         this.scanType = scanType;
     }
@@ -59,8 +58,7 @@ public class ScanConfig {
         return roots;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
-
+    @SuppressWarnings("unused")
     public void setRoots(List<String> roots) {
         this.roots = roots;
     }
@@ -69,10 +67,39 @@ public class ScanConfig {
         return output;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
-
+    @SuppressWarnings("unused")
     public void setOutput(String output) {
         this.output = output;
+    }
+
+    @SuppressWarnings("unused")
+    public Boolean getGrepDisable() {
+        return grepDisable;
+    }
+
+    @SuppressWarnings("unused")
+    public void setGrepDisable(Boolean grepDisable) {
+        this.grepDisable = grepDisable;
+    }
+
+    @SuppressWarnings("unused")
+    public List<String> getCves() {
+        return cves;
+    }
+
+    @SuppressWarnings("unused")
+    public void setCves(List<String> cves) {
+        this.cves = cves;
+    }
+
+    @SuppressWarnings("unused")
+    public List<String> getSkippedFolders() {
+        return skippedFolders;
+    }
+
+    @SuppressWarnings("unused")
+    public void setSkippedFolders(List<String> skippedFolders) {
+        this.skippedFolders = skippedFolders;
     }
 
 
@@ -88,6 +115,7 @@ public class ScanConfig {
         public Builder() {
         }
 
+        @SuppressWarnings("UnusedReturnValue")
         public Builder scanType(String scanType) {
             this.scanType = scanType;
             return this;
@@ -103,12 +131,13 @@ public class ScanConfig {
             return this;
         }
 
+        @SuppressWarnings("UnusedReturnValue")
         public Builder output(String output) {
             this.output = output;
             return this;
         }
 
-        @SuppressWarnings("UnusedReturnValue")
+        @SuppressWarnings("unused")
         public Builder grepDisable(Boolean grepDisable) {
             this.grepDisable = grepDisable;
             return this;
@@ -119,7 +148,7 @@ public class ScanConfig {
             return this;
         }
 
-        @SuppressWarnings("UnusedReturnValue")
+        @SuppressWarnings("unused")
         public Builder skippedFolders(List<String> skippedFolders) {
             this.skippedFolders = skippedFolders;
             return this;

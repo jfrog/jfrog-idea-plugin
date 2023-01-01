@@ -18,32 +18,32 @@ public class Invocation {
     @JsonProperty("workingDirectory")
     private WorkingDirectory workingDirectory;
 
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("unused")
     public Boolean getExecutionSuccessful() {
         return executionSuccessful;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("unused")
     public void setExecutionSuccessful(Boolean executionSuccessful) {
         this.executionSuccessful = executionSuccessful;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("unused")
     public List<String> getArguments() {
         return arguments;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("unused")
     public void setArguments(List<String> arguments) {
         this.arguments = arguments;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("unused")
     public WorkingDirectory getWorkingDirectory() {
         return workingDirectory;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("unused")
     public void setWorkingDirectory(WorkingDirectory workingDirectory) {
         this.workingDirectory = workingDirectory;
     }

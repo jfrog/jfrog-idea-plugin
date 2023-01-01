@@ -1,18 +1,12 @@
 package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@JsonPropertyOrder({
-        "runs",
-        "version",
-        "$schema"
-})
 public class Output {
 
     @JsonProperty("runs")
@@ -23,7 +17,7 @@ public class Output {
     public List<Run> getRuns() {
         return runs;
     }
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("unused")
     public void setRuns(List<Run> runs) {
         this.runs = runs;
     }

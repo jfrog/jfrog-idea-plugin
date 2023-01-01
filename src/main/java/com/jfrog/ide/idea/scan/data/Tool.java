@@ -1,22 +1,20 @@
 package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.util.Objects;
 
-@JsonPropertyOrder({"driver"})
 public class Tool {
 
     @JsonProperty("driver")
     private Driver driver;
 
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("unused")
     public Driver getDriver() {
         return driver;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings("unused")
     public void setDriver(Driver driver) {
         this.driver = driver;
     }
