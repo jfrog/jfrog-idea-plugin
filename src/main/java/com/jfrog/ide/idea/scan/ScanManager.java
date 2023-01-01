@@ -27,6 +27,7 @@ import com.jfrog.ide.common.tree.ImpactTreeNode;
 import com.jfrog.ide.common.tree.IssueNode;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
+import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
 import com.jfrog.ide.idea.ui.ComponentsTree;
@@ -69,6 +70,8 @@ public abstract class ScanManager {
     // Lock to prevent multiple simultaneous scans
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
 
+    protected SourceCodeScannerManager scanner;
+
     /**
      * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
      *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}
@@ -84,6 +87,7 @@ public abstract class ScanManager {
         this.executor = executor;
         this.basePath = basePath;
         this.project = project;
+        this.scanner = new SourceCodeScannerManager(project, getCodeBaseLanguage());
     }
 
     void setExecutor(ExecutorService executor) {
@@ -133,7 +137,7 @@ public abstract class ScanManager {
     /**
      * Scan and update dependency components.
      *
-     * @param indicator   - The progress indicator
+     * @param indicator - The progress indicator
      */
     private void scanAndUpdate(ProgressIndicator indicator) {
         try {
@@ -155,6 +159,10 @@ public abstract class ScanManager {
             createImpactPaths(results, depMap, dependencyTree);
             List<FileTreeNode> fileTreeNodes = groupDependenciesToDescriptorNodes(results.values(), depMap);
             addScanResults(fileTreeNodes);
+            // Source Code Scan
+            scanner.scanAndUpdate(indicator, List.copyOf(issuesMap.keySet()));
+            addScanResults(scanner.getResults(issuesMap));
+
         } catch (ProcessCanceledException e) {
             log.info("Xray scan was canceled");
         } catch (Exception e) {
@@ -244,7 +252,7 @@ public abstract class ScanManager {
      * Launch async dependency scan.
      */
     void asyncScanAndUpdateResults() {
-            if (DumbService.isDumb(project)) { // If intellij is still indexing the project
+        if (DumbService.isDumb(project)) { // If intellij is still indexing the project
             return;
         }
         // The tasks run asynchronously. To make sure no more than 3 tasks are running concurrently,
@@ -396,5 +404,23 @@ public abstract class ScanManager {
 
     public Log getLog() {
         return log;
+    }
+
+    public List<JFrogSecurityWarning> getSourceCodeScanResults() {
+        return this.scanner.getScanResults();
+    }
+
+    private String getCodeBaseLanguage() {
+        switch (getPackageType().toLowerCase()) {
+            case "npm":
+                return "js";
+            case "pip":
+                return "python";
+            case "maven":
+            case "gradle":
+                return "java";
+            default:
+                return "";
+        }
     }
 }

@@ -5,13 +5,23 @@ import com.intellij.openapi.actionSystem.Constraints;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.pom.Navigatable;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
 import com.intellij.ui.*;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.jcef.JBCefApp;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.ui.jcef.JBCefBrowserBase;
 import com.intellij.util.ui.UIUtil;
-import com.jfrog.ide.common.tree.*;
+import com.jfrog.ide.common.tree.ApplicableIssueNode;
+import com.jfrog.ide.common.tree.IssueNode;
+import com.jfrog.ide.common.tree.LicenseViolationNode;
+import com.jfrog.ide.common.tree.VulnerabilityOrViolationNode;
 import com.jfrog.ide.idea.actions.CollapseAllAction;
 import com.jfrog.ide.idea.actions.ExpandAllAction;
 import com.jfrog.ide.idea.events.ApplicationEvents;
@@ -33,7 +43,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static com.jfrog.ide.idea.ui.JFrogToolWindow.*;
+import static com.jfrog.ide.idea.ui.JFrogToolWindow.SCROLL_BAR_SCROLLING_UNITS;
 
 /**
  * @author yahavi
@@ -47,7 +57,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     VulnerabilityOrViolationNode selectedIssue;
 
     /**
-     * @param project   - Currently opened IntelliJ project
+     * @param project - Currently opened IntelliJ project
      */
     public JFrogLocalToolWindow(@NotNull Project project) {
         super(project);
@@ -82,8 +92,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
      */
     public void registerListeners() {
         // Xray credentials were set listener
-        appBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () ->
-                ApplicationManager.getApplication().invokeLater(this::onConfigurationChange));
+        appBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () -> ApplicationManager.getApplication().invokeLater(this::onConfigurationChange));
 
         // Component selection listener
         componentsTree.addTreeSelectionListener(e -> {
@@ -150,12 +159,34 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
     private void updateIssueOrLicenseInWebview(VulnerabilityOrViolationNode vulnerabilityOrViolation) {
         if (vulnerabilityOrViolation instanceof IssueNode) {
-            IssueNode issueNode = (IssueNode) vulnerabilityOrViolation;
-            messagePacker.send(DEPENDENCY_TYPE, WebviewObjectConverter.convertIssueToDepPage(issueNode));
-        } else {
+            IssueNode issue = (IssueNode) vulnerabilityOrViolation;
+            messagePacker.send(DEPENDENCY_TYPE, WebviewObjectConverter.convertIssueToDepPage(issue));
+        } else if (vulnerabilityOrViolation instanceof ApplicableIssueNode) {
+            ApplicableIssueNode node = (ApplicableIssueNode) vulnerabilityOrViolation;
+            messagePacker.send(DEPENDENCY_TYPE, WebviewObjectConverter.convertIssueToDepPage(node.getIssue()));
+            navigateToFile(node);
+        } else if (vulnerabilityOrViolation instanceof LicenseViolationNode) {
             LicenseViolationNode license = (LicenseViolationNode) vulnerabilityOrViolation;
             messagePacker.send(DEPENDENCY_TYPE, WebviewObjectConverter.convertLicenseToDepPage(license));
         }
+    }
+
+    private void navigateToFile(ApplicableIssueNode node) {
+        ApplicationManager.getApplication().invokeLater(() -> {
+            VirtualFile sourceCodeFile = LocalFileSystem.getInstance().findFileByIoFile(new File(node.getFilePath()));
+            if (sourceCodeFile == null) {
+                return;
+            }
+            PsiFile targetFile = PsiManager.getInstance(project).findFile(sourceCodeFile);
+            if (targetFile == null) {
+                return;
+            }
+            int lineOffset = StringUtil.lineColToOffset(targetFile.getText(), node.getRow(), node.getCol());
+            PsiElement element = targetFile.findElementAt(lineOffset);
+            if (element instanceof Navigatable) {
+                ((Navigatable) element).navigate(true);
+            } else targetFile.navigate(true);
+        });
     }
 
     /**

@@ -8,6 +8,7 @@ import com.intellij.testFramework.fixtures.TestFixtureBuilder;
 import com.jfrog.ide.common.persistency.ScanCache;
 import com.jfrog.ide.common.scan.GraphScanLogic;
 import com.jfrog.ide.common.scan.ScanLogic;
+import com.jfrog.ide.idea.ProgressIndicatorMock;
 import com.jfrog.ide.idea.utils.Utils;
 import junit.framework.TestCase;
 
@@ -18,8 +19,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import static com.intellij.testFramework.UsefulTestCase.assertContainsElements;
-import static com.intellij.testFramework.UsefulTestCase.assertOneOf;
+import static com.intellij.testFramework.UsefulTestCase.*;
+import static com.intellij.testFramework.UsefulTestCase.assertEmpty;
 import static com.jfrog.ide.idea.scan.ScanUtils.createScanPaths;
 import static com.jfrog.ide.idea.scan.ScanUtils.isLocalProjectSupported;
 
@@ -106,6 +107,19 @@ public class ScanManagersTest extends TestCase {
             try {
                 fixture.tearDown();
             } catch (Exception ignore) {
+            }
+        });
+    }
+
+    public void testSourceCodeScanNoBinaries() {
+        Collection<ScanManager> scanManagers = scanManagersFactory.scanManagers.values();
+        assertNotEmpty(scanManagers);
+        scanManagers.forEach(scanManager -> {
+            try {
+                scanManager.scanner.scanAndUpdate(new ProgressIndicatorMock(), new ArrayList<>());
+                assertEmpty(scanManager.getSourceCodeScanResults());
+            } catch (Exception e) {
+                fail(e.getMessage());
             }
         });
     }
