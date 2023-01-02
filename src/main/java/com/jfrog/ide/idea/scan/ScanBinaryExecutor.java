@@ -8,6 +8,7 @@ import com.jfrog.ide.idea.scan.data.Output;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
 import com.jfrog.ide.idea.scan.data.ScansConfig;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.jfrog.build.extractor.executor.CommandExecutor;
 import org.jfrog.build.extractor.executor.CommandResults;
 
@@ -25,23 +26,21 @@ import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
  * @author Tal Arian
  */
 public abstract class ScanBinaryExecutor {
-
-    protected List<String> supportedLanguages;
-
-    final String scanType;
     private static final Path BINARIES_DIR = HOME_PATH.resolve("dependencies").resolve("jfrog-security");
-    private final String BINARY_NAME;
     private final CommandExecutor commandExecutor;
-    private boolean shouldExecute;
+    final String scanType;
+    protected List<String> supportedLanguages;
+    private final boolean shouldExecute;
 
     ScanBinaryExecutor(String scanType, String binaryName) {
         this.scanType = scanType;
-        BINARY_NAME = binaryName;
-        Path binaryPath = BINARIES_DIR.resolve(BINARY_NAME);
+        if (SystemUtils.IS_OS_WINDOWS) {
+            binaryName += ".exe";
+        }
+        Path binaryPath = BINARIES_DIR.resolve(binaryName);
         commandExecutor = new CommandExecutor(binaryPath.toString(), Maps.newHashMap());
         shouldExecute = Files.exists(binaryPath);
     }
-
 
     abstract List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder) throws IOException, InterruptedException;
 
