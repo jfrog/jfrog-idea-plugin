@@ -9,15 +9,14 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author yahavi
  */
 public class LocalComponentsTree extends ComponentsTree {
-    Map<String, FileTreeNode> fileNodes = new HashMap<>();
+    List<FileTreeNode> fileNodes = new ArrayList<>();
 
     public LocalComponentsTree(@NotNull Project project) {
         super(project);
@@ -34,31 +33,14 @@ public class LocalComponentsTree extends ComponentsTree {
 
     @Override
     public void reset() {
-        fileNodes = new HashMap<>();
+        fileNodes = new ArrayList<>();
         super.reset();
-    }
-
-    public void applyFiltersForAllProjects() {
-        setModel(null);
-        // TODO: I added the reset here, but it might not be the right solution, and i'm not even sure if it's needed. If it's removed or moved from here, pay attention to the commented code in addOrReplace below.
-        reset();
-        for (FileTreeNode node : fileNodes.values()) {
-            appendProjectWhenReady(node);
-        }
     }
 
     public void addScanResults(List<FileTreeNode> fileTreeNodes) {
         for (FileTreeNode node : fileTreeNodes) {
-            FileTreeNode fileNode = fileNodes.get(Arrays.toString(node.getPath()));
-            if (fileNode != null) {
-                Enumeration<TreeNode> children = fileNode.children();
-                while (children.hasMoreElements()) {
-                    fileNode.add((MutableTreeNode) children.nextElement());
-                }
-            } else {
-                fileNodes.put(Arrays.toString(node.getPath()), node);
-                appendProjectWhenReady(node);
-            }
+            fileNodes.add(node);
+            appendProjectWhenReady(node);
         }
     }
 
