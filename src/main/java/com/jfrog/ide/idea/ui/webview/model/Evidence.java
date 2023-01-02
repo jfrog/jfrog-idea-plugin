@@ -1,15 +1,9 @@
 package com.jfrog.ide.idea.ui.webview.model;
 
-import java.io.Serializable;
-
-public class Evidence implements Serializable {
-    String reason;
-    String filePathEvidence;
-    String codeEvidence;
-
-    public Evidence() {
-
-    }
+public class Evidence {
+    private final String reason;
+    private final String filePathEvidence;
+    private final String codeEvidence;
 
     public Evidence(String reason, String filePathEvidence, String codeEvidence) {
         this.reason = reason;
@@ -17,27 +11,18 @@ public class Evidence implements Serializable {
         this.codeEvidence = codeEvidence;
     }
 
+    @SuppressWarnings("unused")
     public String getReason() {
         return reason;
     }
 
-    public void setReason(String reason) {
-        this.reason = reason;
-    }
-
+    @SuppressWarnings("unused")
     public String getFilePathEvidence() {
         return filePathEvidence;
     }
 
-    public void setFilePathEvidence(String filePathEvidence) {
-        this.filePathEvidence = filePathEvidence;
-    }
-
+    @SuppressWarnings("unused")
     public String getCodeEvidence() {
         return codeEvidence;
-    }
-
-    public void setCodeEvidence(String codeEvidence) {
-        this.codeEvidence = codeEvidence;
     }
 }

@@ -39,8 +39,8 @@ public class SourceCodeScannerManager {
     /**
      * Source code scan and update components.
      *
-     * @param indicator - The progress indicator
-     * @param cves      - white list of cves to scan
+     * @param indicator - the progress indicator.
+     * @param cves      - white list of CVEs to scan.
      */
     public void scanAndUpdate(ProgressIndicator indicator, List<String> cves) {
         if (project.isDisposed()) {

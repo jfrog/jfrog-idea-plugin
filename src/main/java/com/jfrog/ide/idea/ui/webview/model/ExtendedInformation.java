@@ -1,17 +1,11 @@
 package com.jfrog.ide.idea.ui.webview.model;
 
-import java.io.Serializable;
-
-public class ExtendedInformation implements Serializable {
-
-    String shortDescription;
-    String fullDescription;
-    String jfrogResearchSeverity;
-    String remediation;
-    JfrogResearchSeverityReason[] jfrogResearchSeverityReason;
-
-    public ExtendedInformation() {
-    }
+public class ExtendedInformation {
+    private final String shortDescription;
+    private final String fullDescription;
+    private final String jfrogResearchSeverity;
+    private final String remediation;
+    private final JfrogResearchSeverityReason[] jfrogResearchSeverityReason;
     
     public ExtendedInformation(String shortDescription, String fullDescription, String jfrogResearchSeverity, String remediation, JfrogResearchSeverityReason[] jfrogResearchSeverityReason) {
         this.shortDescription = shortDescription;
@@ -21,43 +15,28 @@ public class ExtendedInformation implements Serializable {
         this.jfrogResearchSeverityReason = jfrogResearchSeverityReason;
     }
 
+    @SuppressWarnings("unused")
     public String getShortDescription() {
         return shortDescription;
     }
 
-    public void setShortDescription(String shortDescription) {
-        this.shortDescription = shortDescription;
-    }
-
+    @SuppressWarnings("unused")
     public String getFullDescription() {
         return fullDescription;
     }
 
-    public void setFullDescription(String fullDescription) {
-        this.fullDescription = fullDescription;
-    }
-
+    @SuppressWarnings("unused")
     public String getJfrogResearchSeverity() {
         return jfrogResearchSeverity;
     }
 
-    public void setJfrogResearchSeverity(String jfrogResearchSeverity) {
-        this.jfrogResearchSeverity = jfrogResearchSeverity;
-    }
-
+    @SuppressWarnings("unused")
     public String getRemediation() {
         return remediation;
     }
 
-    public void setRemediation(String remediation) {
-        this.remediation = remediation;
-    }
-
+    @SuppressWarnings("unused")
     public JfrogResearchSeverityReason[] getJfrogResearchSeverityReason() {
         return jfrogResearchSeverityReason;
-    }
-
-    public void setJfrogResearchSeverityReason(JfrogResearchSeverityReason[] jfrogResearchSeverityReason) {
-        this.jfrogResearchSeverityReason = jfrogResearchSeverityReason;
     }
 }
