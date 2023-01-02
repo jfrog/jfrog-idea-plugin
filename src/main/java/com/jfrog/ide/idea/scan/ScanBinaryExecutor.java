@@ -8,6 +8,7 @@ import com.jfrog.ide.idea.scan.data.Output;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
 import com.jfrog.ide.idea.scan.data.ScansConfig;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.jfrog.build.extractor.executor.CommandExecutor;
 import org.jfrog.build.extractor.executor.CommandResults;
 
@@ -36,6 +37,9 @@ public abstract class ScanBinaryExecutor {
 
     ScanBinaryExecutor(String scanType, String binaryName) {
         this.scanType = scanType;
+        if (SystemUtils.IS_OS_WINDOWS) {
+            binaryName += ".exe";
+        }
         BINARY_NAME = binaryName;
         Path binaryPath = BINARIES_DIR.resolve(BINARY_NAME);
         commandExecutor = new CommandExecutor(binaryPath.toString(), Maps.newHashMap());
