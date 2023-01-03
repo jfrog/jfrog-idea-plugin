@@ -116,10 +116,10 @@ public abstract class ScanManager {
     protected abstract AbstractInspection getInspectionTool();
 
     protected void sendUsageReport() {
-        Utils.sendUsageReport(getProjectPackageType() + "-deps");
+        Utils.sendUsageReport(getPackageManagerName() + "-deps");
     }
 
-    protected abstract String getProjectPackageType();
+    protected abstract String getPackageManagerName();
 
     /**
      * Groups a collection of DependencyNodes by the descriptor files of the modules that depend on them.

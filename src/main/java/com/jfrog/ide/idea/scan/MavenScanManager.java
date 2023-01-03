@@ -98,7 +98,7 @@ public class MavenScanManager extends ScanManager {
     }
 
     @Override
-    protected String getProjectPackageType() {
+    protected String getPackageManagerName() {
         return PKG_TYPE;
     }
 

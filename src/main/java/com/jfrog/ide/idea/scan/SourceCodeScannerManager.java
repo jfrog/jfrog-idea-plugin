@@ -53,13 +53,13 @@ public class SourceCodeScannerManager {
         scanResults = new ArrayList<>();
         try {
             if (applicability.getSupportedLanguages().contains(codeBaseLanguage)) {
-                indicator.setText("Applicability Scan");
+                indicator.setText("Running applicability scan");
                 indicator.setFraction(0.25);
                 List<JFrogSecurityWarning> applicabilityResults = applicability.execute(new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).cves(cves));
                 scanResults.addAll(applicabilityResults);
             }
             if (eos.getSupportedLanguages().contains(codeBaseLanguage)) {
-                indicator.setText("Eos Scan");
+                indicator.setText("Running Eos scan");
                 indicator.setFraction(0.5);
                 List<JFrogSecurityWarning> eosResults = eos.execute(new ScanConfig.Builder().language(codeBaseLanguage).roots(List.of(getProjectBasePath(project).toString())));
                 scanResults.addAll(eosResults);
