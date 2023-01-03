@@ -4,8 +4,6 @@ import com.jfrog.ide.common.tree.*;
 import com.jfrog.ide.idea.ui.webview.model.Cve;
 import com.jfrog.ide.idea.ui.webview.model.License;
 import com.jfrog.ide.idea.ui.webview.model.*;
-import com.jfrog.ide.idea.ui.webview.model.Cve;
-import com.jfrog.ide.idea.ui.webview.model.License;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Arrays;
@@ -30,7 +28,7 @@ public class WebviewObjectConverter {
         }
         ApplicableDetails applicableDetails = null;
         if (issueNode.isApplicable() != null) {
-            if (issueNode.getApplicableIssues() != null) {
+            if (issueNode.isApplicable()) {
                 List<ApplicableIssueNode> applicableIssues = issueNode.getApplicableIssues();
                 if (applicableIssues.size() > 0) {
                     Evidence[] evidences = new Evidence[applicableIssues.size()];
@@ -41,8 +39,8 @@ public class WebviewObjectConverter {
                     }
                     applicableDetails = new ApplicableDetails(true, evidences, null);
                 }
+            } else {
                 // If we know the issue is not applicable, adds the relevant ApplicableDetails.
-            } else if (!issueNode.isApplicable()) {
                 applicableDetails = new ApplicableDetails(false, null, null);
             }
         }
@@ -51,7 +49,7 @@ public class WebviewObjectConverter {
                 dependency.getGeneralInfo().getArtifactId(),
                 dependency.getGeneralInfo().getPkgType(),
                 dependency.getGeneralInfo().getVersion(),
-                issueNode.getSeverity().name(),
+                issueNode.getSeverity(false).name(),
                 licenses,
                 issueNode.getSummary(),
                 convertVersionRanges(issueNode.getFixedVersions()),

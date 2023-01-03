@@ -2,6 +2,7 @@ package com.jfrog.ide.idea.scan;
 
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.scan.data.Output;
+import com.jfrog.ide.idea.scan.data.Rule;
 import com.jfrog.ide.idea.scan.data.Run;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
 
@@ -37,7 +38,7 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
         Output output = getOutputObj(outputFile);
         Optional<Run> run = output.getRuns().stream().findFirst();
         if (run.isPresent()) {
-            Stream<String> knownCves = run.get().getTool().getDriver().getRules().stream().map(rule -> rule.getId());
+            Stream<String> knownCves = run.get().getTool().getDriver().getRules().stream().map(Rule::getId);
             knownCves.filter(cve -> !applicabilityCves.contains(cve)).forEach(cve -> results.add(new JFrogSecurityWarning(cve, false)));
         }
         return results;

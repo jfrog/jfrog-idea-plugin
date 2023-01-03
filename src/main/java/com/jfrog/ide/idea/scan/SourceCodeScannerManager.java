@@ -89,12 +89,11 @@ public class SourceCodeScannerManager {
                     fileNode.addDependency(applicableIssue);
                     for (IssueNode issue : issues) {
                         issue.AddApplicableIssues(applicableIssue);
-                        issue.setApplicable(true);
                     }
                 } else {
                     // Mark non applicable issues
                     for (IssueNode issue : issues) {
-                        issue.setApplicable(false);
+                        issue.setApplicableIssues(new ArrayList<>());
                     }
                 }
             }
