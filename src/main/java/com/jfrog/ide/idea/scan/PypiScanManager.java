@@ -129,8 +129,7 @@ public class PypiScanManager extends SingleDescriptorScanManager {
      * @param dependencyMapping - dependency name to Python package mapping
      */
     void populateDependencyTree(DependencyTree node, PyPackage pyPackage, Map<String, PyPackage> dependencyMapping) {
-        String unresolved = pyPackage.isInstalled() ? "" : " [Unresolved]";
-        DependencyTree child = new DependencyTree(pyPackage.getName() + ":" + pyPackage.getVersion() + unresolved);
+        DependencyTree child = new DependencyTree(pyPackage.getName() + ":" + pyPackage.getVersion());
         initDependencyNode(child, pyPackage.getName(), pyPackage.getVersion(), "", "pypi");
         node.add(child);
 
