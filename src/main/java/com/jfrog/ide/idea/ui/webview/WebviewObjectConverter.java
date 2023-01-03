@@ -44,23 +44,22 @@ public class WebviewObjectConverter {
                 applicableDetails = new ApplicableDetails(false, null, null);
             }
         }
-        return new DependencyPage(
-                issueNode.getIssueId(),
-                dependency.getGeneralInfo().getArtifactId(),
-                dependency.getGeneralInfo().getPkgType(),
-                dependency.getGeneralInfo().getVersion(),
-                issueNode.getSeverity(false).name(),
-                licenses,
-                issueNode.getSummary(),
-                convertVersionRanges(issueNode.getFixedVersions()),
-                convertVersionRanges(issueNode.getInfectedVersions()),
-                convertReferences(issueNode.getReferences()),
-                convertCve(issueNode.getCve(), applicableDetails),
-                convertImpactPath(dependency.getImpactPaths()),
-                watchNames,
-                issueNode.getLastUpdated(),
-                extendedInformation
-        );
+        return new DependencyPage()
+                .id(issueNode.getIssueId())
+                .component(dependency.getGeneralInfo().getArtifactId())
+                .type(dependency.getGeneralInfo().getPkgType())
+                .version(dependency.getGeneralInfo().getVersion())
+                .severity(issueNode.getSeverity(false).name())
+                .license(licenses)
+                .summary(issueNode.getSummary())
+                .fixedVersion(convertVersionRanges(issueNode.getFixedVersions()))
+                .infectedVersion(convertVersionRanges(issueNode.getInfectedVersions()))
+                .references(convertReferences(issueNode.getReferences()))
+                .cve(convertCve(issueNode.getCve(), applicableDetails))
+                .impactedPath(convertImpactPath(dependency.getImpactPaths()))
+                .watchName(watchNames)
+                .edited(issueNode.getLastUpdated())
+                .extendedInformation(extendedInformation);
     }
 
     public static DependencyPage convertLicenseToDepPage(LicenseViolationNode license) {
@@ -69,23 +68,16 @@ public class WebviewObjectConverter {
         if (license.getWatchNames() != null) {
             watchNames = license.getWatchNames().toArray(new String[0]);
         }
-        return new DependencyPage(
-                license.getName(),
-                dependency.getGeneralInfo().getArtifactId(),
-                dependency.getGeneralInfo().getPkgType(),
-                dependency.getGeneralInfo().getVersion(),
-                license.getSeverity().name(),
-                null,
-                null,
-                null,
-                null,
-                convertReferences(license.getReferences()),
-                new Cve(null, null, null, null, null, null),
-                convertImpactPath(dependency.getImpactPaths()),
-                watchNames,
-                license.getLastUpdated(),
-                null
-        );
+        return new DependencyPage()
+                .id(license.getName())
+                .component(dependency.getGeneralInfo().getArtifactId())
+                .type(dependency.getGeneralInfo().getPkgType())
+                .version(dependency.getGeneralInfo().getVersion())
+                .severity(license.getSeverity().name())
+                .references(convertReferences(license.getReferences()))
+                .impactedPath(convertImpactPath(dependency.getImpactPaths()))
+                .watchName(watchNames)
+                .edited(license.getLastUpdated());
     }
 
     private static ImpactedPath convertImpactPath(ImpactTreeNode impactTreeNode) {

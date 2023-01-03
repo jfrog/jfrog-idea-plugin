@@ -49,12 +49,13 @@ import static com.jfrog.ide.idea.ui.JFrogToolWindow.SCROLL_BAR_SCROLLING_UNITS;
  * @author yahavi
  */
 public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
-    final static String DEPENDENCY_TYPE = "DEPENDENCY";
-    final LocalComponentsTree componentsTree;
-    JBCefBrowserBase browser;
-    OnePixelSplitter verticalSplit;
-    MessagePacker messagePacker;
-    VulnerabilityOrViolationNode selectedIssue;
+    private final static String DEPENDENCY_TYPE = "DEPENDENCY";
+    private final LocalComponentsTree componentsTree;
+    private final JBCefBrowserBase browser;
+    private final OnePixelSplitter verticalSplit;
+    private final MessagePacker messagePacker;
+    private VulnerabilityOrViolationNode selectedIssue;
+    private Path tempDirPath;
 
     /**
      * @param project - Currently opened IntelliJ project
@@ -114,10 +115,8 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             return;
         }
 
-        Path tempDirPath;
         try {
             tempDirPath = Files.createTempDirectory("jfrog-idea-plugin");
-            tempDirPath.toFile().deleteOnExit();
             FileUtils.copyToFile(getClass().getResourceAsStream("/jfrog-ide-webview-container/index.html"), new File(tempDirPath.toString(), "index.html"));
             FileUtils.copyToFile(getClass().getResourceAsStream("/jfrog-ide-webview-container/bundle.js"), new File(tempDirPath.toString(), "bundle.js"));
         } catch (IOException e) {
@@ -202,5 +201,10 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     public void dispose() {
         super.dispose();
         browser.dispose();
+        try {
+            FileUtils.deleteDirectory(tempDirPath.toFile());
+        } catch (IOException e) {
+            Logger.getInstance().warn("Temporary directory could not be deleted: " + tempDirPath.toString() + ". Error: " + ExceptionUtils.getRootCauseMessage(e));
+        }
     }
 }
