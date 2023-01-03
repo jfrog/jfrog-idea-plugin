@@ -30,15 +30,14 @@ public class WebviewObjectConverter {
         if (issueNode.isApplicable() != null) {
             if (issueNode.isApplicable()) {
                 List<ApplicableIssueNode> applicableIssues = issueNode.getApplicableIssues();
-                if (applicableIssues.size() > 0) {
-                    Evidence[] evidences = new Evidence[applicableIssues.size()];
-                    int i = 0;
-                    for (ApplicableIssueNode applicableIssue : applicableIssues) {
-                        evidences[i] = new Evidence(applicableIssue.getReason(), applicableIssue.getFilePath(), applicableIssue.getLineSnippet());
-                        i++;
-                    }
-                    applicableDetails = new ApplicableDetails(true, evidences, null);
+                String searchTarget = applicableIssues.get(0).getScannerSearchTarget();
+                Evidence[] evidences = new Evidence[applicableIssues.size()];
+                int i = 0;
+                for (ApplicableIssueNode applicableIssue : applicableIssues) {
+                    evidences[i++] = new Evidence(applicableIssue.getReason(), applicableIssue.getFilePath(), applicableIssue.getLineSnippet());
                 }
+                applicableDetails = new ApplicableDetails(true, evidences, searchTarget);
+
             } else {
                 // If we know the issue is not applicable, adds the relevant ApplicableDetails.
                 applicableDetails = new ApplicableDetails(false, null, null);
@@ -95,12 +94,12 @@ public class WebviewObjectConverter {
 
     private static Cve convertCve(com.jfrog.ide.common.tree.Cve cve, ApplicableDetails applicableDetails) {
         return new Cve(
-            cve.getCveId(),
-            cve.getCvssV2Score(),
-            cve.getCvssV2Vector(),
-            cve.getCvssV3Score(),
-            cve.getCvssV3Vector(),
-            applicableDetails
+                cve.getCveId(),
+                cve.getCvssV2Score(),
+                cve.getCvssV2Vector(),
+                cve.getCvssV3Score(),
+                cve.getCvssV3Vector(),
+                applicableDetails
         );
     }
 
