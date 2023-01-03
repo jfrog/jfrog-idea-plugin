@@ -127,7 +127,7 @@ public abstract class ScanManager {
      * guaranteed.
      *
      * @param depScanResults - collection of DependencyNodes.
-     * @param depMap - a map of DependencyTree objects by their component ID.
+     * @param depMap         - a map of DependencyTree objects by their component ID.
      * @return A list of FileTreeNodes (that are all DescriptorFileTreeNodes) having the DependencyNodes as their children.
      */
     protected abstract List<FileTreeNode> groupDependenciesToDescriptorNodes(Collection<DependencyNode> depScanResults, Map<String, List<DependencyTree>> depMap);
@@ -162,6 +162,7 @@ public abstract class ScanManager {
             // Source Code Scan
             scanner.scanAndUpdate(indicator, List.copyOf(issuesMap.keySet()));
             addScanResults(scanner.getResults(issuesMap));
+            fileTreeNodes.forEach(node -> node.sortChildren());
 
         } catch (ProcessCanceledException e) {
             log.info("Xray scan was canceled");
@@ -219,8 +220,8 @@ public abstract class ScanManager {
      * Builds impact paths for DependencyNode objects.
      *
      * @param dependencies - a map of component IDs and the DependencyNode object matching each of them.
-     * @param depMap - a map of component IDs and lists of DependencyTree objects matching each of them.
-     * @param root - the DependencyTree object of the root component of the project/module.
+     * @param depMap       - a map of component IDs and lists of DependencyTree objects matching each of them.
+     * @param root         - the DependencyTree object of the root component of the project/module.
      */
     private void createImpactPaths(Map<String, DependencyNode> dependencies, Map<String, List<DependencyTree>> depMap, DependencyTree root) {
         for (Map.Entry<String, DependencyNode> depEntry : dependencies.entrySet()) {
