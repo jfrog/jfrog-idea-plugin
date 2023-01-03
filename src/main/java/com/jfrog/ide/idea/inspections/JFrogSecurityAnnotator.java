@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * General Annotator for JFrog security source code issues (for Example: applicable CVE)
@@ -45,8 +46,8 @@ public class JFrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<JFro
 
     @Override
     public void apply(@NotNull PsiFile file, List<JFrogSecurityWarning> warnings, @NotNull AnnotationHolder holder) {
-        String filePath = file.getVirtualFile().getPath();
-        warnings.stream().filter(warning -> warning.getFilePath().equals(filePath)).forEach(warning -> {
+        String filePath = file.getVirtualFile() != null ? file.getVirtualFile().getPath() : null;
+        warnings.stream().filter(Objects::nonNull).filter(warning -> warning.isApplicable() && warning.getFilePath().equals(filePath)).forEach(warning -> {
             int startOffset = StringUtil.lineColToOffset(file.getText(), warning.getLineStart(), warning.getColStart());
             int endOffset = StringUtil.lineColToOffset(file.getText(), warning.getLineEnd(), warning.getColEnd());
 
