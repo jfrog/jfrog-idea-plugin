@@ -207,7 +207,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      */
     private DependencyNode getModuleDependency(DescriptorFileTreeNode file, String componentName) {
         for (DependencyNode dependency : file.getDependencies()) {
-            GeneralInfo childGeneralInfo = new GeneralInfo(dependency.getGeneralInfo().getComponentIdWithoutPrefix(), dependency.getGeneralInfo().getPath(), dependency.getGeneralInfo().getPkgType());
+            GeneralInfo childGeneralInfo = new GeneralInfo(dependency.getGeneralInfo().getComponentIdWithoutPrefix(), dependency.getImpactPathsString(), dependency.getGeneralInfo().getPkgType());
             if (compareGeneralInfo(childGeneralInfo, componentName)) {
                 return dependency;
             }
@@ -225,10 +225,10 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     boolean compareGeneralInfo(GeneralInfo generalInfo, String componentName) {
         // Module name
         if (StringUtils.countMatches(componentName, ":") == 0) {
-            return StringUtils.equals(generalInfo.getArtifactId(), componentName);
+            return StringUtils.equals(generalInfo.getArtifactId(), componentName) || generalInfo.getPath().contains(componentName);
         }
         // Dependency
         String childComponentId = StringUtils.substringBeforeLast(generalInfo.getComponentId(), ":");
-        return StringUtils.equals(componentName, childComponentId);
+        return StringUtils.equals(componentName, childComponentId) || generalInfo.getPath().contains(componentName);
     }
 }
