@@ -19,8 +19,8 @@ import static com.jfrog.ide.common.utils.Utils.createYAMLMapper;
  **/
 public class ScanBinaryExecutorTest extends TestCase {
     private final ScanBinaryExecutor scanner = new ApplicabilityScannerExecutor();
-    private final Path SIMPLE_OUTPUT = new File("src/test/resources/sarif/simple_output.sarif").toPath();
-    private final Path NOT_APPLIC_OUTPUT = new File("src/test/resources/sarif/not_applic_output.sarif").toPath();
+    private final Path SIMPLE_OUTPUT = new File("src/test/resources/applicability/simple_output.sarif").toPath();
+    private final Path NOT_APPLIC_OUTPUT = new File("src/test/resources/applicability/not_applic_output.sarif").toPath();
 
 
     public void testInputBuilder() throws IOException {
