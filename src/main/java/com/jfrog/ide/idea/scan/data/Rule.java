@@ -45,7 +45,7 @@ public class Rule {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, shortDescription, fullDescription);
+        return Objects.hash(id);
     }
 
     @Override
@@ -57,6 +57,6 @@ public class Rule {
             return false;
         }
         Rule rhs = ((Rule) other);
-        return Objects.equals(this.id, rhs.id) && Objects.equals(this.shortDescription, rhs.shortDescription) && Objects.equals(this.fullDescription, rhs.fullDescription);
+        return Objects.equals(this.id, rhs.id);
     }
 }

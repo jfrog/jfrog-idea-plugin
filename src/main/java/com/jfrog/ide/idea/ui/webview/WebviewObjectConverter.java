@@ -26,10 +26,29 @@ public class WebviewObjectConverter {
         if (dependency.getLicenses() != null) {
             licenses = dependency.getLicenses().stream().map(depLicense -> new License(depLicense.getName(), depLicense.getMoreInfoUrl())).toArray(License[]::new);
         }
+        return new DependencyPage(
+                issueNode.getIssueId(),
+                dependency.getGeneralInfo().getArtifactId(),
+                dependency.getGeneralInfo().getPkgType(),
+                dependency.getGeneralInfo().getVersion(),
+                issueNode.getSeverity(false).name(),
+                licenses,
+                issueNode.getSummary(),
+                convertVersionRanges(issueNode.getFixedVersions()),
+                convertVersionRanges(issueNode.getInfectedVersions()),
+                convertReferences(issueNode.getReferences()),
+                convertCve(issueNode.getCve(), convertApplicableDetails(issueNode.isApplicable(), issueNode.getApplicableIssues())),
+                convertImpactPath(dependency.getImpactPaths()),
+                watchNames,
+                issueNode.getLastUpdated(),
+                extendedInformation
+        );
+    }
+
+    private static ApplicableDetails convertApplicableDetails(Boolean applicable, List<ApplicableIssueNode> applicableIssues) {
         ApplicableDetails applicableDetails = null;
-        if (issueNode.isApplicable() != null) {
-            if (issueNode.isApplicable()) {
-                List<ApplicableIssueNode> applicableIssues = issueNode.getApplicableIssues();
+        if (applicable != null) {
+            if (applicable) {
                 String searchTarget = applicableIssues.get(0).getScannerSearchTarget();
                 Evidence[] evidences = new Evidence[applicableIssues.size()];
                 int i = 0;
@@ -43,23 +62,7 @@ public class WebviewObjectConverter {
                 applicableDetails = new ApplicableDetails(false, null, null);
             }
         }
-        return new DependencyPage(
-                issueNode.getIssueId(),
-                dependency.getGeneralInfo().getArtifactId(),
-                dependency.getGeneralInfo().getPkgType(),
-                dependency.getGeneralInfo().getVersion(),
-                issueNode.getSeverity(false).name(),
-                licenses,
-                issueNode.getSummary(),
-                convertVersionRanges(issueNode.getFixedVersions()),
-                convertVersionRanges(issueNode.getInfectedVersions()),
-                convertReferences(issueNode.getReferences()),
-                convertCve(issueNode.getCve(), applicableDetails),
-                convertImpactPath(dependency.getImpactPaths()),
-                watchNames,
-                issueNode.getLastUpdated(),
-                extendedInformation
-        );
+        return applicableDetails;
     }
 
     public static DependencyPage convertLicenseToDepPage(LicenseViolationNode license) {
