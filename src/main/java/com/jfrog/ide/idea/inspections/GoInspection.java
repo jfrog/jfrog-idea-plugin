@@ -12,15 +12,11 @@ import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.build.extractor.scan.DependencyTree;
-
-import java.util.Set;
 
 /**
  * Created by Bar Belity on 17/02/2020.
  */
 
-@SuppressWarnings("InspectionDescriptionNotFoundInspection")
 public class GoInspection extends AbstractInspection {
 
     public GoInspection() {
@@ -65,14 +61,6 @@ public class GoInspection extends AbstractInspection {
                 .orElse(null);
     }
 
-    @Override
-    Set<DependencyTree> getModules(PsiElement element, String componentName) {
-        DependencyTree root = getRootDependencyTree(element);
-        if (root == null) {
-            return null;
-        }
-        return collectModules(root, element);
-    }
 
     @Override
     String createComponentName(PsiElement element) {

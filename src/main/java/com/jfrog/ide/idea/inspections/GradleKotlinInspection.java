@@ -11,7 +11,7 @@ import org.jetbrains.kotlin.psi.*;
 import java.util.List;
 
 /**
- * The dependencies in Gradle-Kotlin is a function call with at least one argument.
+ * Each dependency in Gradle-Kotlin is a function call with at least one argument.
  * Examples:
  * compile("a:b:c")
  * testCompile("d", "e", "f")
@@ -19,7 +19,6 @@ import java.util.List;
  *
  * @author yahavi
  */
-@SuppressWarnings("InspectionDescriptionNotFoundInspection")
 public class GradleKotlinInspection extends GradleInspection {
 
     public GradleKotlinInspection() {

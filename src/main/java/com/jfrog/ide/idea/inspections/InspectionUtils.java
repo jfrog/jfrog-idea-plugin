@@ -3,7 +3,7 @@ package com.jfrog.ide.idea.inspections;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.PsiElement;
-import org.jfrog.build.extractor.scan.DependencyTree;
+import com.jfrog.ide.common.tree.DependencyNode;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -22,7 +22,7 @@ public class InspectionUtils {
      * @param dependency     - The dependency tree node correlated to the element
      * @param elements       - The elements to apply the annotations
      */
-    static void registerProblem(ProblemsHolder problemsHolder, DependencyTree dependency, PsiElement[] elements, int dependenciesSize) {
+    static void registerProblem(ProblemsHolder problemsHolder, DependencyNode dependency, PsiElement[] elements, int dependenciesSize) {
         String description = getDescription(dependency, dependenciesSize);
         ShowInDependencyTree quickFix = new ShowInDependencyTree(dependency, description);
         Arrays.stream(elements)
@@ -37,9 +37,9 @@ public class InspectionUtils {
      * @param dependenciesSize - The size of the dependency tree list
      * @return the description of the show in dependency tree quickfix
      */
-    private static String getDescription(DependencyTree dependency, int dependenciesSize) {
+    private static String getDescription(DependencyNode dependency, int dependenciesSize) {
         if (dependenciesSize > 1) {
-            return SHOW_IN_DEPENDENCIES_TREE + " (" + ((DependencyTree) dependency.getParent()).getUserObject() + ")";
+            return SHOW_IN_DEPENDENCIES_TREE + " (" + ((DependencyNode) dependency.getParent()).getUserObject() + ")";
         }
         return SHOW_IN_DEPENDENCIES_TREE;
     }
