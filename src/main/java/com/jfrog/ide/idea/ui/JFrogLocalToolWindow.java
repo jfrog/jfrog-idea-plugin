@@ -12,7 +12,11 @@ import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
-import com.intellij.ui.*;
+import com.intellij.ui.IdeBorderFactory;
+import com.intellij.ui.OnePixelSplitter;
+import com.intellij.ui.ScrollPaneFactory;
+import com.intellij.ui.SideBorder;
+import com.intellij.ui.TreeSpeedSearch;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.jcef.JBCefApp;
 import com.intellij.ui.jcef.JBCefBrowser;
@@ -29,7 +33,7 @@ import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.ui.jcef.message.MessagePacker;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
 import com.jfrog.ide.idea.ui.webview.WebviewObjectConverter;
-import org.apache.commons.io.FileUtils;
+import com.jfrog.ide.idea.utils.Utils;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.handler.CefLoadHandlerAdapter;
@@ -40,6 +44,7 @@ import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -118,9 +123,8 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         try {
             tempDirPath = Files.createTempDirectory("jfrog-idea-plugin");
             tempDirPath.toFile().deleteOnExit();
-            FileUtils.copyToFile(getClass().getResourceAsStream("/jfrog-ide-webview-container/index.html"), new File(tempDirPath.toString(), "index.html"));
-            FileUtils.copyToFile(getClass().getResourceAsStream("/jfrog-ide-webview-container/bundle.js"), new File(tempDirPath.toString(), "bundle.js"));
-        } catch (IOException e) {
+            new Utils().copyFromJar("/jfrog-ide-webview/build", tempDirPath);
+        } catch (IOException | URISyntaxException e) {
             Logger.getInstance().error(e.getMessage());
             return;
         }

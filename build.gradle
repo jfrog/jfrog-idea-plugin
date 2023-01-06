@@ -68,7 +68,7 @@ test {
     }
 }
 
-def webViewVersion = '0.1.5'
+def webViewVersion = '0.1.14'
 def webviewFileName = 'jfrog-ide-webview-' + webViewVersion + '.tgz'
 tasks.register('downloadWebview', Download) {
     src 'https://releases.jfrog.io/artifactory/ide-webview-npm/jfrog-ide-webview/-/' + webviewFileName
@@ -86,7 +86,7 @@ tasks.register('verifyWebview', Verify) {
 
 tasks.register('extractWebview', Copy) {
     from tarTree(new File(buildDir, webviewFileName))
-    into Paths.get('src', 'main', 'resources', 'webview').toFile()
+    into Paths.get('src', 'main', 'resources', 'jfrog-ide-webview').toFile()
     eachFile {
         path = path.replace('package/', '');
     }
