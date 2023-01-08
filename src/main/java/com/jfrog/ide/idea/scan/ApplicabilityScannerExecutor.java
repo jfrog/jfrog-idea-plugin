@@ -38,7 +38,14 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
         Output output = getOutputObj(outputFile);
         Optional<Run> run = output.getRuns().stream().findFirst();
         if (run.isPresent()) {
-            Stream<String> knownCves = run.get().getTool().getDriver().getRules().stream().map(Rule::getId);
+            List<Rule> scanners = run.get().getTool().getDriver().getRules();
+            // Adds the scanner search target data
+            for (JFrogSecurityWarning warning : results) {
+                String ScannerSearchTarget = scanners.stream().filter(scanner -> scanner.getId().equals(warning.getName())).findFirst().map(scanner -> scanner.getFullDescription().getText()).orElse("");
+                warning.setScannerSearchTarget(ScannerSearchTarget);
+            }
+            // Adds the not applicable CVEs data
+            Stream<String> knownCves = scanners.stream().map(Rule::getId);
             knownCves.filter(cve -> !applicabilityCves.contains(cve)).forEach(cve -> results.add(new JFrogSecurityWarning(cve, false)));
         }
         return results;
