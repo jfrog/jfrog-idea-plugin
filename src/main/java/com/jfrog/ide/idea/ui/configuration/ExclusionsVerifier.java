@@ -13,7 +13,12 @@ import java.util.regex.PatternSyntaxException;
  * @author yahavi
  **/
 public class ExclusionsVerifier extends InputVerifier {
-    public static final String DEFAULT_EXCLUSIONS = "**/*{.idea,test,node_modules}*";
+    public static final String EXCLUSIONS_PREFIX = "**/*";
+    public static final String EXCLUSIONS_SUFFIX = "*";
+
+    public static String EXCLUSIONS_REGEX_PARSER = ".*\\{(.*)\\}\\*";
+
+    public static final String DEFAULT_EXCLUSIONS = EXCLUSIONS_PREFIX + "{.idea,test, node_modules}" + EXCLUSIONS_SUFFIX;
 
     private final JTextField excludedPaths;
 
@@ -32,7 +37,8 @@ public class ExclusionsVerifier extends InputVerifier {
 
     @Override
     public boolean verify(JComponent input) {
-        if (StringUtils.isBlank(excludedPaths.getText())) {
+        if (StringUtils.isBlank(excludedPaths.getText()) || !StringUtils.startsWith(excludedPaths.getText(), EXCLUSIONS_PREFIX)
+                || !StringUtils.endsWith(excludedPaths.getText(), EXCLUSIONS_SUFFIX)) {
             return false;
         }
         try {

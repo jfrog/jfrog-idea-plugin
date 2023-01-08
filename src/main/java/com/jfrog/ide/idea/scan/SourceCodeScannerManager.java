@@ -5,9 +5,11 @@ import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.tree.ApplicableIssueNode;
 import com.jfrog.ide.common.tree.FileTreeNode;
 import com.jfrog.ide.common.tree.IssueNode;
+import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
+import com.jfrog.ide.idea.ui.configuration.ExclusionsVerifier;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
@@ -16,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.jfrog.ide.common.log.Utils.logError;
 import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
@@ -51,11 +55,12 @@ public class SourceCodeScannerManager {
             return;
         }
         scanResults = new ArrayList<>();
+        List<String> skippedFolders = getSkippedFoldersPatterns();
         try {
             if (applicability.getSupportedLanguages().contains(codeBaseLanguage)) {
                 indicator.setText("Running applicability scan");
                 indicator.setFraction(0.25);
-                List<JFrogSecurityWarning> applicabilityResults = applicability.execute(new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).cves(cves));
+                List<JFrogSecurityWarning> applicabilityResults = applicability.execute(new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).cves(cves).skippedFolders(skippedFolders));
                 scanResults.addAll(applicabilityResults);
             }
             if (eos.getSupportedLanguages().contains(codeBaseLanguage)) {
@@ -71,6 +76,21 @@ public class SourceCodeScannerManager {
             scanInProgress.set(false);
             indicator.setFraction(1);
         }
+    }
+
+    private List<String> getSkippedFoldersPatterns() {
+        String excludePattern = GlobalSettings.getInstance().getServerConfig().getExcludedPaths();
+        List<String> skippedFoldersPatterns = new ArrayList<>();
+        Pattern pattern = Pattern.compile(ExclusionsVerifier.EXCLUSIONS_REGEX_PARSER);
+        Matcher matcher = pattern.matcher(excludePattern);
+        if (!matcher.find()) {
+            return List.of(excludePattern);
+        }
+        String[] dirsNames = matcher.group(1).split(",");
+        for (String dirName : dirsNames) {
+            skippedFoldersPatterns.add(ExclusionsVerifier.EXCLUSIONS_PREFIX + dirName.strip() + ExclusionsVerifier.EXCLUSIONS_SUFFIX);
+        }
+        return skippedFoldersPatterns;
     }
 
     public List<FileTreeNode> getResults(Map<String, List<IssueNode>> issuesMap) {
