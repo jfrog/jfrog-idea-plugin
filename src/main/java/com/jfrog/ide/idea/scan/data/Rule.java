@@ -12,6 +12,9 @@ public class Rule {
     @JsonProperty("shortDescription")
     private Message shortDescription;
 
+    @JsonProperty("fullDescription")
+    private Message fullDescription;
+
     public String getId() {
         return id;
     }
@@ -30,9 +33,19 @@ public class Rule {
         this.shortDescription = shortDescription;
     }
 
+    @SuppressWarnings({"unused"})
+    public Message getFullDescription() {
+        return fullDescription;
+    }
+
+    @SuppressWarnings({"unused"})
+    public void setFullDescription(Message fullDescription) {
+        this.fullDescription = fullDescription;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(id, shortDescription);
+        return Objects.hash(id);
     }
 
     @Override
@@ -44,7 +57,6 @@ public class Rule {
             return false;
         }
         Rule rhs = ((Rule) other);
-        return (Objects.equals(this.id, rhs.id) && Objects.equals(this.shortDescription, rhs.shortDescription));
+        return Objects.equals(this.id, rhs.id);
     }
-
 }

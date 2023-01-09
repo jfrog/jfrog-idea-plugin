@@ -9,6 +9,9 @@ public class Message {
     @JsonProperty("text")
     private String text;
 
+    @JsonProperty("markdown")
+    private String markdown;
+
     public String getText() {
         return text;
     }
@@ -34,4 +37,13 @@ public class Message {
         return (Objects.equals(this.text, rhs.text));
     }
 
+    @SuppressWarnings({"unused"})
+    public String getMarkdown() {
+        return markdown;
+    }
+
+    @SuppressWarnings({"unused"})
+    public void setMarkdown(String markdown) {
+        this.markdown = markdown;
+    }
 }

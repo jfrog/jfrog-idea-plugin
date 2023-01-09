@@ -12,6 +12,7 @@ public class JFrogSecurityWarning {
     private String reason;
     private String filePath;
     private String lineSnippet;
+    private String scannerSearchTarget;
     private final String name;
 
     private final boolean isApplicable;
@@ -92,5 +93,13 @@ public class JFrogSecurityWarning {
 
     private static Region getFirstRegion(SarifResult result) {
         return result.getLocations().get(0).getPhysicalLocation().getRegion();
+    }
+
+    public String getScannerSearchTarget() {
+        return scannerSearchTarget;
+    }
+
+    public void setScannerSearchTarget(String scannerSearchTarget) {
+        this.scannerSearchTarget = scannerSearchTarget;
     }
 }

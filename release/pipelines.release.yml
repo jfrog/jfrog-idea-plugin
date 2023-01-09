@@ -34,7 +34,8 @@ pipelines:
             - export JFROG_CLI_BUILD_PROJECT=ecosys
 
             # Configure git
-            - git checkout master
+            - if [[ $NEXT_VERSION =~ ^1.* ]]; then BRANCH="v1"; else BRANCH="master"; fi
+            - git checkout ${BRANCH}
             - git remote set-url origin https://$int_il_automation_token@github.com/jfrog/jfrog-idea-plugin.git
 
             # Make sure versions provided

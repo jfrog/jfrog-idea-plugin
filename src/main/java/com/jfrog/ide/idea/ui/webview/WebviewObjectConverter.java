@@ -26,24 +26,6 @@ public class WebviewObjectConverter {
         if (dependency.getLicenses() != null) {
             licenses = dependency.getLicenses().stream().map(depLicense -> new License(depLicense.getName(), depLicense.getMoreInfoUrl())).toArray(License[]::new);
         }
-        ApplicableDetails applicableDetails = null;
-        if (issueNode.isApplicable() != null) {
-            if (issueNode.isApplicable()) {
-                List<ApplicableIssueNode> applicableIssues = issueNode.getApplicableIssues();
-                if (applicableIssues.size() > 0) {
-                    Evidence[] evidences = new Evidence[applicableIssues.size()];
-                    int i = 0;
-                    for (ApplicableIssueNode applicableIssue : applicableIssues) {
-                        evidences[i] = new Evidence(applicableIssue.getReason(), applicableIssue.getFilePath(), applicableIssue.getLineSnippet());
-                        i++;
-                    }
-                    applicableDetails = new ApplicableDetails(true, evidences, null);
-                }
-            } else {
-                // If we know the issue is not applicable, adds the relevant ApplicableDetails.
-                applicableDetails = new ApplicableDetails(false, null, null);
-            }
-        }
         return new DependencyPage(
                 issueNode.getIssueId(),
                 dependency.getGeneralInfo().getArtifactId(),
@@ -55,12 +37,32 @@ public class WebviewObjectConverter {
                 convertVersionRanges(issueNode.getFixedVersions()),
                 convertVersionRanges(issueNode.getInfectedVersions()),
                 convertReferences(issueNode.getReferences()),
-                convertCve(issueNode.getCve(), applicableDetails),
+                convertCve(issueNode.getCve(), convertApplicableDetails(issueNode.isApplicable(), issueNode.getApplicableIssues())),
                 convertImpactPath(dependency.getImpactPaths()),
                 watchNames,
                 issueNode.getLastUpdated(),
                 extendedInformation
         );
+    }
+
+    private static ApplicableDetails convertApplicableDetails(Boolean applicable, List<ApplicableIssueNode> applicableIssues) {
+        ApplicableDetails applicableDetails = null;
+        if (applicable != null) {
+            if (applicable) {
+                String searchTarget = applicableIssues.get(0).getScannerSearchTarget();
+                Evidence[] evidences = new Evidence[applicableIssues.size()];
+                int i = 0;
+                for (ApplicableIssueNode applicableIssue : applicableIssues) {
+                    evidences[i++] = new Evidence(applicableIssue.getReason(), applicableIssue.getFilePath(), applicableIssue.getLineSnippet());
+                }
+                applicableDetails = new ApplicableDetails(true, evidences, searchTarget);
+
+            } else {
+                // If we know the issue is not applicable, adds the relevant ApplicableDetails.
+                applicableDetails = new ApplicableDetails(false, null, null);
+            }
+        }
+        return applicableDetails;
     }
 
     public static DependencyPage convertLicenseToDepPage(LicenseViolationNode license) {
@@ -95,12 +97,12 @@ public class WebviewObjectConverter {
 
     private static Cve convertCve(com.jfrog.ide.common.tree.Cve cve, ApplicableDetails applicableDetails) {
         return new Cve(
-            cve.getCveId(),
-            cve.getCvssV2Score(),
-            cve.getCvssV2Vector(),
-            cve.getCvssV3Score(),
-            cve.getCvssV3Vector(),
-            applicableDetails
+                cve.getCveId(),
+                cve.getCvssV2Score(),
+                cve.getCvssV2Vector(),
+                cve.getCvssV3Score(),
+                cve.getCvssV3Vector(),
+                applicableDetails
         );
     }
 
