@@ -12,11 +12,7 @@ import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
-import com.intellij.ui.IdeBorderFactory;
-import com.intellij.ui.OnePixelSplitter;
-import com.intellij.ui.ScrollPaneFactory;
-import com.intellij.ui.SideBorder;
-import com.intellij.ui.TreeSpeedSearch;
+import com.intellij.ui.*;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.jcef.JBCefApp;
 import com.intellij.ui.jcef.JBCefBrowser;
@@ -123,7 +119,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         try {
             tempDirPath = Files.createTempDirectory("jfrog-idea-plugin");
             tempDirPath.toFile().deleteOnExit();
-            new Utils().copyFromJar("/jfrog-ide-webview", tempDirPath);
+            Utils.extractFromResources("/jfrog-ide-webview", tempDirPath);
         } catch (IOException | URISyntaxException e) {
             Logger.getInstance().error(e.getMessage());
             return;

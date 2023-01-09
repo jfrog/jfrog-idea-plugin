@@ -23,17 +23,9 @@ import org.jfrog.build.extractor.usageReport.UsageReporter;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 
@@ -134,39 +126,33 @@ public class Utils {
     }
 
     /**
-     * Walk on each file in the Resource path and copy files recursively to the target path.
+     * Walk on each file in the resource path and copy files recursively to the target directory.
      *
-     * @param source - Abs path in resources begin with '/'.
-     * @param target - Destination to copy the files.
-     * @throws URISyntaxException
-     * @throws IOException
+     * @param resourceName - Abs path in resources begins with '/'
+     * @param targetDir    - Destination directory
+     * @throws URISyntaxException in case of error in converting the URL to URI.
+     * @throws IOException        in case of any unexpected I/O error.
      */
-    public void copyFromJar(String source, final Path target) throws URISyntaxException, IOException {
-        URI resource = getClass().getResource(source).toURI();
-        FileSystem fileSystem = FileSystems.newFileSystem(
-                resource,
-                Collections.<String, String>emptyMap()
-        );
+    public static void extractFromResources(String resourceName, Path targetDir) throws URISyntaxException, IOException {
+        URL resource = Utils.class.getResource(resourceName);
+        if (resource == null) {
+            throw new IOException("Resource '" + resourceName + "' was not found");
+        }
+        try (FileSystem fileSystem = FileSystems.newFileSystem(resource.toURI(), Collections.emptyMap())) {
+            Path jarPath = fileSystem.getPath(resourceName);
+            Files.walkFileTree(jarPath, new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    Files.createDirectories(targetDir.resolve(jarPath.relativize(dir).toString()));
+                    return FileVisitResult.CONTINUE;
+                }
 
-        final Path jarPath = fileSystem.getPath(source);
-
-        Files.walkFileTree(jarPath, new SimpleFileVisitor<Path>() {
-
-            private Path currentTarget;
-
-            @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                currentTarget = target.resolve(jarPath.relativize(dir).toString());
-                Files.createDirectories(currentTarget);
-                return FileVisitResult.CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                Files.copy(file, target.resolve(jarPath.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
-                return FileVisitResult.CONTINUE;
-            }
-
-        });
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.copy(file, targetDir.resolve(jarPath.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        }
     }
 }
