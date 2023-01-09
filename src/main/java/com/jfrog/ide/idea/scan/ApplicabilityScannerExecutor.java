@@ -18,8 +18,8 @@ import java.util.stream.Stream;
  */
 public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
     private static final String SCAN_TYPE = "analyze-applicability";
-    private static final String SCANNER_BINARY_NAME = "applicability_scanner";
-    private static final List<String> SCANNER_ARGS = List.of("scan");
+    private static final String SCANNER_BINARY_NAME = "analyzerManager";
+    private static final List<String> SCANNER_ARGS = List.of("ca");
 
     public ApplicabilityScannerExecutor() {
         super(SCAN_TYPE, SCANNER_BINARY_NAME);
