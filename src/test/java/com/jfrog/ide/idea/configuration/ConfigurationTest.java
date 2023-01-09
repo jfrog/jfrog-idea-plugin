@@ -145,6 +145,8 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
             assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
             assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
             assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
+            assertEquals(JFROG_PROJECT, actualServerConfig.getProject());
+            assertEquals(WATCH, actualServerConfig.getWatches());
         }
     }
 
@@ -177,6 +179,8 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
             assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
             assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
             assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
+            assertEquals(JFROG_PROJECT, actualServerConfig.getProject());
+            assertEquals(WATCH, actualServerConfig.getWatches());
         }
     }
 
@@ -213,6 +217,8 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
             assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
             assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
             assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
+            assertEquals(JFROG_PROJECT, actualServerConfig.getProject());
+            assertEquals(WATCH, actualServerConfig.getWatches());
         }
     }
 
@@ -235,6 +241,8 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
         assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
         assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
         assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
+        assertEquals(JFROG_PROJECT, actualServerConfig.getProject());
+        assertEquals(WATCH, actualServerConfig.getWatches());
     }
 
     /**
