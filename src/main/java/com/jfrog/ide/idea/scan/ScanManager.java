@@ -130,7 +130,7 @@ public abstract class ScanManager extends ScanManagerBase implements Disposable 
             indicator.setText("1/3: Building dependency tree");
             buildTree(!quickScan);
             indicator.setText("2/3: Xray scanning project dependencies");
-            scanAndCacheArtifacts(indicator, quickScan);
+            scanAndCacheArtifacts(indicator);
             indicator.setText("3/3: Finalizing");
             addXrayInfoToTree(getScanResults());
             setScanResults();

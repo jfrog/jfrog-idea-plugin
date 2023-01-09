@@ -108,7 +108,7 @@ public class PypiScanManagerTest extends LightJavaCodeInsightFixtureTestCase {
 
     public void testBuildTree() throws IOException {
         PypiScanManager pypiScanManager = new PypiScanManager(getProject(), pythonSdk, executorService);
-        pypiScanManager.setScanLogic(new ComponentSummaryScanLogic(new XrayScanCache(getProject().getName(), HOME_PATH.resolve("cache"), new NullLog()), new NullLog()));
+        pypiScanManager.setScanLogic(new ComponentSummaryScanLogic(new XrayScanCache(getProject().getName(), HOME_PATH.resolve("cache"), false, new NullLog()), new NullLog()));
         pypiScanManager.buildTree(false);
 
         // Check root SDK node

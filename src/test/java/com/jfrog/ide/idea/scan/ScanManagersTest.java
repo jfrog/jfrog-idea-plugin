@@ -44,7 +44,7 @@ public class ScanManagersTest extends TestCase {
         myFixture = fixtureBuilder.getFixture();
         myFixture.setUp();
         scanManagersFactory = ScanManagersFactory.getInstance(myFixture.getProject());
-        scanManagersFactory.refreshScanManagers(Utils.ScanLogicType.GraphScan, null);
+        scanManagersFactory.refreshScanManagers(Utils.ScanLogicType.GraphScan, null, false);
     }
 
     @Override
