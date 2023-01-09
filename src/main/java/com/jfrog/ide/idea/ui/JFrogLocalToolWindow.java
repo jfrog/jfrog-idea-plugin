@@ -123,7 +123,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         try {
             tempDirPath = Files.createTempDirectory("jfrog-idea-plugin");
             tempDirPath.toFile().deleteOnExit();
-            new Utils().copyFromJar("/jfrog-ide-webview/build", tempDirPath);
+            new Utils().copyFromJar("/jfrog-ide-webview", tempDirPath);
         } catch (IOException | URISyntaxException e) {
             Logger.getInstance().error(e.getMessage());
             return;

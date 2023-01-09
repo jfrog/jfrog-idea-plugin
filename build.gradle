@@ -80,17 +80,17 @@ tasks.register('downloadWebview', Download) {
 tasks.register('verifyWebview', Verify) {
     src new File(buildDir, webviewFileName)
     algorithm 'SHA-512'
-    checksum 'b2015294714222de1efa2490e9d1b8d36fd82aa79a4d04fd0821c07da8799eb85d45f1dedede2366da71b2d91f6277e31ce7befc9c4cbe2229b437d731fc7689'
+    checksum 'f7a6c2b355583c35c8df84bb254ef6da41a36696bd78e45f31eb4f0bf5e6582665e6def510bafaa9e5d20f8adc006f72ebccb9b512e730e04d2d25a04c6a4dc8'
     finalizedBy('extractWebview')
 }
 
 tasks.register('extractWebview', Copy) {
     from tarTree(new File(buildDir, webviewFileName))
     into Paths.get('src', 'main', 'resources', 'jfrog-ide-webview').toFile()
+    include '**/build/**/*'
     eachFile {
-        path = path.replace('package/', '');
+        path = path.replace('package/build/', '')
     }
-    exclude '**/README.md'
 }
 
 tasks.withType(JavaCompile).configureEach {
