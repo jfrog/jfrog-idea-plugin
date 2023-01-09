@@ -18,7 +18,6 @@ import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jfrog.build.extractor.scan.GeneralInfo;
 
 import javax.swing.tree.TreeNode;
 import java.util.*;
@@ -34,7 +33,7 @@ import java.util.stream.Collectors;
 public abstract class AbstractInspection extends LocalInspectionTool implements Annotator {
 
     private final String packageDescriptorName;
-    // True if the code inspection was automatically triggered after a Xray scan using InspectionEngine.runInspectionOnFile(...).
+    // True if the code inspection was automatically triggered after an Xray scan using InspectionEngine.runInspectionOnFile(...).
     private boolean afterScan;
 
     AbstractInspection(String packageDescriptorName) {
@@ -207,8 +206,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      */
     private DependencyNode getModuleDependency(DescriptorFileTreeNode file, String componentName) {
         for (DependencyNode dependency : file.getDependencies()) {
-            GeneralInfo childGeneralInfo = new GeneralInfo(dependency.getGeneralInfo().getComponentIdWithoutPrefix(), dependency.getImpactPathsString(), dependency.getGeneralInfo().getPkgType());
-            if (compareGeneralInfo(childGeneralInfo, componentName)) {
+            if (CompareDependencyNode(dependency, componentName)) {
                 return dependency;
             }
         }
@@ -216,19 +214,19 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     }
 
     /**
-     * Compare the generated general info from the Psi element and the build info from the Dependency tree.
+     * Compare the component name from the Psi element and the dependency node from the Dependency tree.
      *
-     * @param generalInfo   - General info from the dependency tree
+     * @param node          - the dependency node from the dependency tree
      * @param componentName - Component name representing a dependency without version
-     * @return true if the general info matches the component name
+     * @return true if the node matches the component name
      */
-    boolean compareGeneralInfo(GeneralInfo generalInfo, String componentName) {
-        // Module name
+    boolean CompareDependencyNode(DependencyNode node, String componentName) {
+        String artifactID = node.getGeneralInfo().getComponentIdWithoutPrefix();
+        String impactPath = node.getImpactPathsString();
         if (StringUtils.countMatches(componentName, ":") == 0) {
-            return StringUtils.equals(generalInfo.getArtifactId(), componentName) || generalInfo.getPath().contains(componentName);
+            return StringUtils.equals(artifactID, componentName) || impactPath.contains(componentName);
         }
-        // Dependency
-        String childComponentId = StringUtils.substringBeforeLast(generalInfo.getComponentId(), ":");
-        return StringUtils.equals(componentName, childComponentId) || generalInfo.getPath().contains(componentName);
+        String childComponentId = StringUtils.substringBeforeLast(artifactID, ":");
+        return StringUtils.equals(componentName, childComponentId) || impactPath.contains(componentName);
     }
 }

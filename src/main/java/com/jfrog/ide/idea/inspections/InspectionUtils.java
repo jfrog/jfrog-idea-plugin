@@ -13,12 +13,12 @@ import java.util.Objects;
  */
 public class InspectionUtils {
 
-    final static String SHOW_IN_DEPENDENCIES_TREE = "Show in dependency tree";
+    final static String INSPECTION_MESSAGE = "Show in JFrog plugin";
 
     /**
      * Create the 'Show in dependency tree' quickfix.
      *
-     * @param problemsHolder - The "Show in dependency tree" quickfix will be registered in this container
+     * @param problemsHolder - The "Show in JFrog plugin" quickfix will be registered in this container
      * @param dependency     - The dependency tree node correlated to the element
      * @param elements       - The elements to apply the annotations
      */
@@ -39,8 +39,8 @@ public class InspectionUtils {
      */
     private static String getDescription(DependencyNode dependency, int dependenciesSize) {
         if (dependenciesSize > 1) {
-            return SHOW_IN_DEPENDENCIES_TREE + " (" + ((DependencyNode) dependency.getParent()).getUserObject() + ")";
+            return INSPECTION_MESSAGE + " (" + ((DependencyNode) dependency.getParent()).getUserObject() + ")";
         }
-        return SHOW_IN_DEPENDENCIES_TREE;
+        return INSPECTION_MESSAGE;
     }
 }
