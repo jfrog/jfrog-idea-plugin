@@ -16,7 +16,7 @@ public class InspectionUtils {
     final static String INSPECTION_MESSAGE = "Show in JFrog plugin";
 
     /**
-     * Create the 'Show in dependency tree' quickfix.
+     * Create the 'Show in JFrog plugin' quickfix.
      *
      * @param problemsHolder - The "Show in JFrog plugin" quickfix will be registered in this container
      * @param dependency     - The dependency tree node correlated to the element
@@ -31,15 +31,15 @@ public class InspectionUtils {
     }
 
     /**
-     * Get the description of the show in dependency tree quickfix.
+     * Get the description of the Show in JFrog plugin quickfix.
      *
      * @param dependency       - The dependency tree node
      * @param dependenciesSize - The size of the dependency tree list
-     * @return the description of the show in dependency tree quickfix
+     * @return the description of the Show in JFrog plugin quickfix
      */
     private static String getDescription(DependencyNode dependency, int dependenciesSize) {
         if (dependenciesSize > 1) {
-            return INSPECTION_MESSAGE + " (" + ((DependencyNode) dependency.getParent()).getUserObject() + ")";
+            return INSPECTION_MESSAGE + " ("+ dependency.getTitle() + ")";
         }
         return INSPECTION_MESSAGE;
     }

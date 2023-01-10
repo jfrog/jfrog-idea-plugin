@@ -1,7 +1,7 @@
 <idea-plugin>
     <extensions defaultExtensionNs="com.intellij">
         <localInspection language="kotlin"
-                         displayName="Show in dependency tree"
+                         displayName="Show in JFrog plugin"
                          groupBundle="messages.InspectionsBundle"
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"

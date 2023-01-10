@@ -55,7 +55,7 @@
         <notificationGroup id="JFrogLog" displayType="NONE" isLogByDefault="true"/>
 
         <localInspection language="JSON"
-                         displayName="Show in dependency tree"
+                         displayName="Show in JFrog plugin"
                          groupBundle="messages.InspectionsBundle"
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"

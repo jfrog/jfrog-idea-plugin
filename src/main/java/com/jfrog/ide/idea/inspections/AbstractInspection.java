@@ -12,6 +12,7 @@ import com.intellij.psi.PsiElement;
 import com.jfrog.ide.common.tree.BaseTreeNode;
 import com.jfrog.ide.common.tree.DependencyNode;
 import com.jfrog.ide.common.tree.DescriptorFileTreeNode;
+import com.jfrog.ide.common.tree.ImpactTreeNode;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.ui.ComponentsTree;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
 
 /**
  * Parent class of all inspections and annotations.
- * The inspections are the "Show in dependency tree" action.
+ * The inspections are the "Show in JFrog plugin" action.
  * The annotations are the "Top issue" and "Licenses" labels.
  *
  * @author yahavi
@@ -45,10 +46,10 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     }
 
     /**
-     * Get Psi element and decide whether to add "Show in dependency tree" option, and register a corresponding
+     * Get Psi element and decide whether to add "Show in JFrog plugin" option, and register a corresponding
      * navigation from item in tree to item in project-descriptor.
      *
-     * @param problemsHolder - The "Show in dependency tree" option will be registered in this container.
+     * @param problemsHolder - The "Show in JFrog plugin" option will be registered in this container.
      * @param element        - The Psi element in the package descriptor
      * @param isOnTheFly     - True if the inspection was triggered by opening a package descriptor file.
      *                       False if the inspection was triggered manually by clicking on "Code | Inspect Code".
@@ -194,23 +195,28 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         if (filesNodes == null) {
             return null; // No files descriptors found for this element
         }
-        return filesNodes.stream().map(module -> getModuleDependency(module, componentName)).filter(Objects::nonNull).collect(Collectors.toList());
+        return filesNodes.stream()
+                .filter(fileNode -> fileNode.getFilePath().equals(element.getContainingFile().getVirtualFile().getPath()))
+                .map(descriptorFile -> getMatchDependencies(descriptorFile, componentName))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 
     /**
-     * Get the module dependency that matches to the input general info.
+     * Get the dependencies that match to the input componentName.
      *
      * @param file          - The Descriptor file node in the tree
      * @param componentName - Component name representing a dependency without version
-     * @return the dependency node that match to the input general info
+     * @return the dependencies node that match to the input general info
      */
-    private DependencyNode getModuleDependency(DescriptorFileTreeNode file, String componentName) {
+    private List<DependencyNode> getMatchDependencies(DescriptorFileTreeNode file, String componentName) {
+        List<DependencyNode> dependencies = new ArrayList<>();
         for (DependencyNode dependency : file.getDependencies()) {
-            if (CompareDependencyNode(dependency, componentName)) {
-                return dependency;
+            if (isNodeMatch(dependency, componentName)) {
+                dependencies.add(dependency);
             }
         }
-        return null;
+        return dependencies;
     }
 
     /**
@@ -220,9 +226,9 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * @param componentName - Component name representing a dependency without version
      * @return true if the node matches the component name
      */
-    boolean CompareDependencyNode(DependencyNode node, String componentName) {
+    boolean isNodeMatch(DependencyNode node, String componentName) {
         String artifactID = node.getGeneralInfo().getComponentIdWithoutPrefix();
-        String impactPath = node.getImpactPathsString();
+        ImpactTreeNode impactPath = node.getImpactPaths();
         if (StringUtils.countMatches(componentName, ":") == 0) {
             return StringUtils.equals(artifactID, componentName) || impactPath.contains(componentName);
         }

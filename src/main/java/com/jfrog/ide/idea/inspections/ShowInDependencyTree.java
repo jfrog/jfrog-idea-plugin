@@ -15,7 +15,7 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
- * Adds the yellow bulb action - "Show in dependency tree".
+ * Adds the yellow bulb action - "Show in JFrog plugin".
  *
  * @author yahavi
  */

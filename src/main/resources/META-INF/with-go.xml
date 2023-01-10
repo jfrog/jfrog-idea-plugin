@@ -2,7 +2,7 @@
     <depends>com.intellij.modules.platform</depends>
     <extensions defaultExtensionNs="com.intellij">
         <localInspection language="vgo"
-                         displayName="Show in dependency tree"
+                         displayName="Show in JFrog plugin"
                          groupBundle="messages.InspectionsBundle"
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"
