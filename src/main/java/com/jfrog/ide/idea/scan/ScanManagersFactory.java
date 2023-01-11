@@ -94,7 +94,7 @@ public class ScanManagersFactory implements Disposable {
         project.getMessageBus().syncPublisher(ApplicationEvents.ON_SCAN_LOCAL_STARTED).update();
         ExecutorService executor = Executors.newFixedThreadPool(3);
         try {
-            refreshScanManagers(getScanLogicType(), executor);
+            refreshScanManagers(getScanLogicType(), executor, quickScan);
             NavigationService.clearNavigationMap(project);
             for (ScanManager scanManager : scanManagers.values()) {
                 try {
@@ -137,7 +137,7 @@ public class ScanManagersFactory implements Disposable {
     /**
      * Scan projects, create new ScanManagers and delete unnecessary ones.
      */
-    public void refreshScanManagers(Utils.ScanLogicType scanLogicType, @Nullable ExecutorService executor) throws IOException, InterruptedException {
+    public void refreshScanManagers(Utils.ScanLogicType scanLogicType, @Nullable ExecutorService executor, boolean quickScan) throws IOException, InterruptedException {
         removeScanManagersListeners();
         Map<Integer, ScanManager> scanManagers = Maps.newHashMap();
         int projectHash = Utils.getProjectIdentifier(project);
@@ -154,7 +154,7 @@ public class ScanManagersFactory implements Disposable {
         Set<Path> scanPaths = createScanPaths(scanManagers, project);
         createScanManagers(scanManagers, scanPaths, executor);
         createPypiScanManagerIfApplicable(scanManagers, executor);
-        setScanLogic(scanManagers, scanLogicType);
+        setScanLogic(scanManagers, scanLogicType, quickScan);
         this.scanManagers = scanManagers;
     }
 
@@ -246,11 +246,13 @@ public class ScanManagersFactory implements Disposable {
      * We create a new instance to allow setting the scan results separately after the Xray scan.
      * On the other hand, the scan cache map is a single map shared between all scanners.
      *
-     * @param scanManagers - The scan managers before Xray scan
+     * @param scanManagers  - The scan managers before Xray scan
+     * @param scanLogicType - /graph/scan or /summary/component logic
+     * @param quickScan     - True to allow usage of the scan cache.
      * @throws IOException in case of any I/O error.
      */
-    private void setScanLogic(Map<Integer, ScanManager> scanManagers, Utils.ScanLogicType scanLogicType) throws IOException {
-        ScanCache scanCache = createXrayScanCache();
+    private void setScanLogic(Map<Integer, ScanManager> scanManagers, Utils.ScanLogicType scanLogicType, boolean quickScan) throws IOException {
+        ScanCache scanCache = createXrayScanCache(quickScan);
         Logger logger = Logger.getInstance();
         scanManagers.values().forEach(manager -> manager.setScanLogic(createScanLogic(scanLogicType, scanCache, logger)));
     }
@@ -258,14 +260,15 @@ public class ScanManagersFactory implements Disposable {
     /**
      * Create the scan cache object and the directories needed for it.
      *
+     * @param quickScan - True to load the scan cache.
      * @return scan cache.
      * @throws IOException in cace of any I/O error.
      */
-    private ScanCache createXrayScanCache() throws IOException {
+    private ScanCache createXrayScanCache(boolean quickScan) throws IOException {
         Files.createDirectories(HOME_PATH);
         Logger log = Logger.getInstance();
         ServerConfig server = GlobalSettings.getInstance().getServerConfig();
-        return new XrayScanCache(project.getName() + server.getProject(), HOME_PATH.resolve("cache"), log);
+        return new XrayScanCache(project.getName() + server.getProject(), HOME_PATH.resolve("cache"), quickScan, log);
     }
 
     private enum ScanManagerTypes {
