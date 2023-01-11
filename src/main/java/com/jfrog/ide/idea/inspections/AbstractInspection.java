@@ -134,7 +134,10 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         Enumeration<TreeNode> roots = ((BaseTreeNode) componentsTree.getModel().getRoot()).children();
         for (TreeNode root : Collections.list(roots)) {
             if (root instanceof DescriptorFileTreeNode) {
-                fileDescriptors.add((DescriptorFileTreeNode) root);
+                DescriptorFileTreeNode fileNode = (DescriptorFileTreeNode) root;
+                if (fileNode.getFilePath().equals(element.getContainingFile().getVirtualFile().getPath())) {
+                    fileDescriptors.add(fileNode);
+                }
             }
         }
         return fileDescriptors;
@@ -196,7 +199,6 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
             return null; // No files descriptors found for this element
         }
         return filesNodes.stream()
-                .filter(fileNode -> fileNode.getFilePath().equals(element.getContainingFile().getVirtualFile().getPath()))
                 .map(descriptorFile -> getMatchDependencies(descriptorFile, componentName))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
@@ -229,10 +231,6 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     boolean isNodeMatch(DependencyNode node, String componentName) {
         String artifactID = node.getGeneralInfo().getComponentIdWithoutPrefix();
         ImpactTreeNode impactPath = node.getImpactPaths();
-        if (StringUtils.countMatches(componentName, ":") == 0) {
-            return StringUtils.equals(artifactID, componentName) || impactPath.contains(componentName);
-        }
-        String childComponentId = StringUtils.substringBeforeLast(artifactID, ":");
-        return StringUtils.equals(componentName, childComponentId) || impactPath.contains(componentName);
+        return StringUtils.equals(artifactID, componentName) || impactPath.contains(componentName);
     }
 }
