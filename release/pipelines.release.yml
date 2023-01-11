@@ -68,11 +68,11 @@ pipelines:
             - jf rt bp
 
             # Distribute release bundle
-            - jf ds rbc jfrog-idea-plugin $NEXT_VERSION --spec=./release/specs/prod-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
-            - jf ds rbd jfrog-idea-plugin $NEXT_VERSION --site="releases.jfrog.io" --sync
+            # - jf ds rbc jfrog-idea-plugin $NEXT_VERSION --spec=./release/specs/prod-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
+            # - jf ds rbd jfrog-idea-plugin $NEXT_VERSION --site="releases.jfrog.io" --sync
 
             # Upload to Jetbrains marketplace
-            - env -i JETBRAINS_TOKEN=$int_jetbrains_token ./gradlew publishPlugin
+            - env -i PATH=$PATH HOME=$HOME JAVA_HOME=$JAVA_HOME JETBRAINS_TOKEN=$int_jetbrains_token ./gradlew publishPlugin
 
             # Update next development version
             - sed -i "s/\(currentVersion=\).*\$/\1${NEXT_DEVELOPMENT_VERSION}/" gradle.properties
