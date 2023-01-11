@@ -13,15 +13,10 @@ import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.idea.maven.project.MavenProjectsManager;
-import org.jfrog.build.extractor.scan.DependencyTree;
-
-import java.util.Set;
 
 /**
  * @author yahavi
  */
-@SuppressWarnings("InspectionDescriptionNotFoundInspection")
 public class MavenInspection extends AbstractInspection {
 
     public static final String MAVEN_DEPENDENCY_MANAGEMENT = "dependencyManagement";
@@ -92,16 +87,4 @@ public class MavenInspection extends AbstractInspection {
         return String.join(":", groupId.getValue().getText(), artifactId.getValue().getText());
     }
 
-    @Override
-    Set<DependencyTree> getModules(PsiElement element, String componentName) {
-        Project project = element.getProject();
-        DependencyTree root = getRootDependencyTree(element);
-        MavenProjectsManager mavenProjectsManager = MavenProjectsManager.getInstance(project);
-        if (root == null || mavenProjectsManager == null) {
-            return null;
-        }
-
-        // Search for the relevant module
-        return collectModules(root, project, mavenProjectsManager.getProjects(), componentName);
-    }
 }

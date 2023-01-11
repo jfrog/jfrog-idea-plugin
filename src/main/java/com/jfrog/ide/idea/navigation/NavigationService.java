@@ -6,6 +6,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.jfrog.ide.common.tree.DependencyNode;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependencyTree;
 
@@ -20,7 +21,7 @@ import java.util.Set;
  */
 public class NavigationService {
 
-    private final Map<DependencyTree, Set<NavigationTarget>> navigationMap = Maps.newHashMap();
+    private final Map<DependencyNode, Set<NavigationTarget>> navigationMap = Maps.newHashMap();
 
     public static NavigationService getInstance(@NotNull Project project) {
         return project.getService(NavigationService.class);
@@ -40,7 +41,7 @@ public class NavigationService {
      * @param treeNode                The tree-node to register the navigation from.
      * @param navigationTargetElement The PsiElement we register the navigation to.
      */
-    public void addNavigation(DependencyTree treeNode, PsiElement navigationTargetElement) {
+    public void addNavigation(DependencyNode treeNode, PsiElement navigationTargetElement) {
         PsiFile containingFile = navigationTargetElement.getContainingFile();
         FileViewProvider fileViewProvider = containingFile.getViewProvider();
         Document document = fileViewProvider.getDocument();

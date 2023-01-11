@@ -164,6 +164,9 @@ public abstract class ScanManager {
             addScanResults(scanner.getResults(issuesMap));
             fileTreeNodes.forEach(node -> node.sortChildren());
 
+            // Force inspections run due to changes in the displayed tree
+            runInspections();
+
         } catch (ProcessCanceledException e) {
             log.info("Xray scan was canceled");
         } catch (Exception e) {
@@ -349,23 +352,25 @@ public abstract class ScanManager {
     }
 
     void runInspections() {
-        PsiFile[] projectDescriptors = getProjectDescriptors();
-        if (ArrayUtils.isEmpty(projectDescriptors)) {
-            return;
-        }
-        InspectionManagerEx inspectionManagerEx = (InspectionManagerEx) InspectionManager.getInstance(project);
-        GlobalInspectionContext context = inspectionManagerEx.createNewGlobalContext(false);
-        AbstractInspection localInspectionTool = getInspectionTool();
-        localInspectionTool.setAfterScan(true);
-        for (PsiFile descriptor : projectDescriptors) {
-            // Run inspection on descriptor.
-            InspectionEngine.runInspectionOnFile(descriptor, new LocalInspectionToolWrapper(localInspectionTool), context);
-            FileEditor[] editors = FileEditorManager.getInstance(project).getAllEditors(descriptor.getVirtualFile());
-            if (!ArrayUtils.isEmpty(editors)) {
-                // Refresh descriptor highlighting only if it is already opened.
-                DaemonCodeAnalyzer.getInstance(project).restart(descriptor);
+        ApplicationManager.getApplication().invokeLater(() -> {
+            PsiFile[] projectDescriptors = getProjectDescriptors();
+            if (ArrayUtils.isEmpty(projectDescriptors)) {
+                return;
             }
-        }
+            InspectionManagerEx inspectionManagerEx = (InspectionManagerEx) InspectionManager.getInstance(project);
+            GlobalInspectionContext context = inspectionManagerEx.createNewGlobalContext(false);
+            AbstractInspection localInspectionTool = getInspectionTool();
+            localInspectionTool.setAfterScan(true);
+            for (PsiFile descriptor : projectDescriptors) {
+                // Run inspection on descriptor.
+                InspectionEngine.runInspectionOnFile(descriptor, new LocalInspectionToolWrapper(localInspectionTool), context);
+                FileEditor[] editors = FileEditorManager.getInstance(project).getAllEditors(descriptor.getVirtualFile());
+                if (!ArrayUtils.isEmpty(editors)) {
+                    // Refresh descriptor highlighting only if it is already opened.
+                    DaemonCodeAnalyzer.getInstance(project).restart(descriptor);
+                }
+            }
+        });
     }
 
     /**

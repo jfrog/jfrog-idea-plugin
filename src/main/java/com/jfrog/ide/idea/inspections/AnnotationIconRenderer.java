@@ -5,14 +5,13 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.ui.tree.TreeUtil;
+import com.jfrog.ide.common.tree.DependencyNode;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.ui.utils.IconUtils;
 import com.jfrog.ide.idea.utils.Utils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jfrog.build.extractor.scan.DependencyTree;
-import org.jfrog.build.extractor.scan.Severity;
 
 import javax.swing.*;
 import java.util.Objects;
@@ -23,16 +22,15 @@ import java.util.Objects;
  * @author yahavi
  **/
 public class AnnotationIconRenderer extends GutterIconRenderer {
-    private final DependencyTree node;
+    private final DependencyNode node;
     private final String tooltipText;
     private final Icon icon;
     private Project project;
 
-    public AnnotationIconRenderer(DependencyTree node, String tooltipText) {
+    public AnnotationIconRenderer(DependencyNode node, String tooltipText) {
         this.node = node;
         this.tooltipText = tooltipText;
-        Severity topSeverity = node.getTopIssue().getSeverity();
-        this.icon = IconUtils.load(StringUtils.lowerCase(topSeverity.toString()));
+        this.icon = IconUtils.load(StringUtils.lowerCase(node.getSeverity().toString()));
     }
 
     public void setProject(Project project) {
