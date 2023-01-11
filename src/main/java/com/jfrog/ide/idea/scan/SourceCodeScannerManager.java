@@ -9,7 +9,6 @@ import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
-import com.jfrog.ide.idea.ui.configuration.ExclusionsVerifier;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
@@ -22,6 +21,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.jfrog.ide.common.log.Utils.logError;
+import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.*;
 import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
 
 public class SourceCodeScannerManager {
@@ -81,14 +81,14 @@ public class SourceCodeScannerManager {
     private List<String> getSkippedFoldersPatterns() {
         String excludePattern = GlobalSettings.getInstance().getServerConfig().getExcludedPaths();
         List<String> skippedFoldersPatterns = new ArrayList<>();
-        Pattern pattern = Pattern.compile(ExclusionsVerifier.EXCLUSIONS_REGEX_PARSER);
+        Pattern pattern = Pattern.compile(EXCLUSIONS_REGEX_PARSER);
         Matcher matcher = pattern.matcher(excludePattern);
         if (!matcher.find()) {
             return List.of(excludePattern);
         }
         String[] dirsNames = matcher.group(1).split(",");
         for (String dirName : dirsNames) {
-            skippedFoldersPatterns.add(ExclusionsVerifier.EXCLUSIONS_PREFIX + dirName.strip() + ExclusionsVerifier.EXCLUSIONS_SUFFIX);
+            skippedFoldersPatterns.add(EXCLUSIONS_PREFIX + dirName.strip() + EXCLUSIONS_SUFFIX);
         }
         return skippedFoldersPatterns;
     }

@@ -19,6 +19,7 @@
  */
 package com.jfrog.ide.idea.configuration;
 
+
 import com.intellij.credentialStore.Credentials;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.util.EnvironmentUtil;
@@ -47,7 +48,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 
-import static com.jfrog.ide.idea.ui.configuration.ExclusionsVerifier.DEFAULT_EXCLUSIONS;
 import static com.jfrog.ide.idea.ui.configuration.Utils.*;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.*;
@@ -234,7 +234,7 @@ public class ServerConfigImpl implements ServerConfig {
     }
 
     public String getExcludedPaths() {
-        return defaultIfBlank(this.excludedPaths, DEFAULT_EXCLUSIONS);
+        return this.excludedPaths;
     }
 
     @Override

@@ -40,7 +40,7 @@ import java.util.List;
 
 import static com.jfrog.ide.common.ci.Utils.createAqlForBuildArtifacts;
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.*;
-import static com.jfrog.ide.idea.ui.configuration.ExclusionsVerifier.DEFAULT_EXCLUSIONS;
+import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.DEFAULT_EXCLUSIONS;
 import static com.jfrog.ide.idea.ui.configuration.Utils.clearText;
 import static org.apache.commons.collections4.CollectionUtils.addIgnoreNull;
 import static org.apache.commons.lang3.StringUtils.*;
@@ -346,7 +346,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
 
     @Override
     public void apply() throws ConfigurationException {
-        ConfigVerificationUtils.validateGlobalConfig(serverConfig.getPolicyType(), serverConfig.getProject(), serverConfig.getWatches());
+        ConfigVerificationUtils.validateGlobalConfig(serverConfig.getExcludedPaths(), serverConfig.getPolicyType(), serverConfig.getProject(), serverConfig.getWatches());
         GlobalSettings globalSettings = GlobalSettings.getInstance();
         globalSettings.updateConfig(serverConfig);
         MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
@@ -393,7 +393,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         platformUrl.getEmptyText().setText("Example: https://acme.jfrog.io");
         xrayUrl.getEmptyText().setText("Example: https://acme.jfrog.io/xray");
         artifactoryUrl.getEmptyText().setText("Example: https://acme.jfrog.io/artifactory");
-        excludedPaths.setInputVerifier(new ExclusionsVerifier(excludedPaths));
+        excludedPaths.getEmptyText().setText("Example: " + DEFAULT_EXCLUSIONS);
         watches.getEmptyText().setText("Example: watch-1,watch-2");
         connectionResults.setText("");
 

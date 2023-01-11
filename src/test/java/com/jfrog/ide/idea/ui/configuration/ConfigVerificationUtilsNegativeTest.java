@@ -44,6 +44,6 @@ public class ConfigVerificationUtilsNegativeTest {
 
     @Test(expected = ConfigurationException.class)
     public void testValidateGlobalConfig() throws ConfigurationException {
-        validateGlobalConfig(policyType, project, watches);
+        validateGlobalConfig("",policyType, project, watches);
     }
 }

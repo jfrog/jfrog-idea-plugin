@@ -39,6 +39,6 @@ public class ConfigVerificationUtilsPositiveTest {
 
     @Test
     public void testValidateGlobalConfig() throws ConfigurationException {
-        validateGlobalConfig(policyType, project, watches);
+        validateGlobalConfig("", policyType, project, watches);
     }
 }
