@@ -52,12 +52,6 @@ pipelines:
             # Run audit
             - jf audit
 
-            # Install, build, and audit webview
-            - cd webview
-            - npm i && npm run build
-            - jf audit
-            - cd ..
-
             # Update version
             - sed -i "s/\(currentVersion=\).*\$/\1${NEXT_VERSION}/" gradle.properties
             - git commit -am "[artifactory-release] Release version ${NEXT_VERSION} [skipRun]" --allow-empty

@@ -6,6 +6,7 @@ resources:
       gitProvider: il_automation
       buildOn:
         pullRequestCreate: true
+        commit: true
       branches:
         include: master
       cancelPendingRunsOn:
