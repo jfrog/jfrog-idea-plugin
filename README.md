@@ -6,7 +6,7 @@
 
 ![JFrog Extension Marketplace Installs](https://img.shields.io/jetbrains/plugin/d/9834-jfrog?label=Marketplace%20installs&color=blue&style=for-the-badge)
 
-[![Build status](https://github.com/jfrog/jfrog-idea-plugin/actions/workflows/test.yml/badge.svg)](https://github.com/jfrog/jfrog-idea-plugin/actions/workflows/test.yml)
+[![Test](https://github.com/jfrog/jfrog-idea-plugin/actions/workflows/test.yml/badge.svg?branch=v1)](https://github.com/jfrog/jfrog-idea-plugin/actions/workflows/test.yml?query=branch%3Av1)
 [![Marketplace](https://img.shields.io/jetbrains/plugin/v/9834-jfrog)](https://plugins.jetbrains.com/plugin/9834-jfrog)
 [![](https://img.shields.io/badge/Docs-%F0%9F%93%96-blue)](https://www.jfrog.com/confluence/display/JFROG/JFrog+IntelliJ+IDEA+Plugin)
 
