@@ -30,6 +30,8 @@ import com.jfrog.ide.idea.ui.jcef.message.MessagePacker;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
 import com.jfrog.ide.idea.ui.webview.WebviewObjectConverter;
 import com.jfrog.ide.idea.utils.Utils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.handler.CefLoadHandlerAdapter;
@@ -50,11 +52,12 @@ import static com.jfrog.ide.idea.ui.JFrogToolWindow.SCROLL_BAR_SCROLLING_UNITS;
  * @author yahavi
  */
 public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
-    final LocalComponentsTree componentsTree;
-    JBCefBrowserBase browser;
-    OnePixelSplitter verticalSplit;
-    MessagePacker messagePacker;
-    VulnerabilityOrViolationNode selectedIssue;
+    private final LocalComponentsTree componentsTree;
+    private final JBCefBrowserBase browser;
+    private final OnePixelSplitter verticalSplit;
+    private final MessagePacker messagePacker;
+    private VulnerabilityOrViolationNode selectedIssue;
+    private Path tempDirPath;
 
     /**
      * @param project - Currently opened IntelliJ project
@@ -114,10 +117,8 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             return;
         }
 
-        Path tempDirPath;
         try {
             tempDirPath = Files.createTempDirectory("jfrog-idea-plugin");
-            tempDirPath.toFile().deleteOnExit();
             Utils.extractFromResources("/jfrog-ide-webview", tempDirPath);
         } catch (IOException | URISyntaxException e) {
             Logger.getInstance().error(e.getMessage());
@@ -201,5 +202,10 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     public void dispose() {
         super.dispose();
         browser.dispose();
+        try {
+            FileUtils.deleteDirectory(tempDirPath.toFile());
+        } catch (IOException e) {
+            Logger.getInstance().warn("Temporary directory could not be deleted: " + tempDirPath.toString() + ". Error: " + ExceptionUtils.getRootCauseMessage(e));
+        }
     }
 }

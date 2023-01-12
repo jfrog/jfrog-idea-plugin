@@ -1,23 +1,20 @@
 package com.jfrog.ide.idea.ui.webview.model;
 
-import java.io.Serializable;
-
-public class License implements Serializable {
-    String name;
-    String link;
+public class License {
+    private final String name;
+    private final String link;
 
     public License(String name, String link) {
         this.name = name;
         this.link = link;
     }
 
-    public License() {
-    }
-
+    @SuppressWarnings("unused")
     public String getName() {
         return name;
     }
 
+    @SuppressWarnings("unused")
     public String getLink() {
         return link;
     }

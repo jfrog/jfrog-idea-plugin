@@ -1,174 +1,172 @@
 package com.jfrog.ide.idea.ui.webview.model;
 
-import java.io.Serializable;
-
-public class DependencyPage implements Serializable {
-    String id;
-    String component;
-    String componentType;
-    String pageType = "DEPENDENCY";
-    String version;
-    String severity;
-    License[] license;
-    String summary;
-    String[] fixedVersion;
-    String[] infectedVersion;
-    Reference[] references;
-    Cve cve;
-    ImpactedPath impactedPath;
-    String[] watchName;
-    String edited;
-    ExtendedInformation extendedInformation;
+public class DependencyPage {
+    private String id;
+    private String component;
+    private String componentType;
+    private String version;
+    private String severity;
+    private License[] license;
+    private String summary;
+    private String[] fixedVersion;
+    private String[] infectedVersion;
+    private Reference[] references;
+    private Cve cve;
+    private ImpactedPath impactedPath;
+    private String[] watchName;
+    private String edited;
+    private ExtendedInformation extendedInformation;
 
     public DependencyPage() {
     }
 
-    public DependencyPage(String id, String component, String type, String version, String severity, License[] license,
-                          String summary, String[] fixedVersion, String[] infectedVersion, Reference[] references,
-                          Cve cve, ImpactedPath impactedPath, String[] watchName, String edited,
-                          ExtendedInformation extendedInformation) {
-        this.id = id;
-        this.component = component;
-        this.componentType = type;
-        this.version = version;
-        this.severity = severity;
-        this.license = license;
-        this.summary = summary;
-        this.fixedVersion = fixedVersion;
-        this.infectedVersion = infectedVersion;
-        this.references = references;
-        this.cve = cve;
-        this.impactedPath = impactedPath;
-        this.watchName = watchName;
-        this.edited = edited;
-        this.extendedInformation = extendedInformation;
-    }
-
-    public License[] getLicense() {
-        return license;
-    }
-
-    public void setLicense(License[] license) {
-        this.license = license;
-    }
-
-    public String getSummary() {
-        return summary;
-    }
-
-    public void setSummary(String summary) {
-        this.summary = summary;
-    }
-
-    public String[] getInfectedVersion() {
-        return infectedVersion;
-    }
-
-    public void setInfectedVersion(String[] infectedVersion) {
-        this.infectedVersion = infectedVersion;
-    }
-
-    public Reference[] getReferences() {
-        return references;
-    }
-
-    public void setReferences(Reference[] references) {
-        this.references = references;
-    }
-
-    public ImpactedPath getImpactedPath() {
-        return impactedPath;
-    }
-
-    public void setImpactedPath(ImpactedPath impactedPath) {
-        this.impactedPath = impactedPath;
-    }
-
-    public ExtendedInformation getExtendedInformation() {
-        return extendedInformation;
-    }
-
-    public void setExtendedInformation(ExtendedInformation extendedInformation) {
-        this.extendedInformation = extendedInformation;
-    }
-
-
-
-    public Cve getCve() {
-        return cve;
-    }
-
-    public void setCve(Cve cve) {
-        this.cve = cve;
-    }
-
-
+    @SuppressWarnings("unused")
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public DependencyPage id(String id) {
         this.id = id;
+        return this;
     }
 
+    @SuppressWarnings("unused")
     public String getComponent() {
         return component;
     }
 
-    public void setComponent(String component) {
+    public DependencyPage component(String component) {
         this.component = component;
+        return this;
     }
 
+    @SuppressWarnings("unused")
     public String getComponentType() {
         return componentType;
     }
 
-    public String getPageType() {
-        return pageType;
-    }
-
-    public void setComponentType(String componentType) {
+    public DependencyPage componentType(String componentType) {
         this.componentType = componentType;
+        return this;
     }
 
+    @SuppressWarnings("unused")
     public String getVersion() {
         return version;
     }
 
-    public void setVersion(String version) {
+    public DependencyPage version(String version) {
         this.version = version;
+        return this;
     }
 
-
+    @SuppressWarnings("unused")
     public String getSeverity() {
         return severity;
     }
 
-    public void setSeverity(String severity) {
+    public DependencyPage severity(String severity) {
         this.severity = severity;
+        return this;
     }
 
+    @SuppressWarnings("unused")
+    public License[] getLicense() {
+        return license;
+    }
+
+    public DependencyPage license(License[] license) {
+        this.license = license;
+        return this;
+    }
+
+    @SuppressWarnings("unused")
+    public String getSummary() {
+        return summary;
+    }
+
+    public DependencyPage summary(String summary) {
+        this.summary = summary;
+        return this;
+    }
+
+    @SuppressWarnings("unused")
     public String[] getFixedVersion() {
         return fixedVersion;
     }
 
-    public void setFixedVersion(String[] fixedVersion) {
+    public DependencyPage fixedVersion(String[] fixedVersion) {
         this.fixedVersion = fixedVersion;
+        return this;
     }
 
+    @SuppressWarnings("unused")
+    public String[] getInfectedVersion() {
+        return infectedVersion;
+    }
+
+    public DependencyPage infectedVersion(String[] infectedVersion) {
+        this.infectedVersion = infectedVersion;
+        return this;
+    }
+
+    @SuppressWarnings("unused")
+    public Reference[] getReferences() {
+        return references;
+    }
+
+    public DependencyPage references(Reference[] references) {
+        this.references = references;
+        return this;
+    }
+
+    @SuppressWarnings("unused")
+    public Cve getCve() {
+        return cve;
+    }
+
+    public DependencyPage cve(Cve cve) {
+        this.cve = cve;
+        return this;
+    }
+
+    @SuppressWarnings("unused")
+    public ImpactedPath getImpactedPath() {
+        return impactedPath;
+    }
+
+    public DependencyPage impactedPath(ImpactedPath impactedPath) {
+        this.impactedPath = impactedPath;
+        return this;
+    }
+
+    @SuppressWarnings("unused")
     public String[] getWatchName() {
         return watchName;
     }
 
-    public void setWatchName(String[] watchName) {
+    public DependencyPage watchName(String[] watchName) {
         this.watchName = watchName;
+        return this;
     }
 
+    @SuppressWarnings("unused")
     public String getEdited() {
         return edited;
     }
 
-    public void setEdited(String edited) {
+    public DependencyPage edited(String edited) {
         this.edited = edited;
+        return this;
+    }
+
+    @SuppressWarnings("unused")
+    public ExtendedInformation getExtendedInformation() {
+        return extendedInformation;
+    }
+
+    public DependencyPage extendedInformation(ExtendedInformation extendedInformation) {
+        this.extendedInformation = extendedInformation;
+        return this;
     }
 }

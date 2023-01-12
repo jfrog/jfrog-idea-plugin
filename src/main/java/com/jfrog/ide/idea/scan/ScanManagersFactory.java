@@ -131,7 +131,7 @@ public class ScanManagersFactory {
     /**
      * Create the scan logic according to the input type.
      *
-     * @param type    - GraphScan or ComponentSummary
+     * @param type    - the Xray scan type
      * @param pkgType - package type name
      * @param logger  - logger
      * @return Xray scan logic

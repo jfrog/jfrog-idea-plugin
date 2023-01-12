@@ -1,32 +1,21 @@
 package com.jfrog.ide.idea.ui.webview.model;
 
-import java.io.Serializable;
-
-public class ImpactedPath implements Serializable {
-    String name;
-    ImpactedPath[] children;
-
-    public ImpactedPath() {
-    }
+public class ImpactedPath {
+    private final String name;
+    private final ImpactedPath[] children;
 
     public ImpactedPath(String name, ImpactedPath[] children) {
         this.name = name;
         this.children = children;
     }
 
+    @SuppressWarnings("unused")
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
+    @SuppressWarnings("unused")
     public ImpactedPath[] getChildren() {
         return children;
-    }
-
-    public void setChildren(ImpactedPath[] children) {
-        this.children = children;
     }
 }

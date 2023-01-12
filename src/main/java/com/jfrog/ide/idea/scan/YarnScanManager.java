@@ -59,7 +59,7 @@ public class YarnScanManager extends SingleDescriptorScanManager {
     }
 
     @Override
-    protected String getProjectPackageType() {
+    protected String getPackageManagerName() {
         return PKG_TYPE;
     }
 

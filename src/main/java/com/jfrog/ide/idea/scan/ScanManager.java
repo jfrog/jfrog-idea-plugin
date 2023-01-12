@@ -116,10 +116,10 @@ public abstract class ScanManager {
     protected abstract AbstractInspection getInspectionTool();
 
     protected void sendUsageReport() {
-        Utils.sendUsageReport(getProjectPackageType() + "-deps");
+        Utils.sendUsageReport(getPackageManagerName() + "-deps");
     }
 
-    protected abstract String getProjectPackageType();
+    protected abstract String getPackageManagerName();
 
     /**
      * Groups a collection of DependencyNodes by the descriptor files of the modules that depend on them.
@@ -159,6 +159,7 @@ public abstract class ScanManager {
             createImpactPaths(results, depMap, dependencyTree);
             List<FileTreeNode> fileTreeNodes = groupDependenciesToDescriptorNodes(results.values(), depMap);
             addScanResults(fileTreeNodes);
+
             // Source Code Scan
             scanner.scanAndUpdate(indicator, List.copyOf(issuesMap.keySet()));
             addScanResults(scanner.getResults(issuesMap));
