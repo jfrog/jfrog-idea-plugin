@@ -9,11 +9,9 @@ import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.plugins.gradle.settings.GradleSettings;
-import org.jfrog.build.extractor.scan.DependencyTree;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -34,18 +32,6 @@ public abstract class GradleInspection extends AbstractInspection {
                 .orElse(null);
     }
 
-    @Override
-    Set<DependencyTree> getModules(PsiElement element, String componentName) {
-        Project project = element.getProject();
-        DependencyTree root = getRootDependencyTree(element);
-        List<String> gradleModules = getGradleModules(project);
-        if (root == null || gradleModules == null) {
-            return null;
-        }
-
-        // Collect the modules containing the dependency
-        return collectModules(root, project, gradleModules, componentName);
-    }
 
     @Override
     boolean showAnnotationIcon(PsiElement element) {

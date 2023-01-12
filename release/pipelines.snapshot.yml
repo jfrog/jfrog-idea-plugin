@@ -36,13 +36,7 @@ pipelines:
             - jf gradlec --use-wrapper --repo-resolve ecosys-maven-remote --repo-deploy ecosys-oss-snapshot-local --deploy-maven-desc --deploy-ivy-desc=false
 
             # Run audit
-#             - jf audit
-
-            # Install, build, and audit webview
-            - cd webview
-            - npm i && npm run build
-            - jf audit
-            - cd ..
+            # - jf audit
 
             # Delete former snapshots to make sure the release bundle will not contain the same artifacts
             - jf rt del "ecosys-oss-snapshot-local/com/jfrog/ide/jfrog-idea-plugin/*" --quiet

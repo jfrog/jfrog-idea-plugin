@@ -266,24 +266,28 @@ public class ScanManagersFactory {
      * @param dir          - Project dir
      */
     private void createScanManagerIfApplicable(Map<Integer, ScanManager> scanManagers, int projectHash, ScanManagerTypes type, String dir, ExecutorService executor) {
-        ScanManager scanManager;
-        switch (type) {
-            case GRADLE:
-                scanManager = new GradleScanManager(project, dir, executor);
-                break;
-            case YARN:
-                scanManager = new YarnScanManager(project, dir, executor);
-                break;
-            case NPM:
-                scanManager = new NpmScanManager(project, dir, executor);
-                break;
-            case GO:
-                scanManager = new GoScanManager(project, dir, executor);
-                break;
-            default:
-                return;
+        try {
+            ScanManager scanManager;
+            switch (type) {
+                case GRADLE:
+                    scanManager = new GradleScanManager(project, dir, executor);
+                    break;
+                case YARN:
+                    scanManager = new YarnScanManager(project, dir, executor);
+                    break;
+                case NPM:
+                    scanManager = new NpmScanManager(project, dir, executor);
+                    break;
+                case GO:
+                    scanManager = new GoScanManager(project, dir, executor);
+                    break;
+                default:
+                    return;
+            }
+            scanManagers.put(projectHash, scanManager);
+        } catch (NoClassDefFoundError noClassDefFoundError) {
+            // The Gradle plugin is not installed.
         }
-        scanManagers.put(projectHash, scanManager);
     }
 
     private boolean isScanInProgress() {

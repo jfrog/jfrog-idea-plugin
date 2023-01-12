@@ -25,8 +25,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collections;
 
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBuilder;
 
@@ -76,13 +77,13 @@ public class Utils {
      */
     public static ScanLogicType getScanLogicType() throws IOException {
         ServerConfig server = GlobalSettings.getInstance().getServerConfig();
-        XrayClient client = createXrayClientBuilder(server, Logger.getInstance()).build();
-        Version xrayVersion = client.system().version();
-
-        if (GraphScanLogic.isSupportedInXrayVersion(xrayVersion)) {
-            return ScanLogicType.GraphScan;
+        try (XrayClient client = createXrayClientBuilder(server, Logger.getInstance()).build()) {
+            Version xrayVersion = client.system().version();
+            if (GraphScanLogic.isSupportedInXrayVersion(xrayVersion)) {
+                return ScanLogicType.GraphScan;
+            }
+            throw new IOException("Unsupported JFrog Xray version.");
         }
-        throw new IOException("Unsupported JFrog Xray version.");
     }
 
     public static void sendUsageReport(String techName) {
@@ -102,7 +103,7 @@ public class Utils {
         String pluginVersion = jfrogPlugin.getVersion();
         UsageReporter usageReporter = new UsageReporter(PRODUCT_ID + pluginVersion, featureIdArray);
         try {
-            usageReporter.reportUsage(serverConfig.getArtifactoryUrl(), serverConfig.getUsername(), serverConfig.getPassword(), "", null, log);
+            usageReporter.reportUsage(serverConfig.getArtifactoryUrl(), serverConfig.getUsername(), serverConfig.getPassword(), serverConfig.getAccessToken(), null, log);
         } catch (IOException e) {
             log.debug("Usage report failed: " + ExceptionUtils.getRootCauseMessage(e));
         }
@@ -121,6 +122,37 @@ public class Utils {
             return true;
         } catch (URISyntaxException | MalformedURLException e) {
             return false;
+        }
+    }
+
+    /**
+     * Walk on each file in the resource path and copy files recursively to the target directory.
+     *
+     * @param resourceName - Abs path in resources begins with '/'
+     * @param targetDir    - Destination directory
+     * @throws URISyntaxException in case of error in converting the URL to URI.
+     * @throws IOException        in case of any unexpected I/O error.
+     */
+    public static void extractFromResources(String resourceName, Path targetDir) throws URISyntaxException, IOException {
+        URL resource = Utils.class.getResource(resourceName);
+        if (resource == null) {
+            throw new IOException("Resource '" + resourceName + "' was not found");
+        }
+        try (FileSystem fileSystem = FileSystems.newFileSystem(resource.toURI(), Collections.emptyMap())) {
+            Path jarPath = fileSystem.getPath(resourceName);
+            Files.walkFileTree(jarPath, new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    Files.createDirectories(targetDir.resolve(jarPath.relativize(dir).toString()));
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.copy(file, targetDir.resolve(jarPath.relativize(file).toString()), StandardCopyOption.REPLACE_EXISTING);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
         }
     }
 }

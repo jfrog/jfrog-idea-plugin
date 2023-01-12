@@ -4,7 +4,6 @@ import com.jfrog.ide.common.tree.*;
 import com.jfrog.ide.idea.ui.webview.model.Cve;
 import com.jfrog.ide.idea.ui.webview.model.License;
 import com.jfrog.ide.idea.ui.webview.model.*;
-import org.apache.commons.lang.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -84,7 +83,7 @@ public class WebviewObjectConverter {
 
     private static ImpactedPath convertImpactPath(ImpactTreeNode impactTreeNode) {
         ImpactedPath[] children = impactTreeNode.getChildren().stream().map(WebviewObjectConverter::convertImpactPath).toArray(ImpactedPath[]::new);
-        return new ImpactedPath(removeComponentIdPrefix(impactTreeNode.getName()), children);
+        return new ImpactedPath(impactTreeNode.getNameWithoutPrefix(), children);
     }
 
     private static Cve convertCve(com.jfrog.ide.common.tree.Cve cve, ApplicableDetails applicableDetails) {
@@ -98,9 +97,6 @@ public class WebviewObjectConverter {
         );
     }
 
-    private static String removeComponentIdPrefix(String compId) {
-        return StringUtils.substringAfter(compId, "://");
-    }
 
     private static String[] convertVersionRanges(List<String> xrayVerRanges) {
         if (xrayVerRanges == null) {

@@ -3,9 +3,8 @@ package com.jfrog.ide.idea.inspections;
 import com.intellij.lang.annotation.AnnotationBuilder;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.psi.PsiElement;
-import org.jfrog.build.extractor.scan.DependencyTree;
-import org.jfrog.build.extractor.scan.Issue;
-import org.jfrog.build.extractor.scan.License;
+import com.jfrog.ide.common.tree.DependencyNode;
+import com.jfrog.ide.common.tree.License;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,8 +18,6 @@ import static com.intellij.lang.annotation.HighlightSeverity.INFORMATION;
  */
 public class AnnotationUtils {
 
-    private final static Issue NORMAL_SEVERITY_ISSUE = new Issue();
-
     /**
      * Register "Top issue" and "Licenses" annotations.
      *
@@ -29,7 +26,7 @@ public class AnnotationUtils {
      * @param elements         - The elements to apply the annotations
      * @param showIcon         - True if should add annotation icon
      */
-    static void registerAnnotation(AnnotationHolder annotationHolder, DependencyTree dependency, PsiElement[] elements, boolean showIcon) {
+    static void registerAnnotation(AnnotationHolder annotationHolder, DependencyNode dependency, PsiElement[] elements, boolean showIcon) {
         String licensesString = getLicensesString(dependency);
         String topIssue = getTopIssueString(dependency);
         AnnotationIconRenderer iconRenderer = showIcon ? new AnnotationIconRenderer(dependency, topIssue) : null;
@@ -58,12 +55,8 @@ public class AnnotationUtils {
      * @param node - The dependency tree node
      * @return the top issue string
      */
-    private static String getTopIssueString(DependencyTree node) {
-        Issue topIssue = node.getTopIssue();
-        if (topIssue.isHigherSeverityThan(NORMAL_SEVERITY_ISSUE)) {
-            return "Top issue severity: " + topIssue.getSeverity();
-        }
-        return "No issues found";
+    private static String getTopIssueString(DependencyNode node) {
+        return "Top issue severity: " + node.getSeverity();
     }
 
     /**
@@ -72,7 +65,7 @@ public class AnnotationUtils {
      * @param node - The dependency tree node
      * @return licenses string
      */
-    private static String getLicensesString(DependencyTree node) {
+    private static String getLicensesString(DependencyNode node) {
         String results = "Licenses: ";
         List<String> licensesStrings = node.getLicenses().stream().map(License::getName).collect(Collectors.toList());
         if (licensesStrings.isEmpty()) {

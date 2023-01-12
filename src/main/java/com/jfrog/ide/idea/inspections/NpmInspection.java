@@ -11,14 +11,10 @@ import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScanManagersFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.build.extractor.scan.DependencyTree;
-
-import java.util.Set;
 
 /**
  * @author yahavi
  */
-@SuppressWarnings("InspectionDescriptionNotFoundInspection")
 public class NpmInspection extends AbstractInspection {
 
     public NpmInspection() {
@@ -61,15 +57,6 @@ public class NpmInspection extends AbstractInspection {
                 .filter(manager -> StringUtils.equals(manager.getProjectPath(), path))
                 .findAny()
                 .orElse(null);
-    }
-
-    @Override
-    Set<DependencyTree> getModules(PsiElement element, String componentName) {
-        DependencyTree root = getRootDependencyTree(element);
-        if (root == null) {
-            return null;
-        }
-        return collectModules(root, element);
     }
 
     @Override

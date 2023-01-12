@@ -132,10 +132,8 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
     public void setServerConfig(@NotNull ServerConfigImpl serverConfig) {
         if (serverConfig.isConnectionDetailsFromEnv()) {
             // Load connection details from environment variables.
+            setAdvancedSettings(serverConfig);
             this.serverConfig.setConnectionDetailsFromEnv(this.serverConfig.readConnectionDetailsFromEnv());
-            this.serverConfig.setExcludedPaths(serverConfig.getExcludedPaths());
-            this.serverConfig.setConnectionRetries(serverConfig.getConnectionRetries());
-            this.serverConfig.setConnectionTimeout(serverConfig.getConnectionTimeout());
             return;
         }
 
@@ -156,10 +154,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
             }
             this.serverConfig.setConnectionDetailsFromEnv(true);
             this.serverConfig.readConnectionDetailsFromEnv();
-            this.serverConfig.setExcludedPaths(serverConfig.getExcludedPaths());
-            this.serverConfig.setProject(serverConfig.getProject());
-            this.serverConfig.setConnectionRetries(serverConfig.getConnectionRetries());
-            this.serverConfig.setConnectionTimeout(serverConfig.getConnectionTimeout());
+            setAdvancedSettings(serverConfig);
             return;
         }
 
@@ -177,15 +172,19 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         this.serverConfig.setUrl(serverConfig.getUrl());
         this.serverConfig.setXrayUrl(serverConfig.getXrayUrl());
         this.serverConfig.setArtifactoryUrl(serverConfig.getArtifactoryUrl());
+        this.serverConfig.setConnectionDetailsFromEnv(serverConfig.isConnectionDetailsFromEnv());
+        this.serverConfig.setJFrogSettingsCredentialsKey(serverConfig.getJFrogSettingsCredentialsKey());
+        this.serverConfig.setXraySettingsCredentialsKey(serverConfig.getXraySettingsCredentialsKey());
+        setAdvancedSettings(serverConfig);
+    }
+
+    private void setAdvancedSettings(ServerConfigImpl serverConfig) {
         this.serverConfig.setExcludedPaths(serverConfig.getExcludedPaths());
+        this.serverConfig.setConnectionRetries(serverConfig.getConnectionRetries());
+        this.serverConfig.setConnectionTimeout(serverConfig.getConnectionTimeout());
         this.serverConfig.setPolicyType(serverConfig.getPolicyType());
         this.serverConfig.setProject(serverConfig.getProject());
         this.serverConfig.setWatches(serverConfig.getWatches());
-        this.serverConfig.setConnectionDetailsFromEnv(serverConfig.isConnectionDetailsFromEnv());
-        this.serverConfig.setConnectionRetries(serverConfig.getConnectionRetries());
-        this.serverConfig.setConnectionTimeout(serverConfig.getConnectionTimeout());
-        this.serverConfig.setJFrogSettingsCredentialsKey(serverConfig.getJFrogSettingsCredentialsKey());
-        this.serverConfig.setXraySettingsCredentialsKey(serverConfig.getXraySettingsCredentialsKey());
     }
 
     public boolean areXrayCredentialsSet() {

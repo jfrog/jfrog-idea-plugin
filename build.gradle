@@ -1,7 +1,10 @@
+import java.nio.file.Paths
+
 plugins {
     id "org.jetbrains.intellij" version "1.10.0-SNAPSHOT"
     id "java"
     id "maven-publish"
+    id "de.undercouch.download" version "5.3.0"
 }
 
 group 'com.jfrog.ide'
@@ -46,7 +49,7 @@ dependencies {
     implementation group: 'com.jfrog.xray.client', name: 'xray-client-java', version: '0.11.0'
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
     implementation group: 'org.jfrog.filespecs', name: 'file-specs-java', version: '1.1.2'
-    implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: '1.13.x-20230105.162743-1'
+    implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: '1.13.x-20230111.141928-1'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
     implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-jre'
 
@@ -65,9 +68,35 @@ test {
     }
 }
 
-tasks.withType(JavaCompile) {
+def webViewVersion = '0.1.14'
+def webviewFileName = 'jfrog-ide-webview-' + webViewVersion + '.tgz'
+tasks.register('downloadWebview', Download) {
+    src 'https://releases.jfrog.io/artifactory/ide-webview-npm/jfrog-ide-webview/-/' + webviewFileName
+    dest buildDir
+    onlyIfModified true
+    finalizedBy('verifyWebview')
+}
+
+tasks.register('verifyWebview', Verify) {
+    src new File(buildDir, webviewFileName)
+    algorithm 'SHA-512'
+    checksum 'f7a6c2b355583c35c8df84bb254ef6da41a36696bd78e45f31eb4f0bf5e6582665e6def510bafaa9e5d20f8adc006f72ebccb9b512e730e04d2d25a04c6a4dc8'
+    finalizedBy('extractWebview')
+}
+
+tasks.register('extractWebview', Copy) {
+    from tarTree(new File(buildDir, webviewFileName))
+    into Paths.get('src', 'main', 'resources', 'jfrog-ide-webview').toFile()
+    include '**/build/**/*'
+    eachFile {
+        path = path.replace('package/build/', '')
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
     options.deprecation = true
     options.encoding = "UTF-8"
+    dependsOn('downloadWebview')
 }
 
 publishing {

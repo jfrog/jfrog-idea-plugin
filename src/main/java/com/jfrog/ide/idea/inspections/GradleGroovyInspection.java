@@ -18,7 +18,6 @@ import java.util.Objects;
 /**
  * @author yahavi
  */
-@SuppressWarnings("InspectionDescriptionNotFoundInspection")
 public class GradleGroovyInspection extends GradleInspection {
 
     public static final String GRADLE_GROUP_KEY = "group";
