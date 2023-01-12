@@ -5,7 +5,8 @@ import java.io.Serializable;
 public class DependencyPage implements Serializable {
     String id;
     String component;
-    String type;
+    String componentType;
+    String pageType = "DEPENDENCY";
     String version;
     String severity;
     License[] license;
@@ -28,7 +29,7 @@ public class DependencyPage implements Serializable {
                           ExtendedInformation extendedInformation) {
         this.id = id;
         this.component = component;
-        this.type = type;
+        this.componentType = type;
         this.version = version;
         this.severity = severity;
         this.license = license;
@@ -109,7 +110,7 @@ public class DependencyPage implements Serializable {
     public void setId(String id) {
         this.id = id;
     }
-    
+
     public String getComponent() {
         return component;
     }
@@ -118,12 +119,16 @@ public class DependencyPage implements Serializable {
         this.component = component;
     }
 
-    public String getType() {
-        return type;
+    public String getComponentType() {
+        return componentType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public String getPageType() {
+        return pageType;
+    }
+
+    public void setComponentType(String componentType) {
+        this.componentType = componentType;
     }
 
     public String getVersion() {
