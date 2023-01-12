@@ -68,7 +68,7 @@ test {
     }
 }
 
-def webViewVersion = '0.1.14'
+def webViewVersion = '0.1.16'
 def webviewFileName = 'jfrog-ide-webview-' + webViewVersion + '.tgz'
 tasks.register('downloadWebview', Download) {
     src 'https://releases.jfrog.io/artifactory/ide-webview-npm/jfrog-ide-webview/-/' + webviewFileName
@@ -80,7 +80,7 @@ tasks.register('downloadWebview', Download) {
 tasks.register('verifyWebview', Verify) {
     src new File(buildDir, webviewFileName)
     algorithm 'SHA-512'
-    checksum 'f7a6c2b355583c35c8df84bb254ef6da41a36696bd78e45f31eb4f0bf5e6582665e6def510bafaa9e5d20f8adc006f72ebccb9b512e730e04d2d25a04c6a4dc8'
+    checksum '72fd49e392320ca25972f6b619330652bcf136383904ed1510d80a9918cbb76ca8fd9a1b053039ec2f74c16ea0e716d05810b4a7f959fb767c1902a8fed7b5bd'
     finalizedBy('extractWebview')
 }
 

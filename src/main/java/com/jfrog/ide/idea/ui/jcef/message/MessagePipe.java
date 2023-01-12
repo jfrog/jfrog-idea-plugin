@@ -6,7 +6,7 @@ package com.jfrog.ide.idea.ui.jcef.message;
  */
 public interface MessagePipe {
     /**
-     * Sends raw message with type [type] and content [data] to the other end.
+     * Sends raw message content [data] to the other end.
      */
-    void send(String type, Object data);
+    void send(Object data);
 }

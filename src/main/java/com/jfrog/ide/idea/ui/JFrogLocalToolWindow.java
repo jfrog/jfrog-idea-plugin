@@ -50,7 +50,6 @@ import static com.jfrog.ide.idea.ui.JFrogToolWindow.SCROLL_BAR_SCROLLING_UNITS;
  * @author yahavi
  */
 public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
-    final static String DEPENDENCY_TYPE = "DEPENDENCY";
     final LocalComponentsTree componentsTree;
     JBCefBrowserBase browser;
     OnePixelSplitter verticalSplit;
@@ -160,14 +159,14 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     private void updateIssueOrLicenseInWebview(VulnerabilityOrViolationNode vulnerabilityOrViolation) {
         if (vulnerabilityOrViolation instanceof IssueNode) {
             IssueNode issue = (IssueNode) vulnerabilityOrViolation;
-            messagePacker.send(DEPENDENCY_TYPE, WebviewObjectConverter.convertIssueToDepPage(issue));
+            messagePacker.send(WebviewObjectConverter.convertIssueToDepPage(issue));
         } else if (vulnerabilityOrViolation instanceof ApplicableIssueNode) {
             ApplicableIssueNode node = (ApplicableIssueNode) vulnerabilityOrViolation;
-            messagePacker.send(DEPENDENCY_TYPE, WebviewObjectConverter.convertIssueToDepPage(node.getIssue()));
+            messagePacker.send(WebviewObjectConverter.convertIssueToDepPage(node.getIssue()));
             navigateToFile(node);
         } else if (vulnerabilityOrViolation instanceof LicenseViolationNode) {
             LicenseViolationNode license = (LicenseViolationNode) vulnerabilityOrViolation;
-            messagePacker.send(DEPENDENCY_TYPE, WebviewObjectConverter.convertLicenseToDepPage(license));
+            messagePacker.send(WebviewObjectConverter.convertLicenseToDepPage(license));
         }
     }
 
