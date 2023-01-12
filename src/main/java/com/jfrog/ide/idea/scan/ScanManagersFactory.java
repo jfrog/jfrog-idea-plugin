@@ -131,9 +131,9 @@ public class ScanManagersFactory {
     /**
      * Create the scan logic according to the input type.
      *
-     * @param type    the Xray scan type
-     * @param pkgType package type name
-     * @param logger  logger
+     * @param type    - the Xray scan type
+     * @param pkgType - package type name
+     * @param logger  - logger
      * @return Xray scan logic
      */
     private ScanLogic createScanLogic(Utils.ScanLogicType type, String pkgType, Logger logger) {
