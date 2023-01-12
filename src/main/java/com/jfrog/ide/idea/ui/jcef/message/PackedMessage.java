@@ -8,28 +8,17 @@ public class PackedMessage implements Serializable {
     public static final String IDE_SEND_FUNCTION_NAME = "sendMessageToIde";
 
     private Object data;
-    private String pageType;
 
     public PackedMessage() {
         this.data = null;
-        this.pageType = "";
     }
 
-    public PackedMessage(String type, Object data) {
-        this.pageType = type;
+    public PackedMessage(Object data) {
         this.data = data;
     }
 
     public void setData(String data) {
         this.data = data;
-    }
-
-    public String getPageType() {
-        return pageType;
-    }
-
-    public void setPageType(String pageType) {
-        this.pageType = pageType;
     }
 
     public Object getData() {

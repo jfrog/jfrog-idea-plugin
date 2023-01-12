@@ -3,7 +3,8 @@ package com.jfrog.ide.idea.ui.webview.model;
 public class DependencyPage {
     private String id;
     private String component;
-    private String type;
+    private String componentType;
+    private String pageType = "DEPENDENCY";
     private String version;
     private String severity;
     private License[] license;
@@ -41,13 +42,17 @@ public class DependencyPage {
     }
 
     @SuppressWarnings("unused")
-    public String getType() {
-        return type;
+    public String getComponentType() {
+        return componentType;
     }
 
-    public DependencyPage type(String type) {
-        this.type = type;
+    public DependencyPage componentType(String componentType) {
+        this.componentType = componentType;
         return this;
+    }
+
+    public String getPageType() {
+        return pageType;
     }
 
     @SuppressWarnings("unused")
