@@ -4,7 +4,6 @@ public class DependencyPage {
     private String id;
     private String component;
     private String componentType;
-    private String pageType = "DEPENDENCY";
     private String version;
     private String severity;
     private License[] license;
@@ -49,10 +48,6 @@ public class DependencyPage {
     public DependencyPage componentType(String componentType) {
         this.componentType = componentType;
         return this;
-    }
-
-    public String getPageType() {
-        return pageType;
     }
 
     @SuppressWarnings("unused")
