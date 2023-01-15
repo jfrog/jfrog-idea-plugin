@@ -5,7 +5,6 @@ import com.intellij.credentialStore.CredentialAttributesKt;
 import com.intellij.credentialStore.Credentials;
 import com.intellij.ide.passwordSafe.PasswordSafe;
 import com.intellij.util.ui.UIUtil;
-import com.jfrog.ide.idea.configuration.ServerConfigImpl;
 
 import javax.swing.*;
 import java.util.Arrays;
@@ -95,28 +94,5 @@ public class Utils {
      */
     public static CredentialAttributes createCredentialAttributes(String subsystem, String key) {
         return new CredentialAttributes(CredentialAttributesKt.generateServiceName(subsystem, key));
-    }
-
-    /**
-     * Migrate {@link com.jfrog.ide.idea.configuration.XrayServerConfigImpl} to {@link ServerConfigImpl}.
-     * Remove password from PasswordSafe and
-     * @param serverConfig - The old server config to migrate
-     */
-    public static void migrateXrayConfigToPlatformConfig(ServerConfigImpl serverConfig) {
-        Credentials credentials = serverConfig.getLegacyCredentialsFromPasswordSafe();
-        if (credentials != null) {
-            // Remove credentials from PasswordSafe to allow migration to the new PasswordSafe keys
-            serverConfig.setUsername(credentials.getUserName());
-            serverConfig.setPassword(credentials.getPasswordAsString());
-            serverConfig.removeLegacyCredentialsFromPasswordSafe();
-        }
-        String xrayUrl = removeEnd(serverConfig.getXrayUrl(), "/");
-        if (endsWith(xrayUrl, "/xray")) {
-            String platformUrl = removeEnd(xrayUrl, "/xray");
-            serverConfig.setUrl(platformUrl);
-            serverConfig.setArtifactoryUrl(platformUrl + "/artifactory");
-        } else {
-            serverConfig.setUrl("");
-        }
     }
 }

@@ -15,7 +15,7 @@ targetCompatibility = 1.11
 
 intellij {
     version = sandboxVersion
-    plugins = ['gradle', 'maven', 'Groovy', 'properties', 'java', 'Kotlin', 'org.jetbrains.plugins.go:213.5744.18', 'Pythonid:213.5744.18']
+    plugins = ['gradle', 'maven', 'Groovy', 'properties', 'java', 'Kotlin', 'org.jetbrains.plugins.go:221.5080.210', 'Pythonid:221.5080.210']
     pluginName = 'JFrog'
     updateSinceUntilBuild = false
 }
@@ -58,6 +58,8 @@ dependencies {
 }
 
 test {
+    scanForTestClasses false
+    include "**/*Test.class"
     testLogging {
         exceptionFormat "full"
         events "started", "passed", "skipped", "failed", "standardOut", "standardError"

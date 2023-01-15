@@ -14,7 +14,6 @@ import static com.jfrog.ide.idea.configuration.ServerConfigImpl.*;
 public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
 
     private static final String JFROG_SETTINGS_CREDENTIALS_KEY = "com.jfrog.ideaTest";
-    private static final String XRAY_SETTINGS_CREDENTIALS_KEY = "com.jfrog.xray.ideaTest";
     private static final String ARTIFACTORY_URL = "https://steve.jfrog.io/artifactory";
     private static final String XRAY_URL = "https://steve.jfrog.io/xray";
     private static final String PLATFORM_URL = "https://steve.jfrog.io";
@@ -145,104 +144,8 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
             assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
             assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
             assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
-            assertEquals(JFROG_PROJECT, actualServerConfig.getProject());
             assertEquals(WATCH, actualServerConfig.getWatches());
         }
-    }
-
-    /**
-     * Test set server config from JFROG_IDE_URL legacy environment variable.
-     */
-    @SuppressWarnings("deprecation")
-    public void testSetServerConfigFromLegacyEnv() {
-        try (MockedStatic<EnvironmentUtil> mockController = Mockito.mockStatic(EnvironmentUtil.class)) {
-            mockController.when(() -> EnvironmentUtil.getValue(LEGACY_XRAY_URL_ENV)).thenReturn("https://tython.jfrog.io/xray");
-            mockController.when(() -> EnvironmentUtil.getValue(USERNAME_ENV)).thenReturn("leia");
-            mockController.when(() -> EnvironmentUtil.getValue(PASSWORD_ENV)).thenReturn("princess");
-            // Create overriding server config
-            GlobalSettings globalSettings = new GlobalSettings();
-            ServerConfigImpl overrideServerConfig = createServerConfig(false, false);
-
-            // Make sure that readConnectionDetailsFromEnv indeed returned true when the connection details environment variables set
-            overrideServerConfig.setConnectionDetailsFromEnv(overrideServerConfig.readConnectionDetailsFromEnv());
-
-            // Check that the server in the global settings was overridden by the environment variables
-            globalSettings.setServerConfig(overrideServerConfig);
-            ServerConfigImpl actualServerConfig = globalSettings.getServerConfig();
-            assertTrue(actualServerConfig.readConnectionDetailsFromEnv());
-            assertEquals("https://tython.jfrog.io", actualServerConfig.getUrl());
-            assertEquals("https://tython.jfrog.io/xray", actualServerConfig.getXrayUrl());
-            assertEquals("https://tython.jfrog.io/artifactory", actualServerConfig.getArtifactoryUrl());
-            assertEquals("leia", actualServerConfig.getUsername());
-            assertEquals("princess", actualServerConfig.getPassword());
-            assertEquals("", actualServerConfig.getProject());
-            assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
-            assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
-            assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
-            assertEquals(JFROG_PROJECT, actualServerConfig.getProject());
-            assertEquals(WATCH, actualServerConfig.getWatches());
-        }
-    }
-
-    /**
-     * Test set server config from JFROG_IDE_URL legacy environment variable.
-     * This time, the URL provided could not be resolved to the platform URL.
-     */
-    @SuppressWarnings("deprecation")
-    public void testSetServerConfigFromXrayLegacyEnv() {
-        try (MockedStatic<EnvironmentUtil> mockController = Mockito.mockStatic(EnvironmentUtil.class)) {
-            mockController.when(() -> EnvironmentUtil.getValue(LEGACY_XRAY_URL_ENV)).thenReturn("https://tython-xray.jfrog.io");
-            mockController.when(() -> EnvironmentUtil.getValue(PLATFORM_URL_ENV)).thenReturn("");
-            mockController.when(() -> EnvironmentUtil.getValue(ARTIFACTORY_URL_ENV)).thenReturn("");
-            mockController.when(() -> EnvironmentUtil.getValue(USERNAME_ENV)).thenReturn("leia");
-            mockController.when(() -> EnvironmentUtil.getValue(PASSWORD_ENV)).thenReturn("princess");
-
-            // Create overriding server config
-            GlobalSettings globalSettings = new GlobalSettings();
-            ServerConfigImpl overrideServerConfig = createServerConfig(false, false);
-
-            // Make sure that readConnectionDetailsFromEnv indeed returned true when the connection details environment variables set
-            overrideServerConfig.setConnectionDetailsFromEnv(overrideServerConfig.readConnectionDetailsFromEnv());
-
-            // Check that the server in the global settings was overridden by the environment variables
-            globalSettings.setServerConfig(overrideServerConfig);
-            ServerConfigImpl actualServerConfig = globalSettings.getServerConfig();
-            assertTrue(actualServerConfig.readConnectionDetailsFromEnv());
-            assertEquals("", actualServerConfig.getUrl());
-            assertEquals("https://tython-xray.jfrog.io", actualServerConfig.getXrayUrl());
-            assertEquals("", actualServerConfig.getArtifactoryUrl());
-            assertEquals("leia", actualServerConfig.getUsername());
-            assertEquals("princess", actualServerConfig.getPassword());
-            assertEquals("", actualServerConfig.getProject());
-            assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
-            assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
-            assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
-            assertEquals(JFROG_PROJECT, actualServerConfig.getProject());
-            assertEquals(WATCH, actualServerConfig.getWatches());
-        }
-    }
-
-    /**
-     * Test migration from XrayServerConfig to ServerConfig.
-     */
-    @SuppressWarnings("deprecation")
-    public void testMigrateXrayConfigFromFile() {
-        // Create overriding server config
-        GlobalSettings globalSettings = new GlobalSettings();
-        XrayServerConfigImpl xrayServerConfig = createLegacyServerConfig();
-        globalSettings.setXrayConfig(xrayServerConfig);
-
-        // Check that the xrayServerConfig was migrated to serverConfig
-        ServerConfigImpl actualServerConfig = globalSettings.getServerConfig();
-        assertFalse(actualServerConfig.isConnectionDetailsFromEnv());
-        assertEquals(PLATFORM_URL, actualServerConfig.getUrl());
-        assertEquals(XRAY_URL, actualServerConfig.getXrayUrl());
-        assertEquals(ARTIFACTORY_URL, actualServerConfig.getArtifactoryUrl());
-        assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
-        assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
-        assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
-        assertEquals(JFROG_PROJECT, actualServerConfig.getProject());
-        assertEquals(WATCH, actualServerConfig.getWatches());
     }
 
     /**
@@ -269,27 +172,9 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
     }
 
     /**
-     * Create server config for the tests.
-     *
-     * @return server config
-     */
-    @SuppressWarnings("deprecation")
-    private XrayServerConfigImpl createLegacyServerConfig() {
-        return (XrayServerConfigImpl) new XrayServerConfigImpl.Builder()
-                .setXraySettingsCredentialsKey(XRAY_SETTINGS_CREDENTIALS_KEY)
-                .setUrl(XRAY_URL)
-                .setConnectionRetries(CONNECTION_RETRIES)
-                .setConnectionTimeout(CONNECTION_TIMEOUT)
-                .setExcludedPaths(EXCLUDED_PATHS)
-                .build();
-    }
-
-    /**
      * Clean up PasswordSafe.
      */
-    @SuppressWarnings("deprecation")
     private void cleanUp() {
         createServerConfig(true, true).removeCredentialsFromPasswordSafe();
-        createLegacyServerConfig().removeLegacyCredentialsFromPasswordSafe();
     }
 }
