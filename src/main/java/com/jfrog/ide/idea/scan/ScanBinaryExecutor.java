@@ -1,6 +1,7 @@
 package com.jfrog.ide.idea.scan;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
@@ -11,16 +12,14 @@ import com.jfrog.ide.idea.scan.data.ScansConfig;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.executor.CommandExecutor;
 import org.jfrog.build.extractor.executor.CommandResults;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.jfrog.ide.common.utils.Utils.createMapper;
 import static com.jfrog.ide.common.utils.Utils.createYAMLMapper;
@@ -40,6 +39,11 @@ public abstract class ScanBinaryExecutor {
     private static final String ENV_USER = "JF_USER";
     private static final String ENV_PASSWORD = "JF_PASS";
     private static final String ENV_ACCESS_TOKEN = "JF_TOKEN";
+    private static final String ENV_HTTP_PROXY = "HTTP_PROXY";
+    private static final String ENV_HTTPS_PROXY = "HTTPS_PROXY";
+    private static final String HTTP = "http://";
+    private static final String HTTPS = "https://";
+
 
     ScanBinaryExecutor(String scanType, String binaryName) {
         this.scanType = scanType;
@@ -61,6 +65,17 @@ public abstract class ScanBinaryExecutor {
             } else {
                 env.put(ENV_USER, serverConfig.getUsername());
                 env.put(ENV_PASSWORD, serverConfig.getPassword());
+            }
+
+            ProxyConfiguration proxyConfiguration = serverConfig.getProxyConfForTargetUrl(serverConfig.getUrl());
+            if (proxyConfiguration != null) {
+                String proxyUrl = proxyConfiguration.host + ":" + proxyConfiguration.port;
+                if (StringUtils.isNoneBlank(proxyConfiguration.username, proxyConfiguration.password)) {
+                    String encodedAuth = Base64.getEncoder().encodeToString((proxyConfiguration.username + ":" + proxyConfiguration.password).getBytes());
+                    proxyUrl = encodedAuth + "@" + proxyUrl;
+                }
+                env.put(ENV_HTTP_PROXY, HTTP + proxyUrl);
+                env.put(ENV_HTTPS_PROXY, HTTPS + proxyUrl);
             }
         }
         return env;
