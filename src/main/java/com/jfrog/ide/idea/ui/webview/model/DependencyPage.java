@@ -4,7 +4,7 @@ public class DependencyPage {
     private String id;
     private String component;
     private String componentType;
-    String pageType = "DEPENDENCY";
+    private String pageType = "DEPENDENCY";
     private String version;
     private String severity;
     private License[] license;
