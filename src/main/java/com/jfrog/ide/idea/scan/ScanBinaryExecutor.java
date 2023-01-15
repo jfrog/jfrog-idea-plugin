@@ -41,7 +41,6 @@ public abstract class ScanBinaryExecutor {
     private static final String ENV_PASSWORD = "JF_PASS";
     private static final String ENV_ACCESS_TOKEN = "JF_TOKEN";
 
-
     ScanBinaryExecutor(String scanType, String binaryName) {
         this.scanType = scanType;
         if (SystemUtils.IS_OS_WINDOWS) {
@@ -53,7 +52,7 @@ public abstract class ScanBinaryExecutor {
     }
 
     private Map<String, String> creatEnvWithCredentials() {
-        Map<String, String> env = new HashMap<>();
+        Map<String, String> env = new HashMap<>(EnvironmentUtil.getEnvironmentMap());
         ServerConfigImpl serverConfig = GlobalSettings.getInstance().getServerConfig();
         if (serverConfig.isXrayConfigured()) {
             env.put(ENV_PLATFORM, serverConfig.getUrl());
