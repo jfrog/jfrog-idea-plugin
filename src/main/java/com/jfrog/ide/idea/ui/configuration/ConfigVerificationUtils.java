@@ -5,6 +5,8 @@ import com.jfrog.ide.common.configuration.ServerConfig;
 import org.apache.commons.lang3.StringUtils;
 
 import java.nio.file.FileSystems;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import static org.apache.commons.lang3.StringUtils.*;
@@ -13,11 +15,11 @@ import static org.apache.commons.lang3.StringUtils.*;
  * @author yahavi
  **/
 public class ConfigVerificationUtils {
-
+    // Pattern: **/*{a, b, c ...}* OR **/*a*
     public static final String EXCLUSIONS_PREFIX = "**/*";
     public static final String EXCLUSIONS_SUFFIX = "*";
-    public static String EXCLUSIONS_REGEX_PARSER = ".*\\{(.*)\\}\\*";
-    public static final String DEFAULT_EXCLUSIONS = EXCLUSIONS_PREFIX + "{.idea,test, node_modules}" + EXCLUSIONS_SUFFIX;
+    public static String EXCLUSIONS_REGEX_PARSER = "^\\*\\*\\/\\*\\{([^{}]+)\\}\\*$";
+    public static final String DEFAULT_EXCLUSIONS = EXCLUSIONS_PREFIX + "{.idea, test, node_modules}" + EXCLUSIONS_SUFFIX;
 
     /**
      * Validate config project and watches before saving.
@@ -52,6 +54,13 @@ public class ConfigVerificationUtils {
                 FileSystems.getDefault().getPathMatcher("glob:" + excludedPaths);
             } catch (PatternSyntaxException e) {
                 throw new ConfigurationException("Excluded paths pattern must be a valid glob pattern");
+            }
+            Pattern pattern = Pattern.compile(EXCLUSIONS_REGEX_PARSER);
+            Matcher matcher = pattern.matcher(excludedPaths);
+            if (!matcher.find()) {
+                if (excludedPaths.contains("{")) {
+                    throw new ConfigurationException("Excluded paths pattern can contain at most one pair of {}");
+                }
             }
         }
     }

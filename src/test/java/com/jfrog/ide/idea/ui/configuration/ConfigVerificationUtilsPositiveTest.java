@@ -20,18 +20,23 @@ public class ConfigVerificationUtilsPositiveTest {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {ServerConfig.PolicyType.VULNERABILITIES, "", ""},
-                {ServerConfig.PolicyType.PROJECT, "project", ""},
-                {ServerConfig.PolicyType.WATCHES, "project", "watch-1"},
-                {ServerConfig.PolicyType.WATCHES, "", "watch-1,watch-2"}
+                {"",ServerConfig.PolicyType.VULNERABILITIES, "", ""},
+                {"",ServerConfig.PolicyType.PROJECT, "project", ""},
+                {"",ServerConfig.PolicyType.WATCHES, "project", "watch-1"},
+                {"",ServerConfig.PolicyType.WATCHES, "", "watch-1,watch-2"},
+                {"**/*{.idea, test, node_modules}*",ServerConfig.PolicyType.VULNERABILITIES, "", ""},
+                {"**/*test*",ServerConfig.PolicyType.VULNERABILITIES, "", ""},
+
         });
     }
 
+    private final String excludedPaths;
     private final ServerConfig.PolicyType policyType;
     private final String project;
     private final String watches;
 
-    public ConfigVerificationUtilsPositiveTest(ServerConfig.PolicyType policyType, String project, String watches) {
+    public ConfigVerificationUtilsPositiveTest(String excludedPaths, ServerConfig.PolicyType policyType, String project, String watches) {
+        this.excludedPaths = excludedPaths;
         this.policyType = policyType;
         this.project = project;
         this.watches = watches;
@@ -39,6 +44,6 @@ public class ConfigVerificationUtilsPositiveTest {
 
     @Test
     public void testValidateGlobalConfig() throws ConfigurationException {
-        validateGlobalConfig("", policyType, project, watches);
+        validateGlobalConfig(excludedPaths, policyType, project, watches);
     }
 }
