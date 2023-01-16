@@ -41,8 +41,6 @@ public abstract class ScanBinaryExecutor {
     private static final String ENV_ACCESS_TOKEN = "JF_TOKEN";
     private static final String ENV_HTTP_PROXY = "HTTP_PROXY";
     private static final String ENV_HTTPS_PROXY = "HTTPS_PROXY";
-    private static final String HTTP = "http://";
-    private static final String HTTPS = "https://";
 
 
     ScanBinaryExecutor(String scanType, String binaryName) {
@@ -74,8 +72,8 @@ public abstract class ScanBinaryExecutor {
                     String encodedAuth = Base64.getEncoder().encodeToString((proxyConfiguration.username + ":" + proxyConfiguration.password).getBytes());
                     proxyUrl = encodedAuth + "@" + proxyUrl;
                 }
-                env.put(ENV_HTTP_PROXY, HTTP + proxyUrl);
-                env.put(ENV_HTTPS_PROXY, HTTPS + proxyUrl);
+                env.put(ENV_HTTP_PROXY, "http://" + proxyUrl);
+                env.put(ENV_HTTPS_PROXY, "https://" + proxyUrl);
             }
         }
         return env;
