@@ -480,7 +480,7 @@
           </component>
         </children>
       </grid>
-      <grid id="b5e9b" binding="advanced" layout-manager="GridLayoutManager" row-count="10" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="b5e9b" binding="advanced" layout-manager="GridLayoutManager" row-count="12" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <tabbedpane title="Advanced"/>
@@ -521,12 +521,12 @@
             </constraints>
             <properties>
               <enabled value="false"/>
-              <text value="    A glob pattern from the shape of  **/*{dir1, dir2 ...}* is used to exclude specific local paths from being scanned by JFrog Xray."/>
+              <text value="    A glob pattern from the shape of  **/*{dir1, dir2 ...}*"/>
             </properties>
           </component>
           <component id="11a3e" class="javax.swing.JLabel">
             <constraints>
-              <grid row="7" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+              <grid row="8" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
                 <preferred-size width="133" height="16"/>
               </grid>
             </constraints>
@@ -537,7 +537,7 @@
           </component>
           <component id="5b666" class="javax.swing.JLabel">
             <constraints>
-              <grid row="8" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+              <grid row="9" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
                 <preferred-size width="133" height="16"/>
               </grid>
             </constraints>
@@ -618,7 +618,7 @@
           </hspacer>
           <vspacer id="1a765">
             <constraints>
-              <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false">
+              <grid row="11" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false">
                 <preferred-size width="109" height="14"/>
               </grid>
             </constraints>
@@ -628,6 +628,25 @@
               <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="2" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
           </hspacer>
+          <component id="a57cb" class="javax.swing.JButton" binding="defaultValuesButton">
+            <constraints>
+              <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Restore Default Values"/>
+            </properties>
+          </component>
+          <component id="e3fb8" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="7" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                <preferred-size width="133" height="16"/>
+              </grid>
+            </constraints>
+            <properties>
+              <enabled value="false"/>
+              <text value="    Which is used to exclude specific local paths from being scanned by JFrog Xray."/>
+            </properties>
+          </component>
         </children>
       </grid>
     </children>

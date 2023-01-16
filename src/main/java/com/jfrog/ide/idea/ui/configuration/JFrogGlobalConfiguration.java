@@ -89,6 +89,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private JRadioButton allVulnerabilitiesRadioButton;
     private JRadioButton accordingToProjectRadioButton;
     private JRadioButton accordingToWatchesRadioButton;
+    private JButton defaultValuesButton;
 
     public JFrogGlobalConfiguration() {
         initUrls();
@@ -97,6 +98,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         initAuthenticationMethod();
         initPolicy();
         initLinks();
+        initDefaultValuesButton();
     }
 
     @Nullable
@@ -141,6 +143,15 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             addIgnoreNull(results, checkXrayConnection());
             addIgnoreNull(results, checkArtifactoryConnection());
             setConnectionResults(String.join("<br/>", results));
+        }));
+    }
+
+    private void initDefaultValuesButton() {
+
+        defaultValuesButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            excludedPaths.setText(DEFAULT_EXCLUSIONS);
+            connectionRetries.setValue(ConnectionRetriesSpinner.RANGE.initial);
+            connectionTimeout.setValue(ConnectionTimeoutSpinner.RANGE.initial);
         }));
     }
 
