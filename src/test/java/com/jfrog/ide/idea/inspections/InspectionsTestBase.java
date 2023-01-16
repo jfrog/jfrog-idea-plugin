@@ -10,7 +10,7 @@ import org.junit.Assert;
 /**
  * @author yahavi
  */
-public abstract class InspectionsTest extends LightJavaCodeInsightFixtureTestCase {
+public abstract class InspectionsTestBase extends LightJavaCodeInsightFixtureTestCase {
 
     PsiFile fileDescriptor;
     AbstractInspection inspection;

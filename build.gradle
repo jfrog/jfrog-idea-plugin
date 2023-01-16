@@ -1,7 +1,7 @@
 import java.nio.file.Paths
 
 plugins {
-    id "org.jetbrains.intellij" version "1.10.0-SNAPSHOT"
+    id "org.jetbrains.intellij" version "1.12.0"
     id "java"
     id "maven-publish"
     id "de.undercouch.download" version "5.3.0"
@@ -10,12 +10,12 @@ plugins {
 group 'com.jfrog.ide'
 version currentVersion
 
-sourceCompatibility = 1.11
-targetCompatibility = 1.11
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
 intellij {
     version = sandboxVersion
-    plugins = ['gradle', 'maven', 'Groovy', 'properties', 'java', 'Kotlin', 'org.jetbrains.plugins.go:221.5080.210', 'Pythonid:221.5080.210']
+    plugins = ['gradle', 'maven', 'Groovy', 'properties', 'java', 'Kotlin', 'org.jetbrains.plugins.go:223.7571.182', 'Pythonid:223.7571.182']
     pluginName = 'JFrog'
     updateSinceUntilBuild = false
 }

@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.psi.KtValueArgumentList;
 /**
  * @author yahavi
  */
-public class GradleKotlinInspectionTest extends InspectionsTest {
+public class GradleKotlinInspectionTest extends InspectionsTestBase {
 
     // We are setting 'build.groovy' instead pf 'build.gradle' since the testing FW doesn't identify 'build.gradle'
     // files as groovy-script.

@@ -5,7 +5,7 @@ import com.intellij.psi.xml.XmlTag;
 /**
  * @author yahavi
  */
-public class MavenInspectionTest extends InspectionsTest {
+public class MavenInspectionTest extends InspectionsTestBase {
 
     private static final String PACKAGE_DESCRIPTOR = "pom.xml";
     private final InspectionTestDependency[] DEPENDENCIES = {

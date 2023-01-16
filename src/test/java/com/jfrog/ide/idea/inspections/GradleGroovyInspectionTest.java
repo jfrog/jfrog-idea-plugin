@@ -5,7 +5,7 @@ import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.literals
 /**
  * @author yahavi
  */
-public class GradleGroovyInspectionTest extends InspectionsTest {
+public class GradleGroovyInspectionTest extends InspectionsTestBase {
 
     // We are setting 'build.groovy' instead pf 'build.gradle' since the testing FW doesn't identify 'build.gradle'
     // files as groovy-script.

@@ -5,7 +5,7 @@ import com.goide.vgo.mod.psi.VgoModuleSpec;
 /**
  * Created by Bar Belity on 23/02/2020.
  */
-public class GoInspectionTest extends InspectionsTest {
+public class GoInspectionTest extends InspectionsTestBase {
 
     private static final String PACKAGE_DESCRIPTOR = "go.mod";
     private final InspectionTestDependency[] DEPENDENCIES = {
