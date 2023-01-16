@@ -64,7 +64,7 @@ public class NavigationService {
      * @param treeNode The tree-node to get its navigation.
      * @return Set of candidates for navigation.
      */
-    public Set<NavigationTarget> getNavigation(DependencyTree treeNode) {
+    public Set<NavigationTarget> getNavigation(DependencyNode treeNode) {
         return navigationMap.get(treeNode);
     }
 

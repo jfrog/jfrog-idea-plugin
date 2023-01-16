@@ -8,7 +8,7 @@ import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiInvalidElementAccessException;
 import com.intellij.ui.components.JBMenu;
 import com.intellij.ui.treeStructure.Tree;
-import com.intellij.util.messages.MessageBusConnection;
+import com.jfrog.ide.common.tree.DependencyNode;
 import com.jfrog.ide.idea.exclusion.Excludable;
 import com.jfrog.ide.idea.exclusion.ExclusionUtils;
 import com.jfrog.ide.idea.log.Logger;
@@ -28,7 +28,9 @@ import java.awt.event.MouseListener;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author yahavi
@@ -71,35 +73,24 @@ public abstract class ComponentsTree extends Tree {
         if (!e.isPopupTrigger()) {
             return;
         }
-
         // Event is right-click.
-        TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
-        if (selPath == null) {
+        TreePath selectedPath = tree.getPathForLocation(e.getX(), e.getY());
+        if (selectedPath == null) {
             return;
         }
-        createNodePopupMenu((DependencyTree) selPath.getLastPathComponent());
-        popupMenu.show(tree, e.getX(), e.getY());
+        if (selectedPath.getLastPathComponent() instanceof DependencyNode) {
+            createNodePopupMenu((DependencyNode)selectedPath.getLastPathComponent());
+            popupMenu.show(tree, e.getX(), e.getY());
+        }
     }
 
-    private void createNodePopupMenu(DependencyTree selectedNode) {
+
+    private void createNodePopupMenu(DependencyNode selectedNode) {
         popupMenu.removeAll();
         NavigationService navigationService = NavigationService.getInstance(project);
         Set<NavigationTarget> navigationCandidates = navigationService.getNavigation(selectedNode);
-        DependencyTree affectedNode = selectedNode;
-        if (navigationCandidates == null) {
-            // Find the direct dependency containing the selected dependency.
-            affectedNode = navigationService.getNavigableParent(selectedNode);
-            if (affectedNode == null) {
-                return;
-            }
-            navigationCandidates = navigationService.getNavigation(affectedNode);
-            if (navigationCandidates == null) {
-                return;
-            }
-        }
 
         addNodeNavigation(navigationCandidates);
-        addNodeExclusion(selectedNode, navigationCandidates, affectedNode);
     }
 
     private void addNodeNavigation(Set<NavigationTarget> navigationCandidates) {
