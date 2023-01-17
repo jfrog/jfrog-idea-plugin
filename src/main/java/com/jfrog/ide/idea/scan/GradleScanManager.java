@@ -20,7 +20,9 @@ import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.jetbrains.plugins.gradle.execution.target.GradleTargetUtil;
 import org.jetbrains.plugins.gradle.service.GradleInstallationManager;
+import org.jetbrains.plugins.gradle.service.execution.BuildLayoutParameters;
 import org.jetbrains.plugins.gradle.service.settings.GradleConfigurable;
 import org.jetbrains.plugins.gradle.settings.DistributionType;
 import org.jetbrains.plugins.gradle.settings.GradleProjectSettings;
@@ -142,6 +144,12 @@ public class GradleScanManager extends SingleDescriptorScanManager {
             env.put("JAVA_HOME", javaHome);
         }
 
+        // TODO: revert
+        getLog().info("#####project: " + project);
+        BuildLayoutParameters buildLayoutParameters = gradleInstallationManager.guessBuildLayoutParameters(project, projectSettings.getExternalProjectPath());
+        getLog().info("#####buildLayoutParameters: " + buildLayoutParameters);
+        String gradleHomeT = GradleTargetUtil.maybeGetLocalValue(buildLayoutParameters.getGradleHome());
+        getLog().info("#####gradleHomeT: " + gradleHomeT);
         File gradleHome = gradleInstallationManager.getGradleHome(project, projectSettings.getExternalProjectPath());
         getLog().info("#####1 " + gradleHome);
         if (gradleHome != null) {
