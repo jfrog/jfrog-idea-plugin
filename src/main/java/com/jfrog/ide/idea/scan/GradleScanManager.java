@@ -128,6 +128,7 @@ public class GradleScanManager extends SingleDescriptorScanManager {
      * @return gradle executable
      */
     private File resolveGradleAndSetJavaHome(Map<String, String> env) {
+        getLog().info("##### " + GradleSettings.getInstance(project).getLinkedProjectsSettings().stream().findFirst().get().getGradleHome());
         GradleProjectSettings projectSettings = GradleSettings.getInstance(project).getLinkedProjectsSettings().stream().findAny().orElse(null);
         if (projectSettings == null) {
             logError(getLog(), "Couldn't retrieve Gradle project settings. Hint - make sure the Gradle project was properly imported.", false);
