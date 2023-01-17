@@ -15,7 +15,7 @@ targetCompatibility = JavaVersion.VERSION_11
 
 intellij {
     version = sandboxVersion
-    plugins = ['gradle', 'maven', 'Groovy', 'properties', 'java', 'Kotlin', 'org.jetbrains.plugins.go:221.5080.210', 'Pythonid:221.5080.210']
+    plugins = ['gradle', 'maven', 'Groovy', 'properties', 'java', 'Kotlin', 'org.jetbrains.plugins.go:213.5744.223', 'Pythonid:213.5744.223']
     pluginName = 'JFrog'
     updateSinceUntilBuild = false
 }
