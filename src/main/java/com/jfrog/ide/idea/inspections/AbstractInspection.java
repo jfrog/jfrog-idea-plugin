@@ -68,7 +68,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
             if (isOnTheFly) {
                 InspectionUtils.registerProblem(problemsHolder, dependency, getTargetElements(element), dependencies.size());
             }
-            navigationService.addNavigation(dependency, element);
+            navigationService.addNavigation(dependency, element, createComponentName(element));
         }
     }
 

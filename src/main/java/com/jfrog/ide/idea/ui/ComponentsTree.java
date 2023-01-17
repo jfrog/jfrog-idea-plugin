@@ -36,7 +36,7 @@ import java.util.Set;
  * @author yahavi
  */
 public abstract class ComponentsTree extends Tree {
-    private static final String SHOW_IN_PROJECT_DESCRIPTOR = "Show in project descriptor";
+    private static final String SHOW_IN_PROJECT_DESCRIPTOR = "Show dependency in project descriptor";
     private static final String EXCLUDE_DEPENDENCY = "Exclude dependency";
 
     protected final List<ToolbarPopupMenu> toolbarPopupMenus = new ArrayList<>();
@@ -79,7 +79,7 @@ public abstract class ComponentsTree extends Tree {
             return;
         }
         if (selectedPath.getLastPathComponent() instanceof DependencyNode) {
-            createNodePopupMenu((DependencyNode)selectedPath.getLastPathComponent());
+            createNodePopupMenu((DependencyNode) selectedPath.getLastPathComponent());
             popupMenu.show(tree, e.getX(), e.getY());
         }
     }
@@ -102,15 +102,14 @@ public abstract class ComponentsTree extends Tree {
     }
 
     private void addSingleNavigation(NavigationTarget navigationTarget) {
-        popupMenu.add(createNavigationMenuItem(navigationTarget, SHOW_IN_PROJECT_DESCRIPTOR));
+        popupMenu.add(createNavigationMenuItem(navigationTarget, SHOW_IN_PROJECT_DESCRIPTOR + " (" + navigationTarget.getComponentName() + ")"));
     }
 
     private void addMultiNavigation(Set<NavigationTarget> navigationCandidates) {
         JMenu multiMenu = new JBMenu();
         multiMenu.setText(SHOW_IN_PROJECT_DESCRIPTOR);
         for (NavigationTarget navigationTarget : navigationCandidates) {
-            String descriptorPath = getRelativizedDescriptorPath(navigationTarget);
-            multiMenu.add(createNavigationMenuItem(navigationTarget, descriptorPath + " " + (navigationTarget.getLineNumber() + 1)));
+            multiMenu.add(createNavigationMenuItem(navigationTarget, navigationTarget.getComponentName()));
         }
         popupMenu.add(multiMenu);
     }
