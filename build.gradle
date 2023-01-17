@@ -10,12 +10,12 @@ plugins {
 group 'com.jfrog.ide'
 version currentVersion
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
 
 intellij {
     version = sandboxVersion
-    plugins = ['gradle', 'maven', 'Groovy', 'properties', 'java', 'Kotlin', 'org.jetbrains.plugins.go:223.7571.182', 'Pythonid:223.7571.182']
+    plugins = ['gradle', 'maven', 'Groovy', 'properties', 'java', 'Kotlin', 'org.jetbrains.plugins.go:221.5080.210', 'Pythonid:221.5080.210']
     pluginName = 'JFrog'
     updateSinceUntilBuild = false
 }
