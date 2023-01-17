@@ -21,7 +21,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
         with:
-          gradle-version: 5.6.4
+          gradle-version: 7.4.1
       - name: Setup NodeJS
         uses: actions/setup-node@v2
         with:
