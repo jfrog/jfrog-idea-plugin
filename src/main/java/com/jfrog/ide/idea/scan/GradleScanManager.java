@@ -153,46 +153,46 @@ public class GradleScanManager extends SingleDescriptorScanManager {
         }
 
         // TODO: revert
-        getLog().info("#####project: " + project);
-        getLog().info("#####projectSettings.getExternalProjectPath(): " + projectSettings.getExternalProjectPath());
-
-        getLog().info("#####projectSettings.getDistributionType(): " + projectSettings.getDistributionType());
-        getLog().info("#####GradleLocalSettings.getInstance(project).getGradleHome(projectSettings.getExternalProjectPath()): " + GradleLocalSettings.getInstance(project).getGradleHome(projectSettings.getExternalProjectPath()));
-        WrapperConfiguration wrapperConfiguration = GradleUtil.getWrapperConfiguration(projectSettings.getExternalProjectPath());
-        getLog().info("#####GradleUtil.getWrapperConfiguration(projectPath): " + wrapperConfiguration);
-
-        BuildLayoutParameters buildLayoutParameters = gradleInstallationManager.guessBuildLayoutParameters(project, projectSettings.getExternalProjectPath());
-        try {
-            PathAssembler.LocalDistribution localDistribution = new PathAssembler(new File(buildLayoutParameters.getGradleUserHome().getLocalValue().blockingGet(10000)), new File(projectSettings.getExternalProjectPath()))
-                    .getDistribution(wrapperConfiguration);
-            getLog().info("#####localDistribution: " + localDistribution);
-            File distributionDir = localDistribution.getDistributionDir();
-            getLog().info("#####distributionDir: " + distributionDir);
-            List<Path> dirs = Files.list(distributionDir.toPath()).collect(Collectors.toList());
-            getLog().info("#####dirs.size(): " + dirs.size());
-            if (dirs.size() == 1) {
-                getLog().info("#####dirs.get(0).toString(): " + dirs.get(0).toString());
-                // Expected to find exactly 1 directory, see org.gradle.wrapper.Install.verifyDistributionRoot
-            }
-        } catch (TimeoutException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-
-        getLog().info("#####buildLayoutParameters: " + buildLayoutParameters);
-        getLog().info("#####buildLayoutParameters.getGradleHome(): " + buildLayoutParameters.getGradleHome());
-        String gradleHomeT = GradleTargetUtil.maybeGetLocalValue(buildLayoutParameters.getGradleHome());
-        getLog().info("#####gradleHomeT: " + gradleHomeT);
+//        getLog().info("#####project: " + project);
+//        getLog().info("#####projectSettings.getExternalProjectPath(): " + projectSettings.getExternalProjectPath());
+//
+//        getLog().info("#####projectSettings.getDistributionType(): " + projectSettings.getDistributionType());
+//        getLog().info("#####GradleLocalSettings.getInstance(project).getGradleHome(projectSettings.getExternalProjectPath()): " + GradleLocalSettings.getInstance(project).getGradleHome(projectSettings.getExternalProjectPath()));
+//        WrapperConfiguration wrapperConfiguration = GradleUtil.getWrapperConfiguration(projectSettings.getExternalProjectPath());
+//        getLog().info("#####GradleUtil.getWrapperConfiguration(projectPath): " + wrapperConfiguration);
+//
+//        BuildLayoutParameters buildLayoutParameters = gradleInstallationManager.guessBuildLayoutParameters(project, projectSettings.getExternalProjectPath());
+//        try {
+//            PathAssembler.LocalDistribution localDistribution = new PathAssembler(new File(buildLayoutParameters.getGradleUserHome().getLocalValue().blockingGet(10000)), new File(projectSettings.getExternalProjectPath()))
+//                    .getDistribution(wrapperConfiguration);
+//            getLog().info("#####localDistribution: " + localDistribution);
+//            File distributionDir = localDistribution.getDistributionDir();
+//            getLog().info("#####distributionDir: " + distributionDir);
+//            List<Path> dirs = Files.list(distributionDir.toPath()).collect(Collectors.toList());
+//            getLog().info("#####dirs.size(): " + dirs.size());
+//            if (dirs.size() == 1) {
+//                getLog().info("#####dirs.get(0).toString(): " + dirs.get(0).toString());
+//                // Expected to find exactly 1 directory, see org.gradle.wrapper.Install.verifyDistributionRoot
+//            }
+//        } catch (TimeoutException e) {
+//            throw new RuntimeException(e);
+//        } catch (ExecutionException e) {
+//            throw new RuntimeException(e);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//
+//        getLog().info("#####buildLayoutParameters: " + buildLayoutParameters);
+//        getLog().info("#####buildLayoutParameters.getGradleHome(): " + buildLayoutParameters.getGradleHome());
+//        String gradleHomeT = GradleTargetUtil.maybeGetLocalValue(buildLayoutParameters.getGradleHome());
+//        getLog().info("#####gradleHomeT: " + gradleHomeT);
         File gradleHome = gradleInstallationManager.getGradleHome(project, projectSettings.getExternalProjectPath());
-        getLog().info("#####1 " + gradleHome);
+//        getLog().info("#####1 " + gradleHome);
         if (gradleHome != null) {
             return gradleHome;
         }
-        getLog().info("#####2 " + projectSettings.getGradleHome());
+//        getLog().info("#####2 " + projectSettings.getGradleHome());
         if (StringUtils.isNotBlank(projectSettings.getGradleHome())) {
             return new File(projectSettings.getGradleHome());
         }

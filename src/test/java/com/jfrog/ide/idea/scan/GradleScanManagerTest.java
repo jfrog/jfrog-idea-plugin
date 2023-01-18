@@ -6,6 +6,7 @@ import com.jfrog.ide.common.gradle.GradleDriver;
 import com.jfrog.ide.common.scan.GraphScanLogic;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.jetbrains.plugins.gradle.service.project.open.GradleProjectImportUtil;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.scan.DependencyTree;
@@ -35,8 +36,11 @@ public class GradleScanManagerTest extends HeavyPlatformTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         wrapperProjectDir = createTempProjectDir("wrapper");
-        GradleDriver driver = new GradleDriver(Path.of(wrapperProjectDir, "gradlew").toString(), System.getenv());
+
+        // This is intended to make sure the Gradle Wrapper distribution was downloaded to the machine
+        GradleDriver driver = new GradleDriver(Path.of(wrapperProjectDir, SystemUtils.IS_OS_WINDOWS ? "gradlew.bat" : "gradlew").toString(), System.getenv());
         driver.verifyGradleInstalled();
+
         globalProjectDir = createTempProjectDir("global");
         executorService = ConcurrencyUtil.newSameThreadExecutorService();
     }
