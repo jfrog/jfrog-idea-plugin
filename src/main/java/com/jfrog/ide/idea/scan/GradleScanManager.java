@@ -146,6 +146,7 @@ public class GradleScanManager extends SingleDescriptorScanManager {
 
         // TODO: revert
         getLog().info("#####project: " + project);
+        getLog().info("#####projectSettings.getExternalProjectPath(): " + projectSettings.getExternalProjectPath());
         BuildLayoutParameters buildLayoutParameters = gradleInstallationManager.guessBuildLayoutParameters(project, projectSettings.getExternalProjectPath());
         getLog().info("#####buildLayoutParameters: " + buildLayoutParameters);
         getLog().info("#####buildLayoutParameters.getGradleHome(): " + buildLayoutParameters.getGradleHome());
