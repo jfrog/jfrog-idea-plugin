@@ -16,6 +16,7 @@ public class MessagePacker implements MessagePipe {
     public void send(Object data) {
         try {
             String raw = MessagePipeSupport.Pack(data);
+            Logger.getInstance().debug("Opening webview page with data: "+ raw);
             this.send(raw);
         } catch (JsonProcessingException e) {
             Logger.getInstance().error(e.getMessage());
