@@ -28,6 +28,7 @@ import org.jetbrains.plugins.gradle.settings.DistributionType;
 import org.jetbrains.plugins.gradle.settings.GradleLocalSettings;
 import org.jetbrains.plugins.gradle.settings.GradleProjectSettings;
 import org.jetbrains.plugins.gradle.settings.GradleSettings;
+import org.jetbrains.plugins.gradle.util.GradleUtil;
 import org.jfrog.build.extractor.scan.DependencyTree;
 
 import java.io.File;
@@ -151,6 +152,7 @@ public class GradleScanManager extends SingleDescriptorScanManager {
 
         getLog().info("#####projectSettings.getDistributionType(): " + projectSettings.getDistributionType());
         getLog().info("#####GradleLocalSettings.getInstance(project).getGradleHome(projectSettings.getExternalProjectPath()): " + GradleLocalSettings.getInstance(project).getGradleHome(projectSettings.getExternalProjectPath()));
+        getLog().info("#####GradleUtil.getWrapperConfiguration(projectPath): " + GradleUtil.getWrapperConfiguration(projectSettings.getExternalProjectPath()));
 
         BuildLayoutParameters buildLayoutParameters = gradleInstallationManager.guessBuildLayoutParameters(project, projectSettings.getExternalProjectPath());
         getLog().info("#####buildLayoutParameters: " + buildLayoutParameters);
