@@ -164,6 +164,8 @@ public class GradleScanManager extends SingleDescriptorScanManager {
             PathAssembler.LocalDistribution localDistribution = new PathAssembler(new File(buildLayoutParameters.getGradleUserHome().getLocalValue().blockingGet(10000)), new File(projectSettings.getExternalProjectPath()))
                     .getDistribution(wrapperConfiguration);
             getLog().info("#####localDistribution: " + localDistribution);
+            File distributionDir = localDistribution.getDistributionDir();
+            getLog().info("#####distributionDir: " + distributionDir);
         } catch (TimeoutException e) {
             throw new RuntimeException(e);
         } catch (ExecutionException e) {
