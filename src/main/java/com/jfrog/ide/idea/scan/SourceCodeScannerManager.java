@@ -109,8 +109,9 @@ public class SourceCodeScannerManager {
             if (issues != null) {
                 if (warning.isApplicable()) {
                     ApplicableIssueNode applicableIssue = new ApplicableIssueNode(
-                            cve, warning.getLineStart(), warning.getColStart(), warning.getFilePath(), warning.getReason(),
-                            warning.getLineSnippet(), warning.getScannerSearchTarget(), issues.get(0));
+                            cve, warning.getLineStart(), warning.getColStart(), warning.getLineEnd(), warning.getColEnd(),
+                            warning.getFilePath(), warning.getReason(), warning.getLineSnippet(), warning.getScannerSearchTarget(),
+                            issues.get(0));
                     fileNode.addDependency(applicableIssue);
                     for (IssueNode issue : issues) {
                         issue.AddApplicableIssues(applicableIssue);

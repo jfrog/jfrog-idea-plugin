@@ -9,14 +9,16 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
-import com.jfrog.ide.idea.scan.ScanManager;
-import com.jfrog.ide.idea.scan.ScanManagersFactory;
+import com.jfrog.ide.common.tree.ApplicableIssueNode;
+import com.jfrog.ide.common.tree.BaseTreeNode;
+import com.jfrog.ide.common.tree.FileTreeNode;
+import com.jfrog.ide.idea.ui.ComponentsTree;
+import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import javax.swing.tree.TreeNode;
+import java.util.*;
 
 /**
  * General Annotator for JFrog security source code issues (for Example: applicable CVE)
@@ -24,7 +26,7 @@ import java.util.Objects;
  *
  * @author Tal Arian
  */
-public class JFrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<JFrogSecurityWarning>> {
+public class JFrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<ApplicableIssueNode>> {
 
     @NotNull
     private static final HighlightSeverity HIGHLIGHT_TYPE = HighlightSeverity.WARNING;
@@ -37,19 +39,31 @@ public class JFrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<JFro
 
     @Nullable
     @Override
-    public List<JFrogSecurityWarning> doAnnotate(PsiFile file) {
-        ScanManager scanManager = ScanManagersFactory.getScanManagers(file.getProject()).stream()
-                .findAny()
-                .orElse(null);
-        return scanManager != null ? scanManager.getSourceCodeScanResults() : new ArrayList<>();
+    public List<ApplicableIssueNode> doAnnotate(PsiFile file) {
+        List<ApplicableIssueNode> applicableIssues = new ArrayList<>();
+        ComponentsTree componentsTree = LocalComponentsTree.getInstance(file.getProject());
+        if (componentsTree == null || componentsTree.getModel() == null) {
+            return null;
+        }
+        Enumeration<TreeNode> roots = ((BaseTreeNode) componentsTree.getModel().getRoot()).children();
+        for (TreeNode root : Collections.list(roots)) {
+            FileTreeNode fileNode = (FileTreeNode) root;
+            if (fileNode.getFilePath().equals(file.getContainingFile().getVirtualFile().getPath())) {
+                for (TreeNode issueNode : Collections.list(fileNode.children())) {
+                    applicableIssues.add((ApplicableIssueNode) issueNode);
+                }
+            }
+        }
+        return applicableIssues;
     }
 
     @Override
-    public void apply(@NotNull PsiFile file, List<JFrogSecurityWarning> warnings, @NotNull AnnotationHolder holder) {
-        String filePath = file.getVirtualFile() != null ? file.getVirtualFile().getPath() : null;
-        warnings.stream().filter(Objects::nonNull).filter(warning -> warning.isApplicable() && warning.getFilePath().equals(filePath)).forEach(warning -> {
-            int startOffset = StringUtil.lineColToOffset(file.getText(), warning.getLineStart(), warning.getColStart());
-            int endOffset = StringUtil.lineColToOffset(file.getText(), warning.getLineEnd(), warning.getColEnd());
+    public void apply(@NotNull PsiFile file, List<ApplicableIssueNode> warnings, @NotNull AnnotationHolder holder) {
+        warnings.stream().filter(Objects::nonNull).forEach(warning -> {
+            int startOffset = StringUtil.lineColToOffset(file.getText(), warning.getRowStart(), warning.getColStart());
+            int endOffset = StringUtil.lineColToOffset(file.getText(), warning.getRowEnd(), warning.getColEnd());
+            AnnotationIconRenderer iconRenderer = new AnnotationIconRenderer(warning, "");
+            iconRenderer.setProject(file.getProject());
 
             TextRange range = new TextRange(startOffset, endOffset);
             Document document = PsiDocumentManager.getInstance(file.getProject()).getDocument(file);
@@ -58,8 +72,9 @@ public class JFrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<JFro
                 // If the file has been update after the scan and the relevant line is affected,
                 // no annotation will be added.
                 if (lineText.contains(warning.getLineSnippet())) {
-                    holder.newAnnotation(HIGHLIGHT_TYPE, "\uD83D\uDC38 JFrog [" + warning.getName() + "]: " + warning.getReason())
+                    holder.newAnnotation(HIGHLIGHT_TYPE, "\uD83D\uDC38 JFrog [" + warning.getTitle() + "]: " + warning.getReason())
                             .range(range)
+                            .gutterIconRenderer(iconRenderer)
                             .create();
                 }
             }
