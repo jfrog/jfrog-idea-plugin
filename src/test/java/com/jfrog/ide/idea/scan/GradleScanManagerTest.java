@@ -35,6 +35,8 @@ public class GradleScanManagerTest extends HeavyPlatformTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         wrapperProjectDir = createTempProjectDir("wrapper");
+        GradleDriver driver = new GradleDriver(Path.of(wrapperProjectDir, "gradlew").toString(), System.getenv());
+        driver.verifyGradleInstalled();
         globalProjectDir = createTempProjectDir("global");
         executorService = ConcurrencyUtil.newSameThreadExecutorService();
     }
