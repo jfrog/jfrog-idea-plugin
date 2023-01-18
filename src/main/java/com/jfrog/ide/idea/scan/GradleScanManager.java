@@ -20,6 +20,8 @@ import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.gradle.wrapper.PathAssembler;
+import org.gradle.wrapper.WrapperConfiguration;
 import org.jetbrains.plugins.gradle.execution.target.GradleTargetUtil;
 import org.jetbrains.plugins.gradle.service.GradleInstallationManager;
 import org.jetbrains.plugins.gradle.service.execution.BuildLayoutParameters;
@@ -37,7 +39,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeoutException;
 
 import static com.jfrog.ide.common.log.Utils.logError;
 
@@ -152,9 +156,21 @@ public class GradleScanManager extends SingleDescriptorScanManager {
 
         getLog().info("#####projectSettings.getDistributionType(): " + projectSettings.getDistributionType());
         getLog().info("#####GradleLocalSettings.getInstance(project).getGradleHome(projectSettings.getExternalProjectPath()): " + GradleLocalSettings.getInstance(project).getGradleHome(projectSettings.getExternalProjectPath()));
-        getLog().info("#####GradleUtil.getWrapperConfiguration(projectPath): " + GradleUtil.getWrapperConfiguration(projectSettings.getExternalProjectPath()));
+        WrapperConfiguration wrapperConfiguration = GradleUtil.getWrapperConfiguration(projectSettings.getExternalProjectPath());
+        getLog().info("#####GradleUtil.getWrapperConfiguration(projectPath): " + wrapperConfiguration);
 
         BuildLayoutParameters buildLayoutParameters = gradleInstallationManager.guessBuildLayoutParameters(project, projectSettings.getExternalProjectPath());
+        try {
+            PathAssembler.LocalDistribution localDistribution = new PathAssembler(new File(buildLayoutParameters.getGradleUserHome().getLocalValue().blockingGet(10000)), new File(projectSettings.getExternalProjectPath()))
+                    .getDistribution(wrapperConfiguration);
+            getLog().info("#####localDistribution: " + localDistribution);
+        } catch (TimeoutException e) {
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+
+
         getLog().info("#####buildLayoutParameters: " + buildLayoutParameters);
         getLog().info("#####buildLayoutParameters.getGradleHome(): " + buildLayoutParameters.getGradleHome());
         String gradleHomeT = GradleTargetUtil.maybeGetLocalValue(buildLayoutParameters.getGradleHome());
