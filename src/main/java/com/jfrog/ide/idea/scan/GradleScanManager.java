@@ -38,10 +38,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import static com.jfrog.ide.common.log.Utils.logError;
 
@@ -166,9 +168,17 @@ public class GradleScanManager extends SingleDescriptorScanManager {
             getLog().info("#####localDistribution: " + localDistribution);
             File distributionDir = localDistribution.getDistributionDir();
             getLog().info("#####distributionDir: " + distributionDir);
+            List<Path> dirs = Files.list(distributionDir.toPath()).collect(Collectors.toList());
+            getLog().info("#####dirs.size(): " + dirs.size());
+            if (dirs.size() == 1) {
+                getLog().info("#####dirs.get(0).toString(): " + dirs.get(0).toString());
+                // Expected to find exactly 1 directory, see org.gradle.wrapper.Install.verifyDistributionRoot
+            }
         } catch (TimeoutException e) {
             throw new RuntimeException(e);
         } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
