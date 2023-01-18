@@ -20,17 +20,11 @@ import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.gradle.wrapper.PathAssembler;
-import org.gradle.wrapper.WrapperConfiguration;
-import org.jetbrains.plugins.gradle.execution.target.GradleTargetUtil;
 import org.jetbrains.plugins.gradle.service.GradleInstallationManager;
-import org.jetbrains.plugins.gradle.service.execution.BuildLayoutParameters;
 import org.jetbrains.plugins.gradle.service.settings.GradleConfigurable;
 import org.jetbrains.plugins.gradle.settings.DistributionType;
-import org.jetbrains.plugins.gradle.settings.GradleLocalSettings;
 import org.jetbrains.plugins.gradle.settings.GradleProjectSettings;
 import org.jetbrains.plugins.gradle.settings.GradleSettings;
-import org.jetbrains.plugins.gradle.util.GradleUtil;
 import org.jfrog.build.extractor.scan.DependencyTree;
 
 import java.io.File;
@@ -38,12 +32,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 
 import static com.jfrog.ide.common.log.Utils.logError;
 
@@ -152,47 +142,10 @@ public class GradleScanManager extends SingleDescriptorScanManager {
             env.put("JAVA_HOME", javaHome);
         }
 
-        // TODO: revert
-//        getLog().info("#####project: " + project);
-//        getLog().info("#####projectSettings.getExternalProjectPath(): " + projectSettings.getExternalProjectPath());
-//
-//        getLog().info("#####projectSettings.getDistributionType(): " + projectSettings.getDistributionType());
-//        getLog().info("#####GradleLocalSettings.getInstance(project).getGradleHome(projectSettings.getExternalProjectPath()): " + GradleLocalSettings.getInstance(project).getGradleHome(projectSettings.getExternalProjectPath()));
-//        WrapperConfiguration wrapperConfiguration = GradleUtil.getWrapperConfiguration(projectSettings.getExternalProjectPath());
-//        getLog().info("#####GradleUtil.getWrapperConfiguration(projectPath): " + wrapperConfiguration);
-//
-//        BuildLayoutParameters buildLayoutParameters = gradleInstallationManager.guessBuildLayoutParameters(project, projectSettings.getExternalProjectPath());
-//        try {
-//            PathAssembler.LocalDistribution localDistribution = new PathAssembler(new File(buildLayoutParameters.getGradleUserHome().getLocalValue().blockingGet(10000)), new File(projectSettings.getExternalProjectPath()))
-//                    .getDistribution(wrapperConfiguration);
-//            getLog().info("#####localDistribution: " + localDistribution);
-//            File distributionDir = localDistribution.getDistributionDir();
-//            getLog().info("#####distributionDir: " + distributionDir);
-//            List<Path> dirs = Files.list(distributionDir.toPath()).collect(Collectors.toList());
-//            getLog().info("#####dirs.size(): " + dirs.size());
-//            if (dirs.size() == 1) {
-//                getLog().info("#####dirs.get(0).toString(): " + dirs.get(0).toString());
-//                // Expected to find exactly 1 directory, see org.gradle.wrapper.Install.verifyDistributionRoot
-//            }
-//        } catch (TimeoutException e) {
-//            throw new RuntimeException(e);
-//        } catch (ExecutionException e) {
-//            throw new RuntimeException(e);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//
-//        getLog().info("#####buildLayoutParameters: " + buildLayoutParameters);
-//        getLog().info("#####buildLayoutParameters.getGradleHome(): " + buildLayoutParameters.getGradleHome());
-//        String gradleHomeT = GradleTargetUtil.maybeGetLocalValue(buildLayoutParameters.getGradleHome());
-//        getLog().info("#####gradleHomeT: " + gradleHomeT);
         File gradleHome = gradleInstallationManager.getGradleHome(project, projectSettings.getExternalProjectPath());
-//        getLog().info("#####1 " + gradleHome);
         if (gradleHome != null) {
             return gradleHome;
         }
-//        getLog().info("#####2 " + projectSettings.getGradleHome());
         if (StringUtils.isNotBlank(projectSettings.getGradleHome())) {
             return new File(projectSettings.getGradleHome());
         }
