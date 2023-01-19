@@ -81,6 +81,7 @@ tasks.register('downloadWebview', Download) {
 tasks.register('getAndUpdateWebviewChecksum') {
     finalizedBy('verifyWebview')
     if (System.getenv("CI") != null) {
+        println 'CI mode is active - Skipping Webview checksum update'
         ext.checksum = webviewChecksum
         return
     }
