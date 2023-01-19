@@ -37,7 +37,7 @@ public class WebviewObjectConverter {
                 .infectedVersion(convertVersionRanges(issueNode.getInfectedVersions()))
                 .references(convertReferences(issueNode.getReferences()))
                 .cve(convertCve(issueNode.getCve(), convertApplicableDetails(issueNode.isApplicable(), issueNode.getApplicableIssues())))
-                .impactedPath(convertImpactPath(dependency.getImpactPaths()))
+                .impactGraph(convertImpactGraph(dependency.getImpactPaths()))
                 .watchName(watchNames)
                 .edited(issueNode.getLastUpdated())
                 .extendedInformation(extendedInformation);
@@ -76,14 +76,14 @@ public class WebviewObjectConverter {
                 .version(dependency.getGeneralInfo().getVersion())
                 .severity(license.getSeverity().name())
                 .references(convertReferences(license.getReferences()))
-                .impactedPath(convertImpactPath(dependency.getImpactPaths()))
+                .impactGraph(convertImpactGraph(dependency.getImpactPaths()))
                 .watchName(watchNames)
                 .edited(license.getLastUpdated());
     }
 
-    private static ImpactedPath convertImpactPath(ImpactTreeNode impactTreeNode) {
-        ImpactedPath[] children = impactTreeNode.getChildren().stream().map(WebviewObjectConverter::convertImpactPath).toArray(ImpactedPath[]::new);
-        return new ImpactedPath(impactTreeNode.getNameWithoutPrefix(), children);
+    private static ImpactGraph convertImpactGraph(ImpactTreeNode impactTreeNode) {
+        ImpactGraph[] children = impactTreeNode.getChildren().stream().map(WebviewObjectConverter::convertImpactGraph).toArray(ImpactGraph[]::new);
+        return new ImpactGraph(impactTreeNode.getNameWithoutPrefix(), children);
     }
 
     private static Cve convertCve(com.jfrog.ide.common.tree.Cve cve, ApplicableDetails applicableDetails) {

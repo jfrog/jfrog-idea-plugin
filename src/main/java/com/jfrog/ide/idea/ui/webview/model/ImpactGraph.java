@@ -1,10 +1,10 @@
 package com.jfrog.ide.idea.ui.webview.model;
 
-public class ImpactedPath {
+public class ImpactGraph {
     private final String name;
-    private final ImpactedPath[] children;
+    private final ImpactGraph[] children;
 
-    public ImpactedPath(String name, ImpactedPath[] children) {
+    public ImpactGraph(String name, ImpactGraph[] children) {
         this.name = name;
         this.children = children;
     }
@@ -15,7 +15,7 @@ public class ImpactedPath {
     }
 
     @SuppressWarnings("unused")
-    public ImpactedPath[] getChildren() {
+    public ImpactGraph[] getChildren() {
         return children;
     }
 }

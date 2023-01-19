@@ -13,7 +13,7 @@ public class DependencyPage {
     private String[] infectedVersion;
     private Reference[] references;
     private Cve cve;
-    private ImpactedPath impactedPath;
+    private ImpactGraph impactGraph;
     private String[] watchName;
     private String edited;
     private ExtendedInformation extendedInformation;
@@ -137,12 +137,12 @@ public class DependencyPage {
     }
 
     @SuppressWarnings("unused")
-    public ImpactedPath getImpactedPath() {
-        return impactedPath;
+    public ImpactGraph getImpactGraph() {
+        return impactGraph;
     }
 
-    public DependencyPage impactedPath(ImpactedPath impactedPath) {
-        this.impactedPath = impactedPath;
+    public DependencyPage impactGraph(ImpactGraph impactGraph) {
+        this.impactGraph = impactGraph;
         return this;
     }
 
