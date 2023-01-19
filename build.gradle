@@ -1,3 +1,4 @@
+import java.net.http.*
 import java.nio.file.Paths
 
 plugins {
@@ -68,19 +69,30 @@ test {
     }
 }
 
-def webViewVersion = '0.1.18'
-def webviewFileName = 'jfrog-ide-webview-' + webViewVersion + '.tgz'
+def webviewFileName = 'jfrog-ide-webview-' + webviewVersion + '.tgz'
+def webviewUrl = 'https://releases.jfrog.io/artifactory/ide-webview-npm/jfrog-ide-webview/-/' + webviewFileName
 tasks.register('downloadWebview', Download) {
-    src 'https://releases.jfrog.io/artifactory/ide-webview-npm/jfrog-ide-webview/-/' + webviewFileName
+    src webviewUrl
     dest buildDir
     onlyIfModified true
+    finalizedBy('getAndUpdateWebviewChecksum')
+}
+
+tasks.register('getAndUpdateWebviewChecksum') {
     finalizedBy('verifyWebview')
+    if (System.getenv("CI") != null) {
+        println 'CI mode is active - Skipping Webview checksum update'
+        ext.checksum = webviewChecksum
+        return
+    }
+    ext.checksum = getWebviewChecksumFromServer(webviewUrl)
+    updateWebviewChecksumInPropertiesFile(ext.checksum)
 }
 
 tasks.register('verifyWebview', Verify) {
     src new File(buildDir, webviewFileName)
-    algorithm 'SHA-512'
-    checksum 'a8222870ded18d7dac9628b02d0e10ec7dc9ac53939353dcad834e006e64315f0b204a00b70c73cc382db6f4352bbe5cf07edb6fccd12df3927f74e1f37add50'
+    algorithm 'SHA-256'
+    checksum getAndUpdateWebviewChecksum.checksum
     finalizedBy('extractWebview')
 }
 
@@ -110,4 +122,29 @@ publishing {
 
 publishPlugin {
     token = System.getenv("JETBRAINS_TOKEN")
+}
+
+/**
+ * Get Webview checksum from releases.jfrog.io
+ * @param webviewUrl - Webview URL
+ * @return the sha256 of the webview
+ */
+static String getWebviewChecksumFromServer(String webviewUrl) {
+    def headRequest = HttpRequest.newBuilder(new URL(webviewUrl).toURI()).method("HEAD", HttpRequest.BodyPublishers.noBody()).build()
+    def checksumResponse = HttpClient.newHttpClient().send(headRequest, HttpResponse.BodyHandlers.ofString())
+    return checksumResponse.headers().firstValue("x-checksum-sha256").get()
+}
+
+/**
+ * Update the Webview checksum in the gradle.properties file
+ * @param checksum - Webview checksum to update
+ */
+static def updateWebviewChecksumInPropertiesFile(String checksum) {
+    def gradleProps = new Properties()
+    File gradlePropertiesFile = new File("gradle.properties");
+    gradlePropertiesFile.withInputStream { gradleProps.load(it) }
+    gradleProps.setProperty("webviewChecksum", checksum)
+    gradlePropertiesFile.withWriter('UTF-8') { fileWriter ->
+        gradleProps.each { key, value -> fileWriter.writeLine "$key=$value" }
+    }
 }
