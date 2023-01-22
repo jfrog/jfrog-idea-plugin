@@ -59,7 +59,7 @@ pipelines:
 
             # Run build and publish
             - >
-              env -i PATH=$PATH HOME=$HOME
+              env -i PATH=$PATH HOME=$HOME CI=$CI
               JFROG_CLI_BUILD_NAME=$JFROG_CLI_BUILD_NAME
               JFROG_CLI_BUILD_NUMBER=$JFROG_CLI_BUILD_NUMBER
               JFROG_CLI_BUILD_PROJECT=$JFROG_CLI_BUILD_PROJECT
