@@ -147,7 +147,6 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     }
 
     private void initDefaultValuesButton() {
-
         defaultValuesButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
             excludedPaths.setText(DEFAULT_EXCLUSIONS);
             connectionRetries.setValue(ConnectionRetriesSpinner.RANGE.initial);

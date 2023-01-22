@@ -521,7 +521,7 @@
             </constraints>
             <properties>
               <enabled value="false"/>
-              <text value="    A glob pattern from the shape of  **/*{dir1, dir2 ...}*"/>
+              <text value="    A glob pattern from the shape of **/*{dir-1, dir-2 ...dir-n}* ."/>
             </properties>
           </component>
           <component id="11a3e" class="javax.swing.JLabel">

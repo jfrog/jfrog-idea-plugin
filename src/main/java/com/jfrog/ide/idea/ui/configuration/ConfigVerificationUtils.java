@@ -2,6 +2,7 @@ package com.jfrog.ide.idea.ui.configuration;
 
 import com.intellij.openapi.options.ConfigurationException;
 import com.jfrog.ide.common.configuration.ServerConfig;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.nio.file.FileSystems;
@@ -18,11 +19,12 @@ public class ConfigVerificationUtils {
     // Pattern: **/*{a, b, c ...}* OR **/*a*
     public static final String EXCLUSIONS_PREFIX = "**/*";
     public static final String EXCLUSIONS_SUFFIX = "*";
-    public static String EXCLUSIONS_REGEX_PARSER = "^\\*\\*\\/\\*\\{([^{}]+)\\}\\*$";
+    public static String EXCLUSIONS_REGEX_PARSER = "^\\*\\*/\\*\\{([^{}]+)}\\*$";
+    public static Pattern EXCLUSIONS_REGEX_PATTERN = Pattern.compile(EXCLUSIONS_REGEX_PARSER);
     public static final String DEFAULT_EXCLUSIONS = EXCLUSIONS_PREFIX + "{.idea, test, node_modules}" + EXCLUSIONS_SUFFIX;
 
     /**
-     * Validate config project and watches before saving.
+     * Validate config project, watches and excluded paths before saving.
      *
      * @param policyType - The selected policy
      * @param project    - JFrog platform project key
@@ -42,6 +44,11 @@ public class ConfigVerificationUtils {
         validateExcludedPaths(excludedPaths);
     }
 
+    /**
+     * Validate excluded paths field before saving.
+     * @param excludedPaths users' input parameter
+     * @throws ConfigurationException if excludedPaths field in the configuration is illegal.
+     */
     private static void validateExcludedPaths(String excludedPaths) throws ConfigurationException {
         if (StringUtils.isNotBlank(excludedPaths)) {
             if (!StringUtils.startsWith(excludedPaths, EXCLUSIONS_PREFIX)) {
@@ -53,10 +60,9 @@ public class ConfigVerificationUtils {
             try {
                 FileSystems.getDefault().getPathMatcher("glob:" + excludedPaths);
             } catch (PatternSyntaxException e) {
-                throw new ConfigurationException("Excluded paths pattern must be a valid glob pattern");
+                throw new ConfigurationException(ExceptionUtils.getRootCauseMessage(e),"Excluded paths pattern must be a valid glob pattern");
             }
-            Pattern pattern = Pattern.compile(EXCLUSIONS_REGEX_PARSER);
-            Matcher matcher = pattern.matcher(excludedPaths);
+            Matcher matcher = EXCLUSIONS_REGEX_PATTERN.matcher(excludedPaths);
             if (!matcher.find()) {
                 if (excludedPaths.contains("{")) {
                     throw new ConfigurationException("Excluded paths pattern can contain at most one pair of {}");

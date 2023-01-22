@@ -19,7 +19,6 @@
  */
 package com.jfrog.ide.idea.configuration;
 
-
 import com.intellij.credentialStore.Credentials;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.util.EnvironmentUtil;

@@ -34,8 +34,7 @@ public class ConfigVerificationUtilsNegativeTest {
                 {"**/*{bad,pattern*", ServerConfig.PolicyType.VULNERABILITIES, "", ""},
                 {"**/*{bad,pattern}a{b,c}*", ServerConfig.PolicyType.VULNERABILITIES, "", ""},
                 {"**/*{bad,pattern}*a{b,c}*", ServerConfig.PolicyType.VULNERABILITIES, "", ""},
-
-
+                {"**/*{{}*", ServerConfig.PolicyType.VULNERABILITIES, "", ""},
         });
     }
 

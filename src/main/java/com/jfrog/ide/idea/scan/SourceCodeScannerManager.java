@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static com.jfrog.ide.common.log.Utils.logError;
 import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.*;
@@ -78,11 +77,16 @@ public class SourceCodeScannerManager {
         }
     }
 
+    /**
+     * Splits the users' configured ExcludedPaths glob pattern to a list
+     * of simplified patterns by avoiding the use of "{}".
+     *
+     * @return a list of equivalent patterns without the use of "{}"
+     */
     private List<String> getSkippedFoldersPatterns() {
         String excludePattern = GlobalSettings.getInstance().getServerConfig().getExcludedPaths();
         List<String> skippedFoldersPatterns = new ArrayList<>();
-        Pattern pattern = Pattern.compile(EXCLUSIONS_REGEX_PARSER);
-        Matcher matcher = pattern.matcher(excludePattern);
+        Matcher matcher = EXCLUSIONS_REGEX_PATTERN.matcher(excludePattern);
         if (!matcher.find()) {
             return List.of(excludePattern);
         }
