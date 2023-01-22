@@ -32,9 +32,7 @@ public abstract class ComponentsTree extends Tree {
     protected Project project;
     protected final List<ToolbarPopupMenu> toolbarPopupMenus = new ArrayList<>();
     protected final JBPopupMenu popupMenu = new JBPopupMenu();
-
     private static final String EXCLUDE_DEPENDENCY = "Exclude dependency";
-
 
     public ComponentsTree(@NotNull Project project) {
         super((TreeModel) null);
@@ -50,7 +48,6 @@ public abstract class ComponentsTree extends Tree {
     public void addFilterMenu(ToolbarPopupMenu filterMenu) {
         this.toolbarPopupMenus.add(filterMenu);
     }
-
 
     private String getRelativizedDescriptorPath(NavigationTarget navigationTarget) {
         String pathResult = "";
@@ -71,7 +68,7 @@ public abstract class ComponentsTree extends Tree {
         return pathResult;
     }
 
-
+    @SuppressWarnings("unused")
     private void addNodeExclusion(DependencyTree nodeToExclude, Set<NavigationTarget> parentCandidates, DependencyTree affectedNode) {
         if (parentCandidates.size() > 1) {
             addMultiExclusion(nodeToExclude, affectedNode, parentCandidates);

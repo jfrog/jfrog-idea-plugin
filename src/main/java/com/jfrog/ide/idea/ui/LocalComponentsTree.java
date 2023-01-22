@@ -29,7 +29,7 @@ import java.util.Set;
  * @author yahavi
  */
 public class LocalComponentsTree extends ComponentsTree {
-    private static final String SHOW_IN_PROJECT_DESCRIPTOR = "Show dependency in project descriptor";
+    private static final String SHOW_IN_PROJECT_DESCRIPTOR = "Show direct dependency in project descriptor";
 
     List<FileTreeNode> fileNodes = new ArrayList<>();
 
@@ -94,7 +94,7 @@ public class LocalComponentsTree extends ComponentsTree {
             return;
         }
         // Event is right-click.
-        TreePath selectedPath = tree.getPathForLocation(e.getX(), e.getY());
+        TreePath selectedPath = tree.getPathForRow(tree.getClosestRowForLocation(e.getX(), e.getY()));
         if (selectedPath == null) {
             return;
         }
