@@ -20,23 +20,31 @@ public class ConfigVerificationUtilsNegativeTest {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {ServerConfig.PolicyType.VULNERABILITIES, "bad project", ""},
-                {ServerConfig.PolicyType.PROJECT, "", ""},
-                {ServerConfig.PolicyType.PROJECT, "bad@project", ""},
-                {ServerConfig.PolicyType.PROJECT, "bad project", ""},
-                {ServerConfig.PolicyType.WATCHES, "", ""},
-                {ServerConfig.PolicyType.WATCHES, "project", "watch 1"},
-                {ServerConfig.PolicyType.WATCHES, "", "watch#1,watch-2"},
-                {ServerConfig.PolicyType.WATCHES, "", ",watch-1,watch-2"},
-                {ServerConfig.PolicyType.WATCHES, "", "watch-1,watch-2,"}
+                {"", ServerConfig.PolicyType.VULNERABILITIES, "bad project", ""},
+                {"", ServerConfig.PolicyType.PROJECT, "", ""},
+                {"", ServerConfig.PolicyType.PROJECT, "bad@project", ""},
+                {"", ServerConfig.PolicyType.PROJECT, "bad project", ""},
+                {"", ServerConfig.PolicyType.WATCHES, "", ""},
+                {"", ServerConfig.PolicyType.WATCHES, "project", "watch 1"},
+                {"", ServerConfig.PolicyType.WATCHES, "", "watch#1,watch-2"},
+                {"", ServerConfig.PolicyType.WATCHES, "", ",watch-1,watch-2"},
+                {"", ServerConfig.PolicyType.WATCHES, "", "watch-1,watch-2,"},
+                {"bad pattern *", ServerConfig.PolicyType.WATCHES, "", ""},
+                {"**/*{bad pattern}", ServerConfig.PolicyType.WATCHES, "", ""},
+                {"**/*{bad,pattern*", ServerConfig.PolicyType.VULNERABILITIES, "", ""},
+                {"**/*{bad,pattern}a{b,c}*", ServerConfig.PolicyType.VULNERABILITIES, "", ""},
+                {"**/*{bad,pattern}*a{b,c}*", ServerConfig.PolicyType.VULNERABILITIES, "", ""},
+                {"**/*{{}*", ServerConfig.PolicyType.VULNERABILITIES, "", ""},
         });
     }
 
+    private final String excludedPaths;
     private final ServerConfig.PolicyType policyType;
     private final String project;
     private final String watches;
 
-    public ConfigVerificationUtilsNegativeTest(ServerConfig.PolicyType policyType, String project, String watches) {
+    public ConfigVerificationUtilsNegativeTest(String excludedPaths, ServerConfig.PolicyType policyType, String project, String watches) {
+        this.excludedPaths = excludedPaths;
         this.policyType = policyType;
         this.project = project;
         this.watches = watches;
@@ -44,6 +52,6 @@ public class ConfigVerificationUtilsNegativeTest {
 
     @Test(expected = ConfigurationException.class)
     public void testValidateGlobalConfig() throws ConfigurationException {
-        validateGlobalConfig(policyType, project, watches);
+        validateGlobalConfig(excludedPaths, policyType, project, watches);
     }
 }
