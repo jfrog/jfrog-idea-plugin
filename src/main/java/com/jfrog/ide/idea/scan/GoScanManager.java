@@ -37,7 +37,7 @@ public class GoScanManager extends SingleDescriptorScanManager {
      */
     GoScanManager(Project project, String basePath, ExecutorService executor) {
         super(project, basePath, ComponentPrefix.GO, executor, Paths.get(basePath, "go.mod").toString());
-        getLog().info("Found Go project: " + getProjectName());
+        getLog().info("Found Go project: " + getProjectPath());
         Map<String, String> env = Maps.newHashMap(EnvironmentUtil.getEnvironmentMap());
         String goExec = null;
         try {

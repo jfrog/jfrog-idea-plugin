@@ -34,7 +34,7 @@ public class NpmScanManager extends SingleDescriptorScanManager {
      */
     NpmScanManager(Project project, String basePath, ExecutorService executor) {
         super(project, basePath, ComponentPrefix.NPM, executor, Paths.get(basePath, "package.json").toString());
-        getLog().info("Found npm project: " + getProjectName());
+        getLog().info("Found npm project: " + getProjectPath());
         npmTreeBuilder = new NpmTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap());
     }
 

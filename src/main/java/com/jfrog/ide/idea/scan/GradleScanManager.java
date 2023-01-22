@@ -54,7 +54,7 @@ public class GradleScanManager extends SingleDescriptorScanManager {
      */
     GradleScanManager(Project project, String basePath, ExecutorService executor) {
         super(project, basePath, ComponentPrefix.GAV, executor);
-        getLog().info("Found Gradle project: " + getProjectName());
+        getLog().info("Found Gradle project: " + getProjectPath());
         Path dirPath = Paths.get(this.basePath);
         Path buildGradleKotlinPath = dirPath.resolve("build.gradle.kts");
         if (Files.exists(buildGradleKotlinPath)) {
@@ -128,7 +128,7 @@ public class GradleScanManager extends SingleDescriptorScanManager {
      * @return gradle executable
      */
     private File resolveGradleAndSetJavaHome(Map<String, String> env) {
-        GradleProjectSettings projectSettings = GradleSettings.getInstance(project).getLinkedProjectsSettings().stream().findAny().orElse(null);
+        GradleProjectSettings projectSettings = GradleSettings.getInstance(project).getLinkedProjectSettings(basePath);
         if (projectSettings == null) {
             logError(getLog(), "Couldn't retrieve Gradle project settings. Hint - make sure the Gradle project was properly imported.", false);
             return null;
