@@ -67,11 +67,6 @@ public class ServerConfigImpl implements ServerConfig {
     static final String ACCESS_TOKEN_ENV = "JFROG_IDE_ACCESS_TOKEN";
     static final String PROJECT_ENV = "JFROG_IDE_PROJECT";
 
-    @Deprecated
-    public static final String XRAY_SETTINGS_KEY = "com.jfrog.xray.idea";
-    @Deprecated
-    static final String LEGACY_XRAY_URL_ENV = "JFROG_IDE_URL";
-
     @OptionTag
     private String url;
     @OptionTag
@@ -104,10 +99,6 @@ public class ServerConfigImpl implements ServerConfig {
     // The subsystem key of the plugin configuration in the PasswordSafe
     @Transient
     private String jfrogSettingsCredentialsKey = JFROG_SETTINGS_KEY;
-    // The subsystem key of the legacy plugin configuration in the PasswordSafe
-    @Transient
-    @Deprecated
-    private String xraySettingsCredentialsKey = XRAY_SETTINGS_KEY;
 
     ServerConfigImpl() {
     }
@@ -127,7 +118,6 @@ public class ServerConfigImpl implements ServerConfig {
         this.connectionRetries = builder.connectionRetries;
         this.connectionTimeout = builder.connectionTimeout;
         this.jfrogSettingsCredentialsKey = builder.jfrogSettingsCredentialsKey;
-        this.xraySettingsCredentialsKey = builder.xraySettingsCredentialsKey;
     }
 
     public boolean isXrayConfigured() {
@@ -215,19 +205,6 @@ public class ServerConfigImpl implements ServerConfig {
         removeCredentialsInPasswordSafe(jfrogSettingsCredentialsKey, JFROG_SETTINGS_CREDENTIALS_KEY);
     }
 
-    @Deprecated
-    public Credentials getLegacyCredentialsFromPasswordSafe() {
-        return retrieveCredentialsFromPasswordSafe(xraySettingsCredentialsKey, getUrl());
-    }
-
-    @Deprecated
-    public void removeLegacyCredentialsFromPasswordSafe() {
-        String url = getUrl();
-        if (isNotBlank(url)) {
-            removeCredentialsInPasswordSafe(jfrogSettingsCredentialsKey, url);
-        }
-    }
-
     @Override
     public boolean isInsecureTls() {
         return CertificateManager.getInstance().getState().ACCEPT_AUTOMATICALLY;
@@ -269,11 +246,6 @@ public class ServerConfigImpl implements ServerConfig {
 
     public String getJFrogSettingsCredentialsKey() {
         return this.jfrogSettingsCredentialsKey;
-    }
-
-    @Deprecated
-    public String getXraySettingsCredentialsKey() {
-        return this.xraySettingsCredentialsKey;
     }
 
     void setExcludedPaths(String excludedPaths) {
@@ -428,11 +400,6 @@ public class ServerConfigImpl implements ServerConfig {
         this.jfrogSettingsCredentialsKey = jfrogSettingsCredentialsKey;
     }
 
-    @Deprecated
-    public void setXraySettingsCredentialsKey(String xraySettingsCredentialsKey) {
-        this.xraySettingsCredentialsKey = xraySettingsCredentialsKey;
-    }
-
     /**
      * Read connection details from environment variables.
      * All connection details must be provided from env, otherwise don't use them.
@@ -443,12 +410,11 @@ public class ServerConfigImpl implements ServerConfig {
         String platformUrlEnv = EnvironmentUtil.getValue(PLATFORM_URL_ENV);
         String xrayUrlEnv = EnvironmentUtil.getValue(XRAY_URL_ENV);
         String artifactoryUrlEnv = EnvironmentUtil.getValue(ARTIFACTORY_URL_ENV);
-        String legacyXrayUrlEnv = EnvironmentUtil.getValue(LEGACY_XRAY_URL_ENV);
         String usernameEnv = EnvironmentUtil.getValue(USERNAME_ENV);
         String passwordEnv = EnvironmentUtil.getValue(PASSWORD_ENV);
         String accessTokenEnv = EnvironmentUtil.getValue(ACCESS_TOKEN_ENV);
         String projectEnv = EnvironmentUtil.getValue(PROJECT_ENV);
-        if (isAnyBlank(usernameEnv, passwordEnv) || isAllBlank(platformUrlEnv, xrayUrlEnv, artifactoryUrlEnv, legacyXrayUrlEnv)) {
+        if (isAnyBlank(usernameEnv, passwordEnv) || isAllBlank(platformUrlEnv, xrayUrlEnv, artifactoryUrlEnv)) {
             setUrl("");
             setXrayUrl("");
             setArtifactoryUrl("");
@@ -457,14 +423,10 @@ public class ServerConfigImpl implements ServerConfig {
             setAccessToken("");
             return false;
         }
-        if (isAllBlank(platformUrlEnv, xrayUrlEnv, artifactoryUrlEnv)) {
-            setXrayUrl(legacyXrayUrlEnv);
-            migrateXrayConfigToPlatformConfig(this);
-        } else {
-            setUrl(platformUrlEnv);
-            setXrayUrl(xrayUrlEnv);
-            setArtifactoryUrl(artifactoryUrlEnv);
-        }
+
+        setUrl(platformUrlEnv);
+        setXrayUrl(xrayUrlEnv);
+        setArtifactoryUrl(artifactoryUrlEnv);
         if (isNotBlank(projectEnv)) {
             setProject(projectEnv);
         }
@@ -515,7 +477,6 @@ public class ServerConfigImpl implements ServerConfig {
     }
 
     public static class Builder {
-        private String xraySettingsCredentialsKey = XRAY_SETTINGS_KEY;
         private String jfrogSettingsCredentialsKey = JFROG_SETTINGS_KEY;
         private String url;
         private String xrayUrl;
@@ -602,11 +563,6 @@ public class ServerConfigImpl implements ServerConfig {
 
         public Builder setJFrogSettingsCredentialsKey(String jfrogSettingsCredentialsKey) {
             this.jfrogSettingsCredentialsKey = jfrogSettingsCredentialsKey;
-            return this;
-        }
-
-        public Builder setXraySettingsCredentialsKey(String xraySettingsCredentialsKey) {
-            this.xraySettingsCredentialsKey = xraySettingsCredentialsKey;
             return this;
         }
     }

@@ -5,7 +5,7 @@ import com.intellij.json.psi.JsonProperty;
 /**
  * @author yahavi
  */
-public class NpmInspectionTest extends InspectionsTest {
+public class NpmInspectionTest extends InspectionsTestBase {
 
     private static final String PACKAGE_DESCRIPTOR = "package.json";
     private final InspectionTestDependency[] DEPENDENCIES = {

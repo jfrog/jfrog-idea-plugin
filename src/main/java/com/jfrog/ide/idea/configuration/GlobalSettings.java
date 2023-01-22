@@ -30,24 +30,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
-import static com.jfrog.ide.idea.ui.configuration.Utils.migrateXrayConfigToPlatformConfig;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 /**
  * @author yahavi
  */
 @State(name = "GlobalSettings", storages = {@Storage("jfrogConfig.xml")})
 public final class GlobalSettings implements PersistentStateComponent<GlobalSettings> {
-
     private ServerConfigImpl serverConfig;
-
-    @Deprecated
-    private final XrayServerConfigImpl xrayConfig;
 
     @SuppressWarnings("unused")
     GlobalSettings() {
         this.serverConfig = new ServerConfigImpl();
-        this.xrayConfig = new XrayServerConfigImpl();
     }
 
     public static GlobalSettings getInstance() {
@@ -97,29 +89,6 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
 
     public ServerConfigImpl getServerConfig() {
         return this.serverConfig;
-    }
-
-    @Deprecated
-    public XrayServerConfigImpl getXrayConfig() {
-        return this.xrayConfig;
-    }
-
-    /**
-     * Method is called by Idea IS for reading the previously saved config file 'jfrogConfig.xml' from the disk.
-     * Check if previous configurations contain credentials, perform migration if necessary.
-     * If connection details loaded from environment, don't override them.
-     *
-     * @param xrayConfig - configurations read from file.
-     */
-    @Deprecated
-    public void setXrayConfig(XrayServerConfigImpl xrayConfig) {
-        String xrayUrl = xrayConfig.getUrl();
-        if (isBlank(xrayUrl)) {
-            return;
-        }
-        xrayConfig.setXrayUrl(xrayUrl);
-        migrateXrayConfigToPlatformConfig(xrayConfig);
-        setServerConfig(xrayConfig);
     }
 
     /**
@@ -174,7 +143,6 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         this.serverConfig.setArtifactoryUrl(serverConfig.getArtifactoryUrl());
         this.serverConfig.setConnectionDetailsFromEnv(serverConfig.isConnectionDetailsFromEnv());
         this.serverConfig.setJFrogSettingsCredentialsKey(serverConfig.getJFrogSettingsCredentialsKey());
-        this.serverConfig.setXraySettingsCredentialsKey(serverConfig.getXraySettingsCredentialsKey());
         setAdvancedSettings(serverConfig);
     }
 
