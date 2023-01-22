@@ -54,12 +54,11 @@ public class SourceCodeScannerManager {
             return;
         }
         scanResults = new ArrayList<>();
-        List<String> skippedFolders = getSkippedFoldersPatterns();
         try {
             if (applicability.getSupportedLanguages().contains(codeBaseLanguage)) {
                 indicator.setText("Running applicability scan");
                 indicator.setFraction(0.25);
-                List<JFrogSecurityWarning> applicabilityResults = applicability.execute(new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).cves(cves).skippedFolders(skippedFolders));
+                List<JFrogSecurityWarning> applicabilityResults = applicability.execute(new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).cves(cves).skippedFolders(getSkippedFoldersPatterns()));
                 scanResults.addAll(applicabilityResults);
             }
             if (eos.getSupportedLanguages().contains(codeBaseLanguage)) {
