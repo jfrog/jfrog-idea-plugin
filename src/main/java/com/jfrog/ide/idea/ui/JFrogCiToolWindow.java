@@ -205,7 +205,6 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
 
         issuesTable.addTableSelectionListener(moreInfoPanel);
         componentsTree.addOnProjectChangeListener(projectBusConnection);
-        componentsTree.addRightClickListener();
         projectBusConnection.subscribe(ApplicationEvents.ON_CI_FILTER_CHANGE, () -> ApplicationManager.getApplication().invokeLater(() -> {
             CiComponentsTree.getInstance(project).applyFiltersForAllProjects();
             updateIssuesTable();

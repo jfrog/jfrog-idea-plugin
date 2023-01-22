@@ -109,6 +109,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             verticalSplit.setSecondComponent(browser.getComponent());
         });
         projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_LOCAL_STARTED, () -> ApplicationManager.getApplication().invokeLater(this::resetViews));
+        componentsTree.addRightClickListener();
     }
 
     private void initVulnerabilityInfoBrowser() {

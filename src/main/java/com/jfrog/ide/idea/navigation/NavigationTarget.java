@@ -12,9 +12,12 @@ public class NavigationTarget {
     private final PsiElement element;
     private final int lineNumber;
 
-    NavigationTarget(PsiElement element, int lineNumber) {
+    private final String componentName;
+
+    NavigationTarget(PsiElement element, int lineNumber, String componentName) {
         this.element = element;
         this.lineNumber = lineNumber;
+        this.componentName = componentName;
     }
 
     public PsiElement getElement() {
@@ -23,6 +26,10 @@ public class NavigationTarget {
 
     public int getLineNumber() {
         return lineNumber;
+    }
+
+    public String getComponentName() {
+        return componentName;
     }
 
     @Override
