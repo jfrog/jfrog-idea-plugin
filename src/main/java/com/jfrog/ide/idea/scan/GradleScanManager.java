@@ -128,7 +128,11 @@ public class GradleScanManager extends SingleDescriptorScanManager {
      * @return gradle executable
      */
     private File resolveGradleAndSetJavaHome(Map<String, String> env) {
-        GradleProjectSettings projectSettings = GradleSettings.getInstance(project).getLinkedProjectSettings(basePath);
+        GradleSettings gradleSettings = GradleSettings.getInstance(project);
+        GradleProjectSettings projectSettings = gradleSettings.getLinkedProjectSettings(basePath);
+        if (projectSettings == null && SystemUtils.IS_OS_WINDOWS) {
+            projectSettings = gradleSettings.getLinkedProjectSettings(basePath.replaceAll("\\\\", "/"));
+        }
         if (projectSettings == null) {
             logError(getLog(), "Couldn't retrieve Gradle project settings. Hint - make sure the Gradle project was properly imported.", false);
             return null;
