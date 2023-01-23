@@ -5,9 +5,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBMenuItem;
 import com.intellij.pom.Navigatable;
 import com.intellij.ui.components.JBMenu;
-import com.jfrog.ide.common.tree.BaseTreeNode;
-import com.jfrog.ide.common.tree.DependencyNode;
-import com.jfrog.ide.common.tree.FileTreeNode;
+import com.jfrog.ide.common.tree.*;
+import com.jfrog.ide.idea.actions.CreateIgnoreRuleAction;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.navigation.NavigationTarget;
 import com.jfrog.ide.idea.ui.menus.ToolbarPopupMenu;
@@ -30,6 +29,7 @@ import java.util.Set;
  */
 public class LocalComponentsTree extends ComponentsTree {
     private static final String SHOW_IN_PROJECT_DESCRIPTOR = "Show direct dependency in project descriptor";
+    private static final String IGNORE_RULE_TOOL_TIP = "Create ignore rule option is only available if JFrog Project or watches are defined";
 
     List<FileTreeNode> fileNodes = new ArrayList<>();
 
@@ -98,12 +98,27 @@ public class LocalComponentsTree extends ComponentsTree {
         if (selectedPath == null) {
             return;
         }
-        if (selectedPath.getLastPathComponent() instanceof DependencyNode) {
-            createNodePopupMenu((DependencyNode) selectedPath.getLastPathComponent());
-            popupMenu.show(tree, e.getX(), e.getY());
+        var selected = selectedPath.getLastPathComponent();
+        if (selected instanceof DependencyNode) {
+            createNodePopupMenu((DependencyNode) selected);
         }
+        if (selected instanceof IssueNode) {
+            createIgnoreRuleOption((IssueNode) selected);
+        }
+        if (selected instanceof ApplicableIssueNode) {
+            createIgnoreRuleOption(((ApplicableIssueNode) selected).getIssue());
+        }
+        popupMenu.show(tree, e.getX(), e.getY());
     }
 
+    private void createIgnoreRuleOption(IssueNode selectedIssue) {
+        popupMenu.removeAll();
+        popupMenu.setFocusable(false);
+        popupMenu.add(new CreateIgnoreRuleAction(selectedIssue.getIgnoreRuleUrl()));
+        JToolTip toolTip = popupMenu.createToolTip();
+        toolTip.setToolTipText(IGNORE_RULE_TOOL_TIP);
+        toolTip.setEnabled(true);
+    }
 
     private void createNodePopupMenu(DependencyNode selectedNode) {
         popupMenu.removeAll();
