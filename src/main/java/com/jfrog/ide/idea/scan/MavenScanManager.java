@@ -179,7 +179,7 @@ public class MavenScanManager extends ScanManager {
      */
     @Override
     protected List<FileTreeNode> groupDependenciesToDescriptorNodes(Collection<DependencyNode> depScanResults, Map<String, List<DependencyTree>> depMap) {
-        Map<String, DescriptorFileTreeNode> treeNodeMap = new HashMap<>();
+        Map<String, DescriptorFileTreeNode> descriptorMap = new HashMap<>();
         for (DependencyNode dependencyNode : depScanResults) {
             Map<String, Boolean> addedDescriptors = new HashMap<>();
             for (DependencyTree dep : depMap.get(dependencyNode.getGeneralInfo().getComponentId())) {
@@ -188,12 +188,13 @@ public class MavenScanManager extends ScanManager {
                     if (currDep.getGeneralInfo() != null) {
                         String pomPath = currDep.getGeneralInfo().getPath();
                         if (StringUtils.endsWith(pomPath, POM_FILE_NAME) && !addedDescriptors.containsKey(pomPath)) {
-                            treeNodeMap.putIfAbsent(pomPath, new DescriptorFileTreeNode(pomPath));
+                            descriptorMap.putIfAbsent(pomPath, new DescriptorFileTreeNode(pomPath));
 
                             // Each dependency might be a child of more than one POM file, but Artifact is a tree node, so it can have only one parent.
                             // The solution for this is to clone the dependency before adding it as a child of the POM.
                             DependencyNode clonedDep = (DependencyNode) dependencyNode.clone();
-                            treeNodeMap.get(pomPath).addDependency(clonedDep);
+                            clonedDep.setIndirect(dep.getParent() != currDep);
+                            descriptorMap.get(pomPath).addDependency(clonedDep);
                             addedDescriptors.put(pomPath, true);
                         }
                     }
@@ -201,7 +202,7 @@ public class MavenScanManager extends ScanManager {
                 }
             }
         }
-        return new ArrayList<>(treeNodeMap.values());
+        return new ArrayList<>(descriptorMap.values());
     }
 
     @Override
