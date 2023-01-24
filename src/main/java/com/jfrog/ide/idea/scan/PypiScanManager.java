@@ -46,7 +46,7 @@ public class PypiScanManager extends SingleDescriptorScanManager {
     PypiScanManager(Project project, Sdk pythonSdk, ExecutorService executor) {
         super(project, pythonSdk.getHomePath(), ComponentPrefix.PYPI, executor, pythonSdk.getHomePath());
         this.pythonSdk = pythonSdk;
-        getLog().info("Found PyPI SDK: " + getProjectName());
+        getLog().info("Found PyPI SDK: " + getProjectPath());
     }
 
     @Override
