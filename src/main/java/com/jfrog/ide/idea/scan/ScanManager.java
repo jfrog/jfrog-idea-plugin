@@ -60,7 +60,6 @@ import static com.jfrog.ide.common.log.Utils.logError;
 public abstract class ScanManager {
     private final ServerConfig serverConfig;
     private final ComponentPrefix prefix;
-    private final String projectName;
     private final Log log;
     private ScanLogic scanLogic;
     private ExecutorService executor;
@@ -81,7 +80,6 @@ public abstract class ScanManager {
      */
     ScanManager(@NotNull Project project, String basePath, ComponentPrefix prefix, ExecutorService executor) {
         this.serverConfig = GlobalSettings.getInstance().getServerConfig();
-        this.projectName = basePath;
         this.prefix = prefix;
         this.log = Logger.getInstance();
         this.executor = executor;
@@ -144,7 +142,7 @@ public abstract class ScanManager {
             indicator.setText("1/3: Building dependency tree");
             DependencyTree dependencyTree = buildTree();
             indicator.setText("2/3: Xray scanning project dependencies");
-            log.debug("Start scan for '" + projectName + "'.");
+            log.debug("Start scan for '" + basePath + "'.");
             Map<String, DependencyNode> results = scanLogic.scanArtifacts(dependencyTree, serverConfig, indicator, prefix, this::checkCanceled);
             indicator.setText("3/3: Finalizing");
             if (results == null || results.isEmpty()) {
@@ -403,10 +401,6 @@ public abstract class ScanManager {
 
     public void setScanLogic(ScanLogic scanLogic) {
         this.scanLogic = scanLogic;
-    }
-
-    public String getProjectName() {
-        return projectName;
     }
 
     public Log getLog() {

@@ -34,7 +34,7 @@ public class YarnScanManager extends SingleDescriptorScanManager {
      */
     YarnScanManager(Project project, String basePath, ExecutorService executor) {
         super(project, basePath, ComponentPrefix.NPM, executor, Paths.get(basePath, "package.json").toString());
-        getLog().info("Found yarn project: " + getProjectName());
+        getLog().info("Found yarn project: " + getProjectPath());
         yarnTreeBuilder = new YarnTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap());
     }
 

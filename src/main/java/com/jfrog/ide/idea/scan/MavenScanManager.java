@@ -50,7 +50,7 @@ public class MavenScanManager extends ScanManager {
      */
     MavenScanManager(Project project, ExecutorService executor) {
         super(project, Utils.getProjectBasePath(project).toString(), ComponentPrefix.GAV, executor);
-        getLog().info("Found Maven project: " + getProjectName());
+        getLog().info("Found Maven project: " + getProjectPath());
     }
 
     static boolean isApplicable(@NotNull Project project) {
