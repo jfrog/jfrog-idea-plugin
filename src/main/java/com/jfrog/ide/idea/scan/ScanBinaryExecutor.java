@@ -69,8 +69,7 @@ public abstract class ScanBinaryExecutor {
             if (proxyConfiguration != null) {
                 String proxyUrl = proxyConfiguration.host + ":" + proxyConfiguration.port;
                 if (StringUtils.isNoneBlank(proxyConfiguration.username, proxyConfiguration.password)) {
-                    String encodedAuth = Base64.getEncoder().encodeToString((proxyConfiguration.username + ":" + proxyConfiguration.password).getBytes());
-                    proxyUrl = encodedAuth + "@" + proxyUrl;
+                    proxyUrl = proxyConfiguration.username + ":" + proxyConfiguration.password + "@" + proxyUrl;
                 }
                 env.put(ENV_HTTP_PROXY, "http://" + proxyUrl);
                 env.put(ENV_HTTPS_PROXY, "https://" + proxyUrl);
