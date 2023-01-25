@@ -113,7 +113,7 @@ class IssuesTableSelectionListener extends MouseAdapter implements ListSelection
     private void doRightClickButtonEvent(MouseEvent mouseEvent, Issue selectedIssue) {
         JPopupMenu popupMenu = new JBPopupMenu();
         popupMenu.setFocusable(false);
-        popupMenu.add(new CreateIgnoreRuleAction(selectedIssue.getIgnoreRuleUrl()));
+        popupMenu.add(new CreateIgnoreRuleAction(selectedIssue.getIgnoreRuleUrl(), mouseEvent));
         JBPopupMenu.showByEvent(mouseEvent, popupMenu);
     }
 }

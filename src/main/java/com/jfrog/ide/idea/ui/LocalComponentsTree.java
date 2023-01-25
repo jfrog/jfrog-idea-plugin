@@ -29,7 +29,7 @@ import java.util.Set;
  */
 public class LocalComponentsTree extends ComponentsTree {
     private static final String SHOW_IN_PROJECT_DESCRIPTOR = "Show direct dependency in project descriptor";
-    private static final String IGNORE_RULE_TOOL_TIP = "Create ignore rule option is only available if JFrog Project or watches are defined";
+    public static final String IGNORE_RULE_TOOL_TIP = "Creating Ignore Rules is only available when a JFrog Project or Watch is defined.";
 
     List<FileTreeNode> fileNodes = new ArrayList<>();
 
@@ -101,20 +101,21 @@ public class LocalComponentsTree extends ComponentsTree {
         var selected = selectedPath.getLastPathComponent();
         if (selected instanceof DependencyNode) {
             createNodePopupMenu((DependencyNode) selected);
+        } else if (selected instanceof IssueNode) {
+            createIgnoreRuleOption((IssueNode) selected,e);
+        } else if (selected instanceof ApplicableIssueNode) {
+            createIgnoreRuleOption(((ApplicableIssueNode) selected).getIssue(),e);
         }
-        if (selected instanceof IssueNode) {
-            createIgnoreRuleOption((IssueNode) selected);
-        }
-        if (selected instanceof ApplicableIssueNode) {
-            createIgnoreRuleOption(((ApplicableIssueNode) selected).getIssue());
+        else {
+            // No context menu was created.
+            return;
         }
         popupMenu.show(tree, e.getX(), e.getY());
     }
 
-    private void createIgnoreRuleOption(IssueNode selectedIssue) {
+    private void createIgnoreRuleOption(IssueNode selectedIssue,MouseEvent mouseEvent) {
         popupMenu.removeAll();
-        popupMenu.setFocusable(false);
-        popupMenu.add(new CreateIgnoreRuleAction(selectedIssue.getIgnoreRuleUrl()));
+        popupMenu.add( new CreateIgnoreRuleAction(selectedIssue.getIgnoreRuleUrl(), mouseEvent));
         JToolTip toolTip = popupMenu.createToolTip();
         toolTip.setToolTipText(IGNORE_RULE_TOOL_TIP);
         toolTip.setEnabled(true);

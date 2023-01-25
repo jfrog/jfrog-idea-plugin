@@ -91,7 +91,10 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private JRadioButton accordingToWatchesRadioButton;
     private JButton defaultValuesButton;
 
+    private int selectedTabIndex;
+
     public JFrogGlobalConfiguration() {
+        createComponent();
         initUrls();
         initTestConnection();
         initConnectionDetailsFromEnv();
@@ -108,7 +111,12 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         tabbedPane.add("Connection Details", connectionDetails);
         tabbedPane.add("Settings", settings);
         tabbedPane.add("Advanced", advanced);
+        tabbedPane.setSelectedIndex(selectedTabIndex);
         return tabbedPane;
+    }
+
+    public void selectSettingsTab() {
+        selectedTabIndex = 1;
     }
 
     private void initUrls() {
