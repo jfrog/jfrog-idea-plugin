@@ -46,19 +46,26 @@ public class JFrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<Appl
             return null;
         }
         Enumeration<TreeNode> roots = ((BaseTreeNode) componentsTree.getModel().getRoot()).children();
-        for (TreeNode root : Collections.list(roots)) {
+        roots.asIterator().forEachRemaining(root -> {
             FileTreeNode fileNode = (FileTreeNode) root;
             if (fileNode.getFilePath().equals(file.getContainingFile().getVirtualFile().getPath())) {
-                for (TreeNode issueNode : Collections.list(fileNode.children())) {
-                    applicableIssues.add((ApplicableIssueNode) issueNode);
-                }
+                fileNode.children().asIterator().forEachRemaining(issueNode -> {
+                            if (issueNode instanceof ApplicableIssueNode) {
+                                applicableIssues.add((ApplicableIssueNode) issueNode);
+                            }
+                        }
+                );
             }
-        }
+        });
         return applicableIssues;
     }
 
     @Override
     public void apply(@NotNull PsiFile file, List<ApplicableIssueNode> warnings, @NotNull AnnotationHolder holder) {
+        Document document = PsiDocumentManager.getInstance(file.getProject()).getDocument(file);
+        if (document == null) {
+            return;
+        }
         warnings.stream().filter(Objects::nonNull).forEach(warning -> {
             int startOffset = StringUtil.lineColToOffset(file.getText(), warning.getRowStart(), warning.getColStart());
             int endOffset = StringUtil.lineColToOffset(file.getText(), warning.getRowEnd(), warning.getColEnd());
@@ -66,17 +73,14 @@ public class JFrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<Appl
             iconRenderer.setProject(file.getProject());
 
             TextRange range = new TextRange(startOffset, endOffset);
-            Document document = PsiDocumentManager.getInstance(file.getProject()).getDocument(file);
-            if (document != null) {
-                String lineText = document.getText(range);
-                // If the file has been update after the scan and the relevant line is affected,
-                // no annotation will be added.
-                if (lineText.contains(warning.getLineSnippet())) {
-                    holder.newAnnotation(HIGHLIGHT_TYPE, "\uD83D\uDC38 JFrog [" + warning.getTitle() + "]: " + warning.getReason())
-                            .range(range)
-                            .gutterIconRenderer(iconRenderer)
-                            .create();
-                }
+            String lineText = document.getText(range);
+            // If the file has been update after the scan and the relevant line is affected,
+            // no annotation will be added.
+            if (lineText.contains(warning.getLineSnippet())) {
+                holder.newAnnotation(HIGHLIGHT_TYPE, "\uD83D\uDC38 JFrog [" + warning.getTitle() + "]: " + warning.getReason())
+                        .range(range)
+                        .gutterIconRenderer(iconRenderer)
+                        .create();
             }
         });
     }
