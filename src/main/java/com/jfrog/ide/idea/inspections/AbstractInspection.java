@@ -14,7 +14,7 @@ import com.jfrog.ide.common.tree.DependencyNode;
 import com.jfrog.ide.common.tree.DescriptorFileTreeNode;
 import com.jfrog.ide.common.tree.ImpactTreeNode;
 import com.jfrog.ide.idea.navigation.NavigationService;
-import com.jfrog.ide.idea.scan.ScanManager;
+import com.jfrog.ide.idea.scan.ScannerBase;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import org.apache.commons.collections4.CollectionUtils;
@@ -101,7 +101,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * @param path    - Path to project
      * @return ScanManager
      */
-    abstract ScanManager getScanManager(Project project, String path);
+    abstract ScannerBase getScanner(Project project, String path);
 
     /**
      * Return true if and only if the Psi element is a dependency.
@@ -174,8 +174,8 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
             return false; // File is not a package descriptor file
         }
 
-        ScanManager scanManager = getScanManager(project, editorFile.getParent().getPath());
-        if (scanManager == null) {
+        ScannerBase scanner = getScanner(project, editorFile.getParent().getPath());
+        if (scanner == null) {
             return false; // Scan manager for this project not yet created
         }
         return isDependency(element);
@@ -230,7 +230,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * @return true if the node matches the component name
      */
     boolean isNodeMatch(DependencyNode node, String componentName) {
-        String artifactID = node.getGeneralInfo().getComponentIdWithoutPrefix();
+        String artifactID = node.getComponentIdWithoutPrefix();
         ImpactTreeNode impactPath = node.getImpactPaths();
         return StringUtils.equals(artifactID, componentName) || impactPath.contains(componentName);
     }

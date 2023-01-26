@@ -21,7 +21,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * Created by Yahav Itzhak on 13 Dec 2017.
  */
-public class YarnScanManager extends SingleDescriptorScanManager {
+public class YarnScanner extends SingleDescriptorScanner {
 
     private final YarnTreeBuilder yarnTreeBuilder;
     private final String PKG_TYPE = "yarn";
@@ -32,7 +32,7 @@ public class YarnScanManager extends SingleDescriptorScanManager {
      * @param basePath - The package.json directory.
      * @param executor - An executor that should limit the number of running tasks to 3
      */
-    YarnScanManager(Project project, String basePath, ExecutorService executor) {
+    YarnScanner(Project project, String basePath, ExecutorService executor) {
         super(project, basePath, ComponentPrefix.NPM, executor, Paths.get(basePath, "package.json").toString());
         getLog().info("Found yarn project: " + getProjectPath());
         yarnTreeBuilder = new YarnTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap());

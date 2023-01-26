@@ -4,7 +4,7 @@ import com.intellij.openapi.project.Project;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.tree.ApplicableIssueNode;
 import com.jfrog.ide.common.tree.FileTreeNode;
-import com.jfrog.ide.common.tree.IssueNode;
+import com.jfrog.ide.common.tree.VulnerabilityNode;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
@@ -96,7 +96,7 @@ public class SourceCodeScannerManager {
         return skippedFoldersPatterns;
     }
 
-    public List<FileTreeNode> getResults(Map<String, List<IssueNode>> issuesMap) {
+    public List<FileTreeNode> getResults(Map<String, List<VulnerabilityNode>> issuesMap) {
         HashMap<String, FileTreeNode> results = new HashMap<>();
         for (JFrogSecurityWarning warning : scanResults) {
             FileTreeNode fileNode = results.get(warning.getFilePath());
@@ -105,7 +105,7 @@ public class SourceCodeScannerManager {
                 results.put(warning.getFilePath(), fileNode);
             }
             String cve = StringUtils.removeStart(warning.getName(), "applic_");
-            List<IssueNode> issues = issuesMap.get(cve);
+            List<VulnerabilityNode> issues = issuesMap.get(cve);
             if (issues != null) {
                 if (warning.isApplicable()) {
                     ApplicableIssueNode applicableIssue = new ApplicableIssueNode(
@@ -113,12 +113,12 @@ public class SourceCodeScannerManager {
                             warning.getFilePath(), warning.getReason(), warning.getLineSnippet(), warning.getScannerSearchTarget(),
                             issues.get(0));
                     fileNode.addDependency(applicableIssue);
-                    for (IssueNode issue : issues) {
+                    for (VulnerabilityNode issue : issues) {
                         issue.AddApplicableIssues(applicableIssue);
                     }
                 } else {
                     // Mark non applicable issues
-                    for (IssueNode issue : issues) {
+                    for (VulnerabilityNode issue : issues) {
                         issue.setApplicableIssues(new ArrayList<>());
                     }
                 }

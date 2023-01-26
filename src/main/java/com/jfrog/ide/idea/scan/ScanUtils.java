@@ -34,7 +34,7 @@ public class ScanUtils {
     public static boolean isLocalProjectSupported(Project project) throws IOException {
         // Check if Maven project exist
         try {
-            if (MavenScanManager.isApplicable(project)) {
+            if (MavenScanner.isApplicable(project)) {
                 return true;
             }
         } catch (NoClassDefFoundError ignore) {
@@ -42,7 +42,7 @@ public class ScanUtils {
         }
         // Check if Pypi SDK exist
         try {
-            if (!PypiScanManager.getAllPythonSdks().isEmpty()) {
+            if (!PypiScanner.getAllPythonSdks().isEmpty()) {
                 return true;
             }
         } catch (NoClassDefFoundError ignore) {
@@ -62,11 +62,11 @@ public class ScanUtils {
      * This method gets a set of modules from IDEA, and searches for projects to be scanned.
      * It appends the root path of each module it finds into a set.
      *
-     * @param scanManagers - Current scan managers
-     * @param project      - The project
+     * @param scannersMap - current scanners
+     * @param project     - the project
      * @return local scan paths
      */
-    static Set<Path> createScanPaths(Map<Integer, ScanManager> scanManagers, Project project) {
+    static Set<Path> createScanPaths(Map<Integer, ScannerBase> scannersMap, Project project) {
         final Set<Path> paths = Sets.newHashSet();
         paths.add(com.jfrog.ide.idea.utils.Utils.getProjectBasePath(project));
         for (Module module : ModuleManager.getInstance(project).getModules()) {
@@ -75,7 +75,7 @@ public class ScanUtils {
                 paths.add(modulePath.toNioPath());
             }
         }
-        scanManagers.values().stream().map(ScanManager::getProjectPaths).flatMap(Collection::stream).forEach(paths::add);
+        scannersMap.values().stream().map(ScannerBase::getProjectPaths).flatMap(Collection::stream).forEach(paths::add);
         Logger.getInstance().debug("Scanning projects in the following paths: " + paths);
         return paths;
     }

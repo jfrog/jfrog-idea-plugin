@@ -40,7 +40,7 @@ import static com.jfrog.ide.common.log.Utils.logError;
 /**
  * Created by Yahav Itzhak on 9 Nov 2017.
  */
-public class GradleScanManager extends SingleDescriptorScanManager {
+public class GradleScanner extends SingleDescriptorScanner {
 
     private final String PKG_TYPE = "gradle";
     private final GradleTreeBuilder gradleTreeBuilder;
@@ -52,7 +52,7 @@ public class GradleScanManager extends SingleDescriptorScanManager {
      * @param basePath - The build.gradle or build.gradle.kts directory.
      * @param executor - An executor that should limit the number of running tasks to 3
      */
-    GradleScanManager(Project project, String basePath, ExecutorService executor) {
+    GradleScanner(Project project, String basePath, ExecutorService executor) {
         super(project, basePath, ComponentPrefix.GAV, executor);
         getLog().info("Found Gradle project: " + getProjectPath());
         Path dirPath = Paths.get(this.basePath);

@@ -29,7 +29,7 @@ import static com.jfrog.ide.common.utils.Utils.createComponentId;
 /**
  * @author yahavi
  */
-public class PypiScanManager extends SingleDescriptorScanManager {
+public class PypiScanner extends SingleDescriptorScanner {
     private final Sdk pythonSdk;
     private final String PKG_TYPE = "pypi";
 
@@ -43,7 +43,7 @@ public class PypiScanManager extends SingleDescriptorScanManager {
      * @param pythonSdk - The Python SDK
      * @param executor  - An executor that should limit the number of running tasks to 3
      */
-    PypiScanManager(Project project, Sdk pythonSdk, ExecutorService executor) {
+    PypiScanner(Project project, Sdk pythonSdk, ExecutorService executor) {
         super(project, pythonSdk.getHomePath(), ComponentPrefix.PYPI, executor, pythonSdk.getHomePath());
         this.pythonSdk = pythonSdk;
         getLog().info("Found PyPI SDK: " + getProjectPath());

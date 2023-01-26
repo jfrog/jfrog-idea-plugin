@@ -26,7 +26,7 @@ import static com.jfrog.ide.idea.TestUtils.getAndAssertChild;
 /**
  * @author yahavi
  **/
-public class GradleScanManagerTest extends HeavyPlatformTestCase {
+public class GradleScannerTest extends HeavyPlatformTestCase {
     private static final Path GRADLE_ROOT = Paths.get(".").toAbsolutePath().normalize().resolve(Paths.get("src", "test", "resources", "gradle"));
     private ExecutorService executorService;
     private String wrapperProjectDir;
@@ -59,9 +59,9 @@ public class GradleScanManagerTest extends HeavyPlatformTestCase {
 
     public void testGetGradleWrapperExeAndJdk() throws IOException {
         GradleProjectImportUtil.linkAndRefreshGradleProject(wrapperProjectDir, getProject());
-        GradleScanManager gradleScanManager = new GradleScanManager(getProject(), wrapperProjectDir, executorService);
+        GradleScanner gradleScanner = new GradleScanner(getProject(), wrapperProjectDir, executorService);
         Map<String, String> env = new HashMap<>();
-        String gradleExe = gradleScanManager.getGradleExeAndJdk(env);
+        String gradleExe = gradleScanner.getGradleExeAndJdk(env);
         assertEquals(System.getenv("JAVA_HOME"), env.get("JAVA_HOME"));
         assertTrue(StringUtils.contains(gradleExe, "wrapper"));
         new GradleDriver(gradleExe, null).verifyGradleInstalled();
@@ -69,9 +69,9 @@ public class GradleScanManagerTest extends HeavyPlatformTestCase {
 
     public void testGetGradleGlobalExeAndJdk() throws IOException {
         GradleProjectImportUtil.linkAndRefreshGradleProject(globalProjectDir, getProject());
-        GradleScanManager gradleScanManager = new GradleScanManager(getProject(), globalProjectDir, executorService);
+        GradleScanner gradleScanner = new GradleScanner(getProject(), globalProjectDir, executorService);
         Map<String, String> env = new HashMap<>();
-        String gradleExe = gradleScanManager.getGradleExeAndJdk(env);
+        String gradleExe = gradleScanner.getGradleExeAndJdk(env);
         assertEquals(System.getenv("JAVA_HOME"), env.get("JAVA_HOME"));
         assertNotNull(gradleExe);
         new GradleDriver(gradleExe, null).verifyGradleInstalled();
@@ -79,11 +79,11 @@ public class GradleScanManagerTest extends HeavyPlatformTestCase {
 
     public void testBuildTree() throws IOException {
         GradleProjectImportUtil.linkAndRefreshGradleProject(globalProjectDir, getProject());
-        GradleScanManager gradleScanManager = new GradleScanManager(getProject(), globalProjectDir, executorService);
-        gradleScanManager.setScanLogic(new GraphScanLogic(gradleScanManager.getPackageType(), new NullLog()));
+        GradleScanner gradleScanner = new GradleScanner(getProject(), globalProjectDir, executorService);
+        gradleScanner.setScanLogic(new GraphScanLogic(gradleScanner.getPackageType(), new NullLog()));
 
         // Run and check scan results
-        DependencyTree results = gradleScanManager.buildTree();
+        DependencyTree results = gradleScanner.buildTree();
         assertNotNull(results);
         assertTrue(results.isMetadata());
         assertEquals(Paths.get(globalProjectDir).getFileName().toString(), results.getUserObject());

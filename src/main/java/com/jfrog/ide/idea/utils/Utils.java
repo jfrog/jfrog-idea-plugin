@@ -1,6 +1,5 @@
 package com.jfrog.ide.idea.utils;
 
-import com.google.common.base.Objects;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.extensions.PluginId;
@@ -52,14 +51,6 @@ public class Utils {
         return ObjectUtils.allNotNull(lhsGeneralInfo, rhsGeneralInfo) &&
                 StringUtils.equals(lhsGeneralInfo.getPath(), rhsGeneralInfo.getPath()) &&
                 StringUtils.equals(lhsGeneralInfo.getPkgType(), rhsGeneralInfo.getPkgType());
-    }
-
-    public static int getModuleIdentifier(String name, String path) {
-        return Objects.hashCode(name, path);
-    }
-
-    public static int getProjectIdentifier(Project project) {
-        return getModuleIdentifier(project.getName(), project.getBasePath());
     }
 
     public static void focusJFrogToolWindow(Project project) {

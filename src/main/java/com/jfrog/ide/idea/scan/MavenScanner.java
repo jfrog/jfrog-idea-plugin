@@ -39,7 +39,7 @@ import static com.jfrog.ide.common.utils.Utils.createComponentId;
 /**
  * Created by romang on 3/2/17.
  */
-public class MavenScanManager extends ScanManager {
+public class MavenScanner extends ScannerBase {
     private final String PKG_TYPE = "maven";
     private final String POM_FILE_NAME = "pom.xml";
 
@@ -48,7 +48,7 @@ public class MavenScanManager extends ScanManager {
      *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
      * @param executor - An executor that should limit the number of running tasks to 3
      */
-    MavenScanManager(Project project, ExecutorService executor) {
+    MavenScanner(Project project, ExecutorService executor) {
         super(project, Utils.getProjectBasePath(project).toString(), ComponentPrefix.GAV, executor);
         getLog().info("Found Maven project: " + getProjectPath());
     }
@@ -182,7 +182,7 @@ public class MavenScanManager extends ScanManager {
         Map<String, DescriptorFileTreeNode> treeNodeMap = new HashMap<>();
         for (DependencyNode dependencyNode : depScanResults) {
             Map<String, Boolean> addedDescriptors = new HashMap<>();
-            for (DependencyTree dep : depMap.get(dependencyNode.getGeneralInfo().getComponentId())) {
+            for (DependencyTree dep : depMap.get(dependencyNode.getComponentId())) {
                 DependencyTree currDep = dep;
                 while (currDep != null) {
                     if (currDep.getGeneralInfo() != null) {

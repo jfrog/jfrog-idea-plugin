@@ -1,56 +1,46 @@
 package com.jfrog.ide.idea.scan;
 
-import com.google.common.collect.Maps;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.util.EnvironmentUtil;
-import com.jfrog.ide.common.go.GoTreeBuilder;
+import com.jfrog.ide.common.npm.NpmTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
-import com.jfrog.ide.idea.inspections.GoInspection;
+import com.jfrog.ide.idea.inspections.NpmInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
-import com.jfrog.ide.idea.utils.GoUtils;
 import org.jfrog.build.extractor.scan.DependencyTree;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 /**
- * Created by Bar Belity on 06/02/2020.
+ * Created by Yahav Itzhak on 13 Dec 2017.
  */
-public class GoScanManager extends SingleDescriptorScanManager {
+public class NpmScanner extends SingleDescriptorScanner {
 
-    private final GoTreeBuilder goTreeBuilder;
-    private final String PKG_TYPE = "go";
+    private final NpmTreeBuilder npmTreeBuilder;
+    private final String PKG_TYPE = "npm";
 
     /**
      * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
      *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
-     * @param basePath - The go.mod directory.
+     * @param basePath - The package.json directory.
      * @param executor - An executor that should limit the number of running tasks to 3
      */
-    GoScanManager(Project project, String basePath, ExecutorService executor) {
-        super(project, basePath, ComponentPrefix.GO, executor, Paths.get(basePath, "go.mod").toString());
-        getLog().info("Found Go project: " + getProjectPath());
-        Map<String, String> env = Maps.newHashMap(EnvironmentUtil.getEnvironmentMap());
-        String goExec = null;
-        try {
-            goExec = GoUtils.getGoExeAndSetEnv(env, project);
-        } catch (NoClassDefFoundError error) {
-            getLog().warn("Go plugin is not installed. Install it to get a better experience.");
-        }
-        goTreeBuilder = new GoTreeBuilder(goExec, Paths.get(basePath), env, getLog());
+    NpmScanner(Project project, String basePath, ExecutorService executor) {
+        super(project, basePath, ComponentPrefix.NPM, executor, Paths.get(basePath, "package.json").toString());
+        getLog().info("Found npm project: " + getProjectPath());
+        npmTreeBuilder = new NpmTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap());
     }
 
     @Override
     protected DependencyTree buildTree() throws IOException {
-        return goTreeBuilder.buildTree();
+        return npmTreeBuilder.buildTree(getLog());
     }
 
     @Override
@@ -65,7 +55,7 @@ public class GoScanManager extends SingleDescriptorScanManager {
 
     @Override
     protected AbstractInspection getInspectionTool() {
-        return new GoInspection();
+        return new NpmInspection();
     }
 
     @Override
@@ -75,6 +65,6 @@ public class GoScanManager extends SingleDescriptorScanManager {
 
     @Override
     public String getPackageType() {
-        return "Go";
+        return "npm";
     }
 }
