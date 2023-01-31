@@ -2,6 +2,7 @@ package com.jfrog.ide.idea.scan;
 
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.common.components.ApplicableIssueNode;
+import com.jfrog.ide.common.components.DependencyNode;
 import com.jfrog.ide.common.components.FileTreeNode;
 import com.jfrog.ide.common.components.VulnerabilityNode;
 import com.jfrog.ide.common.log.ProgressIndicator;
@@ -11,11 +12,9 @@ import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
 import org.apache.commons.lang.StringUtils;
 
+import javax.swing.tree.TreeNode;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 
@@ -29,8 +28,6 @@ public class SourceCodeScannerManager {
     private final Eos eos = new Eos();
     private final ApplicabilityScannerExecutor applicability = new ApplicabilityScannerExecutor();
 
-    private List<JFrogSecurityWarning> scanResults;
-
     protected Project project;
     protected String codeBaseLanguage;
 
@@ -42,23 +39,25 @@ public class SourceCodeScannerManager {
     /**
      * Source code scan and update components.
      *
-     * @param indicator - the progress indicator.
-     * @param cves      - white list of CVEs to scan.
+     * @param indicator      the progress indicator.
+     * @param depScanResults collection of DependencyNodes.
+     * @return A list of FileTreeNodes having the source code issues as their children.
      */
-    public void scanAndUpdate(ProgressIndicator indicator, List<String> cves) {
+    public List<FileTreeNode> scanAndUpdate(ProgressIndicator indicator, Collection<DependencyNode> depScanResults) {
         if (project.isDisposed()) {
-            return;
+            return List.of();
         }
         // Prevent multiple simultaneous scans
         if (!scanInProgress.compareAndSet(false, true)) {
-            return;
+            return List.of();
         }
-        scanResults = new ArrayList<>();
+        List<JFrogSecurityWarning> scanResults = new ArrayList<>();
+        Map<String, List<VulnerabilityNode>> issuesMap = mapIssuesByCve(depScanResults);
         try {
             if (applicability.getSupportedLanguages().contains(codeBaseLanguage)) {
                 indicator.setText("Running applicability scan");
                 indicator.setFraction(0.25);
-                List<JFrogSecurityWarning> applicabilityResults = applicability.execute(new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).cves(cves).skippedFolders(getSkippedFoldersPatterns()));
+                List<JFrogSecurityWarning> applicabilityResults = applicability.execute(new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).cves(List.copyOf(issuesMap.keySet())).skippedFolders(getSkippedFoldersPatterns()));
                 scanResults.addAll(applicabilityResults);
             }
             if (eos.getSupportedLanguages().contains(codeBaseLanguage)) {
@@ -74,6 +73,7 @@ public class SourceCodeScannerManager {
             scanInProgress.set(false);
             indicator.setFraction(1);
         }
+        return groupResultsToFileTreeNodes(scanResults, issuesMap);
     }
 
     /**
@@ -96,7 +96,7 @@ public class SourceCodeScannerManager {
         return skippedFoldersPatterns;
     }
 
-    public List<FileTreeNode> getResults(Map<String, List<VulnerabilityNode>> issuesMap) {
+    private List<FileTreeNode> groupResultsToFileTreeNodes(List<JFrogSecurityWarning> scanResults, Map<String, List<VulnerabilityNode>> issuesMap) {
         HashMap<String, FileTreeNode> results = new HashMap<>();
         for (JFrogSecurityWarning warning : scanResults) {
             FileTreeNode fileNode = results.get(warning.getFilePath());
@@ -127,7 +127,31 @@ public class SourceCodeScannerManager {
         return new ArrayList<>(results.values());
     }
 
-    public List<JFrogSecurityWarning> getScanResults() {
-        return scanResults != null ? new ArrayList<>(scanResults) : new ArrayList<>();
+    /**
+     * Maps all the issues (vulnerabilities and security violations) by their CVE IDs.
+     * Issues without a CVE ID are ignored.
+     *
+     * @param depScanResults - collection of DependencyNodes.
+     * @return a map of CVE IDs to lists of issues with them.
+     */
+    private Map<String, List<VulnerabilityNode>> mapIssuesByCve(Collection<DependencyNode> depScanResults) {
+        Map<String, List<VulnerabilityNode>> issues = new HashMap<>();
+        for (DependencyNode dep : depScanResults) {
+            Enumeration<TreeNode> treeNodeEnumeration = dep.children();
+            while (treeNodeEnumeration.hasMoreElements()) {
+                TreeNode node = treeNodeEnumeration.nextElement();
+                if (!(node instanceof VulnerabilityNode)) {
+                    continue;
+                }
+                VulnerabilityNode vulnerabilityNode = (VulnerabilityNode) node;
+                String cveId = vulnerabilityNode.getCve().getCveId();
+                if (vulnerabilityNode.getCve() == null || org.apache.commons.lang3.StringUtils.isBlank(cveId)) {
+                    continue;
+                }
+                issues.putIfAbsent(cveId, new ArrayList<>());
+                issues.get(cveId).add(vulnerabilityNode);
+            }
+        }
+        return issues;
     }
 }

@@ -20,7 +20,6 @@ import com.intellij.psi.PsiFile;
 import com.jfrog.ide.common.components.DependencyNode;
 import com.jfrog.ide.common.components.FileTreeNode;
 import com.jfrog.ide.common.components.ImpactTreeNode;
-import com.jfrog.ide.common.components.VulnerabilityNode;
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.scan.ComponentPrefix;
@@ -42,7 +41,6 @@ import org.jfrog.build.api.util.Log;
 import org.jfrog.build.extractor.scan.DependencyTree;
 
 import javax.swing.*;
-import javax.swing.tree.TreeNode;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -155,13 +153,14 @@ public abstract class ScannerBase {
             mapDependencyTree(depMap, dependencyTree);
 
             createImpactPaths(results, depMap, dependencyTree);
-            List<FileTreeNode> fileTreeNodes = groupDependenciesToDescriptorNodes(results.values(), depMap);
+            List<FileTreeNode> fileTreeNodes = new ArrayList<>();
+            fileTreeNodes.addAll(groupDependenciesToDescriptorNodes(results.values(), depMap));
             addScanResults(fileTreeNodes);
 
             // Source code scanning
-            Map<String, List<VulnerabilityNode>> issuesMap = mapIssuesByCve(results);
-            sourceCodeScannerManager.scanAndUpdate(indicator, List.copyOf(issuesMap.keySet()));
-            addScanResults(sourceCodeScannerManager.getResults(issuesMap));
+            List<FileTreeNode> sourceCodeResFileNodes = sourceCodeScannerManager.scanAndUpdate(indicator, results.values());
+            fileTreeNodes.addAll(sourceCodeResFileNodes);
+            addScanResults(fileTreeNodes);
 
             // Sorting
             fileTreeNodes.forEach(FileTreeNode::sortChildren);
@@ -191,34 +190,6 @@ public abstract class ScannerBase {
         for (DependencyTree child : root.getChildren()) {
             mapDependencyTree(depMap, child);
         }
-    }
-
-    /**
-     * Maps all the issues (vulnerabilities and security violations) by their CVE IDs.
-     * Issues without a CVE ID are ignored.
-     *
-     * @param results - scan results mapped by dependencies.
-     * @return a map of CVE IDs to lists of issues with them.
-     */
-    private Map<String, List<VulnerabilityNode>> mapIssuesByCve(Map<String, DependencyNode> results) {
-        Map<String, List<VulnerabilityNode>> issues = new HashMap<>();
-        for (DependencyNode dep : results.values()) {
-            Enumeration<TreeNode> treeNodeEnumeration = dep.children();
-            while (treeNodeEnumeration.hasMoreElements()) {
-                TreeNode node = treeNodeEnumeration.nextElement();
-                if (!(node instanceof VulnerabilityNode)) {
-                    continue;
-                }
-                VulnerabilityNode vulnerabilityNode = (VulnerabilityNode) node;
-                String cveId = vulnerabilityNode.getCve().getCveId();
-                if (vulnerabilityNode.getCve() == null || StringUtils.isBlank(cveId)) {
-                    continue;
-                }
-                issues.putIfAbsent(cveId, new ArrayList<>());
-                issues.get(cveId).add(vulnerabilityNode);
-            }
-        }
-        return issues;
     }
 
     /**
