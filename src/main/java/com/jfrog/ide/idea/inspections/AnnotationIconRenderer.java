@@ -5,7 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.ui.tree.TreeUtil;
-import com.jfrog.ide.common.tree.DependencyNode;
+import com.jfrog.ide.common.tree.ComparableSeverityTreeNode;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.ui.utils.IconUtils;
 import com.jfrog.ide.idea.utils.Utils;
@@ -22,12 +22,12 @@ import java.util.Objects;
  * @author yahavi
  **/
 public class AnnotationIconRenderer extends GutterIconRenderer {
-    private final DependencyNode node;
+    private final ComparableSeverityTreeNode node;
     private final String tooltipText;
     private final Icon icon;
     private Project project;
 
-    public AnnotationIconRenderer(DependencyNode node, String tooltipText) {
+    public AnnotationIconRenderer(ComparableSeverityTreeNode node, String tooltipText) {
         this.node = node;
         this.tooltipText = tooltipText;
         this.icon = IconUtils.load(StringUtils.lowerCase(node.getSeverity().toString()));

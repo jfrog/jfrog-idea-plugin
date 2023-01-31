@@ -182,7 +182,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             if (targetFile == null) {
                 return;
             }
-            int lineOffset = StringUtil.lineColToOffset(targetFile.getText(), node.getRow(), node.getCol());
+            int lineOffset = StringUtil.lineColToOffset(targetFile.getText(), node.getRowStart(), node.getColStart());
             PsiElement element = targetFile.findElementAt(lineOffset);
             if (element instanceof Navigatable) {
                 ((Navigatable) element).navigate(true);
