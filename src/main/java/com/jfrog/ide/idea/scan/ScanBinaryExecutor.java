@@ -41,6 +41,7 @@ public abstract class ScanBinaryExecutor {
     private static final String ENV_ACCESS_TOKEN = "JF_TOKEN";
     private static final String ENV_HTTP_PROXY = "HTTP_PROXY";
     private static final String ENV_HTTPS_PROXY = "HTTPS_PROXY";
+    private static final int USER_NOT_ENTITLED = 31;
 
 
     ScanBinaryExecutor(String scanType, String binaryName) {
@@ -98,6 +99,10 @@ public abstract class ScanBinaryExecutor {
             Logger log = Logger.getInstance();
             // Execute the external process
             CommandResults commandResults = this.commandExecutor.exeCommand(outputTempDir.toFile(), args, null, log);
+            if (commandResults.getExitValue() == USER_NOT_ENTITLED) {
+                log.debug("User not entitled for advance security scan");
+                return List.of();
+            }
             if (!commandResults.isOk()) {
                 throw new IOException(commandResults.getErr());
             }
