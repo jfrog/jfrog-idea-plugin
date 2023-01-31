@@ -8,10 +8,11 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.jfrog.ide.common.components.DependencyNode;
+import com.jfrog.ide.common.components.DescriptorFileTreeNode;
+import com.jfrog.ide.common.components.FileTreeNode;
 import com.jfrog.ide.common.scan.ComponentPrefix;
-import com.jfrog.ide.common.tree.DependencyNode;
-import com.jfrog.ide.common.tree.DescriptorFileTreeNode;
-import com.jfrog.ide.common.tree.FileTreeNode;
+import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.MavenInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
@@ -48,8 +49,8 @@ public class MavenScanner extends ScannerBase {
      *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
      * @param executor - An executor that should limit the number of running tasks to 3
      */
-    MavenScanner(Project project, ExecutorService executor) {
-        super(project, Utils.getProjectBasePath(project).toString(), ComponentPrefix.GAV, executor);
+    MavenScanner(Project project, ExecutorService executor, ScanLogic scanLogic) {
+        super(project, Utils.getProjectBasePath(project).toString(), ComponentPrefix.GAV, executor, scanLogic);
         getLog().info("Found Maven project: " + getProjectPath());
     }
 
@@ -205,7 +206,7 @@ public class MavenScanner extends ScannerBase {
     }
 
     @Override
-    public String getPackageType() {
-        return "Maven";
+    public String getCodeBaseLanguage() {
+        return "java";
     }
 }

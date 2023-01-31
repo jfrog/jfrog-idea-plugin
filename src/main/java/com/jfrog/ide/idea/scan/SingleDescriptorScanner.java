@@ -1,10 +1,11 @@
 package com.jfrog.ide.idea.scan;
 
 import com.intellij.openapi.project.Project;
+import com.jfrog.ide.common.components.DependencyNode;
+import com.jfrog.ide.common.components.DescriptorFileTreeNode;
+import com.jfrog.ide.common.components.FileTreeNode;
 import com.jfrog.ide.common.scan.ComponentPrefix;
-import com.jfrog.ide.common.tree.DependencyNode;
-import com.jfrog.ide.common.tree.DescriptorFileTreeNode;
-import com.jfrog.ide.common.tree.FileTreeNode;
+import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import org.jetbrains.annotations.NotNull;
@@ -26,8 +27,9 @@ public abstract class SingleDescriptorScanner extends ScannerBase {
      * @param executor           - An executor that should limit the number of running tasks to 3
      * @param descriptorFilePath - Path to the project's descriptor file
      */
-    SingleDescriptorScanner(@NotNull Project project, String basePath, ComponentPrefix prefix, ExecutorService executor, String descriptorFilePath) {
-        super(project, basePath, prefix, executor);
+    SingleDescriptorScanner(@NotNull Project project, String basePath, ComponentPrefix prefix, ExecutorService executor,
+                            String descriptorFilePath, ScanLogic scanLogic) {
+        super(project, basePath, prefix, executor, scanLogic);
         this.descriptorFilePath = descriptorFilePath;
     }
 
@@ -38,8 +40,9 @@ public abstract class SingleDescriptorScanner extends ScannerBase {
      * @param prefix   - Components prefix for xray scan, e.g. gav:// or npm://
      * @param executor - An executor that should limit the number of running tasks to 3
      */
-    SingleDescriptorScanner(@NotNull Project project, String basePath, ComponentPrefix prefix, ExecutorService executor) {
-        this(project, basePath, prefix, executor, "");
+    SingleDescriptorScanner(@NotNull Project project, String basePath, ComponentPrefix prefix, ExecutorService executor,
+                            ScanLogic scanLogic) {
+        this(project, basePath, prefix, executor, "", scanLogic);
     }
 
     /**

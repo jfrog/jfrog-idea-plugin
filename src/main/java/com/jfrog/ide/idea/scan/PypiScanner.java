@@ -11,6 +11,7 @@ import com.jetbrains.python.packaging.PyRequirement;
 import com.jetbrains.python.packaging.pipenv.PyPipEnvPackageManager;
 import com.jetbrains.python.sdk.PythonSdkUtil;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
@@ -43,8 +44,8 @@ public class PypiScanner extends SingleDescriptorScanner {
      * @param pythonSdk - The Python SDK
      * @param executor  - An executor that should limit the number of running tasks to 3
      */
-    PypiScanner(Project project, Sdk pythonSdk, ExecutorService executor) {
-        super(project, pythonSdk.getHomePath(), ComponentPrefix.PYPI, executor, pythonSdk.getHomePath());
+    PypiScanner(Project project, Sdk pythonSdk, ExecutorService executor, ScanLogic scanLogic) {
+        super(project, pythonSdk.getHomePath(), ComponentPrefix.PYPI, executor, pythonSdk.getHomePath(), scanLogic);
         this.pythonSdk = pythonSdk;
         getLog().info("Found PyPI SDK: " + getProjectPath());
     }
@@ -174,7 +175,7 @@ public class PypiScanner extends SingleDescriptorScanner {
     }
 
     @Override
-    public String getPackageType() {
-        return "PyPI";
+    public String getCodeBaseLanguage() {
+        return "python";
     }
 }

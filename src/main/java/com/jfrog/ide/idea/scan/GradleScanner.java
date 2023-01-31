@@ -12,6 +12,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.gradle.GradleTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.GradleGroovyInspection;
 import com.jfrog.ide.idea.inspections.GradleKotlinInspection;
@@ -52,8 +53,8 @@ public class GradleScanner extends SingleDescriptorScanner {
      * @param basePath - The build.gradle or build.gradle.kts directory.
      * @param executor - An executor that should limit the number of running tasks to 3
      */
-    GradleScanner(Project project, String basePath, ExecutorService executor) {
-        super(project, basePath, ComponentPrefix.GAV, executor);
+    GradleScanner(Project project, String basePath, ExecutorService executor, ScanLogic scanLogic) {
+        super(project, basePath, ComponentPrefix.GAV, executor, scanLogic);
         getLog().info("Found Gradle project: " + getProjectPath());
         Path dirPath = Paths.get(this.basePath);
         Path buildGradleKotlinPath = dirPath.resolve("build.gradle.kts");
@@ -95,8 +96,8 @@ public class GradleScanner extends SingleDescriptorScanner {
     }
 
     @Override
-    public String getPackageType() {
-        return "Gradle";
+    public String getCodeBaseLanguage() {
+        return "java";
     }
 
     @Override

@@ -9,6 +9,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.go.GoTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.GoInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
@@ -35,8 +36,8 @@ public class GoScanner extends SingleDescriptorScanner {
      * @param basePath - The go.mod directory.
      * @param executor - An executor that should limit the number of running tasks to 3
      */
-    GoScanner(Project project, String basePath, ExecutorService executor) {
-        super(project, basePath, ComponentPrefix.GO, executor, Paths.get(basePath, "go.mod").toString());
+    GoScanner(Project project, String basePath, ExecutorService executor, ScanLogic scanLogic) {
+        super(project, basePath, ComponentPrefix.GO, executor, Paths.get(basePath, "go.mod").toString(), scanLogic);
         getLog().info("Found Go project: " + getProjectPath());
         Map<String, String> env = Maps.newHashMap(EnvironmentUtil.getEnvironmentMap());
         String goExec = null;
@@ -74,7 +75,7 @@ public class GoScanner extends SingleDescriptorScanner {
     }
 
     @Override
-    public String getPackageType() {
-        return "Go";
+    public String getCodeBaseLanguage() {
+        return "go";
     }
 }

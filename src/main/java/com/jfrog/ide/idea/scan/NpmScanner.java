@@ -8,6 +8,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.npm.NpmTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.NpmInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
@@ -32,8 +33,8 @@ public class NpmScanner extends SingleDescriptorScanner {
      * @param basePath - The package.json directory.
      * @param executor - An executor that should limit the number of running tasks to 3
      */
-    NpmScanner(Project project, String basePath, ExecutorService executor) {
-        super(project, basePath, ComponentPrefix.NPM, executor, Paths.get(basePath, "package.json").toString());
+    NpmScanner(Project project, String basePath, ExecutorService executor, ScanLogic scanLogic) {
+        super(project, basePath, ComponentPrefix.NPM, executor, Paths.get(basePath, "package.json").toString(), scanLogic);
         getLog().info("Found npm project: " + getProjectPath());
         npmTreeBuilder = new NpmTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap());
     }
@@ -64,7 +65,7 @@ public class NpmScanner extends SingleDescriptorScanner {
     }
 
     @Override
-    public String getPackageType() {
-        return "npm";
+    public String getCodeBaseLanguage() {
+        return "js";
     }
 }

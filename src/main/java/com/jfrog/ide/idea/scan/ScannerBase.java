@@ -17,17 +17,16 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
+import com.jfrog.ide.common.components.DependencyNode;
+import com.jfrog.ide.common.components.FileTreeNode;
+import com.jfrog.ide.common.components.ImpactTreeNode;
+import com.jfrog.ide.common.components.VulnerabilityNode;
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
-import com.jfrog.ide.common.tree.DependencyNode;
-import com.jfrog.ide.common.tree.FileTreeNode;
-import com.jfrog.ide.common.tree.ImpactTreeNode;
-import com.jfrog.ide.common.tree.VulnerabilityNode;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
-import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
 import com.jfrog.ide.idea.ui.ComponentsTree;
@@ -76,7 +75,7 @@ public abstract class ScannerBase {
      * @param prefix   - Components prefix for xray scan, e.g. gav:// or npm://
      * @param executor - An executor that should limit the number of running tasks to 3
      */
-    ScannerBase(@NotNull Project project, String basePath, ComponentPrefix prefix, ExecutorService executor) {
+    ScannerBase(@NotNull Project project, String basePath, ComponentPrefix prefix, ExecutorService executor, ScanLogic scanLogic) {
         this.serverConfig = GlobalSettings.getInstance().getServerConfig();
         this.prefix = prefix;
         this.log = Logger.getInstance();
@@ -84,6 +83,7 @@ public abstract class ScannerBase {
         this.basePath = basePath;
         this.project = project;
         this.sourceCodeScannerManager = new SourceCodeScannerManager(project, getCodeBaseLanguage());
+        this.scanLogic = scanLogic;
     }
 
     void setExecutor(ExecutorService executor) {
@@ -128,7 +128,7 @@ public abstract class ScannerBase {
      */
     protected abstract List<FileTreeNode> groupDependenciesToDescriptorNodes(Collection<DependencyNode> depScanResults, Map<String, List<DependencyTree>> depMap);
 
-    public abstract String getPackageType();
+    public abstract String getCodeBaseLanguage();
 
     /**
      * Scan and update dependency components.
@@ -137,11 +137,15 @@ public abstract class ScannerBase {
      */
     private void scanAndUpdate(ProgressIndicator indicator) {
         try {
+            // Building dependency tree
             indicator.setText("1/3: Building dependency tree");
             DependencyTree dependencyTree = buildTree();
+
+            // Sending the dependency tree to Xray for scanning
             indicator.setText("2/3: Xray scanning project dependencies");
             log.debug("Start scan for '" + basePath + "'.");
             Map<String, DependencyNode> results = scanLogic.scanArtifacts(dependencyTree, serverConfig, indicator, prefix, this::checkCanceled);
+
             indicator.setText("3/3: Finalizing");
             if (results == null || results.isEmpty()) {
                 // No violations/vulnerabilities or no components to scan or an error was thrown
@@ -150,16 +154,17 @@ public abstract class ScannerBase {
             Map<String, List<DependencyTree>> depMap = new HashMap<>();
             mapDependencyTree(depMap, dependencyTree);
 
-            Map<String, List<VulnerabilityNode>> issuesMap = mapIssuesByCve(results);
-
             createImpactPaths(results, depMap, dependencyTree);
             List<FileTreeNode> fileTreeNodes = groupDependenciesToDescriptorNodes(results.values(), depMap);
             addScanResults(fileTreeNodes);
 
-            // Source Code Scan
+            // Source code scanning
+            Map<String, List<VulnerabilityNode>> issuesMap = mapIssuesByCve(results);
             sourceCodeScannerManager.scanAndUpdate(indicator, List.copyOf(issuesMap.keySet()));
             addScanResults(sourceCodeScannerManager.getResults(issuesMap));
-            fileTreeNodes.forEach(node -> node.sortChildren());
+
+            // Sorting
+            fileTreeNodes.forEach(FileTreeNode::sortChildren);
 
             // Force inspections run due to changes in the displayed tree
             runInspections();
@@ -397,29 +402,7 @@ public abstract class ScannerBase {
         return this.basePath;
     }
 
-    public void setScanLogic(ScanLogic scanLogic) {
-        this.scanLogic = scanLogic;
-    }
-
     public Log getLog() {
         return log;
-    }
-
-    public List<JFrogSecurityWarning> getSourceCodeScanResults() {
-        return this.sourceCodeScannerManager.getScanResults();
-    }
-
-    private String getCodeBaseLanguage() {
-        switch (getPackageType().toLowerCase()) {
-            case "npm":
-                return "js";
-            case "pip":
-                return "python";
-            case "maven":
-            case "gradle":
-                return "java";
-            default:
-                return "";
-        }
     }
 }

@@ -6,11 +6,15 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.messages.MessageBus;
+import com.jfrog.ide.common.configuration.ServerConfig;
+import com.jfrog.ide.common.scan.GraphScanLogic;
+import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.navigation.NavigationService;
-import com.jfrog.ide.idea.utils.Utils;
+import com.jfrog.xray.client.impl.XrayClient;
+import com.jfrog.xray.client.services.system.Version;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,12 +25,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.jfrog.ide.common.log.Utils.logError;
-import static com.jfrog.ide.idea.utils.Utils.getScanLogicType;
+import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBuilder;
 
 public class ScanManager {
-    private final Map<Integer, ScannerBase> scanners = Maps.newHashMap();
     private final Project project;
     private final ScannerFactory factory;
+    private Map<Integer, ScannerBase> scanners = Maps.newHashMap();
 
     private ScanManager(@NotNull Project project) {
         this.project = project;
@@ -63,7 +67,8 @@ public class ScanManager {
         project.getMessageBus().syncPublisher(ApplicationEvents.ON_SCAN_LOCAL_STARTED).update();
         ExecutorService executor = Executors.newFixedThreadPool(3);
         try {
-            refreshScanners(getScanLogicType(), executor);
+            ScanLogic scanLogic = createScanLogic();
+            refreshScanners(scanLogic, executor);
             NavigationService.clearNavigationMap(project);
             for (ScannerBase scanner : scanners.values()) {
                 try {
@@ -96,11 +101,28 @@ public class ScanManager {
     /**
      * Scan projects, create new Scanners and delete unnecessary ones.
      */
-    public void refreshScanners(Utils.ScanLogicType scanLogicType, @Nullable ExecutorService executor) throws IOException, InterruptedException {
-        factory.refreshScanners(scanners, scanLogicType, executor);
+    public void refreshScanners(ScanLogic scanLogic, @Nullable ExecutorService executor) throws IOException, InterruptedException {
+        scanners = factory.refreshScanners(scanners, scanLogic, executor);
     }
 
     private boolean isScanInProgress() {
         return scanners.values().stream().anyMatch(ScannerBase::isScanInProgress);
+    }
+
+    /**
+     * Create the scan logic according to Xray version.
+     *
+     * @return Xray scan logic
+     */
+    private ScanLogic createScanLogic() throws IOException {
+        Logger logger = Logger.getInstance();
+        ServerConfig server = GlobalSettings.getInstance().getServerConfig();
+        try (XrayClient client = createXrayClientBuilder(server, Logger.getInstance()).build()) {
+            Version xrayVersion = client.system().version();
+            if (GraphScanLogic.isSupportedInXrayVersion(xrayVersion)) {
+                return new GraphScanLogic(logger);
+            }
+            throw new IOException("Unsupported JFrog Xray version.");
+        }
     }
 }

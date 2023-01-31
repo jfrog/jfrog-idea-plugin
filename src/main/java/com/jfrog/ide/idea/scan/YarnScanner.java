@@ -7,6 +7,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.common.yarn.YarnTreeBuilder;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.NpmInspection;
@@ -32,8 +33,8 @@ public class YarnScanner extends SingleDescriptorScanner {
      * @param basePath - The package.json directory.
      * @param executor - An executor that should limit the number of running tasks to 3
      */
-    YarnScanner(Project project, String basePath, ExecutorService executor) {
-        super(project, basePath, ComponentPrefix.NPM, executor, Paths.get(basePath, "package.json").toString());
+    YarnScanner(Project project, String basePath, ExecutorService executor, ScanLogic scanLogic) {
+        super(project, basePath, ComponentPrefix.NPM, executor, Paths.get(basePath, "package.json").toString(), scanLogic);
         getLog().info("Found yarn project: " + getProjectPath());
         yarnTreeBuilder = new YarnTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap());
     }
@@ -64,8 +65,8 @@ public class YarnScanner extends SingleDescriptorScanner {
     }
 
     @Override
-    public String getPackageType() {
-        return "npm";
+    public String getCodeBaseLanguage() {
+        return "js";
     }
 }
 

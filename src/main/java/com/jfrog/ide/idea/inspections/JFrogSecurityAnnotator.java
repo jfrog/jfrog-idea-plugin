@@ -9,16 +9,19 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
-import com.jfrog.ide.common.tree.ApplicableIssueNode;
-import com.jfrog.ide.common.tree.BaseTreeNode;
-import com.jfrog.ide.common.tree.FileTreeNode;
+import com.jfrog.ide.common.components.ApplicableIssueNode;
+import com.jfrog.ide.common.components.BaseTreeNode;
+import com.jfrog.ide.common.components.FileTreeNode;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.tree.TreeNode;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * General Annotator for JFrog security source code issues (for Example: applicable CVE)

@@ -1,8 +1,7 @@
 package com.jfrog.ide.idea.ui.webview;
 
-import com.jfrog.ide.common.tree.*;
-import com.jfrog.ide.idea.ui.webview.model.Cve;
-import com.jfrog.ide.idea.ui.webview.model.License;
+import com.jfrog.ide.common.components.*;
+import com.jfrog.ide.common.components.subentities.ResearchInfo;
 import com.jfrog.ide.idea.ui.webview.model.*;
 
 import java.util.Arrays;
@@ -28,7 +27,7 @@ public class WebviewObjectConverter {
         return new DependencyPage()
                 .id(vulnerabilityNode.getIssueId())
                 .component(dependency.getArtifactId())
-                .componentType(dependency.getPkgType())
+                .componentType(getPackageTypeName(dependency.getComponentId()))
                 .version(dependency.getVersion())
                 .severity(vulnerabilityNode.getSeverity(false).name())
                 .license(licenses)
@@ -72,7 +71,7 @@ public class WebviewObjectConverter {
         return new DependencyPage()
                 .id(license.getName())
                 .component(dependency.getArtifactId())
-                .componentType(dependency.getPkgType())
+                .componentType(getPackageTypeName(dependency.getComponentId()))
                 .version(dependency.getVersion())
                 .severity(license.getSeverity().name())
                 .references(convertReferences(license.getReferences()))
@@ -86,7 +85,7 @@ public class WebviewObjectConverter {
         return new ImpactGraph(impactTreeNode.getNameWithoutPrefix(), children);
     }
 
-    private static Cve convertCve(com.jfrog.ide.common.tree.Cve cve, ApplicableDetails applicableDetails) {
+    private static Cve convertCve(com.jfrog.ide.common.components.subentities.Cve cve, ApplicableDetails applicableDetails) {
         return new Cve(
                 cve.getCveId(),
                 cve.getCvssV2Score(),
@@ -205,5 +204,25 @@ public class WebviewObjectConverter {
             }
             return new Reference(parts[1].substring(0, parts[1].length() - 1), parts[0].substring(1));
         }).toArray(Reference[]::new);
+    }
+
+    private static String getPackageTypeName(String componentId) {
+        String GENERIC_PKG_TYPE = "Generic";
+        String[] compIdParts = componentId.split("://");
+        if (compIdParts.length != 2) {
+            return GENERIC_PKG_TYPE;
+        }
+        switch (compIdParts[0]) {
+            case "gav":
+                return "Maven";
+            case "go":
+                return "Go";
+            case "npm":
+                return "npm";
+            case "pypi":
+                return "PyPI";
+            default:
+                return GENERIC_PKG_TYPE;
+        }
     }
 }

@@ -6,13 +6,9 @@ import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
-import com.jfrog.ide.common.configuration.ServerConfig;
-import com.jfrog.ide.common.scan.GraphScanLogic;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
 import com.jfrog.ide.idea.log.Logger;
-import com.jfrog.xray.client.impl.XrayClient;
-import com.jfrog.xray.client.services.system.Version;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -28,8 +24,6 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 
-import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBuilder;
-
 /**
  * Created by romang on 5/8/17.
  */
@@ -38,8 +32,6 @@ public class Utils {
     public static final Path HOME_PATH = Paths.get(System.getProperty("user.home"), ".jfrog-idea-plugin");
     public static final String PRODUCT_ID = "jfrog-idea-plugin/";
     public static final String PLUGIN_ID = "org.jfrog.idea";
-
-    public enum ScanLogicType {GraphScan}
 
     public static Path getProjectBasePath(Project project) {
         return project.getBasePath() != null ? Paths.get(project.getBasePath()) : Paths.get(".");
@@ -57,23 +49,6 @@ public class Utils {
         ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("JFrog");
         if (toolWindow != null) {
             toolWindow.activate(null);
-        }
-    }
-
-    /**
-     * Get scan logic type, according to the Xray version.
-     *
-     * @return scan logic type, according to the Xray version.
-     * @throws IOException if the version is not supported, or in case of connection error to Xray.
-     */
-    public static ScanLogicType getScanLogicType() throws IOException {
-        ServerConfig server = GlobalSettings.getInstance().getServerConfig();
-        try (XrayClient client = createXrayClientBuilder(server, Logger.getInstance()).build()) {
-            Version xrayVersion = client.system().version();
-            if (GraphScanLogic.isSupportedInXrayVersion(xrayVersion)) {
-                return ScanLogicType.GraphScan;
-            }
-            throw new IOException("Unsupported JFrog Xray version.");
         }
     }
 

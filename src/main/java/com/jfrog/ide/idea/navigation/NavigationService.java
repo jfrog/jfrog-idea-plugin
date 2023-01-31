@@ -6,7 +6,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.jfrog.ide.common.tree.DependencyNode;
+import com.jfrog.ide.common.components.DependencyNode;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;

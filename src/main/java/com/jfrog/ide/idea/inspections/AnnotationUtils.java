@@ -3,8 +3,8 @@ package com.jfrog.ide.idea.inspections;
 import com.intellij.lang.annotation.AnnotationBuilder;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.psi.PsiElement;
-import com.jfrog.ide.common.tree.DependencyNode;
-import com.jfrog.ide.common.tree.License;
+import com.jfrog.ide.common.components.DependencyNode;
+import com.jfrog.ide.common.components.subentities.License;
 
 import java.util.Arrays;
 import java.util.List;
