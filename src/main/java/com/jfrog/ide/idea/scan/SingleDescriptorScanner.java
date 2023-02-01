@@ -58,7 +58,7 @@ public abstract class SingleDescriptorScanner extends ScannerBase {
         DescriptorFileTreeNode fileTreeNode = new DescriptorFileTreeNode(descriptorFilePath);
         for (DependencyNode dependency : depScanResults) {
             boolean directDep = false;
-            for (DependencyTree depTree : depMap.get(dependency.getGeneralInfo().getComponentId())) {
+            for (DependencyTree depTree : depMap.get(dependency.getComponentId())) {
                 if (depTree.getParent() != null && depTree.getParent().getParent() == null) {
                     directDep = true;
                     break;
