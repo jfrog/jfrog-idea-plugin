@@ -161,7 +161,7 @@ public abstract class ScanManager {
             // Source Code Scan
             scanner.scanAndUpdate(indicator, List.copyOf(issuesMap.keySet()));
             addScanResults(scanner.getResults(issuesMap));
-            fileTreeNodes.forEach(node -> node.sortChildren());
+            fileTreeNodes.forEach(FileTreeNode::sortChildren);
 
             // Force inspections run due to changes in the displayed tree
             runInspections();
