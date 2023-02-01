@@ -56,7 +56,17 @@ public abstract class SingleDescriptorScanner extends ScannerBase {
     @Override
     protected List<FileTreeNode> groupDependenciesToDescriptorNodes(Collection<DependencyNode> depScanResults, Map<String, List<DependencyTree>> depMap) {
         DescriptorFileTreeNode fileTreeNode = new DescriptorFileTreeNode(descriptorFilePath);
-        fileTreeNode.addDependencies(depScanResults);
+        for (DependencyNode dependency : depScanResults) {
+            boolean directDep = false;
+            for (DependencyTree depTree : depMap.get(dependency.getGeneralInfo().getComponentId())) {
+                if (depTree.getParent() != null && depTree.getParent().getParent() == null) {
+                    directDep = true;
+                    break;
+                }
+            }
+            dependency.setIndirect(!directDep);
+            fileTreeNode.addDependency(dependency);
+        }
         return List.of(fileTreeNode);
     }
 }
