@@ -47,7 +47,7 @@ pipelines:
               JFROG_CLI_BUILD_NAME=$JFROG_CLI_BUILD_NAME
               JFROG_CLI_BUILD_NUMBER=$JFROG_CLI_BUILD_NUMBER
               JFROG_CLI_BUILD_PROJECT=$JFROG_CLI_BUILD_PROJECT
-              jf gradle clean build -x test artifactoryPublish
+              jf gradle clean buildPlugin -x test artifactoryPublish
             - jf rt bag && jf rt bce
             - jf rt bp
 
