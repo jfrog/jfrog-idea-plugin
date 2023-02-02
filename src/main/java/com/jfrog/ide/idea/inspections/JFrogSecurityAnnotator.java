@@ -9,9 +9,9 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
-import com.jfrog.ide.common.components.ApplicableIssueNode;
-import com.jfrog.ide.common.components.BaseTreeNode;
-import com.jfrog.ide.common.components.FileTreeNode;
+import com.jfrog.ide.common.nodes.ApplicableIssueNode;
+import com.jfrog.ide.common.nodes.FileTreeNode;
+import com.jfrog.ide.common.nodes.SortableChildrenTreeNode;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import org.jetbrains.annotations.NotNull;
@@ -48,7 +48,7 @@ public class JFrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<Appl
         if (componentsTree == null || componentsTree.getModel() == null) {
             return null;
         }
-        Enumeration<TreeNode> roots = ((BaseTreeNode) componentsTree.getModel().getRoot()).children();
+        Enumeration<TreeNode> roots = ((SortableChildrenTreeNode) componentsTree.getModel().getRoot()).children();
         roots.asIterator().forEachRemaining(root -> {
             FileTreeNode fileNode = (FileTreeNode) root;
             if (fileNode.getFilePath().equals(file.getContainingFile().getVirtualFile().getPath())) {
@@ -72,7 +72,7 @@ public class JFrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<Appl
         warnings.stream().filter(Objects::nonNull).forEach(warning -> {
             int startOffset = StringUtil.lineColToOffset(file.getText(), warning.getRowStart(), warning.getColStart());
             int endOffset = StringUtil.lineColToOffset(file.getText(), warning.getRowEnd(), warning.getColEnd());
-            AnnotationIconRenderer iconRenderer = new AnnotationIconRenderer(warning, "");
+            AnnotationIconRenderer iconRenderer = new AnnotationIconRenderer(warning, warning.getSeverity(), "");
             iconRenderer.setProject(file.getProject());
 
             TextRange range = new TextRange(startOffset, endOffset);

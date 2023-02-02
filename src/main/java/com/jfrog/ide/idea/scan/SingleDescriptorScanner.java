@@ -1,9 +1,9 @@
 package com.jfrog.ide.idea.scan;
 
 import com.intellij.openapi.project.Project;
-import com.jfrog.ide.common.components.DependencyNode;
-import com.jfrog.ide.common.components.DescriptorFileTreeNode;
-import com.jfrog.ide.common.components.FileTreeNode;
+import com.jfrog.ide.common.nodes.DependencyNode;
+import com.jfrog.ide.common.nodes.DescriptorFileTreeNode;
+import com.jfrog.ide.common.nodes.FileTreeNode;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.ui.ComponentsTree;

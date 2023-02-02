@@ -5,9 +5,9 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBMenuItem;
 import com.intellij.pom.Navigatable;
 import com.intellij.ui.components.JBMenu;
-import com.jfrog.ide.common.components.BaseTreeNode;
-import com.jfrog.ide.common.components.DependencyNode;
-import com.jfrog.ide.common.components.FileTreeNode;
+import com.jfrog.ide.common.nodes.DependencyNode;
+import com.jfrog.ide.common.nodes.FileTreeNode;
+import com.jfrog.ide.common.nodes.SortableChildrenTreeNode;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.navigation.NavigationTarget;
 import com.jfrog.ide.idea.ui.menus.ToolbarPopupMenu;
@@ -60,11 +60,11 @@ public class LocalComponentsTree extends ComponentsTree {
     }
 
     private void appendProject(FileTreeNode filteredRoot) {
-        BaseTreeNode root;
+        SortableChildrenTreeNode root;
         if (getModel() == null) {
-            root = new BaseTreeNode();
+            root = new SortableChildrenTreeNode();
         } else {
-            root = (BaseTreeNode) getModel().getRoot();
+            root = (SortableChildrenTreeNode) getModel().getRoot();
         }
 
         root.add(filteredRoot);

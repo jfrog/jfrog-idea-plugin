@@ -17,11 +17,11 @@ import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
-import com.jfrog.ide.common.components.DependencyNode;
-import com.jfrog.ide.common.components.FileTreeNode;
-import com.jfrog.ide.common.components.ImpactTreeNode;
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.log.ProgressIndicator;
+import com.jfrog.ide.common.nodes.DependencyNode;
+import com.jfrog.ide.common.nodes.FileTreeNode;
+import com.jfrog.ide.common.nodes.ImpactTreeNode;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
@@ -161,9 +161,6 @@ public abstract class ScannerBase {
             List<FileTreeNode> sourceCodeResFileNodes = sourceCodeScannerManager.scanAndUpdate(indicator, results.values());
             fileTreeNodes.addAll(sourceCodeResFileNodes);
             addScanResults(fileTreeNodes);
-
-            // Sorting
-            fileTreeNodes.forEach(FileTreeNode::sortChildren);
 
             // Force inspections run due to changes in the displayed tree
             runInspections();

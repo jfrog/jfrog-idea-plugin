@@ -1,11 +1,11 @@
 package com.jfrog.ide.idea.scan;
 
 import com.intellij.openapi.project.Project;
-import com.jfrog.ide.common.components.ApplicableIssueNode;
-import com.jfrog.ide.common.components.DependencyNode;
-import com.jfrog.ide.common.components.FileTreeNode;
-import com.jfrog.ide.common.components.VulnerabilityNode;
 import com.jfrog.ide.common.log.ProgressIndicator;
+import com.jfrog.ide.common.nodes.ApplicableIssueNode;
+import com.jfrog.ide.common.nodes.DependencyNode;
+import com.jfrog.ide.common.nodes.FileTreeNode;
+import com.jfrog.ide.common.nodes.VulnerabilityNode;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;

@@ -9,10 +9,10 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.PsiElement;
-import com.jfrog.ide.common.components.BaseTreeNode;
-import com.jfrog.ide.common.components.DependencyNode;
-import com.jfrog.ide.common.components.DescriptorFileTreeNode;
-import com.jfrog.ide.common.components.ImpactTreeNode;
+import com.jfrog.ide.common.nodes.DependencyNode;
+import com.jfrog.ide.common.nodes.DescriptorFileTreeNode;
+import com.jfrog.ide.common.nodes.ImpactTreeNode;
+import com.jfrog.ide.common.nodes.SortableChildrenTreeNode;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.scan.ScannerBase;
 import com.jfrog.ide.idea.ui.ComponentsTree;
@@ -132,7 +132,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
             return null;
         }
         Set<DescriptorFileTreeNode> fileDescriptors = new HashSet<>();
-        Enumeration<TreeNode> roots = ((BaseTreeNode) componentsTree.getModel().getRoot()).children();
+        Enumeration<TreeNode> roots = ((SortableChildrenTreeNode) componentsTree.getModel().getRoot()).children();
         for (TreeNode root : Collections.list(roots)) {
             if (root instanceof DescriptorFileTreeNode) {
                 DescriptorFileTreeNode fileNode = (DescriptorFileTreeNode) root;

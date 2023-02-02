@@ -1,7 +1,7 @@
 package com.jfrog.ide.idea.ui.webview;
 
-import com.jfrog.ide.common.components.*;
-import com.jfrog.ide.common.components.subentities.ResearchInfo;
+import com.jfrog.ide.common.nodes.*;
+import com.jfrog.ide.common.nodes.subentities.ResearchInfo;
 import com.jfrog.ide.idea.ui.webview.model.*;
 
 import java.util.Arrays;
@@ -85,7 +85,7 @@ public class WebviewObjectConverter {
         return new ImpactGraph(impactTreeNode.getNameWithoutPrefix(), children);
     }
 
-    private static Cve convertCve(com.jfrog.ide.common.components.subentities.Cve cve, ApplicableDetails applicableDetails) {
+    private static Cve convertCve(com.jfrog.ide.common.nodes.subentities.Cve cve, ApplicableDetails applicableDetails) {
         return new Cve(
                 cve.getCveId(),
                 cve.getCvssV2Score(),

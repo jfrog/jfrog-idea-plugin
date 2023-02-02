@@ -3,7 +3,7 @@ package com.jfrog.ide.idea.inspections;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.PsiElement;
-import com.jfrog.ide.common.components.DependencyNode;
+import com.jfrog.ide.common.nodes.DependencyNode;
 
 import java.util.Arrays;
 import java.util.Objects;
