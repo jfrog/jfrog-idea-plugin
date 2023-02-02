@@ -112,6 +112,9 @@ tasks.register('extractWebview', Copy) {
 tasks.withType(JavaCompile).configureEach {
     options.deprecation = true
     options.encoding = "UTF-8"
+}
+
+tasks.withType(ProcessResources).configureEach {
     dependsOn('downloadWebview')
 }
 
