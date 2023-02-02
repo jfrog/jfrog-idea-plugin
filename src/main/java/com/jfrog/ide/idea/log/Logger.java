@@ -18,8 +18,8 @@ import org.jfrog.build.api.util.Log;
 public class Logger implements Log {
     private static final long serialVersionUID = 1L;
 
-    private static final NotificationGroup EVENT_LOG_NOTIFIER = NotificationGroupManager.getInstance().getNotificationGroup("JFrogLog");
-    private static final NotificationGroup BALLOON_NOTIFIER = NotificationGroupManager.getInstance().getNotificationGroup("JFrogBalloon");
+    private static final NotificationGroup EVENT_LOG_NOTIFIER = NotificationGroupManager.getInstance().getNotificationGroup("JFrog Log");
+    private static final NotificationGroup BALLOON_NOTIFIER = NotificationGroupManager.getInstance().getNotificationGroup("JFrog Errors");
     private static final com.intellij.openapi.diagnostic.Logger ideaLogger = com.intellij.openapi.diagnostic.Logger.getInstance(Logger.class);
     private static Notification lastNotification;
 
