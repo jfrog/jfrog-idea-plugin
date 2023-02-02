@@ -39,10 +39,11 @@ public class PypiScanner extends SingleDescriptorScanner {
     }
 
     /**
-     * @param project   - Currently opened IntelliJ project. We'll use this project to retrieve project based services
+     * @param project   currently opened IntelliJ project. We'll use this project to retrieve project based services
      *                  like {@link ConsistentFilterManager} and {@link ComponentsTree}.
-     * @param pythonSdk - The Python SDK
-     * @param executor  - An executor that should limit the number of running tasks to 3
+     * @param pythonSdk the Python SDK
+     * @param executor  an executor that should limit the number of running tasks to 3
+     * @param scanLogic the scan logic to use
      */
     PypiScanner(Project project, Sdk pythonSdk, ExecutorService executor, ScanLogic scanLogic) {
         super(project, pythonSdk.getHomePath(), ComponentPrefix.PYPI, executor, pythonSdk.getHomePath(), scanLogic);

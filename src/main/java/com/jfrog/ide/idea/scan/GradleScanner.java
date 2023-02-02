@@ -48,10 +48,11 @@ public class GradleScanner extends SingleDescriptorScanner {
     private boolean kotlin;
 
     /**
-     * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
-     *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
-     * @param basePath - The build.gradle or build.gradle.kts directory.
-     * @param executor - An executor that should limit the number of running tasks to 3
+     * @param project   currently opened IntelliJ project. We'll use this project to retrieve project based services
+     *                  like {@link ConsistentFilterManager} and {@link ComponentsTree}.
+     * @param basePath  the build.gradle or build.gradle.kts directory
+     * @param executor  an executor that should limit the number of running tasks to 3
+     * @param scanLogic the scan logic to use
      */
     GradleScanner(Project project, String basePath, ExecutorService executor, ScanLogic scanLogic) {
         super(project, basePath, ComponentPrefix.GAV, executor, scanLogic);

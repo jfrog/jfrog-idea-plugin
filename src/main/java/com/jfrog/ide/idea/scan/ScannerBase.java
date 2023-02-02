@@ -60,18 +60,19 @@ public abstract class ScannerBase {
     private final Log log;
     // Lock to prevent multiple simultaneous scans
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
+    private final ScanLogic scanLogic;
     protected Project project;
     protected SourceCodeScannerManager sourceCodeScannerManager;
     String basePath;
-    private ScanLogic scanLogic;
     private ExecutorService executor;
 
     /**
-     * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
-     *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}
-     * @param basePath - Project base path
-     * @param prefix   - Components prefix for xray scan, e.g. gav:// or npm://
-     * @param executor - An executor that should limit the number of running tasks to 3
+     * @param project   currently opened IntelliJ project. We'll use this project to retrieve project based services
+     *                  like {@link ConsistentFilterManager} and {@link ComponentsTree}
+     * @param basePath  project base path
+     * @param prefix    components prefix for xray scan, e.g. gav:// or npm://
+     * @param executor  an executor that should limit the number of running tasks to 3
+     * @param scanLogic the scan logic to use
      */
     ScannerBase(@NotNull Project project, String basePath, ComponentPrefix prefix, ExecutorService executor, ScanLogic scanLogic) {
         this.serverConfig = GlobalSettings.getInstance().getServerConfig();
@@ -153,8 +154,7 @@ public abstract class ScannerBase {
             mapDependencyTree(depMap, dependencyTree);
 
             createImpactPaths(results, depMap, dependencyTree);
-            List<FileTreeNode> fileTreeNodes = new ArrayList<>();
-            fileTreeNodes.addAll(groupDependenciesToDescriptorNodes(results.values(), depMap));
+            List<FileTreeNode> fileTreeNodes = new ArrayList<>(groupDependenciesToDescriptorNodes(results.values(), depMap));
             addScanResults(fileTreeNodes);
 
             // Source code scanning

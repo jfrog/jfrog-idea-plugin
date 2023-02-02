@@ -20,12 +20,13 @@ public abstract class SingleDescriptorScanner extends ScannerBase {
     protected String descriptorFilePath;
 
     /**
-     * @param project            - Currently opened IntelliJ project. We'll use this project to retrieve project based services
+     * @param project            currently opened IntelliJ project. We'll use this project to retrieve project based services
      *                           like {@link ConsistentFilterManager} and {@link ComponentsTree}
-     * @param basePath           - Project base path
-     * @param prefix             - Components prefix for xray scan, e.g. gav:// or npm://
-     * @param executor           - An executor that should limit the number of running tasks to 3
-     * @param descriptorFilePath - Path to the project's descriptor file
+     * @param basePath           project base path
+     * @param prefix             components prefix for xray scan, e.g. gav:// or npm://
+     * @param executor           an executor that should limit the number of running tasks to 3
+     * @param descriptorFilePath path to the project's descriptor file
+     * @param scanLogic          the scan logic to use
      */
     SingleDescriptorScanner(@NotNull Project project, String basePath, ComponentPrefix prefix, ExecutorService executor,
                             String descriptorFilePath, ScanLogic scanLogic) {
@@ -34,11 +35,12 @@ public abstract class SingleDescriptorScanner extends ScannerBase {
     }
 
     /**
-     * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
-     *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}
-     * @param basePath - Project base path
-     * @param prefix   - Components prefix for xray scan, e.g. gav:// or npm://
-     * @param executor - An executor that should limit the number of running tasks to 3
+     * @param project   currently opened IntelliJ project. We'll use this project to retrieve project based services
+     *                  like {@link ConsistentFilterManager} and {@link ComponentsTree}
+     * @param basePath  project base path
+     * @param prefix    components prefix for xray scan, e.g. gav:// or npm://
+     * @param executor  an executor that should limit the number of running tasks to 3
+     * @param scanLogic the scan logic to use
      */
     SingleDescriptorScanner(@NotNull Project project, String basePath, ComponentPrefix prefix, ExecutorService executor,
                             ScanLogic scanLogic) {

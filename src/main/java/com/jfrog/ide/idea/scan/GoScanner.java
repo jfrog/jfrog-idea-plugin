@@ -26,15 +26,15 @@ import java.util.concurrent.ExecutorService;
  * Created by Bar Belity on 06/02/2020.
  */
 public class GoScanner extends SingleDescriptorScanner {
-
     private final GoTreeBuilder goTreeBuilder;
     private final String PKG_TYPE = "go";
 
     /**
-     * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
-     *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
-     * @param basePath - The go.mod directory.
-     * @param executor - An executor that should limit the number of running tasks to 3
+     * @param project   currently opened IntelliJ project. We'll use this project to retrieve project based services
+     *                  like {@link ConsistentFilterManager} and {@link ComponentsTree}.
+     * @param basePath  the go.mod directory
+     * @param executor  an executor that should limit the number of running tasks to 3
+     * @param scanLogic the scan logic to use
      */
     GoScanner(Project project, String basePath, ExecutorService executor, ScanLogic scanLogic) {
         super(project, basePath, ComponentPrefix.GO, executor, Paths.get(basePath, "go.mod").toString(), scanLogic);
