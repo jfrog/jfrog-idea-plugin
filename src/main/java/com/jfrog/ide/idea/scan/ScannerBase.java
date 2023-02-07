@@ -136,7 +136,6 @@ public abstract class ScannerBase {
      */
     private void scanAndUpdate(ProgressIndicator indicator) {
         try {
-            // Send usage report
             sendUsageReport();
 
             // Building dependency tree

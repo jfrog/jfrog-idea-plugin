@@ -73,7 +73,7 @@ public class SourceCodeScannerManager {
             scanInProgress.set(false);
             indicator.setFraction(1);
         }
-        return groupResultsToFileTreeNodes(scanResults, issuesMap);
+        return createAndUpdateNodes(scanResults, issuesMap);
     }
 
     /**
@@ -97,29 +97,27 @@ public class SourceCodeScannerManager {
     }
 
     /**
-     * Convert {@link JFrogSecurityWarning}s to a list of {@link FileTreeNode}s with source code issues.
-     * Also, update {@link VulnerabilityNode}s with their matching source code issues.
+     * Create {@link FileTreeNode}s with applicability issues and update applicability issues in {@link VulnerabilityNode}s.
      *
      * @param scanResults a list of source code scan results.
      * @param issuesMap   a map of {@link VulnerabilityNode}s mapped by their CVEs.
      * @return a list of new {@link FileTreeNode}s containing source code issues.
      */
-    private List<FileTreeNode> groupResultsToFileTreeNodes(List<JFrogSecurityWarning> scanResults, Map<String, List<VulnerabilityNode>> issuesMap) {
-        // Map of new FileTreeNodes mapped by their paths
+    private List<FileTreeNode> createAndUpdateNodes(List<JFrogSecurityWarning> scanResults, Map<String, List<VulnerabilityNode>> issuesMap) {
         HashMap<String, FileTreeNode> results = new HashMap<>();
         for (JFrogSecurityWarning warning : scanResults) {
-            // Create FileTreeNodes for files with applicable issues
-            FileTreeNode fileNode = results.get(warning.getFilePath());
-            if (fileNode == null && warning.isApplicable()) {
-                fileNode = new FileTreeNode(warning.getFilePath());
-                results.put(warning.getFilePath(), fileNode);
-            }
-
             // Update all VulnerabilityNodes that have the warning's CVE
             String cve = StringUtils.removeStart(warning.getName(), "applic_");
             List<VulnerabilityNode> issues = issuesMap.get(cve);
             if (issues != null) {
                 if (warning.isApplicable()) {
+                    // Create FileTreeNodes for files with applicable issues
+                    FileTreeNode fileNode = results.get(warning.getFilePath());
+                    if (fileNode == null && warning.isApplicable()) {
+                        fileNode = new FileTreeNode(warning.getFilePath());
+                        results.put(warning.getFilePath(), fileNode);
+                    }
+
                     ApplicableIssueNode applicableIssue = new ApplicableIssueNode(
                             cve, warning.getLineStart(), warning.getColStart(), warning.getLineEnd(), warning.getColEnd(),
                             warning.getFilePath(), warning.getReason(), warning.getLineSnippet(), warning.getScannerSearchTarget(),
