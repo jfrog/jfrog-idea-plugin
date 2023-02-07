@@ -2,6 +2,7 @@ package com.jfrog.ide.idea.ui.webview;
 
 import com.jfrog.ide.common.nodes.*;
 import com.jfrog.ide.common.nodes.subentities.ResearchInfo;
+import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.idea.ui.webview.model.*;
 
 import java.util.Arrays;
@@ -212,17 +213,11 @@ public class WebviewObjectConverter {
         if (compIdParts.length != 2) {
             return GENERIC_PKG_TYPE;
         }
-        switch (compIdParts[0]) {
-            case "gav":
-                return "Maven";
-            case "go":
-                return "Go";
-            case "npm":
-                return "npm";
-            case "pypi":
-                return "PyPI";
-            default:
-                return GENERIC_PKG_TYPE;
+        try {
+            ComponentPrefix prefix = ComponentPrefix.valueOf(compIdParts[0].toUpperCase());
+            return prefix.getPackageTypeName();
+        } catch (IllegalArgumentException e) {
+            return GENERIC_PKG_TYPE;
         }
     }
 }

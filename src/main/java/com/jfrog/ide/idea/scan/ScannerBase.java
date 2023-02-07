@@ -111,7 +111,7 @@ public abstract class ScannerBase {
     protected abstract AbstractInspection getInspectionTool();
 
     protected void sendUsageReport() {
-        Utils.sendUsageReport(getPackageManagerName() + "-deps");
+        ApplicationManager.getApplication().invokeLater(() -> Utils.sendUsageReport(getPackageManagerName() + "-deps"));
     }
 
     protected abstract String getPackageManagerName();
@@ -136,6 +136,9 @@ public abstract class ScannerBase {
      */
     private void scanAndUpdate(ProgressIndicator indicator) {
         try {
+            // Send usage report
+            sendUsageReport();
+
             // Building dependency tree
             indicator.setText("1/3: Building dependency tree");
             DependencyTree dependencyTree = buildTree();
@@ -171,7 +174,6 @@ public abstract class ScannerBase {
             logError(log, "Xray Scan failed", e, true);
         } finally {
             scanInProgress.set(false);
-            sendUsageReport();
         }
     }
 

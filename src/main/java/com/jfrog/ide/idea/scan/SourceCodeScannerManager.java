@@ -45,11 +45,11 @@ public class SourceCodeScannerManager {
      */
     public List<FileTreeNode> scanAndUpdate(ProgressIndicator indicator, Collection<DependencyNode> depScanResults) {
         if (project.isDisposed()) {
-            return List.of();
+            return Collections.emptyList();
         }
         // Prevent multiple simultaneous scans
         if (!scanInProgress.compareAndSet(false, true)) {
-            return List.of();
+            return Collections.emptyList();
         }
         List<JFrogSecurityWarning> scanResults = new ArrayList<>();
         Map<String, List<VulnerabilityNode>> issuesMap = mapIssuesByCve(depScanResults);
@@ -96,14 +96,26 @@ public class SourceCodeScannerManager {
         return skippedFoldersPatterns;
     }
 
+    /**
+     * Convert {@link JFrogSecurityWarning}s to a list of {@link FileTreeNode}s with source code issues.
+     * Also, update {@link VulnerabilityNode}s with their matching source code issues.
+     *
+     * @param scanResults a list of source code scan results.
+     * @param issuesMap   a map of {@link VulnerabilityNode}s mapped by their CVEs.
+     * @return a list of new {@link FileTreeNode}s containing source code issues.
+     */
     private List<FileTreeNode> groupResultsToFileTreeNodes(List<JFrogSecurityWarning> scanResults, Map<String, List<VulnerabilityNode>> issuesMap) {
+        // Map of new FileTreeNodes mapped by their paths
         HashMap<String, FileTreeNode> results = new HashMap<>();
         for (JFrogSecurityWarning warning : scanResults) {
+            // Create FileTreeNodes for files with applicable issues
             FileTreeNode fileNode = results.get(warning.getFilePath());
             if (fileNode == null && warning.isApplicable()) {
                 fileNode = new FileTreeNode(warning.getFilePath());
                 results.put(warning.getFilePath(), fileNode);
             }
+
+            // Update all VulnerabilityNodes that have the warning's CVE
             String cve = StringUtils.removeStart(warning.getName(), "applic_");
             List<VulnerabilityNode> issues = issuesMap.get(cve);
             if (issues != null) {
@@ -112,12 +124,13 @@ public class SourceCodeScannerManager {
                             cve, warning.getLineStart(), warning.getColStart(), warning.getLineEnd(), warning.getColEnd(),
                             warning.getFilePath(), warning.getReason(), warning.getLineSnippet(), warning.getScannerSearchTarget(),
                             issues.get(0));
-                    fileNode.addDependency(applicableIssue);
+                    //noinspection DataFlowIssue
+                    fileNode.addIssue(applicableIssue);
                     for (VulnerabilityNode issue : issues) {
-                        issue.AddApplicableIssues(applicableIssue);
+                        issue.addApplicableIssue(applicableIssue);
                     }
                 } else {
-                    // Mark non applicable issues
+                    // Mark non-applicable vulnerabilities by setting an empty list of applicability issues
                     for (VulnerabilityNode issue : issues) {
                         issue.setApplicableIssues(new ArrayList<>());
                     }
@@ -145,7 +158,7 @@ public class SourceCodeScannerManager {
                 }
                 VulnerabilityNode vulnerabilityNode = (VulnerabilityNode) node;
                 String cveId = vulnerabilityNode.getCve().getCveId();
-                if (vulnerabilityNode.getCve() == null || org.apache.commons.lang3.StringUtils.isBlank(cveId)) {
+                if (vulnerabilityNode.getCve() == null || StringUtils.isBlank(cveId)) {
                     continue;
                 }
                 issues.putIfAbsent(cveId, new ArrayList<>());
