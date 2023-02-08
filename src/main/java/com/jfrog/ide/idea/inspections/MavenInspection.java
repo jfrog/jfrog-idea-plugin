@@ -8,9 +8,9 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.XmlElementVisitor;
 import com.intellij.psi.impl.source.xml.XmlTagImpl;
 import com.intellij.psi.xml.XmlTag;
-import com.jfrog.ide.idea.scan.MavenScanManager;
+import com.jfrog.ide.idea.scan.MavenScanner;
 import com.jfrog.ide.idea.scan.ScanManager;
-import com.jfrog.ide.idea.scan.ScanManagersFactory;
+import com.jfrog.ide.idea.scan.ScannerBase;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -70,9 +70,9 @@ public class MavenInspection extends AbstractInspection {
     }
 
     @Override
-    ScanManager getScanManager(Project project, String path) {
-        return ScanManagersFactory.getScanManagers(project).stream()
-                .filter(MavenScanManager.class::isInstance)
+    ScannerBase getScanner(Project project, String path) {
+        return ScanManager.getScanners(project).stream()
+                .filter(MavenScanner.class::isInstance)
                 .findAny()
                 .orElse(null);
     }

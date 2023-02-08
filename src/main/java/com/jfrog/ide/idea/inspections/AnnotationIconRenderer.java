@@ -5,7 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.ui.tree.TreeUtil;
-import com.jfrog.ide.common.tree.ComparableSeverityTreeNode;
+import com.jfrog.ide.common.nodes.subentities.Severity;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.ui.utils.IconUtils;
 import com.jfrog.ide.idea.utils.Utils;
@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.Objects;
 
 /**
@@ -22,15 +23,15 @@ import java.util.Objects;
  * @author yahavi
  **/
 public class AnnotationIconRenderer extends GutterIconRenderer {
-    private final ComparableSeverityTreeNode node;
+    private final DefaultMutableTreeNode node;
     private final String tooltipText;
     private final Icon icon;
     private Project project;
 
-    public AnnotationIconRenderer(ComparableSeverityTreeNode node, String tooltipText) {
+    public AnnotationIconRenderer(DefaultMutableTreeNode node, Severity severity, String tooltipText) {
         this.node = node;
         this.tooltipText = tooltipText;
-        this.icon = IconUtils.load(StringUtils.lowerCase(node.getSeverity().toString()));
+        this.icon = IconUtils.load(StringUtils.lowerCase(severity.toString()));
     }
 
     public void setProject(Project project) {

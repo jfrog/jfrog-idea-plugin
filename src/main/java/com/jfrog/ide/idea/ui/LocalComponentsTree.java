@@ -5,7 +5,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBMenuItem;
 import com.intellij.pom.Navigatable;
 import com.intellij.ui.components.JBMenu;
-import com.jfrog.ide.common.tree.*;
+import com.jfrog.ide.common.nodes.*;
 import com.jfrog.ide.idea.actions.CreateIgnoreRuleAction;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.navigation.NavigationTarget;
@@ -60,11 +60,11 @@ public class LocalComponentsTree extends ComponentsTree {
     }
 
     private void appendProject(FileTreeNode filteredRoot) {
-        BaseTreeNode root;
+        SortableChildrenTreeNode root;
         if (getModel() == null) {
-            root = new BaseTreeNode();
+            root = new SortableChildrenTreeNode();
         } else {
-            root = (BaseTreeNode) getModel().getRoot();
+            root = (SortableChildrenTreeNode) getModel().getRoot();
         }
 
         root.add(filteredRoot);
@@ -101,8 +101,8 @@ public class LocalComponentsTree extends ComponentsTree {
         var selected = selectedPath.getLastPathComponent();
         if (selected instanceof DependencyNode) {
             createNodePopupMenu((DependencyNode) selected);
-        } else if (selected instanceof IssueNode) {
-            createIgnoreRuleOption((IssueNode) selected, e);
+        } else if (selected instanceof VulnerabilityNode) {
+            createIgnoreRuleOption((VulnerabilityNode) selected, e);
         } else if (selected instanceof ApplicableIssueNode) {
             createIgnoreRuleOption(((ApplicableIssueNode) selected).getIssue(), e);
         } else {
@@ -112,7 +112,7 @@ public class LocalComponentsTree extends ComponentsTree {
         popupMenu.show(tree, e.getX(), e.getY());
     }
 
-    private void createIgnoreRuleOption(IssueNode selectedIssue, MouseEvent mouseEvent) {
+    private void createIgnoreRuleOption(VulnerabilityNode selectedIssue, MouseEvent mouseEvent) {
         popupMenu.removeAll();
         popupMenu.add(new CreateIgnoreRuleAction(selectedIssue.getIgnoreRuleUrl(), mouseEvent));
         JToolTip toolTip = popupMenu.createToolTip();

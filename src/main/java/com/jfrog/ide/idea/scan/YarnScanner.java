@@ -6,8 +6,9 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.util.EnvironmentUtil;
-import com.jfrog.ide.common.npm.NpmTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.common.scan.ScanLogic;
+import com.jfrog.ide.common.yarn.YarnTreeBuilder;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.NpmInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
@@ -21,26 +22,27 @@ import java.util.concurrent.ExecutorService;
 /**
  * Created by Yahav Itzhak on 13 Dec 2017.
  */
-public class NpmScanManager extends SingleDescriptorScanManager {
+public class YarnScanner extends SingleDescriptorScanner {
 
-    private final NpmTreeBuilder npmTreeBuilder;
-    private final String PKG_TYPE = "npm";
+    private final YarnTreeBuilder yarnTreeBuilder;
+    private final String PKG_TYPE = "yarn";
 
     /**
-     * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
-     *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
-     * @param basePath - The package.json directory.
-     * @param executor - An executor that should limit the number of running tasks to 3
+     * @param project   currently opened IntelliJ project. We'll use this project to retrieve project based services
+     *                  like {@link ConsistentFilterManager} and {@link ComponentsTree}.
+     * @param basePath  the package.json directory
+     * @param executor  an executor that should limit the number of running tasks to 3
+     * @param scanLogic the scan logic to use
      */
-    NpmScanManager(Project project, String basePath, ExecutorService executor) {
-        super(project, basePath, ComponentPrefix.NPM, executor, Paths.get(basePath, "package.json").toString());
-        getLog().info("Found npm project: " + getProjectPath());
-        npmTreeBuilder = new NpmTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap());
+    YarnScanner(Project project, String basePath, ExecutorService executor, ScanLogic scanLogic) {
+        super(project, basePath, ComponentPrefix.NPM, executor, Paths.get(basePath, "package.json").toString(), scanLogic);
+        getLog().info("Found yarn project: " + getProjectPath());
+        yarnTreeBuilder = new YarnTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap());
     }
 
     @Override
     protected DependencyTree buildTree() throws IOException {
-        return npmTreeBuilder.buildTree(getLog());
+        return yarnTreeBuilder.buildTree(getLog());
     }
 
     @Override
@@ -64,7 +66,8 @@ public class NpmScanManager extends SingleDescriptorScanManager {
     }
 
     @Override
-    public String getPackageType() {
-        return "npm";
+    public String getCodeBaseLanguage() {
+        return "js";
     }
 }
+

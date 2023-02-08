@@ -8,10 +8,11 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.jfrog.ide.common.nodes.DependencyNode;
+import com.jfrog.ide.common.nodes.DescriptorFileTreeNode;
+import com.jfrog.ide.common.nodes.FileTreeNode;
 import com.jfrog.ide.common.scan.ComponentPrefix;
-import com.jfrog.ide.common.tree.DependencyNode;
-import com.jfrog.ide.common.tree.DescriptorFileTreeNode;
-import com.jfrog.ide.common.tree.FileTreeNode;
+import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.MavenInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
@@ -39,7 +40,7 @@ import static com.jfrog.ide.common.utils.Utils.createComponentId;
 /**
  * Created by romang on 3/2/17.
  */
-public class MavenScanManager extends ScanManager {
+public class MavenScanner extends ScannerBase {
     private final String PKG_TYPE = "maven";
     private final String POM_FILE_NAME = "pom.xml";
 
@@ -48,8 +49,8 @@ public class MavenScanManager extends ScanManager {
      *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
      * @param executor - An executor that should limit the number of running tasks to 3
      */
-    MavenScanManager(Project project, ExecutorService executor) {
-        super(project, Utils.getProjectBasePath(project).toString(), ComponentPrefix.GAV, executor);
+    MavenScanner(Project project, ExecutorService executor, ScanLogic scanLogic) {
+        super(project, Utils.getProjectBasePath(project).toString(), ComponentPrefix.GAV, executor, scanLogic);
         getLog().info("Found Maven project: " + getProjectPath());
     }
 
@@ -182,7 +183,7 @@ public class MavenScanManager extends ScanManager {
         Map<String, DescriptorFileTreeNode> descriptorMap = new HashMap<>();
         for (DependencyNode dependencyNode : depScanResults) {
             Map<String, Boolean> addedDescriptors = new HashMap<>();
-            for (DependencyTree dep : depMap.get(dependencyNode.getGeneralInfo().getComponentId())) {
+            for (DependencyTree dep : depMap.get(dependencyNode.getComponentId())) {
                 DependencyTree currDep = dep;
                 while (currDep != null) {
                     if (currDep.getGeneralInfo() != null) {
@@ -206,7 +207,7 @@ public class MavenScanManager extends ScanManager {
     }
 
     @Override
-    public String getPackageType() {
-        return "Maven";
+    public String getCodeBaseLanguage() {
+        return "java";
     }
 }

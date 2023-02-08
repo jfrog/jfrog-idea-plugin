@@ -9,6 +9,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.go.GoTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.GoInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
@@ -24,19 +25,19 @@ import java.util.concurrent.ExecutorService;
 /**
  * Created by Bar Belity on 06/02/2020.
  */
-public class GoScanManager extends SingleDescriptorScanManager {
-
+public class GoScanner extends SingleDescriptorScanner {
     private final GoTreeBuilder goTreeBuilder;
     private final String PKG_TYPE = "go";
 
     /**
-     * @param project  - Currently opened IntelliJ project. We'll use this project to retrieve project based services
-     *                 like {@link ConsistentFilterManager} and {@link ComponentsTree}.
-     * @param basePath - The go.mod directory.
-     * @param executor - An executor that should limit the number of running tasks to 3
+     * @param project   currently opened IntelliJ project. We'll use this project to retrieve project based services
+     *                  like {@link ConsistentFilterManager} and {@link ComponentsTree}.
+     * @param basePath  the go.mod directory
+     * @param executor  an executor that should limit the number of running tasks to 3
+     * @param scanLogic the scan logic to use
      */
-    GoScanManager(Project project, String basePath, ExecutorService executor) {
-        super(project, basePath, ComponentPrefix.GO, executor, Paths.get(basePath, "go.mod").toString());
+    GoScanner(Project project, String basePath, ExecutorService executor, ScanLogic scanLogic) {
+        super(project, basePath, ComponentPrefix.GO, executor, Paths.get(basePath, "go.mod").toString(), scanLogic);
         getLog().info("Found Go project: " + getProjectPath());
         Map<String, String> env = Maps.newHashMap(EnvironmentUtil.getEnvironmentMap());
         String goExec = null;
@@ -74,7 +75,7 @@ public class GoScanManager extends SingleDescriptorScanManager {
     }
 
     @Override
-    public String getPackageType() {
-        return "Go";
+    public String getCodeBaseLanguage() {
+        return "go";
     }
 }

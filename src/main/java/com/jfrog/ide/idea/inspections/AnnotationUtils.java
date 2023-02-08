@@ -3,8 +3,8 @@ package com.jfrog.ide.idea.inspections;
 import com.intellij.lang.annotation.AnnotationBuilder;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.psi.PsiElement;
-import com.jfrog.ide.common.tree.DependencyNode;
-import com.jfrog.ide.common.tree.License;
+import com.jfrog.ide.common.nodes.DependencyNode;
+import com.jfrog.ide.common.nodes.subentities.License;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +29,7 @@ public class AnnotationUtils {
     static void registerAnnotation(AnnotationHolder annotationHolder, DependencyNode dependency, PsiElement[] elements, boolean showIcon) {
         String licensesString = getLicensesString(dependency);
         String topIssue = getTopIssueString(dependency);
-        AnnotationIconRenderer iconRenderer = showIcon ? new AnnotationIconRenderer(dependency, topIssue) : null;
+        AnnotationIconRenderer iconRenderer = showIcon ? new AnnotationIconRenderer(dependency, dependency.getSeverity(), topIssue) : null;
         Arrays.stream(elements)
                 .filter(Objects::nonNull)
                 .forEach(element -> {
