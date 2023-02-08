@@ -102,20 +102,19 @@ public class LocalComponentsTree extends ComponentsTree {
         if (selected instanceof DependencyNode) {
             createNodePopupMenu((DependencyNode) selected);
         } else if (selected instanceof IssueNode) {
-            createIgnoreRuleOption((IssueNode) selected,e);
+            createIgnoreRuleOption((IssueNode) selected, e);
         } else if (selected instanceof ApplicableIssueNode) {
-            createIgnoreRuleOption(((ApplicableIssueNode) selected).getIssue(),e);
-        }
-        else {
+            createIgnoreRuleOption(((ApplicableIssueNode) selected).getIssue(), e);
+        } else {
             // No context menu was created.
             return;
         }
         popupMenu.show(tree, e.getX(), e.getY());
     }
 
-    private void createIgnoreRuleOption(IssueNode selectedIssue,MouseEvent mouseEvent) {
+    private void createIgnoreRuleOption(IssueNode selectedIssue, MouseEvent mouseEvent) {
         popupMenu.removeAll();
-        popupMenu.add( new CreateIgnoreRuleAction(selectedIssue.getIgnoreRuleUrl(), mouseEvent));
+        popupMenu.add(new CreateIgnoreRuleAction(selectedIssue.getIgnoreRuleUrl(), mouseEvent));
         JToolTip toolTip = popupMenu.createToolTip();
         toolTip.setToolTipText(IGNORE_RULE_TOOL_TIP);
         toolTip.setEnabled(true);
