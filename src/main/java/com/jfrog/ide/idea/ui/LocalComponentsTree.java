@@ -101,8 +101,8 @@ public class LocalComponentsTree extends ComponentsTree {
         var selected = selectedPath.getLastPathComponent();
         if (selected instanceof DependencyNode) {
             createNodePopupMenu((DependencyNode) selected);
-        } else if (selected instanceof IssueNode) {
-            createIgnoreRuleOption((IssueNode) selected, e);
+        } else if (selected instanceof VulnerabilityNode) {
+            createIgnoreRuleOption((VulnerabilityNode) selected, e);
         } else if (selected instanceof ApplicableIssueNode) {
             createIgnoreRuleOption(((ApplicableIssueNode) selected).getIssue(), e);
         } else {
@@ -112,7 +112,7 @@ public class LocalComponentsTree extends ComponentsTree {
         popupMenu.show(tree, e.getX(), e.getY());
     }
 
-    private void createIgnoreRuleOption(IssueNode selectedIssue, MouseEvent mouseEvent) {
+    private void createIgnoreRuleOption(VulnerabilityNode selectedIssue, MouseEvent mouseEvent) {
         popupMenu.removeAll();
         popupMenu.add(new CreateIgnoreRuleAction(selectedIssue.getIgnoreRuleUrl(), mouseEvent));
         JToolTip toolTip = popupMenu.createToolTip();
