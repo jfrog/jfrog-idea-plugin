@@ -2,7 +2,6 @@ package com.jfrog.ide.idea.ui;
 
 import com.intellij.openapi.ui.JBPopupMenu;
 import com.jfrog.ide.idea.actions.CreateIgnoreRuleAction;
-import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.Issue;
 
@@ -112,12 +111,9 @@ class IssuesTableSelectionListener extends MouseAdapter implements ListSelection
      * @param selectedIssue - The selected issue
      */
     private void doRightClickButtonEvent(MouseEvent mouseEvent, Issue selectedIssue) {
-        if (StringUtils.isBlank(selectedIssue.getIgnoreRuleUrl())) {
-            return;
-        }
         JPopupMenu popupMenu = new JBPopupMenu();
         popupMenu.setFocusable(false);
-        popupMenu.add(new CreateIgnoreRuleAction(selectedIssue));
+        popupMenu.add(new CreateIgnoreRuleAction(selectedIssue.getIgnoreRuleUrl(), mouseEvent));
         JBPopupMenu.showByEvent(mouseEvent, popupMenu);
     }
 }

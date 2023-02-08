@@ -1,18 +1,12 @@
 package com.jfrog.ide.idea.inspections;
 
 import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.externalSystem.settings.ExternalProjectSettings;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
-import com.jfrog.ide.idea.scan.GradleScanManager;
+import com.jfrog.ide.idea.scan.GradleScanner;
 import com.jfrog.ide.idea.scan.ScanManager;
-import com.jfrog.ide.idea.scan.ScanManagersFactory;
+import com.jfrog.ide.idea.scan.ScannerBase;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.plugins.gradle.settings.GradleSettings;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author yahavi
@@ -25,9 +19,9 @@ public abstract class GradleInspection extends AbstractInspection {
     }
 
     @Override
-    ScanManager getScanManager(Project project, String path) {
-        return ScanManagersFactory.getScanManagers(project).stream()
-                .filter(GradleScanManager.class::isInstance)
+    ScannerBase getScanner(Project project, String path) {
+        return ScanManager.getScanners(project).stream()
+                .filter(GradleScanner.class::isInstance)
                 .findAny()
                 .orElse(null);
     }
@@ -62,22 +56,5 @@ public abstract class GradleInspection extends AbstractInspection {
         }
         // compile project(':xyz')
         return StringUtils.removeStart(componentId, ":");
-    }
-
-    /**
-     * Get all modules of the current project
-     *
-     * @param project - The current project
-     * @return list of gradle modules or null if the Gradle project not yet initialized
-     */
-    private List<String> getGradleModules(Project project) {
-        GradleSettings.MyState gradleState = GradleSettings.getInstance(project).getState();
-        if (gradleState == null) {
-            return null;
-        }
-        return gradleState.getLinkedExternalProjectsSettings().stream()
-                .map(ExternalProjectSettings::getModules)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
     }
 }

@@ -18,10 +18,10 @@ import com.intellij.ui.jcef.JBCefApp;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.ui.jcef.JBCefBrowserBase;
 import com.intellij.util.ui.UIUtil;
-import com.jfrog.ide.common.tree.ApplicableIssueNode;
-import com.jfrog.ide.common.tree.IssueNode;
-import com.jfrog.ide.common.tree.LicenseViolationNode;
-import com.jfrog.ide.common.tree.VulnerabilityOrViolationNode;
+import com.jfrog.ide.common.nodes.ApplicableIssueNode;
+import com.jfrog.ide.common.nodes.IssueNode;
+import com.jfrog.ide.common.nodes.LicenseViolationNode;
+import com.jfrog.ide.common.nodes.VulnerabilityNode;
 import com.jfrog.ide.idea.actions.CollapseAllAction;
 import com.jfrog.ide.idea.actions.ExpandAllAction;
 import com.jfrog.ide.idea.events.ApplicationEvents;
@@ -56,7 +56,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     private final JBCefBrowserBase browser;
     private final OnePixelSplitter verticalSplit;
     private final MessagePacker messagePacker;
-    private VulnerabilityOrViolationNode selectedIssue;
+    private IssueNode selectedIssue;
     private Path tempDirPath;
 
     /**
@@ -99,12 +99,12 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
         // Component selection listener
         componentsTree.addTreeSelectionListener(e -> {
-            if (e == null || e.getNewLeadSelectionPath() == null || !(e.getNewLeadSelectionPath().getLastPathComponent() instanceof VulnerabilityOrViolationNode)) {
+            if (e == null || e.getNewLeadSelectionPath() == null || !(e.getNewLeadSelectionPath().getLastPathComponent() instanceof IssueNode)) {
                 verticalSplit.setSecondComponent(null);
                 return;
             }
 
-            selectedIssue = (VulnerabilityOrViolationNode) e.getNewLeadSelectionPath().getLastPathComponent();
+            selectedIssue = (IssueNode) e.getNewLeadSelectionPath().getLastPathComponent();
             updateIssueOrLicenseInWebview(selectedIssue);
             verticalSplit.setSecondComponent(browser.getComponent());
         });
@@ -158,9 +158,9 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         return treeScrollPane;
     }
 
-    private void updateIssueOrLicenseInWebview(VulnerabilityOrViolationNode vulnerabilityOrViolation) {
-        if (vulnerabilityOrViolation instanceof IssueNode) {
-            IssueNode issue = (IssueNode) vulnerabilityOrViolation;
+    private void updateIssueOrLicenseInWebview(IssueNode vulnerabilityOrViolation) {
+        if (vulnerabilityOrViolation instanceof VulnerabilityNode) {
+            VulnerabilityNode issue = (VulnerabilityNode) vulnerabilityOrViolation;
             messagePacker.send(WebviewObjectConverter.convertIssueToDepPage(issue));
         } else if (vulnerabilityOrViolation instanceof ApplicableIssueNode) {
             ApplicableIssueNode node = (ApplicableIssueNode) vulnerabilityOrViolation;

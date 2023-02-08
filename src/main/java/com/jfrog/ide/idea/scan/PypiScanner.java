@@ -11,6 +11,7 @@ import com.jetbrains.python.packaging.PyRequirement;
 import com.jetbrains.python.packaging.pipenv.PyPipEnvPackageManager;
 import com.jetbrains.python.sdk.PythonSdkUtil;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
@@ -29,7 +30,7 @@ import static com.jfrog.ide.common.utils.Utils.createComponentId;
 /**
  * @author yahavi
  */
-public class PypiScanManager extends SingleDescriptorScanManager {
+public class PypiScanner extends SingleDescriptorScanner {
     private final Sdk pythonSdk;
     private final String PKG_TYPE = "pypi";
 
@@ -38,13 +39,14 @@ public class PypiScanManager extends SingleDescriptorScanManager {
     }
 
     /**
-     * @param project   - Currently opened IntelliJ project. We'll use this project to retrieve project based services
+     * @param project   currently opened IntelliJ project. We'll use this project to retrieve project based services
      *                  like {@link ConsistentFilterManager} and {@link ComponentsTree}.
-     * @param pythonSdk - The Python SDK
-     * @param executor  - An executor that should limit the number of running tasks to 3
+     * @param pythonSdk the Python SDK
+     * @param executor  an executor that should limit the number of running tasks to 3
+     * @param scanLogic the scan logic to use
      */
-    PypiScanManager(Project project, Sdk pythonSdk, ExecutorService executor) {
-        super(project, pythonSdk.getHomePath(), ComponentPrefix.PYPI, executor, pythonSdk.getHomePath());
+    PypiScanner(Project project, Sdk pythonSdk, ExecutorService executor, ScanLogic scanLogic) {
+        super(project, pythonSdk.getHomePath(), ComponentPrefix.PYPI, executor, pythonSdk.getHomePath(), scanLogic);
         this.pythonSdk = pythonSdk;
         getLog().info("Found PyPI SDK: " + getProjectPath());
     }
@@ -174,7 +176,7 @@ public class PypiScanManager extends SingleDescriptorScanManager {
     }
 
     @Override
-    public String getPackageType() {
-        return "PyPI";
+    public String getCodeBaseLanguage() {
+        return "python";
     }
 }

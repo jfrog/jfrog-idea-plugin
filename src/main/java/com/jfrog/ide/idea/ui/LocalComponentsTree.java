@@ -5,9 +5,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBMenuItem;
 import com.intellij.pom.Navigatable;
 import com.intellij.ui.components.JBMenu;
-import com.jfrog.ide.common.tree.BaseTreeNode;
-import com.jfrog.ide.common.tree.DependencyNode;
-import com.jfrog.ide.common.tree.FileTreeNode;
+import com.jfrog.ide.common.nodes.*;
+import com.jfrog.ide.idea.actions.CreateIgnoreRuleAction;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.navigation.NavigationTarget;
 import com.jfrog.ide.idea.ui.menus.ToolbarPopupMenu;
@@ -30,6 +29,7 @@ import java.util.Set;
  */
 public class LocalComponentsTree extends ComponentsTree {
     private static final String SHOW_IN_PROJECT_DESCRIPTOR = "Show direct dependency in project descriptor";
+    public static final String IGNORE_RULE_TOOL_TIP = "Creating Ignore Rules is only available when a JFrog Project or Watch is defined.";
 
     List<FileTreeNode> fileNodes = new ArrayList<>();
 
@@ -60,11 +60,11 @@ public class LocalComponentsTree extends ComponentsTree {
     }
 
     private void appendProject(FileTreeNode filteredRoot) {
-        BaseTreeNode root;
+        SortableChildrenTreeNode root;
         if (getModel() == null) {
-            root = new BaseTreeNode();
+            root = new SortableChildrenTreeNode();
         } else {
-            root = (BaseTreeNode) getModel().getRoot();
+            root = (SortableChildrenTreeNode) getModel().getRoot();
         }
 
         root.add(filteredRoot);
@@ -98,12 +98,27 @@ public class LocalComponentsTree extends ComponentsTree {
         if (selectedPath == null) {
             return;
         }
-        if (selectedPath.getLastPathComponent() instanceof DependencyNode) {
-            createNodePopupMenu((DependencyNode) selectedPath.getLastPathComponent());
-            popupMenu.show(tree, e.getX(), e.getY());
+        var selected = selectedPath.getLastPathComponent();
+        if (selected instanceof DependencyNode) {
+            createNodePopupMenu((DependencyNode) selected);
+        } else if (selected instanceof VulnerabilityNode) {
+            createIgnoreRuleOption((VulnerabilityNode) selected, e);
+        } else if (selected instanceof ApplicableIssueNode) {
+            createIgnoreRuleOption(((ApplicableIssueNode) selected).getIssue(), e);
+        } else {
+            // No context menu was created.
+            return;
         }
+        popupMenu.show(tree, e.getX(), e.getY());
     }
 
+    private void createIgnoreRuleOption(VulnerabilityNode selectedIssue, MouseEvent mouseEvent) {
+        popupMenu.removeAll();
+        popupMenu.add(new CreateIgnoreRuleAction(selectedIssue.getIgnoreRuleUrl(), mouseEvent));
+        JToolTip toolTip = popupMenu.createToolTip();
+        toolTip.setToolTipText(IGNORE_RULE_TOOL_TIP);
+        toolTip.setEnabled(true);
+    }
 
     private void createNodePopupMenu(DependencyNode selectedNode) {
         popupMenu.removeAll();

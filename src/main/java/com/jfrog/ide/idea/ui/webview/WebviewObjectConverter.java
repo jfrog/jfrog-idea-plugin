@@ -1,45 +1,45 @@
 package com.jfrog.ide.idea.ui.webview;
 
-import com.jfrog.ide.common.tree.*;
-import com.jfrog.ide.idea.ui.webview.model.Cve;
-import com.jfrog.ide.idea.ui.webview.model.License;
+import com.jfrog.ide.common.nodes.*;
+import com.jfrog.ide.common.nodes.subentities.ResearchInfo;
+import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.idea.ui.webview.model.*;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class WebviewObjectConverter {
-    public static DependencyPage convertIssueToDepPage(IssueNode issueNode) {
+    public static DependencyPage convertIssueToDepPage(VulnerabilityNode vulnerabilityNode) {
         ExtendedInformation extendedInformation = null;
-        if (issueNode.getResearchInfo() != null) {
-            ResearchInfo issueResearchInfo = issueNode.getResearchInfo();
+        if (vulnerabilityNode.getResearchInfo() != null) {
+            ResearchInfo issueResearchInfo = vulnerabilityNode.getResearchInfo();
             JfrogResearchSeverityReason[] severityReasons = Arrays.stream(issueResearchInfo.getSeverityReasons()).map(severityReason -> new JfrogResearchSeverityReason(severityReason.getName(), severityReason.getDescription(), severityReason.isPositive())).toArray(JfrogResearchSeverityReason[]::new);
             extendedInformation = new ExtendedInformation(issueResearchInfo.getShortDescription(), issueResearchInfo.getFullDescription(), issueResearchInfo.getSeverity().name(), issueResearchInfo.getRemediation(), severityReasons);
         }
-        DependencyNode dependency = issueNode.getParentArtifact();
+        DependencyNode dependency = vulnerabilityNode.getParentArtifact();
         String[] watchNames = null;
-        if (issueNode.getWatchNames() != null) {
-            watchNames = issueNode.getWatchNames().toArray(new String[0]);
+        if (vulnerabilityNode.getWatchNames() != null) {
+            watchNames = vulnerabilityNode.getWatchNames().toArray(new String[0]);
         }
         License[] licenses = null;
         if (dependency.getLicenses() != null) {
             licenses = dependency.getLicenses().stream().map(depLicense -> new License(depLicense.getName(), depLicense.getMoreInfoUrl())).toArray(License[]::new);
         }
         return new DependencyPage()
-                .id(issueNode.getIssueId())
-                .component(dependency.getGeneralInfo().getArtifactId())
-                .componentType(dependency.getGeneralInfo().getPkgType())
-                .version(dependency.getGeneralInfo().getVersion())
-                .severity(issueNode.getSeverity(false).name())
+                .id(vulnerabilityNode.getIssueId())
+                .component(dependency.getArtifactId())
+                .componentType(getPackageTypeName(dependency.getComponentId()))
+                .version(dependency.getVersion())
+                .severity(vulnerabilityNode.getSeverity(false).name())
                 .license(licenses)
-                .summary(issueNode.getSummary())
-                .fixedVersion(convertVersionRanges(issueNode.getFixedVersions()))
-                .infectedVersion(convertVersionRanges(issueNode.getInfectedVersions()))
-                .references(convertReferences(issueNode.getReferences()))
-                .cve(convertCve(issueNode.getCve(), convertApplicableDetails(issueNode.isApplicable(), issueNode.getApplicableIssues())))
+                .summary(vulnerabilityNode.getSummary())
+                .fixedVersion(convertVersionRanges(vulnerabilityNode.getFixedVersions()))
+                .infectedVersion(convertVersionRanges(vulnerabilityNode.getInfectedVersions()))
+                .references(convertReferences(vulnerabilityNode.getReferences()))
+                .cve(convertCve(vulnerabilityNode.getCve(), convertApplicableDetails(vulnerabilityNode.isApplicable(), vulnerabilityNode.getApplicableIssues())))
                 .impactGraph(convertImpactGraph(dependency.getImpactPaths()))
                 .watchName(watchNames)
-                .edited(issueNode.getLastUpdated())
+                .edited(vulnerabilityNode.getLastUpdated())
                 .extendedInformation(extendedInformation);
     }
 
@@ -71,9 +71,9 @@ public class WebviewObjectConverter {
         }
         return new DependencyPage()
                 .id(license.getName())
-                .component(dependency.getGeneralInfo().getArtifactId())
-                .componentType(dependency.getGeneralInfo().getPkgType())
-                .version(dependency.getGeneralInfo().getVersion())
+                .component(dependency.getArtifactId())
+                .componentType(getPackageTypeName(dependency.getComponentId()))
+                .version(dependency.getVersion())
                 .severity(license.getSeverity().name())
                 .references(convertReferences(license.getReferences()))
                 .impactGraph(convertImpactGraph(dependency.getImpactPaths()))
@@ -86,7 +86,7 @@ public class WebviewObjectConverter {
         return new ImpactGraph(impactTreeNode.getNameWithoutPrefix(), children);
     }
 
-    private static Cve convertCve(com.jfrog.ide.common.tree.Cve cve, ApplicableDetails applicableDetails) {
+    private static Cve convertCve(com.jfrog.ide.common.nodes.subentities.Cve cve, ApplicableDetails applicableDetails) {
         return new Cve(
                 cve.getCveId(),
                 cve.getCvssV2Score(),
@@ -205,5 +205,19 @@ public class WebviewObjectConverter {
             }
             return new Reference(parts[1].substring(0, parts[1].length() - 1), parts[0].substring(1));
         }).toArray(Reference[]::new);
+    }
+
+    private static String getPackageTypeName(String componentId) {
+        String GENERIC_PKG_TYPE = "Generic";
+        String[] compIdParts = componentId.split("://");
+        if (compIdParts.length != 2) {
+            return GENERIC_PKG_TYPE;
+        }
+        try {
+            ComponentPrefix prefix = ComponentPrefix.valueOf(compIdParts[0].toUpperCase());
+            return prefix.getPackageTypeName();
+        } catch (IllegalArgumentException e) {
+            return GENERIC_PKG_TYPE;
+        }
     }
 }
