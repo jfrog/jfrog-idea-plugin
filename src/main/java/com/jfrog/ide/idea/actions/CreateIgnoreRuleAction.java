@@ -35,7 +35,7 @@ public class CreateIgnoreRuleAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (isBlank(this.ignoreRuleUrl)) {
-            Balloon balloon = JBPopupFactory.getInstance().createHtmlTextBalloonBuilder(IGNORE_RULE_TOOL_TIP + "<br><a href=\"Configure it here\"> Configure it here </a>", MessageType.ERROR,
+            Balloon balloon = JBPopupFactory.getInstance().createHtmlTextBalloonBuilder(IGNORE_RULE_TOOL_TIP + "<br><a href=\"Configure it here.\"> Configure it here. </a>", MessageType.ERROR,
                             event -> {
                                 if (event.getEventType() != ACTIVATED) {
                                     return;
