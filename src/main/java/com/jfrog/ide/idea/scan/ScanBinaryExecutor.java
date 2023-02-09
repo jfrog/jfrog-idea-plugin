@@ -30,7 +30,8 @@ import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
  */
 public abstract class ScanBinaryExecutor {
     private static final Path BINARIES_DIR = HOME_PATH.resolve("dependencies").resolve("jfrog-security");
-    private final CommandExecutor commandExecutor;
+    private CommandExecutor commandExecutor;
+    private final String BINARY_PATH;
     final String scanType;
     protected List<String> supportedLanguages;
     private final boolean shouldExecute;
@@ -50,8 +51,8 @@ public abstract class ScanBinaryExecutor {
             binaryName += ".exe";
         }
         Path binaryPath = BINARIES_DIR.resolve(binaryName);
-        commandExecutor = new CommandExecutor(binaryPath.toString(), creatEnvWithCredentials());
         shouldExecute = Files.exists(binaryPath);
+        BINARY_PATH = binaryPath.toString();
     }
 
     private Map<String, String> creatEnvWithCredentials() {
@@ -85,6 +86,7 @@ public abstract class ScanBinaryExecutor {
         if (!shouldExecute) {
             return List.of();
         }
+        commandExecutor = new CommandExecutor(BINARY_PATH, creatEnvWithCredentials());
         Path outputTempDir = null;
         Path inputFile = null;
         try {
