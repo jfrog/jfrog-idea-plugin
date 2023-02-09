@@ -47,6 +47,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 
+import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.DEFAULT_EXCLUSIONS;
 import static com.jfrog.ide.idea.ui.configuration.Utils.*;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.*;
@@ -210,7 +211,7 @@ public class ServerConfigImpl implements ServerConfig {
     }
 
     public String getExcludedPaths() {
-        return this.excludedPaths;
+        return defaultIfNull(this.excludedPaths, DEFAULT_EXCLUSIONS);
     }
 
     @Override
