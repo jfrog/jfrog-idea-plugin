@@ -85,13 +85,15 @@ public class SourceCodeScannerManager {
     private List<String> getSkippedFoldersPatterns() {
         String excludePattern = GlobalSettings.getInstance().getServerConfig().getExcludedPaths();
         List<String> skippedFoldersPatterns = new ArrayList<>();
-        Matcher matcher = EXCLUSIONS_REGEX_PATTERN.matcher(excludePattern);
-        if (!matcher.find()) {
-            return List.of(excludePattern);
-        }
-        String[] dirsNames = matcher.group(1).split(",");
-        for (String dirName : dirsNames) {
-            skippedFoldersPatterns.add(EXCLUSIONS_PREFIX + dirName.strip() + EXCLUSIONS_SUFFIX);
+        if (StringUtils.isNotBlank(excludePattern)) {
+            Matcher matcher = EXCLUSIONS_REGEX_PATTERN.matcher(excludePattern);
+            if (!matcher.find()) {
+                return List.of(excludePattern);
+            }
+            String[] dirsNames = matcher.group(1).split(",");
+            for (String dirName : dirsNames) {
+                skippedFoldersPatterns.add(EXCLUSIONS_PREFIX + dirName.strip() + EXCLUSIONS_SUFFIX);
+            }
         }
         return skippedFoldersPatterns;
     }
