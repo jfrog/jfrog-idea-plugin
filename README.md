@@ -220,4 +220,4 @@ To build and run the plugin following your code changes, follow these steps:
 We welcome community contribution through pull requests.
 
 # Release Notes
-The release are available on [Marketplace](https://plugins.jetbrains.com/plugin/9834-jfrog/versions).
+The release notes are available on [Marketplace](https://plugins.jetbrains.com/plugin/9834-jfrog/versions).
