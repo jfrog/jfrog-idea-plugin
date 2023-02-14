@@ -1,4 +1,4 @@
-[![](readme_image.png)](#readme)
+[![](readme-resources/readme_image.png)](#readme)
 
 <div align="center">
 
@@ -30,12 +30,170 @@ In addition to IntelliJ IDEA, the plugin also supports the following IDEs:
 * Android Studio
 * GoLand
 
-## Getting Started
-1. Install the JFrog IntelliJ IDEA Plugin: <iframe frameborder="none" width="245px" height="48px" src="https://plugins.jetbrains.com/embeddable/install/9834"></iframe>
+# Getting Started
+1. Install the JFrog IntelliJ IDEA Plugin via the Plugins tab in the IDE settings, or in [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/9834-jfrog).
 2. Need a FREE JFrog environment in the cloud? [Create one now](#set-up-a-free-jfrog-environment-in-the-cloud).
-3. [Connect the plugin to your JFrog environment](#connecting-to-your-jfrog-environment).
+3. [Connect the plugin to your JFrog environment](#connecting-the-plugin-to-your-jfrog-environment).
 4. [Start](#using-the-plugin) using the plugin.
 
+## Set Up a FREE JFrog Environment in the Cloud
+Need a FREE JFrog environment in the cloud, so that JFrog IntelliJ IDEA Plugin can connect to it? Just run one of the following commands in your terminal. The commands will do the following:
+
+1. Install JFrog CLI on your machine.
+2. Create a FREE JFrog environment in the cloud for you.
+
+**MacOS and Linux using cURL**
+```
+curl -fL https://getcli.jfrog.io?setup | sh
+```
+
+**Windows using PowerShell**
+```
+powershell "Start-Process -Wait -Verb RunAs powershell '-NoProfile iwr https://releases.jfrog.io/artifactory/jfrog-cli/v2-jf/[RELEASE]/jfrog-cli-windows-amd64/jf.exe -OutFile $env:SYSTEMROOT\system32\jf.exe'" ; jf setup
+```
+
+## Connecting the Plugin to Your JFrog Environment
+You can connect the plugin to your JFrog environment:
+* [In the IDE Settings](#in-the-ide-settings)
+* [Using environment variables](#using-environment-variables)
+
+**Notes:**
+* If your JFrog Platform instance uses a domain with a self-signed certificate, add the certificate to IDEA as described [here](https://www.jetbrains.com/help/idea/settings-tools-server-certificates.html).
+* From JFrog Xray version **1.9** to **2.x**, IntelliJ IDEA users connecting to Xray from IntelliJ are required to be granted the ‘View Components’ action in Xray.
+* From JFrog Xray version **3.x**, as part of the JFrog Platform, IntelliJ IDEA users connecting to Xray from IntelliJ require ‘Read’ permission. For more information, see [here](https://www.jfrog.com/confluence/display/JFROG/Permissions).
+
+### In the IDE Settings
+Once the plugin is successfully installed, connect the plugin to your instance of the JFrog Platform:
+1. If your JFrog Platform instance is behind an HTTP proxy, configure the proxy settings as described [here](https://www.jetbrains.com/help/idea/settings-http-proxy.html).
+   Manual proxy configuration is supported since version 1.3.0 of the JFrog IntelliJ IDEA Plugin. Auto-detect proxy settings is supported since version 1.7.0.
+2. Under **Settings (Preferences)** | **Other Settings**, click **JFrog Global Configuration**.
+3. Set your JFrog Platform URL and login credentials.
+4. Test your connection to Xray using the Test Connection button.
+
+![](readme-resources/connect.png)
+
+### Using Environment Variables
+The plugin also supports connecting to your JFrog environment using environment variables:
+1. Under **Settings (Preferences)** | **Other Settings**, click **JFrog Global Configuration**.
+2. Mark **Load connection details from environment variables**.
+
+You may provide basic auth credentials or access token as follows:
+
+*Note: For security reasons, it is recommended to unset the environment variables after launching the IDE.*
+
+- `JFROG_IDE_PLATFORM_URL` - JFrog Platform URL
+- `JFROG_IDE_USERNAME` - JFrog Platform username
+- `JFROG_IDE_PASSWORD` - JFrog Platform password
+- `JFROG_IDE_ACCESS_TOKEN` - JFrog Platform access token
+
+## Applying Your Xray Policies
+You can configure the JFrog IntelliJ IDEA Plugin to reflect the Security Policies. The policies are configured in JFrog Xray.
+
+If you'd like to use a JFrog Project that is associated with the policy, follow these steps:
+1. Create a [JFrog Project](https://www.jfrog.com/confluence/display/JFROG/Projects), or obtain the relevant JFrog Project key.
+2. Create a [Policy](https://www.jfrog.com/confluence/display/JFROG/Creating+Xray+Policies+and+Rules) on JFrog Xray.
+3. Create a [Watch](https://www.jfrog.com/confluence/display/JFROG/Configuring+Xray+Watches) on JFrog Xray and assign your Policy and Project as resources to it.
+4. Configure your Project key in the plugin settings: under **Settings (Preferences)** | **Other Settings**, click **JFrog Global Configuration** and go to the **Settings** tab.
+
+If however your policies are referenced through Xray Watches, follow these steps instead:
+1. Create one or more [Watches](https://www.jfrog.com/confluence/display/JFROG/Configuring+Xray+Watches) on JFrog Xray.
+2. Configure your Watches in the plugin settings: under **Settings (Preferences)** | **Other Settings**, click **JFrog Global Configuration** and go to the **Settings** tab.
+
+# Using the Plugin
+After the JFrog Plugin is installed, a new JFrog panel is added at the bottom of the screen.
+Opening the JFrog panel displays two views:
+
+- The **Local** view displays information about the local code as it is being developed in the IDE.
+  JFrog Xray continuously scans the project's dependencies and source code locally.
+  The information is displayed in the **Local** view.
+- The **CI** view allows the tracking of the code as it is built, tested and scanned by the CI server.
+  It displays information about the status of the build and includes a link to the build log on the CI server.
+
+## The Local View
+The JFrog IntelliJ IDEA Plugin continuously scans your project's dependencies with JFrog Xray and displays this information under the Local view.
+It allows developers to view vulnerability information about their dependencies and source code in their IDE.
+With this information, a developer can make an informed decision on whether to use a component or not before it gets entrenched into the organization’s product.
+
+### Scanning a Project
+Scan your project by clicking the Run Scan ![](readme-resources/run-scan-button.png) button.
+After the scan is done, a list of vulnerable files will appear.
+
+Each descriptor file (like pom.xml in Maven, go.mod in Go, etc.) in the list contains vulnerable dependencies, and each dependency contains the vulnerabilities themselves.
+
+By right-clicking on a dependency line, you can jump to the dependency's declaration in the descriptor file (if it's a direct dependency), or to direct dependencies that depend on the vulnerable component (if any).
+
+![](readme-resources/jump-to-descriptor.png)
+
+By right-clicking on a vulnerability line, you can create an [Ignore Rule](https://www.jfrog.com/confluence/display/JFROG/Ignore+Rules) in Xray.
+
+![](readme-resources/create-ignore-rule.png)
+
+### Viewing Vulnerability Details
+Clicking a vulnerability in the list will open the vulnerability details view.
+This view contains information about the vulnerability, the vulnerable component, fixed versions, impact paths and much more.
+
+![](readme-resources/vuln-details.png)
+![](readme-resources/vuln-impact-graph.png)
+
+### Dependencies Tree Icons
+The icon demonstrates the top severity issue of a selected component and its transitive dependencies. The following table describes the severities from lowest to highest:
+
+|                             Icon                             | Severity |
+|:------------------------------------------------------------:|:--------:|
+| <img src="src/main/resources/icons/unknown.svg" width="30">  | Unknown  |
+|   <img src="src/main/resources/icons/low.svg" width="30">    |   Low    |
+|  <img src="src/main/resources/icons/medium.svg" width="30">  |  Medium  |
+|   <img src="src/main/resources/icons/high.svg" width="30">   |   High   |
+| <img src="src/main/resources/icons/critical.svg" width="30"> | Critical |
+
+## The CI View
+The JFrog IntelliJ IDEA Plugin allows you to view information about your builds directly from your CI system.
+This allows developers to keep track of the status of their code, while it is being built, tested and scanned as part of the CI pipeline, regardless of the CI provider used.
+
+This information can be viewed inside IntelliJ IDEA, from the **JFrog** Panel, under the **CI** tab.
+
+The following details can be made available in the CI view:
+
+* Status of the build run (passed or failed)
+* Build run start time
+* Git branch and latest commit message
+* Link to the CI run log
+* Security information about the build artifacts and dependencies
+
+![](readme-resources/ci-view.png)
+
+### How Does It Work?
+The CI information displayed in IDEA is pulled by the JFrog IDEA Plugin directly from JFrog Artifactory.
+This information is stored in Artifactory as part of the build-info, which is published to Artifactory by the CI server.
+Read more about build-info in the [Build Integration](https://www.jfrog.com/confluence/display/JFROG/Build+Integration) documentation page.
+If the CI pipeline is also configured to scan the build-info by JFrog Xray, the JFrog IDEA Plugin will pull the results of the scan from JFrog Xray and display them in the CI view as well.
+
+### Setting Up CI Integration
+Set up your CI pipeline to expose information, so that it is visible in IDEA as described [here](https://www.jfrog.com/confluence/display/JFROG/Setting+Up+CI+Integration).
+
+Next, follow these steps:
+1. Under **Settings (Preferences)** | **Other Settings**, click **JFrog Global Configuration**. configure the JFrog Platform URL and the user you created.
+2. Under **Settings (Preferences)** | **Other Settings**, click **JFrog CI Integration**. Set your CI build name in the **Build name pattern** field. This is the name of the build published to Artifactory by your CI pipeline. You have the option of setting * to view all the builds published to Artifactory.
+   ![](readme-resources/ci-settings.png)
+3. Click **Apply** and open the **CI** tab under the **JFrog** panel at the bottom of the screen and click the **Refresh** button.
+
+# Troubleshooting
+The JFrog IntelliJ IDES Plugin uses the IntelliJ IDEA log files. By default, the log level used by the plugin is INFO.
+
+You have the option of increasing the log level to DEBUG. Here's how to do it:
+
+1. Go to **Help** | **Diagnostic Tools** | **Debug Log Settings...**
+2. Inside the **Custom Debug Log Configuration** window add the following line:
+```
+#com.jfrog.ide.idea.log.Logger
+```
+To see the Intellij IDEA log file, depends on the IDE version and OS as described [here](https://intellij-support.jetbrains.com/hc/en-us/articles/207241085-Locating-IDE-log-files), go to **Help** | **Show/reveal Log in Explorer/finder/Konqueror/Nautilus**.
+
+## Reporting Issues
+
+Please report issues by opening an issue on [Github](https://github.com/jfrog/jfrog-idea-plugin/issues).
+
+# Contributions
 ## Building and Testing the Sources
 
 To build the plugin sources, please follow these steps:
@@ -58,7 +216,7 @@ To build and run the plugin following your code changes, follow these steps:
 * Run the *buildPlugin* task.
 * Run the *runIdea* task.
 
-# Code Contributions
+## Code Contributions
 We welcome community contribution through pull requests.
 
 # Release Notes
