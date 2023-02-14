@@ -1,6 +1,6 @@
 [![](readme_image.png)](#readme)
 
-<div style="text-align: center;">
+<div align="center">
 
 # JFrog IntelliJ IDEA Plugin 
 
@@ -31,8 +31,7 @@ In addition to IntelliJ IDEA, the plugin also supports the following IDEs:
 * GoLand
 
 ## Getting Started
-1. Install the JFrog IntelliJ IDEA Plugin:
-<iframe frameborder="none" width="245px" height="48px" src="https://plugins.jetbrains.com/embeddable/install/9834"></iframe>
+1. Install the JFrog IntelliJ IDEA Plugin: <iframe frameborder="none" width="245px" height="48px" src="https://plugins.jetbrains.com/embeddable/install/9834"></iframe>
 2. Need a FREE JFrog environment in the cloud? [Create one now](#set-up-a-free-jfrog-environment-in-the-cloud).
 3. [Connect the plugin to your JFrog environment](#connecting-to-your-jfrog-environment).
 4. [Start](#using-the-plugin) using the plugin.
