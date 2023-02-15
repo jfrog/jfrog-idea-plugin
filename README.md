@@ -8,11 +8,10 @@
 
 [![Build status](https://github.com/jfrog/jfrog-idea-plugin/actions/workflows/test.yml/badge.svg)](https://github.com/jfrog/jfrog-idea-plugin/actions/workflows/test.yml)
 [![Marketplace](https://img.shields.io/jetbrains/plugin/v/9834-jfrog)](https://plugins.jetbrains.com/plugin/9834-jfrog)
-[![](https://img.shields.io/badge/Docs-%F0%9F%93%96-blue)](https://www.jfrog.com/confluence/display/JFROG/JFrog+IntelliJ+IDEA+Plugin)
 
 </div>
 
-## About this Plugin
+# About this Plugin
 The cost of remediating a vulnerability is akin to the cost of fixing a bug.
 The earlier you remediate a vulnerability in the release cycle, the lower the cost.
 [JFrog Xray](https://jfrog.com/xray/) is instrumental in flagging components when vulnerabilities are discovered in production systems at runtime,
@@ -41,6 +40,7 @@ Need a FREE JFrog environment in the cloud, so that JFrog IntelliJ IDEA Plugin c
 
 1. Install JFrog CLI on your machine.
 2. Create a FREE JFrog environment in the cloud for you.
+3. Configure IntelliJ IDEA to connect to your new environment.
 
 **MacOS and Linux using cURL**
 ```
@@ -54,7 +54,7 @@ powershell "Start-Process -Wait -Verb RunAs powershell '-NoProfile iwr https://r
 
 ## Connecting the Plugin to Your JFrog Environment
 You can connect the plugin to your JFrog environment:
-* [In the IDE Settings](#in-the-ide-settings)
+* [In the IDE settings](#in-the-ide-settings)
 * [Using environment variables](#using-environment-variables)
 
 **Notes:**
@@ -135,16 +135,24 @@ This view contains information about the vulnerability, the vulnerable component
 ![](readme-resources/vuln-details.png)
 ![](readme-resources/vuln-impact-graph.png)
 
+### Contextual Analysis
+You can avoid wasting your time fixing risks that are not imposed and reduce false positives with contextual analysis.
+As part of the project's scan, JFrog IntelliJ IDEA Plugin will let you know if vulnerabilities in your dependencies are applicable or not.
+
+![](readme-resources/not-applicable.png)
+![](readme-resources/applicable.png)
+
 ### Dependencies Tree Icons
 The icon demonstrates the top severity issue of a selected component and its transitive dependencies. The following table describes the severities from lowest to highest:
 
-|                             Icon                             | Severity |
-|:------------------------------------------------------------:|:--------:|
-| <img src="src/main/resources/icons/unknown.svg" width="30">  | Unknown  |
-|   <img src="src/main/resources/icons/low.svg" width="30">    |   Low    |
-|  <img src="src/main/resources/icons/medium.svg" width="30">  |  Medium  |
-|   <img src="src/main/resources/icons/high.svg" width="30">   |   High   |
-| <img src="src/main/resources/icons/critical.svg" width="30"> | Critical |
+|                                                                                                                                                                     Icon                                                                                                                                                                      |    Severity    |
+|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------:|
+|                                                                                                                                          <img src="src/main/resources/icons/unknown.svg" width="30">                                                                                                                                          |    Unknown     |
+|                                                                                                                                            <img src="src/main/resources/icons/low.svg" width="30">                                                                                                                                            |      Low       |
+|                                                                                                                                          <img src="src/main/resources/icons/medium.svg" width="30">                                                                                                                                           |     Medium     |
+|                                                                                                                                           <img src="src/main/resources/icons/high.svg" width="30">                                                                                                                                            |      High      |
+|                                                                                                                                         <img src="src/main/resources/icons/critical.svg" width="30">                                                                                                                                          |    Critical    |
+| <img src="src/main/resources/icons/unknownnotapplic.svg" width="15"><img src="src/main/resources/icons/lownotapplic.svg" width="15"><img src="src/main/resources/icons/mediumnotapplic.svg" width="15"><img src="src/main/resources/icons/highnotapplic.svg" width="15"><img src="src/main/resources/icons/criticalnotapplic.svg" width="15"> | Not Applicable |
 
 ## The CI View
 The JFrog IntelliJ IDEA Plugin allows you to view information about your builds directly from your CI system.
@@ -189,7 +197,7 @@ You have the option of increasing the log level to DEBUG. Here's how to do it:
 ```
 To see the Intellij IDEA log file, depends on the IDE version and OS as described [here](https://intellij-support.jetbrains.com/hc/en-us/articles/207241085-Locating-IDE-log-files), go to **Help** | **Show/reveal Log in Explorer/finder/Konqueror/Nautilus**.
 
-## Reporting Issues
+# Reporting Issues
 
 Please report issues by opening an issue on [Github](https://github.com/jfrog/jfrog-idea-plugin/issues).
 
