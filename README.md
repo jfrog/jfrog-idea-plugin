@@ -11,6 +11,33 @@
 
 </div>
 
+# Table of Contents
+- [JFrog IntelliJ IDEA Plugin](#jfrog-intellij-idea-plugin)
+- [Table of Contents](#table-of-contents)
+- [About this Plugin](#about-this-plugin)
+- [Getting Started](#getting-started)
+  - [Set Up a FREE JFrog Environment in the Cloud](#set-up-a-free-jfrog-environment-in-the-cloud)
+  - [Connecting the Plugin to Your JFrog Environment](#connecting-the-plugin-to-your-jfrog-environment)
+    - [In the IDE Settings](#in-the-ide-settings)
+    - [Using Environment Variables](#using-environment-variables)
+  - [Applying Your Xray Policies](#applying-your-xray-policies)
+- [Using the Plugin](#using-the-plugin)
+  - [The Local View](#the-local-view)
+      - [Scanning a Project](#scanning-a-project)
+      - [Viewing Vulnerability Details](#viewing-vulnerability-details)
+      - [Contextual Analysis](#contextual-analysis)
+      - [Dependencies Tree Icons](#dependencies-tree-icons)
+  - [The CI View](#the-ci-view)
+      - [How Does It Work?](#how-does-it-work)
+      - [Setting Up CI Integration](#setting-up-ci-integration)
+- [Troubleshooting](#troubleshooting)
+- [Reporting Issues](#reporting-issues)
+- [Contributions](#contributions)
+  - [Building and Testing the Sources](#building-and-testing-the-sources)
+  - [Developing the Plugin Code](#developing-the-plugin-code)
+  - [Code Contributions](#code-contributions)
+- [Release Notes](#release-notes)
+
 # About this Plugin
 The cost of remediating a vulnerability is akin to the cost of fixing a bug.
 The earlier you remediate a vulnerability in the release cycle, the lower the cost.
