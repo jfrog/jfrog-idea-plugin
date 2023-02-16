@@ -2,8 +2,10 @@ package com.jfrog.ide.idea.scan;
 
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
+import com.jfrog.xray.client.services.entitlements.Feature;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 
 /**
@@ -19,8 +21,18 @@ public class Eos extends ScanBinaryExecutor {
         supportedLanguages = List.of("python");
     }
 
-    public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder) throws IOException, InterruptedException {
+    public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder) throws IOException, InterruptedException, URISyntaxException {
         return super.execute(inputFileBuilder, SCANNER_ARGS);
+    }
+
+    @Override
+    String getBinaryDownloadURL() {
+        return null;
+    }
+
+    @Override
+    Feature getScannerFeatureName() {
+        return null;
     }
 
 }

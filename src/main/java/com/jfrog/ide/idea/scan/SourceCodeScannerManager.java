@@ -14,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
 
 import javax.swing.tree.TreeNode;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
@@ -24,7 +25,6 @@ import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
 
 public class SourceCodeScannerManager {
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
-
     private final Eos eos = new Eos();
     private final ApplicabilityScannerExecutor applicability = new ApplicabilityScannerExecutor();
 
@@ -66,7 +66,7 @@ public class SourceCodeScannerManager {
                 List<JFrogSecurityWarning> eosResults = eos.execute(new ScanConfig.Builder().language(codeBaseLanguage).roots(List.of(getProjectBasePath(project).toString())));
                 scanResults.addAll(eosResults);
             }
-        } catch (IOException | InterruptedException |
+        } catch (IOException | InterruptedException | URISyntaxException |
                  NullPointerException e) {
             logError(Logger.getInstance(), "Failed to scan source code", e, true);
         } finally {
