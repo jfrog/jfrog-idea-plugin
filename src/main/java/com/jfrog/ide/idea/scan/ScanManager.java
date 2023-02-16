@@ -13,6 +13,7 @@ import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.navigation.NavigationService;
+import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.xray.client.impl.XrayClient;
 import com.jfrog.xray.client.services.system.Version;
 import org.jetbrains.annotations.NotNull;
@@ -23,11 +24,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static com.jfrog.ide.common.log.Utils.logError;
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBuilder;
 
 public class ScanManager {
+    private final long SCAN_TIMEOUT_MINUTES = 10;
     private final Project project;
     private final ScannerFactory factory;
     private Map<Integer, ScannerBase> scanners = Maps.newHashMap();
@@ -65,23 +68,31 @@ public class ScanManager {
         }
 
         project.getMessageBus().syncPublisher(ApplicationEvents.ON_SCAN_LOCAL_STARTED).update();
-        ExecutorService executor = Executors.newFixedThreadPool(3);
-        try {
-            ScanLogic scanLogic = createScanLogic();
-            refreshScanners(scanLogic, executor);
-            NavigationService.clearNavigationMap(project);
-            for (ScannerBase scanner : scanners.values()) {
-                try {
-                    scanner.asyncScanAndUpdateResults();
-                } catch (RuntimeException e) {
-                    logError(Logger.getInstance(), "", e, true);
+        Thread currScanThread = new Thread(() -> {
+            LocalComponentsTree componentsTree = LocalComponentsTree.getInstance(project);
+            ExecutorService executor = Executors.newFixedThreadPool(3);
+            try {
+                ScanLogic scanLogic = createScanLogic();
+                refreshScanners(scanLogic, executor);
+                NavigationService.clearNavigationMap(project);
+                for (ScannerBase scanner : scanners.values()) {
+                    try {
+                        scanner.asyncScanAndUpdateResults();
+                    } catch (RuntimeException e) {
+                        logError(Logger.getInstance(), "", e, true);
+                    }
                 }
+                executor.shutdown();
+                //noinspection ResultOfMethodCallIgnored
+                executor.awaitTermination(SCAN_TIMEOUT_MINUTES, TimeUnit.MINUTES);
+                componentsTree.cacheTree();
+            } catch (IOException | RuntimeException | InterruptedException e) {
+                logError(Logger.getInstance(), "", e, true);
+            } finally {
+                executor.shutdownNow();
             }
-        } catch (IOException | RuntimeException | InterruptedException e) {
-            logError(Logger.getInstance(), "", e, true);
-        } finally {
-            executor.shutdown();
-        }
+        });
+        currScanThread.start();
     }
 
     /**

@@ -6,10 +6,15 @@ import com.intellij.openapi.ui.JBMenuItem;
 import com.intellij.pom.Navigatable;
 import com.intellij.ui.components.JBMenu;
 import com.jfrog.ide.common.nodes.*;
+import com.jfrog.ide.common.persistency.ScanCache;
+import com.jfrog.ide.common.persistency.ScanCacheObject;
 import com.jfrog.ide.idea.actions.CreateIgnoreRuleAction;
+import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.navigation.NavigationTarget;
 import com.jfrog.ide.idea.ui.menus.ToolbarPopupMenu;
+import com.jfrog.ide.idea.utils.Utils;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -20,9 +25,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
+import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author yahavi
@@ -31,31 +38,31 @@ public class LocalComponentsTree extends ComponentsTree {
     private static final String SHOW_IN_PROJECT_DESCRIPTOR = "Show direct dependency in project descriptor";
     public static final String IGNORE_RULE_TOOL_TIP = "Creating Ignore Rules is only available when a JFrog Project or Watch is defined.";
 
-    List<FileTreeNode> fileNodes = new ArrayList<>();
+    private final ScanCache cache;
 
-    public LocalComponentsTree(@NotNull Project project) {
+    public LocalComponentsTree(@NotNull Project project) throws IOException {
         super(project);
         setCellRenderer(new ComponentsTreeCellRenderer());
+        String projectId = project.getProjectFilePath();
+        if (StringUtils.isBlank(projectId)) {
+            projectId = project.getName();
+        }
+        cache = new ScanCache(projectId, Utils.HOME_PATH.resolve("cache"), Logger.getInstance());
+        setNodesFromCache();
     }
 
     public static LocalComponentsTree getInstance(@NotNull Project project) {
         return project.getService(LocalComponentsTree.class);
     }
 
-    private void appendProjectWhenReady(FileTreeNode filteredRoot) {
-        ApplicationManager.getApplication().invokeLater(() -> appendProject(filteredRoot));
-    }
-
     @Override
     public void reset() {
-        fileNodes = new ArrayList<>();
         super.reset();
     }
 
     public void addScanResults(List<FileTreeNode> fileTreeNodes) {
         for (FileTreeNode node : fileTreeNodes) {
-            fileNodes.add(node);
-            appendProjectWhenReady(node);
+            ApplicationManager.getApplication().invokeLater(() -> appendProject(node));
         }
     }
 
@@ -162,5 +169,26 @@ public class LocalComponentsTree extends ComponentsTree {
                 }
             }
         });
+    }
+
+    public void cacheTree() throws IOException {
+        SortableChildrenTreeNode root = (SortableChildrenTreeNode) getModel().getRoot();
+        cache.cacheNodes(Collections.list(root.children()).stream().map(treeNode -> (FileTreeNode) treeNode).collect(Collectors.toList()));
+    }
+
+    private void setNodesFromCache() {
+        ScanCacheObject cacheObject = cache.getScanCacheObject();
+        if (cacheObject == null) {
+            return;
+        }
+        List<FileTreeNode> treeNodes = cacheObject.getFileTreeNodes();
+        if (treeNodes == null) {
+            return;
+        }
+        SortableChildrenTreeNode root = new SortableChildrenTreeNode();
+        for (FileTreeNode node : treeNodes) {
+            root.add(node);
+        }
+        populateTree(root);
     }
 }
