@@ -45,11 +45,6 @@ public class GradleKotlinInspection extends GradleInspection {
     }
 
     @Override
-    PsiElement[] getTargetElements(PsiElement element) {
-        return new PsiElement[]{element};
-    }
-
-    @Override
     boolean isDependency(PsiElement element) {
         List<KtValueArgument> argumentList = ((KtValueArgumentList) element).getArguments();
         if (argumentList.isEmpty() || !(argumentList.get(0).getArgumentExpression() instanceof KtStringTemplateExpression)) {
@@ -91,4 +86,5 @@ public class GradleKotlinInspection extends GradleInspection {
         // Remove '@' suffix, for example commons-lang:commons-lang:2.4@jar
         return StringUtils.substringBefore(value, "@");
     }
+
 }

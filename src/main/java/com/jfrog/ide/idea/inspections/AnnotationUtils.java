@@ -6,9 +6,7 @@ import com.intellij.psi.PsiElement;
 import com.jfrog.ide.common.nodes.DependencyNode;
 import com.jfrog.ide.common.nodes.subentities.License;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.intellij.lang.annotation.HighlightSeverity.INFORMATION;
@@ -23,30 +21,26 @@ public class AnnotationUtils {
      *
      * @param annotationHolder - The annotations will be registered in this container
      * @param dependency       - The dependency tree node correlated to the element
-     * @param elements         - The elements to apply the annotations
+     * @param element          - The element to apply the annotations
      * @param showIcon         - True if should add annotation icon
      */
-    static void registerAnnotation(AnnotationHolder annotationHolder, DependencyNode dependency, PsiElement[] elements, boolean showIcon) {
+    static void registerAnnotation(AnnotationHolder annotationHolder, DependencyNode dependency, PsiElement element, boolean showIcon) {
         String licensesString = getLicensesString(dependency);
         String topIssue = getTopIssueString(dependency);
         AnnotationIconRenderer iconRenderer = showIcon ? new AnnotationIconRenderer(dependency, dependency.getSeverity(), topIssue) : null;
-        Arrays.stream(elements)
-                .filter(Objects::nonNull)
-                .forEach(element -> {
-                    try {
-                        AnnotationBuilder builder = annotationHolder.newAnnotation(INFORMATION, topIssue).range(element);
-                        if (showIcon) {
-                            iconRenderer.setProject(element.getProject());
-                            builder = builder.gutterIconRenderer(iconRenderer);
-                        }
-                        builder.create();
-                        annotationHolder.newAnnotation(INFORMATION, licensesString).range(element).create();
-                    } catch (IllegalArgumentException e) {
-                        // Exception is thrown when the element we register the annotation for is out of bound of the
-                        // containing element exists in the provided annotationHolder.
-                        // This scenario may occur during a gradle-inspections.
-                    }
-                });
+        try {
+            AnnotationBuilder builder = annotationHolder.newAnnotation(INFORMATION, topIssue).range(element);
+            if (showIcon) {
+                iconRenderer.setProject(element.getProject());
+                builder = builder.gutterIconRenderer(iconRenderer);
+            }
+            builder.create();
+            annotationHolder.newAnnotation(INFORMATION, licensesString).range(element).create();
+        } catch (IllegalArgumentException e) {
+            // Exception is thrown when the element we register the annotation for is out of bound of the
+            // containing element exists in the provided annotationHolder.
+            // This scenario may occur during a gradle-inspections.
+        }
     }
 
     /**
