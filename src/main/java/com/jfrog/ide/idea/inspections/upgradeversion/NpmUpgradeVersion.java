@@ -2,11 +2,10 @@ package com.jfrog.ide.idea.inspections.upgradeversion;
 
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.project.Project;
-import com.intellij.util.EnvironmentUtil;
-import com.jfrog.ide.common.npm.NpmInstall;
-import com.jfrog.ide.idea.log.Logger;
+import com.jfrog.ide.common.npm.NpmComponentUpdater;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.nio.file.Paths;
 
 /**
@@ -21,12 +20,9 @@ public class NpmUpgradeVersion extends UpgradeVersion {
     }
 
     @Override
-    public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
-        try {
-            NpmInstall npmInstall = new NpmInstall(Paths.get(project.getBasePath()), EnvironmentUtil.getEnvironmentMap());
-            npmInstall.run(componentName, fixVersion, Logger.getInstance());
-        } catch (Exception e) {
-            Logger.getInstance().warn("Failed while trying to upgrade npm component version. Error: " + e);
-        }
+    public void upgradeComponentVersion(@NotNull Project project, @NotNull ProblemDescriptor descriptor) throws IOException {
+        NpmComponentUpdater npmComponentUpdater = new NpmComponentUpdater(Paths.get(project.getBasePath()), this.log, this.env);
+        npmComponentUpdater.run(componentName, fixVersion);
     }
+
 }

@@ -2,11 +2,10 @@ package com.jfrog.ide.idea.inspections.upgradeversion;
 
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.project.Project;
-import com.intellij.util.EnvironmentUtil;
-import com.jfrog.ide.common.yarn.YarnUpgrade;
-import com.jfrog.ide.idea.log.Logger;
+import com.jfrog.ide.common.yarn.YarnComponentUpdater;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.nio.file.Paths;
 
 /**
@@ -21,12 +20,8 @@ public class YarnUpgradeVersion extends UpgradeVersion {
     }
 
     @Override
-    public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
-        try {
-            YarnUpgrade yarnUpgrade = new YarnUpgrade(Paths.get(project.getBasePath()), EnvironmentUtil.getEnvironmentMap());
-            yarnUpgrade.run(componentName, fixVersion);
-        } catch (Exception e) {
-            Logger.getInstance().warn("Failed while trying to upgrade yarn component version. Error: " + e);
-        }
+    public void upgradeComponentVersion(@NotNull Project project, @NotNull ProblemDescriptor descriptor) throws IOException {
+        YarnComponentUpdater yarnComponentUpdater = new YarnComponentUpdater(Paths.get(project.getBasePath()), this.log, this.env);
+        yarnComponentUpdater.run(componentName, fixVersion);
     }
 }

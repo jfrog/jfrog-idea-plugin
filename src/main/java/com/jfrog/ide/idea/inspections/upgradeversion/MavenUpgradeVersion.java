@@ -28,7 +28,7 @@ public class MavenUpgradeVersion extends UpgradeVersion {
     }
 
     @Override
-    public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
+    public void upgradeComponentVersion(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
         final XmlTag[] versions = ((XmlTagImpl) descriptor.getPsiElement()).findSubTags("version");
         XmlTagValue versionTagValue = versions[0].getValue();
         Matcher propMatcher = POM_PROPERTY_REGEX.matcher(versionTagValue.getText());

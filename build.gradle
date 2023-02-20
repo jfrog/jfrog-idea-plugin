@@ -42,7 +42,7 @@ repositories {
     }
 }
 
-def buildInfoVersion = '2.39.1'
+def buildInfoVersion = '2.39.4'
 dependencies {
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.14.0'
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-extractor', version: buildInfoVersion
@@ -148,7 +148,7 @@ static String getWebviewChecksumFromServer(String webviewUrl) {
  */
 static def updateWebviewChecksumInPropertiesFile(String checksum) {
     def gradleProps = new Properties()
-    File gradlePropertiesFile = new File("gradle.properties");
+    File gradlePropertiesFile = new File("gradle.properties")
     gradlePropertiesFile.withInputStream { gradleProps.load(it) }
     gradleProps.setProperty("webviewChecksum", checksum)
     gradlePropertiesFile.withWriter('UTF-8') { fileWriter ->
