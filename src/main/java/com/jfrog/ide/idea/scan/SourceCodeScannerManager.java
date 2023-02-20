@@ -25,7 +25,7 @@ import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
 
 public class SourceCodeScannerManager {
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
-    private final ApplicabilityScannerExecutor applicability = new ApplicabilityScannerExecutor();
+    private final ApplicabilityScannerExecutor applicability = new ApplicabilityScannerExecutor(Logger.getInstance());
 
     protected Project project;
     protected String codeBaseLanguage;
@@ -51,7 +51,7 @@ public class SourceCodeScannerManager {
             return Collections.emptyList();
         }
         List<JFrogSecurityWarning> scanResults = new ArrayList<>();
-        Map<String, List<VulnerabilityNode>> issuesMap = mapIssuesByCve(depScanResults);
+        Map<String, List<VulnerabilityNode>> issuesMap = mapDirectIssuesByCve(depScanResults);
         try {
             if (applicability.getSupportedLanguages().contains(codeBaseLanguage)) {
                 indicator.setText("Running applicability scan");
@@ -134,15 +134,18 @@ public class SourceCodeScannerManager {
     }
 
     /**
-     * Maps all the issues (vulnerabilities and security violations) by their CVE IDs.
+     * Maps direct dependencies  issues (vulnerabilities and security violations) by their CVE IDs.
      * Issues without a CVE ID are ignored.
      *
      * @param depScanResults - collection of DependencyNodes.
      * @return a map of CVE IDs to lists of issues with them.
      */
-    private Map<String, List<VulnerabilityNode>> mapIssuesByCve(Collection<DependencyNode> depScanResults) {
+    private Map<String, List<VulnerabilityNode>> mapDirectIssuesByCve(Collection<DependencyNode> depScanResults) {
         Map<String, List<VulnerabilityNode>> issues = new HashMap<>();
         for (DependencyNode dep : depScanResults) {
+            if (dep.isIndirect()) {
+                continue;
+            }
             Enumeration<TreeNode> treeNodeEnumeration = dep.children();
             while (treeNodeEnumeration.hasMoreElements()) {
                 TreeNode node = treeNodeEnumeration.nextElement();

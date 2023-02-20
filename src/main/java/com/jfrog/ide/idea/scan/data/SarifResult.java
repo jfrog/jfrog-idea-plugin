@@ -17,9 +17,15 @@ public class SarifResult {
     private String ruleId;
     @JsonProperty("codeFlows")
     private List<CodeFlow> codeFlows = new ArrayList<>();
+    @JsonProperty("kind")
+    private String kind;
 
     public Message getMessage() {
         return message;
+    }
+
+    public String getKind() {
+        return kind != null ? kind : "";
     }
 
     public void setMessage(Message message) {
@@ -29,6 +35,7 @@ public class SarifResult {
     public List<Location> getLocations() {
         return locations;
     }
+
     @SuppressWarnings({"unused"})
     public void setLocations(List<Location> locations) {
         this.locations = locations;
@@ -37,14 +44,17 @@ public class SarifResult {
     public String getRuleId() {
         return ruleId;
     }
+
     @SuppressWarnings({"unused"})
     public void setRuleId(String ruleId) {
         this.ruleId = ruleId;
     }
+
     @SuppressWarnings({"unused"})
     public List<CodeFlow> getCodeFlows() {
         return codeFlows;
     }
+
     @SuppressWarnings({"unused"})
     public void setCodeFlows(List<CodeFlow> codeFlows) {
         this.codeFlows = codeFlows;

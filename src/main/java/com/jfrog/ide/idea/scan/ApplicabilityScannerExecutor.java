@@ -6,6 +6,7 @@ import com.jfrog.ide.idea.scan.data.Rule;
 import com.jfrog.ide.idea.scan.data.Run;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
 import com.jfrog.xray.client.services.entitlements.Feature;
+import org.jfrog.build.api.util.Log;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -13,7 +14,6 @@ import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * @author Tal Arian
@@ -25,8 +25,8 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
     private static final String BINARY_DOWNLOAD_URL = "xsc-gen-exe-analyzer-manager-local/v1/[RELEASE]";
     private static final String DOWNLOAD_SCANNER_NAME = "analyzerManager.zip";
 
-    public ApplicabilityScannerExecutor() {
-        super(SCAN_TYPE, SCANNER_BINARY_NAME, DOWNLOAD_SCANNER_NAME);
+    public ApplicabilityScannerExecutor(Log log) {
+        super(SCAN_TYPE, SCANNER_BINARY_NAME, DOWNLOAD_SCANNER_NAME, log);
         supportedLanguages = List.of("python", "js");
     }
 
@@ -58,9 +58,6 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
                 String ScannerSearchTarget = scanners.stream().filter(scanner -> scanner.getId().equals(warning.getName())).findFirst().map(scanner -> scanner.getFullDescription().getText()).orElse("");
                 warning.setScannerSearchTarget(ScannerSearchTarget);
             }
-            // Adds the not applicable CVEs data
-            Stream<String> knownCves = scanners.stream().map(Rule::getId);
-            knownCves.filter(cve -> !applicabilityCves.contains(cve)).forEach(cve -> results.add(new JFrogSecurityWarning(cve, false)));
         }
         return results;
     }
