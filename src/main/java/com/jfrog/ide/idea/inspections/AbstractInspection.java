@@ -231,14 +231,12 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     abstract UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, String issue);
 
     void registerProblem(ProblemsHolder problemsHolder, DependencyNode dependency, PsiElement element, String componentName) {
+        boolean isTransitive = dependency.isIndirect() || !dependency.getTitle().contains(componentName);
+        String dependencyDescription = getDependencyDescription(dependency.getTitle(), isTransitive);
         List<LocalQuickFix> quickFixes = new ArrayList<>();
-        boolean isIndirect = dependency.isIndirect();
-        quickFixes.add(new ShowInDependencyTree(dependency, isIndirect));
+        quickFixes.add(new ShowInDependencyTree(dependency, dependencyDescription));
 
-        String description = "dependency <" + dependency.getTitle() + "> has security vulnerabilities";
-        if (isIndirect) {
-            description = "transitive " + description;
-        } else {
+        if (!isTransitive) {
             dependency.children().asIterator().forEachRemaining(issueNode -> {
                 List<String> fixVersionStrings = ListUtils.emptyIfNull(((VulnerabilityNode) issueNode).getFixedVersions());
                 for (String fixVersionString : fixVersionStrings) {
@@ -250,10 +248,18 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         }
         problemsHolder.registerProblem(
                 element,
-                "JFrog: " + description,
+                "JFrog: " + dependencyDescription + " has security vulnerabilities",
                 ProblemHighlightType.WARNING,
                 quickFixes.toArray(LocalQuickFix[]::new)
         );
+    }
+
+    private String getDependencyDescription(String depComponent, boolean isTransitive) {
+        String description = "dependency <" + depComponent + ">";
+        if (isTransitive) {
+            description = "transitive " + description;
+        }
+        return description;
     }
 
     private String convertFixVersionStringToMinFixVersion(String fixVersionString) {

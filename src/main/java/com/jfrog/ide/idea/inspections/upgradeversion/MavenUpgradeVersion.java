@@ -39,7 +39,7 @@ public class MavenUpgradeVersion extends UpgradeVersion {
             // Property version tag. (example: '<version>${my.ver}</version>')
             MavenDomProjectModel domModel = MavenDomUtil.getMavenDomProjectModel(project, descriptor.getPsiElement().getContainingFile().getVirtualFile());
             if (domModel != null) {
-                XmlTag prop = findProperty(domModel.getProperties(), propMatcher.group(0));
+                XmlTag prop = findProperty(domModel.getProperties(), propMatcher.group(1));
                 if (prop != null) {
                     prop.getValue().setText(fixVersion);
                 }

@@ -23,11 +23,11 @@ public class ShowInDependencyTree implements LocalQuickFix, Iconable, HighPriori
 
     final static String SHOW_IN_TREE_MESSAGE = "Show vulnerability info in JFrog plugin";
     private final DependencyNode node;
-    private final boolean isIndirect;
+    private final String dependencyDescription;
 
-    public ShowInDependencyTree(DependencyNode node, boolean isIndirect) {
+    public ShowInDependencyTree(DependencyNode node, String dependencyDescription) {
         this.node = node;
-        this.isIndirect = isIndirect;
+        this.dependencyDescription = dependencyDescription;
     }
 
     @Override
@@ -38,11 +38,7 @@ public class ShowInDependencyTree implements LocalQuickFix, Iconable, HighPriori
     @NotNull
     @Override
     public String getFamilyName() {
-        String description = SHOW_IN_TREE_MESSAGE;
-        if (isIndirect) {
-            description += " (transitive dependency:  <" + node.getTitle() + ">)";
-        }
-        return description;
+        return SHOW_IN_TREE_MESSAGE + " (" + dependencyDescription + ")";
     }
 
     @Override
