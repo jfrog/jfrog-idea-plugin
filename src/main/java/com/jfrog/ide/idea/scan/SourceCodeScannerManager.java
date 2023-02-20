@@ -25,7 +25,6 @@ import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
 
 public class SourceCodeScannerManager {
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
-    private final Eos eos = new Eos();
     private final ApplicabilityScannerExecutor applicability = new ApplicabilityScannerExecutor();
 
     protected Project project;
@@ -59,12 +58,6 @@ public class SourceCodeScannerManager {
                 indicator.setFraction(0.25);
                 List<JFrogSecurityWarning> applicabilityResults = applicability.execute(new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).cves(List.copyOf(issuesMap.keySet())).skippedFolders(getSkippedFoldersPatterns()));
                 scanResults.addAll(applicabilityResults);
-            }
-            if (eos.getSupportedLanguages().contains(codeBaseLanguage)) {
-                indicator.setText("Running Eos scan");
-                indicator.setFraction(0.5);
-                List<JFrogSecurityWarning> eosResults = eos.execute(new ScanConfig.Builder().language(codeBaseLanguage).roots(List.of(getProjectBasePath(project).toString())));
-                scanResults.addAll(eosResults);
             }
         } catch (IOException | InterruptedException | URISyntaxException |
                  NullPointerException e) {

@@ -6,7 +6,6 @@ import com.jfrog.ide.idea.scan.data.Rule;
 import com.jfrog.ide.idea.scan.data.Run;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
 import com.jfrog.xray.client.services.entitlements.Feature;
-import org.apache.commons.lang3.SystemUtils;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -21,12 +20,13 @@ import java.util.stream.Stream;
  */
 public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
     private static final String SCAN_TYPE = "analyze-applicability";
-    private static final String SCANNER_BINARY_NAME = SystemUtils.IS_OS_WINDOWS ? "analyzerManager.exe" : "analyzerManager";
+    private static final String SCANNER_BINARY_NAME = "analyzerManager";
     private static final List<String> SCANNER_ARGS = List.of("ca");
     private static final String BINARY_DOWNLOAD_URL = "xsc-gen-exe-analyzer-manager-local/v1/[RELEASE]";
+    private static final String DOWNLOAD_SCANNER_NAME = "analyzerManager.zip";
 
     public ApplicabilityScannerExecutor() {
-        super(SCAN_TYPE, SCANNER_BINARY_NAME);
+        super(SCAN_TYPE, SCANNER_BINARY_NAME, DOWNLOAD_SCANNER_NAME);
         supportedLanguages = List.of("python", "js");
     }
 
@@ -36,7 +36,7 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
 
     @Override
     String getBinaryDownloadURL() {
-        return String.format("%s/%s/%s", BINARY_DOWNLOAD_URL, getOsDistribution(), SCANNER_BINARY_NAME);
+        return String.format("%s/%s/%s", BINARY_DOWNLOAD_URL, getOsDistribution(), DOWNLOAD_SCANNER_NAME);
     }
 
     @Override

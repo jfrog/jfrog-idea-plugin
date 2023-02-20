@@ -12,6 +12,9 @@ import com.jfrog.ide.idea.scan.data.ScanConfig;
 import com.jfrog.ide.idea.scan.data.ScansConfig;
 import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.services.entitlements.Feature;
+import net.lingala.zip4j.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.UnzipParameters;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -49,11 +52,12 @@ public abstract class ScanBinaryExecutor {
     final String scanType;
     protected List<String> supportedLanguages;
     private static final Path BINARIES_DIR = HOME_PATH.resolve("dependencies").resolve("jfrog-security");
-    private static Path BINARY_TARGET_PATH;
+    private static Path binaryTargetPath;
+    private static Path archiveTargetPath;
     private static final String MINIMAL_XRAY_VERSION_SUPPORTED_FOR_ENTITLEMENT = "3.66.0";
     private static final int UPDATE_INTERVAL = 1;
     private static LocalDateTime nextUpdateCheck;
-    private Log log;
+    private final Log log;
     private boolean notSupportedOS;
     private static final String ENV_PLATFORM = "JF_PLATFORM_URL";
     private static final String ENV_USER = "JF_USER";
@@ -67,10 +71,11 @@ public abstract class ScanBinaryExecutor {
     private final ArtifactoryManagerBuilder artifactoryManagerBuilder;
 
 
-    ScanBinaryExecutor(String scanType, String binaryName) {
+    ScanBinaryExecutor(String scanType, String binaryName, String archiveName) {
         this.scanType = scanType;
-        BINARY_TARGET_PATH = BINARIES_DIR.resolve(binaryName);
-        commandExecutor = new CommandExecutor(BINARY_TARGET_PATH.toString(), creatEnvWithCredentials());
+        String executable = SystemUtils.IS_OS_WINDOWS ? binaryName + ".exe" : binaryName;
+        binaryTargetPath = BINARIES_DIR.resolve(binaryName).resolve(executable);
+        archiveTargetPath = BINARIES_DIR.resolve(archiveName);
         log = Logger.getInstance();
         ServerConfig server = GlobalSettings.getInstance().getServerConfig();
         artifactoryManagerBuilder = createAnonymousAccessArtifactoryManagerBuilder(JFROG_RELEASES, server.getProxyConfForTargetUrl(JFROG_RELEASES), log);
@@ -96,7 +101,7 @@ public abstract class ScanBinaryExecutor {
         if (notSupportedOS || !shouldExecute()) {
             return List.of();
         }
-        CommandExecutor commandExecutor = new CommandExecutor(BINARY_TARGET_PATH.toString(), creatEnvWithCredentials());
+        CommandExecutor commandExecutor = new CommandExecutor(binaryTargetPath.toString(), creatEnvWithCredentials());
         updateBinaryIfNeeded();
         Path outputTempDir = null;
         Path inputFile = null;
@@ -111,7 +116,7 @@ public abstract class ScanBinaryExecutor {
 
             Logger log = Logger.getInstance();
             // Execute the external process
-            CommandResults commandResults = commandExecutor.exeCommand(outputTempDir.toFile(), args, null, log);
+            CommandResults commandResults = commandExecutor.exeCommand(binaryTargetPath.toFile().getParentFile(), args, null, log);
             if (commandResults.getExitValue() == USER_NOT_ENTITLED) {
                 log.debug("User not entitled for advance security scan");
                 return List.of();
@@ -131,7 +136,7 @@ public abstract class ScanBinaryExecutor {
     }
 
     private void updateBinaryIfNeeded() throws IOException, URISyntaxException, InterruptedException {
-        if (!Files.exists(BINARY_TARGET_PATH)) {
+        if (!Files.exists(binaryTargetPath)) {
             downloadBinary();
             return;
         }
@@ -139,9 +144,9 @@ public abstract class ScanBinaryExecutor {
             var currentTime = LocalDateTime.now();
             nextUpdateCheck = LocalDateTime.of(currentTime.getYear(), currentTime.getMonth(), currentTime.getDayOfMonth() + UPDATE_INTERVAL, currentTime.getHour(), currentTime.getMinute(), currentTime.getSecond());
             // Check for new version of the binary
-            try (FileInputStream binaryFile = new FileInputStream(BINARY_TARGET_PATH.toFile())) {
+            try (FileInputStream archiveBinaryFile = new FileInputStream(archiveTargetPath.toFile())) {
                 String latestBinaryChecksum = getFileChecksumFromServer(JFROG_RELEASES + getBinaryDownloadURL());
-                String currentBinaryCheckSum = DigestUtils.sha256Hex(binaryFile).toString();
+                String currentBinaryCheckSum = DigestUtils.sha256Hex(archiveBinaryFile);
                 if (!latestBinaryChecksum.equals(currentBinaryCheckSum)) {
                     downloadBinary();
                 }
@@ -149,19 +154,18 @@ public abstract class ScanBinaryExecutor {
         }
     }
 
-
     protected boolean shouldExecute() {
         ServerConfig server = GlobalSettings.getInstance().getServerConfig();
         try (Xray xrayClient = createXrayClientBuilder(server, log).build()) {
             try {
-                if (xrayClient.system().version().isAtLeast(MINIMAL_XRAY_VERSION_SUPPORTED_FOR_ENTITLEMENT)) {
+                if (!xrayClient.system().version().isAtLeast(MINIMAL_XRAY_VERSION_SUPPORTED_FOR_ENTITLEMENT)) {
                     return false;
                 }
+                return xrayClient.entitlements().isEntitled(getScannerFeatureName());
             } catch (IOException e) {
                 log.error("Couldn't connect to JFrog Xray. Please check your credentials.", e);
                 return false;
             }
-            return xrayClient.entitlements().isEntitled(getScannerFeatureName());
         }
     }
 
@@ -184,11 +188,24 @@ public abstract class ScanBinaryExecutor {
     protected void downloadBinary() throws IOException {
         try (ArtifactoryManager artifactoryManager = artifactoryManagerBuilder.build()) {
             String downloadUrl = getBinaryDownloadURL();
-            File downloadBinary = artifactoryManager.downloadToFile(downloadUrl, BINARY_TARGET_PATH.toString());
-            if (downloadBinary == null) {
+            File downloadArchive = artifactoryManager.downloadToFile(downloadUrl, archiveTargetPath.toString());
+            if (downloadArchive == null) {
                 throw new IOException("An empty response received from Artifactory.");
             }
-            downloadBinary.setExecutable(true);
+            // Delete current scanners
+            FileUtils.deleteDirectory(binaryTargetPath.toFile().getParentFile());
+            // Extract archive
+            UnzipParameters params = new UnzipParameters();
+            params.setExtractSymbolicLinks(false);
+            try (ZipFile zip = new ZipFile(archiveTargetPath.toFile())) {
+                zip.extractAll(binaryTargetPath.toFile().getParentFile().toString(), params);
+            } catch (ZipException exception) {
+                throw new IOException("An error occurred while trying to unarchived the JFrog executable:\n" + exception.getMessage());
+            }
+            // Set executable permissions to the downloaded scanner
+            if (!binaryTargetPath.toFile().setExecutable(true)) {
+                throw new IOException("An error occurred while trying to give access permissions to the JFrog executable.");
+            }
         }
     }
 
@@ -233,7 +250,7 @@ public abstract class ScanBinaryExecutor {
         }
         // Mac
         if (SystemUtils.IS_OS_MAC) {
-            if (arch == "arm64") {
+            if (arch.equals("arm64")) {
                 return "mac-arm64";
             } else {
                 return "mac-amd64";
