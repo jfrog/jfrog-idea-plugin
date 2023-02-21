@@ -2,9 +2,16 @@ package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.MessageType;
+import com.intellij.openapi.ui.popup.Balloon;
+import com.intellij.openapi.ui.popup.JBPopupFactory;
+import com.intellij.openapi.wm.StatusBar;
+import com.intellij.openapi.wm.WindowManager;
+import com.intellij.ui.awt.RelativePoint;
 import com.intellij.util.messages.MessageBus;
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.scan.GraphScanLogic;
@@ -15,6 +22,7 @@ import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.xray.client.impl.XrayClient;
+import com.jfrog.xray.client.impl.util.JFrogInactiveEnvironmentException;
 import com.jfrog.xray.client.services.system.Version;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.jfrog.ide.common.log.Utils.logError;
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBuilder;
+import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 public class ScanManager {
     private final long SCAN_TIMEOUT_MINUTES = 10;
@@ -86,6 +95,8 @@ public class ScanManager {
                 //noinspection ResultOfMethodCallIgnored
                 executor.awaitTermination(SCAN_TIMEOUT_MINUTES, TimeUnit.MINUTES);
                 componentsTree.cacheTree();
+            } catch (JFrogInactiveEnvironmentException e) {
+                handleJfrogInactiveEnvironment(e.getRedirectUrl());
             } catch (IOException | RuntimeException | InterruptedException e) {
                 logError(Logger.getInstance(), "", e, true);
             } finally {
@@ -93,6 +104,30 @@ public class ScanManager {
             }
         });
         currScanThread.start();
+    }
+
+    /**
+     * Handle inactive JFrog platform (free-tier) by displaying a clear warning message and a reactivation link.
+     * @param reactivationUrl is an URL to reactivate the specific free-tier platform.
+     */
+    private void handleJfrogInactiveEnvironment(String reactivationUrl) {
+        Logger.getInstance().warn("JFrog Platform is not active.");
+        StatusBar statusBar = WindowManager.getInstance().getStatusBar(project);
+        Balloon balloon = JBPopupFactory.getInstance().createHtmlTextBalloonBuilder("JFrog Platform is not active.\nYou can activate it <a href=\"here\">here. </a>", MessageType.WARNING,
+                        event -> {
+                            if (!(event.getEventType() == ACTIVATED)) {
+                                return;
+                            }
+                            BrowserUtil.browse(reactivationUrl);
+                        })
+                .setCloseButtonEnabled(true)
+                .setHideOnAction(true)
+                .setHideOnClickOutside(true)
+                .setHideOnLinkClick(true)
+                .setHideOnKeyOutside(true)
+                .setDialogMode(true)
+                .createBalloon();
+        balloon.show(RelativePoint.getNorthWestOf(statusBar.getComponent()), Balloon.Position.atRight);
     }
 
     /**

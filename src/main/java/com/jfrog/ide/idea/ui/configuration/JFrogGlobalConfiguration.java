@@ -17,6 +17,7 @@ import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.ui.components.ConnectionResultsGesture;
 import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.impl.XrayClientBuilder;
+import com.jfrog.xray.client.impl.util.JFrogInactiveEnvironmentException;
 import com.jfrog.xray.client.services.system.Version;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -90,6 +91,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private JRadioButton accordingToProjectRadioButton;
     private JRadioButton accordingToWatchesRadioButton;
     private JButton defaultValuesButton;
+    private HyperlinkLabel inActiveEnv;
 
     private int selectedTabIndex;
 
@@ -202,6 +204,9 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             connectionResultsGesture.setSuccess();
             return Results.success(xrayVersion);
         } catch (IOException exception) {
+            if (exception instanceof JFrogInactiveEnvironmentException) {
+                initHyperlink(inActiveEnv, "JFrog Platform is not active.\nYou can activate it<hyperlink>here</hyperlink>.", ((JFrogInactiveEnvironmentException) exception).getRedirectUrl());
+            }
             connectionResultsGesture.setFailure(ExceptionUtils.getRootCauseMessage(exception));
             return "Could not connect to JFrog Xray.";
         }
