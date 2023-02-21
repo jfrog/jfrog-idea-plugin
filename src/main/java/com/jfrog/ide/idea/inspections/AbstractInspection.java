@@ -231,7 +231,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     abstract UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, String issue);
 
     void registerProblem(ProblemsHolder problemsHolder, DependencyNode dependency, PsiElement element, String componentName) {
-        boolean isTransitive = dependency.isIndirect() || !dependency.getTitle().contains(componentName);
+        boolean isTransitive = dependency.isIndirect() || !StringUtils.contains(dependency.getTitle(), componentName);
         String dependencyDescription = getDependencyDescription(dependency.getTitle(), isTransitive);
         List<LocalQuickFix> quickFixes = new ArrayList<>();
         quickFixes.add(new ShowInDependencyTree(dependency, dependencyDescription));
@@ -241,7 +241,8 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
                 List<String> fixVersionStrings = ListUtils.emptyIfNull(((VulnerabilityNode) issueNode).getFixedVersions());
                 for (String fixVersionString : fixVersionStrings) {
                     String fixVersion = convertFixVersionStringToMinFixVersion(fixVersionString);
-                    UpgradeVersion upgradeVersion = getUpgradeVersion(componentName, fixVersion, issueNode.toString());
+                    UpgradeVersion upgradeVersion = getUpgradeVersion(dependency.getArtifactId(), fixVersion, issueNode.toString());
+                    // Todo: merge same version fixes to one fix
                     quickFixes.add(upgradeVersion);
                 }
             });
@@ -271,7 +272,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         // (1.0,)     >> N/A
         // (1.0, 2.0) >> N/A
         // [1.0, 2.0] >> 1.0
-        String fixVersion = fixVersionString.split(",")[0];
+        String fixVersion = StringUtils.substringBefore(fixVersionString, ",");
         if (fixVersion.charAt(0) == '(') {
             // If first character is '(' then we can't tell what's the minimal fix version
             return "";

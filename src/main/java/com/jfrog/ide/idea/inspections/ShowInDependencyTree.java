@@ -38,7 +38,7 @@ public class ShowInDependencyTree implements LocalQuickFix, Iconable, HighPriori
     @NotNull
     @Override
     public String getFamilyName() {
-        return SHOW_IN_TREE_MESSAGE + " (" + dependencyDescription + ")";
+        return SHOW_IN_TREE_MESSAGE + " - " + dependencyDescription;
     }
 
     @Override

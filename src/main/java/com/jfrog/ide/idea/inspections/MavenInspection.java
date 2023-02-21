@@ -8,6 +8,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.XmlElementVisitor;
 import com.intellij.psi.impl.source.xml.XmlTagImpl;
 import com.intellij.psi.xml.XmlTag;
+import com.intellij.util.xml.DomManager;
 import com.jfrog.ide.idea.inspections.upgradeversion.MavenUpgradeVersion;
 import com.jfrog.ide.idea.inspections.upgradeversion.UpgradeVersion;
 import com.jfrog.ide.idea.scan.MavenScanner;
@@ -15,6 +16,7 @@ import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScannerBase;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.idea.maven.dom.model.MavenDomDependency;
 
 /**
  * @author yahavi
@@ -76,7 +78,9 @@ public class MavenInspection extends AbstractInspection {
         if (groupId == null || artifactId == null) {
             return null;
         }
-        return String.join(":", groupId.getValue().getText(), artifactId.getValue().getText());
+        MavenDomDependency dependency = (MavenDomDependency) DomManager.getDomManager(element.getProject()).getDomElement((XmlTag) element);
+        String version = dependency.getVersion().getStringValue();
+        return String.join(":", groupId.getValue().getText(), artifactId.getValue().getText(), version);
     }
 
     @Override
