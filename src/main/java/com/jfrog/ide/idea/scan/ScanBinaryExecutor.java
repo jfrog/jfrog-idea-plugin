@@ -29,12 +29,11 @@ import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
  * @author Tal Arian
  */
 public abstract class ScanBinaryExecutor {
-    private static final Path BINARIES_DIR = HOME_PATH.resolve("dependencies").resolve("jfrog-security");
-    private final CommandExecutor commandExecutor;
     final String scanType;
     protected List<String> supportedLanguages;
     private final boolean shouldExecute;
-
+    private final String binaryPath;
+    private static final Path BINARIES_DIR = HOME_PATH.resolve("dependencies").resolve("jfrog-security");
     private static final String ENV_PLATFORM = "JF_PLATFORM_URL";
     private static final String ENV_USER = "JF_USER";
     private static final String ENV_PASSWORD = "JF_PASS";
@@ -50,8 +49,8 @@ public abstract class ScanBinaryExecutor {
             binaryName += ".exe";
         }
         Path binaryPath = BINARIES_DIR.resolve(binaryName);
-        commandExecutor = new CommandExecutor(binaryPath.toString(), creatEnvWithCredentials());
         shouldExecute = Files.exists(binaryPath);
+        this.binaryPath = binaryPath.toString();
     }
 
     private Map<String, String> creatEnvWithCredentials() {
@@ -85,6 +84,7 @@ public abstract class ScanBinaryExecutor {
         if (!shouldExecute) {
             return List.of();
         }
+        CommandExecutor commandExecutor = new CommandExecutor(binaryPath, creatEnvWithCredentials());
         Path outputTempDir = null;
         Path inputFile = null;
         try {
@@ -98,7 +98,7 @@ public abstract class ScanBinaryExecutor {
 
             Logger log = Logger.getInstance();
             // Execute the external process
-            CommandResults commandResults = this.commandExecutor.exeCommand(outputTempDir.toFile(), args, null, log);
+            CommandResults commandResults = commandExecutor.exeCommand(outputTempDir.toFile(), args, null, log);
             if (commandResults.getExitValue() == USER_NOT_ENTITLED) {
                 log.debug("User not entitled for advance security scan");
                 return List.of();
