@@ -71,13 +71,12 @@ public abstract class ScanBinaryExecutor {
     private final ArtifactoryManagerBuilder artifactoryManagerBuilder;
 
 
-    ScanBinaryExecutor(String scanType, String binaryName, String archiveName, Log log) {
+    ScanBinaryExecutor(String scanType, String binaryName, String archiveName, Log log, ServerConfig server) {
         this.scanType = scanType;
         this.log = log;
         String executable = SystemUtils.IS_OS_WINDOWS ? binaryName + ".exe" : binaryName;
         binaryTargetPath = BINARIES_DIR.resolve(binaryName).resolve(executable);
         archiveTargetPath = BINARIES_DIR.resolve(archiveName);
-        ServerConfig server = GlobalSettings.getInstance().getServerConfig();
         artifactoryManagerBuilder = createAnonymousAccessArtifactoryManagerBuilder(JFROG_RELEASES, server.getProxyConfForTargetUrl(JFROG_RELEASES), log);
         try {
             osDistribution = getOSAndArc();

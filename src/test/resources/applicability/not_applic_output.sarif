@@ -110,6 +110,20 @@
                         }
                     ],
                     "ruleId": "CVE-2022-25978"
+                },
+                {
+                    "message": {
+                        "text": "The scanner checks whether the vulnerable function `ansi-regex` is called."
+                    },
+                    "kind": "pass",
+                    "ruleId": "applic_CVE-2021-25878"
+                },
+                {
+                    "message": {
+                        "text": "The scanner checks whether the vulnerable function `ansi-regex` is called."
+                    },
+                    "kind": "pass",
+                    "ruleId": "applic_CVE-2022-29019"
                 }
             ]
         }

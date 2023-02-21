@@ -25,7 +25,7 @@ import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
 
 public class SourceCodeScannerManager {
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
-    private final ApplicabilityScannerExecutor applicability = new ApplicabilityScannerExecutor(Logger.getInstance());
+    private final ApplicabilityScannerExecutor applicability = new ApplicabilityScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig());
 
     protected Project project;
     protected String codeBaseLanguage;

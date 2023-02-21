@@ -1,5 +1,6 @@
 package com.jfrog.ide.idea.scan;
 
+import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.scan.data.Output;
 import com.jfrog.ide.idea.scan.data.Rule;
@@ -25,8 +26,8 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
     private static final String BINARY_DOWNLOAD_URL = "xsc-gen-exe-analyzer-manager-local/v1/[RELEASE]";
     private static final String DOWNLOAD_SCANNER_NAME = "analyzerManager.zip";
 
-    public ApplicabilityScannerExecutor(Log log) {
-        super(SCAN_TYPE, SCANNER_BINARY_NAME, DOWNLOAD_SCANNER_NAME, log);
+    public ApplicabilityScannerExecutor(Log log, ServerConfig serverConfig) {
+        super(SCAN_TYPE, SCANNER_BINARY_NAME, DOWNLOAD_SCANNER_NAME, log, serverConfig);
         supportedLanguages = List.of("python", "js");
     }
 
