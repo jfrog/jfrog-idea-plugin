@@ -2,6 +2,7 @@ package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,7 @@ public class SarifResult {
     }
 
     public String getKind() {
-        return kind != null ? kind : "";
+        return StringUtils.defaultString(kind);
     }
 
     public void setMessage(Message message) {

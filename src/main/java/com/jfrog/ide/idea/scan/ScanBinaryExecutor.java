@@ -19,6 +19,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.http.Header;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryManagerBuilder;
@@ -43,7 +44,6 @@ import static com.jfrog.ide.common.utils.Utils.createMapper;
 import static com.jfrog.ide.common.utils.Utils.createYAMLMapper;
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBuilder;
 import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
-import static com.jfrog.ide.idea.utils.Utils.getFileChecksumFromServer;
 
 /**
  * @author Tal Arian
@@ -96,7 +96,7 @@ public abstract class ScanBinaryExecutor {
 
     abstract Feature getScannerFeatureName();
 
-    protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args) throws IOException, InterruptedException, URISyntaxException {
+    protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args) throws IOException, InterruptedException {
         if (notSupportedOS || !shouldExecute()) {
             return List.of();
         }
@@ -134,7 +134,7 @@ public abstract class ScanBinaryExecutor {
         }
     }
 
-    private void updateBinaryIfNeeded() throws IOException, URISyntaxException, InterruptedException {
+    private void updateBinaryIfNeeded() throws IOException {
         if (!Files.exists(binaryTargetPath)) {
             downloadBinary();
             return;
@@ -144,12 +144,24 @@ public abstract class ScanBinaryExecutor {
             nextUpdateCheck = LocalDateTime.of(currentTime.getYear(), currentTime.getMonth(), currentTime.getDayOfMonth() + UPDATE_INTERVAL, currentTime.getHour(), currentTime.getMinute(), currentTime.getSecond());
             // Check for new version of the binary
             try (FileInputStream archiveBinaryFile = new FileInputStream(archiveTargetPath.toFile())) {
-                String latestBinaryChecksum = getFileChecksumFromServer(JFROG_RELEASES + getBinaryDownloadURL());
+                String latestBinaryChecksum = getFileChecksumFromServer();
                 String currentBinaryCheckSum = DigestUtils.sha256Hex(archiveBinaryFile);
                 if (!latestBinaryChecksum.equals(currentBinaryCheckSum)) {
                     downloadBinary();
                 }
             }
+        }
+    }
+
+    public String getFileChecksumFromServer() throws IOException {
+        try (ArtifactoryManager artifactoryManager = artifactoryManagerBuilder.build()) {
+            Header[] headers = artifactoryManager.downloadHeaders(JFROG_RELEASES + getBinaryDownloadURL());
+            for (Header header : headers) {
+                if (header.getName().equals("x-checksum-sha256")) {
+                    return header.getValue();
+                }
+            }
+            return "";
         }
     }
 
@@ -274,7 +286,6 @@ public abstract class ScanBinaryExecutor {
                     return "linux-arm";
                 case "aarch64":
                     return "linux-arm64";
-                case "s390x":
                 case "ppc64":
                 case "ppc64le":
                     return "linux-" + arch;

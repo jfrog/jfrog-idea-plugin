@@ -7,13 +7,10 @@ import com.jfrog.ide.idea.scan.data.ScanConfig;
 import com.jfrog.ide.idea.scan.data.ScansConfig;
 import junit.framework.TestCase;
 import org.apache.commons.io.FileUtils;
-import org.gradle.internal.impldep.org.testng.annotations.Test;
 import org.jfrog.build.api.util.NullLog;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 

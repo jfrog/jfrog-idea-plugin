@@ -9,28 +9,20 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
 import com.jfrog.ide.idea.log.Logger;
-import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.jfrog.build.extractor.usageReport.UsageReporter;
-import org.jfrog.build.util.URI;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
-
-import static org.apache.commons.codec.binary.StringUtils.getBytesUtf8;
-import static org.apache.commons.codec.binary.StringUtils.newStringUsAscii;
 
 /**
  * Created by romang on 5/8/17.
@@ -82,19 +74,6 @@ public class Utils {
             log.debug("Usage report failed: " + ExceptionUtils.getRootCauseMessage(e));
         }
         log.debug("Usage report sent successfully.");
-    }
-
-    /**
-     * Returns the file sha256 (checksum) from a remote server.
-     *
-     * @param url the requested file URL
-     * @return the file checksum.
-     */
-    public static String getFileChecksumFromServer(String url) throws IOException, InterruptedException, URISyntaxException {
-        byte[] rawData = URLCodec.encodeUrl(URI.allowed_query, getBytesUtf8(url));
-        HttpRequest headRequest = HttpRequest.newBuilder(new URL(newStringUsAscii(rawData)).toURI()).method("HEAD", HttpRequest.BodyPublishers.noBody()).build();
-        HttpResponse<String> checksumResponse = HttpClient.newHttpClient().send(headRequest, HttpResponse.BodyHandlers.ofString());
-        return checksumResponse.headers().firstValue("x-checksum-sha256").get();
     }
 
     /**

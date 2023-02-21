@@ -14,7 +14,6 @@ import org.apache.commons.lang.StringUtils;
 
 import javax.swing.tree.TreeNode;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
@@ -59,8 +58,7 @@ public class SourceCodeScannerManager {
                 List<JFrogSecurityWarning> applicabilityResults = applicability.execute(new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).cves(List.copyOf(issuesMap.keySet())).skippedFolders(getSkippedFoldersPatterns()));
                 scanResults.addAll(applicabilityResults);
             }
-        } catch (IOException | InterruptedException | URISyntaxException |
-                 NullPointerException e) {
+        } catch (IOException | InterruptedException | NullPointerException e) {
             logError(Logger.getInstance(), "Failed to scan source code", e, true);
         } finally {
             scanInProgress.set(false);

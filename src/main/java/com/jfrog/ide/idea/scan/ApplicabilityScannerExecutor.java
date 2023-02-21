@@ -10,7 +10,6 @@ import com.jfrog.xray.client.services.entitlements.Feature;
 import org.jfrog.build.api.util.Log;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
@@ -31,7 +30,7 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
         supportedLanguages = List.of("python", "js");
     }
 
-    public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder) throws IOException, InterruptedException, URISyntaxException {
+    public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder) throws IOException, InterruptedException {
         return super.execute(inputFileBuilder, SCANNER_ARGS);
     }
 
