@@ -24,8 +24,10 @@ import com.jfrog.ide.common.nodes.LicenseViolationNode;
 import com.jfrog.ide.common.nodes.VulnerabilityNode;
 import com.jfrog.ide.idea.actions.CollapseAllAction;
 import com.jfrog.ide.idea.actions.ExpandAllAction;
+import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.log.Logger;
+import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.ui.jcef.message.MessagePacker;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
 import com.jfrog.ide.idea.ui.webview.WebviewObjectConverter;
@@ -55,6 +57,8 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     private final LocalComponentsTree componentsTree;
     private final JBCefBrowserBase browser;
     private final OnePixelSplitter verticalSplit;
+    private final JPanel leftPanelContent;
+    private final JComponent compTreeView;
     private final MessagePacker messagePacker;
     private IssueNode selectedIssue;
     private Path tempDirPath;
@@ -74,12 +78,15 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         toolbar.setBorder(IdeBorderFactory.createBorder(SideBorder.BOTTOM));
         JPanel leftPanel = new JBPanel<>(new BorderLayout());
         leftPanel.add(toolbar, BorderLayout.PAGE_START);
-        leftPanel.add(createComponentsTreeView());
+        leftPanelContent = new JBPanel<>(new BorderLayout());
+        leftPanel.add(leftPanelContent);
+        compTreeView = createComponentsTreeView();
 
         verticalSplit = new OnePixelSplitter(false, 0.4f);
         verticalSplit.setFirstComponent(leftPanel);
         setContent(verticalSplit);
 
+        refreshView();
         registerListeners();
     }
 
@@ -108,8 +115,47 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             updateIssueOrLicenseInWebview(selectedIssue);
             verticalSplit.setSecondComponent(browser.getComponent());
         });
-        projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_LOCAL_STARTED, () -> ApplicationManager.getApplication().invokeLater(this::resetViews));
+        projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_LOCAL_STARTED, () -> {
+            setLeftPanelContent(compTreeView);
+            ApplicationManager.getApplication().invokeLater(this::resetViews);
+        });
         componentsTree.addRightClickListener();
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private void refreshView() {
+        if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
+            setLeftPanelContent(ComponentUtils.createNoCredentialsView());
+            return;
+        }
+        if (componentsTree.isCacheEmpty() && !ScanManager.getInstance(project).isScanInProgress()) {
+            setLeftPanelContent(createReadyEnvView());
+            return;
+        }
+        setLeftPanelContent(compTreeView);
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private JComponent createReadyEnvView() {
+        JPanel noCredentialsPanel = new JBPanel<>();
+        noCredentialsPanel.setLayout(new BoxLayout(noCredentialsPanel, BoxLayout.PAGE_AXIS));
+
+        // "We're all set!"
+        HyperlinkLabel allSetLabel = new HyperlinkLabel();
+        allSetLabel.setText("We're all set.");
+        ComponentUtils.addCenteredHyperlinkLabel(noCredentialsPanel, allSetLabel);
+
+        // "Scan your project"
+        HyperlinkLabel scanLink = new HyperlinkLabel();
+        scanLink.setTextWithHyperlink("<hyperlink>Scan your project</hyperlink>");
+        scanLink.addHyperlinkListener(e -> ScanManager.getInstance(project).startScan());
+        ComponentUtils.addCenteredHyperlinkLabel(noCredentialsPanel, scanLink);
+
+        return ComponentUtils.createUnsupportedPanel(noCredentialsPanel);
+    }
+
+    private void setLeftPanelContent(JComponent component) {
+        leftPanelContent.add(component, 0);
     }
 
     private void initVulnerabilityInfoBrowser() {
@@ -197,6 +243,15 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         if (componentsTree != null) {
             componentsTree.reset();
         }
+    }
+
+    /**
+     * Called after a change in the credentials.
+     */
+    @Override
+    public void onConfigurationChange() {
+        super.onConfigurationChange();
+        refreshView();
     }
 
     @Override

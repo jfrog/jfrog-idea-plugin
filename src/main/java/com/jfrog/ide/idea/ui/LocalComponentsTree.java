@@ -26,6 +26,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -35,8 +36,10 @@ import java.util.stream.Collectors;
  * @author yahavi
  */
 public class LocalComponentsTree extends ComponentsTree {
-    private static final String SHOW_IN_PROJECT_DESCRIPTOR = "Show direct dependency in project descriptor";
     public static final String IGNORE_RULE_TOOL_TIP = "Creating Ignore Rules is only available when a JFrog Project or Watch is defined.";
+    private static final String SHOW_IN_PROJECT_DESCRIPTOR = "Show direct dependency in project descriptor";
+    private static final String NO_ISSUES_EMPTY_STRING = "Your project was scanned and we didn't find any security issues.";
+    private static final String SCANNING_EMPTY_STRING = "Scanning...";
 
     private final ScanCache cache;
 
@@ -172,6 +175,10 @@ public class LocalComponentsTree extends ComponentsTree {
     }
 
     public void cacheTree() throws IOException {
+        if (getModel() == null) {
+            cache.cacheNodes(new ArrayList<>());
+            return;
+        }
         SortableChildrenTreeNode root = (SortableChildrenTreeNode) getModel().getRoot();
         cache.cacheNodes(Collections.list(root.children()).stream().map(treeNode -> (FileTreeNode) treeNode).collect(Collectors.toList()));
     }
@@ -183,6 +190,7 @@ public class LocalComponentsTree extends ComponentsTree {
         }
         List<FileTreeNode> treeNodes = cacheObject.getFileTreeNodes();
         if (treeNodes == null) {
+            setNoIssuesEmptyText();
             return;
         }
         SortableChildrenTreeNode root = new SortableChildrenTreeNode();
@@ -190,5 +198,25 @@ public class LocalComponentsTree extends ComponentsTree {
             root.add(node);
         }
         populateTree(root);
+    }
+
+    public boolean isCacheEmpty() {
+        return cache.getScanCacheObject() == null;
+    }
+
+    /**
+     * Sets the empty text to "Scanning...".
+     * It means that this text will be shown only if the tree is empty.
+     */
+    public void setScanningEmptyText() {
+        getEmptyText().setText(SCANNING_EMPTY_STRING);
+    }
+
+    /**
+     * Sets the empty text to indicate that the project was scanned and no issues were found.
+     * It means that this indication will be shown only if the tree is empty.
+     */
+    public void setNoIssuesEmptyText() {
+        getEmptyText().setText(NO_ISSUES_EMPTY_STRING);
     }
 }

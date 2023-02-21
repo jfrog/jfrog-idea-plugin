@@ -2,10 +2,8 @@ package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
-import com.intellij.util.messages.MessageBus;
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.scan.GraphScanLogic;
 import com.jfrog.ide.common.scan.ScanLogic;
@@ -63,13 +61,14 @@ public class ScanManager {
         }
 
         if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
-            tryConnectionDetailsFromJfrogCli();
+            Logger.getInstance().warn("Xray server is not configured.");
             return;
         }
 
         project.getMessageBus().syncPublisher(ApplicationEvents.ON_SCAN_LOCAL_STARTED).update();
+        LocalComponentsTree componentsTree = LocalComponentsTree.getInstance(project);
+        componentsTree.setScanningEmptyText();
         Thread currScanThread = new Thread(() -> {
-            LocalComponentsTree componentsTree = LocalComponentsTree.getInstance(project);
             ExecutorService executor = Executors.newFixedThreadPool(3);
             try {
                 ScanLogic scanLogic = createScanLogic();
@@ -90,23 +89,10 @@ public class ScanManager {
                 logError(Logger.getInstance(), "", e, true);
             } finally {
                 executor.shutdownNow();
+                componentsTree.setNoIssuesEmptyText();
             }
         });
         currScanThread.start();
-    }
-
-    /**
-     * Load connection details From JFrog CLI configuration. If credentials loaded successfully, trigger a new scan.
-     */
-    private void tryConnectionDetailsFromJfrogCli() {
-        GlobalSettings globalSettings = GlobalSettings.getInstance();
-        if (!globalSettings.loadConnectionDetailsFromJfrogCli()) {
-            Logger.getInstance().warn("Xray server is not configured.");
-            return;
-        }
-        // Send the ON_CONFIGURATION_DETAILS_CHANGE event that updates the UI panels and triggers a new Xray scan
-        MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
-        messageBus.syncPublisher(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE).update();
     }
 
     /**
@@ -116,7 +102,7 @@ public class ScanManager {
         scanners = factory.refreshScanners(scanners, scanLogic, executor);
     }
 
-    private boolean isScanInProgress() {
+    public boolean isScanInProgress() {
         return scanners.values().stream().anyMatch(ScannerBase::isScanInProgress);
     }
 

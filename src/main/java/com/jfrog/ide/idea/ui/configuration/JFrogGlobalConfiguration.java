@@ -7,12 +7,10 @@ import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.ui.HyperlinkLabel;
 import com.intellij.ui.components.*;
-import com.intellij.util.messages.MessageBus;
 import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
-import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.ui.components.ConnectionResultsGesture;
 import com.jfrog.xray.client.Xray;
@@ -367,8 +365,6 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         ConfigVerificationUtils.validateGlobalConfig(serverConfig.getExcludedPaths(), serverConfig.getPolicyType(), serverConfig.getProject(), serverConfig.getWatches());
         GlobalSettings globalSettings = GlobalSettings.getInstance();
         globalSettings.updateConfig(serverConfig);
-        MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
-        messageBus.syncPublisher(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE).update();
         connectionResults.setText("");
         loadConfig();
     }
