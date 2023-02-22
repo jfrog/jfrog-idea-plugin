@@ -1,17 +1,18 @@
 package com.jfrog.ide.idea.inspections;
 
+import com.jfrog.ide.idea.scan.data.Message;
 import com.jfrog.ide.idea.scan.data.Region;
 import com.jfrog.ide.idea.scan.data.SarifResult;
 import org.apache.commons.lang.StringUtils;
 
 public class JFrogSecurityWarning {
-    private int lineStart;
-    private int colStart;
-    private int lineEnd;
-    private int colEnd;
-    private String reason;
-    private String filePath;
-    private String lineSnippet;
+    private final int lineStart;
+    private final int colStart;
+    private final int lineEnd;
+    private final int colEnd;
+    private final String reason;
+    private final String filePath;
+    private final String lineSnippet;
     private String scannerSearchTarget;
     private final String name;
 
@@ -23,7 +24,8 @@ public class JFrogSecurityWarning {
             int colEnd, String reason,
             String filePath,
             String name,
-            String lineSnippet
+            String lineSnippet,
+            boolean isApplicable
     ) {
         this.lineStart = lineStart;
         this.colStart = colStart;
@@ -33,26 +35,19 @@ public class JFrogSecurityWarning {
         this.filePath = filePath;
         this.name = name;
         this.lineSnippet = lineSnippet;
-        this.isApplicable = true;
+        this.isApplicable = isApplicable;
     }
 
     public JFrogSecurityWarning(SarifResult result) {
         this(getFirstRegion(result).getStartLine() - 1,
-                getFirstRegion(result).getStartColumn(),
+                getFirstRegion(result).getStartColumn() - 1,
                 getFirstRegion(result).getEndLine() - 1,
-                getFirstRegion(result).getEndColumn(),
+                getFirstRegion(result).getEndColumn() - 1,
                 result.getMessage().getText(),
-                StringUtils.removeStart(result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri(), "file://"),
+                result.getLocations().size() > 0 ? StringUtils.removeStart(result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri(), "file://") : "",
                 result.getRuleId(),
-                getFirstRegion(result).getSnippet().getText());
-    }
-
-    public JFrogSecurityWarning(
-            String name,
-            Boolean isApplicable
-    ) {
-        this.name = name;
-        this.isApplicable = isApplicable;
+                getFirstRegion(result).getSnippet().getText(),
+                !result.getKind().equals("pass"));
     }
 
     public int getLineStart() {
@@ -92,7 +87,9 @@ public class JFrogSecurityWarning {
     }
 
     private static Region getFirstRegion(SarifResult result) {
-        return result.getLocations().get(0).getPhysicalLocation().getRegion();
+        Region emptyRegion = new Region();
+        emptyRegion.setSnippet(new Message());
+        return result.getLocations().size() > 0 ? result.getLocations().get(0).getPhysicalLocation().getRegion() : emptyRegion;
     }
 
     public String getScannerSearchTarget() {
