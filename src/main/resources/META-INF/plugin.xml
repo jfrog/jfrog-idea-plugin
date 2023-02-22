@@ -69,7 +69,7 @@
         <!--suppress PluginXmlCapitalization -->
         <action id="JFrog.RefreshLocal"
                 class="com.jfrog.ide.idea.actions.RefreshLocalAction"
-                text="Run scan"
+                text="Run Scan"
                 description="Force Xray scan"
                 icon="AllIcons.Actions.Execute"/>
         <action id="JFrog.RefreshBuilds"

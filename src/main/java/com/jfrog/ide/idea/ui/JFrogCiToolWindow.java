@@ -273,7 +273,7 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
         Vcs vcs = buildGeneralInfo != null ? buildGeneralInfo.getVcs() : null;
         if (vcs == null || buildGeneralInfo.getStatus() == null ||
                 isAnyBlank(vcs.getBranch(), vcs.getMessage(), buildGeneralInfo.getPath())) {
-            seeMore.init(project, "See more in this view", "https://www.jfrog.com/confluence/display/JFROG/JFrog+IntelliJ+IDEA+Plugin");
+            seeMore.init(project, "See more in this view", "https://github.com/jfrog/jfrog-idea-plugin#the-ci-view");
         } else {
             seeMore.init(project, "", "");
         }

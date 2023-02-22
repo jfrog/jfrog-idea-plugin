@@ -12,21 +12,17 @@
 </div>
 
 # Table of Contents
-- [JFrog IntelliJ IDEA Plugin](#jfrog-intellij-idea-plugin)
-- [Table of Contents](#table-of-contents)
 - [About this Plugin](#about-this-plugin)
+- [Supported Packages](#supported-packages)
 - [Getting Started](#getting-started)
-  - [Set Up a FREE JFrog Environment in the Cloud](#set-up-a-free-jfrog-environment-in-the-cloud)
-  - [Connecting the Plugin to Your JFrog Environment](#connecting-the-plugin-to-your-jfrog-environment)
-    - [In the IDE Settings](#in-the-ide-settings)
-    - [Using Environment Variables](#using-environment-variables)
-  - [Applying Your Xray Policies](#applying-your-xray-policies)
+  - [Connecting to Your JFrog Environment](#connecting-to-your-jfrog-environment)
+  - [Apply Xray Policies](#apply-xray-policies)
 - [Using the Plugin](#using-the-plugin)
   - [The Local View](#the-local-view)
       - [Scanning a Project](#scanning-a-project)
       - [Viewing Vulnerability Details](#viewing-vulnerability-details)
       - [Contextual Analysis](#contextual-analysis)
-      - [Dependencies Tree Icons](#dependencies-tree-icons)
+      - [Severity Icons](#severity-icons)
   - [The CI View](#the-ci-view)
       - [How Does It Work?](#how-does-it-work)
       - [Setting Up CI Integration](#setting-up-ci-integration)
@@ -39,16 +35,40 @@
 - [Release Notes](#release-notes)
 
 # About this Plugin
-The cost of remediating a vulnerability is akin to the cost of fixing a bug.
-The earlier you remediate a vulnerability in the release cycle, the lower the cost.
-[JFrog Xray](https://jfrog.com/xray/) is instrumental in flagging components when vulnerabilities are discovered in production systems at runtime,
-or even sooner, during the development.
+The plugin allows developers to find and fix security vulnerabilities in their projects and to see valuable information
+about the status of their code by continuously scanning it locally with [JFrog Xray](https://jfrog.com/xray/).
 
-JFrog IntelliJ IDEA Plugin adds JFrog Xray scanning of project dependencies to IntelliJ IDEA.
-It allows developers to view panels displaying vulnerability information about the components and their dependencies directly in their IDE.
-The plugin also allows developers to track the status of the code while it is being built, tested and scanned on the CI server.
+### What security capabilities do we provide?
+#### Software Composition Analysis (SCA)
+Scan your project dependencies for security issues.
 
-Currently, Maven, Gradle, npm, Yarn, Python and Go are supported by the plugin.
+#### CVE Research and Enrichment
+For selected security issues, get leverage-enhanced CVE data that is provided by our JFrog Security Research team.
+Prioritize the CVEs based on:
+* **JFrog Severity**: The severity given by the JFrog Security Research team after the manual analysis of the CVE by the team.
+CVEs with the highest JFrog security severity are the most likely to be used by real-world attackers.
+This means that you should put effort into fixing them as soon as possible.
+* **Research Summary**: The summary that is based on JFrog's security analysis of the security issue provides detailed technical information on the specific conditions for the CVE to be applicable.
+* **Remediation**: Detailed fix and mitigation options for the CVEs
+
+You can learn more about enriched CVEs [here](https://www.jfrog.com/confluence/display/JFROG/JFrog+Security+CVE+Research+and+Enrichment).
+
+Check out what our research team is up to and stay updated on newly discovered issues by clicking on this link: https://research.jfrog.com
+
+#### Advanced Scans
+*Requires Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
+
+With advanced [**Contextual Analysis**](#contextual-analysis), understand the applicability of CVEs in your application and utilize JFrog Security scanners to analyze the way you use 3rd party packages in your projects.
+Automatically validate some high-impact vulnerabilities, such as vulnerabilities that have prerequisites for exploitations, and reduce false positives and vulnerability noise with smart CVE analysis.
+
+To learn more, see [here](https://www.jfrog.com/confluence/display/JFROG/Vulnerability+Contextual+Analysis).
+
+#### Additional Perks
+* Security issues are easily visible inline.
+* The results show issues with context, impact, and remediation.
+* View all security issues in one place, in the JFrog tab.
+* For Security issues with an available fixed version, you can upgrade to the fixed version within the plugin.
+* Track the status of the code while it is being built, tested, and scanned on the CI server.
 
 In addition to IntelliJ IDEA, the plugin also supports the following IDEs:
 * WebStorm
@@ -56,17 +76,27 @@ In addition to IntelliJ IDEA, the plugin also supports the following IDEs:
 * Android Studio
 * GoLand
 
+# Supported Packages
+| Features                                          | Go  | Maven | Gradle | npm | Yarn v1 | Python |
+|---------------------------------------------------|:---:|:-----:|:------:|:---:|:-------:|:------:|
+| SCA                                               |  ✅  |   ✅   |   ✅    |  ✅  |    ✅    |   ✅    |
+| CVE Research and Enrichment                       |  ✅  |   ✅   |   ✅    |  ✅  |    ✅    |   ✅    |
+| Upgrade vulnerable dependencies to fixed versions |  ✅  |   ✅   |   ❌    |  ✅  |    ✅    |   ❌    |
+| Contextual Analysis                               |  ❌  |   ❌   |   ❌    |  ✅  |    ❌    |   ✅    |
+
 # Getting Started
 1. Install the JFrog IntelliJ IDEA Plugin via the Plugins tab in the IDE settings, or in [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/9834-jfrog).
-2. Need a FREE JFrog environment in the cloud? [Create one now](#set-up-a-free-jfrog-environment-in-the-cloud).
-3. [Connect the plugin to your JFrog environment](#connecting-the-plugin-to-your-jfrog-environment).
-4. [Start](#using-the-plugin) using the plugin.
+2. [Connect the plugin to your JFrog environment](#connecting-to-your-jfrog-environment).
+3. [Start](#using-the-plugin) using the plugin.
 
-## Set Up a FREE JFrog Environment in the Cloud
-Need a FREE JFrog environment in the cloud, so that JFrog IntelliJ IDEA Plugin can connect to it? Just run one of the following commands in your terminal. The commands will do the following:
+## Connecting to Your JFrog Environment
+<details>
+  <summary>Set Up a FREE JFrog Environment in the Cloud</summary>
+
+Need a FREE JFrog environment in the Cloud, so that JFrog IntelliJ IDEA Plugin can connect to it? Just run one of the following commands in your terminal. The commands will do the following:
 
 1. Install JFrog CLI on your machine.
-2. Create a FREE JFrog environment in the cloud for you.
+2. Create a FREE JFrog environment in the Cloud for you.
 3. Configure IntelliJ IDEA to connect to your new environment.
 
 **MacOS and Linux using cURL**
@@ -78,29 +108,30 @@ curl -fL https://getcli.jfrog.io?setup | sh
 ```
 powershell "Start-Process -Wait -Verb RunAs powershell '-NoProfile iwr https://releases.jfrog.io/artifactory/jfrog-cli/v2-jf/[RELEASE]/jfrog-cli-windows-amd64/jf.exe -OutFile $env:SYSTEMROOT\system32\jf.exe'" ; jf setup
 ```
+</details>
 
-## Connecting the Plugin to Your JFrog Environment
+<details>
+  <summary>Connect the Plugin to an Existing JFrog Environment</summary>
+
 You can connect the plugin to your JFrog environment:
-* [In the IDE settings](#in-the-ide-settings)
-* [Using environment variables](#using-environment-variables)
 
-**Notes:**
-* If your JFrog Platform instance uses a domain with a self-signed certificate, add the certificate to IDEA as described [here](https://www.jetbrains.com/help/idea/settings-tools-server-certificates.html).
-* From JFrog Xray version **1.9** to **2.x**, IntelliJ IDEA users connecting to Xray from IntelliJ are required to be granted the ‘View Components’ action in Xray.
-* From JFrog Xray version **3.x**, as part of the JFrog Platform, IntelliJ IDEA users connecting to Xray from IntelliJ require ‘Read’ permission. For more information, see [here](https://www.jfrog.com/confluence/display/JFROG/Permissions).
+<details>
+  <summary>In the IDE Settings</summary>
+  Once the plugin is successfully installed, connect the plugin to your instance of the JFrog Platform:
 
-### In the IDE Settings
-Once the plugin is successfully installed, connect the plugin to your instance of the JFrog Platform:
-1. If your JFrog Platform instance is behind an HTTP proxy, configure the proxy settings as described [here](https://www.jetbrains.com/help/idea/settings-http-proxy.html).
-   Manual proxy configuration is supported since version 1.3.0 of the JFrog IntelliJ IDEA Plugin. Auto-detect proxy settings is supported since version 1.7.0.
-2. Under **Settings (Preferences)** | **Other Settings**, click **JFrog Global Configuration**.
-3. Set your JFrog Platform URL and login credentials.
-4. Test your connection to Xray using the Test Connection button.
+  1. If your JFrog Platform instance is behind an HTTP proxy, configure the proxy settings as described [here](https://www.jetbrains.com/help/idea/settings-http-proxy.html).
+     Manual proxy configuration is supported since version 1.3.0 of the JFrog IntelliJ IDEA Plugin. Auto-detect proxy settings is supported since version 1.7.0.
+  2. Under **Settings (Preferences)** | **Other Settings**, click **JFrog Global Configuration**.
+  3. Set your JFrog Platform URL and login credentials.
+  4. Test your connection to Xray using the Test Connection button.
+  
+  ![](readme-resources/connect.png)
+</details>
 
-![](readme-resources/connect.png)
-
-### Using Environment Variables
+<details>
+  <summary>Using Environment Variables</summary>
 The plugin also supports connecting to your JFrog environment using environment variables:
+
 1. Under **Settings (Preferences)** | **Other Settings**, click **JFrog Global Configuration**.
 2. Mark **Load connection details from environment variables**.
 
@@ -112,9 +143,18 @@ You may provide basic auth credentials or access token as follows:
 - `JFROG_IDE_USERNAME` - JFrog Platform username
 - `JFROG_IDE_PASSWORD` - JFrog Platform password
 - `JFROG_IDE_ACCESS_TOKEN` - JFrog Platform access token
+</details>
+</details>
 
-## Applying Your Xray Policies
-You can configure the JFrog IntelliJ IDEA Plugin to reflect the Security Policies. The policies are configured in JFrog Xray.
+**Notes:**
+* If your JFrog Platform instance uses a domain with a self-signed certificate, add the certificate to IDEA as described [here](https://www.jetbrains.com/help/idea/settings-tools-server-certificates.html).
+* From JFrog Xray version **1.9** to **2.x**, IntelliJ IDEA users connecting to Xray from IntelliJ are required to be granted the ‘View Components’ action in Xray.
+* From JFrog Xray version **3.x**, as part of the JFrog Platform, IntelliJ IDEA users connecting to Xray from IntelliJ require ‘Read’ permission. For more information, see [here](https://www.jfrog.com/confluence/display/JFROG/Permissions).
+
+## Apply Xray Policies
+You can configure the JFrog IntelliJ IDEA Plugin to use the security policies you create in Xray.
+Policies enable you to create a set of rules, in which each rule defines security criteria, with a corresponding set of automatic actions according to your needs.
+Policies are enforced when applying them to Watches.
 
 If you'd like to use a JFrog Project that is associated with the policy, follow these steps:
 1. Create a [JFrog Project](https://www.jfrog.com/confluence/display/JFROG/Projects), or obtain the relevant JFrog Project key.
@@ -153,6 +193,8 @@ By right-clicking on a dependency line, you can jump to the dependency's declara
 
 By right-clicking on a vulnerability line, you can create an [Ignore Rule](https://www.jfrog.com/confluence/display/JFROG/Ignore+Rules) in Xray.
 
+*Creating Ignore Rules is only available [when a JFrog Project or Watch is defined](#apply-xray-policies).*
+
 ![](readme-resources/create-ignore-rule.png)
 
 ### Viewing Vulnerability Details
@@ -163,23 +205,25 @@ This view contains information about the vulnerability, the vulnerable component
 ![](readme-resources/vuln-impact-graph.png)
 
 ### Contextual Analysis
+*Requires Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
+
 You can avoid wasting your time fixing risks that are not imposed and reduce false positives with contextual analysis.
 As part of the project's scan, JFrog IntelliJ IDEA Plugin will let you know if vulnerabilities in your dependencies are applicable or not.
 
 ![](readme-resources/not-applicable.png)
 ![](readme-resources/applicable.png)
 
-### Dependencies Tree Icons
-The icon demonstrates the top severity issue of a selected component and its transitive dependencies. The following table describes the severities from lowest to highest:
+### Severity Icons
+The icon demonstrates the top severity issue of a selected component and its transitive dependencies. The following table describes the severities from highest to lowest:
 
-|                                                                                                                                                                                                   Icon                                                                                                                                                                                                    |    Severity    |
-|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------:|
-|                                                                                                                                                                        <img src="src/main/resources/icons/unknown.svg" width="30">                                                                                                                                                                        |    Unknown     |
-|                                                                                                                                                                          <img src="src/main/resources/icons/low.svg" width="30">                                                                                                                                                                          |      Low       |
-|                                                                                                                                                                        <img src="src/main/resources/icons/medium.svg" width="30">                                                                                                                                                                         |     Medium     |
-|                                                                                                                                                                         <img src="src/main/resources/icons/high.svg" width="30">                                                                                                                                                                          |      High      |
-|                                                                                                                                                                       <img src="src/main/resources/icons/critical.svg" width="30">                                                                                                                                                                        |    Critical    |
-| <img src="src/main/resources/icons/unknownnotapplic.svg" height="15" width="15"><img src="src/main/resources/icons/lownotapplic.svg" height="15" width="15"><img src="src/main/resources/icons/mediumnotapplic.svg" height="15" width="15"><img src="src/main/resources/icons/highnotapplic.svg" height="15" width="15"><img src="src/main/resources/icons/criticalnotapplic.svg" height="15" width="15"> | Not Applicable |
+|                                                                                                                                                                                                   Icon                                                                                                                                                                                                    |                Severity                |
+|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------:|
+|                                                                                                                                                                       <img src="src/main/resources/icons/critical.svg" width="20">                                                                                                                                                                        |                Critical                |
+|                                                                                                                                                                         <img src="src/main/resources/icons/high.svg" width="20">                                                                                                                                                                          |                  High                  |
+|                                                                                                                                                                        <img src="src/main/resources/icons/medium.svg" width="20">                                                                                                                                                                         |                 Medium                 |
+|                                                                                                                                                                          <img src="src/main/resources/icons/low.svg" width="20">                                                                                                                                                                          |                  Low                   |
+|                                                                                                                                                                        <img src="src/main/resources/icons/unknown.svg" width="20">                                                                                                                                                                        |                Unknown                 |
+| <img src="src/main/resources/icons/unknownnotapplic.svg" height="15" width="15"><img src="src/main/resources/icons/lownotapplic.svg" height="15" width="15"><img src="src/main/resources/icons/mediumnotapplic.svg" height="15" width="15"><img src="src/main/resources/icons/highnotapplic.svg" height="15" width="15"><img src="src/main/resources/icons/criticalnotapplic.svg" height="15" width="15"> | [Not Applicable](#contextual-analysis) |
 
 ## The CI View
 The JFrog IntelliJ IDEA Plugin allows you to view information about your builds directly from your CI system.
