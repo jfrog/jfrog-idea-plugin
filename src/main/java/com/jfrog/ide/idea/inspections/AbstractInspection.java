@@ -276,7 +276,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         // (1.0,)     >> N/A
         // (1.0, 2.0) >> N/A
         // [1.0, 2.0] >> 1.0
-        String fixVersion = StringUtils.substringBefore(fixVersionString, ",");
+        String fixVersion = fixVersionString.split(",")[0];
         if (fixVersion.charAt(0) == '(') {
             // If first character is '(' then we can't tell what's the minimal fix version
             return "";
