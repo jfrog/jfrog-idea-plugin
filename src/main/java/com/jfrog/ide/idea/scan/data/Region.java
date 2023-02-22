@@ -7,50 +7,50 @@ import java.util.Objects;
 public class Region {
 
     @JsonProperty("endColumn")
-    private Integer endColumn;
+    private int endColumn;
     @JsonProperty("endLine")
-    private Integer endLine;
+    private int endLine;
     @JsonProperty("startColumn")
-    private Integer startColumn;
+    private int startColumn;
     @JsonProperty("startLine")
-    private Integer startLine;
+    private int startLine;
     @JsonProperty("snippet")
 
     private Message snippet;
 
-    public Integer getEndColumn() {
+    public int getEndColumn() {
         return endColumn;
     }
 
     @SuppressWarnings("unused")
-    public void setEndColumn(Integer endColumn) {
+    public void setEndColumn(int endColumn) {
         this.endColumn = endColumn;
     }
 
-    public Integer getEndLine() {
+    public int getEndLine() {
         return endLine;
     }
 
     @SuppressWarnings("unused")
-    public void setEndLine(Integer endLine) {
+    public void setEndLine(int endLine) {
         this.endLine = endLine;
     }
 
-    public Integer getStartColumn() {
+    public int getStartColumn() {
         return startColumn;
     }
 
     @SuppressWarnings("unused")
-    public void setStartColumn(Integer startColumn) {
+    public void setStartColumn(int startColumn) {
         this.startColumn = startColumn;
     }
 
-    public Integer getStartLine() {
+    public int getStartLine() {
         return startLine;
     }
 
     @SuppressWarnings("unused")
-    public void setStartLine(Integer startLine) {
+    public void setStartLine(int startLine) {
         this.startLine = startLine;
     }
 
