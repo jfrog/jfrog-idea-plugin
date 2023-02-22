@@ -21,7 +21,7 @@ import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.nodes.DependencyNode;
 import com.jfrog.ide.common.nodes.FileTreeNode;
-import com.jfrog.ide.common.nodes.ImpactTreeNode;
+import com.jfrog.ide.common.nodes.subentities.ImpactTreeNode;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
@@ -256,13 +256,7 @@ public abstract class ScannerBase {
                 latch.countDown();
             }
         };
-        if (executor.isShutdown() || executor.isTerminated()) {
-            // Scan initiated by a change in the project descriptor
-            createRunnable(scanAndUpdateTask, null).run();
-        } else {
-            // Scan initiated by opening IntelliJ, by user, or by changing the configuration
-            executor.submit(createRunnable(scanAndUpdateTask, latch));
-        }
+        executor.submit(createRunnable(scanAndUpdateTask, latch));
     }
 
     /**
