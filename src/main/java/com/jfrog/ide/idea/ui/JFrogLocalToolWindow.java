@@ -124,7 +124,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
     @SuppressWarnings("UnstableApiUsage")
     private void refreshView() {
-        if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
+        if (!GlobalSettings.getInstance().reloadXrayCredentials()) {
             setLeftPanelContent(ComponentUtils.createNoCredentialsView());
             return;
         }
@@ -155,6 +155,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     }
 
     private void setLeftPanelContent(JComponent component) {
+        leftPanelContent.removeAll();
         leftPanelContent.add(component, 0);
     }
 

@@ -86,10 +86,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
 
     @Override
     public void noStateLoaded() {
-        serverConfig.setConnectionDetailsFromEnv(serverConfig.readConnectionDetailsFromEnv());
-        if (!areXrayCredentialsSet()) {
-            loadConnectionDetailsFromJfrogCli();
-        }
+        reloadXrayCredentials();
     }
 
     public ServerConfigImpl getServerConfig() {
@@ -164,8 +161,21 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         this.serverConfig.setWatches(serverConfig.getWatches());
     }
 
-    public boolean areXrayCredentialsSet() {
-        return serverConfig != null && serverConfig.isXrayConfigured();
+    /**
+     * Reloads Xray credentials.
+     *
+     * @return true if credentials exist and Xray is configured, false otherwise.
+     */
+    public boolean reloadXrayCredentials() {
+        if (serverConfig.isXrayConfigured()) {
+            return true;
+        }
+        serverConfig.setConnectionDetailsFromEnv(serverConfig.readConnectionDetailsFromEnv());
+        if (serverConfig.isXrayConfigured()) {
+            return true;
+        }
+        loadConnectionDetailsFromJfrogCli();
+        return serverConfig.isXrayConfigured();
     }
 
     public boolean areArtifactoryCredentialsSet() {

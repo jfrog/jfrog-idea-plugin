@@ -425,8 +425,17 @@ public class ServerConfigImpl implements ServerConfig {
         }
 
         setUrl(platformUrlEnv);
-        setXrayUrl(xrayUrlEnv);
-        setArtifactoryUrl(artifactoryUrlEnv);
+        String platformUrlStr = removeEnd(platformUrlEnv, "/");
+        if (isBlank(xrayUrlEnv)) {
+            setXrayUrl(platformUrlStr + "/xray");
+        } else {
+            setXrayUrl(xrayUrlEnv);
+        }
+        if (isBlank(artifactoryUrlEnv)) {
+            setArtifactoryUrl(platformUrlStr + "/artifactory");
+        } else {
+            setArtifactoryUrl(artifactoryUrlEnv);
+        }
         if (isNotBlank(projectEnv)) {
             setProject(projectEnv);
         }

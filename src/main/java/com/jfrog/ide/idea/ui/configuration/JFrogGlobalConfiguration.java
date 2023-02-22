@@ -454,6 +454,9 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             setRtAndXraySeparately.getModel().setPressed(true);
             xrayUrl.setEnabled(true);
             artifactoryUrl.setEnabled(true);
+        } else {
+            setRtAndXraySeparately.getModel().setSelected(false);
+            resolveXrayAndArtifactoryUrls();
         }
     }
 
