@@ -1,14 +1,15 @@
 package com.jfrog.ide.idea.inspections;
 
-import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import static org.gradle.internal.impldep.org.junit.Assert.assertEquals;
 
 /**
  * @author michaels
  */
 
-public class InspectionToolsTest extends LightJavaCodeInsightFixtureTestCase {
+public class InspectionToolsTest {
 
     @DataProvider
     private Object[][] goVersionProvider() {
