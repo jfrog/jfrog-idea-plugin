@@ -12,7 +12,7 @@ public class InspectionToolsTest extends LightJavaCodeInsightFixtureTestCase {
         assertEquals("1.0", AbstractInspection.convertFixVersionStringToMinFixVersion("1.0"));
         assertEquals("", AbstractInspection.convertFixVersionStringToMinFixVersion("(,1.0]"));
         assertEquals("", AbstractInspection.convertFixVersionStringToMinFixVersion("(,1.0)"));
-        assertEquals("1.0", AbstractInspection.convertFixVersionStringToMinFixVersion("[1.0] "));
+        assertEquals("1.0", AbstractInspection.convertFixVersionStringToMinFixVersion("[1.0]"));
         assertEquals("", AbstractInspection.convertFixVersionStringToMinFixVersion("(1.0,)"));
         assertEquals("", AbstractInspection.convertFixVersionStringToMinFixVersion("(1.0, 2.0)"));
         assertEquals("1.0", AbstractInspection.convertFixVersionStringToMinFixVersion("[1.0, 2.0]"));
