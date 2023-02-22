@@ -10,7 +10,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest, windows-latest, macOS-latest ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Install required tools
       - name: Set up Java
@@ -23,11 +23,11 @@ jobs:
         with:
           gradle-version: 7.4.1
       - name: Setup NodeJS
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '14'
           check-latest: true
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.x'
       # Install JFrog CLI for ConnectionDetailsFromCliTest

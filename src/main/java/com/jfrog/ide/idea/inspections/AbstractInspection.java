@@ -1,6 +1,8 @@
 package com.jfrog.ide.idea.inspections;
 
 import com.intellij.codeInspection.LocalInspectionTool;
+import com.intellij.codeInspection.LocalQuickFix;
+import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
@@ -12,12 +14,15 @@ import com.intellij.psi.PsiElement;
 import com.jfrog.ide.common.nodes.DependencyNode;
 import com.jfrog.ide.common.nodes.DescriptorFileTreeNode;
 import com.jfrog.ide.common.nodes.SortableChildrenTreeNode;
+import com.jfrog.ide.common.nodes.VulnerabilityNode;
 import com.jfrog.ide.common.nodes.subentities.ImpactTreeNode;
+import com.jfrog.ide.idea.inspections.upgradeversion.UpgradeVersion;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.scan.ScannerBase;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.tree.TreeNode;
@@ -67,7 +72,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         String componentName = createComponentName(element);
         for (DependencyNode dependency : dependencies) {
             if (isOnTheFly) {
-                InspectionUtils.registerProblem(problemsHolder, dependency, getTargetElements(element), dependencies.size());
+                registerProblem(problemsHolder, dependency, element, componentName);
             }
             navigationService.addNavigation(dependency, element, componentName);
         }
@@ -82,17 +87,9 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     void visitElement(AnnotationHolder annotationHolder, PsiElement element) {
         List<DependencyNode> dependencies = getDependencies(element);
         if (CollectionUtils.isNotEmpty(dependencies)) {
-            AnnotationUtils.registerAnnotation(annotationHolder, dependencies.get(0), getTargetElements(element), showAnnotationIcon(element));
+            AnnotationUtils.registerAnnotation(annotationHolder, dependencies.get(0), element, showAnnotationIcon(element));
         }
     }
-
-    /**
-     * Get the elements to apply the inspections and annotations.
-     *
-     * @param element - The Psi element in the package descriptor
-     * @return elements array to apply the inspection and annotation
-     */
-    abstract PsiElement[] getTargetElements(PsiElement element);
 
     /**
      * Get the relevant scan manager according to the project type and path.
@@ -233,5 +230,59 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         String artifactID = node.getComponentIdWithoutPrefix();
         ImpactTreeNode impactPath = node.getImpactPaths();
         return StringUtils.equals(artifactID, componentName) || impactPath.contains(componentName);
+    }
+
+    abstract UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, String issue);
+
+    void registerProblem(ProblemsHolder problemsHolder, DependencyNode dependency, PsiElement element, String componentName) {
+        boolean isTransitive = dependency.isIndirect() || !StringUtils.contains(dependency.getTitle(), componentName);
+        String dependencyDescription = getDependencyDescription(dependency.getTitle(), isTransitive);
+        List<LocalQuickFix> quickFixes = new ArrayList<>();
+        quickFixes.add(new ShowInDependencyTree(dependency, dependencyDescription));
+
+        if (!isTransitive) {
+            dependency.children().asIterator().forEachRemaining(issueNode -> {
+                List<String> fixVersionStrings = ListUtils.emptyIfNull(((VulnerabilityNode) issueNode).getFixedVersions());
+                for (String fixVersionString : fixVersionStrings) {
+                    String fixVersion = convertFixVersionStringToMinFixVersion(fixVersionString);
+                    UpgradeVersion upgradeVersion = getUpgradeVersion(dependency.getArtifactId(), fixVersion, issueNode.toString());
+                    // Todo: merge same version fixes to one fix
+                    quickFixes.add(upgradeVersion);
+                }
+            });
+        }
+        problemsHolder.registerProblem(
+                element,
+                "JFrog: " + dependencyDescription + " has security vulnerabilities",
+                ProblemHighlightType.WARNING,
+                quickFixes.toArray(LocalQuickFix[]::new)
+        );
+    }
+
+    private String getDependencyDescription(String depComponent, boolean isTransitive) {
+        String description = "dependency <" + depComponent + ">";
+        if (isTransitive) {
+            description = "transitive " + description;
+        }
+        return description;
+    }
+
+    protected static String convertFixVersionStringToMinFixVersion(String fixVersionString) {
+        // Possible fix version string formats:
+        // 1.0        >> 1.0
+        // (,1.0]     >> N/A
+        // (,1.0)     >> N/A
+        // [1.0]      >> 1.0
+        // (1.0,)     >> N/A
+        // (1.0, 2.0) >> N/A
+        // [1.0, 2.0] >> 1.0
+        String fixVersion = fixVersionString.trim().split(",")[0];
+        if (fixVersion.charAt(0) == '(') {
+            // If first character is '(' then we can't tell what's the minimal fix version
+            return "";
+        }
+        fixVersion = StringUtils.strip(fixVersion, "[");
+        fixVersion = StringUtils.strip(fixVersion, "]");
+        return fixVersion;
     }
 }

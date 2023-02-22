@@ -46,11 +46,6 @@ public class GradleGroovyInspection extends GradleInspection {
     }
 
     @Override
-    PsiElement[] getTargetElements(PsiElement element) {
-        return new PsiElement[]{element};
-    }
-
-    @Override
     boolean isDependency(PsiElement element) {
         PsiElement parent = element.getParent();
         for (int i = 0; i < 6; i++, parent = parent.getParent()) {

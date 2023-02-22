@@ -8,11 +8,15 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.XmlElementVisitor;
 import com.intellij.psi.impl.source.xml.XmlTagImpl;
 import com.intellij.psi.xml.XmlTag;
+import com.intellij.util.xml.DomManager;
+import com.jfrog.ide.idea.inspections.upgradeversion.MavenUpgradeVersion;
+import com.jfrog.ide.idea.inspections.upgradeversion.UpgradeVersion;
 import com.jfrog.ide.idea.scan.MavenScanner;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScannerBase;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.idea.maven.dom.model.MavenDomDependency;
 
 /**
  * @author yahavi
@@ -23,7 +27,6 @@ public class MavenInspection extends AbstractInspection {
     public static final String MAVEN_DEPENDENCIES_TAG = "dependencies";
     public static final String MAVEN_ARTIFACT_ID_TAG = "artifactId";
     public static final String MAVEN_GROUP_ID_TAG = "groupId";
-    public static final String MAVEN_VERSION_TAG = "version";
 
     public MavenInspection() {
         super("pom.xml");
@@ -46,15 +49,6 @@ public class MavenInspection extends AbstractInspection {
         if (element instanceof XmlTag) {
             MavenInspection.this.visitElement(holder, element);
         }
-    }
-
-    @Override
-    PsiElement[] getTargetElements(PsiElement element) {
-        XmlTag xmlTag = (XmlTag) element;
-        PsiElement groupId = xmlTag.findFirstSubTag(MAVEN_GROUP_ID_TAG);
-        PsiElement artifactId = xmlTag.findFirstSubTag(MAVEN_ARTIFACT_ID_TAG);
-        PsiElement version = xmlTag.findFirstSubTag(MAVEN_VERSION_TAG);
-        return new PsiElement[]{groupId, artifactId, version};
     }
 
     @Override
@@ -84,7 +78,13 @@ public class MavenInspection extends AbstractInspection {
         if (groupId == null || artifactId == null) {
             return null;
         }
-        return String.join(":", groupId.getValue().getText(), artifactId.getValue().getText());
+        MavenDomDependency dependency = (MavenDomDependency) DomManager.getDomManager(element.getProject()).getDomElement((XmlTag) element);
+        String version = dependency.getVersion().getStringValue();
+        return String.join(":", groupId.getValue().getText(), artifactId.getValue().getText(), version);
     }
 
+    @Override
+    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, String issue) {
+        return new MavenUpgradeVersion(componentName, fixVersion, issue);
+    }
 }

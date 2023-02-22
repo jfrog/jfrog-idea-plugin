@@ -6,13 +6,13 @@ import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Iconable;
 import com.intellij.util.ui.tree.TreeUtil;
+import com.jfrog.ide.common.nodes.DependencyNode;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.ui.utils.IconUtils;
 import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  * Adds the yellow bulb action - "Show in JFrog plugin".
@@ -21,12 +21,13 @@ import javax.swing.tree.DefaultMutableTreeNode;
  */
 public class ShowInDependencyTree implements LocalQuickFix, Iconable, HighPriorityAction {
 
-    private final DefaultMutableTreeNode node;
-    private final String description;
+    final static String SHOW_IN_TREE_MESSAGE = "Show vulnerability info in JFrog plugin";
+    private final DependencyNode node;
+    private final String dependencyDescription;
 
-    public ShowInDependencyTree(DefaultMutableTreeNode node, String description) {
+    public ShowInDependencyTree(DependencyNode node, String dependencyDescription) {
         this.node = node;
-        this.description = description;
+        this.dependencyDescription = dependencyDescription;
     }
 
     @Override
@@ -37,7 +38,7 @@ public class ShowInDependencyTree implements LocalQuickFix, Iconable, HighPriori
     @NotNull
     @Override
     public String getFamilyName() {
-        return description;
+        return SHOW_IN_TREE_MESSAGE + " - " + dependencyDescription;
     }
 
     @Override
