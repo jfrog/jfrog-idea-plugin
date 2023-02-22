@@ -9,7 +9,7 @@ public class MavenInspectionTest extends InspectionsTestBase {
 
     private static final String PACKAGE_DESCRIPTOR = "pom.xml";
     private final InspectionTestDependency[] DEPENDENCIES = {
-            new InspectionTestDependency(789, "a", "b")
+            new InspectionTestDependency(789, "a", "b:c")
     };
 
     private final int[] NON_DEPENDENCIES_POSITIONS = {397, 549, 766};
