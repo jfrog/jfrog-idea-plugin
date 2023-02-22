@@ -56,7 +56,7 @@ You can learn more about enriched CVEs [here](https://www.jfrog.com/confluence/d
 Check out what our research team is up to and stay updated on newly discovered issues by clicking on this link: https://research.jfrog.com
 
 #### Advanced Scans
-*Requires Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
+*Requires Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
 
 With advanced [**Contextual Analysis**](#contextual-analysis), understand the applicability of CVEs in your application and utilize JFrog Security scanners to analyze the way you use 3rd party packages in your projects.
 Automatically validate some high-impact vulnerabilities, such as vulnerabilities that have prerequisites for exploitations, and reduce false positives and vulnerability noise with smart CVE analysis.
@@ -77,12 +77,12 @@ In addition to IntelliJ IDEA, the plugin also supports the following IDEs:
 * GoLand
 
 # Supported Packages
-| Features                                          | Go  | Maven | Gradle | npm | Yarn v1 | Python |
-|---------------------------------------------------|:---:|:-----:|:------:|:---:|:-------:|:------:|
-| SCA                                               |  ✅  |   ✅   |   ✅    |  ✅  |    ✅    |   ✅    |
-| CVE Research and Enrichment                       |  ✅  |   ✅   |   ✅    |  ✅  |    ✅    |   ✅    |
-| Upgrade vulnerable dependencies to fixed versions |  ✅  |   ✅   |   ❌    |  ✅  |    ✅    |   ❌    |
-| Contextual Analysis                               |  ❌  |   ❌   |   ❌    |  ✅  |    ❌    |   ✅    |
+| Features                                            | Go  | Maven | Gradle | npm | Yarn v1 | Python |
+|-----------------------------------------------------|:---:|:-----:|:------:|:---:|:-------:|:------:|
+| SCA                                                 |  ✅  |   ✅   |   ✅    |  ✅  |    ✅    |   ✅    |
+| CVE Research and Enrichment                         |  ✅  |   ✅   |   ✅    |  ✅  |    ✅    |   ✅    |
+| Upgrade vulnerable dependencies to fixed versions   |  ✅  |   ✅   |   ❌    |  ✅  |    ✅    |   ❌    |
+| Contextual Analysis (requires Xray 3.66.5 or above) |  ❌  |   ❌   |   ❌    |  ✅  |    ❌    |   ✅    |
 
 # Getting Started
 1. Install the JFrog IntelliJ IDEA Plugin via the Plugins tab in the IDE settings, or in [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/9834-jfrog).
@@ -205,7 +205,7 @@ This view contains information about the vulnerability, the vulnerable component
 ![](readme-resources/vuln-impact-graph.png)
 
 ### Contextual Analysis
-*Requires Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
+*Requires Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
 
 Xray automatically validates some high and very high impact vulnerabilities, such as vulnerabilities that have prerequisites for exploitations, and provides contextual analysis information for these vulnerabilities, to assist you in figuring out which vulnerabilities need to be fixed.
 
