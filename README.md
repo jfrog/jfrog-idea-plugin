@@ -207,8 +207,13 @@ This view contains information about the vulnerability, the vulnerable component
 ### Contextual Analysis
 *Requires Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
 
-You can avoid wasting your time fixing risks that are not imposed and reduce false positives with contextual analysis.
-As part of the project's scan, JFrog IntelliJ IDEA Plugin will let you know if vulnerabilities in your dependencies are applicable or not.
+Xray automatically validates some high and very high impact vulnerabilities, such as vulnerabilities that have prerequisites for exploitations, and provides contextual analysis information for these vulnerabilities, to assist you in figuring out which vulnerabilities need to be fixed.
+
+Contextual Analysis data includes:
+
+* **Contextual Analysis status**: Contextual Analysis results indicating if a CVE was found applicable in your application or not applicable.
+* **Contextual Analysis breakdown**: An explanation provided by our research team as to why the CVE was found applicable or not applicable.
+* **Remediation**: Contextual mitigation steps and options provided by our research team that assist you with remediating the issues.
 
 ![](readme-resources/not-applicable.png)
 ![](readme-resources/applicable.png)
