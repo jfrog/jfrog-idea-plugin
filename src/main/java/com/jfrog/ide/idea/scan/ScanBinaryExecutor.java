@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.http.Header;
 import org.jfrog.build.api.util.Log;
+import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryManagerBuilder;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
@@ -65,6 +66,8 @@ public abstract class ScanBinaryExecutor {
     private static final String ENV_ACCESS_TOKEN = "JF_TOKEN";
     private static final String ENV_HTTP_PROXY = "HTTP_PROXY";
     private static final String ENV_HTTPS_PROXY = "HTTPS_PROXY";
+    private static final String ENV_LOG_DIR = "AM_LOG_DIRECTORY";
+
     private static final int USER_NOT_ENTITLED = 31;
     private static final String JFROG_RELEASES = "https://releases.jfrog.io/artifactory/";
     private static String osDistribution;
@@ -115,7 +118,7 @@ public abstract class ScanBinaryExecutor {
 
             Logger log = Logger.getInstance();
             // Execute the external process
-            CommandResults commandResults = commandExecutor.exeCommand(binaryTargetPath.toFile().getParentFile(), args, null, log);
+            CommandResults commandResults = commandExecutor.exeCommand(binaryTargetPath.toFile().getParentFile(), args, null, new NullLog());
             if (commandResults.getExitValue() == USER_NOT_ENTITLED) {
                 log.debug("User not entitled for advance security scan");
                 return List.of();
@@ -250,6 +253,7 @@ public abstract class ScanBinaryExecutor {
                 env.put(ENV_HTTPS_PROXY, "https://" + proxyUrl);
             }
         }
+        env.put(ENV_LOG_DIR, BINARIES_DIR.toAbsolutePath().toString());
         return env;
     }
 
