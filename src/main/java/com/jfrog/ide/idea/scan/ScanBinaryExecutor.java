@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.http.Header;
 import org.jfrog.build.api.util.Log;
+import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryManagerBuilder;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
@@ -44,6 +45,7 @@ import static com.jfrog.ide.common.utils.Utils.createMapper;
 import static com.jfrog.ide.common.utils.Utils.createYAMLMapper;
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBuilder;
 import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
+import static java.lang.String.join;
 
 /**
  * @author Tal Arian
@@ -65,6 +67,7 @@ public abstract class ScanBinaryExecutor {
     private static final String ENV_ACCESS_TOKEN = "JF_TOKEN";
     private static final String ENV_HTTP_PROXY = "HTTP_PROXY";
     private static final String ENV_HTTPS_PROXY = "HTTPS_PROXY";
+    private static final String ENV_LOG_DIR = "AM_LOG_DIRECTORY";
     private static final int USER_NOT_ENTITLED = 31;
     private static final String JFROG_RELEASES = "https://releases.jfrog.io/artifactory/";
     private static String osDistribution;
@@ -114,8 +117,11 @@ public abstract class ScanBinaryExecutor {
             args.add(inputFile.toString());
 
             Logger log = Logger.getInstance();
+            // The following logging is done outside the commandExecutor because the commandExecutor log level is set to INFO.
+            //  As it is an internal binary execution, the message should be printed for DEBUG use only.
+            log.debug(String.format("Executing command: %s %s", binaryTargetPath.toString(), join(" ", args)));
             // Execute the external process
-            CommandResults commandResults = commandExecutor.exeCommand(binaryTargetPath.toFile().getParentFile(), args, null, log);
+            CommandResults commandResults = commandExecutor.exeCommand(binaryTargetPath.toFile().getParentFile(), args, null, new NullLog());
             if (commandResults.getExitValue() == USER_NOT_ENTITLED) {
                 log.debug("User not entitled for advance security scan");
                 return List.of();
@@ -139,9 +145,9 @@ public abstract class ScanBinaryExecutor {
             downloadBinary();
             return;
         }
-        if (nextUpdateCheck == null || LocalDateTime.now().isAfter(nextUpdateCheck)) {
-            var currentTime = LocalDateTime.now();
-            nextUpdateCheck = LocalDateTime.of(currentTime.getYear(), currentTime.getMonth(), currentTime.getDayOfMonth() + UPDATE_INTERVAL, currentTime.getHour(), currentTime.getMinute(), currentTime.getSecond());
+        LocalDateTime currentTime = LocalDateTime.now();
+        if (nextUpdateCheck == null || currentTime.isAfter(nextUpdateCheck)) {
+            nextUpdateCheck = currentTime.plusDays(UPDATE_INTERVAL);
             // Check for new version of the binary
             try (FileInputStream archiveBinaryFile = new FileInputStream(archiveTargetPath.toFile())) {
                 String latestBinaryChecksum = getFileChecksumFromServer();
@@ -155,12 +161,13 @@ public abstract class ScanBinaryExecutor {
 
     public String getFileChecksumFromServer() throws IOException {
         try (ArtifactoryManager artifactoryManager = artifactoryManagerBuilder.build()) {
-            Header[] headers = artifactoryManager.downloadHeaders(JFROG_RELEASES + getBinaryDownloadURL());
+            Header[] headers = artifactoryManager.downloadHeaders(getBinaryDownloadURL());
             for (Header header : headers) {
-                if (header.getName().equals("x-checksum-sha256")) {
+                if (StringUtils.equalsIgnoreCase(header.getName(), "x-checksum-sha256")) {
                     return header.getValue();
                 }
             }
+            log.warn(String.format("Failed to retrieve file checksum from: %s/%s ", artifactoryManager.getUrl(), getBinaryDownloadURL()));
             return "";
         }
     }
@@ -250,6 +257,7 @@ public abstract class ScanBinaryExecutor {
                 env.put(ENV_HTTPS_PROXY, "https://" + proxyUrl);
             }
         }
+        env.put(ENV_LOG_DIR, BINARIES_DIR.toAbsolutePath().toString());
         return env;
     }
 
