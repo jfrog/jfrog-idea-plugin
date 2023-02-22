@@ -1,11 +1,13 @@
 package com.jfrog.ide.idea.scan;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jfrog.ide.idea.ServerConfigStub;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
 import com.jfrog.ide.idea.scan.data.ScansConfig;
 import junit.framework.TestCase;
 import org.apache.commons.io.FileUtils;
+import org.jfrog.build.api.util.NullLog;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +20,7 @@ import static com.jfrog.ide.common.utils.Utils.createYAMLMapper;
  * @author tala
  **/
 public class ScanBinaryExecutorTest extends TestCase {
-    private final ScanBinaryExecutor scanner = new ApplicabilityScannerExecutor();
+    private final ScanBinaryExecutor scanner = new ApplicabilityScannerExecutor(new NullLog(), new ServerConfigStub());
     private final Path SIMPLE_OUTPUT = new File("src/test/resources/applicability/simple_output.sarif").toPath();
     private final Path NOT_APPLIC_OUTPUT = new File("src/test/resources/applicability/not_applic_output.sarif").toPath();
 
