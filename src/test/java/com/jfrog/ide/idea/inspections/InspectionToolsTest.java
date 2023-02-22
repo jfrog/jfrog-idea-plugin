@@ -1,6 +1,8 @@
 package com.jfrog.ide.idea.inspections;
 
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 /**
  * @author michaels
@@ -8,13 +10,21 @@ import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 
 public class InspectionToolsTest extends LightJavaCodeInsightFixtureTestCase {
 
-    public void testConvertFixVersionStringToMinFixVersion() {
-        assertEquals("1.0", AbstractInspection.convertFixVersionStringToMinFixVersion("1.0"));
-        assertEquals("", AbstractInspection.convertFixVersionStringToMinFixVersion("(,1.0]"));
-        assertEquals("", AbstractInspection.convertFixVersionStringToMinFixVersion("(,1.0)"));
-        assertEquals("1.0", AbstractInspection.convertFixVersionStringToMinFixVersion("[1.0]"));
-        assertEquals("", AbstractInspection.convertFixVersionStringToMinFixVersion("(1.0,)"));
-        assertEquals("", AbstractInspection.convertFixVersionStringToMinFixVersion("(1.0, 2.0)"));
-        assertEquals("1.0", AbstractInspection.convertFixVersionStringToMinFixVersion("[1.0, 2.0]"));
+    @DataProvider
+    private Object[][] goVersionProvider() {
+        return new Object[][]{
+                {"1.0", "1.0"},
+                {"", "(,1.0]"},
+                {"", "(,1.0)"},
+                {"1.0", "[1.0]"},
+                {"", "(1.0,)"},
+                {"", "(1.0, 2.0)"},
+                {"1.0", "[1.0, 2.0]"},
+        };
+    }
+
+    @Test(dataProvider = "goVersionProvider")
+    public void testConvertFixVersionStringToMinFixVersion(String versionOutput, String expectedVersion) {
+        assertEquals(expectedVersion, AbstractInspection.convertFixVersionStringToMinFixVersion(versionOutput));
     }
 }
