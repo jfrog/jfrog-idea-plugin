@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author yahavi
@@ -180,7 +179,8 @@ public class LocalComponentsTree extends ComponentsTree {
             return;
         }
         SortableChildrenTreeNode root = (SortableChildrenTreeNode) getModel().getRoot();
-        cache.cacheNodes(Collections.list(root.children()).stream().map(treeNode -> (FileTreeNode) treeNode).collect(Collectors.toList()));
+        //noinspection unchecked
+        cache.cacheNodes((List<FileTreeNode>) (List<?>) Collections.list(root.children()));
     }
 
     private void setNodesFromCache() {
