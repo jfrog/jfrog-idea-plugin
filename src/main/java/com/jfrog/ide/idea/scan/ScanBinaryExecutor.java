@@ -117,8 +117,10 @@ public abstract class ScanBinaryExecutor {
             args.add(inputFile.toString());
 
             Logger log = Logger.getInstance();
-            // Execute the external process
+            // The following logging is done outside the commandExecutor because the commandExecutor log level is set to INFO.
+            //  As it is an internal binary execution, the message should be printed for DEBUG use only.
             log.debug(String.format("Executing command: %s %s", binaryTargetPath.toString(), join(" ", args)));
+            // Execute the external process
             CommandResults commandResults = commandExecutor.exeCommand(binaryTargetPath.toFile().getParentFile(), args, null, new NullLog());
             if (commandResults.getExitValue() == USER_NOT_ENTITLED) {
                 log.debug("User not entitled for advance security scan");
@@ -143,9 +145,9 @@ public abstract class ScanBinaryExecutor {
             downloadBinary();
             return;
         }
-        if (nextUpdateCheck == null || LocalDateTime.now().isAfter(nextUpdateCheck)) {
-            var currentTime = LocalDateTime.now();
-            nextUpdateCheck = LocalDateTime.of(currentTime.getYear(), currentTime.getMonth(), currentTime.getDayOfMonth() + UPDATE_INTERVAL, currentTime.getHour(), currentTime.getMinute(), currentTime.getSecond());
+        LocalDateTime currentTime = LocalDateTime.now();
+        if (nextUpdateCheck == null || currentTime.isAfter(nextUpdateCheck)) {
+            nextUpdateCheck = currentTime.plusDays(UPDATE_INTERVAL);
             // Check for new version of the binary
             try (FileInputStream archiveBinaryFile = new FileInputStream(archiveTargetPath.toFile())) {
                 String latestBinaryChecksum = getFileChecksumFromServer();
@@ -161,10 +163,11 @@ public abstract class ScanBinaryExecutor {
         try (ArtifactoryManager artifactoryManager = artifactoryManagerBuilder.build()) {
             Header[] headers = artifactoryManager.downloadHeaders(getBinaryDownloadURL());
             for (Header header : headers) {
-                if (header.getName().toLowerCase().equals("x-checksum-sha256")) {
+                if (StringUtils.equalsIgnoreCase(header.getName(), "x-checksum-sha256")) {
                     return header.getValue();
                 }
             }
+            log.warn(String.format("Failed to retrieve file checksum from: %s/%s ", artifactoryManager.getUrl(), getBinaryDownloadURL()));
             return "";
         }
     }
