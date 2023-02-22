@@ -37,8 +37,8 @@ import java.util.Set;
 public class LocalComponentsTree extends ComponentsTree {
     public static final String IGNORE_RULE_TOOL_TIP = "Creating Ignore Rules is only available when a JFrog Project or Watch is defined.";
     private static final String SHOW_IN_PROJECT_DESCRIPTOR = "Show direct dependency in project descriptor";
-    private static final String NO_ISSUES_EMPTY_STRING = "Your project was scanned and we didn't find any security issues.";
-    private static final String SCANNING_EMPTY_STRING = "Scanning...";
+    private static final String NO_ISSUES = "Your project was scanned and we didn't find any security issues.";
+    private static final String SCANNING = "Scanning...";
 
     private final ScanCache cache;
 
@@ -209,7 +209,7 @@ public class LocalComponentsTree extends ComponentsTree {
      * It means that this text will be shown only if the tree is empty.
      */
     public void setScanningEmptyText() {
-        getEmptyText().setText(SCANNING_EMPTY_STRING);
+        getEmptyText().setText(SCANNING);
     }
 
     /**
@@ -217,6 +217,6 @@ public class LocalComponentsTree extends ComponentsTree {
      * It means that this indication will be shown only if the tree is empty.
      */
     public void setNoIssuesEmptyText() {
-        getEmptyText().setText(NO_ISSUES_EMPTY_STRING);
+        getEmptyText().setText(NO_ISSUES);
     }
 }
