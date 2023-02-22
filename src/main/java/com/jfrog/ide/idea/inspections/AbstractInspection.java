@@ -263,7 +263,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         return description;
     }
 
-    private String convertFixVersionStringToMinFixVersion(String fixVersionString) {
+    protected static String convertFixVersionStringToMinFixVersion(String fixVersionString) {
         // Possible fix version string formats:
         // 1.0        >> 1.0
         // (,1.0]     >> N/A
