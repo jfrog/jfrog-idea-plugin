@@ -24,9 +24,7 @@ import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
 
 public class SourceCodeScannerManager {
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
-
-    private final Eos eos = new Eos();
-    private final ApplicabilityScannerExecutor applicability = new ApplicabilityScannerExecutor();
+    private final ApplicabilityScannerExecutor applicability = new ApplicabilityScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig());
 
     protected Project project;
     protected String codeBaseLanguage;
@@ -52,7 +50,7 @@ public class SourceCodeScannerManager {
             return Collections.emptyList();
         }
         List<JFrogSecurityWarning> scanResults = new ArrayList<>();
-        Map<String, List<VulnerabilityNode>> issuesMap = mapIssuesByCve(depScanResults);
+        Map<String, List<VulnerabilityNode>> issuesMap = mapDirectIssuesByCve(depScanResults);
         try {
             if (applicability.getSupportedLanguages().contains(codeBaseLanguage)) {
                 indicator.setText("Running applicability scan");
@@ -60,14 +58,7 @@ public class SourceCodeScannerManager {
                 List<JFrogSecurityWarning> applicabilityResults = applicability.execute(new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).cves(List.copyOf(issuesMap.keySet())).skippedFolders(getSkippedFoldersPatterns()));
                 scanResults.addAll(applicabilityResults);
             }
-            if (eos.getSupportedLanguages().contains(codeBaseLanguage)) {
-                indicator.setText("Running Eos scan");
-                indicator.setFraction(0.5);
-                List<JFrogSecurityWarning> eosResults = eos.execute(new ScanConfig.Builder().language(codeBaseLanguage).roots(List.of(getProjectBasePath(project).toString())));
-                scanResults.addAll(eosResults);
-            }
-        } catch (IOException | InterruptedException |
-                 NullPointerException e) {
+        } catch (IOException | InterruptedException | NullPointerException e) {
             logError(Logger.getInstance(), "Failed to scan source code", e, true);
         } finally {
             scanInProgress.set(false);
@@ -141,15 +132,18 @@ public class SourceCodeScannerManager {
     }
 
     /**
-     * Maps all the issues (vulnerabilities and security violations) by their CVE IDs.
+     * Maps direct dependencies  issues (vulnerabilities and security violations) by their CVE IDs.
      * Issues without a CVE ID are ignored.
      *
      * @param depScanResults - collection of DependencyNodes.
      * @return a map of CVE IDs to lists of issues with them.
      */
-    private Map<String, List<VulnerabilityNode>> mapIssuesByCve(Collection<DependencyNode> depScanResults) {
+    private Map<String, List<VulnerabilityNode>> mapDirectIssuesByCve(Collection<DependencyNode> depScanResults) {
         Map<String, List<VulnerabilityNode>> issues = new HashMap<>();
         for (DependencyNode dep : depScanResults) {
+            if (dep.isIndirect()) {
+                continue;
+            }
             Enumeration<TreeNode> treeNodeEnumeration = dep.children();
             while (treeNodeEnumeration.hasMoreElements()) {
                 TreeNode node = treeNodeEnumeration.nextElement();

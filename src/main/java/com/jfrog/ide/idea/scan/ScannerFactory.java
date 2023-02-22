@@ -135,6 +135,7 @@ public class ScannerFactory {
                 if (scanner == null) {
                     scanner = new PypiScanner(project, pythonSdk, executor, scanLogic);
                 }
+                scanner.setExecutor(executor);
                 newScanners.put(projectHash, scanner);
             }
         } catch (NoClassDefFoundError noClassDefFoundError) {
@@ -151,6 +152,7 @@ public class ScannerFactory {
                 scanner = createGenericScanner(type, dir, executor, scanLogic);
             }
             if (scanner != null) {
+                scanner.setExecutor(executor);
                 newScanners.put(projectHash, scanner);
             }
         }

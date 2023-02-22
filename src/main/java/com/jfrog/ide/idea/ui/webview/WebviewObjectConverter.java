@@ -1,11 +1,14 @@
 package com.jfrog.ide.idea.ui.webview;
 
-import com.jfrog.ide.common.nodes.*;
+import com.jfrog.ide.common.nodes.ApplicableIssueNode;
+import com.jfrog.ide.common.nodes.DependencyNode;
+import com.jfrog.ide.common.nodes.LicenseViolationNode;
+import com.jfrog.ide.common.nodes.VulnerabilityNode;
+import com.jfrog.ide.common.nodes.subentities.ImpactTreeNode;
 import com.jfrog.ide.common.nodes.subentities.ResearchInfo;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.idea.ui.webview.model.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class WebviewObjectConverter {
@@ -13,7 +16,7 @@ public class WebviewObjectConverter {
         ExtendedInformation extendedInformation = null;
         if (vulnerabilityNode.getResearchInfo() != null) {
             ResearchInfo issueResearchInfo = vulnerabilityNode.getResearchInfo();
-            JfrogResearchSeverityReason[] severityReasons = Arrays.stream(issueResearchInfo.getSeverityReasons()).map(severityReason -> new JfrogResearchSeverityReason(severityReason.getName(), severityReason.getDescription(), severityReason.isPositive())).toArray(JfrogResearchSeverityReason[]::new);
+            JfrogResearchSeverityReason[] severityReasons = issueResearchInfo.getSeverityReasons().stream().map(severityReason -> new JfrogResearchSeverityReason(severityReason.getName(), severityReason.getDescription(), severityReason.isPositive())).toArray(JfrogResearchSeverityReason[]::new);
             extendedInformation = new ExtendedInformation(issueResearchInfo.getShortDescription(), issueResearchInfo.getFullDescription(), issueResearchInfo.getSeverity().name(), issueResearchInfo.getRemediation(), severityReasons);
         }
         DependencyNode dependency = vulnerabilityNode.getParentArtifact();

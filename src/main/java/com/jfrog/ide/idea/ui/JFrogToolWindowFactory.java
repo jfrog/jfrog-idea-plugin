@@ -6,7 +6,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.jfrog.ide.idea.ci.CiManager;
-import com.jfrog.ide.idea.scan.ScanManager;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +21,6 @@ public class JFrogToolWindowFactory implements ToolWindowFactory {
         boolean buildsConfigured = isBuildsConfigured(project);
         DumbService.getInstance(project).runWhenSmart(() -> {
             project.getService(JFrogToolWindow.class).initToolWindow(toolWindow, project, buildsConfigured);
-            ScanManager.getInstance(project).startScan();
             CiManager.getInstance(project).asyncRefreshBuilds();
         });
     }

@@ -54,12 +54,12 @@
                                     "uri": "examples/applic-demo/../applic-demo/index.js"
                                 },
                                 "region": {
-                                    "endColumn": 17,
+                                    "endColumn": 18,
                                     "endLine": 20,
                                     "snippet": {
                                         "text": "protobuf.parse(p)"
                                     },
-                                    "startColumn": 0,
+                                    "startColumn": 1,
                                     "startLine": 20
                                 }
                             }
@@ -78,12 +78,12 @@
                                     "uri": "file://examples/applic-demo/../applic-demo/index.js"
                                 },
                                 "region": {
-                                    "endColumn": 73,
+                                    "endColumn": 74,
                                     "endLine": 22,
                                     "snippet": {
                                         "text": "protobuf.load(\"/path/to/untrusted.proto\", function(err, root) { return })"
                                     },
-                                    "startColumn": 0,
+                                    "startColumn": 1,
                                     "startLine": 18
                                 }
                             }

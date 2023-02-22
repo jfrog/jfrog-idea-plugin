@@ -40,9 +40,8 @@ public class CreateIgnoreRuleAction extends AbstractAction {
                                 if (event.getEventType() != ACTIVATED) {
                                     return;
                                 }
-                                ShowSettingsUtil.getInstance().showSettingsDialog(null, JFrogGlobalConfiguration.class, (GlobalConfiguration) -> GlobalConfiguration.selectSettingsTab());
+                                ShowSettingsUtil.getInstance().showSettingsDialog(null, JFrogGlobalConfiguration.class, JFrogGlobalConfiguration::selectSettingsTab);
                             })
-                    .setCloseButtonEnabled(true)
                     .setHideOnAction(true)
                     .setHideOnClickOutside(true)
                     .setHideOnLinkClick(true)
