@@ -67,7 +67,6 @@ public abstract class ScanBinaryExecutor {
     private static final String ENV_HTTP_PROXY = "HTTP_PROXY";
     private static final String ENV_HTTPS_PROXY = "HTTPS_PROXY";
     private static final String ENV_LOG_DIR = "AM_LOG_DIRECTORY";
-
     private static final int USER_NOT_ENTITLED = 31;
     private static final String JFROG_RELEASES = "https://releases.jfrog.io/artifactory/";
     private static String osDistribution;
@@ -158,9 +157,9 @@ public abstract class ScanBinaryExecutor {
 
     public String getFileChecksumFromServer() throws IOException {
         try (ArtifactoryManager artifactoryManager = artifactoryManagerBuilder.build()) {
-            Header[] headers = artifactoryManager.downloadHeaders(JFROG_RELEASES + getBinaryDownloadURL());
+            Header[] headers = artifactoryManager.downloadHeaders(getBinaryDownloadURL());
             for (Header header : headers) {
-                if (header.getName().equals("x-checksum-sha256")) {
+                if (header.getName().toLowerCase().equals("x-checksum-sha256")) {
                     return header.getValue();
                 }
             }
