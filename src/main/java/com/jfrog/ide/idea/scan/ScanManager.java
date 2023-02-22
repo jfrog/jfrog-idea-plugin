@@ -39,7 +39,7 @@ import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBui
 import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 public class ScanManager {
-    private final long SCAN_TIMEOUT_MINUTES = 10;
+    private final int SCAN_TIMEOUT_MINUTES = 10;
     private final Project project;
     private final ScannerFactory factory;
     private Map<Integer, ScannerBase> scanners = Maps.newHashMap();
