@@ -10,7 +10,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest, windows-latest, macOS-latest ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # Install required tools
       - name: Set up Java

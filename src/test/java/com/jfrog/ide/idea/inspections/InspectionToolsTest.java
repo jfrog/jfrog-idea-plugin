@@ -3,7 +3,7 @@ package com.jfrog.ide.idea.inspections;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import static org.gradle.internal.impldep.org.junit.Assert.assertEquals;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author michaels
