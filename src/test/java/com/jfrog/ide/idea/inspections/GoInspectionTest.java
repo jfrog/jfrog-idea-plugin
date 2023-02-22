@@ -9,9 +9,9 @@ public class GoInspectionTest extends InspectionsTestBase {
 
     private static final String PACKAGE_DESCRIPTOR = "go.mod";
     private final InspectionTestDependency[] DEPENDENCIES = {
-            new InspectionTestDependency(54, "github.com/jfrog/gocmd"),
-            new InspectionTestDependency(89, "github.com/jfrog/gofrog"),
-            new InspectionTestDependency(124, "github.com/jfrog/gogopowerrangers")
+            new InspectionTestDependency(54, "github.com/jfrog/gocmd:0.1.12"),
+            new InspectionTestDependency(89, "github.com/jfrog/gofrog:1.0.5"),
+            new InspectionTestDependency(124, "github.com/jfrog/gogopowerrangers:1.2.3")
     };
 
     private final int[] NON_DEPENDENCIES_POSITIONS = {176, 202};

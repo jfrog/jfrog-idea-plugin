@@ -10,7 +10,7 @@ import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.common.yarn.YarnTreeBuilder;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
-import com.jfrog.ide.idea.inspections.NpmInspection;
+import com.jfrog.ide.idea.inspections.YarnInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import org.jfrog.build.extractor.scan.DependencyTree;
@@ -57,7 +57,7 @@ public class YarnScanner extends SingleDescriptorScanner {
 
     @Override
     protected AbstractInspection getInspectionTool() {
-        return new NpmInspection();
+        return new YarnInspection();
     }
 
     @Override

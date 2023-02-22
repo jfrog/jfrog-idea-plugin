@@ -8,6 +8,8 @@ import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
+import com.jfrog.ide.idea.inspections.upgradeversion.GoUpgradeVersion;
+import com.jfrog.ide.idea.inspections.upgradeversion.UpgradeVersion;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScannerBase;
 import org.apache.commons.lang3.StringUtils;
@@ -43,11 +45,6 @@ public class GoInspection extends AbstractInspection {
     }
 
     @Override
-    PsiElement[] getTargetElements(PsiElement element) {
-        return new PsiElement[]{element};
-    }
-
-    @Override
     boolean isDependency(PsiElement element) {
         PsiElement parentElement = element.getParent();
         return parentElement instanceof VgoRequireDirective;
@@ -61,9 +58,17 @@ public class GoInspection extends AbstractInspection {
                 .orElse(null);
     }
 
-
     @Override
     String createComponentName(PsiElement element) {
-        return element.getFirstChild().getText();
+        VgoModuleSpec goElement = ((VgoModuleSpec) element);
+        String version = goElement.getModuleVersion().getText();
+        // String leading "v" from version
+        version = StringUtils.strip(version, "v");
+        return String.join(":", goElement.getIdentifier().getText(), version);
+    }
+
+    @Override
+    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, String issue) {
+        return new GoUpgradeVersion(componentName, fixVersion, issue);
     }
 }

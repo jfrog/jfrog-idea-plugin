@@ -3,6 +3,7 @@ package com.jfrog.ide.idea.inspections;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
+import com.jfrog.ide.idea.inspections.upgradeversion.UpgradeVersion;
 import com.jfrog.ide.idea.scan.GradleScanner;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScannerBase;
@@ -56,5 +57,10 @@ public abstract class GradleInspection extends AbstractInspection {
         }
         // compile project(':xyz')
         return StringUtils.removeStart(componentId, ":");
+    }
+
+    @Override
+    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, String issue) {
+        return null;
     }
 }
