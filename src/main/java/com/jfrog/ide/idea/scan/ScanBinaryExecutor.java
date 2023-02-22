@@ -45,6 +45,7 @@ import static com.jfrog.ide.common.utils.Utils.createMapper;
 import static com.jfrog.ide.common.utils.Utils.createYAMLMapper;
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBuilder;
 import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
+import static java.lang.String.join;
 
 /**
  * @author Tal Arian
@@ -117,6 +118,7 @@ public abstract class ScanBinaryExecutor {
 
             Logger log = Logger.getInstance();
             // Execute the external process
+            log.debug(String.format("Executing command: %s %s", binaryTargetPath.toString(), join(" ", args)));
             CommandResults commandResults = commandExecutor.exeCommand(binaryTargetPath.toFile().getParentFile(), args, null, new NullLog());
             if (commandResults.getExitValue() == USER_NOT_ENTITLED) {
                 log.debug("User not entitled for advance security scan");
