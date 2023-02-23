@@ -9,6 +9,7 @@ import org.jetbrains.kotlin.psi.KtStringTemplateExpression;
 import org.jetbrains.kotlin.psi.KtValueArgument;
 import org.jetbrains.kotlin.psi.KtValueArgumentList;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -18,7 +19,7 @@ import java.util.List;
  */
 public class GradleKotlinUpgradeVersion extends UpgradeVersion {
 
-    public GradleKotlinUpgradeVersion(String componentName, String fixVersion, String issue) {
+    public GradleKotlinUpgradeVersion(String componentName, String fixVersion, Collection<String> issue) {
         super(componentName, fixVersion, issue);
     }
 

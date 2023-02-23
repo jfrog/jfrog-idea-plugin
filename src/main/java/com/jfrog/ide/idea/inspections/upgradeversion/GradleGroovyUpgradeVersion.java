@@ -7,6 +7,8 @@ import org.jetbrains.plugins.groovy.lang.psi.GroovyPsiElementFactory;
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.arguments.GrNamedArgument;
 import org.jetbrains.plugins.groovy.lang.psi.api.util.GrNamedArgumentsOwner;
 
+import java.util.Collection;
+
 /**
  * Adds the yellow bulb action - ""Upgrade Version"".
  *
@@ -14,7 +16,7 @@ import org.jetbrains.plugins.groovy.lang.psi.api.util.GrNamedArgumentsOwner;
  */
 public class GradleGroovyUpgradeVersion extends UpgradeVersion {
 
-    public GradleGroovyUpgradeVersion(String componentName, String fixVersion, String issue) {
+    public GradleGroovyUpgradeVersion(String componentName, String fixVersion, Collection<String> issue) {
         super(componentName, fixVersion, issue);
     }
 

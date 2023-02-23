@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.dom.MavenDomUtil;
 import org.jetbrains.idea.maven.dom.model.MavenDomProjectModel;
 
+import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,7 +24,7 @@ public class MavenUpgradeVersion extends UpgradeVersion {
 
     private static final Pattern POM_PROPERTY_REGEX = Pattern.compile("^\\$\\{(.*)}");
 
-    public MavenUpgradeVersion(String componentName, String fixVersion, String issue) {
+    public MavenUpgradeVersion(String componentName, String fixVersion, Collection<String> issue) {
         super(componentName, fixVersion, issue);
     }
 

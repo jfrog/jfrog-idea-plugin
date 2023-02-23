@@ -1,5 +1,7 @@
 package com.jfrog.ide.idea.inspections;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.LocalQuickFix;
 import com.intellij.codeInspection.ProblemHighlightType;
@@ -232,7 +234,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         return StringUtils.equals(artifactID, componentName) || impactPath.contains(componentName);
     }
 
-    abstract UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, String issue);
+    abstract UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issues);
 
     void registerProblem(ProblemsHolder problemsHolder, DependencyNode dependency, PsiElement element, String componentName) {
         boolean isTransitive = dependency.isIndirect() || !StringUtils.contains(dependency.getTitle(), componentName);
@@ -241,16 +243,21 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         quickFixes.add(new ShowInDependencyTree(dependency, dependencyDescription));
 
         if (!isTransitive) {
+            Multimap<String, String> fixVersionToCves = ArrayListMultimap.create();
             dependency.children().asIterator().forEachRemaining(issueNode -> {
                 List<String> fixVersionStrings = ListUtils.emptyIfNull(((VulnerabilityNode) issueNode).getFixedVersions());
                 for (String fixVersionString : fixVersionStrings) {
                     String fixVersion = convertFixVersionStringToMinFixVersion(fixVersionString);
-                    UpgradeVersion upgradeVersion = getUpgradeVersion(dependency.getArtifactId(), fixVersion, issueNode.toString());
-                    // Todo: merge same version fixes to one fix
-                    quickFixes.add(upgradeVersion);
+                    fixVersionToCves.put(fixVersion, issueNode.toString());
                 }
             });
+
+            fixVersionToCves.asMap().forEach((key, collection) -> {
+                UpgradeVersion upgradeVersion = getUpgradeVersion(dependency.getArtifactId(), key, collection);
+                quickFixes.add(upgradeVersion);
+            });
         }
+
         problemsHolder.registerProblem(
                 element,
                 "JFrog: " + dependencyDescription + " has security vulnerabilities",

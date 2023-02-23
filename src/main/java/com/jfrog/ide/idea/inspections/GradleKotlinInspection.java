@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.psi.*;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -90,7 +91,7 @@ public class GradleKotlinInspection extends GradleInspection {
     }
 
     @Override
-    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, String issue) {
+    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issue) {
         return new GradleKotlinUpgradeVersion(componentName, fixVersion, issue);
     }
 

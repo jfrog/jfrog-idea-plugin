@@ -14,6 +14,8 @@ import com.jfrog.ide.idea.scan.ScannerBase;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
+
 /**
  * @author yahavi
  */
@@ -62,7 +64,7 @@ public class NpmInspection extends AbstractInspection {
     }
 
     @Override
-    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, String issue) {
+    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issue) {
         return new NpmUpgradeVersion(componentName, fixVersion, issue);
     }
 }

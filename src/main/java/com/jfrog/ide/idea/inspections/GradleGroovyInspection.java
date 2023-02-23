@@ -16,6 +16,7 @@ import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.GrExpres
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.literals.GrLiteral;
 import org.jetbrains.plugins.groovy.lang.psi.api.util.GrNamedArgumentsOwner;
 
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -102,7 +103,7 @@ public class GradleGroovyInspection extends GradleInspection {
     }
 
     @Override
-    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, String issue) {
+    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issue) {
         return new GradleGroovyUpgradeVersion(componentName, fixVersion, issue);
     }
 }
