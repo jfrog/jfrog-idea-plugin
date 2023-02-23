@@ -140,7 +140,6 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
 
         MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
         messageBus.syncPublisher(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE).update();
-
     }
 
     public void setCommonConfigFields(ServerConfigImpl serverConfig) {
@@ -187,7 +186,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
      * This allows developers who already have JFrog CLI installed and configured,
      * to have IDEA load the config automatically.
      */
-    public void loadConnectionDetailsFromJfrogCli() {
+    private void loadConnectionDetailsFromJfrogCli() {
         try {
             if (serverConfig.readConnectionDetailsFromJfrogCli()) {
                 Logger.getInstance().info("Successfully loaded config connection details from JFrog CLI");
