@@ -11,11 +11,11 @@ public class GradleGroovyInspectionTest extends InspectionsTestBase {
     // files as groovy-script.
     private static final String PACKAGE_DESCRIPTOR = "build.groovy";
     private final InspectionTestDependency[] DEPENDENCIES = {
-            new InspectionTestDependency(96, "a", "b"),
-            new InspectionTestDependency(139, "a", "b"),
-            new InspectionTestDependency(180, "a", "b"),
+            new InspectionTestDependency(96, "a1", "b1"),
+            new InspectionTestDependency(139, "a2", "b2"),
+            new InspectionTestDependency(180, "a3", "b3"),
             new InspectionTestDependency(215, "d", "e"),
-            new InspectionTestDependency(256, "a", "b"),
+            new InspectionTestDependency(256, "a4", "b4"),
             new InspectionTestDependency(321, "project")
     };
 
