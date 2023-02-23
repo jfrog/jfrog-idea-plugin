@@ -42,20 +42,26 @@ public class ComponentUtils {
 
         // "Thank you for installing the JFrog plugin"
         HyperlinkLabel thanksLabel = new HyperlinkLabel();
-        thanksLabel.setText("Thank you for installing the JFrog plugin.");
+        thanksLabel.setText("Thank you for installing the JFrog IntelliJ IDEA Plugin!");
         addCenteredHyperlinkLabel(noCredentialsPanel, thanksLabel);
 
-        // "If you already have a JFrog environment, please configure its connection details."
+        // "If you already have a JFrog environment, configure its connection details."
         HyperlinkLabel configLink = new HyperlinkLabel();
-        configLink.setTextWithHyperlink("If you already have a JFrog environment, please<hyperlink>configure</hyperlink> its connection details.");
+        configLink.setTextWithHyperlink("If you already have a JFrog environment,<hyperlink>configure</hyperlink> its connection details.");
         configLink.addHyperlinkListener(e -> ShowSettingsUtil.getInstance().showSettingsDialog(null, JFrogGlobalConfiguration.class));
         addCenteredHyperlinkLabel(noCredentialsPanel, configLink);
 
-        // "Don't have a JFrog environment? Get one for FREE"
+        // "Don't have a JFrog environment? Get one for FREE!"
         HyperlinkLabel getFreeLink = new HyperlinkLabel();
-        getFreeLink.setTextWithHyperlink("Don't have a JFrog environment?<hyperlink>Get one for FREE</hyperlink>");
-        getFreeLink.addHyperlinkListener(e -> BrowserUtil.browse("https://www.jfrog.com/confluence/display/JFROG/JFrog+IntelliJ+IDEA+Plugin#JFrogIntelliJIDEAPlugin-SetUpaFREEJFrogEnvironmentintheCloud"));
+        getFreeLink.setTextWithHyperlink("Don't have a JFrog environment?<hyperlink>Get one for FREE!</hyperlink>");
+        getFreeLink.addHyperlinkListener(e -> BrowserUtil.browse("https://github.com/jfrog/jfrog-idea-plugin#set-up-a-free-jfrog-environment-in-the-cloud"));
         addCenteredHyperlinkLabel(noCredentialsPanel, getFreeLink);
+
+        // "Read more about the plugin."
+        HyperlinkLabel readMoreLink = new HyperlinkLabel();
+        readMoreLink.setTextWithHyperlink("<hyperlink>Read more</hyperlink> about the plugin.");
+        readMoreLink.addHyperlinkListener(e -> BrowserUtil.browse("https://github.com/jfrog/jfrog-idea-plugin#readme"));
+        addCenteredHyperlinkLabel(noCredentialsPanel, readMoreLink);
 
         return createUnsupportedPanel(noCredentialsPanel);
     }
@@ -66,7 +72,7 @@ public class ComponentUtils {
      * @param panel          - The input panel
      * @param hyperlinkLabel - The hyperlink label
      */
-    private static void addCenteredHyperlinkLabel(JPanel panel, HyperlinkLabel hyperlinkLabel) {
+    public static void addCenteredHyperlinkLabel(JPanel panel, HyperlinkLabel hyperlinkLabel) {
         hyperlinkLabel.setMaximumSize(hyperlinkLabel.getPreferredSize());
         hyperlinkLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(hyperlinkLabel);
@@ -80,7 +86,7 @@ public class ComponentUtils {
         return createUnsupportedPanel(link);
     }
 
-    private static JPanel createUnsupportedPanel(Component label) {
+    public static JPanel createUnsupportedPanel(Component label) {
         JBPanel<?> panel = new JBPanel<>(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.BOTH;

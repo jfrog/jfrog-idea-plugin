@@ -23,7 +23,9 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
+import com.intellij.util.messages.MessageBus;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.log.Logger;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
@@ -84,7 +86,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
 
     @Override
     public void noStateLoaded() {
-        this.serverConfig.setConnectionDetailsFromEnv(this.serverConfig.readConnectionDetailsFromEnv());
+        reloadXrayCredentials();
     }
 
     public ServerConfigImpl getServerConfig() {
@@ -135,6 +137,9 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         this.serverConfig.setPassword(serverConfig.getPassword());
         this.serverConfig.setAccessToken(serverConfig.getAccessToken());
         this.serverConfig.addCredentialsToPasswordSafe();
+
+        MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
+        messageBus.syncPublisher(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE).update();
     }
 
     public void setCommonConfigFields(ServerConfigImpl serverConfig) {
@@ -155,8 +160,21 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         this.serverConfig.setWatches(serverConfig.getWatches());
     }
 
-    public boolean areXrayCredentialsSet() {
-        return serverConfig != null && serverConfig.isXrayConfigured();
+    /**
+     * Reloads Xray credentials.
+     *
+     * @return true if credentials exist and Xray is configured, false otherwise.
+     */
+    public boolean reloadXrayCredentials() {
+        if (serverConfig.isXrayConfigured()) {
+            return true;
+        }
+        serverConfig.setConnectionDetailsFromEnv(serverConfig.readConnectionDetailsFromEnv());
+        if (serverConfig.isXrayConfigured()) {
+            return true;
+        }
+        loadConnectionDetailsFromJfrogCli();
+        return serverConfig.isXrayConfigured();
     }
 
     public boolean areArtifactoryCredentialsSet() {
@@ -167,19 +185,18 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
      * The plugin supports reading the JFrog connection details from JFrog CLI's configuration.
      * This allows developers who already have JFrog CLI installed and configured,
      * to have IDEA load the config automatically.
-     *
-     * @return true if connection details from CLI were loaded.
      */
-    public boolean loadConnectionDetailsFromJfrogCli() {
+    private void loadConnectionDetailsFromJfrogCli() {
         try {
             if (serverConfig.readConnectionDetailsFromJfrogCli()) {
                 Logger.getInstance().info("Successfully loaded config connection details from JFrog CLI");
-                return true;
+                MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
+                messageBus.syncPublisher(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE).update();
+                return;
             }
         } catch (IOException exception) {
             Logger.getInstance().warn(ExceptionUtils.getRootCauseMessage(exception));
         }
         Logger.getInstance().debug("Couldn't load config connection details from JFrog CLI");
-        return false;
     }
 }
