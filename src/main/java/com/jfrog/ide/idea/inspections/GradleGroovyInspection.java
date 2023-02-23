@@ -64,7 +64,12 @@ public class GradleGroovyInspection extends GradleInspection {
     @Override
     String createComponentName(PsiElement element) {
         if (element instanceof GrNamedArgumentsOwner) {
-            return String.join(":", extractExpression((GrNamedArgumentsOwner) element, GRADLE_GROUP_KEY), extractExpression((GrNamedArgumentsOwner) element, GRADLE_NAME_KEY));
+            GrNamedArgumentsOwner argOwner = (GrNamedArgumentsOwner) element;
+            String group = extractExpression(argOwner, GRADLE_GROUP_KEY);
+            String name = extractExpression(argOwner, GRADLE_NAME_KEY);
+            if (StringUtils.isNotEmpty(group) && StringUtils.isNotEmpty(name)) {
+                return String.join(":", group, name);
+            }
         }
         String componentId = getLiteralValue((GrLiteral) element);
         return super.createComponentName(componentId);

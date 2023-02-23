@@ -231,7 +231,7 @@ public abstract class ScannerBase {
             return;
         }
         // The tasks run asynchronously. To make sure no more than 3 tasks are running concurrently,
-        // we use a count down latch that signals to that executor service that it can get more tasks.
+        // we use a count-down latch that signals to that executor service that it can get more tasks.
         CountDownLatch latch = new CountDownLatch(1);
         Task.Backgroundable scanAndUpdateTask = new Task.Backgroundable(null, getTaskTitle()) {
             @Override
