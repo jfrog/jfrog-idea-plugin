@@ -4,6 +4,8 @@ import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
+import com.jfrog.ide.idea.inspections.upgradeversion.GradleKotlinUpgradeVersion;
+import com.jfrog.ide.idea.inspections.upgradeversion.UpgradeVersion;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.psi.*;
@@ -85,6 +87,11 @@ public class GradleKotlinInspection extends GradleInspection {
 
         // Remove '@' suffix, for example commons-lang:commons-lang:2.4@jar
         return StringUtils.substringBefore(value, "@");
+    }
+
+    @Override
+    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, String issue) {
+        return new GradleKotlinUpgradeVersion(componentName, fixVersion, issue);
     }
 
 }
