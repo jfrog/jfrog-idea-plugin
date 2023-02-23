@@ -239,7 +239,7 @@ public abstract class ScannerBase {
                 if (project.isDisposed()) {
                     return;
                 }
-                if (!GlobalSettings.getInstance().areXrayCredentialsSet()) {
+                if (!GlobalSettings.getInstance().reloadXrayCredentials()) {
                     log.warn("Xray server is not configured.");
                     return;
                 }
