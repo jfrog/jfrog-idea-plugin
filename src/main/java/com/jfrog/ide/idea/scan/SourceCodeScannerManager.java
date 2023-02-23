@@ -55,8 +55,12 @@ public class SourceCodeScannerManager {
             if (applicability.getSupportedLanguages().contains(codeBaseLanguage)) {
                 indicator.setText("Running applicability scan");
                 indicator.setFraction(0.25);
-                List<JFrogSecurityWarning> applicabilityResults = applicability.execute(new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).cves(List.copyOf(issuesMap.keySet())).skippedFolders(getSkippedFoldersPatterns()));
-                scanResults.addAll(applicabilityResults);
+                Set<String> directIssuesCVEs = issuesMap.keySet();
+                // If no direct dependencies with issues are found by Xray, the applicability scan is irrelevant.
+                if (directIssuesCVEs.size() > 0) {
+                    List<JFrogSecurityWarning> applicabilityResults = applicability.execute(new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).cves(List.copyOf(directIssuesCVEs)).skippedFolders(getSkippedFoldersPatterns()));
+                    scanResults.addAll(applicabilityResults);
+                }
             }
         } catch (IOException | InterruptedException | NullPointerException e) {
             logError(Logger.getInstance(), "Failed to scan source code", e, true);
