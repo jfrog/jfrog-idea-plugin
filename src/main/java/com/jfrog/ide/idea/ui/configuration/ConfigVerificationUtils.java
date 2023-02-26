@@ -21,7 +21,7 @@ public class ConfigVerificationUtils {
     public static final String EXCLUSIONS_SUFFIX = "*";
     public static String EXCLUSIONS_REGEX_PARSER = "^\\*\\*/\\*\\{([^{}]+)}\\*$";
     public static Pattern EXCLUSIONS_REGEX_PATTERN = Pattern.compile(EXCLUSIONS_REGEX_PARSER);
-    public static final String DEFAULT_EXCLUSIONS = EXCLUSIONS_PREFIX + "{.idea, test, node_modules}" + EXCLUSIONS_SUFFIX;
+    public static final String DEFAULT_EXCLUSIONS = EXCLUSIONS_PREFIX + "{.idea,test,node_modules}" + EXCLUSIONS_SUFFIX;
 
     /**
      * Validate config project, watches and excluded paths before saving.
@@ -46,6 +46,7 @@ public class ConfigVerificationUtils {
 
     /**
      * Validate excluded paths field before saving.
+     *
      * @param excludedPaths users' input parameter
      * @throws ConfigurationException if excludedPaths field in the configuration is illegal.
      */
@@ -60,7 +61,7 @@ public class ConfigVerificationUtils {
             try {
                 FileSystems.getDefault().getPathMatcher("glob:" + excludedPaths);
             } catch (PatternSyntaxException e) {
-                throw new ConfigurationException(ExceptionUtils.getRootCauseMessage(e),"Excluded paths pattern must be a valid glob pattern");
+                throw new ConfigurationException(ExceptionUtils.getRootCauseMessage(e), "Excluded paths pattern must be a valid glob pattern");
             }
             Matcher matcher = EXCLUSIONS_REGEX_PATTERN.matcher(excludedPaths);
             if (!matcher.find()) {

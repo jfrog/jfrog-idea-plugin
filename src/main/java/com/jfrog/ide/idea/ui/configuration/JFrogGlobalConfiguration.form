@@ -652,7 +652,7 @@
             </constraints>
             <properties>
               <enabled value="false"/>
-              <text value="    Which is used to exclude specific local paths from being scanned by JFrog Xray."/>
+              <text value="    Which is used to exclude specific local directories paths from being scanned by the plugin."/>
             </properties>
           </component>
         </children>
