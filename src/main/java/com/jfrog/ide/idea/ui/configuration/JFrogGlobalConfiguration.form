@@ -506,8 +506,8 @@
               </grid>
             </constraints>
             <properties>
-              <text value="    Excluded paths"/>
-              <toolTipText value="Pattern of project paths to exclude from Xray scanning for npm and Go projects."/>
+              <text value="    Excluded directories"/>
+              <toolTipText value=""/>
             </properties>
           </component>
           <component id="a1d59" class="com.intellij.ui.components.JBTextField" binding="excludedPaths">
@@ -652,7 +652,7 @@
             </constraints>
             <properties>
               <enabled value="false"/>
-              <text value="    Which is used to exclude specific local paths from being scanned by JFrog Xray."/>
+              <text value="    Which is used to exclude specific local directories paths from being scanned by the plugin."/>
             </properties>
           </component>
         </children>
