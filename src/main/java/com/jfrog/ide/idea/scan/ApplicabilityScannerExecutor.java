@@ -11,7 +11,6 @@ import org.jfrog.build.api.util.Log;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,8 +46,6 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
     @Override
     protected List<JFrogSecurityWarning> parseOutputSarif(Path outputFile) throws IOException {
         List<JFrogSecurityWarning> results = super.parseOutputSarif(outputFile);
-        HashSet<String> applicabilityCves = new HashSet<>();
-        results.forEach(jFrogSecurityWarning -> applicabilityCves.add(jFrogSecurityWarning.getName()));
         Output output = getOutputObj(outputFile);
         Optional<Run> run = output.getRuns().stream().findFirst();
         if (run.isPresent()) {
