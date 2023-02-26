@@ -506,7 +506,7 @@
               </grid>
             </constraints>
             <properties>
-              <text value="    Excluded paths"/>
+              <text value="    Excluded directories"/>
               <toolTipText value="Pattern of project paths to exclude from Xray scanning for npm and Go projects."/>
             </properties>
           </component>
