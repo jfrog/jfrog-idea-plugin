@@ -28,7 +28,7 @@ public class SourceCodeScannerManager {
 
     protected Project project;
     protected String codeBaseLanguage;
-    public static final String SKIP_FOLDERS_SUFFIX = "*/**";
+    private static final String SKIP_FOLDERS_SUFFIX = "*/**";
 
     public SourceCodeScannerManager(Project project, String codeBaseLanguage) {
         this.project = project;
