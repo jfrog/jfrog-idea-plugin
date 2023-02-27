@@ -138,6 +138,9 @@ public class LocalComponentsTree extends ComponentsTree {
     }
 
     private void addNodeNavigation(Set<NavigationTarget> navigationCandidates) {
+        if (navigationCandidates == null) {
+            return;
+        }
         if (navigationCandidates.size() > 1) {
             addMultiNavigation(navigationCandidates);
         } else {

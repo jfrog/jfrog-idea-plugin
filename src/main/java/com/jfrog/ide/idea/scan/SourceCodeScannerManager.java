@@ -28,6 +28,7 @@ public class SourceCodeScannerManager {
 
     protected Project project;
     protected String codeBaseLanguage;
+    private static final String SKIP_FOLDERS_SUFFIX = "*/**";
 
     public SourceCodeScannerManager(Project project, String codeBaseLanguage) {
         this.project = project;
@@ -51,12 +52,18 @@ public class SourceCodeScannerManager {
         }
         List<JFrogSecurityWarning> scanResults = new ArrayList<>();
         Map<String, List<VulnerabilityNode>> issuesMap = mapDirectIssuesByCve(depScanResults);
+        String excludePattern = GlobalSettings.getInstance().getServerConfig().getExcludedPaths();
+
         try {
             if (applicability.getSupportedLanguages().contains(codeBaseLanguage)) {
                 indicator.setText("Running applicability scan");
                 indicator.setFraction(0.25);
-                List<JFrogSecurityWarning> applicabilityResults = applicability.execute(new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).cves(List.copyOf(issuesMap.keySet())).skippedFolders(getSkippedFoldersPatterns()));
-                scanResults.addAll(applicabilityResults);
+                Set<String> directIssuesCVEs = issuesMap.keySet();
+                // If no direct dependencies with issues are found by Xray, the applicability scan is irrelevant.
+                if (directIssuesCVEs.size() > 0) {
+                    List<JFrogSecurityWarning> applicabilityResults = applicability.execute(new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).cves(List.copyOf(directIssuesCVEs)).skippedFolders(convertToSkippedFolders(excludePattern)));
+                    scanResults.addAll(applicabilityResults);
+                }
             }
         } catch (IOException | InterruptedException | NullPointerException e) {
             logError(Logger.getInstance(), "Failed to scan source code", e, true);
@@ -73,17 +80,17 @@ public class SourceCodeScannerManager {
      *
      * @return a list of equivalent patterns without the use of "{}"
      */
-    private List<String> getSkippedFoldersPatterns() {
-        String excludePattern = GlobalSettings.getInstance().getServerConfig().getExcludedPaths();
+    static List<String> convertToSkippedFolders(String excludePattern) {
         List<String> skippedFoldersPatterns = new ArrayList<>();
         if (StringUtils.isNotBlank(excludePattern)) {
             Matcher matcher = EXCLUSIONS_REGEX_PATTERN.matcher(excludePattern);
             if (!matcher.find()) {
-                return List.of(excludePattern);
+                // Convert pattern form shape "**/*a*" to "**/*a*/**"
+                return List.of(StringUtils.removeEnd(excludePattern, EXCLUSIONS_SUFFIX) + SKIP_FOLDERS_SUFFIX);
             }
             String[] dirsNames = matcher.group(1).split(",");
             for (String dirName : dirsNames) {
-                skippedFoldersPatterns.add(EXCLUSIONS_PREFIX + dirName.strip() + EXCLUSIONS_SUFFIX);
+                skippedFoldersPatterns.add(EXCLUSIONS_PREFIX + dirName.strip() + SKIP_FOLDERS_SUFFIX);
             }
         }
         return skippedFoldersPatterns;

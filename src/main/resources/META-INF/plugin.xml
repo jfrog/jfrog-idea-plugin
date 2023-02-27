@@ -4,18 +4,17 @@
     <vendor email="support@jfrog.com" url="https://www.jfrog.com">JFrog</vendor>
 
     <description><![CDATA[
-      The JFrog plugin adds JFrog Xray scanning of Maven, Gradle, Go, npm, and PyPI project dependencies to your IDE.
+      The JFrog plugin adds JFrog Xray scanning of Maven, Gradle, Go, npm, Yarn v1, and PyPI project dependencies to your IDE.
       The plugin allows developers to see security vulnerabilities and license violations within their code by continuously scanning it locally with JFrog Xray.
-      Since version 1.8.0, the plugin also allows developers to track the status of the code while it is being built, tested and scanned on the CI server.
+      It also allows developers to track the status of the code while it is being built, tested and scanned on the CI server.
       The plugin is compatible with IntelliJ IDEA, WebStorm, GoLand, PyCharm, and Android Studio.
     ]]></description>
 
     <change-notes>
         <![CDATA[
-          <li>Remove duplicated components in payload to JFrog Xray</li>
-          <li>Increase default connection timeout to 5 minutes</li>
-          <li>Bug - Missing Xray scan results in CI mode</li>
-          <li>Bug - Stackoverflow when reading credentials from CLI</li>
+          <li>New look and feel</li>
+          <li>New details pane that is opened when clicking on a CVE</li>
+          <li>Support for Contextual Analysis capability, as part of JFrog's Advanced Security package</li>
         ]]>
     </change-notes>
 
@@ -69,7 +68,7 @@
         <!--suppress PluginXmlCapitalization -->
         <action id="JFrog.RefreshLocal"
                 class="com.jfrog.ide.idea.actions.RefreshLocalAction"
-                text="Run scan"
+                text="Run Scan"
                 description="Force Xray scan"
                 icon="AllIcons.Actions.Execute"/>
         <action id="JFrog.RefreshBuilds"

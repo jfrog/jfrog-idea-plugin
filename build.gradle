@@ -4,7 +4,7 @@ import java.net.http.HttpResponse
 import java.nio.file.Paths
 
 plugins {
-    id "org.jetbrains.intellij" version "1.13.0"
+    id "org.jetbrains.intellij" version "1.12.0"
     id "java"
     id "maven-publish"
     id "de.undercouch.download" version "5.3.0"
@@ -50,10 +50,10 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.14.0'
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-api', version: buildInfoVersion
     implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.4'
-    implementation group: 'com.jfrog.xray.client', name: 'xray-client-java', version: '0.13.x-20230219.172211-1'
+    implementation group: 'com.jfrog.xray.client', name: 'xray-client-java', version: '0.14.0'
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
     implementation group: 'org.jfrog.filespecs', name: 'file-specs-java', version: '1.1.2'
-    implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: '1.13.x-20230222.095001-2'
+    implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: '2.0.0'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
     implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-jre'
     testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.2.0'
