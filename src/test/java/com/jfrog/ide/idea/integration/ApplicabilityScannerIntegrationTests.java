@@ -10,7 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTests {
+public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
     private ApplicabilityScannerExecutor scanner;
 
     @Override

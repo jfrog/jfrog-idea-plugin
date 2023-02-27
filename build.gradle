@@ -64,6 +64,7 @@ dependencies {
 test {
     scanForTestClasses false
     include "**/*Test.class"
+    exclude "**/*IntegrationTest*"
     testLogging {
         exceptionFormat "full"
         events "started", "passed", "skipped", "failed", "standardOut", "standardError"

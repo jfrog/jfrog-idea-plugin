@@ -10,7 +10,7 @@ import java.nio.file.Path;
 
 import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.DEFAULT_EXCLUSIONS;
 
-public class BaseIntegrationTests extends HeavyPlatformTestCase {
+public abstract class BaseIntegrationTest extends HeavyPlatformTestCase {
     public static final String ENV_PLATFORM_URL = "JFROG_IDE_PLATFORM_URL";
     public static final String ENV_ACCESS_TOKEN = "JFROG_IDE_ACCESS_TOKEN";
     private static final int CONNECTION_TIMEOUT = 70;
