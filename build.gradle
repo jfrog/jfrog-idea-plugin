@@ -74,6 +74,19 @@ test {
     }
 }
 
+tasks.register('integrationTests', Test) {
+    scanForTestClasses false
+    include "**/*IntegrationTests.class"
+    testLogging {
+        exceptionFormat "full"
+        events "started", "passed", "skipped", "failed", "standardOut", "standardError"
+        minGranularity 0
+    }
+    if (project.hasProperty('excludeTests')) {
+        exclude project.property('excludeTests')
+    }
+}
+
 def webviewFileName = 'jfrog-ide-webview-' + webviewVersion + '.tgz'
 def webviewUrl = 'https://releases.jfrog.io/artifactory/ide-webview-npm/jfrog-ide-webview/-/' + webviewFileName
 tasks.register('downloadWebview', Download) {
