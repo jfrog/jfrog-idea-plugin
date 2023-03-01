@@ -1,10 +1,10 @@
 package com.jfrog.ide.idea.integration;
 
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
+import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.ApplicabilityScannerExecutor;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
 import org.apache.commons.io.FileUtils;
-import org.jfrog.build.api.util.NullLog;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +16,7 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        scanner = new ApplicabilityScannerExecutor(new NullLog(), serverConfig);
+        scanner = new ApplicabilityScannerExecutor(Logger.getInstance(), serverConfig);
     }
 
     @Override

@@ -1,8 +1,9 @@
 package com.jfrog.ide.idea.integration;
 
 import com.intellij.testFramework.HeavyPlatformTestCase;
-import com.jfrog.ide.common.configuration.ServerConfig;
+import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
+import org.gradle.internal.impldep.org.junit.platform.commons.util.StringUtils;
 import org.junit.Assert;
 
 import java.io.File;
@@ -17,15 +18,16 @@ public abstract class BaseIntegrationTest extends HeavyPlatformTestCase {
     private static final int CONNECTION_RETRIES = 5;
     private final Path TEST_PROJECT_PATH = new File("src/test/resources/applicability/testProjects").toPath();
 
-    protected ServerConfig serverConfig;
+    protected ServerConfigImpl serverConfig;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         serverConfig = createServerConfigFromEnv();
+        GlobalSettings.getInstance().updateConfig(serverConfig);
     }
 
-    private ServerConfig createServerConfigFromEnv() {
+    private ServerConfigImpl createServerConfigFromEnv() {
         String platformUrl = addSlashIfNeeded(readParam(ENV_PLATFORM_URL));
         String token = readParam(ENV_ACCESS_TOKEN);
         return createServerConfig(platformUrl, token);
@@ -45,7 +47,7 @@ public abstract class BaseIntegrationTest extends HeavyPlatformTestCase {
 
     private String readParam(String paramName) {
         String paramValue = System.getenv(paramName);
-        if (paramValue == null) {
+        if (StringUtils.isBlank(paramValue)) {
             failSetup();
         }
         return paramValue;

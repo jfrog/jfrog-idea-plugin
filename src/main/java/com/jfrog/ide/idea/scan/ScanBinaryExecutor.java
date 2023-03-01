@@ -73,7 +73,6 @@ public abstract class ScanBinaryExecutor {
     private static String osDistribution;
     private final ArtifactoryManagerBuilder artifactoryManagerBuilder;
 
-
     ScanBinaryExecutor(String scanType, String binaryName, String archiveName, Log log, ServerConfig server) {
         this.scanType = scanType;
         this.log = log;
@@ -142,6 +141,7 @@ public abstract class ScanBinaryExecutor {
 
     private void updateBinaryIfNeeded() throws IOException {
         if (!Files.exists(binaryTargetPath)) {
+            log.debug(String.format("Resource %s is not found. Downloading it.", binaryTargetPath));
             downloadBinary();
             return;
         }
@@ -153,6 +153,7 @@ public abstract class ScanBinaryExecutor {
                 String latestBinaryChecksum = getFileChecksumFromServer();
                 String currentBinaryCheckSum = DigestUtils.sha256Hex(archiveBinaryFile);
                 if (!latestBinaryChecksum.equals(currentBinaryCheckSum)) {
+                    log.debug(String.format("Resource %s is not up to date. Downloading it.", archiveTargetPath));
                     downloadBinary();
                 }
             }
@@ -207,6 +208,7 @@ public abstract class ScanBinaryExecutor {
         try (ArtifactoryManager artifactoryManager = artifactoryManagerBuilder.build()) {
             String downloadUrl = getBinaryDownloadURL();
             File downloadArchive = artifactoryManager.downloadToFile(downloadUrl, archiveTargetPath.toString());
+            log.debug(String.format("Downloading: %s", downloadUrl));
             if (downloadArchive == null) {
                 throw new IOException("An empty response received from Artifactory.");
             }
@@ -238,24 +240,22 @@ public abstract class ScanBinaryExecutor {
     private Map<String, String> creatEnvWithCredentials() {
         Map<String, String> env = new HashMap<>(EnvironmentUtil.getEnvironmentMap());
         ServerConfigImpl serverConfig = GlobalSettings.getInstance().getServerConfig();
-        if (serverConfig.isXrayConfigured()) {
-            env.put(ENV_PLATFORM, serverConfig.getUrl());
-            if (StringUtils.isNotEmpty(serverConfig.getAccessToken())) {
-                env.put(ENV_ACCESS_TOKEN, serverConfig.getAccessToken());
-            } else {
-                env.put(ENV_USER, serverConfig.getUsername());
-                env.put(ENV_PASSWORD, serverConfig.getPassword());
-            }
+        env.put(ENV_PLATFORM, serverConfig.getUrl());
+        if (StringUtils.isNotEmpty(serverConfig.getAccessToken())) {
+            env.put(ENV_ACCESS_TOKEN, serverConfig.getAccessToken());
+        } else {
+            env.put(ENV_USER, serverConfig.getUsername());
+            env.put(ENV_PASSWORD, serverConfig.getPassword());
+        }
 
-            ProxyConfiguration proxyConfiguration = serverConfig.getProxyConfForTargetUrl(serverConfig.getUrl());
-            if (proxyConfiguration != null) {
-                String proxyUrl = proxyConfiguration.host + ":" + proxyConfiguration.port;
-                if (StringUtils.isNoneBlank(proxyConfiguration.username, proxyConfiguration.password)) {
-                    proxyUrl = proxyConfiguration.username + ":" + proxyConfiguration.password + "@" + proxyUrl;
-                }
-                env.put(ENV_HTTP_PROXY, "http://" + proxyUrl);
-                env.put(ENV_HTTPS_PROXY, "https://" + proxyUrl);
+        ProxyConfiguration proxyConfiguration = serverConfig.getProxyConfForTargetUrl(serverConfig.getUrl());
+        if (proxyConfiguration != null) {
+            String proxyUrl = proxyConfiguration.host + ":" + proxyConfiguration.port;
+            if (StringUtils.isNoneBlank(proxyConfiguration.username, proxyConfiguration.password)) {
+                proxyUrl = proxyConfiguration.username + ":" + proxyConfiguration.password + "@" + proxyUrl;
             }
+            env.put(ENV_HTTP_PROXY, "http://" + proxyUrl);
+            env.put(ENV_HTTPS_PROXY, "https://" + proxyUrl);
         }
         env.put(ENV_LOG_DIR, BINARIES_DIR.toAbsolutePath().toString());
         return env;
