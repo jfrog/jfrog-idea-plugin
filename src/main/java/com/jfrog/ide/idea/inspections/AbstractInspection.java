@@ -66,12 +66,15 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
             // Code inspection was triggered manually by clicking on "Code | Inspect Code".
             return;
         }
-        List<DependencyNode> dependencies = getDependencies(element);
+        String componentName = createComponentName(element);
+        if (componentName.isEmpty()) {
+            return; // Failed creating the component name
+        }
+        List<DependencyNode> dependencies = getDependencies(element, componentName);
         if (CollectionUtils.isEmpty(dependencies)) {
             return;
         }
         NavigationService navigationService = NavigationService.getInstance(element.getProject());
-        String componentName = createComponentName(element);
         for (DependencyNode dependency : dependencies) {
             if (isOnTheFly) {
                 registerProblem(problemsHolder, dependency, element, componentName);
@@ -87,7 +90,11 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * @param element          - The Psi element in the package descriptor
      */
     void visitElement(AnnotationHolder annotationHolder, PsiElement element) {
-        List<DependencyNode> dependencies = getDependencies(element);
+        String componentName = createComponentName(element);
+        if (componentName == null) {
+            return; // Failed creating the component name
+        }
+        List<DependencyNode> dependencies = getDependencies(element, componentName);
         if (CollectionUtils.isNotEmpty(dependencies)) {
             AnnotationUtils.registerAnnotation(annotationHolder, dependencies.get(0), element, showAnnotationIcon(element));
         }
@@ -186,13 +193,9 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      * @param element - The Psi element in the package descriptor
      * @return all dependencies in the dependency tree that relevant to the element
      */
-    List<DependencyNode> getDependencies(PsiElement element) {
+    List<DependencyNode> getDependencies(PsiElement element, String componentName) {
         if (!isShowInspection(element)) {
             return null; // Inspection is not needed for this element
-        }
-        String componentName = createComponentName(element);
-        if (componentName == null) {
-            return null; // Failed creating the component name
         }
         Set<DescriptorFileTreeNode> filesNodes = getFileDescriptors(element);
         if (filesNodes == null) {

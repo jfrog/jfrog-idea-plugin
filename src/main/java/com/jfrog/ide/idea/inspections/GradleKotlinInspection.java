@@ -31,18 +31,19 @@ public class GradleKotlinInspection extends GradleInspection {
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        return new KtVisitor<Void, Void>() {
+        return new KtVisitorVoid() {
             @Override
-            public Void visitValueArgumentList(@NotNull KtValueArgumentList list, Void data) {
-                GradleKotlinInspection.this.visitElement(holder, list, isOnTheFly);
-                return null;
+            public void visitValueArgumentList(@NotNull KtValueArgumentList list) {
+                if (((KtFile) list.getContainingFile()).isScript()) {
+                    GradleKotlinInspection.this.visitElement(holder, list, isOnTheFly);
+                }
             }
         };
     }
 
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-        if (element instanceof KtValueArgumentList) {
+        if (element instanceof KtValueArgumentList && ((KtFile) element.getContainingFile()).isScript()) {
             GradleKotlinInspection.this.visitElement(holder, element);
         }
     }
@@ -68,12 +69,22 @@ public class GradleKotlinInspection extends GradleInspection {
 
     @Override
     String createComponentName(PsiElement element) {
-        List<KtValueArgument> argumentList = ((KtValueArgumentList) element).getArguments();
-        String componentId = extractArgument(argumentList.get(0));
-        if (argumentList.size() == 3) {
-            componentId += ":" + extractArgument(argumentList.get(1)) + ":" + extractArgument(argumentList.get(2));
+        if (!(element instanceof KtValueArgumentList)) {
+            return "";
         }
-        return super.createComponentName(componentId);
+        List<KtValueArgument> argumentList = ((KtValueArgumentList) element).getArguments();
+        if (argumentList.size() == 1) {
+            // "commons-collections:commons-collections:3.2.2"
+            return extractArgument(argumentList.get(0));
+        }
+        if (argumentList.size() >= 3) {
+            // "commons-collections", "commons-collections", "3.2.2"
+            return String.join(":",
+                    extractArgument(argumentList.get(0)),
+                    extractArgument(argumentList.get(1)),
+                    extractArgument(argumentList.get(2)));
+        }
+        return "";
     }
 
     /**

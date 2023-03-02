@@ -39,22 +39,11 @@ public abstract class GradleInspection extends AbstractInspection {
         return showAnnotationIcon;
     }
 
-    /**
-     * Create component name from component ID in build.gradle or build.gradle.kts files.
-     * Some examples:
-     * compile project(':xyz') > xyz
-     * implementation('a:b:c') > a:b
-     * implementation('a:b') > a:b
-     *
-     * @param componentId - Component ID from the build.gradle or build.gradle.kts files
-     * @return component name.
-     */
-    String createComponentName(String componentId) {
-        if (StringUtils.countMatches(componentId, ":") == 2) {
+    public static String stripVersion(String componentId) {
+        if (StringUtils.countMatches(componentId, ":") >= 2) {
             // implementation('a:b:c')
-            return StringUtils.substringBeforeLast(componentId, ":");
+            componentId = componentId.split(":")[0] + ":" + componentId.split(":")[1];
         }
-        // compile project(':xyz')
-        return StringUtils.removeStart(componentId, ":");
+        return componentId;
     }
 }

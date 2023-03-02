@@ -59,9 +59,9 @@ public abstract class InspectionsTestBase extends LightJavaCodeInsightFixtureTes
     }
 
     static class InspectionTestDependency {
-        private final String artifactId;
-        private final int offset;
-        private String groupId;
+        public final String artifactId;
+        public final int offset;
+        public String groupId;
 
         public InspectionTestDependency(int offset, String groupId, String artifactId) {
             this.artifactId = artifactId;

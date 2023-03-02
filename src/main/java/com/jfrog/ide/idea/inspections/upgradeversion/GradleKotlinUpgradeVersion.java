@@ -12,6 +12,8 @@ import org.jetbrains.kotlin.psi.KtValueArgumentList;
 import java.util.Collection;
 import java.util.List;
 
+import static com.jfrog.ide.idea.inspections.GradleInspection.stripVersion;
+
 /**
  * Adds the yellow bulb action - ""Upgrade Version"".
  *
@@ -26,21 +28,22 @@ public class GradleKotlinUpgradeVersion extends UpgradeVersion {
     @Override
     public void upgradeComponentVersion(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
         List<KtValueArgument> argumentList = ((KtValueArgumentList) descriptor.getPsiElement()).getArguments();
+        String updateText = "";
+        KtExpression expressionToUpdate = null;
+
         if (argumentList.size() == 1) {
-            KtExpression ktExpression = argumentList.get(0).getArgumentExpression();
-            if (ktExpression instanceof KtStringTemplateExpression) {
-                KtStringTemplateExpression ktStringExpression = (KtStringTemplateExpression) ktExpression;
-                // "commons-collections:commons-collections:3.2.2" >> "commons-collections:commons-collections:{NEW_VERSION}"
-                String newVersionString = StringUtils.substringBeforeLast(ktStringExpression.getText(), ":") + ":" + fixVersion + "\"";
-                ktStringExpression.updateText(newVersionString);
-            }
-        } else if (argumentList.size() == 3) {
-            KtExpression ktExpression = argumentList.get(2).getArgumentExpression();
-            if (ktExpression instanceof KtStringTemplateExpression) {
-                KtStringTemplateExpression versionExpr = (KtStringTemplateExpression) ktExpression;
-                // "commons-collections", "commons-collections", "3.2.2" >> "commons-collections", "commons-collections", {NEW_VERSION}
-                versionExpr.updateText("\"" + fixVersion + "\"");
-            }
+            // "commons-collections:commons-collections:3.2.2"
+            expressionToUpdate = argumentList.get(0).getArgumentExpression();
+            String stripQuotes = StringUtils.unwrap(expressionToUpdate.getText(), "\"");
+            updateText = stripVersion(stripQuotes) + ":" + fixVersion;
+        } else if (argumentList.size() >= 3) {
+            // "commons-collections", "commons-collections", "3.2.2"
+            expressionToUpdate = argumentList.get(2).getArgumentExpression();
+            updateText = fixVersion;
+        }
+
+        if (expressionToUpdate instanceof KtStringTemplateExpression) {
+            ((KtStringTemplateExpression) expressionToUpdate).updateText(StringUtils.wrap(updateText, "\""));
         }
     }
 }
