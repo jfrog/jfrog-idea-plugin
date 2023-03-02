@@ -14,9 +14,6 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.ui.*;
 import com.intellij.ui.components.JBPanel;
-import com.intellij.ui.jcef.JBCefApp;
-import com.intellij.ui.jcef.JBCefBrowser;
-import com.intellij.ui.jcef.JBCefBrowserBase;
 import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.common.nodes.ApplicableIssueNode;
 import com.jfrog.ide.common.nodes.IssueNode;
@@ -31,12 +28,11 @@ import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.ui.jcef.message.MessagePacker;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
 import com.jfrog.ide.idea.ui.webview.WebviewObjectConverter;
+import com.jfrog.ide.idea.ui.webview.WebviewService;
 import com.jfrog.ide.idea.utils.Utils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.cef.browser.CefBrowser;
-import org.cef.browser.CefFrame;
-import org.cef.handler.CefLoadHandlerAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -44,7 +40,6 @@ import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -55,7 +50,6 @@ import static com.jfrog.ide.idea.ui.JFrogToolWindow.SCROLL_BAR_SCROLLING_UNITS;
  */
 public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     private final LocalComponentsTree componentsTree;
-    private final JBCefBrowserBase browser;
     private final OnePixelSplitter verticalSplit;
     private final JPanel leftPanelContent;
     private final JComponent compTreeView;
@@ -66,14 +60,9 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     /**
      * @param project - Currently opened IntelliJ project
      */
-    public JFrogLocalToolWindow(@NotNull Project project) {
+    public JFrogLocalToolWindow(@NotNull Project project) throws Exception {
         super(project);
         componentsTree = LocalComponentsTree.getInstance(project);
-        browser = new JBCefBrowser();
-
-        messagePacker = new MessagePacker(browser);
-        initVulnerabilityInfoBrowser();
-
         JPanel toolbar = createActionToolbar();
         toolbar.setBorder(IdeBorderFactory.createBorder(SideBorder.BOTTOM));
         JPanel leftPanel = new JBPanel<>(new BorderLayout());
@@ -87,7 +76,11 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         setContent(verticalSplit);
 
         refreshView();
-        registerListeners();
+
+        CefBrowser browser = initVulnerabilityInfoBrowser();
+
+        messagePacker = new MessagePacker(browser);
+        registerListeners(browser);
     }
 
     @Override
@@ -100,7 +93,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     /**
      * Register the issues tree listeners.
      */
-    public void registerListeners() {
+    public void registerListeners(CefBrowser browser) {
         // Xray credentials were set listener
         appBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () -> ApplicationManager.getApplication().invokeLater(this::onConfigurationChange));
 
@@ -113,7 +106,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
             selectedIssue = (IssueNode) e.getNewLeadSelectionPath().getLastPathComponent();
             updateIssueOrLicenseInWebview(selectedIssue);
-            verticalSplit.setSecondComponent(browser.getComponent());
+            verticalSplit.setSecondComponent((JComponent) browser.getUIComponent());
         });
         projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_LOCAL_STARTED, () -> {
             setLeftPanelContent(compTreeView);
@@ -122,7 +115,6 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         componentsTree.addRightClickListener();
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private void refreshView() {
         if (!GlobalSettings.getInstance().reloadXrayCredentials()) {
             setLeftPanelContent(ComponentUtils.createNoCredentialsView());
@@ -159,34 +151,14 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         leftPanelContent.add(component, 0);
     }
 
-    private void initVulnerabilityInfoBrowser() {
-        if (!JBCefApp.isSupported()) {
-            Logger.getInstance().error("Could not open the issue details view - JCEF is not supported");
-            return;
-        }
-
-        try {
-            tempDirPath = Files.createTempDirectory("jfrog-idea-plugin");
-            Utils.extractFromResources("/jfrog-ide-webview", tempDirPath);
-        } catch (IOException | URISyntaxException e) {
-            Logger.getInstance().error(e.getMessage());
-            return;
-        }
-
-        browser.getJBCefClient().addLoadHandler(new CefLoadHandlerAdapter() {
-            @Override
-            public void onLoadEnd(CefBrowser browser, CefFrame frame, int httpStatusCode) {
-                updateIssueOrLicenseInWebview(selectedIssue);
-            }
-
-            @Override
-            public void onLoadError(CefBrowser browser, CefFrame frame, ErrorCode errorCode, String errorText, String failedUrl) {
-                Logger.getInstance().error("An error occurred while opening the issue details view: " + errorText);
-            }
-        }, browser.getCefBrowser());
+    private CefBrowser initVulnerabilityInfoBrowser() throws Exception {
+        tempDirPath = Files.createTempDirectory("jfrog-idea-plugin");
+        Utils.extractFromResources("/jfrog-ide-webview", tempDirPath);
 
         String pageUri = tempDirPath.resolve("index.html").toFile().toURI().toString();
-        browser.loadURL(pageUri);
+        WebviewService webviewService = WebviewService.getInstance();
+        webviewService.setOnLoadEnd(() -> updateIssueOrLicenseInWebview(selectedIssue));
+        return webviewService.initBrowser(pageUri);
     }
 
     /**
@@ -258,7 +230,6 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     @Override
     public void dispose() {
         super.dispose();
-        browser.dispose();
         try {
             FileUtils.deleteDirectory(tempDirPath.toFile());
         } catch (IOException e) {

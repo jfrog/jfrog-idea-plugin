@@ -5,6 +5,7 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.content.ContentManager;
+import com.jfrog.ide.idea.log.Logger;
 import org.jetbrains.annotations.NotNull;
 
 
@@ -19,15 +20,22 @@ public class JFrogToolWindow {
 
     void initToolWindow(@NotNull ToolWindow toolWindow, @NotNull Project project, boolean buildsConfigured) {
         ContentManager contentManager = toolWindow.getContentManager();
-        JFrogLocalToolWindow jfrogLocalContent = new JFrogLocalToolWindow(project);
+        JFrogLocalToolWindow jfrogLocalContent = null;
+        try {
+            jfrogLocalContent = new JFrogLocalToolWindow(project);
+        } catch (Exception e) {
+            Logger.getInstance().error("Local view could not be initialized.", e);
+        }
         JFrogCiToolWindow jFrogCiContent = new JFrogCiToolWindow(project, buildsConfigured);
         addContent(contentManager, jfrogLocalContent, jFrogCiContent);
     }
 
     private void addContent(ContentManager contentManager, JFrogLocalToolWindow jfrogLocalContent, JFrogCiToolWindow jfrogBuildsContent) {
         ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
-        Content localContent = contentFactory.createContent(jfrogLocalContent, "Local", false);
-        contentManager.addContent(localContent);
+        if (jfrogLocalContent != null) {
+            Content localContent = contentFactory.createContent(jfrogLocalContent, "Local", false);
+            contentManager.addContent(localContent);
+        }
         Content buildsContent = contentFactory.createContent(jfrogBuildsContent, "CI", false);
         contentManager.addContent(buildsContent);
     }
