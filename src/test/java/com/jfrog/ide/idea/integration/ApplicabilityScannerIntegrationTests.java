@@ -8,13 +8,20 @@ import com.jfrog.ide.idea.scan.data.ScanConfig;
 import java.io.IOException;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+
 public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
+    private static String ENV_BINARY_DOWNLOAD_URL = "JFROG_IDE_ANALYZER_MANAGER_DOWNLOAD_URL";
+    private static String ENV_DOWNLOAD_FROM_JFROG_RELEASES = "JFROG_IDE_DOWNLOAD_FROM_JFROG_RELEASES";
+
     private ApplicabilityScannerExecutor scanner;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        scanner = new ApplicabilityScannerExecutor(Logger.getInstance(), serverConfig);
+        String binaryDownloadUrl = System.getenv(ENV_BINARY_DOWNLOAD_URL);
+        boolean useReleases = Boolean.parseBoolean(defaultIfEmpty(System.getenv(ENV_DOWNLOAD_FROM_JFROG_RELEASES), "true"));
+        scanner = new ApplicabilityScannerExecutor(Logger.getInstance(), serverConfig, binaryDownloadUrl, useReleases);
     }
 
     public void testApplicabilityScannerNpmProjectNotApplicable() throws IOException, InterruptedException {

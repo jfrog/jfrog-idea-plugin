@@ -41,9 +41,11 @@ import java.util.List;
 import java.util.Map;
 
 import static com.jfrog.ide.common.utils.ArtifactoryConnectionUtils.createAnonymousAccessArtifactoryManagerBuilder;
+import static com.jfrog.ide.common.utils.ArtifactoryConnectionUtils.createArtifactoryManagerBuilder;
 import static com.jfrog.ide.common.utils.Utils.createMapper;
 import static com.jfrog.ide.common.utils.Utils.createYAMLMapper;
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBuilder;
+import static com.jfrog.ide.idea.scan.ScanUtils.getOSAndArc;
 import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
 import static java.lang.String.join;
 
@@ -60,7 +62,7 @@ public abstract class ScanBinaryExecutor {
     private static final int UPDATE_INTERVAL = 1;
     private static LocalDateTime nextUpdateCheck;
     private final Log log;
-    private boolean notSupportedOS;
+    private boolean notSupported;
     private static final String ENV_PLATFORM = "JF_PLATFORM_URL";
     private static final String ENV_USER = "JF_USER";
     private static final String ENV_PASSWORD = "JF_PASS";
@@ -70,21 +72,39 @@ public abstract class ScanBinaryExecutor {
     private static final String ENV_LOG_DIR = "AM_LOG_DIRECTORY";
     private static final int USER_NOT_ENTITLED = 31;
     private static final String JFROG_RELEASES = "https://releases.jfrog.io/artifactory/";
+
     private static String osDistribution;
     private final ArtifactoryManagerBuilder artifactoryManagerBuilder;
 
-    ScanBinaryExecutor(String scanType, String binaryName, String archiveName, Log log, ServerConfig server) {
+    ScanBinaryExecutor(String scanType, String binaryName, String archiveName, Log log, ServerConfig server, boolean useJFrogReleases) {
         this.scanType = scanType;
         this.log = log;
         String executable = SystemUtils.IS_OS_WINDOWS ? binaryName + ".exe" : binaryName;
         binaryTargetPath = BINARIES_DIR.resolve(binaryName).resolve(executable);
         archiveTargetPath = BINARIES_DIR.resolve(archiveName);
-        artifactoryManagerBuilder = createAnonymousAccessArtifactoryManagerBuilder(JFROG_RELEASES, server.getProxyConfForTargetUrl(JFROG_RELEASES), log);
+        artifactoryManagerBuilder = createManagerBuilder(useJFrogReleases, server);
+        setOsDistribution();
+    }
+
+    private ArtifactoryManagerBuilder createManagerBuilder(boolean useJFrogReleases, ServerConfig server) {
+        if (useJFrogReleases) {
+            return createAnonymousAccessArtifactoryManagerBuilder(JFROG_RELEASES, server.getProxyConfForTargetUrl(JFROG_RELEASES), log);
+        }
+        try {
+            return createArtifactoryManagerBuilder(server, log);
+        } catch (Exception e) {
+            log.warn(e.getMessage());
+            notSupported = true;
+        }
+        return null;
+    }
+
+    protected void setOsDistribution() {
         try {
             osDistribution = getOSAndArc();
         } catch (IOException e) {
-            log.info(e.getMessage());
-            notSupportedOS = true;
+            log.warn(e.getMessage());
+            notSupported = true;
         }
     }
 
@@ -99,7 +119,7 @@ public abstract class ScanBinaryExecutor {
     abstract Feature getScannerFeatureName();
 
     protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args) throws IOException, InterruptedException {
-        if (notSupportedOS || !shouldExecute()) {
+        if (!shouldExecute()) {
             return List.of();
         }
         CommandExecutor commandExecutor = new CommandExecutor(binaryTargetPath.toString(), creatEnvWithCredentials());
@@ -174,6 +194,9 @@ public abstract class ScanBinaryExecutor {
     }
 
     protected boolean shouldExecute() {
+        if (notSupported) {
+            return false;
+        }
         ServerConfig server = GlobalSettings.getInstance().getServerConfig();
         try (Xray xrayClient = createXrayClientBuilder(server, log).build()) {
             try {
@@ -261,44 +284,4 @@ public abstract class ScanBinaryExecutor {
         return env;
     }
 
-    private static String getOSAndArc() throws IOException {
-        String arch = SystemUtils.OS_ARCH;
-        // Windows
-        if (SystemUtils.IS_OS_WINDOWS) {
-            return "windows-amd64";
-        }
-        // Mac
-        if (SystemUtils.IS_OS_MAC) {
-            if (arch.equals("arm64")) {
-                return "mac-arm64";
-            } else {
-                return "mac-amd64";
-            }
-        }
-        // Linux
-        if (SystemUtils.IS_OS_LINUX) {
-            switch (arch) {
-                case "i386":
-                case "i486":
-                case "i586":
-                case "i686":
-                case "i786":
-                case "x86":
-                    return "linux-386";
-                case "amd64":
-                case "x86_64":
-                case "x64":
-                    return "linux-amd64";
-                case "arm":
-                case "armv7l":
-                    return "linux-arm";
-                case "aarch64":
-                    return "linux-arm64";
-                case "ppc64":
-                case "ppc64le":
-                    return "linux-" + arch;
-            }
-        }
-        throw new IOException(String.format("Unsupported OS: %s-%s", SystemUtils.OS_NAME, arch));
-    }
 }
