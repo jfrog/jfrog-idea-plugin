@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.Collection;
 
 /**
- * Adds the yellow bulb action - ""Upgrade Version"".
+ * Adds the yellow bulb action - "Upgrade Version".
  *
  * @author michaels
  */

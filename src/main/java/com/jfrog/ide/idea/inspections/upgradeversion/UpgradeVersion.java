@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Adds the yellow bulb action - ""Upgrade Version"".
+ * Adds the yellow bulb action - "Upgrade Version".
  *
  * @author michaels
  */

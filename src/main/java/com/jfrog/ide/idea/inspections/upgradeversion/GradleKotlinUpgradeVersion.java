@@ -15,7 +15,7 @@ import java.util.List;
 import static com.jfrog.ide.idea.inspections.GradleInspection.stripVersion;
 
 /**
- * Adds the yellow bulb action - ""Upgrade Version"".
+ * Adds the yellow bulb action - "Upgrade Version".
  *
  * @author michaels
  */
@@ -34,8 +34,10 @@ public class GradleKotlinUpgradeVersion extends UpgradeVersion {
         if (argumentList.size() == 1) {
             // "commons-collections:commons-collections:3.2.2"
             expressionToUpdate = argumentList.get(0).getArgumentExpression();
-            String stripQuotes = StringUtils.unwrap(expressionToUpdate.getText(), "\"");
-            updateText = stripVersion(stripQuotes) + ":" + fixVersion;
+            if (expressionToUpdate != null) {
+                String stripQuotes = StringUtils.unwrap(expressionToUpdate.getText(), "\"");
+                updateText = stripVersion(stripQuotes) + ":" + fixVersion;
+            }
         } else if (argumentList.size() >= 3) {
             // "commons-collections", "commons-collections", "3.2.2"
             expressionToUpdate = argumentList.get(2).getArgumentExpression();

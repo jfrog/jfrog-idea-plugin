@@ -18,7 +18,7 @@ import static com.jfrog.ide.idea.inspections.GradleInspection.stripVersion;
 
 
 /**
- * Adds the yellow bulb action - ""Upgrade Version"".
+ * Adds the yellow bulb action - "Upgrade Version".
  *
  * @author michaels
  */

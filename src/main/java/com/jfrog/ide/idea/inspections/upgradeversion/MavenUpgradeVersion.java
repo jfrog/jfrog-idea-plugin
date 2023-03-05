@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 import static org.jetbrains.idea.maven.dom.MavenDomProjectProcessorUtils.findProperty;
 
 /**
- * Adds the yellow bulb action - ""Upgrade Version"".
+ * Adds the yellow bulb action - "Upgrade Version".
  *
  * @author michaels
  */

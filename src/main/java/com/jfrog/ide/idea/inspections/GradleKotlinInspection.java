@@ -34,6 +34,7 @@ public class GradleKotlinInspection extends GradleInspection {
         return new KtVisitorVoid() {
             @Override
             public void visitValueArgumentList(@NotNull KtValueArgumentList list) {
+                // Verify that the visited file is a build.gradle.kts file
                 if (((KtFile) list.getContainingFile()).isScript()) {
                     GradleKotlinInspection.this.visitElement(holder, list, isOnTheFly);
                 }

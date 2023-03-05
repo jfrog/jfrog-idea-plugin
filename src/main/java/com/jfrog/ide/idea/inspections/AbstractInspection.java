@@ -255,8 +255,8 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
                 }
             });
 
-            fixVersionToCves.asMap().forEach((key, collection) -> {
-                UpgradeVersion upgradeVersion = getUpgradeVersion(dependency.getArtifactId(), key, collection);
+            fixVersionToCves.asMap().forEach((fixedVersion, issues) -> {
+                UpgradeVersion upgradeVersion = getUpgradeVersion(dependency.getArtifactId(), fixedVersion, issues);
                 quickFixes.add(upgradeVersion);
             });
         }

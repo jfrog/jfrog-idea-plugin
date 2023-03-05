@@ -60,7 +60,6 @@ public class GradleGroovyInspection extends GradleInspection {
                 for (GroovyPsiElement elementToVisit : elementsToVisit) {
                     GradleGroovyInspection.this.visitElement(holder, elementToVisit, isOnTheFly);
                 }
-
             }
         });
     }

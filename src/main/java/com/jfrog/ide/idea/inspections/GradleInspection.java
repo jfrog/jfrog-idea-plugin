@@ -42,7 +42,8 @@ public abstract class GradleInspection extends AbstractInspection {
     public static String stripVersion(String componentId) {
         if (StringUtils.countMatches(componentId, ":") >= 2) {
             // implementation('a:b:c')
-            componentId = componentId.split(":")[0] + ":" + componentId.split(":")[1];
+            String[] splitComponent = componentId.split(":");
+            componentId = splitComponent[0] + ":" + splitComponent[1];
         }
         return componentId;
     }
