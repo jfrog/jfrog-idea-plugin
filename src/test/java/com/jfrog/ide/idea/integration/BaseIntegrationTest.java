@@ -3,10 +3,14 @@ package com.jfrog.ide.idea.integration;
 import com.intellij.testFramework.HeavyPlatformTestCase;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
-import org.gradle.internal.impldep.org.junit.platform.commons.util.StringUtils;
+import com.jfrog.ide.idea.ui.configuration.ConnectionRetriesSpinner;
+import com.jfrog.ide.idea.ui.configuration.ConnectionTimeoutSpinner;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 
 import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.DEFAULT_EXCLUSIONS;
@@ -14,9 +18,7 @@ import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.DEFAUL
 public abstract class BaseIntegrationTest extends HeavyPlatformTestCase {
     public static final String ENV_PLATFORM_URL = "JFROG_IDE_PLATFORM_URL";
     public static final String ENV_ACCESS_TOKEN = "JFROG_IDE_ACCESS_TOKEN";
-    private static final int CONNECTION_TIMEOUT = 70;
-    private static final int CONNECTION_RETRIES = 5;
-    private final Path TEST_PROJECT_PATH = new File("src/test/resources/applicability/testProjects").toPath();
+    private final static Path TEST_PROJECT_PATH = new File("src/test/resources/applicability/testProjects").toPath();
 
     protected ServerConfigImpl serverConfig;
 
@@ -39,8 +41,8 @@ public abstract class BaseIntegrationTest extends HeavyPlatformTestCase {
                 .setXrayUrl(platformUrl + "xray")
                 .setArtifactoryUrl(platformUrl + "artifactory")
                 .setAccessToken(token)
-                .setConnectionRetries(CONNECTION_RETRIES)
-                .setConnectionTimeout(CONNECTION_TIMEOUT)
+                .setConnectionRetries(ConnectionRetriesSpinner.RANGE.initial)
+                .setConnectionTimeout(ConnectionTimeoutSpinner.RANGE.initial)
                 .setExcludedPaths(DEFAULT_EXCLUSIONS)
                 .build();
     }
@@ -54,7 +56,7 @@ public abstract class BaseIntegrationTest extends HeavyPlatformTestCase {
     }
 
     private String addSlashIfNeeded(String paramValue) {
-        return paramValue.endsWith("/") ? paramValue : paramValue + "/";
+        return StringUtils.appendIfMissing(paramValue, "/");
     }
 
     private void failSetup() {
@@ -62,7 +64,9 @@ public abstract class BaseIntegrationTest extends HeavyPlatformTestCase {
         Assert.fail(message);
     }
 
-    public Path getTestProjectPath() {
-        return TEST_PROJECT_PATH;
+    protected String createTempProjectDir(String projectName) throws IOException {
+        String tempProjectDir = getTempDir().createVirtualDir(projectName).toNioPath().toString();
+        FileUtils.copyDirectory(TEST_PROJECT_PATH.resolve(projectName).toFile(), new File(tempProjectDir));
+        return tempProjectDir;
     }
 }

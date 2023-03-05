@@ -70,9 +70,6 @@ test {
         events "started", "passed", "skipped", "failed", "standardOut", "standardError"
         minGranularity 0
     }
-    if (project.hasProperty('excludeTests')) {
-        exclude project.property('excludeTests')
-    }
 }
 
 tasks.register('integrationTests', Test) {
@@ -82,9 +79,6 @@ tasks.register('integrationTests', Test) {
         exceptionFormat "full"
         events "started", "passed", "skipped", "failed", "standardOut", "standardError"
         minGranularity 0
-    }
-    if (project.hasProperty('excludeTests')) {
-        exclude project.property('excludeTests')
     }
 }
 

@@ -107,7 +107,7 @@ public class LocalComponentsTree extends ComponentsTree {
         if (selectedPath == null) {
             return;
         }
-        var selected = selectedPath.getLastPathComponent();
+        Object selected = selectedPath.getLastPathComponent();
         if (selected instanceof DependencyNode) {
             createNodePopupMenu((DependencyNode) selected);
         } else if (selected instanceof VulnerabilityNode) {
