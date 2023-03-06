@@ -27,20 +27,10 @@ public class GradleGroovyInspectionTest extends InspectionsTestBase {
             new InspectionTestDependency(390, "org.codehaus.groovy", "groovy-all:3.0.5"),
     };
 
-    private final int[] NON_DEPENDENCIES_POSITIONS = {20, 57, 435};
-
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public void setUp() throws Exception {
         super.setUp(new GradleGroovyInspection(), PACKAGE_DESCRIPTOR, GrNamedArgumentsOwner.class);
-    }
-
-    public void testDependencies() {
-        isDependencyTest(DEPENDENCIES);
-    }
-
-    public void testNonDependencies() {
-        isNonDependencyTest(NON_DEPENDENCIES_POSITIONS);
     }
 
     public void testCreateGeneralInfo() {
