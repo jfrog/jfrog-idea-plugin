@@ -1,5 +1,3 @@
-package inspections
-
 plugins {
     id 'java'
 }

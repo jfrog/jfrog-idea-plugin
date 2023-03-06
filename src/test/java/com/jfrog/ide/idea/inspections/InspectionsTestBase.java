@@ -14,7 +14,7 @@ public abstract class InspectionsTestBase extends LightJavaCodeInsightFixtureTes
 
     PsiFile fileDescriptor;
     AbstractInspection inspection;
-    private Class<? extends PsiElement> psiClass;
+    Class<? extends PsiElement> psiClass;
 
     public void setUp(AbstractInspection inspection, String packageDescriptorName, Class<? extends PsiElement> psiClass) throws Exception {
         super.setUp();
