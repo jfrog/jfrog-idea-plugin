@@ -26,12 +26,23 @@ public abstract class BaseIntegrationTest extends HeavyPlatformTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         serverConfig = createServerConfigFromEnv();
-        GlobalSettings.getInstance().updateConfig(serverConfig);
+        if (serverConfig != null) {
+            GlobalSettings.getInstance().updateConfig(serverConfig);
+        }
+        // Try to use the loaded config from JFrog CLI.
+        serverConfig = GlobalSettings.getInstance().getServerConfig();
+        // If not configured, fail the setup.
+        if (!serverConfig.isXrayConfigured()) {
+            failSetup();
+        }
     }
 
     private ServerConfigImpl createServerConfigFromEnv() {
-        String platformUrl = addSlashIfNeeded(readParam(ENV_PLATFORM_URL));
-        String token = readParam(ENV_ACCESS_TOKEN);
+        String platformUrl = addSlashIfNeeded(System.getenv(ENV_PLATFORM_URL));
+        String token = System.getenv(ENV_ACCESS_TOKEN);
+        if (StringUtils.isEmpty(platformUrl) || StringUtils.isEmpty(ENV_ACCESS_TOKEN)) {
+            return null;
+        }
         return createServerConfig(platformUrl, token);
     }
 
@@ -47,20 +58,13 @@ public abstract class BaseIntegrationTest extends HeavyPlatformTestCase {
                 .build();
     }
 
-    private String readParam(String paramName) {
-        String paramValue = System.getenv(paramName);
-        if (StringUtils.isBlank(paramValue)) {
-            failSetup();
-        }
-        return paramValue;
-    }
 
     private String addSlashIfNeeded(String paramValue) {
         return StringUtils.appendIfMissing(paramValue, "/");
     }
 
     private void failSetup() {
-        String message = String.format("Failed to load JFrog platform credentials.\n Looking for Environment variables %s and %s", ENV_PLATFORM_URL, ENV_ACCESS_TOKEN);
+        String message = String.format("Failed to load JFrog platform credentials.\n Looking for Environment variables %s and %s\n Or installed JFrog CLI with configured server.", ENV_PLATFORM_URL, ENV_ACCESS_TOKEN);
         Assert.fail(message);
     }
 
