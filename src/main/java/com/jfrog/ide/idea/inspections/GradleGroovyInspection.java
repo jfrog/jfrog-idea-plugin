@@ -4,15 +4,22 @@ import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
+import com.jfrog.ide.idea.inspections.upgradeversion.GradleGroovyUpgradeVersion;
+import com.jfrog.ide.idea.inspections.upgradeversion.UpgradeVersion;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.groovy.lang.psi.GroovyElementVisitor;
+import org.jetbrains.plugins.groovy.lang.psi.GroovyPsiElement;
 import org.jetbrains.plugins.groovy.lang.psi.GroovyPsiElementVisitor;
+import org.jetbrains.plugins.groovy.lang.psi.api.statements.arguments.GrArgumentList;
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.arguments.GrNamedArgument;
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.GrExpression;
 import org.jetbrains.plugins.groovy.lang.psi.api.statements.expressions.literals.GrLiteral;
 import org.jetbrains.plugins.groovy.lang.psi.api.util.GrNamedArgumentsOwner;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -22,9 +29,24 @@ public class GradleGroovyInspection extends GradleInspection {
 
     public static final String GRADLE_GROUP_KEY = "group";
     public static final String GRADLE_NAME_KEY = "name";
+    public static final String GRADLE_VERSION_KEY = "version";
 
     public GradleGroovyInspection() {
         super("build.gradle");
+    }
+
+    /**
+     * Get the string value of the groovy literal.
+     *
+     * @param literal - The groovy literal
+     * @return the value of the literal
+     */
+    public static String getLiteralValue(GrLiteral literal) {
+        return Objects.toString((literal).getValue(), "");
+    }
+
+    public static boolean isNamedArgumentComponent(PsiElement element) {
+        return (element instanceof GrNamedArgumentsOwner && ((GrNamedArgumentsOwner) element).getNamedArguments().length >= 3);
     }
 
     @NotNull
@@ -32,17 +54,14 @@ public class GradleGroovyInspection extends GradleInspection {
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
         return new GroovyPsiElementVisitor(new GroovyElementVisitor() {
             @Override
-            public void visitLiteralExpression(@NotNull GrLiteral literal) {
-                GradleGroovyInspection.this.visitElement(holder, literal, isOnTheFly);
+            public void visitArgumentList(@NotNull GrArgumentList list) {
+                super.visitArgumentList(list);
+                List<GroovyPsiElement> elementsToVisit = parseComponentElements(list);
+                for (GroovyPsiElement elementToVisit : elementsToVisit) {
+                    GradleGroovyInspection.this.visitElement(holder, elementToVisit, isOnTheFly);
+                }
             }
         });
-    }
-
-    @Override
-    public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-        if (element instanceof GrLiteral) {
-            GradleGroovyInspection.this.visitElement(holder, element);
-        }
     }
 
     @Override
@@ -57,14 +76,55 @@ public class GradleGroovyInspection extends GradleInspection {
     }
 
     @Override
-    String createComponentName(PsiElement element) {
-        PsiElement parent = element.getParent();
-        if (parent instanceof GrNamedArgument) {
-            GrNamedArgumentsOwner namedArgument = (GrNamedArgumentsOwner) parent.getParent();
-            return String.join(":", extractExpression(namedArgument, GRADLE_GROUP_KEY), extractExpression(namedArgument, GRADLE_NAME_KEY));
+    public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
+        if (element instanceof GrArgumentList) {
+            List<GroovyPsiElement> elementsToVisit = parseComponentElements((GrArgumentList) element);
+            for (GroovyPsiElement elementToVisit : elementsToVisit) {
+                GradleGroovyInspection.this.visitElement(holder, elementToVisit);
+            }
         }
-        String componentId = getLiteralValue((GrLiteral) element);
-        return super.createComponentName(componentId);
+    }
+
+    List<GroovyPsiElement> parseComponentElements(GrArgumentList element) {
+        List<GroovyPsiElement> elementsToVisit = new ArrayList<>();
+        if (isNamedArgumentComponent(element)) {
+            // Example: implementation group: 'j', name: 'k', version: 'l'
+            elementsToVisit.add(element);
+        } else {
+            // Example:
+            // implementation([group: 'net.lingala.zip4j', name: 'zip4j', version: '2.3.0'],
+            //                [group: 'org.codehaus.groovy', name: 'groovy-all', version: '3.0.5'])
+            // OR
+            // implementation("org.codehaus.groovy:groovy-all:3.0.5")
+            // OR
+            // implementation 'net.lingala.zip4j:zip4j:2.3.0',
+            //                'org.codehaus.groovy:groovy-all:3.0.5'
+            for (GroovyPsiElement subElement : element.getAllArguments()) {
+                if (isNamedArgumentComponent(subElement) || (subElement instanceof GrLiteral)) {
+                    elementsToVisit.add(subElement);
+                } else if (subElement.getChildren().length > 0 && subElement.getChildren()[0] instanceof GrLiteral) {
+                    elementsToVisit.add((GrLiteral) subElement.getChildren()[0]);
+                }
+            }
+        }
+        return elementsToVisit;
+    }
+
+    @Override
+    String createComponentName(PsiElement element) {
+        if (isNamedArgumentComponent(element)) {
+            // implementation group: 'j', name: 'k', version: 'l'
+            return String.join(":",
+                    extractExpression(element, GRADLE_GROUP_KEY),
+                    extractExpression(element, GRADLE_NAME_KEY),
+                    extractExpression(element, GRADLE_VERSION_KEY)
+            );
+        }
+        if (element instanceof GrLiteral) {
+            //  implementation 'g:h:i'
+            return getLiteralValue((GrLiteral) element);
+        }
+        return "";
     }
 
     /**
@@ -74,8 +134,8 @@ public class GradleGroovyInspection extends GradleInspection {
      * @param name         - The name of the argument to extract
      * @return the value of the argument
      */
-    private String extractExpression(GrNamedArgumentsOwner argumentList, String name) {
-        GrNamedArgument argument = argumentList.findNamedArgument(name);
+    private String extractExpression(PsiElement argumentList, String name) {
+        GrNamedArgument argument = ((GrNamedArgumentsOwner) argumentList).findNamedArgument(name);
         if (argument == null) {
             return "";
         }
@@ -89,13 +149,8 @@ public class GradleGroovyInspection extends GradleInspection {
         return getLiteralValue((GrLiteral) grExpression);
     }
 
-    /**
-     * Get the string value of the groovy literal.
-     *
-     * @param literal - The groovy literal
-     * @return the value of the literal
-     */
-    private String getLiteralValue(GrLiteral literal) {
-        return Objects.toString((literal).getValue(), "");
+    @Override
+    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issue) {
+        return new GradleGroovyUpgradeVersion(componentName, fixVersion, issue);
     }
 }

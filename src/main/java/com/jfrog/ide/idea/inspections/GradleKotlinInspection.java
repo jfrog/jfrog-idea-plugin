@@ -4,10 +4,13 @@ import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
+import com.jfrog.ide.idea.inspections.upgradeversion.GradleKotlinUpgradeVersion;
+import com.jfrog.ide.idea.inspections.upgradeversion.UpgradeVersion;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.psi.*;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -28,18 +31,20 @@ public class GradleKotlinInspection extends GradleInspection {
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        return new KtVisitor<Void, Void>() {
+        return new KtVisitorVoid() {
             @Override
-            public Void visitValueArgumentList(@NotNull KtValueArgumentList list, Void data) {
-                GradleKotlinInspection.this.visitElement(holder, list, isOnTheFly);
-                return null;
+            public void visitValueArgumentList(@NotNull KtValueArgumentList list) {
+                // Verify that the visited file is a build.gradle.kts file
+                if (((KtFile) list.getContainingFile()).isScript()) {
+                    GradleKotlinInspection.this.visitElement(holder, list, isOnTheFly);
+                }
             }
         };
     }
 
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-        if (element instanceof KtValueArgumentList) {
+        if (element instanceof KtValueArgumentList && ((KtFile) element.getContainingFile()).isScript()) {
             GradleKotlinInspection.this.visitElement(holder, element);
         }
     }
@@ -65,12 +70,22 @@ public class GradleKotlinInspection extends GradleInspection {
 
     @Override
     String createComponentName(PsiElement element) {
-        List<KtValueArgument> argumentList = ((KtValueArgumentList) element).getArguments();
-        String componentId = extractArgument(argumentList.get(0));
-        if (argumentList.size() == 3) {
-            componentId += ":" + extractArgument(argumentList.get(1)) + ":" + extractArgument(argumentList.get(2));
+        if (!(element instanceof KtValueArgumentList)) {
+            return "";
         }
-        return super.createComponentName(componentId);
+        List<KtValueArgument> argumentList = ((KtValueArgumentList) element).getArguments();
+        if (argumentList.size() == 1) {
+            // "commons-collections:commons-collections:3.2.2"
+            return extractArgument(argumentList.get(0));
+        }
+        if (argumentList.size() >= 3) {
+            // "commons-collections", "commons-collections", "3.2.2"
+            return String.join(":",
+                    extractArgument(argumentList.get(0)),
+                    extractArgument(argumentList.get(1)),
+                    extractArgument(argumentList.get(2)));
+        }
+        return "";
     }
 
     /**
@@ -85,6 +100,11 @@ public class GradleKotlinInspection extends GradleInspection {
 
         // Remove '@' suffix, for example commons-lang:commons-lang:2.4@jar
         return StringUtils.substringBefore(value, "@");
+    }
+
+    @Override
+    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issue) {
+        return new GradleKotlinUpgradeVersion(componentName, fixVersion, issue);
     }
 
 }

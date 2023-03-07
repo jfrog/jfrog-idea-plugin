@@ -7,6 +7,7 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static com.jfrog.ide.idea.inspections.GradleInspection.stripVersion;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -21,7 +22,7 @@ public class GradleInspectionTest {
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {"a:b:c", "a:b"},
-                {":xyz", "xyz"},
+                {"a:b:c:d", "a:b"},
                 {"a:b", "a:b"},
                 {"xyz", "xyz"}
         });
@@ -33,8 +34,7 @@ public class GradleInspectionTest {
     }
 
     @Test
-    public void testCreateComponentName() {
-        assertEquals(expectedComponentName, new GradleGroovyInspection().createComponentName(componentId));
-        assertEquals(expectedComponentName, new GradleKotlinInspection().createComponentName(componentId));
+    public void testStripVersion() {
+        assertEquals(expectedComponentName, stripVersion(componentId));
     }
 }

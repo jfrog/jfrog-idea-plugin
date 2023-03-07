@@ -7,6 +7,7 @@ import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.Collection;
 
 /**
  * Adds the yellow bulb action - "Upgrade Version".
@@ -15,7 +16,7 @@ import java.io.IOException;
  */
 public class YarnUpgradeVersion extends UpgradeVersion {
 
-    public YarnUpgradeVersion(String componentName, String fixVersion, String issue) {
+    public YarnUpgradeVersion(String componentName, String fixVersion, Collection<String> issue) {
         super(componentName, fixVersion, issue);
     }
 

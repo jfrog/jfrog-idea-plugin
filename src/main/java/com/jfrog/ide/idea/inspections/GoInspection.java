@@ -15,6 +15,8 @@ import com.jfrog.ide.idea.scan.ScannerBase;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
+
 /**
  * Created by Bar Belity on 17/02/2020.
  */
@@ -68,7 +70,7 @@ public class GoInspection extends AbstractInspection {
     }
 
     @Override
-    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, String issue) {
+    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issue) {
         return new GoUpgradeVersion(componentName, fixVersion, issue);
     }
 }
