@@ -11,9 +11,10 @@ import org.jfrog.build.api.util.Log;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 
 /**
  * @author Tal Arian
@@ -22,12 +23,19 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
     private static final String SCAN_TYPE = "analyze-applicability";
     private static final String SCANNER_BINARY_NAME = "analyzerManager";
     private static final List<String> SCANNER_ARGS = List.of("ca");
-    private static final String BINARY_DOWNLOAD_URL = "xsc-gen-exe-analyzer-manager-local/v1/[RELEASE]";
+    private static final String DEFAULT_BINARY_DOWNLOAD_URL = "xsc-gen-exe-analyzer-manager-local/v1/[RELEASE]";
     private static final String DOWNLOAD_SCANNER_NAME = "analyzerManager.zip";
+    private final String BINARY_DOWNLOAD_URL;
+
 
     public ApplicabilityScannerExecutor(Log log, ServerConfig serverConfig) {
-        super(SCAN_TYPE, SCANNER_BINARY_NAME, DOWNLOAD_SCANNER_NAME, log, serverConfig);
+        this(log, serverConfig, DEFAULT_BINARY_DOWNLOAD_URL, true);
+    }
+
+    public ApplicabilityScannerExecutor(Log log, ServerConfig serverConfig, String binaryDownloadUrl, boolean useJFrogReleases) {
+        super(SCAN_TYPE, SCANNER_BINARY_NAME, DOWNLOAD_SCANNER_NAME, log, serverConfig, useJFrogReleases);
         supportedLanguages = List.of("python", "js");
+        BINARY_DOWNLOAD_URL = defaultIfEmpty(binaryDownloadUrl, DEFAULT_BINARY_DOWNLOAD_URL);
     }
 
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder) throws IOException, InterruptedException {
@@ -47,8 +55,6 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
     @Override
     protected List<JFrogSecurityWarning> parseOutputSarif(Path outputFile) throws IOException {
         List<JFrogSecurityWarning> results = super.parseOutputSarif(outputFile);
-        HashSet<String> applicabilityCves = new HashSet<>();
-        results.forEach(jFrogSecurityWarning -> applicabilityCves.add(jFrogSecurityWarning.getName()));
         Output output = getOutputObj(outputFile);
         Optional<Run> run = output.getRuns().stream().findFirst();
         if (run.isPresent()) {

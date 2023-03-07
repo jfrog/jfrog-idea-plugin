@@ -30,7 +30,7 @@ public class SourceCodeScannerManager {
     protected String codeBaseLanguage;
     private static final String SKIP_FOLDERS_SUFFIX = "*/**";
 
-    public SourceCodeScannerManager(Project project, String codeBaseLanguage) {
+    public SourceCodeScannerManager(Project project, String codeBaseLanguage)  {
         this.project = project;
         this.codeBaseLanguage = codeBaseLanguage.toLowerCase();
     }
