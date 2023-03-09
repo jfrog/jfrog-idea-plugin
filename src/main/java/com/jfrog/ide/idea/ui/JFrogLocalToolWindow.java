@@ -60,6 +60,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     private final JPanel leftPanelContent;
     private final JComponent compTreeView;
     private final MessagePacker messagePacker;
+    private final boolean isInitialized;
     private IssueNode selectedIssue;
     private Path tempDirPath;
 
@@ -88,6 +89,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
         refreshView();
         registerListeners();
+        isInitialized = true;
     }
 
     @Override
@@ -122,7 +124,6 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         componentsTree.addRightClickListener();
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private void refreshView() {
         if (!GlobalSettings.getInstance().reloadXrayCredentials()) {
             setLeftPanelContent(ComponentUtils.createNoCredentialsView());
@@ -263,6 +264,14 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             FileUtils.deleteDirectory(tempDirPath.toFile());
         } catch (IOException e) {
             Logger.getInstance().warn("Temporary directory could not be deleted: " + tempDirPath.toString() + ". Error: " + ExceptionUtils.getRootCauseMessage(e));
+        }
+    }
+
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        if (isInitialized) {
+            refreshView();
         }
     }
 }
