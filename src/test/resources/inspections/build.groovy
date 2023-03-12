@@ -8,12 +8,15 @@ repositories {
 
 dependencies {
     implementation 'a:b:c'
-    implementation group: "a", name: "b", version: "c"
-    implementation 'a:b:c',
-            group: 'd', name: 'e', version: 'f'
-    implementation("a:b:c") {
-        exclude module: "d"
+    implementation group: "d", name: "e", version: "f"
+    implementation 'g:h:i',
+            'j:k:l'
+    implementation("m:n:o") {
+        exclude module: "p"
     }
-    compile project(":project")
+    implementation(
+            [group: 'net.lingala.zip4j', name: 'zip4j', version: '2.3.0'],
+            ['org.codehaus.groovy:groovy-all:3.0.5']
+    )
     compile fileTree(dir: "${gradle.gradleHomeDir}/lib/plugins", include: '**/*.jar')
 }

@@ -77,12 +77,12 @@ In addition to IntelliJ IDEA, the plugin also supports the following IDEs:
 * GoLand
 
 # Supported Packages
-| Features                                            | Go  | Maven | Gradle | npm | Yarn v1 | Python |
-|-----------------------------------------------------|:---:|:-----:|:------:|:---:|:-------:|:------:|
-| SCA                                                 |  ✅  |   ✅   |   ✅    |  ✅  |    ✅    |   ✅    |
-| CVE Research and Enrichment                         |  ✅  |   ✅   |   ✅    |  ✅  |    ✅    |   ✅    |
-| Upgrade vulnerable dependencies to fixed versions   |  ✅  |   ✅   |   ❌    |  ✅  |    ✅    |   ❌    |
-| Contextual Analysis (requires Xray 3.66.5 or above) |  ❌  |   ❌   |   ❌    |  ✅  |    ❌    |   ✅    |
+| Features                                          | Go  | Maven | Gradle Groovy | Gradle Kotlin | npm | Yarn v1 | Python |
+|---------------------------------------------------|:---:|:-----:|:-------------:|:-------------:|:---:|:-------:|:------:|
+| SCA                                               |  ✅  |   ✅   |       ✅       |       ✅       |  ✅  |    ✅    |   ✅    |
+| CVE Research and Enrichment                       |  ✅  |   ✅   |       ✅       |       ✅       |  ✅  |    ✅    |   ✅    |
+| Upgrade vulnerable dependencies to fixed versions |  ✅  |   ✅   |       ✅       |       ✅       |  ✅  |    ✅    |   ❌    |
+| Contextual Analysis                               |  ❌  |   ❌   |       ❌       |       ❌       |  ✅  |    ❌    |   ✅    |
 
 # Getting Started
 1. Install the JFrog IntelliJ IDEA Plugin via the Plugins tab in the IDE settings, or in [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/9834-jfrog).

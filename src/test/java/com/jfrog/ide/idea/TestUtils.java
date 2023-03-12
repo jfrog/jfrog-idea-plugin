@@ -8,7 +8,6 @@ import org.junit.Assert;
 import java.util.Enumeration;
 
 import static com.intellij.testFramework.UsefulTestCase.assertNotEmpty;
-import static org.gradle.internal.impldep.org.testng.Assert.assertNotNull;
 
 /**
  * Created by Bar Belity on 11/06/2020.
@@ -37,7 +36,7 @@ public class TestUtils {
                 .filter(child -> childName.equals(child.getUserObject()))
                 .findAny()
                 .orElse(null);
-        assertNotNull(childNode, "Couldn't find node '" + childName + "' between " + node + ".");
+        Assert.assertNotNull("Couldn't find node '" + childName + "' between " + node + ".", childNode);
         return childNode;
     }
 

@@ -56,6 +56,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     private final OnePixelSplitter verticalSplit;
     private JPanel leftPanelContent;
     private JComponent compTreeView;
+    private boolean isInitialized;
     private IssueNode selectedIssue;
     private Path tempDirPath;
     private WebviewManager webviewManager;
@@ -85,6 +86,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
         JComponent browserComponent = initVulnerabilityInfoBrowser();
         registerListeners(browserComponent);
+        isInitialized = true;
     }
 
     @Override
@@ -264,6 +266,14 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             FileUtils.deleteDirectory(tempDirPath.toFile());
         } catch (IOException e) {
             Logger.getInstance().warn("Temporary directory could not be deleted: " + tempDirPath.toString() + ". Error: " + ExceptionUtils.getRootCauseMessage(e));
+        }
+    }
+
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        if (isInitialized) {
+            refreshView();
         }
     }
 }

@@ -11,11 +11,8 @@ public class GradleKotlinInspectionTest extends InspectionsTestBase {
     // files as groovy-script.
     private static final String PACKAGE_DESCRIPTOR = "build.gradle.kts";
     private final InspectionTestDependency[] DEPENDENCIES = {
-            new InspectionTestDependency(96, "project"),
-            new InspectionTestDependency(119, "a", "b"),
-            new InspectionTestDependency(144, "d", "e"),
-            new InspectionTestDependency(147, "d", "e"),
-            new InspectionTestDependency(155, "d", "e"),
+            new InspectionTestDependency(119, "a", "b:c"),
+            new InspectionTestDependency(144, "d", "e:f"),
     };
 
     private final int[] NON_DEPENDENCIES_POSITIONS = {273, 338};

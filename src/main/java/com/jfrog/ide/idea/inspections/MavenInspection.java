@@ -18,6 +18,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.dom.model.MavenDomDependency;
 
+import java.util.Collection;
+
 /**
  * @author yahavi
  */
@@ -84,7 +86,7 @@ public class MavenInspection extends AbstractInspection {
     }
 
     @Override
-    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, String issue) {
+    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issue) {
         return new MavenUpgradeVersion(componentName, fixVersion, issue);
     }
 }

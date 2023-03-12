@@ -12,11 +12,12 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Adds the yellow bulb action - ""Upgrade Version"".
+ * Adds the yellow bulb action - "Upgrade Version".
  *
  * @author michaels
  */
@@ -28,10 +29,10 @@ public abstract class UpgradeVersion implements LocalQuickFix, Iconable, HighPri
     protected Logger log;
     protected Map<String, String> env;
 
-    public UpgradeVersion(String componentName, String fixVersion, String issue) {
+    public UpgradeVersion(String componentName, String fixVersion, Collection<String> issue) {
         this.componentName = componentName;
         this.fixVersion = fixVersion;
-        this.issue = issue;
+        this.issue = issue.toString();
         this.log = Logger.getInstance();
         this.env = new HashMap<>(EnvironmentUtil.getEnvironmentMap());
     }

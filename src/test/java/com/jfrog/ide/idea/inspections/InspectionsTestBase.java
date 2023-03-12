@@ -14,7 +14,7 @@ public abstract class InspectionsTestBase extends LightJavaCodeInsightFixtureTes
 
     PsiFile fileDescriptor;
     AbstractInspection inspection;
-    private Class<? extends PsiElement> psiClass;
+    Class<? extends PsiElement> psiClass;
 
     public void setUp(AbstractInspection inspection, String packageDescriptorName, Class<? extends PsiElement> psiClass) throws Exception {
         super.setUp();
@@ -59,9 +59,9 @@ public abstract class InspectionsTestBase extends LightJavaCodeInsightFixtureTes
     }
 
     static class InspectionTestDependency {
-        private final String artifactId;
-        private final int offset;
-        private String groupId;
+        public final String artifactId;
+        public final int offset;
+        public String groupId;
 
         public InspectionTestDependency(int offset, String groupId, String artifactId) {
             this.artifactId = artifactId;
