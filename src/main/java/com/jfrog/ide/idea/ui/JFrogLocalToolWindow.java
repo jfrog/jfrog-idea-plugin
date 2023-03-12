@@ -157,15 +157,20 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         JPanel jcefNotSupportedPanel = new JBPanel<>();
         jcefNotSupportedPanel.setLayout(new BoxLayout(jcefNotSupportedPanel, BoxLayout.PAGE_AXIS));
 
-        // "⚠️ The plugin could not be loaded."
-        HyperlinkLabel notLoadedLabel = new HyperlinkLabel();
-        notLoadedLabel.setText("⚠️ The plugin could not be loaded.");
-        ComponentUtils.addCenteredHyperlinkLabel(jcefNotSupportedPanel, notLoadedLabel);
+        // "Thank you for installing the JFrog IDEA Plugin!"
+        HyperlinkLabel thanksLabel = new HyperlinkLabel();
+        thanksLabel.setText("Thank you for installing the JFrog IDEA Plugin!");
+        ComponentUtils.addCenteredHyperlinkLabel(jcefNotSupportedPanel, thanksLabel);
 
-        // "The IDE's boot runtime must contain JCEF for the plugin to work properly."
+        // "The plugin uses a component named JCEF that seem to be missing in your IDE."
         HyperlinkLabel pluginNeedsJcefLabel = new HyperlinkLabel();
-        pluginNeedsJcefLabel.setText("The IDE's boot runtime must contain JCEF for the plugin to work properly.");
+        pluginNeedsJcefLabel.setText("The plugin uses a component named JCEF that seem to be missing in your IDE.");
         ComponentUtils.addCenteredHyperlinkLabel(jcefNotSupportedPanel, pluginNeedsJcefLabel);
+
+        // "To make JCEF available in your IDE, you’ll need to have the IDE use a different boot runtime."
+        HyperlinkLabel replaceBootRuntimeLabel = new HyperlinkLabel();
+        replaceBootRuntimeLabel.setText("To make JCEF available in your IDE, you’ll need to have the IDE use a different boot runtime.");
+        ComponentUtils.addCenteredHyperlinkLabel(jcefNotSupportedPanel, replaceBootRuntimeLabel);
 
         // "Click here, choose a boot runtime with JCEF, restart the IDE and come back."
         HyperlinkLabel scanLink = new HyperlinkLabel();
