@@ -77,11 +77,11 @@
 
     <actions>
         <!--suppress PluginXmlCapitalization -->
-        <action id="JFrog.RefreshLocal"
-                class="com.jfrog.ide.idea.actions.RefreshLocalAction"
+        <action id="JFrog.StartLocalScan"
+                class="com.jfrog.ide.idea.actions.StartLocalScanAction"
                 text="Run Scan"
-                description="Force Xray scan"
-                icon="AllIcons.Actions.Execute"/>
+                description="Run JFrog scan"
+                icon="/icons/jfrog_scan_icon.svg"/>
         <action id="JFrog.RefreshBuilds"
                 class="com.jfrog.ide.idea.actions.RefreshBuildsAction"
                 text="Refresh Builds"
@@ -91,6 +91,8 @@
                 class="com.jfrog.ide.idea.actions.CollapseAllAction"/>
         <action id="JFrog.ExpandAll"
                 class="com.jfrog.ide.idea.actions.ExpandAllAction"/>
+        <action id="JFrog.GoToSettings"
+                class="com.jfrog.ide.idea.actions.GoToSettingsAction"/>
     </actions>
 
 </idea-plugin>

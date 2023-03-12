@@ -7,7 +7,7 @@ import com.jfrog.ide.idea.scan.ScanManager;
 /**
  * Created by romang on 3/6/17.
  */
-public class RefreshLocalAction extends AnAction {
+public class StartLocalScanAction extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {
