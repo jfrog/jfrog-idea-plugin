@@ -26,6 +26,7 @@ import com.jfrog.ide.common.nodes.VulnerabilityNode;
 import com.jfrog.ide.idea.actions.CollapseAllAction;
 import com.jfrog.ide.idea.actions.ExpandAllAction;
 import com.jfrog.ide.idea.actions.GoToSettingsAction;
+import com.jfrog.ide.idea.actions.ScanTimeLabelAction;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.log.Logger;
@@ -102,7 +103,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
     @Override
     public JPanel createActionToolbar() {
-        DefaultActionGroup actionGroup = new DefaultActionGroup(new CollapseAllAction(componentsTree), new ExpandAllAction(componentsTree), new GoToSettingsAction());
+        DefaultActionGroup actionGroup = new DefaultActionGroup(new CollapseAllAction(componentsTree), new ExpandAllAction(componentsTree), new GoToSettingsAction(), new ScanTimeLabelAction());
         actionGroup.addAction(ActionManager.getInstance().getAction("JFrog.StartLocalScan"), Constraints.FIRST);
         return createJFrogToolbar(actionGroup);
     }

@@ -213,6 +213,13 @@ public class LocalComponentsTree extends ComponentsTree {
         return System.currentTimeMillis() - cache.getScanCacheObject().getScanTimestamp() >= EXPIRED_CACHE_TIME;
     }
 
+    public Long lastScanTime() {
+        if (isCacheEmpty()) {
+            return null;
+        }
+        return cache.getScanCacheObject().getScanTimestamp();
+    }
+
     /**
      * Sets the empty text to "Scanning...".
      * It means that this text will be shown only if the tree is empty.

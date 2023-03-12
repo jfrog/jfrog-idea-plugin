@@ -93,6 +93,9 @@
                 class="com.jfrog.ide.idea.actions.ExpandAllAction"/>
         <action id="JFrog.GoToSettings"
                 class="com.jfrog.ide.idea.actions.GoToSettingsAction"/>
+        <action id="JFrog.ScanTimeLabelAction"
+                class="com.jfrog.ide.idea.actions.ScanTimeLabelAction"
+        />
     </actions>
 
 </idea-plugin>
