@@ -41,7 +41,6 @@
         <projectConfigurable id="JFrogCi" displayName="JFrog CI Integration"
                              instance="com.jfrog.ide.idea.ui.configuration.JFrogProjectConfiguration"/>
         <applicationService serviceImplementation="com.jfrog.ide.idea.log.Logger"/>
-        <applicationService serviceImplementation="com.jfrog.ide.idea.ui.webview.WebviewService"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.ui.menus.filtermanager.CiFilterManager"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.scan.ScanManager"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.ci.CiManager"/>

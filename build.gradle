@@ -56,7 +56,6 @@ dependencies {
     implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: '2.0.0'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
     implementation group: 'com.google.guava', name: 'guava', version: '30.1.1-jre'
-    implementation group: 'me.friwi', name: 'jcefmaven', version: '110.0.25'
     testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.2.0'
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.2.0'
     testImplementation 'org.testng:testng:7.7.0'
