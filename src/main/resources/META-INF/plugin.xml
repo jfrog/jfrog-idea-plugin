@@ -12,7 +12,8 @@
 
     <change-notes>
         <![CDATA[
-          <li>Gradle and Kotlin - Suggest fixing vulnerable version and aggregate fix CVEs</li>
+          <li>Gradle and Kotlin - Suggest fixing vulnerable version</li>
+          <li>Gradle and Kotlin - Aggregate fix CVEs</li>
           <li>Go - Scan the Go version</li>
           <li>Add expiry of 7 days for cached scan results</li>
           <li>Android Studio - Fix plugin not loaded</li>
