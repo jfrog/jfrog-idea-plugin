@@ -27,10 +27,8 @@ public class JFrogToolWindow {
 
     private void addContent(ContentManager contentManager, JFrogLocalToolWindow jfrogLocalContent, JFrogCiToolWindow jfrogBuildsContent) {
         ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
-        if (jfrogLocalContent != null) {
-            Content localContent = contentFactory.createContent(jfrogLocalContent, "Local", false);
-            contentManager.addContent(localContent);
-        }
+        Content localContent = contentFactory.createContent(jfrogLocalContent, "Local", false);
+        contentManager.addContent(localContent);
         Content buildsContent = contentFactory.createContent(jfrogBuildsContent, "CI", false);
         contentManager.addContent(buildsContent);
     }
