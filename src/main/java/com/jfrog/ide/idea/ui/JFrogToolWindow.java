@@ -20,12 +20,7 @@ public class JFrogToolWindow {
 
     void initToolWindow(@NotNull ToolWindow toolWindow, @NotNull Project project, boolean buildsConfigured) {
         ContentManager contentManager = toolWindow.getContentManager();
-        JFrogLocalToolWindow jfrogLocalContent = null;
-        try {
-            jfrogLocalContent = new JFrogLocalToolWindow(project);
-        } catch (Exception e) {
-            Logger.getInstance().error("Local view could not be initialized.", e);
-        }
+        JFrogLocalToolWindow jfrogLocalContent = new JFrogLocalToolWindow(project);
         JFrogCiToolWindow jFrogCiContent = new JFrogCiToolWindow(project, buildsConfigured);
         addContent(contentManager, jfrogLocalContent, jFrogCiContent);
     }

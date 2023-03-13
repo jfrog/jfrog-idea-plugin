@@ -15,6 +15,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.ui.*;
+import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.jcef.JBCefApp;
 import com.intellij.util.ui.UIUtil;
@@ -64,7 +65,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     /**
      * @param project - Currently opened IntelliJ project
      */
-    public JFrogLocalToolWindow(@NotNull Project project) throws IOException, URISyntaxException {
+    public JFrogLocalToolWindow(@NotNull Project project) {
         super(project);
         componentsTree = LocalComponentsTree.getInstance(project);
         JPanel leftPanel = new JBPanel<>(new BorderLayout());
@@ -76,15 +77,24 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             return;
         }
 
+        JComponent browserComponent;
+        try {
+            browserComponent = initVulnerabilityInfoBrowser();
+        } catch (IOException | URISyntaxException e) {
+            Logger.getInstance().error("Local view couldn't be initialized.", e);
+            leftPanel.removeAll();
+            leftPanel.add(createLoadErrorView(), 0);
+            return;
+        }
+
         JPanel toolbar = createActionToolbar();
         toolbar.setBorder(IdeBorderFactory.createBorder(SideBorder.BOTTOM));
         leftPanel.add(toolbar, BorderLayout.PAGE_START);
         leftPanelContent = new JBPanel<>(new BorderLayout());
         leftPanel.add(leftPanelContent);
         compTreeView = createComponentsTreeView();
-        refreshView();
 
-        JComponent browserComponent = initVulnerabilityInfoBrowser();
+        refreshView();
         registerListeners(browserComponent);
         isInitialized = true;
     }
@@ -139,15 +149,15 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         readyEnvPanel.setLayout(new BoxLayout(readyEnvPanel, BoxLayout.PAGE_AXIS));
 
         // "We're all set!"
-        HyperlinkLabel allSetLabel = new HyperlinkLabel();
+        JBLabel allSetLabel = new JBLabel();
         allSetLabel.setText("We're all set.");
-        ComponentUtils.addCenteredHyperlinkLabel(readyEnvPanel, allSetLabel);
+        ComponentUtils.addCenteredComponent(readyEnvPanel, allSetLabel);
 
         // "Scan your project"
         HyperlinkLabel scanLink = new HyperlinkLabel();
         scanLink.setTextWithHyperlink("<hyperlink>Scan your project</hyperlink>");
         scanLink.addHyperlinkListener(e -> ScanManager.getInstance(project).startScan());
-        ComponentUtils.addCenteredHyperlinkLabel(readyEnvPanel, scanLink);
+        ComponentUtils.addCenteredComponent(readyEnvPanel, scanLink);
 
         return ComponentUtils.createUnsupportedPanel(readyEnvPanel);
     }
@@ -158,27 +168,44 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         jcefNotSupportedPanel.setLayout(new BoxLayout(jcefNotSupportedPanel, BoxLayout.PAGE_AXIS));
 
         // "Thank you for installing the JFrog IDEA Plugin!"
-        HyperlinkLabel thanksLabel = new HyperlinkLabel();
-        thanksLabel.setText("Thank you for installing the JFrog IDEA Plugin!");
-        ComponentUtils.addCenteredHyperlinkLabel(jcefNotSupportedPanel, thanksLabel);
+        JBLabel thanksLabel = new JBLabel();
+        thanksLabel.setText("Thank you for installing the JFrog IntelliJ IDEA Plugin!");
+        ComponentUtils.addCenteredComponent(jcefNotSupportedPanel, thanksLabel);
 
         // "The plugin uses a component named JCEF that seem to be missing in your IDE."
-        HyperlinkLabel pluginNeedsJcefLabel = new HyperlinkLabel();
+        JBLabel pluginNeedsJcefLabel = new JBLabel();
         pluginNeedsJcefLabel.setText("The plugin uses a component named JCEF that seem to be missing in your IDE.");
-        ComponentUtils.addCenteredHyperlinkLabel(jcefNotSupportedPanel, pluginNeedsJcefLabel);
+        ComponentUtils.addCenteredComponent(jcefNotSupportedPanel, pluginNeedsJcefLabel);
 
         // "To make JCEF available in your IDE, you’ll need to have the IDE use a different boot runtime."
-        HyperlinkLabel replaceBootRuntimeLabel = new HyperlinkLabel();
+        JBLabel replaceBootRuntimeLabel = new JBLabel();
         replaceBootRuntimeLabel.setText("To make JCEF available in your IDE, you’ll need to have the IDE use a different boot runtime.");
-        ComponentUtils.addCenteredHyperlinkLabel(jcefNotSupportedPanel, replaceBootRuntimeLabel);
+        ComponentUtils.addCenteredComponent(jcefNotSupportedPanel, replaceBootRuntimeLabel);
 
         // "Click here, choose a boot runtime with JCEF, restart the IDE and come back."
         HyperlinkLabel scanLink = new HyperlinkLabel();
         scanLink.setTextWithHyperlink("<hyperlink>Click here</hyperlink>, choose a boot runtime with JCEF, restart the IDE and come back.");
         scanLink.addHyperlinkListener(e -> RuntimeChooserUtil.INSTANCE.showRuntimeChooserPopup());
-        ComponentUtils.addCenteredHyperlinkLabel(jcefNotSupportedPanel, scanLink);
+        ComponentUtils.addCenteredComponent(jcefNotSupportedPanel, scanLink);
 
         return ComponentUtils.createUnsupportedPanel(jcefNotSupportedPanel);
+    }
+
+    private JComponent createLoadErrorView() {
+        JPanel loadErrorPanel = new JBPanel<>();
+        loadErrorPanel.setLayout(new BoxLayout(loadErrorPanel, BoxLayout.PAGE_AXIS));
+
+        // "The view couldn't be loaded."
+        JBLabel viewNotLoadedLabel = new JBLabel();
+        viewNotLoadedLabel.setText("The view couldn't be loaded.");
+        ComponentUtils.addCenteredComponent(loadErrorPanel, viewNotLoadedLabel);
+
+        // "Check the Notifications / Event Log for more information."
+        JBLabel checkLogsLabel = new JBLabel();
+        checkLogsLabel.setText("Check the Notifications / Event Log for more information.");
+        ComponentUtils.addCenteredComponent(loadErrorPanel, checkLogsLabel);
+
+        return ComponentUtils.createUnsupportedPanel(loadErrorPanel);
     }
 
     private void setLeftPanelContent(JComponent component) {

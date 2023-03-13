@@ -41,41 +41,41 @@ public class ComponentUtils {
         noCredentialsPanel.setLayout(new BoxLayout(noCredentialsPanel, BoxLayout.PAGE_AXIS));
 
         // "Thank you for installing the JFrog plugin"
-        HyperlinkLabel thanksLabel = new HyperlinkLabel();
+        JBLabel thanksLabel = new JBLabel();
         thanksLabel.setText("Thank you for installing the JFrog IntelliJ IDEA Plugin!");
-        addCenteredHyperlinkLabel(noCredentialsPanel, thanksLabel);
+        addCenteredComponent(noCredentialsPanel, thanksLabel);
 
         // "If you already have a JFrog environment, configure its connection details."
         HyperlinkLabel configLink = new HyperlinkLabel();
         configLink.setTextWithHyperlink("If you already have a JFrog environment,<hyperlink>configure</hyperlink> its connection details.");
         configLink.addHyperlinkListener(e -> ShowSettingsUtil.getInstance().showSettingsDialog(null, JFrogGlobalConfiguration.class));
-        addCenteredHyperlinkLabel(noCredentialsPanel, configLink);
+        addCenteredComponent(noCredentialsPanel, configLink);
 
         // "Don't have a JFrog environment? Get one for FREE!"
         HyperlinkLabel getFreeLink = new HyperlinkLabel();
         getFreeLink.setTextWithHyperlink("Don't have a JFrog environment?<hyperlink>Get one for FREE!</hyperlink>");
         getFreeLink.addHyperlinkListener(e -> BrowserUtil.browse("https://github.com/jfrog/jfrog-idea-plugin#set-up-a-free-jfrog-environment-in-the-cloud"));
-        addCenteredHyperlinkLabel(noCredentialsPanel, getFreeLink);
+        addCenteredComponent(noCredentialsPanel, getFreeLink);
 
         // "Read more about the plugin."
         HyperlinkLabel readMoreLink = new HyperlinkLabel();
         readMoreLink.setTextWithHyperlink("<hyperlink>Read more</hyperlink> about the plugin.");
         readMoreLink.addHyperlinkListener(e -> BrowserUtil.browse("https://github.com/jfrog/jfrog-idea-plugin#readme"));
-        addCenteredHyperlinkLabel(noCredentialsPanel, readMoreLink);
+        addCenteredComponent(noCredentialsPanel, readMoreLink);
 
         return createUnsupportedPanel(noCredentialsPanel);
     }
 
     /**
-     * Add centered HyperlinkLabel to the input panel.
+     * Add centered {@link JComponent} to the input panel.
      *
-     * @param panel          - The input panel
-     * @param hyperlinkLabel - The hyperlink label
+     * @param panel     - The input panel
+     * @param component - The component to add
      */
-    public static void addCenteredHyperlinkLabel(JPanel panel, HyperlinkLabel hyperlinkLabel) {
-        hyperlinkLabel.setMaximumSize(hyperlinkLabel.getPreferredSize());
-        hyperlinkLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(hyperlinkLabel);
+    public static void addCenteredComponent(JPanel panel, JComponent component) {
+        component.setMaximumSize(component.getPreferredSize());
+        component.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(component);
     }
 
     @SuppressWarnings("UnstableApiUsage")
