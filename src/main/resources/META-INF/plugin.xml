@@ -12,9 +12,10 @@
 
     <change-notes>
         <![CDATA[
-          <li>New look and feel</li>
-          <li>New details pane that is opened when clicking on a CVE</li>
-          <li>Support for Contextual Analysis capability, as part of JFrog's Advanced Security package</li>
+          <li>Gradle and Kotlin - Suggest fixing vulnerable version and aggregate fix CVEs</li>
+          <li>Go - Scan the Go version</li>
+          <li>Add expiry of 7 days for cached scan results</li>
+          <li>Android Studio - Fix plugin not loaded</li>
         ]]>
     </change-notes>
 
