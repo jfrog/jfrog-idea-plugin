@@ -65,13 +65,13 @@ public class MavenInspection extends AbstractInspection {
     @Override
     boolean isDependency(PsiElement element) {
         PsiElement parentElement = element.getParent();
-        if (!(parentElement instanceof XmlTag) ||
-                !StringUtils.equalsAny(((XmlTag) parentElement).getName(), MAVEN_DEPENDENCIES_TAG, MAVEN_PLUGINS_TAG)) {
-            return false;
+        if ((parentElement instanceof XmlTag) &&
+                StringUtils.equalsAny(((XmlTag) parentElement).getName(), MAVEN_DEPENDENCIES_TAG, MAVEN_PLUGINS_TAG)) {
+            return true;
         }
         PsiElement grandParentElement = parentElement.getParent();
-        return !(grandParentElement instanceof XmlTag) ||
-                !StringUtils.equals(((XmlTag) grandParentElement).getName(), MAVEN_DEPENDENCY_MANAGEMENT);
+        return (grandParentElement instanceof XmlTag &&
+                StringUtils.equals(((XmlTag) grandParentElement).getName(), MAVEN_DEPENDENCY_MANAGEMENT));
     }
 
     @Override
