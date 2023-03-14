@@ -9,10 +9,12 @@ public class MavenInspectionTest extends InspectionsTestBase {
 
     private static final String PACKAGE_DESCRIPTOR = "pom.xml";
     private final InspectionTestDependency[] DEPENDENCIES = {
-            new InspectionTestDependency(789, "a", "b:c")
+            new InspectionTestDependency(550, "a", "b:c"),
+            new InspectionTestDependency(788, "d", "e:f"),
+            new InspectionTestDependency(990, "g", "h:i"),
     };
 
-    private final int[] NON_DEPENDENCIES_POSITIONS = {397, 549, 766};
+    private final int[] NON_DEPENDENCIES_POSITIONS = {397, 1197, 1258};
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override

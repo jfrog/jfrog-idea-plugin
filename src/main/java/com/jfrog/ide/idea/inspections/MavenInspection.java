@@ -8,6 +8,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.XmlElementVisitor;
 import com.intellij.psi.impl.source.xml.XmlTagImpl;
 import com.intellij.psi.xml.XmlTag;
+import com.intellij.util.xml.DomElement;
 import com.intellij.util.xml.DomManager;
 import com.jfrog.ide.idea.inspections.upgradeversion.MavenUpgradeVersion;
 import com.jfrog.ide.idea.inspections.upgradeversion.UpgradeVersion;
@@ -16,7 +17,7 @@ import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScannerBase;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.idea.maven.dom.model.MavenDomDependency;
+import org.jetbrains.idea.maven.dom.model.MavenDomArtifactCoordinates;
 
 import java.util.Collection;
 
@@ -27,6 +28,9 @@ public class MavenInspection extends AbstractInspection {
 
     public static final String MAVEN_DEPENDENCY_MANAGEMENT = "dependencyManagement";
     public static final String MAVEN_DEPENDENCIES_TAG = "dependencies";
+    public static final String MAVEN_PLUGINS_TAG = "plugins";
+    public static final String MAVEN_DEPENDENCY_TAG = "dependency";
+    public static final String MAVEN_PLUGIN_TAG = "plugin";
     public static final String MAVEN_ARTIFACT_ID_TAG = "artifactId";
     public static final String MAVEN_GROUP_ID_TAG = "groupId";
 
@@ -40,29 +44,34 @@ public class MavenInspection extends AbstractInspection {
         return new XmlElementVisitor() {
             @Override
             public void visitXmlTag(XmlTag element) {
-                super.visitElement(element);
-                MavenInspection.this.visitElement(holder, element, isOnTheFly);
+                if (isDependencyOrPlugin(element)) {
+                    MavenInspection.this.visitElement(holder, element, isOnTheFly);
+                }
             }
         };
     }
 
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-        if (element instanceof XmlTag) {
+        if (element instanceof XmlTag && isDependencyOrPlugin((XmlTag) element)) {
             MavenInspection.this.visitElement(holder, element);
         }
+    }
+
+    boolean isDependencyOrPlugin(XmlTag xmlTag) {
+        return StringUtils.equalsAny(xmlTag.getName(), MAVEN_DEPENDENCY_TAG, MAVEN_PLUGIN_TAG);
     }
 
     @Override
     boolean isDependency(PsiElement element) {
         PsiElement parentElement = element.getParent();
-        if (!(parentElement instanceof XmlTag) ||
-                !StringUtils.equals(((XmlTag) parentElement).getName(), MAVEN_DEPENDENCIES_TAG)) {
-            return false;
+        if ((parentElement instanceof XmlTag) &&
+                StringUtils.equalsAny(((XmlTag) parentElement).getName(), MAVEN_DEPENDENCIES_TAG, MAVEN_PLUGINS_TAG)) {
+            return true;
         }
         PsiElement grandParentElement = parentElement.getParent();
-        return !(grandParentElement instanceof XmlTag) ||
-                !StringUtils.equals(((XmlTag) grandParentElement).getName(), MAVEN_DEPENDENCY_MANAGEMENT);
+        return (grandParentElement instanceof XmlTag &&
+                StringUtils.equals(((XmlTag) grandParentElement).getName(), MAVEN_DEPENDENCY_MANAGEMENT));
     }
 
     @Override
@@ -80,9 +89,12 @@ public class MavenInspection extends AbstractInspection {
         if (groupId == null || artifactId == null) {
             return null;
         }
-        MavenDomDependency dependency = (MavenDomDependency) DomManager.getDomManager(element.getProject()).getDomElement((XmlTag) element);
-        String version = dependency.getVersion().getStringValue();
-        return String.join(":", groupId.getValue().getText(), artifactId.getValue().getText(), version);
+        DomElement domElement = DomManager.getDomManager(element.getProject()).getDomElement((XmlTag) element);
+        if (domElement instanceof MavenDomArtifactCoordinates) {
+            String version = ((MavenDomArtifactCoordinates) domElement).getVersion().getStringValue();
+            return String.join(":", groupId.getValue().getText(), artifactId.getValue().getText(), version);
+        }
+        return null;
     }
 
     @Override

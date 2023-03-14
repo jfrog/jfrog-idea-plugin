@@ -67,7 +67,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
             return;
         }
         String componentName = createComponentName(element);
-        if (componentName.isEmpty()) {
+        if (StringUtils.isBlank(componentName)) {
             return; // Failed creating the component name
         }
         List<DependencyNode> dependencies = getDependencies(element, componentName);

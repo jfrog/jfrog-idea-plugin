@@ -20,10 +20,23 @@
 
     <dependencies>
         <dependency>
-            <groupId>a</groupId>
-            <artifactId>b</artifactId>
-            <version>c</version>
+            <groupId>d</groupId>
+            <artifactId>e</artifactId>
+            <version>f</version>
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>g</groupId>
+                <artifactId>h</artifactId>
+                <version>i</version>
+            </plugin>
+        </plugins>
+    </build>
+
+    <properties>
+        <maven.min.version>3.3.9</maven.min.version>
+    </properties>
 </project>
