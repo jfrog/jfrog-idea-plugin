@@ -63,10 +63,13 @@ public class GoInspection extends AbstractInspection {
     @Override
     String createComponentName(PsiElement element) {
         VgoModuleSpec goElement = ((VgoModuleSpec) element);
-        String version = goElement.getModuleVersion().getText();
-        // String leading "v" from version
-        version = StringUtils.strip(version, "v");
-        return String.join(":", goElement.getIdentifier().getText(), version);
+        if (goElement.getModuleVersion() != null) {
+            String version = goElement.getModuleVersion().getText();
+            // String leading "v" from version
+            version = StringUtils.strip(version, "v");
+            return String.join(":", goElement.getIdentifier().getText(), version);
+        }
+        return "";
     }
 
     @Override
