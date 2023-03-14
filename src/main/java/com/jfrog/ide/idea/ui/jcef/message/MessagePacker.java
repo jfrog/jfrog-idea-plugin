@@ -1,15 +1,13 @@
 package com.jfrog.ide.idea.ui.jcef.message;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.intellij.ui.jcef.JBCefBrowserBase;
 import com.jfrog.ide.idea.log.Logger;
-
-import static com.jfrog.ide.idea.ui.jcef.message.PackedMessage.IDE_SEND_FUNCTION_NAME;
+import org.cef.browser.CefBrowser;
 
 public class MessagePacker implements MessagePipe {
-    JBCefBrowserBase browser;
+    CefBrowser browser;
 
-    public MessagePacker(JBCefBrowserBase browser) {
+    public MessagePacker(CefBrowser browser) {
         this.browser = browser;
     }
 
@@ -24,11 +22,8 @@ public class MessagePacker implements MessagePipe {
     }
 
     private void send(String raw) {
-        browser.getCefBrowser().executeJavaScript(
-                "window." + IDE_SEND_FUNCTION_NAME + "=" + raw,
-                browser.getCefBrowser().getURL(), 0);
-        browser.getCefBrowser().executeJavaScript(
+        browser.executeJavaScript(
                 "window.postMessage(" + raw + ")",
-                browser.getCefBrowser().getURL(), 0);
+                browser.getURL(), 0);
     }
 }

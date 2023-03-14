@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author yahavi
@@ -39,6 +40,7 @@ public class LocalComponentsTree extends ComponentsTree {
     private static final String SHOW_IN_PROJECT_DESCRIPTOR = "Show direct dependency in project descriptor";
     private static final String NO_ISSUES = "Your project was scanned and we didn't find any security issues.";
     private static final String SCANNING = "Scanning...";
+    private static final long EXPIRED_CACHE_TIME = TimeUnit.DAYS.toMillis(7); // week
 
     private final ScanCache cache;
 
@@ -107,7 +109,7 @@ public class LocalComponentsTree extends ComponentsTree {
         if (selectedPath == null) {
             return;
         }
-        var selected = selectedPath.getLastPathComponent();
+        Object selected = selectedPath.getLastPathComponent();
         if (selected instanceof DependencyNode) {
             createNodePopupMenu((DependencyNode) selected);
         } else if (selected instanceof VulnerabilityNode) {
@@ -204,7 +206,11 @@ public class LocalComponentsTree extends ComponentsTree {
     }
 
     public boolean isCacheEmpty() {
-        return cache.getScanCacheObject() == null;
+        return cache.getScanCacheObject() == null || isCacheExpired();
+    }
+
+    private boolean isCacheExpired() {
+        return System.currentTimeMillis() - cache.getScanCacheObject().getScanTimestamp() >= EXPIRED_CACHE_TIME;
     }
 
     /**

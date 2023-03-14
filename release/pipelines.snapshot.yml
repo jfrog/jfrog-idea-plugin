@@ -36,7 +36,7 @@ pipelines:
             - jf gradlec --use-wrapper --repo-resolve ecosys-maven-remote --repo-deploy ecosys-oss-snapshot-local --deploy-maven-desc --deploy-ivy-desc=false
 
             # Run audit
-            # - jf audit
+            - jf audit
 
             # Delete former snapshots to make sure the release bundle will not contain the same artifacts
             - jf rt del "ecosys-oss-snapshot-local/com/jfrog/ide/jfrog-idea-plugin/*" --quiet
@@ -52,8 +52,8 @@ pipelines:
             - jf rt bp
 
             # Distribute release bundle
-            - jf ds rbc jfrog-idea-plugin-snapshot $run_number --spec=./release/specs/dev-rbc-filespec.json --sign
-            - jf ds rbd jfrog-idea-plugin-snapshot $run_number --site="releases.jfrog.io" --sync
+            - jf ds rbc ecosystem-jfrog-idea-plugin-snapshot $run_number --spec=./release/specs/dev-rbc-filespec.json --sign
+            - jf ds rbd ecosystem-jfrog-idea-plugin-snapshot $run_number --site="releases.jfrog.io" --sync
 
           onComplete:
             # Save gradle cache

@@ -26,6 +26,7 @@
   - [The CI View](#the-ci-view)
       - [How Does It Work?](#how-does-it-work)
       - [Setting Up CI Integration](#setting-up-ci-integration)
+- [Android Studio Support for JCEF](#android-studio-support-for-jcef)
 - [Troubleshooting](#troubleshooting)
 - [Reporting Issues](#reporting-issues)
 - [Contributions](#contributions)
@@ -260,6 +261,16 @@ Next, follow these steps:
 2. Under **Settings (Preferences)** | **Other Settings**, click **JFrog CI Integration**. Set your CI build name in the **Build name pattern** field. This is the name of the build published to Artifactory by your CI pipeline. You have the option of setting * to view all the builds published to Artifactory.
    ![](readme-resources/ci-settings.png)
 3. Click **Apply** and open the **CI** tab under the **JFrog** panel at the bottom of the screen and click the **Refresh** button.
+
+# Android Studio Support for JCEF
+
+The JFrog IntelliJ IDEA Plugin uses JCEF (Java Chromium Embedded Framework) to create a webview component in the plugin's tool window.
+
+Most IntelliJ-based IDEs use a boot runtime that contains JCEF by default.
+
+Android Studio and some older versions of other IntelliJ-based IDEs use a boot runtime that doesn't contain JCEF by default, and therefore the plugin can't be loaded in them.
+
+To solve this issue, open the ["Choose Boot Runtime for the IDE"](https://www.jetbrains.com/help/idea/switching-boot-jdk.html) dialog where you can change the boot runtime to one that contains JCEF.
 
 # Troubleshooting
 The JFrog IntelliJ IDES Plugin uses the IntelliJ IDEA log files. By default, the log level used by the plugin is INFO.

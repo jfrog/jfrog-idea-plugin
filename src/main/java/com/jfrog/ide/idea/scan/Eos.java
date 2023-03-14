@@ -21,7 +21,7 @@ public class Eos extends ScanBinaryExecutor {
     private static final List<String> SCANNER_ARGS = List.of("analyze", "config");
 
     public Eos(Log log, ServerConfig server) {
-        super(SCAN_TYPE, SCANNER_BINARY_NAME, DOWNLOAD_SCANNER_NAME, log, server);
+        super(SCAN_TYPE, SCANNER_BINARY_NAME, DOWNLOAD_SCANNER_NAME, log, server, true);
         supportedLanguages = List.of("python");
     }
 

@@ -1,0 +1,39 @@
+name: IntegrationTests
+
+on:
+  push:
+  # Triggers the workflow on labeled PRs only.
+  pull_request_target:
+    types: [ labeled ]
+  schedule:
+    - cron: '0 6 * * *' # Runs every day at 6:00 AM GMT
+
+jobs:
+  test:
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'safe to test')
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macOS-latest ]
+        include:
+          - os: windows-latest
+            gradlew_suffix: .bat
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      # Install required tools
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "11"
+
+      # Run integration tests
+      - name: Integration Tests
+        env:
+          JFROG_IDE_PLATFORM_URL: ${{ secrets.PLATFORM_URL }}
+          JFROG_IDE_ACCESS_TOKEN: ${{ secrets.PLATFORM_ADMIN_TOKEN }}
+        run: ./gradlew${{ matrix.gradlew_suffix }} clean integrationTests

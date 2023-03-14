@@ -5,6 +5,8 @@ import com.intellij.openapi.actionSystem.Constraints;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.projectRoots.impl.jdkDownloader.RuntimeChooserUtil;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -13,10 +15,9 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.ui.*;
+import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.jcef.JBCefApp;
-import com.intellij.ui.jcef.JBCefBrowser;
-import com.intellij.ui.jcef.JBCefBrowserBase;
 import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.common.nodes.ApplicableIssueNode;
 import com.jfrog.ide.common.nodes.IssueNode;
@@ -28,15 +29,13 @@ import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.ScanManager;
-import com.jfrog.ide.idea.ui.jcef.message.MessagePacker;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
+import com.jfrog.ide.idea.ui.webview.WebviewManager;
 import com.jfrog.ide.idea.ui.webview.WebviewObjectConverter;
 import com.jfrog.ide.idea.utils.Utils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.cef.browser.CefBrowser;
-import org.cef.browser.CefFrame;
-import org.cef.handler.CefLoadHandlerAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -55,13 +54,13 @@ import static com.jfrog.ide.idea.ui.JFrogToolWindow.SCROLL_BAR_SCROLLING_UNITS;
  */
 public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     private final LocalComponentsTree componentsTree;
-    private final JBCefBrowserBase browser;
     private final OnePixelSplitter verticalSplit;
-    private final JPanel leftPanelContent;
-    private final JComponent compTreeView;
-    private final MessagePacker messagePacker;
+    private JPanel leftPanelContent;
+    private JComponent compTreeView;
+    private boolean isInitialized;
     private IssueNode selectedIssue;
     private Path tempDirPath;
+    private WebviewManager webviewManager;
 
     /**
      * @param project - Currently opened IntelliJ project
@@ -69,25 +68,35 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     public JFrogLocalToolWindow(@NotNull Project project) {
         super(project);
         componentsTree = LocalComponentsTree.getInstance(project);
-        browser = new JBCefBrowser();
+        JPanel leftPanel = new JBPanel<>(new BorderLayout());
+        verticalSplit = new OnePixelSplitter(false, 0.4f);
+        verticalSplit.setFirstComponent(leftPanel);
+        setContent(verticalSplit);
+        if (!JBCefApp.isSupported()) {
+            leftPanel.add(createJcefNotSupportedView(), 0);
+            return;
+        }
 
-        messagePacker = new MessagePacker(browser);
-        initVulnerabilityInfoBrowser();
+        JComponent browserComponent;
+        try {
+            browserComponent = initVulnerabilityInfoBrowser();
+        } catch (IOException | URISyntaxException e) {
+            Logger.getInstance().error("Local view couldn't be initialized.", e);
+            leftPanel.removeAll();
+            leftPanel.add(createLoadErrorView(), 0);
+            return;
+        }
 
         JPanel toolbar = createActionToolbar();
         toolbar.setBorder(IdeBorderFactory.createBorder(SideBorder.BOTTOM));
-        JPanel leftPanel = new JBPanel<>(new BorderLayout());
         leftPanel.add(toolbar, BorderLayout.PAGE_START);
         leftPanelContent = new JBPanel<>(new BorderLayout());
         leftPanel.add(leftPanelContent);
         compTreeView = createComponentsTreeView();
 
-        verticalSplit = new OnePixelSplitter(false, 0.4f);
-        verticalSplit.setFirstComponent(leftPanel);
-        setContent(verticalSplit);
-
         refreshView();
-        registerListeners();
+        registerListeners(browserComponent);
+        isInitialized = true;
     }
 
     @Override
@@ -100,7 +109,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     /**
      * Register the issues tree listeners.
      */
-    public void registerListeners() {
+    public void registerListeners(JComponent browserComponent) {
         // Xray credentials were set listener
         appBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () -> ApplicationManager.getApplication().invokeLater(this::onConfigurationChange));
 
@@ -113,7 +122,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
             selectedIssue = (IssueNode) e.getNewLeadSelectionPath().getLastPathComponent();
             updateIssueOrLicenseInWebview(selectedIssue);
-            verticalSplit.setSecondComponent(browser.getComponent());
+            verticalSplit.setSecondComponent(browserComponent);
         });
         projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_LOCAL_STARTED, () -> {
             setLeftPanelContent(compTreeView);
@@ -122,7 +131,6 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         componentsTree.addRightClickListener();
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private void refreshView() {
         if (!GlobalSettings.getInstance().reloadXrayCredentials()) {
             setLeftPanelContent(ComponentUtils.createNoCredentialsView());
@@ -137,21 +145,67 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
     @SuppressWarnings("UnstableApiUsage")
     private JComponent createReadyEnvView() {
-        JPanel noCredentialsPanel = new JBPanel<>();
-        noCredentialsPanel.setLayout(new BoxLayout(noCredentialsPanel, BoxLayout.PAGE_AXIS));
+        JPanel readyEnvPanel = new JBPanel<>();
+        readyEnvPanel.setLayout(new BoxLayout(readyEnvPanel, BoxLayout.PAGE_AXIS));
 
         // "We're all set!"
-        HyperlinkLabel allSetLabel = new HyperlinkLabel();
+        JBLabel allSetLabel = new JBLabel();
         allSetLabel.setText("We're all set.");
-        ComponentUtils.addCenteredHyperlinkLabel(noCredentialsPanel, allSetLabel);
+        ComponentUtils.addCenteredComponent(readyEnvPanel, allSetLabel);
 
         // "Scan your project"
         HyperlinkLabel scanLink = new HyperlinkLabel();
         scanLink.setTextWithHyperlink("<hyperlink>Scan your project</hyperlink>");
         scanLink.addHyperlinkListener(e -> ScanManager.getInstance(project).startScan());
-        ComponentUtils.addCenteredHyperlinkLabel(noCredentialsPanel, scanLink);
+        ComponentUtils.addCenteredComponent(readyEnvPanel, scanLink);
 
-        return ComponentUtils.createUnsupportedPanel(noCredentialsPanel);
+        return ComponentUtils.createUnsupportedPanel(readyEnvPanel);
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private JComponent createJcefNotSupportedView() {
+        JPanel jcefNotSupportedPanel = new JBPanel<>();
+        jcefNotSupportedPanel.setLayout(new BoxLayout(jcefNotSupportedPanel, BoxLayout.PAGE_AXIS));
+
+        // "Thank you for installing the JFrog IDEA Plugin!"
+        JBLabel thanksLabel = new JBLabel();
+        thanksLabel.setText("Thank you for installing the JFrog IntelliJ IDEA Plugin!");
+        ComponentUtils.addCenteredComponent(jcefNotSupportedPanel, thanksLabel);
+
+        // "The plugin uses a component named JCEF that seem to be missing in your IDE."
+        JBLabel pluginNeedsJcefLabel = new JBLabel();
+        pluginNeedsJcefLabel.setText("The plugin uses a component named JCEF that seem to be missing in your IDE.");
+        ComponentUtils.addCenteredComponent(jcefNotSupportedPanel, pluginNeedsJcefLabel);
+
+        // "To make JCEF available in your IDE, you’ll need to have the IDE use a different boot runtime."
+        JBLabel replaceBootRuntimeLabel = new JBLabel();
+        replaceBootRuntimeLabel.setText("To make JCEF available in your IDE, you’ll need to have the IDE use a different boot runtime.");
+        ComponentUtils.addCenteredComponent(jcefNotSupportedPanel, replaceBootRuntimeLabel);
+
+        // "Click here, choose a boot runtime with JCEF, restart the IDE and come back."
+        HyperlinkLabel scanLink = new HyperlinkLabel();
+        scanLink.setTextWithHyperlink("<hyperlink>Click here</hyperlink>, choose a boot runtime with JCEF, restart the IDE and come back.");
+        scanLink.addHyperlinkListener(e -> RuntimeChooserUtil.INSTANCE.showRuntimeChooserPopup());
+        ComponentUtils.addCenteredComponent(jcefNotSupportedPanel, scanLink);
+
+        return ComponentUtils.createUnsupportedPanel(jcefNotSupportedPanel);
+    }
+
+    private JComponent createLoadErrorView() {
+        JPanel loadErrorPanel = new JBPanel<>();
+        loadErrorPanel.setLayout(new BoxLayout(loadErrorPanel, BoxLayout.PAGE_AXIS));
+
+        // "The view couldn't be loaded."
+        JBLabel viewNotLoadedLabel = new JBLabel();
+        viewNotLoadedLabel.setText("The view couldn't be loaded.");
+        ComponentUtils.addCenteredComponent(loadErrorPanel, viewNotLoadedLabel);
+
+        // "Check the Notifications / Event Log for more information."
+        JBLabel checkLogsLabel = new JBLabel();
+        checkLogsLabel.setText("Check the Notifications / Event Log for more information.");
+        ComponentUtils.addCenteredComponent(loadErrorPanel, checkLogsLabel);
+
+        return ComponentUtils.createUnsupportedPanel(loadErrorPanel);
     }
 
     private void setLeftPanelContent(JComponent component) {
@@ -159,34 +213,16 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         leftPanelContent.add(component, 0);
     }
 
-    private void initVulnerabilityInfoBrowser() {
-        if (!JBCefApp.isSupported()) {
-            Logger.getInstance().error("Could not open the issue details view - JCEF is not supported");
-            return;
-        }
-
-        try {
-            tempDirPath = Files.createTempDirectory("jfrog-idea-plugin");
-            Utils.extractFromResources("/jfrog-ide-webview", tempDirPath);
-        } catch (IOException | URISyntaxException e) {
-            Logger.getInstance().error(e.getMessage());
-            return;
-        }
-
-        browser.getJBCefClient().addLoadHandler(new CefLoadHandlerAdapter() {
-            @Override
-            public void onLoadEnd(CefBrowser browser, CefFrame frame, int httpStatusCode) {
-                updateIssueOrLicenseInWebview(selectedIssue);
-            }
-
-            @Override
-            public void onLoadError(CefBrowser browser, CefFrame frame, ErrorCode errorCode, String errorText, String failedUrl) {
-                Logger.getInstance().error("An error occurred while opening the issue details view: " + errorText);
-            }
-        }, browser.getCefBrowser());
+    private JComponent initVulnerabilityInfoBrowser() throws IOException, URISyntaxException {
+        tempDirPath = Files.createTempDirectory("jfrog-idea-plugin");
+        Utils.extractFromResources("/jfrog-ide-webview", tempDirPath);
 
         String pageUri = tempDirPath.resolve("index.html").toFile().toURI().toString();
-        browser.loadURL(pageUri);
+        webviewManager = new WebviewManager();
+        Disposer.register(this, webviewManager);
+
+        CefBrowser browser = webviewManager.createBrowser(pageUri, () -> updateIssueOrLicenseInWebview(selectedIssue));
+        return (JComponent) browser.getUIComponent();
     }
 
     /**
@@ -208,14 +244,14 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     private void updateIssueOrLicenseInWebview(IssueNode vulnerabilityOrViolation) {
         if (vulnerabilityOrViolation instanceof VulnerabilityNode) {
             VulnerabilityNode issue = (VulnerabilityNode) vulnerabilityOrViolation;
-            messagePacker.send(WebviewObjectConverter.convertIssueToDepPage(issue));
+            webviewManager.sendMessage(WebviewObjectConverter.convertIssueToDepPage(issue));
         } else if (vulnerabilityOrViolation instanceof ApplicableIssueNode) {
             ApplicableIssueNode node = (ApplicableIssueNode) vulnerabilityOrViolation;
-            messagePacker.send(WebviewObjectConverter.convertIssueToDepPage(node.getIssue()));
+            webviewManager.sendMessage(WebviewObjectConverter.convertIssueToDepPage(node.getIssue()));
             navigateToFile(node);
         } else if (vulnerabilityOrViolation instanceof LicenseViolationNode) {
             LicenseViolationNode license = (LicenseViolationNode) vulnerabilityOrViolation;
-            messagePacker.send(WebviewObjectConverter.convertLicenseToDepPage(license));
+            webviewManager.sendMessage(WebviewObjectConverter.convertLicenseToDepPage(license));
         }
     }
 
@@ -258,11 +294,18 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     @Override
     public void dispose() {
         super.dispose();
-        browser.dispose();
         try {
             FileUtils.deleteDirectory(tempDirPath.toFile());
         } catch (IOException e) {
             Logger.getInstance().warn("Temporary directory could not be deleted: " + tempDirPath.toString() + ". Error: " + ExceptionUtils.getRootCauseMessage(e));
+        }
+    }
+
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        if (isInitialized) {
+            refreshView();
         }
     }
 }
