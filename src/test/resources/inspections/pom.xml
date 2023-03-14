@@ -35,4 +35,8 @@
             </plugin>
         </plugins>
     </build>
+
+    <properties>
+        <maven.min.version>3.3.9</maven.min.version>
+    </properties>
 </project>

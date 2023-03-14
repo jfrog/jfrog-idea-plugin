@@ -14,7 +14,7 @@ public class MavenInspectionTest extends InspectionsTestBase {
             new InspectionTestDependency(990, "g", "h:i"),
     };
 
-    private final int[] NON_DEPENDENCIES_POSITIONS = {397, 549, 766};
+    private final int[] NON_DEPENDENCIES_POSITIONS = {397, 1197, 1258};
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
