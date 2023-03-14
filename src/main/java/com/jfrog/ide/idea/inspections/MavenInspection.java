@@ -53,14 +53,13 @@ public class MavenInspection extends AbstractInspection {
 
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-        if (isDependencyOrPlugin(element)) {
+        if (element instanceof XmlTag && isDependencyOrPlugin((XmlTag) element)) {
             MavenInspection.this.visitElement(holder, element);
         }
     }
 
-    boolean isDependencyOrPlugin(PsiElement element) {
-        return element instanceof XmlTag &&
-                StringUtils.equalsAny(((XmlTag) element).getName(), MAVEN_DEPENDENCY_TAG, MAVEN_PLUGIN_TAG);
+    boolean isDependencyOrPlugin(XmlTag xmlTag) {
+        return StringUtils.equalsAny(xmlTag.getName(), MAVEN_DEPENDENCY_TAG, MAVEN_PLUGIN_TAG);
     }
 
     @Override
