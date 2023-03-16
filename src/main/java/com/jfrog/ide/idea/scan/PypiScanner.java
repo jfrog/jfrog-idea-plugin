@@ -126,22 +126,25 @@ public class PypiScanner extends SingleDescriptorScanner {
     /**
      * Recursively, populate the SDK dependency tree.
      *
-     * @param node              - Dependency tree node
-     * @param pyPackage         - Current Python package
+     * @param parentNode        - Dependency tree node
+     * @param childPyPackage    - Child Python package to add
      * @param dependencyMapping - dependency name to Python package mapping
      */
-    void populateDependencyTree(DependencyTree node, PyPackage pyPackage, Map<String, PyPackage> dependencyMapping) {
-        DependencyTree child = new DependencyTree(pyPackage.getName() + ":" + pyPackage.getVersion());
-        initDependencyNode(child, pyPackage.getName(), pyPackage.getVersion(), "", "pypi");
-        node.add(child);
+    void populateDependencyTree(DependencyTree parentNode, PyPackage childPyPackage, Map<String, PyPackage> dependencyMapping) {
+        DependencyTree childNode = new DependencyTree(childPyPackage.getName() + ":" + childPyPackage.getVersion());
+        initDependencyNode(childNode, childPyPackage.getName(), childPyPackage.getVersion(), "", "pypi");
+        if (childNode.hasLoop(getLog())) {
+            return;
+        }
+        parentNode.add(childNode);
 
-        for (PyRequirement requirement : pyPackage.getRequirements()) {
+        for (PyRequirement requirement : childPyPackage.getRequirements()) {
             PyPackage dependency = dependencyMapping.get(requirement.getName().toLowerCase());
             if (dependency == null) {
                 getLog().warn("Dependency " + requirement.getName() + " is not installed.");
                 continue;
             }
-            populateDependencyTree(child, dependency, dependencyMapping);
+            populateDependencyTree(childNode, dependency, dependencyMapping);
         }
     }
 
