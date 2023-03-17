@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.model.MavenArtifact;
 import org.jetbrains.idea.maven.model.MavenArtifactNode;
+import org.jetbrains.idea.maven.model.MavenArtifactState;
 import org.jetbrains.idea.maven.model.MavenId;
 import org.jetbrains.idea.maven.project.MavenProject;
 import org.jetbrains.idea.maven.project.MavenProjectsManager;
@@ -75,7 +76,7 @@ public class MavenScanner extends ScannerBase {
     protected DependencyTree buildTree() {
         DependencyTree rootNode = new DependencyTree(project.getName());
         rootNode.setMetadata(true);
-        MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject -> populateMavenModule(rootNode, rootMavenProject, Sets.newHashSet()));
+        MavenProjectsManager.getInstance(project).getRootProjects().forEach(rootMavenProject -> populateMavenModule(rootNode, rootMavenProject));
         GeneralInfo generalInfo = new GeneralInfo().componentId(project.getName()).path(basePath).pkgType(PKG_TYPE);
         rootNode.setGeneralInfo(generalInfo);
         if (rootNode.getChildren().size() == 1) {
@@ -103,11 +104,11 @@ public class MavenScanner extends ScannerBase {
         return PKG_TYPE;
     }
 
-    private void addSubmodules(DependencyTree mavenNode, MavenProject mavenProject, Set<String> added) {
+    private void addSubmodules(DependencyTree mavenNode, MavenProject mavenProject) {
         mavenProject.getExistingModuleFiles().stream()
                 .map(this::getModuleByVirtualFile)
                 .filter(Objects::nonNull)
-                .forEach(mavenModule -> populateMavenModule(mavenNode, mavenModule, added));
+                .forEach(mavenModule -> populateMavenModule(mavenNode, mavenModule));
     }
 
     /**
@@ -115,16 +116,13 @@ public class MavenScanner extends ScannerBase {
      *
      * @param root             - The root dependencies node
      * @param rootMavenProject - The root Maven project
-     * @param added            - This set is used to make sure the dependencies added are unique between module and its parent
      */
-    private void populateMavenModule(DependencyTree root, MavenProject rootMavenProject, Set<String> added) {
+    private void populateMavenModule(DependencyTree root, MavenProject rootMavenProject) {
         DependencyTree mavenNode = populateMavenModuleNode(rootMavenProject);
         mavenNode.setMetadata(true);
         root.add(mavenNode);
-        added = Sets.newHashSet(added);
-        added.add(rootMavenProject.toString());
-        addMavenProjectDependencies(mavenNode, rootMavenProject, added);
-        addSubmodules(mavenNode, rootMavenProject, added);
+        addMavenProjectDependencies(mavenNode, rootMavenProject);
+        addSubmodules(mavenNode, rootMavenProject);
     }
 
     private MavenProject getModuleByVirtualFile(VirtualFile virtualFile) {
@@ -135,11 +133,11 @@ public class MavenScanner extends ScannerBase {
                 .orElse(null);
     }
 
-    private void addMavenProjectDependencies(DependencyTree node, MavenProject mavenProject, Set<String> added) {
+    private void addMavenProjectDependencies(DependencyTree node, MavenProject mavenProject) {
         mavenProject.getDependencyTree()
                 .stream()
-                .filter(dependencyTree -> added.add(dependencyTree.getArtifact().getDisplayStringForLibraryName()))
-                .forEach(dependencyTree -> updateChildrenNodes(node, dependencyTree, added, true));
+                .filter(mavenArtifactNode -> mavenArtifactNode.getState() == MavenArtifactState.ADDED)
+                .forEach(mavenArtifactNode -> updateChildrenNodes(node, mavenArtifactNode, true));
     }
 
     /**
@@ -155,9 +153,7 @@ public class MavenScanner extends ScannerBase {
         return node;
     }
 
-    private void updateChildrenNodes(DependencyTree parentNode, MavenArtifactNode mavenArtifactNode, Set<String> added, boolean setScopes) {
-        // This set is used to disallow duplications between a node and its ancestors
-        final Set<String> addedInSubTree = Sets.newHashSet(added);
+    private void updateChildrenNodes(DependencyTree parentNode, MavenArtifactNode mavenArtifactNode, boolean setScopes) {
         MavenArtifact mavenArtifact = mavenArtifactNode.getArtifact();
         DependencyTree currentNode = new DependencyTree(mavenArtifact.getDisplayStringSimple());
         if (setScopes) {
@@ -165,8 +161,8 @@ public class MavenScanner extends ScannerBase {
         }
         mavenArtifactNode.getDependencies()
                 .stream()
-                .filter(dependencyTree -> addedInSubTree.add(dependencyTree.getArtifact().getDisplayStringForLibraryName()))
-                .forEach(childrenArtifactNode -> updateChildrenNodes(currentNode, childrenArtifactNode, addedInSubTree, false));
+                .filter(mavenArtifactChild -> mavenArtifactChild.getState() == MavenArtifactState.ADDED)
+                .forEach(childrenArtifactNode -> updateChildrenNodes(currentNode, childrenArtifactNode, false));
         parentNode.add(currentNode);
     }
 
