@@ -31,7 +31,6 @@
 
     <idea-version since-build="213.5744"/>
     <depends>com.intellij.modules.lang</depends>
-    <depends>com.intellij.modules.python</depends>
     <depends config-file="with-java.xml" optional="true">com.intellij.modules.java</depends>
     <depends config-file="with-gradle.xml" optional="true">com.intellij.gradle</depends>
     <depends config-file="with-groovy.xml" optional="true">org.intellij.groovy</depends>

@@ -20,9 +20,11 @@ import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.jfrog.build.extractor.scan.Scope;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 
 import static com.jfrog.ide.common.log.Utils.logError;
 import static com.jfrog.ide.common.utils.Utils.createComponentId;
@@ -106,18 +108,9 @@ public class PypiScanner extends SingleDescriptorScanner {
 
         // Populate dependency tree
         Collection<PyPackage> values = dependencyMapping.values();
-        Set<String> allDependencies = values.parallelStream()
-                .map(PyPackage::getRequirements)
-                .flatMap(Collection::stream)
-                .map(PyRequirement::getName)
-                .map(String::toLowerCase)
-                .collect(Collectors.toSet());
+
         for (PyPackage pyPackage : values) {
-            // If pyPackage is contained in one of the dependencies, we conclude it is a transitive dependency.
-            // If it's transitive, we shouldn't add it as a direct dependency.
-            if (!allDependencies.contains(pyPackage.getName().toLowerCase())) {
-                populateDependencyTree(sdkNode, pyPackage, dependencyMapping);
-            }
+            populateDependencyTree(sdkNode, pyPackage, dependencyMapping);
         }
 
         return sdkNode;
@@ -133,10 +126,11 @@ public class PypiScanner extends SingleDescriptorScanner {
     void populateDependencyTree(DependencyTree parentNode, PyPackage childPyPackage, Map<String, PyPackage> dependencyMapping) {
         DependencyTree childNode = new DependencyTree(childPyPackage.getName() + ":" + childPyPackage.getVersion());
         initDependencyNode(childNode, childPyPackage.getName(), childPyPackage.getVersion(), "", "pypi");
+        parentNode.add(childNode);
+
         if (childNode.hasLoop(getLog())) {
             return;
         }
-        parentNode.add(childNode);
 
         for (PyRequirement requirement : childPyPackage.getRequirements()) {
             PyPackage dependency = dependencyMapping.get(requirement.getName().toLowerCase());

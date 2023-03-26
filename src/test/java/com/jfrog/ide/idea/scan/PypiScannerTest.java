@@ -23,11 +23,14 @@ import org.jfrog.build.extractor.executor.CommandExecutor;
 import org.jfrog.build.extractor.executor.CommandResults;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 
 import static com.jfrog.ide.idea.TestUtils.assertScopes;
@@ -43,6 +46,7 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String TRANSITIVE_DEPENDENCY_NAME = "anytree";
     private static final String TRANSITIVE_DEPENDENCY_VERSION = "2.8.0";
 
+
     private ExecutorService executorService;
     private Sdk pythonSdk;
     private File tmpDir;
@@ -52,7 +56,6 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
         super.setUp();
         createVirtualEnv();
         resolvePythonSdk();
-        installDependencyOnVirtualEnv();
         executorService = ConcurrencyUtil.newSameThreadExecutorService();
     }
 
@@ -74,12 +77,13 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
     private void createVirtualEnv() throws IOException, InterruptedException {
         tmpDir = Files.createTempDirectory("").toFile();
         CommandExecutor commandExecutor = new CommandExecutor("python", null);
-        CommandResults results = commandExecutor.exeCommand(tmpDir, Lists.newArrayList("-m", "venv", "pip-venv"), null, new NullLog());
+        ArrayList<String> args = Lists.newArrayList("-m", "venv", "pip-venv");
+        CommandResults results = commandExecutor.exeCommand(tmpDir, Lists.newArrayList(args), null, new NullLog());
         if (!results.isOk()) {
             // The Python tests requires Python 3 because the "venv" module exists only at Python 3.
             // In some machines the "python" executable is Python 2.
             commandExecutor = new CommandExecutor("python3", null);
-            results = commandExecutor.exeCommand(tmpDir, Lists.newArrayList("-m", "venv", "pip-venv"), null, new NullLog());
+            results = commandExecutor.exeCommand(tmpDir, Lists.newArrayList(args), null, new NullLog());
         }
         assertTrue(results.getRes() + ". Error: " + results.getErr(), results.isOk());
     }
@@ -105,6 +109,8 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
     }
 
     public void testBuildTree() {
+        installDependencyOnVirtualEnv();
+
         PypiScanner pypiScanner = new PypiScanner(getProject(), pythonSdk, executorService, new GraphScanLogic(new NullLog()));
 
         // Check root SDK node
@@ -135,5 +141,41 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
         assertEquals(TRANSITIVE_DEPENDENCY_NAME, generalInfo.getArtifactId());
         assertEquals(TRANSITIVE_DEPENDENCY_VERSION, generalInfo.getVersion());
         assertSize(1, anyTree.getChildren());
+    }
+
+    public void testBuildTreeCircularDependency() {
+        try (MockedStatic<PyPackageManager> mockController = Mockito.mockStatic(PyPackageManager.class)) {
+            mockController.when(() -> PyPackageManager.getInstance(pythonSdk)).thenReturn(new DummyCircularDepSDK());
+            PypiScanner pypiScanner = new PypiScanner(getProject(), pythonSdk, executorService, new GraphScanLogic(new NullLog()));
+
+            // Check root SDK node
+            DependencyTree results = pypiScanner.buildTree();
+            assertEquals(SDK_NAME, results.getUserObject());
+            assertScopes(results);
+            assertTrue(results.isMetadata());
+            GeneralInfo generalInfo = results.getGeneralInfo();
+            assertEquals("Python SDK", generalInfo.getPkgType());
+            assertEquals(SDK_NAME, generalInfo.getArtifactId());
+            assertEquals(pythonSdk.getHomePath(), generalInfo.getPath());
+            assertNotEmpty(results.getChildren());
+
+            // Check dependency "a". The expected tree: a-> b -> a
+            DependencyTree a = getAndAssertChild(results, DummyCircularDepSDK.DIRECT_DEPENDENCY_NAME + ":" + DummyCircularDepSDK.DIRECT_DEPENDENCY_VERSION);
+            assertSize(1, a.getChildren());
+            generalInfo = a.getGeneralInfo();
+            assertEquals("pypi", generalInfo.getPkgType());
+            assertEquals(DummyCircularDepSDK.DIRECT_DEPENDENCY_NAME, generalInfo.getArtifactId());
+            assertEquals(DummyCircularDepSDK.DIRECT_DEPENDENCY_VERSION, generalInfo.getVersion());
+            DependencyTree b = getAndAssertChild(a, DummyCircularDepSDK.CIRCULAR_DEPENDENCY_NAME + ":" + DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION);
+
+            // Check dependency "b"
+            assertSize(1, b.getChildren());
+            generalInfo = b.getGeneralInfo();
+            assertEquals("pypi", generalInfo.getPkgType());
+            assertEquals(DummyCircularDepSDK.CIRCULAR_DEPENDENCY_NAME, generalInfo.getArtifactId());
+            assertEquals(DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION, generalInfo.getVersion());
+            getAndAssertChild(b, DummyCircularDepSDK.DIRECT_DEPENDENCY_NAME + ":" + DummyCircularDepSDK.DIRECT_DEPENDENCY_VERSION);
+
+        }
     }
 }

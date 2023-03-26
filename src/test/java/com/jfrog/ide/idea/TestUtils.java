@@ -36,7 +36,7 @@ public class TestUtils {
                 .filter(child -> childName.equals(child.getUserObject()))
                 .findAny()
                 .orElse(null);
-        Assert.assertNotNull("Couldn't find node '" + childName + "' between " + node + ".", childNode);
+        Assert.assertNotNull("Couldn't find node '" + childName + "' as one of " + node + "'s children.", childNode);
         return childNode;
     }
 
