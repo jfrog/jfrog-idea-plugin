@@ -78,7 +78,6 @@ test {
 }
 
 tasks.register('pythonTests', Test) {
-    intellijVersion = pythonTestVersion
     scanForTestClasses false
     include "**/*PypiScannerTest*"
     testLogging {
