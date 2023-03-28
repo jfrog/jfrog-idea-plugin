@@ -6,9 +6,12 @@ import com.jfrog.ide.common.nodes.LicenseViolationNode;
 import com.jfrog.ide.common.nodes.VulnerabilityNode;
 import com.jfrog.ide.common.nodes.subentities.ImpactTreeNode;
 import com.jfrog.ide.common.nodes.subentities.ResearchInfo;
+import com.jfrog.ide.common.nodes.subentities.SeverityReason;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.idea.ui.webview.model.*;
+import org.apache.commons.collections4.CollectionUtils;
 
+import java.util.Collection;
 import java.util.List;
 
 public class WebviewObjectConverter {
@@ -16,8 +19,9 @@ public class WebviewObjectConverter {
         ExtendedInformation extendedInformation = null;
         if (vulnerabilityNode.getResearchInfo() != null) {
             ResearchInfo issueResearchInfo = vulnerabilityNode.getResearchInfo();
-            JfrogResearchSeverityReason[] severityReasons = issueResearchInfo.getSeverityReasons().stream().map(severityReason -> new JfrogResearchSeverityReason(severityReason.getName(), severityReason.getDescription(), severityReason.isPositive())).toArray(JfrogResearchSeverityReason[]::new);
-            extendedInformation = new ExtendedInformation(issueResearchInfo.getShortDescription(), issueResearchInfo.getFullDescription(), issueResearchInfo.getSeverity().name(), issueResearchInfo.getRemediation(), severityReasons);
+            Collection<SeverityReason> severityReasons = CollectionUtils.emptyIfNull(issueResearchInfo.getSeverityReasons());
+            JfrogResearchSeverityReason[] researchSeverityReasons = severityReasons.stream().map(severityReason -> new JfrogResearchSeverityReason(severityReason.getName(), severityReason.getDescription(), severityReason.isPositive())).toArray(JfrogResearchSeverityReason[]::new);
+            extendedInformation = new ExtendedInformation(issueResearchInfo.getShortDescription(), issueResearchInfo.getFullDescription(), issueResearchInfo.getSeverity().name(), issueResearchInfo.getRemediation(), researchSeverityReasons);
         }
         DependencyNode dependency = vulnerabilityNode.getParentArtifact();
         String[] watchNames = null;
