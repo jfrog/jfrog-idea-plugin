@@ -159,22 +159,31 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
             assertEquals(pythonSdk.getHomePath(), generalInfo.getPath());
             assertNotEmpty(results.getChildren());
 
-            // Check dependency "a". The expected tree: a-> b -> a
-            DependencyTree a = getAndAssertChild(results, DummyCircularDepSDK.DIRECT_DEPENDENCY_NAME + ":" + DummyCircularDepSDK.DIRECT_DEPENDENCY_VERSION);
-            assertSize(1, a.getChildren());
-            generalInfo = a.getGeneralInfo();
+            // The expected tree: root -> a-> b -> a
+            // Check root
+            DependencyTree root = getAndAssertChild(results, DummyCircularDepSDK.DIRECT_DEPENDENCY_NAME + ":" + DummyCircularDepSDK.DIRECT_DEPENDENCY_VERSION);
+            assertSize(1, root.getChildren());
+            generalInfo = root.getGeneralInfo();
             assertEquals("pypi", generalInfo.getPkgType());
             assertEquals(DummyCircularDepSDK.DIRECT_DEPENDENCY_NAME, generalInfo.getArtifactId());
             assertEquals(DummyCircularDepSDK.DIRECT_DEPENDENCY_VERSION, generalInfo.getVersion());
-            DependencyTree b = getAndAssertChild(a, DummyCircularDepSDK.CIRCULAR_DEPENDENCY_NAME + ":" + DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION);
+            DependencyTree a = getAndAssertChild(root, DummyCircularDepSDK.CIRCULAR_DEPENDENCY_A + ":" + DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION);
+
+            // Check dependency "a"
+            assertSize(1, a.getChildren());
+            generalInfo = a.getGeneralInfo();
+            assertEquals("pypi", generalInfo.getPkgType());
+            assertEquals(DummyCircularDepSDK.CIRCULAR_DEPENDENCY_A, generalInfo.getArtifactId());
+            assertEquals(DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION, generalInfo.getVersion());
+            DependencyTree b = getAndAssertChild(a, DummyCircularDepSDK.CIRCULAR_DEPENDENCY_B + ":" + DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION);
 
             // Check dependency "b"
             assertSize(1, b.getChildren());
             generalInfo = b.getGeneralInfo();
             assertEquals("pypi", generalInfo.getPkgType());
-            assertEquals(DummyCircularDepSDK.CIRCULAR_DEPENDENCY_NAME, generalInfo.getArtifactId());
+            assertEquals(DummyCircularDepSDK.CIRCULAR_DEPENDENCY_B, generalInfo.getArtifactId());
             assertEquals(DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION, generalInfo.getVersion());
-            getAndAssertChild(b, DummyCircularDepSDK.DIRECT_DEPENDENCY_NAME + ":" + DummyCircularDepSDK.DIRECT_DEPENDENCY_VERSION);
+            getAndAssertChild(b, DummyCircularDepSDK.CIRCULAR_DEPENDENCY_A + ":" + DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION);
 
         }
     }

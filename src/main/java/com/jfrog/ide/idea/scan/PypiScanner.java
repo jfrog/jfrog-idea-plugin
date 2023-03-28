@@ -20,11 +20,9 @@ import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.jfrog.build.extractor.scan.Scope;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 import static com.jfrog.ide.common.log.Utils.logError;
 import static com.jfrog.ide.common.utils.Utils.createComponentId;
@@ -107,12 +105,21 @@ public class PypiScanner extends SingleDescriptorScanner {
         }
 
         // Populate dependency tree
-        Collection<PyPackage> values = dependencyMapping.values();
+        Collection<PyPackage> allDependencies = dependencyMapping.values();
+        Set<String> transitiveDependencies = allDependencies.parallelStream()
+                .map(PyPackage::getRequirements)
+                .flatMap(Collection::stream)
+                .map(PyRequirement::getName)
+                .map(String::toLowerCase)
+                .collect(Collectors.toSet());
 
-        for (PyPackage pyPackage : values) {
-            populateDependencyTree(sdkNode, pyPackage, dependencyMapping);
+        for (PyPackage pyPackage : allDependencies) {
+            // If pyPackage is contained in one of the dependencies, we conclude it is a transitive dependency.
+            // If it's transitive, we shouldn't add it as a direct dependency.
+            if (!transitiveDependencies.contains(pyPackage.getName().toLowerCase())) {
+                populateDependencyTree(sdkNode, pyPackage, dependencyMapping);
+            }
         }
-
         return sdkNode;
     }
 
