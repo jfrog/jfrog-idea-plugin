@@ -29,7 +29,7 @@
         ]]>
     </change-notes>
 
-    <idea-version since-build="213.5744"/>
+    <idea-version since-build="221.5080"/>
     <depends>com.intellij.modules.lang</depends>
     <depends config-file="with-java.xml" optional="true">com.intellij.modules.java</depends>
     <depends config-file="with-gradle.xml" optional="true">com.intellij.gradle</depends>
