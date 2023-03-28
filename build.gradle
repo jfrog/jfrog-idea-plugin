@@ -17,14 +17,14 @@ sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 def testPython = project.gradle.startParameter.taskNames.contains("pythonTests")
 def intellijVersion = testPython ? pythonTestVersion : sandboxVersion
-def pluginVersions = [
+def pythonPluginVersion = [
         "2022.1"   : "PythonCore:221.5080.210",
         "IU-2022.1": "PythonId:221.5080.210",
 ]
 
 intellij {
     version = intellijVersion
-    plugins = ['gradle', 'maven', 'Groovy', 'properties', 'java', 'Kotlin', 'org.jetbrains.plugins.go:221.5080.210', pluginVersions[intellijVersion]]
+    plugins = ['gradle', 'maven', 'Groovy', 'properties', 'java', 'Kotlin', 'org.jetbrains.plugins.go:221.5080.210', pythonPluginVersion[intellijVersion]]
     pluginName = 'JFrog'
     updateSinceUntilBuild = false
 }
