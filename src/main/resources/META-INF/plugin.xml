@@ -80,7 +80,6 @@
         <action id="JFrog.StartLocalScan"
                 class="com.jfrog.ide.idea.actions.StartLocalScanAction"
                 text="Run Scan"
-                description="Run JFrog scan"
                 icon="AllIcons.Actions.Execute"/>
         <action id="JFrog.RefreshBuilds"
                 class="com.jfrog.ide.idea.actions.RefreshBuildsAction"

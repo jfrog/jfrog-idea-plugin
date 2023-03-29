@@ -11,7 +11,7 @@ import com.jfrog.ide.idea.ui.configuration.JFrogGlobalConfiguration;
  */
 public class GoToSettingsAction extends AnAction {
     public GoToSettingsAction() {
-        super("JFrog Global Configuration", "Go to JFrog global configuration ", AllIcons.General.Settings);
+        super("JFrog Global Configuration", "Go to JFrog global configuration", AllIcons.General.Settings);
     }
 
     @Override
