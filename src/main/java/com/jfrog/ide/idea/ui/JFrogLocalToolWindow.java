@@ -289,6 +289,13 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
      */
     @Override
     public void onConfigurationChange() {
+        if (componentsTree != null) {
+            try {
+                componentsTree.deleteCachedTree();
+            } catch (IOException e) {
+                Logger.getInstance().warn("Error: " + ExceptionUtils.getRootCauseMessage(e));
+            }
+        }
         super.onConfigurationChange();
         refreshView();
     }

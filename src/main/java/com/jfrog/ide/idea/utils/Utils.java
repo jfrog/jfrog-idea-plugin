@@ -70,7 +70,7 @@ public class Utils {
         UsageReporter usageReporter = new UsageReporter(PRODUCT_ID + pluginVersion, featureIdArray);
         try {
             usageReporter.reportUsage(serverConfig.getArtifactoryUrl(), serverConfig.getUsername(), serverConfig.getPassword(), serverConfig.getAccessToken(), null, log);
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException e) {
             log.debug("Usage report failed: " + ExceptionUtils.getRootCauseMessage(e));
         }
         log.debug("Usage report sent successfully.");
