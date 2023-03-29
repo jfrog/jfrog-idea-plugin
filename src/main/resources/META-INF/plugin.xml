@@ -77,10 +77,9 @@
 
     <actions>
         <!--suppress PluginXmlCapitalization -->
-        <action id="JFrog.RefreshLocal"
-                class="com.jfrog.ide.idea.actions.RefreshLocalAction"
+        <action id="JFrog.StartLocalScan"
+                class="com.jfrog.ide.idea.actions.StartLocalScanAction"
                 text="Run Scan"
-                description="Force Xray scan"
                 icon="AllIcons.Actions.Execute"/>
         <action id="JFrog.RefreshBuilds"
                 class="com.jfrog.ide.idea.actions.RefreshBuildsAction"
@@ -91,6 +90,11 @@
                 class="com.jfrog.ide.idea.actions.CollapseAllAction"/>
         <action id="JFrog.ExpandAll"
                 class="com.jfrog.ide.idea.actions.ExpandAllAction"/>
+        <action id="JFrog.GoToSettings"
+                class="com.jfrog.ide.idea.actions.GoToSettingsAction"/>
+        <action id="JFrog.ScanTimeLabelAction"
+                class="com.jfrog.ide.idea.actions.ScanTimeLabelAction"
+        />
     </actions>
 
 </idea-plugin>
