@@ -57,6 +57,15 @@ public class ScanManager {
         return Sets.newHashSet(scanManager.scanners.values());
     }
 
+    public void runInspections(Project project) {
+        try {
+            refreshScanners(null, null);
+            getScanners(project).forEach(ScannerBase::runInspections);
+        } catch (InterruptedException | IOException e) {
+            logError(Logger.getInstance(), "", e, false);
+        }
+    }
+
     /**
      * Start an Xray scan for all projects.
      */
