@@ -55,9 +55,12 @@ public class WebviewObjectConverter {
         if (applicableInfo != null) {
             if (applicableInfo.isApplicable()) {
                 String searchTarget = applicableInfo.getSearchTarget();
-                Evidence[] evidences = new Evidence[applicableInfo.getCodeEvidences().length];
-                for (int i = 0; i < applicableInfo.getCodeEvidences().length; i++) {
-                    evidences[i] = new Evidence(applicableInfo.getReasons()[i], applicableInfo.getFilePathEvidences()[i], applicableInfo.getCodeEvidences()[i]);
+                String[] reasons = applicableInfo.getReasons().toArray(new String[]{});
+                String[] filePaths = applicableInfo.getFilePathEvidences().toArray(new String[]{});
+                String[] codeEvidences = applicableInfo.getCodeEvidences().toArray(new String[]{});
+                Evidence[] evidences = new Evidence[reasons.length];
+                for (int i = 0; i < reasons.length; i++) {
+                    evidences[i] = new Evidence(reasons[i], filePaths[i], codeEvidences[i]);
                 }
                 applicableDetails = new ApplicableDetails(true, evidences, searchTarget);
 
