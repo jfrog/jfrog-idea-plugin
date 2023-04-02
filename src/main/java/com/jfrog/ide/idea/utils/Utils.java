@@ -14,6 +14,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
+import org.jfrog.build.extractor.usageReport.ClientIdUsageReporter;
 import org.jfrog.build.extractor.usageReport.UsageReporter;
 
 import java.io.IOException;
@@ -67,7 +68,7 @@ public class Utils {
             return;
         }
         String pluginVersion = jfrogPlugin.getVersion();
-        UsageReporter usageReporter = new UsageReporter(PRODUCT_ID + pluginVersion, featureIdArray);
+        UsageReporter usageReporter = new ClientIdUsageReporter(PRODUCT_ID + pluginVersion, featureIdArray, log);
         try {
             usageReporter.reportUsage(serverConfig.getArtifactoryUrl(), serverConfig.getUsername(), serverConfig.getPassword(), serverConfig.getAccessToken(), null, log);
         } catch (IOException | RuntimeException e) {
