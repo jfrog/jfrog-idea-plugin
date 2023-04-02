@@ -39,6 +39,8 @@ public class LocalComponentsTree extends ComponentsTree {
     public static final String IGNORE_RULE_TOOL_TIP = "Creating Ignore Rules is only available when a JFrog Project or Watch is defined.";
     private static final String SHOW_IN_PROJECT_DESCRIPTOR = "Show direct dependency in project descriptor";
     private static final String NO_ISSUES = "Your project was scanned and we didn't find any security issues.";
+    private static final String ERROR_WHILE_SCANNING = "An error occurred while your project was scanned. Please see the Notifications tab for more details.";
+
     private static final String SCANNING = "Scanning...";
     private static final long EXPIRED_CACHE_TIME = TimeUnit.DAYS.toMillis(7); // week
 
@@ -57,11 +59,6 @@ public class LocalComponentsTree extends ComponentsTree {
 
     public static LocalComponentsTree getInstance(@NotNull Project project) {
         return project.getService(LocalComponentsTree.class);
-    }
-
-    @Override
-    public void reset() {
-        super.reset();
     }
 
     public void addScanResults(List<FileTreeNode> fileTreeNodes) {
@@ -188,6 +185,10 @@ public class LocalComponentsTree extends ComponentsTree {
         cache.cacheNodes((List<FileTreeNode>) (List<?>) Collections.list(root.children()));
     }
 
+    public void deleteCachedTree() throws IOException {
+        cache.deleteScanCacheObject();
+    }
+
     private void setNodesFromCache() {
         ScanCacheObject cacheObject = cache.getScanCacheObject();
         if (cacheObject == null) {
@@ -234,5 +235,12 @@ public class LocalComponentsTree extends ComponentsTree {
      */
     public void setNoIssuesEmptyText() {
         getEmptyText().setText(NO_ISSUES);
+    }
+
+    /**
+     * Sets the empty text to indicate that during the project scan an error occurred.
+     */
+    public void setScanErrorEmptyText() {
+        getEmptyText().setText(ERROR_WHILE_SCANNING);
     }
 }

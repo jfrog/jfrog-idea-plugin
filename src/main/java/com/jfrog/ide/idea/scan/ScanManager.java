@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jfrog.ide.common.log.Utils.logError;
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBuilder;
@@ -77,6 +78,7 @@ public class ScanManager {
         project.getMessageBus().syncPublisher(ApplicationEvents.ON_SCAN_LOCAL_STARTED).update();
         LocalComponentsTree componentsTree = LocalComponentsTree.getInstance(project);
         componentsTree.setScanningEmptyText();
+        AtomicBoolean isScanCompleted = new AtomicBoolean(false);
         Thread currScanThread = new Thread(() -> {
             ExecutorService executor = Executors.newFixedThreadPool(3);
             try {
@@ -84,23 +86,29 @@ public class ScanManager {
                 refreshScanners(scanLogic, executor);
                 NavigationService.clearNavigationMap(project);
                 for (ScannerBase scanner : scanners.values()) {
-                    try {
-                        scanner.asyncScanAndUpdateResults();
-                    } catch (RuntimeException e) {
-                        logError(Logger.getInstance(), "", e, true);
-                    }
+                    scanner.asyncScanAndUpdateResults();
                 }
                 executor.shutdown();
                 //noinspection ResultOfMethodCallIgnored
                 executor.awaitTermination(SCAN_TIMEOUT_MINUTES, TimeUnit.MINUTES);
-                componentsTree.cacheTree();
+                // Cache tree only if no errors occurred during scan.
+                if (scanners.values().stream().anyMatch(ScannerBase::isScanInterrupted)) {
+                    componentsTree.deleteCachedTree();
+                } else {
+                    isScanCompleted.set(true);
+                    componentsTree.cacheTree();
+                }
             } catch (JFrogInactiveEnvironmentException e) {
                 handleJfrogInactiveEnvironment(e.getRedirectUrl());
             } catch (IOException | RuntimeException | InterruptedException e) {
                 logError(Logger.getInstance(), "", e, true);
             } finally {
                 executor.shutdownNow();
-                componentsTree.setNoIssuesEmptyText();
+                if (isScanCompleted.get()) {
+                    componentsTree.setNoIssuesEmptyText();
+                } else {
+                    componentsTree.setScanErrorEmptyText();
+                }
             }
         });
         currScanThread.start();
@@ -108,6 +116,7 @@ public class ScanManager {
 
     /**
      * Handle inactive JFrog platform (free-tier) by displaying a clear warning message and a reactivation link.
+     *
      * @param reactivationUrl is an URL to reactivate the specific free-tier platform.
      */
     private void handleJfrogInactiveEnvironment(String reactivationUrl) {
@@ -149,12 +158,10 @@ public class ScanManager {
     private ScanLogic createScanLogic() throws IOException {
         Logger logger = Logger.getInstance();
         ServerConfig server = GlobalSettings.getInstance().getServerConfig();
-        try (XrayClient client = createXrayClientBuilder(server, Logger.getInstance()).build()) {
+        try (XrayClient client = createXrayClientBuilder(server, logger).build()) {
             Version xrayVersion = client.system().version();
-            if (GraphScanLogic.isSupportedInXrayVersion(xrayVersion)) {
-                return new GraphScanLogic(logger);
-            }
-            throw new IOException("Unsupported JFrog Xray version.");
+            GraphScanLogic.validateXraySupport(xrayVersion);
         }
+        return new GraphScanLogic(logger);
     }
 }

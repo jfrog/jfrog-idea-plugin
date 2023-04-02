@@ -60,6 +60,8 @@ public abstract class ScannerBase {
     private final Log log;
     // Lock to prevent multiple simultaneous scans
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
+    private final AtomicBoolean scanInterrupted = new AtomicBoolean(false);
+
     private final ScanLogic scanLogic;
     protected Project project;
     protected SourceCodeScannerManager sourceCodeScannerManager;
@@ -169,10 +171,10 @@ public abstract class ScannerBase {
 
         } catch (ProcessCanceledException e) {
             log.info("Xray scan was canceled");
+            scanInterrupted.set(true);
         } catch (Exception e) {
+            scanInterrupted.set(true);
             logError(log, "Xray Scan failed", e, true);
-        } finally {
-            scanInProgress.set(false);
         }
     }
 
@@ -240,8 +242,7 @@ public abstract class ScannerBase {
                     return;
                 }
                 if (!GlobalSettings.getInstance().reloadXrayCredentials()) {
-                    log.warn("Xray server is not configured.");
-                    return;
+                    throw new RuntimeException("Xray server is not configured.");
                 }
                 // Prevent multiple simultaneous scans
                 if (!scanInProgress.compareAndSet(false, true)) {
@@ -254,7 +255,15 @@ public abstract class ScannerBase {
             @Override
             public void onFinished() {
                 latch.countDown();
+                scanInProgress.set(false);
             }
+
+            @Override
+            public void onThrowable(@NotNull Throwable error) {
+                log.error(ExceptionUtils.getRootCauseMessage(error));
+                scanInterrupted.set(true);
+            }
+
         };
         executor.submit(createRunnable(scanAndUpdateTask, latch));
     }
@@ -359,6 +368,10 @@ public abstract class ScannerBase {
 
     boolean isScanInProgress() {
         return this.scanInProgress.get();
+    }
+
+    boolean isScanInterrupted() {
+        return this.scanInterrupted.get();
     }
 
     public String getProjectPath() {
