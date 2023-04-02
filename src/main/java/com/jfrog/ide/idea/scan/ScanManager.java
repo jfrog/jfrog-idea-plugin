@@ -11,6 +11,7 @@ import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.wm.StatusBar;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.awt.RelativePoint;
+import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.scan.GraphScanLogic;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
@@ -18,7 +19,9 @@ import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
+import com.jfrog.xray.client.impl.XrayClient;
 import com.jfrog.xray.client.impl.util.JFrogInactiveEnvironmentException;
+import com.jfrog.xray.client.services.system.Version;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jfrog.ide.common.log.Utils.logError;
+import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBuilder;
 import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 public class ScanManager {
@@ -152,6 +156,13 @@ public class ScanManager {
      * @return Xray scan logic
      */
     private ScanLogic createScanLogic() throws IOException {
-        return new GraphScanLogic(Logger.getInstance());
+        Logger logger = Logger.getInstance();
+        ServerConfig server = GlobalSettings.getInstance().getServerConfig();
+        try (XrayClient client = createXrayClientBuilder(server, logger).build()) {
+            Version xrayVersion = client.system().version();
+            GraphScanLogic.validateXraySupport(xrayVersion);
+        }
+        return new GraphScanLogic(logger);
     }
+
 }
