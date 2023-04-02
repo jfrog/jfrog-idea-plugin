@@ -164,5 +164,4 @@ public class ScanManager {
         }
         return new GraphScanLogic(logger);
     }
-
 }
