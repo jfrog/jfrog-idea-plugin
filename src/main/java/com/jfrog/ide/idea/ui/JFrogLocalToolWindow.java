@@ -293,7 +293,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             try {
                 componentsTree.deleteCachedTree();
             } catch (IOException e) {
-                Logger.getInstance().warn("Error: " + ExceptionUtils.getRootCauseMessage(e));
+                Logger.getInstance().warn("An error occurred while trying to delete the scan results cache: " + ExceptionUtils.getRootCauseMessage(e));
             }
         }
         super.onConfigurationChange();

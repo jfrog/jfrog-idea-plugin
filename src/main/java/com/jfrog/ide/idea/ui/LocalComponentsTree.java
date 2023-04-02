@@ -39,7 +39,7 @@ public class LocalComponentsTree extends ComponentsTree {
     public static final String IGNORE_RULE_TOOL_TIP = "Creating Ignore Rules is only available when a JFrog Project or Watch is defined.";
     private static final String SHOW_IN_PROJECT_DESCRIPTOR = "Show direct dependency in project descriptor";
     private static final String NO_ISSUES = "Your project was scanned and we didn't find any security issues.";
-    private static final String ERROR_WHILE_SCANNING = "An error occurred while your project was scanned. Please see the Notifications log for more details.";
+    private static final String ERROR_WHILE_SCANNING = "An error occurred while your project was scanned. Please see the Notifications tab for more details.";
 
     private static final String SCANNING = "Scanning...";
     private static final long EXPIRED_CACHE_TIME = TimeUnit.DAYS.toMillis(7); // week
@@ -243,5 +243,4 @@ public class LocalComponentsTree extends ComponentsTree {
     public void setScanErrorEmptyText() {
         getEmptyText().setText(ERROR_WHILE_SCANNING);
     }
-
 }
