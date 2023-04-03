@@ -184,7 +184,6 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
             assertEquals(DummyCircularDepSDK.CIRCULAR_DEPENDENCY_B, generalInfo.getArtifactId());
             assertEquals(DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION, generalInfo.getVersion());
             getAndAssertChild(b, DummyCircularDepSDK.CIRCULAR_DEPENDENCY_A + ":" + DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION);
-
         }
     }
 }

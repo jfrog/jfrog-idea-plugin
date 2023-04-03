@@ -12,6 +12,7 @@ jobs:
         include:
           - os: windows-latest
             gradlew_suffix: .bat
+        testCommand: [ "verifyPlugin runPluginVerifier test", "pythonTests" ]
     steps:
       - uses: actions/checkout@v3
 
@@ -39,7 +40,4 @@ jobs:
 
       # Run tests
       - name: Tests on macOS, Linux and Windows
-        run: ./gradlew${{ matrix.gradlew_suffix }} clean verifyPlugin runPluginVerifier test
-
-      - name: Tests Python on macOS, Linux and Windows
-        run: ./gradlew${{ matrix.gradlew_suffix }} clean pythonTests
+        run: ./gradlew${{ matrix.gradlew_suffix }} clean ${{ matrix.testCommand }}
