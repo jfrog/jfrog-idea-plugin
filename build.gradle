@@ -27,7 +27,7 @@ intellij {
 }
 
 runPluginVerifier {
-    ideVersions = [sandboxVersion]
+    ideVersions = [intellijType + "-"+ sandboxVersion]
 }
 
 runIde {
