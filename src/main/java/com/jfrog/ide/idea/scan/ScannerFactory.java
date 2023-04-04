@@ -153,6 +153,7 @@ public class ScannerFactory {
             }
             if (scanner != null) {
                 scanner.setExecutor(executor);
+                scanner.setScanLogic(scanLogic);
                 newScanners.put(projectHash, scanner);
             }
         }

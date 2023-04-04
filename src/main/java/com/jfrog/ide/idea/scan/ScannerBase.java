@@ -61,8 +61,7 @@ public abstract class ScannerBase {
     // Lock to prevent multiple simultaneous scans
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
     private final AtomicBoolean scanInterrupted = new AtomicBoolean(false);
-
-    private final ScanLogic scanLogic;
+    private ScanLogic scanLogic;
     protected Project project;
     protected SourceCodeScannerManager sourceCodeScannerManager;
     String basePath;
@@ -89,6 +88,10 @@ public abstract class ScannerBase {
 
     void setExecutor(ExecutorService executor) {
         this.executor = executor;
+    }
+
+    void setScanLogic(ScanLogic logic) {
+        this.scanLogic = logic;
     }
 
     /**

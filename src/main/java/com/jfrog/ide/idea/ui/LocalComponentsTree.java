@@ -12,6 +12,7 @@ import com.jfrog.ide.idea.actions.CreateIgnoreRuleAction;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.navigation.NavigationTarget;
+import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.ui.menus.ToolbarPopupMenu;
 import com.jfrog.ide.idea.utils.Utils;
 import org.apache.commons.lang.StringUtils;
@@ -204,6 +205,9 @@ public class LocalComponentsTree extends ComponentsTree {
             root.add(node);
         }
         populateTree(root);
+
+        // Run inspections after loaded cache
+        ApplicationManager.getApplication().invokeLater(() -> ScanManager.getInstance(project).runInspections(project));
     }
 
     public boolean isCacheEmpty() {
