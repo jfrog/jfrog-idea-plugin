@@ -55,15 +55,14 @@ public class WebviewObjectConverter {
         if (applicableInfo != null) {
             if (applicableInfo.isApplicable()) {
                 String searchTarget = applicableInfo.getSearchTarget();
-                String[] reasons = applicableInfo.getReasons().toArray(new String[]{});
-                String[] filePaths = applicableInfo.getFilePathEvidences().toArray(new String[]{});
-                String[] codeEvidences = applicableInfo.getCodeEvidences().toArray(new String[]{});
+                String[] reasons = applicableInfo.getReasons().toArray(String[]::new);
+                String[] filePaths = applicableInfo.getFilePathEvidences().toArray(String[]::new);
+                String[] codeEvidences = applicableInfo.getCodeEvidences().toArray(String[]::new);
                 Evidence[] evidences = new Evidence[reasons.length];
                 for (int i = 0; i < reasons.length; i++) {
                     evidences[i] = new Evidence(reasons[i], filePaths[i], codeEvidences[i]);
                 }
                 applicableDetails = new ApplicableDetails(true, evidences, searchTarget);
-
             } else {
                 // If we know the issue is not applicable, adds the relevant ApplicableDetails.
                 applicableDetails = new ApplicableDetails(false, null, null);
