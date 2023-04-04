@@ -295,11 +295,21 @@ To build the plugin sources, please follow these steps:
 1. Clone the code from git.
 2. Build and create the JFrog IDEA Plugin zip file by running the following gradle command.
 After the build finishes, you'll find the zip file in the *plugin/build/distributions* directory, located under the *jfrog-idea-plugin* directory.
-The zip file can be loaded into IntelliJ
-
-```
-gradle clean build
-```
+The zip file can be loaded into IntelliJ:
+    ```
+    gradle clean build
+    ```
+3. Python tests:
+    ```
+    gradle pythonTests
+    ```
+4. Integration tests:
+   * Make sure you have JFrog platform Instance with JAS enabled.
+   * Set the JFROG_IDE_PLATFORM_URL, JFROG_IDE_ACCESS_TOKEN environment variables with your JFrog platform URL, and access token.
+    Run the following command:
+     ```
+     gradle integrationTests
+     ```
 
 ## Developing the Plugin Code
 If you'd like to help us develop and enhance the plugin, this section is for you.

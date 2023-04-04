@@ -15,16 +15,19 @@ version currentVersion
 
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
+def testPython = project.gradle.startParameter.taskNames.contains("pythonTests")
+def intellijType = testPython ? "IC" : "IU"
 
 intellij {
     version = sandboxVersion
-    plugins = ['gradle', 'maven', 'Groovy', 'properties', 'java', 'Kotlin', 'org.jetbrains.plugins.go:213.5744.223', 'Pythonid:213.5744.223']
+    type = intellijType
+    plugins = ['gradle', 'maven', 'Groovy', 'properties', 'java', 'Kotlin', 'org.jetbrains.plugins.go:221.5080.210', "PythonCore:221.5080.210"]
     pluginName = 'JFrog'
     updateSinceUntilBuild = false
 }
 
 runPluginVerifier {
-    ideVersions = [sandboxVersion]
+    ideVersions = [intellijType + "-"+ sandboxVersion]
 }
 
 runIde {
@@ -63,7 +66,17 @@ dependencies {
 test {
     scanForTestClasses false
     include "**/*Test.class"
-    exclude "**/*IntegrationTest*"
+    exclude "**/*IntegrationTest*", "**/*PypiScannerTest*"
+    testLogging {
+        exceptionFormat "full"
+        events "started", "passed", "skipped", "failed", "standardOut", "standardError"
+        minGranularity 0
+    }
+}
+
+tasks.register('pythonTests', Test) {
+    scanForTestClasses false
+    include "**/*PypiScannerTest*"
     testLogging {
         exceptionFormat "full"
         events "started", "passed", "skipped", "failed", "standardOut", "standardError"

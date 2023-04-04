@@ -9,6 +9,13 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, windows-latest, macOS-latest ]
+        testCommand: [ "verifyPlugin runPluginVerifier test", "pythonTests" ]
+        include:
+          - os: windows-latest
+            gradlewSuffix: .bat
+          - testCommand: "pythonTests"
+            testName: Python
+    name: ${{ matrix.testName }} Tests on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
 
@@ -35,9 +42,5 @@ jobs:
         run: curl -fL https://install-cli.jfrog.io | sh
 
       # Run tests
-      - name: Tests on macOS, Linux
-        run: ./gradlew clean verifyPlugin runPluginVerifier test
-        if: runner.os != 'Windows'
-      - name: Tests on Windows
-        run: ./gradlew.bat clean verifyPlugin runPluginVerifier test
-        if: runner.os == 'Windows'
+      - name: ${{ matrix.testName }} Tests on ${{ matrix.os }}
+        run: ./gradlew${{ matrix.gradlewSuffix }} clean ${{ matrix.testCommand }}

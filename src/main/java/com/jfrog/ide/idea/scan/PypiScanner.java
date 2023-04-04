@@ -105,43 +105,47 @@ public class PypiScanner extends SingleDescriptorScanner {
         }
 
         // Populate dependency tree
-        Collection<PyPackage> values = dependencyMapping.values();
-        Set<String> allDependencies = values.parallelStream()
+        Collection<PyPackage> allDependencies = dependencyMapping.values();
+        Set<String> transitiveDependencies = allDependencies.parallelStream()
                 .map(PyPackage::getRequirements)
                 .flatMap(Collection::stream)
                 .map(PyRequirement::getName)
                 .map(String::toLowerCase)
                 .collect(Collectors.toSet());
-        for (PyPackage pyPackage : values) {
+
+        for (PyPackage pyPackage : allDependencies) {
             // If pyPackage is contained in one of the dependencies, we conclude it is a transitive dependency.
             // If it's transitive, we shouldn't add it as a direct dependency.
-            if (!allDependencies.contains(pyPackage.getName().toLowerCase())) {
+            if (!transitiveDependencies.contains(pyPackage.getName().toLowerCase())) {
                 populateDependencyTree(sdkNode, pyPackage, dependencyMapping);
             }
         }
-
         return sdkNode;
     }
 
     /**
      * Recursively, populate the SDK dependency tree.
      *
-     * @param node              - Dependency tree node
-     * @param pyPackage         - Current Python package
+     * @param parentNode        - Dependency tree node
+     * @param childPyPackage    - Child Python package to add
      * @param dependencyMapping - dependency name to Python package mapping
      */
-    void populateDependencyTree(DependencyTree node, PyPackage pyPackage, Map<String, PyPackage> dependencyMapping) {
-        DependencyTree child = new DependencyTree(pyPackage.getName() + ":" + pyPackage.getVersion());
-        initDependencyNode(child, pyPackage.getName(), pyPackage.getVersion(), "", "pypi");
-        node.add(child);
+    void populateDependencyTree(DependencyTree parentNode, PyPackage childPyPackage, Map<String, PyPackage> dependencyMapping) {
+        DependencyTree childNode = new DependencyTree(childPyPackage.getName() + ":" + childPyPackage.getVersion());
+        initDependencyNode(childNode, childPyPackage.getName(), childPyPackage.getVersion(), "", "pypi");
+        parentNode.add(childNode);
 
-        for (PyRequirement requirement : pyPackage.getRequirements()) {
+        if (childNode.hasLoop(getLog())) {
+            return;
+        }
+
+        for (PyRequirement requirement : childPyPackage.getRequirements()) {
             PyPackage dependency = dependencyMapping.get(requirement.getName().toLowerCase());
             if (dependency == null) {
                 getLog().warn("Dependency " + requirement.getName() + " is not installed.");
                 continue;
             }
-            populateDependencyTree(child, dependency, dependencyMapping);
+            populateDependencyTree(childNode, dependency, dependencyMapping);
         }
     }
 
