@@ -45,7 +45,7 @@ repositories {
     }
 }
 
-def buildInfoVersion = '2.39.x-20230402.124801-2'
+def buildInfoVersion = '2.39.9'
 dependencies {
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.14.0'
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-extractor', version: buildInfoVersion
