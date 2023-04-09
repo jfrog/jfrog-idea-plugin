@@ -55,12 +55,11 @@ public class WebviewObjectConverter {
         if (applicableInfo != null) {
             if (applicableInfo.isApplicable()) {
                 String searchTarget = applicableInfo.getSearchTarget();
-                String[] reasons = applicableInfo.getReasons().toArray(String[]::new);
-                String[] filePaths = applicableInfo.getFilePathEvidences().toArray(String[]::new);
-                String[] codeEvidences = applicableInfo.getCodeEvidences().toArray(String[]::new);
-                Evidence[] evidences = new Evidence[reasons.length];
-                for (int i = 0; i < reasons.length; i++) {
-                    evidences[i] = new Evidence(reasons[i], filePaths[i], codeEvidences[i]);
+                List<com.jfrog.ide.common.nodes.subentities.Evidence> evidencesInfo = applicableInfo.getEvidences();
+                Evidence[] evidences = new Evidence[evidencesInfo.size()];
+                var i = 0;
+                for (var evidenceInfo : evidencesInfo) {
+                    evidences[i++] = new Evidence(evidenceInfo.getReason(), evidenceInfo.getFilePathEvidence(), evidenceInfo.getCodeEvidence());
                 }
                 applicableDetails = new ApplicableDetails(true, evidences, searchTarget);
             } else {
