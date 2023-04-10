@@ -13,12 +13,12 @@ To build the plugin sources, please follow these steps:
     ./gradlew clean build
     ```
 
-After the build finishes, you'll find the zip file in the *plugin/build/distributions* directory, located under the *jfrog-idea-plugin* directory.
+After the build finishes, you'll find the zip file in the *build/distributions* directory, located under the *jfrog-idea-plugin* directory.
 The zip file can be loaded into IntelliJ
 
-## Additional Tests suits
+## Additional Tests Suits
 
-1. In order to run the Python tests suit, run the following gradle command:
+1. In order to run the Python tests suite, run the following gradle command:
 
     ```bash
     ./gradlew clean pythonTests

@@ -30,7 +30,7 @@
 - [Android Studio Support for JCEF](#android-studio-support-for-jcef)
 - [Troubleshooting](#troubleshooting)
 - [Reporting Issues](#reporting-issues)
-  - [Code Contributions](#code-contributions)
+- [Contributions](#contributions)
 - [Release Notes](#release-notes)
 
 # About this Plugin
@@ -55,7 +55,7 @@ This means that you should put effort into fixing them as soon as possible.
 - **Research Summary**: The summary that is based on JFrog's security analysis of the security issue provides detailed technical information on the specific conditions for the CVE to be applicable.
 - **Remediation**: Detailed fix and mitigation options for the CVEs
 
-You can learn more about enriched CVEs [here](https://www.jfrog.com/confluence/display/JFROG/JFrog+Security+CVE+Research+and+Enrichment).
+You can learn more about enriched CVEs [here](https://jfrog.com/help/r/jfrog-security-documentation/jfrog-security-cve-research-and-enrichment).
 
 Check out what our research team is up to and stay updated on newly discovered issues by clicking on this link: <https://research.jfrog.com>
 
@@ -66,7 +66,7 @@ Check out what our research team is up to and stay updated on newly discovered i
 With advanced [**Contextual Analysis**](#contextual-analysis), understand the applicability of CVEs in your application and utilize JFrog Security scanners to analyze the way you use 3rd party packages in your projects.
 Automatically validate some high-impact vulnerabilities, such as vulnerabilities that have prerequisites for exploitations, and reduce false positives and vulnerability noise with smart CVE analysis.
 
-To learn more, see [here](https://www.jfrog.com/confluence/display/JFROG/Vulnerability+Contextual+Analysis).
+To learn more, see [here](https://jfrog.com/help/r/jfrog-security-documentation/vulnerability-contextual-analysis).
 
 #### Additional Perks
 
@@ -165,7 +165,7 @@ You may provide basic auth credentials or access token as follows:
 
 - If your JFrog Platform instance uses a domain with a self-signed certificate, add the certificate to IDEA as described [here](https://www.jetbrains.com/help/idea/settings-tools-server-certificates.html).
 - From JFrog Xray version **1.9** to **2.x**, IntelliJ IDEA users connecting to Xray from IntelliJ are required to be granted the ‘View Components’ action in Xray.
-- From JFrog Xray version **3.x**, as part of the JFrog Platform, IntelliJ IDEA users connecting to Xray from IntelliJ require ‘Read’ permission. For more information, see [here](https://www.jfrog.com/confluence/display/JFROG/Permissions).
+- From JFrog Xray version **3.x**, as part of the JFrog Platform, IntelliJ IDEA users connecting to Xray from IntelliJ require ‘Read’ permission. For more information, see [here](https://jfrog.com/help/r/jfrog-platform-administration-documentation/permissions).
 
 ## Apply Xray Policies
 
@@ -175,14 +175,14 @@ Policies are enforced when applying them to Watches.
 
 If you'd like to use a JFrog Project that is associated with the policy, follow these steps:
 
-1. Create a [JFrog Project](https://www.jfrog.com/confluence/display/JFROG/Projects), or obtain the relevant JFrog Project key.
-2. Create a [Policy](https://www.jfrog.com/confluence/display/JFROG/Creating+Xray+Policies+and+Rules) on JFrog Xray.
-3. Create a [Watch](https://www.jfrog.com/confluence/display/JFROG/Configuring+Xray+Watches) on JFrog Xray and assign your Policy and Project as resources to it.
+1. Create a [JFrog Project](https://jfrog.com/help/r/jfrog-platform-administration-documentation/introduction-to-projects), or obtain the relevant JFrog Project key.
+2. Create a [Policy](https://jfrog.com/help/r/jfrog-security-documentation/creating-xray-policies-and-rules) on JFrog Xray.
+3. Create a [Watch](https://jfrog.com/help/r/jfrog-security-documentation/configuring-xray-watches) on JFrog Xray and assign your Policy and Project as resources to it.
 4. Configure your Project key in the plugin settings: under **Settings (Preferences)** | **Other Settings**, click **JFrog Global Configuration** and go to the **Settings** tab.
 
 If however your policies are referenced through Xray Watches, follow these steps instead:
 
-1. Create one or more [Watches](https://www.jfrog.com/confluence/display/JFROG/Configuring+Xray+Watches) on JFrog Xray.
+1. Create one or more [Watches](https://jfrog.com/help/r/jfrog-security-documentation/configuring-xray-watches) on JFrog Xray.
 2. Configure your Watches in the plugin settings: under **Settings (Preferences)** | **Other Settings**, click **JFrog Global Configuration** and go to the **Settings** tab.
 
 # Using the Plugin
@@ -213,7 +213,7 @@ By right-clicking on a dependency line, you can jump to the dependency's declara
 
 ![](readme-resources/jump-to-descriptor.png)
 
-By right-clicking on a vulnerability line, you can create an [Ignore Rule](https://www.jfrog.com/confluence/display/JFROG/Ignore+Rules) in Xray.
+By right-clicking on a vulnerability line, you can create an [Ignore Rule](https://jfrog.com/help/r/jfrog-security-documentation/ignore-rules) in Xray.
 
 *Creating Ignore Rules is only available [when a JFrog Project or Watch is defined](#apply-xray-policies).*
 
@@ -276,12 +276,12 @@ The following details can be made available in the CI view:
 
 The CI information displayed in IDEA is pulled by the JFrog IDEA Plugin directly from JFrog Artifactory.
 This information is stored in Artifactory as part of the build-info, which is published to Artifactory by the CI server.
-Read more about build-info in the [Build Integration](https://www.jfrog.com/confluence/display/JFROG/Build+Integration) documentation page.
+Read more about build-info in the [Build Integration](https://jfrog.com/help/r/jfrog-integrations-documentation/build-integration) documentation page.
 If the CI pipeline is also configured to scan the build-info by JFrog Xray, the JFrog IDEA Plugin will pull the results of the scan from JFrog Xray and display them in the CI view as well.
 
 ### Setting Up CI Integration
 
-Set up your CI pipeline to expose information, so that it is visible in IDEA as described [here](https://www.jfrog.com/confluence/display/JFROG/Setting+Up+CI+Integration).
+Set up your CI pipeline to expose information, so that it is visible in IDEA as described [here](https://jfrog.com/help/r/jfrog-integrations-documentation/setting-up-ci-integration).
 
 Next, follow these steps:
 
@@ -319,7 +319,7 @@ To see the Intellij IDEA log file, depends on the IDE version and OS as describe
 
 Please report issues by opening an issue on [Github](https://github.com/jfrog/jfrog-idea-plugin/issues).
 
-## Code Contributions
+# Contributions
 
 We welcome community contribution through pull requests. To help us improve this project, please read our [Contribution](./CONTRIBUTING.md#-guidelines) guide.
 
