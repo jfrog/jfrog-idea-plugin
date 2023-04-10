@@ -1,9 +1,9 @@
 package com.jfrog.ide.idea.ui.webview;
 
-import com.jfrog.ide.common.nodes.ApplicableIssueNode;
 import com.jfrog.ide.common.nodes.DependencyNode;
 import com.jfrog.ide.common.nodes.LicenseViolationNode;
 import com.jfrog.ide.common.nodes.VulnerabilityNode;
+import com.jfrog.ide.common.nodes.subentities.ApplicableInfo;
 import com.jfrog.ide.common.nodes.subentities.ImpactTreeNode;
 import com.jfrog.ide.common.nodes.subentities.ResearchInfo;
 import com.jfrog.ide.common.nodes.subentities.SeverityReason;
@@ -43,25 +43,25 @@ public class WebviewObjectConverter {
                 .fixedVersion(convertVersionRanges(vulnerabilityNode.getFixedVersions()))
                 .infectedVersion(convertVersionRanges(vulnerabilityNode.getInfectedVersions()))
                 .references(convertReferences(vulnerabilityNode.getReferences()))
-                .cve(convertCve(vulnerabilityNode.getCve(), convertApplicableDetails(vulnerabilityNode.isApplicable(), vulnerabilityNode.getApplicableIssues())))
+                .cve(convertCve(vulnerabilityNode.getCve(), convertApplicableDetails(vulnerabilityNode.getApplicableInfo())))
                 .impactGraph(convertImpactGraph(dependency.getImpactPaths()))
                 .watchName(watchNames)
                 .edited(vulnerabilityNode.getLastUpdated())
                 .extendedInformation(extendedInformation);
     }
 
-    private static ApplicableDetails convertApplicableDetails(Boolean applicable, List<ApplicableIssueNode> applicableIssues) {
+    private static ApplicableDetails convertApplicableDetails(ApplicableInfo applicableInfo) {
         ApplicableDetails applicableDetails = null;
-        if (applicable != null) {
-            if (applicable) {
-                String searchTarget = applicableIssues.get(0).getScannerSearchTarget();
-                Evidence[] evidences = new Evidence[applicableIssues.size()];
-                int i = 0;
-                for (ApplicableIssueNode applicableIssue : applicableIssues) {
-                    evidences[i++] = new Evidence(applicableIssue.getReason(), applicableIssue.getFilePath(), applicableIssue.getLineSnippet());
+        if (applicableInfo != null) {
+            if (applicableInfo.isApplicable()) {
+                String searchTarget = applicableInfo.getSearchTarget();
+                List<com.jfrog.ide.common.nodes.subentities.Evidence> evidencesInfo = applicableInfo.getEvidences();
+                Evidence[] evidences = new Evidence[evidencesInfo.size()];
+                var i = 0;
+                for (var evidenceInfo : evidencesInfo) {
+                    evidences[i++] = new Evidence(evidenceInfo.getReason(), evidenceInfo.getFilePathEvidence(), evidenceInfo.getCodeEvidence());
                 }
                 applicableDetails = new ApplicableDetails(true, evidences, searchTarget);
-
             } else {
                 // If we know the issue is not applicable, adds the relevant ApplicableDetails.
                 applicableDetails = new ApplicableDetails(false, null, null);
