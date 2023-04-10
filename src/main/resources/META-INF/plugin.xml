@@ -4,23 +4,28 @@
     <vendor email="support@jfrog.com" url="https://www.jfrog.com">JFrog</vendor>
 
     <description><![CDATA[
-        The plugin allows developers to find and fix security vulnerabilities in their projects and to see valuable information about the status of their code by continuously scanning it locally with JFrog Xray.
+        <p>The plugin allows developers to find and fix security vulnerabilities in their projects and to see valuable information about the status of their code by continuously scanning it locally with JFrog Xray.</p>
 
-        Software Composition Analysis (SCA)
-        Scan your project dependencies for security issues. The plugin offers an automatic upgrade of the vulnerable dependencies to versions which include fixes.
+        <h3>Software Composition Analysis (SCA)</h3>
+        <p>Scan your project dependencies for security issues. The plugin offers an automatic upgrade of the vulnerable dependencies to versions which include fixes.</p>
 
-        CVE Research and Enrichment
+        <h3>CVE Research and Enrichment</h3>
+        <p>
         For selected security issues, get leverage-enhanced CVE data that is provided by our JFrog Security Research team. Prioritize the CVEs based on:
-        JFrog Severity: The severity given by the JFrog Security Research team after the manual analysis of the CVE by the team. CVEs with the highest JFrog security severity are the most likely to be used by real-world attackers. This means that you should put effort into fixing them as soon as possible.
-        Research Summary: The summary that is based on JFrog's security analysis of the security issue provides detailed technical information on the specific conditions for the CVE to be applicable.
-        Remediation: Detailed fix and mitigation options for the CVEs
+        <ul>
+        <li>JFrog Severity: The severity given by the JFrog Security Research team after the manual analysis of the CVE by the team. CVEs with the highest JFrog security severity are the most likely to be used by real-world attackers. This means that you should put effort into fixing them as soon as possible.</li>
+        <li>Research Summary: The summary that is based on JFrog's security analysis of the security issue provides detailed technical information on the specific conditions for the CVE to be applicable.</li>
+        <li>Remediation: Detailed fix and mitigation options for the CVEs.</li>
+        </ul>
+        <br>
         Check out what our research team is up to and stay updated on newly discovered issues by clicking on this link: https://research.jfrog.com
+        </p>
 
-        Advanced Scans in the form of Vulnerability Contextual Analysis
-        Vulnerability Contextual Analysis eliminates false positive reports on CVEs that are not applicable to your code. Xray automatically validates some high and very high impact vulnerabilities, such as vulnerabilities that have prerequisites for exploitations, and provides contextual analysis information for these vulnerabilities, to assist you in figuring out which vulnerabilities are applicable to a specific artifact.
-        Advanced Scans require Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.
+        <h3>Advanced Scans in the form of Vulnerability Contextual Analysis</h3>
+        <p>Vulnerability Contextual Analysis eliminates false positive reports on CVEs that are not applicable to your code. Xray automatically validates some high and very high impact vulnerabilities, such as vulnerabilities that have prerequisites for exploitations, and provides contextual analysis information for these vulnerabilities, to assist you in figuring out which vulnerabilities are applicable to a specific artifact.
+        Advanced Scans require Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.</p><br>
 
-        For more information about the plugin see https://github.com/jfrog/jfrog-idea-plugin#readme
+        <p>For more information about the plugin see the <a href="https://github.com/jfrog/jfrog-idea-plugin#readme">README</a>.</p>
     ]]></description>
 
     <change-notes>
