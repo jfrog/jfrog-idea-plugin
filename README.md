@@ -71,7 +71,6 @@ To learn more, see [here](https://jfrog.com/help/r/jfrog-security-documentation/
 #### Additional Perks
 
 - Security issues are easily visible inline.
-
 - The results show issues with context, impact, and remediation.
 - View all security issues in one place, in the JFrog tab.
 - For Security issues with an available fixed version, you can upgrade to the fixed version within the plugin.
