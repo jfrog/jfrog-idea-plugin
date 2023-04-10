@@ -30,7 +30,7 @@ public class SourceCodeScannerManager {
     protected String codeBaseLanguage;
     private static final String SKIP_FOLDERS_SUFFIX = "*/**";
 
-    public SourceCodeScannerManager(Project project, String codeBaseLanguage)  {
+    public SourceCodeScannerManager(Project project, String codeBaseLanguage) {
         this.project = project;
         this.codeBaseLanguage = codeBaseLanguage.toLowerCase();
     }
@@ -125,12 +125,12 @@ public class SourceCodeScannerManager {
                     //noinspection DataFlowIssue
                     fileNode.addIssue(applicableIssue);
                     for (VulnerabilityNode issue : issues) {
-                        issue.addApplicableIssue(applicableIssue);
+                        issue.updateApplicableInfo(applicableIssue);
                     }
                 } else {
-                    // Mark non-applicable vulnerabilities by setting an empty list of applicability issues
+                    // Mark non-applicable vulnerabilities.
                     for (VulnerabilityNode issue : issues) {
-                        issue.setApplicableIssues(new ArrayList<>());
+                        issue.setNotApplicable();
                     }
                 }
             }
