@@ -30,13 +30,7 @@
 
     <change-notes>
         <![CDATA[
-          <li>Add the last scan time to the plugin's toolbar</li>
-          <li>Add JFrog setting shortcut to the plugin's toolbar</li>
-          <li>Remove omitted dependencies in Maven</li>
-          <li>Bug fix - add an indication for scan completed with errors</li>
-          <li>Bug fix - Python tree with circular dependencies</li>
-          <li>Bug fix - inspections didn't run after results were loaded from cache</li>
-          <li>Bug fix - missing applicability data in cached objects</li>
+          <li>Bug fix - Maven/Python ScanLogic Null Pointer Exception /li>
         ]]>
     </change-notes>
 
