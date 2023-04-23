@@ -99,6 +99,7 @@ public class ScannerFactory {
         if (scanner != null) {
             // Set the new executor on the old scan manager
             scanner.setExecutor(executor);
+            scanner.setScanLogic(scanLogic);
             newScanners.put(projectHash, scanner);
         } else {
             // Unlike other scanners whereby we create them if the package descriptor exist, MavenScanner is created if
@@ -136,6 +137,7 @@ public class ScannerFactory {
                     scanner = new PypiScanner(project, pythonSdk, executor, scanLogic);
                 }
                 scanner.setExecutor(executor);
+                scanner.setScanLogic(scanLogic);
                 newScanners.put(projectHash, scanner);
             }
         } catch (NoClassDefFoundError noClassDefFoundError) {
