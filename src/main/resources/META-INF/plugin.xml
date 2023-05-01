@@ -31,7 +31,7 @@
     <change-notes>
         <![CDATA[
           <li>Bug fix - Display issues in Windows.</li>
-          <li>Bug fix - Fix cache reading failures.</li>
+          <li>Bug fix - Cache reading failures.</li>
         ]]>
     </change-notes>
 
