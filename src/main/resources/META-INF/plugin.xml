@@ -30,7 +30,8 @@
 
     <change-notes>
         <![CDATA[
-          <li>Bug fix - Maven/Python ScanLogic Null Pointer Exception /li>
+          <li>Bug fix - Display issues in Windows.</li>
+          <li>Bug fix - Fix cache reading failures.</li>
         ]]>
     </change-notes>
 
