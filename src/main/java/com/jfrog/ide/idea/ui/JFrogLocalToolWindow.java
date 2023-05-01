@@ -115,6 +115,11 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         // Xray credentials were set listener
         appBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () -> ApplicationManager.getApplication().invokeLater(this::onConfigurationChange));
 
+        // Wrap the browser component in a Panel to avoid display issues that may occur in some versions of IntelliJ in Windows.
+        JPanel browserWrapper = new JBPanel<>();
+        browserWrapper.setLayout(new GridLayout());
+        browserWrapper.add(browserComponent);
+
         // Component selection listener
         componentsTree.addTreeSelectionListener(e -> {
             if (e == null || e.getNewLeadSelectionPath() == null || !(e.getNewLeadSelectionPath().getLastPathComponent() instanceof IssueNode)) {
@@ -124,7 +129,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
             selectedIssue = (IssueNode) e.getNewLeadSelectionPath().getLastPathComponent();
             updateIssueOrLicenseInWebview(selectedIssue);
-            verticalSplit.setSecondComponent(browserComponent);
+            verticalSplit.setSecondComponent(browserWrapper);
         });
         projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_LOCAL_STARTED, () -> {
             setLeftPanelContent(compTreeView);
