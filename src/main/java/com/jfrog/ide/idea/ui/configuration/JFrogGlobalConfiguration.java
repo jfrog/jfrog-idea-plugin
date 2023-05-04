@@ -177,7 +177,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
 
     private String checkXrayConnection() {
         if (isBlank(xrayUrl.getText())) {
-            return null;
+            return "Xray URL is missing.";
         }
         try {
             Xray xrayClient = createXrayClient();
@@ -212,7 +212,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
 
     private String checkArtifactoryConnection() {
         if (isBlank(artifactoryUrl.getText())) {
-            return null;
+            return "Artifactory URL is missing.";
         }
         try (ArtifactoryManager artifactoryManager = createArtifactoryManagerBuilder().build()) {
             setConnectionResults("Connecting to Artifactory...");
