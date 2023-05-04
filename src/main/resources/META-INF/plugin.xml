@@ -30,8 +30,8 @@
 
     <change-notes>
         <![CDATA[
-          <li>Bug fix - Display issues in Windows.</li>
-          <li>Bug fix - Cache reading failures.</li>
+          <li>Loading the issue details view in the background and having it ready to display when needed, without any delay.</li>
+          <li>Bug fix - When the URLs aren’t set, the 'Test Connection' button seems to be stuck.</li>
         ]]>
     </change-notes>
 
