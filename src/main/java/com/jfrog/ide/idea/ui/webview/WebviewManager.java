@@ -1,11 +1,8 @@
 package com.jfrog.ide.idea.ui.webview;
 
-import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.jcef.JBCefBrowser;
-import com.intellij.ui.jcef.JBCefBrowserBase;
-import com.intellij.ui.jcef.JBCefJSQuery;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.ui.jcef.message.MessagePacker;
 import org.cef.browser.CefBrowser;
@@ -20,41 +17,22 @@ public class WebviewManager implements Disposable {
         jbCefBrowser = new JBCefBrowser(pageUri);
         Disposer.register(this, jbCefBrowser);
         CefBrowser cefBrowser = jbCefBrowser.getCefBrowser();
+        jbCefBrowser.createImmediately();
+        jbCefBrowser.setOpenLinksInExternalBrowser(true);
         handleLoadEvent(onLoadEnd);
         messagePacker = new MessagePacker(cefBrowser);
         return cefBrowser;
     }
 
     private void handleLoadEvent(Runnable onLoadEnd) {
-        CefBrowser cefBrowser = jbCefBrowser.getCefBrowser();
-        JBCefJSQuery openInBrowserQuery = JBCefJSQuery.create((JBCefBrowserBase) jbCefBrowser);
-        Disposer.register(this, openInBrowserQuery);
-        openInBrowserQuery.addHandler((link) -> {
-            BrowserUtil.browse(link);
-            return null;
-        });
-
-        String injectedCall = openInBrowserQuery.inject("link");
         jbCefBrowser.getJBCefClient().addLoadHandler(new CefLoadHandlerAdapter() {
             @Override
             public void onLoadEnd(CefBrowser browser, CefFrame frame, int httpStatusCode) {
+                Logger.getInstance().info("Issue details view loaded successfully.");
                 super.onLoadEnd(browser, frame, httpStatusCode);
                 if (onLoadEnd != null) {
                     onLoadEnd.run();
                 }
-
-                // Add a click event listener to the whole page. Any click on an <a> element (even if it wasn't created
-                // yet), will trigger this function which sends the link address to openInBrowserQuery.
-                cefBrowser.executeJavaScript(
-                        "function callback(e) {\n" +
-                                "    if (e.target.tagName !== 'A')\n" +
-                                "        return;\n" +
-                                "    let link = e.target.href;\n" +
-                                injectedCall +
-                                "    e.preventDefault();\n" +
-                                "}\n" +
-                                "document.addEventListener('click', callback, false);",
-                        cefBrowser.getURL(), 0);
             }
 
             @Override
@@ -62,7 +40,7 @@ public class WebviewManager implements Disposable {
                 super.onLoadError(browser, frame, errorCode, errorText, failedUrl);
                 Logger.getInstance().error("An error occurred while opening the issue details view: " + errorText);
             }
-        }, cefBrowser);
+        }, jbCefBrowser.getCefBrowser());
     }
 
     public void sendMessage(Object data) {
