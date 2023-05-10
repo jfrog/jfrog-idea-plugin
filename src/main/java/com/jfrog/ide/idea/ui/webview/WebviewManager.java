@@ -53,7 +53,11 @@ public class WebviewManager implements Disposable {
         jbCefBrowser.getJBCefClient().addDisplayHandler(new CefDisplayHandlerAdapter() {
             @Override
             public boolean onConsoleMessage(CefBrowser browser, CefSettings.LogSeverity level, String message, String source, int line) {
-                Logger.getInstance().info(String.format("Webview console message: %s - %s", level, message));
+                if (level == CefSettings.LogSeverity.LOGSEVERITY_VERBOSE) {
+                    Logger.getInstance().debug(String.format("Webview console message: %s - %s", level, message));
+                } else {
+                    Logger.getInstance().info(String.format("Webview console message: %s - %s", level, message));
+                }
                 return false;
             }
         }, jbCefBrowser.getCefBrowser());

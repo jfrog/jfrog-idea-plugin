@@ -38,7 +38,7 @@ public class WebviewResourceHandler implements CefResourceHandler {
             callback.Continue();
             return true;
         } catch (IOException | NullPointerException e) {
-            Logger.getInstance().error("An error occurred while reading webview resource.", e);
+            Logger.getInstance().error("An error occurred while reading webview resource: " + currUrl.toString(), e);
             error = true;
             return false;
         }
