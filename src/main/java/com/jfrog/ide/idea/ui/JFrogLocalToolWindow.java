@@ -34,8 +34,6 @@ import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
 import com.jfrog.ide.idea.ui.webview.WebviewManager;
 import com.jfrog.ide.idea.ui.webview.WebviewObjectConverter;
-import com.jfrog.ide.idea.utils.Utils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.cef.browser.CefBrowser;
 import org.jetbrains.annotations.NotNull;
@@ -46,8 +44,6 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import static com.jfrog.ide.idea.ui.JFrogToolWindow.SCROLL_BAR_SCROLLING_UNITS;
 
@@ -61,7 +57,6 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     private JComponent compTreeView;
     private boolean isInitialized;
     private IssueNode selectedIssue;
-    private Path tempDirPath;
     private WebviewManager webviewManager;
 
     /**
@@ -221,14 +216,10 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     }
 
     private JComponent initVulnerabilityInfoBrowser() throws IOException, URISyntaxException {
-        tempDirPath = Files.createTempDirectory("jfrog-idea-plugin");
-        Utils.extractFromResources("/jfrog-ide-webview", tempDirPath);
-
-        String pageUri = tempDirPath.resolve("index.html").toFile().toURI().toString();
         webviewManager = new WebviewManager();
         Disposer.register(this, webviewManager);
 
-        CefBrowser browser = webviewManager.createBrowser(pageUri, () -> updateIssueOrLicenseInWebview(selectedIssue));
+        CefBrowser browser = webviewManager.createBrowser(() -> updateIssueOrLicenseInWebview(selectedIssue));
         return (JComponent) browser.getUIComponent();
     }
 
@@ -303,16 +294,6 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         }
         super.onConfigurationChange();
         refreshView();
-    }
-
-    @Override
-    public void dispose() {
-        super.dispose();
-        try {
-            FileUtils.deleteDirectory(tempDirPath.toFile());
-        } catch (IOException e) {
-            Logger.getInstance().warn("Temporary directory could not be deleted: " + tempDirPath.toString() + ". Error: " + ExceptionUtils.getRootCauseMessage(e));
-        }
     }
 
     @Override
