@@ -21,7 +21,7 @@ public class ConfigVerificationUtils {
     public static final String EXCLUSIONS_SUFFIX = "*";
     public static String EXCLUSIONS_REGEX_PARSER = "^\\*\\*/\\*\\{([^{}]+)}\\*$";
     public static Pattern EXCLUSIONS_REGEX_PATTERN = Pattern.compile(EXCLUSIONS_REGEX_PARSER);
-    public static final String DEFAULT_EXCLUSIONS = EXCLUSIONS_PREFIX + "{.idea,test,node_modules}" + EXCLUSIONS_SUFFIX;
+    public static final String DEFAULT_EXCLUSIONS = EXCLUSIONS_PREFIX + "{.idea,test,node_modules,build}" + EXCLUSIONS_SUFFIX;
 
     /**
      * Validate config project, watches and excluded paths before saving.

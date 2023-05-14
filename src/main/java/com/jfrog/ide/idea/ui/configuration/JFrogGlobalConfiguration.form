@@ -517,7 +517,7 @@
               </grid>
             </constraints>
             <properties>
-              <text value="&quot;**/*{.idea,test,node_modules}*&quot;"/>
+              <text value="&quot;**/*{.idea,test,node_modules,build}*&quot;"/>
               <toolTipText value="Pattern of project paths to exclude from Xray scanning for npm and Go projects."/>
             </properties>
           </component>
