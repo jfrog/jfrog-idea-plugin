@@ -91,6 +91,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         leftPanel.add(leftPanelContent);
         compTreeView = createComponentsTreeView();
 
+        alertIfCacheExpired();
         refreshView();
         registerListeners(browserComponent);
         isInitialized = true;
@@ -131,6 +132,14 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             ApplicationManager.getApplication().invokeLater(this::resetViews);
         });
         componentsTree.addRightClickListener();
+    }
+
+    private void alertIfCacheExpired() {
+        if (!componentsTree.isCacheEmpty() && componentsTree.isCacheExpired()) {
+            Logger.showActionableBalloon(project,
+                    "The scan results have expired.\nClick <a href=\"here\">here</a> to trigger a scan.", () ->
+                            ScanManager.getInstance(project).startScan());
+        }
     }
 
     private void refreshView() {

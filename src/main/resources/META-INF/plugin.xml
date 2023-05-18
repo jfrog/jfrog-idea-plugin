@@ -68,6 +68,7 @@
                     factoryClass="com.jfrog.ide.idea.ui.JFrogToolWindowFactory" canCloseContents="false"/>
         <notificationGroup id="JFrog Errors" displayType="BALLOON" isLogByDefault="false"/>
         <notificationGroup id="JFrog Log" displayType="NONE" isLogByDefault="true"/>
+        <editorFloatingToolbarProvider implementation="com.jfrog.ide.idea.ui.JFrogFloatingToolbar"/>
 
         <localInspection language="JSON"
                          displayName="Show in JFrog plugin"
@@ -81,10 +82,17 @@
     </extensions>
 
     <actions>
-        <!--suppress PluginXmlCapitalization -->
+        <group id="JFrog.Floating">
+            <action id="JFrog.FloatingStartLocalScan"
+                    class="com.jfrog.ide.idea.actions.StartLocalScanAction"
+                    text="Trigger Scan"
+                    description="Trigger JFrog Scan"
+                    icon="/icons/jfrog_icon.svg"/>
+        </group>
         <action id="JFrog.StartLocalScan"
                 class="com.jfrog.ide.idea.actions.StartLocalScanAction"
-                text="Run Scan"
+                text="Trigger Scan"
+                description="Trigger JFrog Scan"
                 icon="AllIcons.Actions.Execute"/>
         <action id="JFrog.RefreshBuilds"
                 class="com.jfrog.ide.idea.actions.RefreshBuildsAction"

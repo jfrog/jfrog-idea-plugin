@@ -6,6 +6,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.jfrog.ide.idea.inspections.upgradeversion.GradleKotlinUpgradeVersion;
 import com.jfrog.ide.idea.inspections.upgradeversion.UpgradeVersion;
+import com.jfrog.ide.idea.utils.Descriptor;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.psi.*;
@@ -25,7 +26,7 @@ import java.util.List;
 public class GradleKotlinInspection extends GradleInspection {
 
     public GradleKotlinInspection() {
-        super("build.gradle.kts");
+        super(Descriptor.GRADLE_KOTLIN);
     }
 
     @NotNull

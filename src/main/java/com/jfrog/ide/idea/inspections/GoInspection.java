@@ -12,6 +12,7 @@ import com.jfrog.ide.idea.inspections.upgradeversion.GoUpgradeVersion;
 import com.jfrog.ide.idea.inspections.upgradeversion.UpgradeVersion;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScannerBase;
+import com.jfrog.ide.idea.utils.Descriptor;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,7 +25,7 @@ import java.util.Collection;
 public class GoInspection extends AbstractInspection {
 
     public GoInspection() {
-        super("go.mod");
+        super(Descriptor.GO);
     }
 
     @NotNull

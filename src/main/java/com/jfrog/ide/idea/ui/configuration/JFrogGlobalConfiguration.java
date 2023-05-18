@@ -203,7 +203,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             return Results.success(xrayVersion);
         } catch (IOException exception) {
             if (exception instanceof JFrogInactiveEnvironmentException) {
-                initHyperlink(inActiveEnv, "JFrog Platform is not active.\nYou can activate it<hyperlink>here</hyperlink>.", ((JFrogInactiveEnvironmentException) exception).getRedirectUrl());
+                initHyperlink(inActiveEnv, "JFrog Platform is not active.\nClick <hyperlink>here</hyperlink> to activate it.", ((JFrogInactiveEnvironmentException) exception).getRedirectUrl());
             }
             connectionResultsGesture.setFailure(ExceptionUtils.getRootCauseMessage(exception));
             return "Could not connect to JFrog Xray.";

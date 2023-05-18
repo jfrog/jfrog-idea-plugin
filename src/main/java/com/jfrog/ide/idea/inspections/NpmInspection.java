@@ -11,6 +11,7 @@ import com.jfrog.ide.idea.inspections.upgradeversion.NpmUpgradeVersion;
 import com.jfrog.ide.idea.inspections.upgradeversion.UpgradeVersion;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScannerBase;
+import com.jfrog.ide.idea.utils.Descriptor;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +23,7 @@ import java.util.Collection;
 public class NpmInspection extends AbstractInspection {
 
     public NpmInspection() {
-        super("package.json");
+        super(Descriptor.NPM);
     }
 
     @NotNull
