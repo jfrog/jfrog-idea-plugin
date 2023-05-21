@@ -1,6 +1,7 @@
 package com.jfrog.ide.idea.ui;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.JBMenuItem;
 import com.intellij.pom.Navigatable;
@@ -207,7 +208,7 @@ public class LocalComponentsTree extends ComponentsTree {
         populateTree(root);
 
         // Run inspections after loaded cache
-        ApplicationManager.getApplication().invokeLater(() -> ScanManager.getInstance(project).runInspections(project));
+        DumbService.getInstance(project).runWhenSmart(() -> ScanManager.getInstance(project).runInspections(project));
     }
 
     public boolean isCacheEmpty() {
