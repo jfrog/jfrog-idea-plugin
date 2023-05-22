@@ -25,6 +25,10 @@ jobs:
         with:
           java-version: "11"
           distribution: "temurin"
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: 7.4.1
 
       - uses: jfrog/frogbot@v2
         env:
