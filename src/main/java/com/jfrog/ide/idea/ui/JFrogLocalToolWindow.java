@@ -3,6 +3,7 @@ package com.jfrog.ide.idea.ui;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.Constraints;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.actionSystem.Separator;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.impl.jdkDownloader.RuntimeChooserUtil;
@@ -99,7 +100,8 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
     @Override
     public JPanel createActionToolbar() {
-        DefaultActionGroup actionGroup = new DefaultActionGroup(new CollapseAllAction(componentsTree), new ExpandAllAction(componentsTree), new GoToSettingsAction(), new ScanTimeLabelAction());
+        DefaultActionGroup actionGroup = new DefaultActionGroup(new CollapseAllAction(componentsTree), new ExpandAllAction(componentsTree),
+                new GoToSettingsAction(), new Separator(), new ScanTimeLabelAction());
         actionGroup.addAction(ActionManager.getInstance().getAction("JFrog.StartLocalScan"), Constraints.FIRST);
         return createJFrogToolbar(actionGroup);
     }

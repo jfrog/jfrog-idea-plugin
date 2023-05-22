@@ -30,7 +30,7 @@ public class ScanTimeLabelAction extends ToolbarLabelAction {
             DateTimeFormatter format = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
             LocalDateTime lastScanString = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastScanTime), ZoneId.systemDefault());
             boolean expired = LocalComponentsTree.getInstance(project).isCacheExpired();
-            String expiredMessage = expired ? " (Outdated)" : "";
+            String expiredMessage = expired ? " (outdated)" : "";
             presentation.setText("Last scanned at " + format.format(lastScanString) + expiredMessage);
             presentation.setIcon(expired ? AllIcons.General.Warning : null);
         } else {
