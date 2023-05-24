@@ -1,18 +1,23 @@
 package com.jfrog.ide.idea.ui.configuration;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.intellij.icons.AllIcons;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.ui.HyperlinkLabel;
-import com.intellij.ui.components.*;
-import com.intellij.util.ui.UIUtil;
+import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.JBPasswordField;
+import com.intellij.ui.components.JBTabbedPane;
+import com.intellij.ui.components.JBTextField;
+import com.intellij.util.Time;
+import com.intellij.util.ui.AsyncProcessIcon;
 import com.jfrog.ide.common.configuration.ServerConfig;
+import com.jfrog.ide.common.utils.XrayConnectionUtils;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
 import com.jfrog.ide.idea.log.Logger;
-import com.jfrog.ide.idea.ui.components.ConnectionResultsGesture;
 import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.impl.XrayClientBuilder;
 import com.jfrog.xray.client.impl.util.JFrogInactiveEnvironmentException;
@@ -22,25 +27,33 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.conn.ssl.TrustAllStrategy;
 import org.apache.http.ssl.SSLContextBuilder;
+import org.jdesktop.swingx.JXCollapsiblePane;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
+import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryManagerBuilder;
+import org.jfrog.build.extractor.clientConfiguration.client.access.AccessManager;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
+import org.jfrog.build.extractor.clientConfiguration.client.response.CreateAccessTokenResponse;
 
 import javax.swing.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
+import java.awt.event.ItemEvent;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import static com.jfrog.ide.common.ci.Utils.createAqlForBuildArtifacts;
-import static com.jfrog.ide.common.utils.XrayConnectionUtils.*;
+import static com.jfrog.ide.common.utils.Utils.resolveArtifactoryUrl;
+import static com.jfrog.ide.common.utils.Utils.resolveXrayUrl;
+import static com.jfrog.ide.common.utils.XrayConnectionUtils.isSupportedInXrayVersion;
+import static com.jfrog.ide.common.utils.XrayConnectionUtils.testComponentPermission;
 import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.DEFAULT_EXCLUSIONS;
-import static com.jfrog.ide.idea.ui.configuration.Utils.clearText;
+import static com.jfrog.ide.idea.ui.configuration.Utils.*;
 import static org.apache.commons.collections4.CollectionUtils.addIgnoreNull;
 import static org.apache.commons.lang3.StringUtils.*;
 
@@ -48,60 +61,86 @@ import static org.apache.commons.lang3.StringUtils.*;
  * Created by romang on 1/29/17.
  */
 public class JFrogGlobalConfiguration implements Configurable, Configurable.NoScroll {
-
     public static final String USER_AGENT = "jfrog-idea-plugin/" + JFrogGlobalConfiguration.class.getPackage().getImplementationVersion();
-
-    private JPanel connectionDetails;
-    private JPanel settings;
-    private JPanel advanced;
+    private static final String SSO_LOGIN_FAILURE = "The SSO login option isn't available.\nCause: %s\n\nHints:\n" +
+            "1. Ensure that the JFrog Platform URL is correct\n" +
+            "2. The SSO login option is supported since Artifactory 7.57.0";
+    // All UI components
+    private Set<JComponent> CONNECTION_DETAILS_ENABLED_COMPONENTS, CONNECTION_DETAILS_VISIBLE_COMPONENTS;
+    private Set<JComponent> WEB_LOGIN_ENABLED_COMPONENTS, WEB_LOGIN_VISIBLE_COMPONENTS;
+    private Set<JComponent> ALL_UI_COMPONENTS;
+    private static final int SSO_WAIT_BETWEEN_RETRIES_MILLIS = 2 * Time.SECOND;
+    private static final int SSO_RETRIES = 30;
 
     private ServerConfigImpl serverConfig;
-    private JButton testConnectionButton;
-    private JBPasswordField password;
-    private JBLabel connectionResults;
-    private JBTextField excludedPaths;
-    private JBTextField project;
-    private JBTextField watches;
-    private JBTextField username;
-    private JBTextField platformUrl;
-    private JBCheckBox connectionDetailsFromEnv;
-    private ConnectionRetriesSpinner connectionRetries;
-    private ConnectionTimeoutSpinner connectionTimeout;
 
-    private JBTextField xrayUrl;
-    private JBTextField artifactoryUrl;
-    private JCheckBox setRtAndXraySeparately;
-    private JBLabel xrayConnectionResults;
-    private JBLabel artifactoryConnectionResults;
-    private ConnectionResultsGesture connectionResultsGesture;
-    private ConnectionResultsGesture artifactoryConnectionResultsGesture;
-    private HyperlinkLabel projectInstructions;
-    private HyperlinkLabel policyInstructions;
-    private HyperlinkLabel watchInstructions;
+    // Tabs
+    private JPanel connectionDetails, settings, advanced;
+
+    // Connection types
+    private JRadioButton ssoLoginSelection, setCredentialsManuallySelection;
+
+    // Connection details
+    private JLabel platformUrlTitle;
+    private JBTextField platformUrl;
+    private JLabel usernameTitle;
+    private JBTextField username;
+    private JLabel passwordTitle;
+    private JBPasswordField password;
+    private JLabel accessTokenTitle;
     private JBPasswordField accessToken;
+    private JButton loginButton;
+    private JLabel authenticationMethodTitle;
+
+    // Test connection
+    private JButton testConnectionButton;
+    private JBLabel connectionResults;
+    private HyperlinkLabel infoPanel;
+
+    // Advanced button
+    private JXCollapsiblePane setSeparately;
+    private JButton advancedExpandButton;
+    private JLabel artifactoryUrlTitle;
+    private JBTextField artifactoryUrl;
+    private JLabel xrayUrlTitle;
+    private JBTextField xrayUrl;
+
 
     // Authentication types
-    private JRadioButton usernamePasswordRadioButton;
-    private JRadioButton accessTokenRadioButton;
+    private JRadioButton usernamePasswordRadioButton, accessTokenRadioButton;
 
-    // Scan policies
-    private JRadioButton allVulnerabilitiesRadioButton;
-    private JRadioButton accordingToProjectRadioButton;
-    private JRadioButton accordingToWatchesRadioButton;
+    // Settings tab
+    private JBTextField project;
+    private HyperlinkLabel projectInstructions, policyInstructions, watchInstructions;
+    private JRadioButton allVulnerabilitiesRadioButton, accordingToProjectRadioButton, accordingToWatchesRadioButton;
+    private JBTextField watches;
+
+    // Advanced tab
+    private ConnectionRetriesSpinner connectionRetries;
+    private ConnectionTimeoutSpinner connectionTimeout;
     private JButton defaultValuesButton;
-    private HyperlinkLabel inActiveEnv;
+    private JBTextField excludedPaths;
 
     private int selectedTabIndex;
 
+
     public JFrogGlobalConfiguration() {
         createComponent();
-        initUrls();
-        initTestConnection();
-        initConnectionDetailsFromEnv();
+
+        // Connection details
+        initEnabledComponentSets();
         initAuthenticationMethod();
+        initCredentialsTypeSelection();
+        initLoginViaBrowserButton();
+        initTestConnection();
+        initAdvancedExpandButton();
+
+        // Settings
         initPolicy();
         initLinks();
         initDefaultValuesButton();
+
+        loadConfig();
     }
 
     @Nullable
@@ -119,213 +158,6 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         selectedTabIndex = 1;
     }
 
-    private void initUrls() {
-        setRtAndXraySeparately.addActionListener(listener -> {
-            boolean selected = ((AbstractButton) listener.getSource()).isSelected();
-            xrayUrl.setEnabled(selected);
-            artifactoryUrl.setEnabled(selected);
-            if (!selected) {
-                resolveXrayAndArtifactoryUrls();
-            }
-        });
-        platformUrl.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (!setRtAndXraySeparately.isSelected()) {
-                    resolveXrayAndArtifactoryUrls();
-                }
-            }
-        });
-        xrayUrl.setEnabled(false);
-        artifactoryUrl.setEnabled(false);
-    }
-
-    private void initTestConnection() {
-        connectionResultsGesture = new ConnectionResultsGesture(xrayConnectionResults);
-        artifactoryConnectionResultsGesture = new ConnectionResultsGesture(artifactoryConnectionResults);
-        testConnectionButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            if (!setRtAndXraySeparately.isSelected()) {
-                resolveXrayAndArtifactoryUrls();
-            }
-            List<String> results = new ArrayList<>();
-            addIgnoreNull(results, checkXrayConnection());
-            addIgnoreNull(results, checkArtifactoryConnection());
-            setConnectionResults(String.join("<br/>", results));
-        }));
-    }
-
-    private void initDefaultValuesButton() {
-        defaultValuesButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            excludedPaths.setText(DEFAULT_EXCLUSIONS);
-            connectionRetries.setValue(ConnectionRetriesSpinner.RANGE.initial);
-            connectionTimeout.setValue(ConnectionTimeoutSpinner.RANGE.initial);
-        }));
-    }
-
-    private void resolveXrayAndArtifactoryUrls() {
-        String platformUrlStr = platformUrl.getText();
-        if (isBlank(platformUrlStr)) {
-            if (!setRtAndXraySeparately.isSelected()) {
-                clearText(xrayUrl, artifactoryUrl);
-            }
-            return;
-        }
-        platformUrlStr = removeEnd(platformUrlStr, "/");
-        xrayUrl.setText(platformUrlStr + "/xray");
-        artifactoryUrl.setText(platformUrlStr + "/artifactory");
-    }
-
-    private String checkXrayConnection() {
-        if (isBlank(xrayUrl.getText())) {
-            return "Xray URL is missing.";
-        }
-        try {
-            Xray xrayClient = createXrayClient();
-
-            setConnectionResults("Connecting to Xray...");
-            connectionDetails.validate();
-            connectionDetails.repaint();
-            Version xrayVersion = xrayClient.system().version();
-
-            // Check version
-            if (!isSupportedInXrayVersion(xrayVersion)) {
-                connectionResultsGesture.setFailure(Results.unsupported(xrayVersion));
-                return Results.unsupported(xrayVersion);
-            }
-
-            // Check permissions
-            Pair<Boolean, String> testComponentPermissionRes = testComponentPermission(xrayClient);
-            if (!testComponentPermissionRes.getLeft()) {
-                throw new IOException(testComponentPermissionRes.getRight());
-            }
-
-            connectionResultsGesture.setSuccess();
-            return Results.success(xrayVersion);
-        } catch (IOException exception) {
-            if (exception instanceof JFrogInactiveEnvironmentException) {
-                initHyperlink(inActiveEnv, "JFrog Platform is not active.\nClick <hyperlink>here</hyperlink> to activate it.", ((JFrogInactiveEnvironmentException) exception).getRedirectUrl());
-            }
-            connectionResultsGesture.setFailure(ExceptionUtils.getRootCauseMessage(exception));
-            return "Could not connect to JFrog Xray.";
-        }
-    }
-
-    private String checkArtifactoryConnection() {
-        if (isBlank(artifactoryUrl.getText())) {
-            return "Artifactory URL is missing.";
-        }
-        try (ArtifactoryManager artifactoryManager = createArtifactoryManagerBuilder().build()) {
-            setConnectionResults("Connecting to Artifactory...");
-            connectionDetails.validate();
-            connectionDetails.repaint();
-
-            // Check connection.
-            // This command will throw an exception if there is a connection or credentials issue.
-            artifactoryManager.searchArtifactsByAql(createAqlForBuildArtifacts("*", "artifactory-build-info"));
-
-            artifactoryConnectionResultsGesture.setSuccess();
-            return "Successfully connected to Artifactory version: " + artifactoryManager.getVersion();
-        } catch (Exception exception) {
-            artifactoryConnectionResultsGesture.setFailure(ExceptionUtils.getRootCauseMessage(exception));
-            return "Could not connect to JFrog Artifactory.";
-        }
-    }
-
-    private void initConnectionDetailsFromEnv() {
-        List<JComponent> effectedComponents = Lists.newArrayList(setRtAndXraySeparately, platformUrl, username, password, accessToken,
-                accessTokenRadioButton, usernamePasswordRadioButton);
-        connectionDetailsFromEnv.addItemListener(e -> {
-            JBCheckBox cb = (JBCheckBox) e.getSource();
-            if (cb.isSelected()) {
-                xrayUrl.setEnabled(false);
-                artifactoryUrl.setEnabled(false);
-                effectedComponents.forEach(field -> field.setEnabled(false));
-                serverConfig.readConnectionDetailsFromEnv();
-                updateConnectionDetailsTextFields();
-            } else {
-                effectedComponents.forEach(field -> field.setEnabled(true));
-                initAuthMethodSelection();
-                // Restore connection details if original settings were inserted manually.
-                // This will prevent losing data after checking/unchecking the checkbox.
-                ServerConfigImpl oldConfig = GlobalSettings.getInstance().getServerConfig();
-                if (oldConfig != null && !oldConfig.isConnectionDetailsFromEnv()) {
-                    reset();
-                }
-            }
-        });
-    }
-
-    private void initAuthenticationMethod() {
-        initAuthMethodSelection();
-        accessTokenRadioButton.addItemListener(e -> {
-            JRadioButton accessTokenButton = (JRadioButton) e.getSource();
-            ServerConfigImpl oldConfig = GlobalSettings.getInstance().getServerConfig();
-
-            if (accessTokenButton.isSelected()) {
-                accessToken.setEnabled(true);
-                username.setText("");
-                password.setText("");
-                username.setEnabled(false);
-                password.setEnabled(false);
-                // Restore connection details if original settings were inserted manually.
-                // This will prevent losing data after checking/unchecking the checkbox.
-                if (oldConfig != null && isNotBlank(oldConfig.getAccessToken())) {
-                    reset();
-                }
-            } else {
-                username.setEnabled(true);
-                password.setEnabled(true);
-                accessToken.setText("");
-                accessToken.setEnabled(false);
-                // Restore connection details if original settings were inserted manually.
-                // This will prevent losing data after checking/unchecking the checkbox.
-                if (oldConfig != null && isNoneBlank(oldConfig.getUsername(), oldConfig.getPassword())) {
-                    reset();
-                }
-            }
-        });
-    }
-
-    private void initAuthMethodSelection() {
-        boolean isAccessMode = isNotBlank(new String(accessToken.getPassword()));
-        usernamePasswordRadioButton.setSelected(!isAccessMode);
-        accessTokenRadioButton.setSelected(isAccessMode);
-        accessToken.setEnabled(isAccessMode);
-        username.setEnabled(!isAccessMode);
-        password.setEnabled(!isAccessMode);
-    }
-
-    private void initPolicy() {
-        accordingToWatchesRadioButton.addChangeListener(e -> {
-            if (accordingToWatchesRadioButton.isSelected()) {
-                watches.setEnabled(true);
-                watches.setText(serverConfig.getWatches());
-            } else {
-                watches.setEnabled(false);
-            }
-        });
-    }
-
-    private void initLinks() {
-        initHyperlink(projectInstructions, "Create a <hyperlink>JFrog Project</hyperlink>, or obtain the relevant JFrog Project key.", "https://www.jfrog.com/confluence/display/JFROG/Projects");
-        initHyperlink(policyInstructions, "Create a <hyperlink>Policy</hyperlink> on JFrog Xray.", "https://www.jfrog.com/confluence/display/JFROG/Creating+Xray+Policies+and+Rules");
-        initHyperlink(watchInstructions, "Create a <hyperlink>Watch</hyperlink> on JFrog Xray and assign your Policy and Project as resources to it.", "https://www.jfrog.com/confluence/display/JFROG/Configuring+Xray+Watches");
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
-    private void initHyperlink(HyperlinkLabel label, String text, String link) {
-        label.setTextWithHyperlink("    " + text);
-        label.addHyperlinkListener(l -> BrowserUtil.browse(link));
-        label.setForeground(UIUtil.getInactiveTextColor());
-    }
-
-    private void setConnectionResults(String results) {
-        if (results == null) {
-            return;
-        }
-        connectionResults.setText("<html>" + results + "</html>");
-    }
-
     @Nls
     @Override
     public String getDisplayName() {
@@ -340,38 +172,14 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
 
     @Override
     public boolean isModified() {
-        ServerConfig.PolicyType policyType = ServerConfig.PolicyType.VULNERABILITIES;
-        if (accordingToProjectRadioButton.isSelected()) {
-            policyType = ServerConfig.PolicyType.PROJECT;
-        } else if (accordingToWatchesRadioButton.isSelected()) {
-            policyType = ServerConfig.PolicyType.WATCHES;
-        }
-        serverConfig = new ServerConfigImpl.Builder()
-                .setUrl(platformUrl.getText())
-                .setArtifactoryUrl(artifactoryUrl.getText())
-                .setXrayUrl(xrayUrl.getText())
-                .setUsername(username.getText())
-                .setPassword(String.valueOf(password.getPassword()))
-                .setAccessToken(String.valueOf(accessToken.getPassword()))
-                .setExcludedPaths(excludedPaths.getText())
-                .setPolicyType(policyType)
-                .setProject(project.getText())
-                .setWatches(watches.getText())
-                .setConnectionDetailsFromEnv(connectionDetailsFromEnv.isSelected())
-                .setConnectionRetries(connectionRetries.getNumber())
-                .setConnectionTimeout(connectionTimeout.getNumber())
-                .build();
-
-        return !serverConfig.equals(GlobalSettings.getInstance().getServerConfig());
+        return !createServerConfig().equals(GlobalSettings.getInstance().getServerConfig());
     }
 
     @Override
     public void apply() throws ConfigurationException {
+        serverConfig = createServerConfig();
         ConfigVerificationUtils.validateGlobalConfig(serverConfig.getExcludedPaths(), serverConfig.getPolicyType(), serverConfig.getProject(), serverConfig.getWatches());
-        GlobalSettings globalSettings = GlobalSettings.getInstance();
-        globalSettings.updateConfig(serverConfig);
-        connectionResults.setText("");
-        loadConfig();
+        GlobalSettings.getInstance().updateConfig(serverConfig);
     }
 
     @Override
@@ -379,35 +187,73 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         loadConfig();
     }
 
-    private Xray createXrayClient() {
-        String urlStr = trim(xrayUrl.getText());
-        return (Xray) new XrayClientBuilder()
-                .setUrl(urlStr)
-                .setUserName(trim(username.getText()))
+    /**
+     * Initialize all UI components sets in order to show/hide them according to the user's choice.
+     */
+    private void initEnabledComponentSets() {
+        ALL_UI_COMPONENTS = Sets.newHashSet(infoPanel, platformUrlTitle, platformUrl, xrayUrlTitle, xrayUrl,
+                artifactoryUrlTitle, artifactoryUrl, username, password, accessTokenTitle, accessToken, accessTokenRadioButton, usernamePasswordRadioButton,
+                loginButton, authenticationMethodTitle, usernameTitle, passwordTitle, advancedExpandButton, setSeparately, advancedExpandButton);
+
+        WEB_LOGIN_ENABLED_COMPONENTS = WEB_LOGIN_VISIBLE_COMPONENTS = Sets.newHashSet(infoPanel, platformUrlTitle, platformUrl, loginButton);
+
+        CONNECTION_DETAILS_ENABLED_COMPONENTS = CONNECTION_DETAILS_VISIBLE_COMPONENTS = Sets.newHashSet(infoPanel, platformUrlTitle, platformUrl,
+                authenticationMethodTitle, usernamePasswordRadioButton, accessTokenRadioButton, usernameTitle, username,
+                passwordTitle, password, accessTokenTitle, accessToken, advancedExpandButton, setSeparately, artifactoryUrlTitle,
+                artifactoryUrl, xrayUrlTitle, xrayUrl);
+    }
+
+    /**
+     * Create the server config according to the configured data in the UI.
+     *
+     * @return a new server config.
+     */
+    private ServerConfigImpl createServerConfig() {
+        return new ServerConfigImpl.Builder()
+                .setConnectionType(getConnectionType())
+                .setUrl(platformUrl.getText())
+                .setArtifactoryUrl(artifactoryUrl.getText())
+                .setXrayUrl(xrayUrl.getText())
+                .setUsername(username.getText())
                 .setPassword(String.valueOf(password.getPassword()))
                 .setAccessToken(String.valueOf(accessToken.getPassword()))
-                .setUserAgent(USER_AGENT)
-                .setInsecureTls(serverConfig.isInsecureTls())
-                .setSslContext(serverConfig.getSslContext())
-                .setProxyConfiguration(serverConfig.getProxyConfForTargetUrl(urlStr))
-                .setLog(Logger.getInstance())
+                .setExcludedPaths(excludedPaths.getText())
+                .setPolicyType(getPolicyType())
+                .setProject(project.getText())
+                .setWatches(watches.getText())
+                .setConnectionRetries(connectionRetries.getNumber())
+                .setConnectionTimeout(connectionTimeout.getNumber())
                 .build();
     }
 
-    private ArtifactoryManagerBuilder createArtifactoryManagerBuilder() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
-        String urlStr = trim(artifactoryUrl.getText());
-        return new ArtifactoryManagerBuilder()
-                .setServerUrl(urlStr)
-                .setUsername(serverConfig.getUsername())
-                .setPassword(serverConfig.getPassword())
-                .setAccessToken(serverConfig.getAccessToken())
-                .setProxyConfiguration(serverConfig.getProxyConfForTargetUrl(urlStr))
-                .setLog(Logger.getInstance())
-                .setSslContext(serverConfig.isInsecureTls() ?
-                        SSLContextBuilder.create().loadTrustMaterial(TrustAllStrategy.INSTANCE).build() :
-                        serverConfig.getSslContext());
+    /**
+     * Get the selected policy type - Project, Watches or all vulnerabilities.
+     *
+     * @return the selected policy type.
+     */
+    private ServerConfig.PolicyType getPolicyType() {
+        if (accordingToProjectRadioButton.isSelected()) {
+            return ServerConfig.PolicyType.PROJECT;
+        } else if (accordingToWatchesRadioButton.isSelected()) {
+            return ServerConfig.PolicyType.WATCHES;
+        }
+        return ServerConfig.PolicyType.VULNERABILITIES;
     }
 
+    /**
+     * Get the selected connection type - SSO or set the connection details manually.
+     *
+     * @return the selected connection type.
+     */
+    private ServerConfigImpl.ConnectionType getConnectionType() {
+        return setCredentialsManuallySelection.isSelected() ?
+                ServerConfigImpl.ConnectionType.CONNECTION_DETAILS :
+                ServerConfigImpl.ConnectionType.SSO;
+    }
+
+    /**
+     * Load the config and populate the UI fields.
+     */
     private void loadConfig() {
         platformUrl.getEmptyText().setText("Example: https://acme.jfrog.io");
         xrayUrl.getEmptyText().setText("Example: https://acme.jfrog.io/xray");
@@ -425,42 +271,367 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             watches.setText(serverConfig.getWatches());
             connectionRetries.setValue(serverConfig.getConnectionRetries());
             connectionTimeout.setValue(serverConfig.getConnectionTimeout());
-            connectionDetailsFromEnv.setSelected(serverConfig.isConnectionDetailsFromEnv());
         } else {
             clearText(platformUrl, xrayUrl, artifactoryUrl, username, password);
             excludedPaths.setText(DEFAULT_EXCLUSIONS);
             allVulnerabilitiesRadioButton.setSelected(true);
             project.setText("");
             watches.setText("");
-            connectionDetailsFromEnv.setSelected(false);
             connectionRetries.setValue(ConnectionRetriesSpinner.RANGE.initial);
             connectionTimeout.setValue(ConnectionTimeoutSpinner.RANGE.initial);
+            ssoLoginSelection.setSelected(true);
+        }
+        initAuthMethodSelection();
+    }
+
+    /**
+     * Initialize the test connection button.
+     */
+    private void initTestConnection() {
+        testConnectionButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            List<String> results = new ArrayList<>();
+            if (isBlank(platformUrl.getText()) && ssoLoginSelection.isSelected()) {
+                results.add("JFrog platform URL is missing");
+            } else {
+                addIgnoreNull(results, checkXrayConnection());
+                addIgnoreNull(results, checkArtifactoryConnection());
+            }
+
+            setConnectionResults(String.join("<br/>", results));
+        }));
+    }
+
+    /**
+     * Check connection to Xray.
+     *
+     * @return empty string for success, the reason if failed.
+     */
+    private String checkXrayConnection() {
+        String url = resolveXrayUrl(xrayUrl.getText(), platformUrl.getText());
+        if (isBlank(url)) {
+            return "Xray URL is missing.";
+        }
+        try {
+            Xray xrayClient = createXrayClient(url);
+
+            setConnectionResults("Connecting to Xray...");
+            connectionDetails.validate();
+            connectionDetails.repaint();
+            Version xrayVersion = xrayClient.system().version();
+
+            // Check version
+            if (!isSupportedInXrayVersion(xrayVersion)) {
+                return XrayConnectionUtils.Results.unsupported(xrayVersion);
+            }
+
+            // Check permissions
+            Pair<Boolean, String> testComponentPermissionRes = testComponentPermission(xrayClient);
+            if (!testComponentPermissionRes.getLeft()) {
+                throw new IOException(testComponentPermissionRes.getRight());
+            }
+
+            return XrayConnectionUtils.Results.success(xrayVersion);
+        } catch (IOException exception) {
+            if (exception instanceof JFrogInactiveEnvironmentException) {
+                initHyperlinkLabel(infoPanel, "JFrog Platform is not active.\nClick <hyperlink>here</hyperlink> to activate it.", ((JFrogInactiveEnvironmentException) exception).getRedirectUrl());
+            } else {
+                createConnectionResultsBalloon(getLoginErrorMessage(exception), testConnectionButton);
+            }
+
+            return "Could not connect to JFrog Xray.";
         }
     }
 
-    private void updateConnectionDetailsTextFields() {
+    /**
+     * Check connection to Artifactory.
+     *
+     * @return empty string for success, the reason if failed.
+     */
+    private String checkArtifactoryConnection() {
+        String url = resolveArtifactoryUrl(artifactoryUrl.getText(), platformUrl.getText());
+        if (isBlank(url)) {
+            return "Artifactory URL is missing.";
+        }
+        try (ArtifactoryManager artifactoryManager = createArtifactoryManagerBuilder(url).build()) {
+            setConnectionResults("Connecting to Artifactory...");
+            connectionDetails.validate();
+            connectionDetails.repaint();
+
+            // Check connection.
+            // This command will throw an exception if there is a connection or credentials issue.
+            artifactoryManager.searchArtifactsByAql(createAqlForBuildArtifacts("*", "artifactory-build-info"));
+
+            return "Successfully connected to Artifactory version: " + artifactoryManager.getVersion();
+        } catch (Exception exception) {
+            return "Could not connect to JFrog Artifactory.";
+        }
+    }
+
+    /**
+     * Get the login error after a failing connection testing.
+     *
+     * @param e - the received exception
+     * @return the login error to display.
+     */
+    private String getLoginErrorMessage(Exception e) {
+        String rootCause = substringBefore(ExceptionUtils.getRootCauseMessage(e), "<");
+        if (setCredentialsManuallySelection.isSelected()) {
+            return rootCause;
+        }
+        return String.format(SSO_LOGIN_FAILURE, rootCause);
+    }
+
+    /**
+     * Create an Xray client from the configured details in the UI.
+     *
+     * @param xrayUrl - The Xray URL
+     * @return an Xray client.
+     */
+    private Xray createXrayClient(String xrayUrl) {
+        return (Xray) new XrayClientBuilder()
+                .setUrl(xrayUrl)
+                .setUserName(trim(username.getText()))
+                .setPassword(String.valueOf(password.getPassword()))
+                .setAccessToken(String.valueOf(accessToken.getPassword()))
+                .setUserAgent(USER_AGENT)
+                .setInsecureTls(serverConfig.isInsecureTls())
+                .setSslContext(serverConfig.getSslContext())
+                .setProxyConfiguration(serverConfig.getProxyConfForTargetUrl(xrayUrl))
+                .setLog(Logger.getInstance())
+                .build();
+    }
+
+    /**
+     * Create an Artifactory client from the configured details in the UI.
+     *
+     * @param artifactoryUrl - The Artifactory URL
+     * @return an Xray client.
+     */
+    private ArtifactoryManagerBuilder createArtifactoryManagerBuilder(String artifactoryUrl) throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+        return new ArtifactoryManagerBuilder()
+                .setServerUrl(artifactoryUrl)
+                .setUsername(trim(username.getText()))
+                .setPassword(String.valueOf(password.getPassword()))
+                .setAccessToken(String.valueOf(accessToken.getPassword()))
+                .setProxyConfiguration(serverConfig.getProxyConfForTargetUrl(artifactoryUrl))
+                .setLog(Logger.getInstance())
+                .setSslContext(serverConfig.isInsecureTls() ?
+                        SSLContextBuilder.create().loadTrustMaterial(TrustAllStrategy.INSTANCE).build() :
+                        serverConfig.getSslContext());
+    }
+
+    /**
+     * Set the connection results panel.
+     *
+     * @param results - The connection results to set.
+     */
+    private void setConnectionResults(String results) {
+        if (results == null) {
+            return;
+        }
+        connectionResults.setText("<html>" + results + "</html>");
+    }
+
+
+    /**
+     * Init the "Advanced" button that displays the panel of Artifactory and Xray URLs.
+     */
+    private void initAdvancedExpandButton() {
+        advancedExpandButton.setAction(setSeparately.getActionMap().get(JXCollapsiblePane.TOGGLE_ACTION));
+        advancedExpandButton.setText("Advanced");
+
+        Action toggleAction = setSeparately.getActionMap().get(JXCollapsiblePane.TOGGLE_ACTION);
+        toggleAction.putValue(JXCollapsiblePane.COLLAPSE_ICON, UIManager.getIcon("Tree.expandedIcon"));
+        toggleAction.putValue(JXCollapsiblePane.EXPAND_ICON, UIManager.getIcon("Tree.collapsedIcon"));
+    }
+
+    /**
+     * Init the "Login" button that do the SSO login.
+     */
+    private void initLoginViaBrowserButton() {
+        loginButton.setIcon(AllIcons.Ide.External_link_arrow);
+        loginButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            if (isBlank(platformUrl.getText())) {
+                addRedBorder(platformUrl);
+                return;
+            }
+            doSsoLogin();
+        }));
+    }
+
+    /**
+     * Do the SSO login.
+     */
+    private void doSsoLogin() {
+        String uuid = UUID.randomUUID().toString();
+
+        AsyncProcessIcon asyncProcessIcon = new AsyncProcessIcon("Connecting...");
+        clearText(artifactoryUrl, xrayUrl, accessToken, username, password);
+        loginButton.setText("");
+        loginButton.setIcon(null);
+        loginButton.add(asyncProcessIcon);
+        loginButton.setEnabled(false);
+        String urlStr = removeEnd(trim(platformUrl.getText()), "/") + "/access";
+        try (AccessManager accessManager = new AccessManager(urlStr, "", Logger.getInstance())) {
+            ProxyConfiguration proxyConfiguration = serverConfig.getProxyConfForTargetUrl(urlStr);
+            if (proxyConfiguration != null) {
+                accessManager.setProxyConfiguration(proxyConfiguration);
+            }
+            accessManager.setSslContext(serverConfig.isInsecureTls() ?
+                    SSLContextBuilder.create().loadTrustMaterial(TrustAllStrategy.INSTANCE).build() :
+                    serverConfig.getSslContext());
+
+            accessManager.sendBrowserLoginRequest(uuid);
+            BrowserUtil.browse(removeEnd(platformUrl.getText(), "/") + "/ui/login?jfClientSession=" + uuid +
+                    "&jfClientName=IDEA");
+
+            for (int i = 0; i < SSO_RETRIES; i++) {
+                CreateAccessTokenResponse response = accessManager.getBrowserLoginRequestToken(uuid);
+                if (response != null) {
+                    accessToken.setText(response.getAccessToken());
+                    return;
+                }
+                Thread.sleep(SSO_WAIT_BETWEEN_RETRIES_MILLIS);
+            }
+        } catch (Exception e) {
+            Logger.getInstance().error(ExceptionUtils.getRootCauseMessage(e), e);
+        } finally {
+            if (accessToken.getPassword().length == 0) {
+                createConnectionResultsBalloon(String.format(SSO_LOGIN_FAILURE, "Timeout"), testConnectionButton);
+            } else {
+                testConnectionButton.doClick();
+            }
+            loginButton.remove(asyncProcessIcon);
+            loginButton.setText("Login");
+            loginButton.setIcon(AllIcons.Ide.External_link_arrow);
+            loginButton.setEnabled(true);
+        }
+    }
+
+    /**
+     * Initialize the credentials type selection buttons.
+     */
+    private void initCredentialsTypeSelection() {
+        setCredentialsManuallySelection.addItemListener(e -> {
+            enableAndShowFields(e, CONNECTION_DETAILS_ENABLED_COMPONENTS, CONNECTION_DETAILS_VISIBLE_COMPONENTS);
+            initAuthMethodSelection();
+        });
+        ssoLoginSelection.addItemListener(e -> enableAndShowFields(e, WEB_LOGIN_ENABLED_COMPONENTS, WEB_LOGIN_VISIBLE_COMPONENTS));
+    }
+
+    /**
+     * Enable/Disable fields in the UI according to the selected values.
+     *
+     * @param event             - The button event
+     * @param enabledComponents - The components to enable/disable, according to the event
+     * @param visibleComponents - The components to show/hide, according to the event
+     */
+    private void enableAndShowFields(ItemEvent event, Set<JComponent> enabledComponents, Set<JComponent> visibleComponents) {
+        JRadioButton cb = (JRadioButton) event.getSource();
+        ALL_UI_COMPONENTS.forEach(component -> {
+            component.setEnabled(cb.isSelected() && enabledComponents.contains(component));
+            component.setVisible(cb.isSelected() && visibleComponents.contains(component));
+        });
+    }
+
+    /**
+     * Initialize the authentication method radio buttons.
+     */
+    private void initAuthenticationMethod() {
+        accessTokenRadioButton.addItemListener(e -> {
+            JRadioButton accessTokenButton = (JRadioButton) e.getSource();
+            if (accessTokenButton.isSelected()) {
+                accessToken.setEnabled(true);
+                clearText(username, password);
+                username.setEnabled(false);
+                password.setEnabled(false);
+                accessToken.setText(serverConfig.getAccessToken());
+            } else {
+                username.setEnabled(true);
+                password.setEnabled(true);
+                clearText(accessToken);
+                accessToken.setEnabled(false);
+                username.setText(serverConfig.getUsername());
+                password.setText(serverConfig.getPassword());
+            }
+        });
+    }
+
+    /**
+     * Initialize the auth method selection - access token or username and password.
+     */
+    private void initAuthMethodSelection() {
+        boolean isAccessMode = isNotBlank(new String(accessToken.getPassword()));
+        usernamePasswordRadioButton.setSelected(!isAccessMode);
+        accessTokenRadioButton.setSelected(isAccessMode);
+        accessToken.setEnabled(isAccessMode);
+        username.setEnabled(!isAccessMode);
+        password.setEnabled(!isAccessMode);
+    }
+
+    /**
+     * Update the connection details from to the loaded server config.
+     */
+    void updateConnectionDetailsTextFields() {
         platformUrl.setText(serverConfig.getUrl());
         xrayUrl.setText(serverConfig.getXrayUrl());
         artifactoryUrl.setText(serverConfig.getArtifactoryUrl());
-        if (isNotBlank(serverConfig.getAccessToken())) {
+        if (isNotBlank(serverConfig.getAccessToken()) && setCredentialsManuallySelection.isSelected()) {
             accessToken.setText(serverConfig.getAccessToken());
             accessTokenRadioButton.setSelected(true);
         } else {
             username.setText(serverConfig.getUsername());
             password.setText(serverConfig.getPassword());
         }
-        if (!isAllBlank(xrayUrl.getText(), artifactoryUrl.getText()) && isBlank(platformUrl.getText())) {
-            setRtAndXraySeparately.getModel().setSelected(true);
-            setRtAndXraySeparately.getModel().setPressed(true);
-            xrayUrl.setEnabled(true);
-            artifactoryUrl.setEnabled(true);
-        } else {
-            setRtAndXraySeparately.getModel().setSelected(false);
-            resolveXrayAndArtifactoryUrls();
+        loadConnectionType();
+    }
+
+    /**
+     * Load the connection type field from the loaded server config.
+     */
+    void loadConnectionType() {
+        if (serverConfig.getConnectionType() == null) {
+            // Keep legacy behavior
+            setCredentialsManuallySelection.setSelected(true);
+            return;
+        }
+        switch (serverConfig.getConnectionType()) {
+            case SSO:
+                ssoLoginSelection.setSelected(true);
+                break;
+            case CONNECTION_DETAILS:
+                setCredentialsManuallySelection.setSelected(true);
+                break;
         }
     }
 
-    private void updatePolicyTextFields() {
+    /**
+     * Init the hyperlinks label in the "Settings" tab.
+     */
+    private void initLinks() {
+        initHyperlinkLabel(projectInstructions, "Create a <hyperlink>JFrog Project</hyperlink>, or obtain the relevant JFrog Project key.", "https://www.jfrog.com/confluence/display/JFROG/Projects");
+        initHyperlinkLabel(policyInstructions, "Create a <hyperlink>Policy</hyperlink> on JFrog Xray.", "https://www.jfrog.com/confluence/display/JFROG/Creating+Xray+Policies+and+Rules");
+        initHyperlinkLabel(watchInstructions, "Create a <hyperlink>Watch</hyperlink> on JFrog Xray and assign your Policy and Project as resources to it.", "https://www.jfrog.com/confluence/display/JFROG/Configuring+Xray+Watches");
+    }
+
+    /**
+     * Initialize the policy in the "Settings" tab.
+     */
+    private void initPolicy() {
+        accordingToWatchesRadioButton.addChangeListener(e -> {
+            if (accordingToWatchesRadioButton.isSelected()) {
+                watches.setEnabled(true);
+                watches.setText(serverConfig.getWatches());
+            } else {
+                watches.setEnabled(false);
+            }
+        });
+    }
+
+    /**
+     * Update the policy text fields according to the selected policy type.
+     */
+    void updatePolicyTextFields() {
         switch (ObjectUtils.defaultIfNull(serverConfig.getPolicyType(), ServerConfig.PolicyType.VULNERABILITIES)) {
             case WATCHES:
                 accordingToWatchesRadioButton.setSelected(true);
@@ -475,5 +646,16 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
                 allVulnerabilitiesRadioButton.setSelected(true);
                 watches.setEnabled(false);
         }
+    }
+
+    /**
+     * Initialize the "Default values" button in the "Advanced" tab.
+     */
+    private void initDefaultValuesButton() {
+        defaultValuesButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            excludedPaths.setText(DEFAULT_EXCLUSIONS);
+            connectionRetries.setValue(ConnectionRetriesSpinner.RANGE.initial);
+            connectionTimeout.setValue(ConnectionTimeoutSpinner.RANGE.initial);
+        }));
     }
 }
