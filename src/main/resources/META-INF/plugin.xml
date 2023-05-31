@@ -76,6 +76,13 @@
                          enabledByDefault="true"
                          implementationClass="com.jfrog.ide.idea.inspections.NpmInspection"/>
         <annotator language="JSON" implementationClass="com.jfrog.ide.idea.inspections.NpmInspection"/>
+        <localInspection language="JSON"
+                         displayName="Show in JFrog plugin"
+                         groupBundle="messages.InspectionsBundle"
+                         groupKey="group.names.probable.bugs"
+                         enabledByDefault="true"
+                         implementationClass="com.jfrog.ide.idea.inspections.YarnInspection"/>
+        <annotator language="JSON" implementationClass="com.jfrog.ide.idea.inspections.YarnInspection"/>
         <externalAnnotator language="JavaScript"
                            implementationClass="com.jfrog.ide.idea.inspections.JFrogSecurityAnnotator"/>
     </extensions>
