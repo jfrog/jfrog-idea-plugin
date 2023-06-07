@@ -15,6 +15,7 @@ import com.jfrog.ide.idea.inspections.upgradeversion.UpgradeVersion;
 import com.jfrog.ide.idea.scan.MavenScanner;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScannerBase;
+import com.jfrog.ide.idea.utils.Descriptor;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.dom.model.MavenDomArtifactCoordinates;
@@ -35,7 +36,7 @@ public class MavenInspection extends AbstractInspection {
     public static final String MAVEN_GROUP_ID_TAG = "groupId";
 
     public MavenInspection() {
-        super("pom.xml");
+        super(Descriptor.MAVEN);
     }
 
     @NotNull

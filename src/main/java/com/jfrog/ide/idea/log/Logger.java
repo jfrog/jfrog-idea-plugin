@@ -7,10 +7,19 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.popup.Balloon;
+import com.intellij.openapi.ui.popup.JBPopupFactory;
+import com.intellij.openapi.wm.StatusBar;
+import com.intellij.openapi.wm.WindowManager;
+import com.intellij.ui.JBColor;
+import com.intellij.ui.awt.RelativePoint;
+import com.jfrog.ide.idea.ui.utils.IconUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.plexus.util.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.util.Log;
+
+import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 /**
  * @author yahavi
@@ -132,5 +141,38 @@ public class Logger implements Log {
                     }
                 })
                 .notify(project);
+    }
+
+    /**
+     * Popup a balloon with an actionable link.
+     * Usage example:
+     * Logger.showActionableBalloon(project,
+     * "The scan results have expired. Click <a href=\"here\">here</a> to trigger a scan.",
+     * () -> ScanManager.getInstance(project).startScan());
+     *
+     * @param project     - IDEA project
+     * @param htmlContent - The log message
+     * @param action      - The action to perform
+     */
+    public static void showActionableBalloon(Project project, String htmlContent, Runnable action) {
+        StatusBar statusBar = WindowManager.getInstance().getStatusBar(project);
+        JBPopupFactory.getInstance().createHtmlTextBalloonBuilder(htmlContent,
+                        IconUtils.load("jfrog_icon"),
+                        JBColor.foreground(),
+                        JBColor.background(),
+                        event -> {
+                            if (event.getEventType() != ACTIVATED) {
+                                return;
+                            }
+                            action.run();
+                        })
+                .setCloseButtonEnabled(true)
+                .setHideOnAction(true)
+                .setHideOnClickOutside(true)
+                .setHideOnLinkClick(true)
+                .setHideOnKeyOutside(true)
+                .setDialogMode(true)
+                .createBalloon()
+                .show(RelativePoint.getNorthWestOf(statusBar.getComponent()), Balloon.Position.atRight);
     }
 }

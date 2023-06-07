@@ -49,7 +49,6 @@ public class LocalComponentsTree extends ComponentsTree {
 
     public LocalComponentsTree(@NotNull Project project) throws IOException {
         super(project);
-        setCellRenderer(new ComponentsTreeCellRenderer());
         String projectId = project.getProjectFilePath();
         if (StringUtils.isBlank(projectId)) {
             projectId = project.getName();
@@ -63,6 +62,7 @@ public class LocalComponentsTree extends ComponentsTree {
     }
 
     public void addScanResults(List<FileTreeNode> fileTreeNodes) {
+        setCellRenderer(new ComponentsTreeCellRenderer());
         for (FileTreeNode node : fileTreeNodes) {
             ApplicationManager.getApplication().invokeLater(() -> appendProject(node));
         }
@@ -206,15 +206,23 @@ public class LocalComponentsTree extends ComponentsTree {
         }
         populateTree(root);
 
+        if (isCacheExpired()) {
+            // If cache is expired, display a gray tree and don't show inspections.
+            // The reason for not showing inspections is to avoid displaying outdated results in the package descriptor.
+            setCellRenderer(new ExpiredComponentsTreeCellRenderer());
+            return;
+        }
+        setCellRenderer(new ComponentsTreeCellRenderer());
+
         // Run inspections after loaded cache
         ScanManager.getInstance(project).runInspections(project);
     }
 
     public boolean isCacheEmpty() {
-        return cache.getScanCacheObject() == null || isCacheExpired();
+        return cache.getScanCacheObject() == null;
     }
 
-    private boolean isCacheExpired() {
+    public boolean isCacheExpired() {
         return System.currentTimeMillis() - cache.getScanCacheObject().getScanTimestamp() >= EXPIRED_CACHE_TIME;
     }
 

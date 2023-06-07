@@ -5,12 +5,6 @@ import com.google.common.collect.Sets;
 import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.MessageType;
-import com.intellij.openapi.ui.popup.Balloon;
-import com.intellij.openapi.ui.popup.JBPopupFactory;
-import com.intellij.openapi.wm.StatusBar;
-import com.intellij.openapi.wm.WindowManager;
-import com.intellij.ui.awt.RelativePoint;
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.scan.GraphScanLogic;
 import com.jfrog.ide.common.scan.ScanLogic;
@@ -35,7 +29,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jfrog.ide.common.log.Utils.logError;
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBuilder;
-import static javax.swing.event.HyperlinkEvent.EventType.ACTIVATED;
 
 public class ScanManager {
     private final int SCAN_TIMEOUT_MINUTES = 10;
@@ -130,22 +123,7 @@ public class ScanManager {
      */
     private void handleJfrogInactiveEnvironment(String reactivationUrl) {
         Logger.getInstance().warn("JFrog Platform is not active.");
-        StatusBar statusBar = WindowManager.getInstance().getStatusBar(project);
-        Balloon balloon = JBPopupFactory.getInstance().createHtmlTextBalloonBuilder("JFrog Platform is not active.\nYou can activate it <a href=\"here\">here. </a>", MessageType.WARNING,
-                        event -> {
-                            if (!(event.getEventType() == ACTIVATED)) {
-                                return;
-                            }
-                            BrowserUtil.browse(reactivationUrl);
-                        })
-                .setCloseButtonEnabled(true)
-                .setHideOnAction(true)
-                .setHideOnClickOutside(true)
-                .setHideOnLinkClick(true)
-                .setHideOnKeyOutside(true)
-                .setDialogMode(true)
-                .createBalloon();
-        balloon.show(RelativePoint.getNorthWestOf(statusBar.getComponent()), Balloon.Position.atRight);
+        Logger.showActionableBalloon(project, "JFrog Platform is not active.\nYou can activate it <a href=\"here\">here. </a>", () -> BrowserUtil.browse(reactivationUrl));
     }
 
     /**

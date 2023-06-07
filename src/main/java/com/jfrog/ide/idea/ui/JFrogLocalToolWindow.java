@@ -3,6 +3,7 @@ package com.jfrog.ide.idea.ui;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.Constraints;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.actionSystem.Separator;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.impl.jdkDownloader.RuntimeChooserUtil;
@@ -91,6 +92,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         leftPanel.add(leftPanelContent);
         compTreeView = createComponentsTreeView();
 
+        alertIfCacheExpired();
         refreshView();
         registerListeners(browserComponent);
         isInitialized = true;
@@ -98,7 +100,8 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
     @Override
     public JPanel createActionToolbar() {
-        DefaultActionGroup actionGroup = new DefaultActionGroup(new CollapseAllAction(componentsTree), new ExpandAllAction(componentsTree), new GoToSettingsAction(), new ScanTimeLabelAction());
+        DefaultActionGroup actionGroup = new DefaultActionGroup(new CollapseAllAction(componentsTree), new ExpandAllAction(componentsTree),
+                new GoToSettingsAction(), new Separator(), new ScanTimeLabelAction());
         actionGroup.addAction(ActionManager.getInstance().getAction("JFrog.StartLocalScan"), Constraints.FIRST);
         return createJFrogToolbar(actionGroup);
     }
@@ -131,6 +134,14 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             ApplicationManager.getApplication().invokeLater(this::resetViews);
         });
         componentsTree.addRightClickListener();
+    }
+
+    private void alertIfCacheExpired() {
+        if (!componentsTree.isCacheEmpty() && componentsTree.isCacheExpired()) {
+            Logger.showActionableBalloon(project,
+                    "The scan results have expired.\nClick <a href=\"here\">here</a> to trigger a scan.", () ->
+                            ScanManager.getInstance(project).startScan());
+        }
     }
 
     private void refreshView() {

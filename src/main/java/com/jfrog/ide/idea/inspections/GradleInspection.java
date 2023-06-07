@@ -6,6 +6,7 @@ import com.intellij.psi.PsiElement;
 import com.jfrog.ide.idea.scan.GradleScanner;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScannerBase;
+import com.jfrog.ide.idea.utils.Descriptor;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -14,8 +15,8 @@ import org.apache.commons.lang3.StringUtils;
 public abstract class GradleInspection extends AbstractInspection {
     private int lastAnnotatedLine;
 
-    public GradleInspection(String packageDescriptorName) {
-        super(packageDescriptorName);
+    public GradleInspection(Descriptor descriptor) {
+        super(descriptor);
     }
 
     @Override
