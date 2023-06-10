@@ -70,7 +70,7 @@ public class Utils {
         String pluginVersion = jfrogPlugin.getVersion();
         UsageReporter usageReporter = new ClientIdUsageReporter(PRODUCT_ID + pluginVersion, featureIdArray, log);
         try {
-            usageReporter.reportUsage(serverConfig.getArtifactoryUrl(), serverConfig.getUsername(), serverConfig.getPassword(), serverConfig.getAccessToken(), null, log);
+            usageReporter.reportUsage(serverConfig.getArtifactoryUrl(), serverConfig.getUsername(), serverConfig.getPassword(), serverConfig.getAccessToken(), serverConfig.getProxyConfForTargetUrl(serverConfig.getArtifactoryUrl()), log);
         } catch (IOException | RuntimeException e) {
             log.debug("Usage report failed: " + ExceptionUtils.getRootCauseMessage(e));
         }

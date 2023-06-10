@@ -267,18 +267,18 @@ public class ServerConfigImpl implements ServerConfig {
     /**
      * Get proxy configuration as configured under 'Appearance & Behavior' -> 'System Settings' -> 'HTTP Proxy'
      *
-     * @param xrayUrl - The xray URL. The URL is necessary to determine whether to bypass proxy or to pick the relevant
-     *                proxy configuration for the Xray URL as configured in *.pac file.
+     * @param targetUrl - The target URL. The URL is necessary to determine whether to bypass proxy or to pick the relevant
+     *                proxy configuration for the target URL as configured in *.pac file.
      * @return the proxy configuration as configured in IDEA settings.
      */
     @Override
-    public ProxyConfiguration getProxyConfForTargetUrl(String xrayUrl) {
+    public ProxyConfiguration getProxyConfForTargetUrl(String targetUrl) {
         HttpConfigurable httpConfigurable = HttpConfigurable.getInstance();
         if (httpConfigurable.USE_PROXY_PAC) {
             // 'Auto-detect proxy settings' option is selected
-            return getProxyConfForTargetUrlUsingPac(httpConfigurable, xrayUrl);
+            return getProxyConfForTargetUrlUsingPac(httpConfigurable, targetUrl);
         }
-        if (httpConfigurable.isHttpProxyEnabledForUrl(xrayUrl)) {
+        if (httpConfigurable.isHttpProxyEnabledForUrl(targetUrl)) {
             // 'Manual proxy configuration' option is selected
             return getProxyConfForTargetUrlUsingManualConf(httpConfigurable);
         }
