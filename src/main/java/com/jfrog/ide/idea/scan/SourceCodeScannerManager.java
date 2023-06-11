@@ -9,11 +9,13 @@ import com.jfrog.ide.common.nodes.VulnerabilityNode;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
+import com.jfrog.ide.idea.scan.data.PackageType;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
 import org.apache.commons.lang.StringUtils;
 
 import javax.swing.tree.TreeNode;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
@@ -26,23 +28,25 @@ public class SourceCodeScannerManager {
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
     private final ApplicabilityScannerExecutor applicability = new ApplicabilityScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig());
 
+    private final Collection<ScanBinaryExecutor> scanners = initScannersCollection();
+
     protected Project project;
-    protected String codeBaseLanguage;
+    protected PackageType packageType;
     private static final String SKIP_FOLDERS_SUFFIX = "*/**";
 
-    public SourceCodeScannerManager(Project project, String codeBaseLanguage) {
+    public SourceCodeScannerManager(Project project, PackageType packageType) {
         this.project = project;
-        this.codeBaseLanguage = codeBaseLanguage.toLowerCase();
+        this.packageType = packageType;
     }
 
     /**
-     * Source code scan and update components.
+     * Applicability source code scanning (Contextual Analysis).
      *
      * @param indicator      the progress indicator.
      * @param depScanResults collection of DependencyNodes.
      * @return A list of FileTreeNodes having the source code issues as their children.
      */
-    public List<FileTreeNode> scanAndUpdate(ProgressIndicator indicator, Collection<DependencyNode> depScanResults) {
+    public List<FileTreeNode> applicabilityScan(ProgressIndicator indicator, Collection<DependencyNode> depScanResults, Runnable checkCanceled) {
         if (project.isDisposed()) {
             return Collections.emptyList();
         }
@@ -52,16 +56,15 @@ public class SourceCodeScannerManager {
         }
         List<JFrogSecurityWarning> scanResults = new ArrayList<>();
         Map<String, List<VulnerabilityNode>> issuesMap = mapDirectIssuesByCve(depScanResults);
-        String excludePattern = GlobalSettings.getInstance().getServerConfig().getExcludedPaths();
 
         try {
-            if (applicability.getSupportedLanguages().contains(codeBaseLanguage)) {
+            if (applicability.isPackageTypeSupported(packageType)) {
                 indicator.setText("Running applicability scan");
                 indicator.setFraction(0.25);
                 Set<String> directIssuesCVEs = issuesMap.keySet();
                 // If no direct dependencies with issues are found by Xray, the applicability scan is irrelevant.
                 if (directIssuesCVEs.size() > 0) {
-                    List<JFrogSecurityWarning> applicabilityResults = applicability.execute(new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).cves(List.copyOf(directIssuesCVEs)).skippedFolders(convertToSkippedFolders(excludePattern)));
+                    List<JFrogSecurityWarning> applicabilityResults = applicability.execute(createBasicScannerInput().cves(List.copyOf(directIssuesCVEs)), checkCanceled);
                     scanResults.addAll(applicabilityResults);
                 }
             }
@@ -71,7 +74,25 @@ public class SourceCodeScannerManager {
             scanInProgress.set(false);
             indicator.setFraction(1);
         }
-        return createAndUpdateNodes(scanResults, issuesMap);
+        return createAndUpdateApplicabilityIssueNodes(scanResults, issuesMap);
+    }
+
+    public List<FileTreeNode> sourceCodeScan(ProgressIndicator indicator, Runnable checkCanceled) throws IOException, URISyntaxException, InterruptedException {
+        List<JFrogSecurityWarning> results = new ArrayList<>();
+        indicator.setText("Running advance source code scanning");
+        double fraction = 0;
+        for (var scanner : scanners) {
+            checkCanceled.run();
+            fraction += 1.0 / scanners.size();
+            indicator.setFraction(fraction);
+            results.addAll(scanner.execute(createBasicScannerInput(), checkCanceled));
+        }
+        return createFileIssueNodes(results);
+    }
+
+    private ScanConfig.Builder createBasicScannerInput() {
+        String excludePattern = GlobalSettings.getInstance().getServerConfig().getExcludedPaths();
+        return new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).skippedFolders(convertToSkippedFolders(excludePattern));
     }
 
     /**
@@ -97,13 +118,38 @@ public class SourceCodeScannerManager {
     }
 
     /**
+     * Create {@link FileTreeNode}s with file issues nodes.
+     *
+     * @param scanResults a list of source code scan results.
+     * @return a list of new {@link FileTreeNode}s containing source code issues.
+     */
+    private List<FileTreeNode> createFileIssueNodes(List<JFrogSecurityWarning> scanResults) {
+        HashMap<String, FileTreeNode> results = new HashMap<>();
+        for (JFrogSecurityWarning warning : scanResults) {
+
+            // Create FileTreeNodes for files with found issues
+            FileTreeNode fileNode = results.get(warning.getFilePath());
+            if (fileNode == null) {
+                fileNode = new FileTreeNode(warning.getFilePath());
+                results.put(warning.getFilePath(), fileNode);
+            }
+
+            ApplicableIssueNode applicableIssue = new ApplicableIssueNode(
+                    cve, warning.getLineStart(), warning.getColStart(), warning.getLineEnd(), warning.getColEnd(),
+                    warning.getFilePath(), warning.getReason(), warning.getLineSnippet(), warning.getScannerSearchTarget(),
+                    issues.get(0));
+        }
+        return new ArrayList<>(results.values());
+    }
+
+    /**
      * Create {@link FileTreeNode}s with applicability issues and update applicability issues in {@link VulnerabilityNode}s.
      *
      * @param scanResults a list of source code scan results.
      * @param issuesMap   a map of {@link VulnerabilityNode}s mapped by their CVEs.
      * @return a list of new {@link FileTreeNode}s containing source code issues.
      */
-    private List<FileTreeNode> createAndUpdateNodes(List<JFrogSecurityWarning> scanResults, Map<String, List<VulnerabilityNode>> issuesMap) {
+    private List<FileTreeNode> createAndUpdateApplicabilityIssueNodes(List<JFrogSecurityWarning> scanResults, Map<String, List<VulnerabilityNode>> issuesMap) {
         HashMap<String, FileTreeNode> results = new HashMap<>();
         for (JFrogSecurityWarning warning : scanResults) {
             // Update all VulnerabilityNodes that have the warning's CVE
@@ -113,7 +159,7 @@ public class SourceCodeScannerManager {
                 if (warning.isApplicable()) {
                     // Create FileTreeNodes for files with applicable issues
                     FileTreeNode fileNode = results.get(warning.getFilePath());
-                    if (fileNode == null && warning.isApplicable()) {
+                    if (fileNode == null) {
                         fileNode = new FileTreeNode(warning.getFilePath());
                         results.put(warning.getFilePath(), fileNode);
                     }
@@ -167,5 +213,9 @@ public class SourceCodeScannerManager {
             }
         }
         return issues;
+    }
+
+    private Collection<ScanBinaryExecutor> initScannersCollection() {
+        return List.of(new SecretsScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig()));
     }
 }
