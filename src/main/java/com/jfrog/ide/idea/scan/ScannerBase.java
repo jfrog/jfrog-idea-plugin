@@ -31,6 +31,7 @@ import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
+import com.jfrog.ide.idea.scan.data.PackageType;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
@@ -84,7 +85,7 @@ public abstract class ScannerBase {
         this.executor = executor;
         this.basePath = basePath;
         this.project = project;
-        this.sourceCodeScannerManager = new SourceCodeScannerManager(project, getCodeBaseLanguage());
+        this.sourceCodeScannerManager = new SourceCodeScannerManager(project, getPackageManagerType());
         this.scanLogic = scanLogic;
     }
 
@@ -118,12 +119,21 @@ public abstract class ScannerBase {
     protected abstract AbstractInspection getInspectionTool();
 
     protected void sendUsageReport() {
-        ApplicationManager.getApplication().invokeLater(() -> Utils.sendUsageReport(getPackageManagerName() + "-deps"));
+        ApplicationManager.getApplication().invokeLater(() -> Utils.sendUsageReport(getPackageManagerType().getName() + "-deps"));
     }
 
-    protected abstract String getPackageManagerName();
+    protected abstract PackageType getPackageManagerType();
 
-    public abstract String getCodeBaseLanguage();
+    /**
+     * Groups a collection of DependencyNodes by the descriptor files of the modules that depend on them.
+     * The returned DependencyNodes inside the FileTreeNodes might be clones of the ones in depScanResults, but it's not
+     * guaranteed.
+     *
+     * @param depScanResults - collection of DependencyNodes.
+     * @param depMap         - a map of DependencyTree objects by their component ID.
+     * @return A list of FileTreeNodes (that are all DescriptorFileTreeNodes) having the DependencyNodes as their children.
+     */
+    protected abstract List<FileTreeNode> groupDependenciesToDescriptorNodes(Collection<DependencyNode> depScanResults, Map<String, List<DependencyTree>> depMap);
 
     /**
      * Scan and update dependency components.
@@ -151,9 +161,14 @@ public abstract class ScannerBase {
             List<FileTreeNode> fileTreeNodes = walkDepTree(results, depTree);
             addScanResults(fileTreeNodes);
 
+            // Contextual Analysis
+            List<FileTreeNode> applicabilityScanResults = sourceCodeScannerManager.applicabilityScan(indicator, results.values(), this::checkCanceled);
+            fileTreeNodes.addAll(applicabilityScanResults);
+            addScanResults(fileTreeNodes);
+
             // Source code scanning
-            List<FileTreeNode> sourceCodeResFileNodes = sourceCodeScannerManager.scanAndUpdate(indicator, results.values());
-            fileTreeNodes.addAll(sourceCodeResFileNodes);
+            List<FileTreeNode> sourceCodeScanScanResults = sourceCodeScannerManager.sourceCodeScan(indicator, this::checkCanceled);
+            fileTreeNodes.addAll(sourceCodeScanScanResults);
             addScanResults(fileTreeNodes);
 
             // Force inspections run due to changes in the displayed tree

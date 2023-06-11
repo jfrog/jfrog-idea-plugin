@@ -12,6 +12,7 @@ import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.common.yarn.YarnTreeBuilder;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.YarnInspection;
+import com.jfrog.ide.idea.scan.data.PackageType;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 
@@ -25,8 +26,6 @@ import java.util.concurrent.ExecutorService;
 public class YarnScanner extends SingleDescriptorScanner {
 
     private final YarnTreeBuilder yarnTreeBuilder;
-    private final String PKG_TYPE = "yarn";
-
     /**
      * @param project   currently opened IntelliJ project. We'll use this project to retrieve project based services
      *                  like {@link ConsistentFilterManager} and {@link ComponentsTree}.
@@ -61,13 +60,8 @@ public class YarnScanner extends SingleDescriptorScanner {
     }
 
     @Override
-    protected String getPackageManagerName() {
-        return PKG_TYPE;
-    }
-
-    @Override
-    public String getCodeBaseLanguage() {
-        return "js";
+    protected PackageType getPackageManagerType() {
+        return PackageType.YARN;
     }
 }
 

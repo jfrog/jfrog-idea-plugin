@@ -18,6 +18,7 @@ import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.GradleGroovyInspection;
 import com.jfrog.ide.idea.inspections.GradleKotlinInspection;
 import com.jfrog.ide.idea.log.Logger;
+import com.jfrog.ide.idea.scan.data.PackageType;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import org.apache.commons.lang3.StringUtils;
@@ -42,8 +43,6 @@ import static com.jfrog.ide.common.log.Utils.logError;
  * Created by Yahav Itzhak on 9 Nov 2017.
  */
 public class GradleScanner extends SingleDescriptorScanner {
-
-    private final String PKG_TYPE = "gradle";
     private final GradleTreeBuilder gradleTreeBuilder;
     private boolean kotlin;
 
@@ -92,13 +91,8 @@ public class GradleScanner extends SingleDescriptorScanner {
     }
 
     @Override
-    protected String getPackageManagerName() {
-        return PKG_TYPE;
-    }
-
-    @Override
-    public String getCodeBaseLanguage() {
-        return "java";
+    protected PackageType getPackageManagerType() {
+        return PackageType.GRADLE;
     }
 
     @Override

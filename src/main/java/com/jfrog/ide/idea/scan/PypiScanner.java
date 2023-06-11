@@ -13,6 +13,7 @@ import com.jfrog.ide.common.deptree.DepTreeNode;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
+import com.jfrog.ide.idea.scan.data.PackageType;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import org.apache.commons.collections4.CollectionUtils;
@@ -28,7 +29,6 @@ import static com.jfrog.ide.common.utils.Utils.createComponentId;
  */
 public class PypiScanner extends SingleDescriptorScanner {
     private final Sdk pythonSdk;
-    private final String PKG_TYPE = "pypi";
 
     /**
      * @param project   currently opened IntelliJ project. We'll use this project to retrieve project based services
@@ -110,12 +110,7 @@ public class PypiScanner extends SingleDescriptorScanner {
     }
 
     @Override
-    protected String getPackageManagerName() {
-        return PKG_TYPE;
-    }
-
-    @Override
-    public String getCodeBaseLanguage() {
-        return "python";
+    protected PackageType getPackageManagerType() {
+        return PackageType.PYPI;
     }
 }

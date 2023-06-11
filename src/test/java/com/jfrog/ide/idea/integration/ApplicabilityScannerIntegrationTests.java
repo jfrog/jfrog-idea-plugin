@@ -29,7 +29,7 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
         ScanConfig.Builder input = new ScanConfig.Builder()
                 .roots(List.of(testProjectRoot))
                 .cves(List.of("CVE-2021-3918", "CVE-2021-3807"));
-        List<JFrogSecurityWarning> results = scanner.execute(input);
+        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled);
         assertEquals(2, results.size());
         // Expect all issues to be not applicable to this test project
         assertFalse(results.stream().anyMatch(JFrogSecurityWarning::isApplicable));
@@ -40,7 +40,7 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
         ScanConfig.Builder input = new ScanConfig.Builder()
                 .roots(List.of(testProjectRoot))
                 .cves(List.of("CVE-2022-25878"));
-        List<JFrogSecurityWarning> results = scanner.execute(input);
+        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled);
         assertEquals(2, results.size());
         // Expect all issues to be applicable.
         assertTrue(results.stream().allMatch(JFrogSecurityWarning::isApplicable));
@@ -58,7 +58,7 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
         ScanConfig.Builder input = new ScanConfig.Builder()
                 .roots(List.of(testProjectRoot))
                 .cves(List.of("CVE-2021-3918", "CVE-2019-15605"));
-        List<JFrogSecurityWarning> results = scanner.execute(input);
+        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled);
         assertEquals(2, results.size());
         // Expect all issues to be not applicable to this test project
         assertFalse(results.stream().anyMatch(JFrogSecurityWarning::isApplicable));
@@ -69,7 +69,7 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
         ScanConfig.Builder input = new ScanConfig.Builder()
                 .roots(List.of(testProjectRoot))
                 .cves(List.of("CVE-2019-20907"));
-        List<JFrogSecurityWarning> results = scanner.execute(input);
+        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled);
         assertEquals(1, results.size());
         // Expect specific indications
         assertTrue(results.get(0).isApplicable());
@@ -79,5 +79,9 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
         assertEquals(6, results.get(0).getColStart());
         assertEquals(24, results.get(0).getColEnd());
         assertTrue(results.get(0).getFilePath().endsWith("main.py"));
+    }
+
+    private void dummyCheckCanceled() {
+
     }
 }
