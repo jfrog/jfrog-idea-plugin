@@ -14,7 +14,7 @@ import java.util.List;
  * @author Tal Arian
  */
 public class SecretsScannerExecutor extends ScanBinaryExecutor {
-    private static final String SCAN_TYPE = "secrets-scan";
+    public static final String SCAN_TYPE = "secrets-scan";
     private static final List<String> SCANNER_ARGS = List.of("sec");
 
 

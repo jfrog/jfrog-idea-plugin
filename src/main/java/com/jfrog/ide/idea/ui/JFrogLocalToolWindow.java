@@ -20,10 +20,7 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.jcef.JBCefApp;
 import com.intellij.util.ui.UIUtil;
-import com.jfrog.ide.common.nodes.ApplicableIssueNode;
-import com.jfrog.ide.common.nodes.IssueNode;
-import com.jfrog.ide.common.nodes.LicenseViolationNode;
-import com.jfrog.ide.common.nodes.VulnerabilityNode;
+import com.jfrog.ide.common.nodes.*;
 import com.jfrog.ide.idea.actions.CollapseAllAction;
 import com.jfrog.ide.idea.actions.ExpandAllAction;
 import com.jfrog.ide.idea.actions.GoToSettingsAction;
@@ -250,17 +247,20 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         return treeScrollPane;
     }
 
-    private void updateIssueOrLicenseInWebview(IssueNode vulnerabilityOrViolation) {
-        if (vulnerabilityOrViolation instanceof VulnerabilityNode) {
-            VulnerabilityNode issue = (VulnerabilityNode) vulnerabilityOrViolation;
+    private void updateIssueOrLicenseInWebview(IssueNode issueNode) {
+        if (issueNode instanceof VulnerabilityNode) {
+            VulnerabilityNode issue = (VulnerabilityNode) issueNode;
             webviewManager.sendMessage(WebviewObjectConverter.convertIssueToDepPage(issue));
-        } else if (vulnerabilityOrViolation instanceof ApplicableIssueNode) {
-            ApplicableIssueNode node = (ApplicableIssueNode) vulnerabilityOrViolation;
+        } else if (issueNode instanceof ApplicableIssueNode) {
+            ApplicableIssueNode node = (ApplicableIssueNode) issueNode;
             webviewManager.sendMessage(WebviewObjectConverter.convertIssueToDepPage(node.getIssue()));
             navigateToFile(node);
-        } else if (vulnerabilityOrViolation instanceof LicenseViolationNode) {
-            LicenseViolationNode license = (LicenseViolationNode) vulnerabilityOrViolation;
+        } else if (issueNode instanceof LicenseViolationNode) {
+            LicenseViolationNode license = (LicenseViolationNode) issueNode;
             webviewManager.sendMessage(WebviewObjectConverter.convertLicenseToDepPage(license));
+        } else if (issueNode instanceof FileIssueNode) {
+            FileIssueNode node = (FileIssueNode) issueNode;
+            webviewManager.sendMessage(WebviewObjectConverter.convertFileIssueToIssuePage(node));
         }
     }
 

@@ -15,6 +15,7 @@ public class JFrogSecurityWarning {
     private final String lineSnippet;
     private String scannerSearchTarget;
     private final String name;
+    private final String reporter;
 
     private final boolean isApplicable;
 
@@ -25,6 +26,7 @@ public class JFrogSecurityWarning {
             String filePath,
             String name,
             String lineSnippet,
+            String reporter,
             boolean isApplicable
     ) {
         this.lineStart = lineStart;
@@ -35,10 +37,11 @@ public class JFrogSecurityWarning {
         this.filePath = filePath;
         this.name = name;
         this.lineSnippet = lineSnippet;
+        this.reporter = reporter;
         this.isApplicable = isApplicable;
     }
 
-    public JFrogSecurityWarning(SarifResult result) {
+    public JFrogSecurityWarning(SarifResult result, String reporter) {
         this(getFirstRegion(result).getStartLine() - 1,
                 getFirstRegion(result).getStartColumn() - 1,
                 getFirstRegion(result).getEndLine() - 1,
@@ -47,6 +50,7 @@ public class JFrogSecurityWarning {
                 result.getLocations().size() > 0 ? StringUtils.removeStart(result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri(), "file://") : "",
                 result.getRuleId(),
                 getFirstRegion(result).getSnippet().getText(),
+                reporter,
                 !result.getKind().equals("pass"));
     }
 
@@ -76,6 +80,10 @@ public class JFrogSecurityWarning {
 
     public String getName() {
         return name;
+    }
+
+    public String getReporter() {
+        return reporter;
     }
 
     public String getLineSnippet() {

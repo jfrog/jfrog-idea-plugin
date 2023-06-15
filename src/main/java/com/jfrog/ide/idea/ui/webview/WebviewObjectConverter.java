@@ -1,6 +1,7 @@
 package com.jfrog.ide.idea.ui.webview;
 
 import com.jfrog.ide.common.nodes.DependencyNode;
+import com.jfrog.ide.common.nodes.FileIssueNode;
 import com.jfrog.ide.common.nodes.LicenseViolationNode;
 import com.jfrog.ide.common.nodes.VulnerabilityNode;
 import com.jfrog.ide.common.nodes.subentities.ApplicableInfo;
@@ -8,9 +9,11 @@ import com.jfrog.ide.common.nodes.subentities.ImpactTreeNode;
 import com.jfrog.ide.common.nodes.subentities.ResearchInfo;
 import com.jfrog.ide.common.nodes.subentities.SeverityReason;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.idea.scan.SecretsScannerExecutor;
 import com.jfrog.ide.idea.ui.webview.model.*;
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 
@@ -48,6 +51,36 @@ public class WebviewObjectConverter {
                 .watchName(watchNames)
                 .edited(vulnerabilityNode.getLastUpdated())
                 .extendedInformation(extendedInformation);
+    }
+
+    public static IssuePage convertFileIssueToIssuePage(FileIssueNode fileIssueNodeNode) {
+
+        return new IssuePage()
+                .type(ConvertPageType(fileIssueNodeNode.getReporterType()))
+                .severity(fileIssueNodeNode.getSeverity().name())
+                .description(fileIssueNodeNode.getReason())
+                .header(fileIssueNodeNode.getTitle())
+                .location(convertFileLocation(fileIssueNodeNode));
+    }
+
+    private static String ConvertPageType(String reporterType) {
+        switch (reporterType) {
+            case SecretsScannerExecutor.SCAN_TYPE:
+                return "SECRETS";
+            default:
+                return "EMPTY";
+        }
+    }
+
+    private static Location convertFileLocation(FileIssueNode fileIssueNodeNode) {
+        return new Location(
+                fileIssueNodeNode.getFilePath(),
+                Paths.get(fileIssueNodeNode.getFilePath()).getFileName().toString(),
+                fileIssueNodeNode.getRowStart(),
+                fileIssueNodeNode.getColStart(),
+                fileIssueNodeNode.getRowEnd(),
+                fileIssueNodeNode.getColEnd(),
+                fileIssueNodeNode.getLineSnippet());
     }
 
     private static ApplicableDetails convertApplicableDetails(ApplicableInfo applicableInfo) {

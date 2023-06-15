@@ -84,7 +84,7 @@
                          enabledByDefault="true"
                          implementationClass="com.jfrog.ide.idea.inspections.YarnInspection"/>
         <annotator language="JSON" implementationClass="com.jfrog.ide.idea.inspections.YarnInspection"/>
-        <externalAnnotator language="JavaScript"
+        <externalAnnotator language=""
                            implementationClass="com.jfrog.ide.idea.inspections.JFrogSecurityAnnotator"/>
     </extensions>
 

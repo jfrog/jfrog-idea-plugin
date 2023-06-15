@@ -9,7 +9,7 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
-import com.jfrog.ide.common.nodes.ApplicableIssueNode;
+import com.jfrog.ide.common.nodes.FileIssueNode;
 import com.jfrog.ide.common.nodes.FileTreeNode;
 import com.jfrog.ide.common.nodes.SortableChildrenTreeNode;
 import com.jfrog.ide.idea.ui.ComponentsTree;
@@ -29,7 +29,7 @@ import java.util.Objects;
  *
  * @author Tal Arian
  */
-public class JFrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<ApplicableIssueNode>> {
+public class JFrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<FileIssueNode>> {
 
     @NotNull
     private static final HighlightSeverity HIGHLIGHT_TYPE = HighlightSeverity.WARNING;
@@ -42,8 +42,8 @@ public class JFrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<Appl
 
     @Nullable
     @Override
-    public List<ApplicableIssueNode> doAnnotate(PsiFile file) {
-        List<ApplicableIssueNode> applicableIssues = new ArrayList<>();
+    public List<FileIssueNode> doAnnotate(PsiFile file) {
+        List<FileIssueNode> issues = new ArrayList<>();
         ComponentsTree componentsTree = LocalComponentsTree.getInstance(file.getProject());
         if (componentsTree == null || componentsTree.getModel() == null) {
             return null;
@@ -53,18 +53,18 @@ public class JFrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<Appl
             FileTreeNode fileNode = (FileTreeNode) root;
             if (fileNode.getFilePath().equals(file.getContainingFile().getVirtualFile().getPath())) {
                 fileNode.children().asIterator().forEachRemaining(issueNode -> {
-                            if (issueNode instanceof ApplicableIssueNode) {
-                                applicableIssues.add((ApplicableIssueNode) issueNode);
+                            if (issueNode instanceof FileIssueNode) {
+                                issues.add((FileIssueNode) issueNode);
                             }
                         }
                 );
             }
         });
-        return applicableIssues;
+        return issues;
     }
 
     @Override
-    public void apply(@NotNull PsiFile file, List<ApplicableIssueNode> warnings, @NotNull AnnotationHolder holder) {
+    public void apply(@NotNull PsiFile file, List<FileIssueNode> warnings, @NotNull AnnotationHolder holder) {
         Document document = PsiDocumentManager.getInstance(file.getProject()).getDocument(file);
         if (document == null) {
             return;

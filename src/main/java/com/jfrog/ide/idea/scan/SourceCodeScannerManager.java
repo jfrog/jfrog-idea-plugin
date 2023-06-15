@@ -2,10 +2,7 @@ package com.jfrog.ide.idea.scan;
 
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.common.log.ProgressIndicator;
-import com.jfrog.ide.common.nodes.ApplicableIssueNode;
-import com.jfrog.ide.common.nodes.DependencyNode;
-import com.jfrog.ide.common.nodes.FileTreeNode;
-import com.jfrog.ide.common.nodes.VulnerabilityNode;
+import com.jfrog.ide.common.nodes.*;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
@@ -83,9 +80,9 @@ public class SourceCodeScannerManager {
         double fraction = 0;
         for (var scanner : scanners) {
             checkCanceled.run();
+            results.addAll(scanner.execute(createBasicScannerInput(), checkCanceled));
             fraction += 1.0 / scanners.size();
             indicator.setFraction(fraction);
-            results.addAll(scanner.execute(createBasicScannerInput(), checkCanceled));
         }
         return createFileIssueNodes(results);
     }
@@ -134,10 +131,10 @@ public class SourceCodeScannerManager {
                 results.put(warning.getFilePath(), fileNode);
             }
 
-            ApplicableIssueNode applicableIssue = new ApplicableIssueNode(
-                    cve, warning.getLineStart(), warning.getColStart(), warning.getLineEnd(), warning.getColEnd(),
-                    warning.getFilePath(), warning.getReason(), warning.getLineSnippet(), warning.getScannerSearchTarget(),
-                    issues.get(0));
+            FileIssueNode issueNode = new FileIssueNode(warning.getName(),
+                    warning.getFilePath(), warning.getLineStart(), warning.getColStart(), warning.getLineEnd(), warning.getColEnd(),
+                    warning.getReason(), warning.getLineSnippet(), warning.getReporter());
+            fileNode.addIssue(issueNode);
         }
         return new ArrayList<>(results.values());
     }

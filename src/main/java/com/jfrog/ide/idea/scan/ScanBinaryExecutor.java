@@ -76,6 +76,7 @@ public abstract class ScanBinaryExecutor {
     private static final String ENV_HTTPS_PROXY = "HTTPS_PROXY";
     private static final String ENV_LOG_DIR = "AM_LOG_DIRECTORY";
     private static final int USER_NOT_ENTITLED = 31;
+    private static final int NOT_SUPPORTED = 13;
     private static final String JFROG_RELEASES = "https://releases.jfrog.io/artifactory/";
     private static String osDistribution;
     private final ArtifactoryManagerBuilder artifactoryManagerBuilder;
@@ -153,6 +154,10 @@ public abstract class ScanBinaryExecutor {
                 log.debug("User not entitled for advance security scan");
                 return List.of();
             }
+            if (commandResults.getExitValue() == NOT_SUPPORTED) {
+                log.debug(String.format("Scanner %s is not supported in the current Analyzer Manager version.", scanType));
+                return List.of();
+            }
             if (!commandResults.isOk()) {
                 throw new IOException(commandResults.getErr());
             }
@@ -226,7 +231,7 @@ public abstract class ScanBinaryExecutor {
     protected List<JFrogSecurityWarning> parseOutputSarif(Path outputFile) throws IOException {
         Output output = getOutputObj(outputFile);
         List<JFrogSecurityWarning> warnings = new ArrayList<>();
-        output.getRuns().forEach(run -> run.getResults().forEach(result -> warnings.add(new JFrogSecurityWarning(result))));
+        output.getRuns().forEach(run -> run.getResults().forEach(result -> warnings.add(new JFrogSecurityWarning(result, scanType))));
         return warnings;
     }
 
