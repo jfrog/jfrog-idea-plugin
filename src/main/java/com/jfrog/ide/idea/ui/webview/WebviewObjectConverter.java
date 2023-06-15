@@ -9,6 +9,7 @@ import com.jfrog.ide.common.nodes.subentities.ImpactTreeNode;
 import com.jfrog.ide.common.nodes.subentities.ResearchInfo;
 import com.jfrog.ide.common.nodes.subentities.SeverityReason;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.idea.scan.IACScannerExecutor;
 import com.jfrog.ide.idea.scan.SecretsScannerExecutor;
 import com.jfrog.ide.idea.ui.webview.model.*;
 import org.apache.commons.collections4.CollectionUtils;
@@ -67,6 +68,8 @@ public class WebviewObjectConverter {
         switch (reporterType) {
             case SecretsScannerExecutor.SCAN_TYPE:
                 return "SECRETS";
+            case IACScannerExecutor.SCAN_TYPE:
+                return "IaC";
             default:
                 return "EMPTY";
         }

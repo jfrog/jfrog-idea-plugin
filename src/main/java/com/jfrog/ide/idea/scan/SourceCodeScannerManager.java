@@ -213,6 +213,9 @@ public class SourceCodeScannerManager {
     }
 
     private Collection<ScanBinaryExecutor> initScannersCollection() {
-        return List.of(new SecretsScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig()));
+        return List.of(
+                new SecretsScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig()),
+                new IACScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig())
+        );
     }
 }
