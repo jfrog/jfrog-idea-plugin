@@ -261,10 +261,11 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         } else if (issueNode instanceof FileIssueNode) {
             FileIssueNode node = (FileIssueNode) issueNode;
             webviewManager.sendMessage(WebviewObjectConverter.convertFileIssueToIssuePage(node));
+            navigateToFile(node);
         }
     }
 
-    private void navigateToFile(ApplicableIssueNode node) {
+    private void navigateToFile(FileIssueNode node) {
         ApplicationManager.getApplication().invokeLater(() -> {
             VirtualFile sourceCodeFile = LocalFileSystem.getInstance().findFileByIoFile(new File(node.getFilePath()));
             if (sourceCodeFile == null) {

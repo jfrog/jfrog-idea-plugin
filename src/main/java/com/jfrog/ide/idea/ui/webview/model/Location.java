@@ -1,8 +1,12 @@
 package com.jfrog.ide.idea.ui.webview.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Location {
     private final String file;
     private final String fileName;
+    // For webview version 0.1.22
+    @JsonProperty("row")
     private final int startRow;
     private final int startColumn;
     private final int endRow;

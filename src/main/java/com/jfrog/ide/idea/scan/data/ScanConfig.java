@@ -1,12 +1,13 @@
 package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.jfrog.ide.common.nodes.subentities.ScanType;
 
 import java.util.List;
 
 public class ScanConfig {
     @JsonProperty("type")
-    private String scanType;
+    private ScanType scanType;
     @JsonProperty("language")
     private String language;
     @JsonProperty("roots")
@@ -37,12 +38,12 @@ public class ScanConfig {
     }
 
     @SuppressWarnings("unused")
-    public String getScanType() {
+    public ScanType getScanType() {
         return scanType;
     }
 
     @SuppressWarnings("unused")
-    public void setScanType(String scanType) {
+    public void setScanType(ScanType scanType) {
         this.scanType = scanType;
     }
 
@@ -104,7 +105,7 @@ public class ScanConfig {
 
 
     public static class Builder {
-        private String scanType;
+        private ScanType scanType;
         private String language;
         private List<String> roots;
         private String output;
@@ -116,7 +117,7 @@ public class ScanConfig {
         }
 
         @SuppressWarnings("UnusedReturnValue")
-        public Builder scanType(String scanType) {
+        public Builder scanType(ScanType scanType) {
             this.scanType = scanType;
             return this;
         }

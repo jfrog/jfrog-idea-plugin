@@ -4,6 +4,7 @@ import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.scan.data.PackageType;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
+import com.jfrog.ide.common.nodes.subentities.ScanType;
 import com.jfrog.xray.client.services.entitlements.Feature;
 import org.jfrog.build.api.util.Log;
 
@@ -14,7 +15,6 @@ import java.util.List;
  * @author Tal Arian
  */
 public class IACScannerExecutor extends ScanBinaryExecutor {
-    public static final String SCAN_TYPE = "iac-scan-modules";
     private static final List<String> SCANNER_ARGS = List.of("iac");
 
 
@@ -23,7 +23,7 @@ public class IACScannerExecutor extends ScanBinaryExecutor {
     }
 
     public IACScannerExecutor(Log log, ServerConfig serverConfig, String binaryDownloadUrl, boolean useJFrogReleases) {
-        super(SCAN_TYPE, binaryDownloadUrl, log, serverConfig, useJFrogReleases);
+        super(ScanType.IAC, binaryDownloadUrl, log, serverConfig, useJFrogReleases);
     }
 
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException {

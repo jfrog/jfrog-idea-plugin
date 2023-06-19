@@ -21,12 +21,19 @@ public class SarifResult {
     @JsonProperty("kind")
     private String kind;
 
+    @JsonProperty("level")
+    private String severity;
+
     public Message getMessage() {
         return message;
     }
 
     public String getKind() {
         return StringUtils.defaultString(kind);
+    }
+
+    public String getSeverity() {
+        return StringUtils.defaultString(severity, "warning");
     }
 
     public void setMessage(Message message) {

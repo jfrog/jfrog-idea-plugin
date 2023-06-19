@@ -4,13 +4,11 @@ import com.jfrog.ide.common.nodes.DependencyNode;
 import com.jfrog.ide.common.nodes.FileIssueNode;
 import com.jfrog.ide.common.nodes.LicenseViolationNode;
 import com.jfrog.ide.common.nodes.VulnerabilityNode;
-import com.jfrog.ide.common.nodes.subentities.ApplicableInfo;
-import com.jfrog.ide.common.nodes.subentities.ImpactTreeNode;
-import com.jfrog.ide.common.nodes.subentities.ResearchInfo;
-import com.jfrog.ide.common.nodes.subentities.SeverityReason;
+import com.jfrog.ide.common.nodes.subentities.*;
 import com.jfrog.ide.common.scan.ComponentPrefix;
-import com.jfrog.ide.idea.scan.IACScannerExecutor;
-import com.jfrog.ide.idea.scan.SecretsScannerExecutor;
+import com.jfrog.ide.idea.ui.webview.model.Cve;
+import com.jfrog.ide.idea.ui.webview.model.Evidence;
+import com.jfrog.ide.idea.ui.webview.model.License;
 import com.jfrog.ide.idea.ui.webview.model.*;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -64,11 +62,11 @@ public class WebviewObjectConverter {
                 .location(convertFileLocation(fileIssueNodeNode));
     }
 
-    private static String ConvertPageType(String reporterType) {
+    private static String ConvertPageType(ScanType reporterType) {
         switch (reporterType) {
-            case SecretsScannerExecutor.SCAN_TYPE:
+            case SECRETS:
                 return "SECRETS";
-            case IACScannerExecutor.SCAN_TYPE:
+            case IAC:
                 return "IaC";
             default:
                 return "EMPTY";

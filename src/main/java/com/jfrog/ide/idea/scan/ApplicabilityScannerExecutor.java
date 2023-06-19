@@ -1,6 +1,7 @@
 package com.jfrog.ide.idea.scan;
 
 import com.jfrog.ide.common.configuration.ServerConfig;
+import com.jfrog.ide.common.nodes.subentities.ScanType;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.scan.data.*;
 import com.jfrog.xray.client.services.entitlements.Feature;
@@ -15,7 +16,6 @@ import java.util.Optional;
  * @author Tal Arian
  */
 public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
-    private static final String SCAN_TYPE = "analyze-applicability";
     private static final List<String> SCANNER_ARGS = List.of("ca");
     private static final List<PackageType> SUPPORTED_PACKAGE_TYPES = List.of(PackageType.PYPI, PackageType.NPM, PackageType.YARN);
 
@@ -25,7 +25,7 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
     }
 
     public ApplicabilityScannerExecutor(Log log, ServerConfig serverConfig, String binaryDownloadUrl, boolean useJFrogReleases) {
-        super(SCAN_TYPE, binaryDownloadUrl, log, serverConfig, useJFrogReleases);
+        super(ScanType.CONTEXTUAL, binaryDownloadUrl, log, serverConfig, useJFrogReleases);
         supportedPackageTypes = SUPPORTED_PACKAGE_TYPES;
     }
 

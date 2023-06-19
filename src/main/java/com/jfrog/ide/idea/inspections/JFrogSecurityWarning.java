@@ -1,8 +1,10 @@
 package com.jfrog.ide.idea.inspections;
 
+import com.jfrog.ide.common.nodes.subentities.Severity;
 import com.jfrog.ide.idea.scan.data.Message;
 import com.jfrog.ide.idea.scan.data.Region;
 import com.jfrog.ide.idea.scan.data.SarifResult;
+import com.jfrog.ide.common.nodes.subentities.ScanType;
 import org.apache.commons.lang.StringUtils;
 
 public class JFrogSecurityWarning {
@@ -15,7 +17,8 @@ public class JFrogSecurityWarning {
     private final String lineSnippet;
     private String scannerSearchTarget;
     private final String name;
-    private final String reporter;
+    private final ScanType reporter;
+    private final Severity severity;
 
     private final boolean isApplicable;
 
@@ -26,8 +29,9 @@ public class JFrogSecurityWarning {
             String filePath,
             String name,
             String lineSnippet,
-            String reporter,
-            boolean isApplicable
+            ScanType reporter,
+            boolean isApplicable,
+            Severity severity
     ) {
         this.lineStart = lineStart;
         this.colStart = colStart;
@@ -39,9 +43,10 @@ public class JFrogSecurityWarning {
         this.lineSnippet = lineSnippet;
         this.reporter = reporter;
         this.isApplicable = isApplicable;
+        this.severity = severity;
     }
 
-    public JFrogSecurityWarning(SarifResult result, String reporter) {
+    public JFrogSecurityWarning(SarifResult result, ScanType reporter) {
         this(getFirstRegion(result).getStartLine() - 1,
                 getFirstRegion(result).getStartColumn() - 1,
                 getFirstRegion(result).getEndLine() - 1,
@@ -51,7 +56,8 @@ public class JFrogSecurityWarning {
                 result.getRuleId(),
                 getFirstRegion(result).getSnippet().getText(),
                 reporter,
-                !result.getKind().equals("pass"));
+                !result.getKind().equals("pass"),
+                Severity.fromSarif(result.getSeverity()));
     }
 
     public int getLineStart() {
@@ -78,11 +84,7 @@ public class JFrogSecurityWarning {
         return filePath;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getReporter() {
+    public ScanType getReporter() {
         return reporter;
     }
 
@@ -106,5 +108,13 @@ public class JFrogSecurityWarning {
 
     public void setScannerSearchTarget(String scannerSearchTarget) {
         this.scannerSearchTarget = scannerSearchTarget;
+    }
+
+    public Severity getSeverity() {
+        return severity;
+    }
+
+    public String getName() {
+        return name;
     }
 }

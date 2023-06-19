@@ -3,14 +3,12 @@ package com.jfrog.ide.idea.scan;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.configuration.ServerConfig;
+import com.jfrog.ide.common.nodes.subentities.ScanType;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
-import com.jfrog.ide.idea.scan.data.Output;
-import com.jfrog.ide.idea.scan.data.PackageType;
-import com.jfrog.ide.idea.scan.data.ScanConfig;
-import com.jfrog.ide.idea.scan.data.ScansConfig;
+import com.jfrog.ide.idea.scan.data.*;
 import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.services.entitlements.Feature;
 import net.lingala.zip4j.ZipFile;
@@ -53,7 +51,7 @@ import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
  * @author Tal Arian
  */
 public abstract class ScanBinaryExecutor {
-    protected final String scanType;
+    protected final ScanType scanType;
     protected Collection<PackageType> supportedPackageTypes;
     private final Log log;
     private boolean notSupported;
@@ -81,7 +79,7 @@ public abstract class ScanBinaryExecutor {
     private static String osDistribution;
     private final ArtifactoryManagerBuilder artifactoryManagerBuilder;
 
-    ScanBinaryExecutor(String scanType, String binaryDownloadUrl, Log log, ServerConfig server, boolean useJFrogReleases) {
+    ScanBinaryExecutor(ScanType scanType, String binaryDownloadUrl, Log log, ServerConfig server, boolean useJFrogReleases) {
         this.scanType = scanType;
         this.log = log;
         BINARY_DOWNLOAD_URL = defaultIfEmpty(binaryDownloadUrl, DEFAULT_BINARY_DOWNLOAD_URL);
