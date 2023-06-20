@@ -166,11 +166,6 @@ public abstract class ScannerBase {
             fileTreeNodes.addAll(applicabilityScanResults);
             addScanResults(fileTreeNodes);
 
-            // Source code scanning
-            List<FileTreeNode> sourceCodeScanScanResults = sourceCodeScannerManager.sourceCodeScan(indicator, this::checkCanceled);
-            fileTreeNodes.addAll(sourceCodeScanScanResults);
-            addScanResults(fileTreeNodes);
-
             // Force inspections run due to changes in the displayed tree
             runInspections();
 
@@ -313,7 +308,7 @@ public abstract class ScannerBase {
             }
 
         };
-        executor.submit(createRunnable(scanAndUpdateTask, latch));
+        executor.submit(createRunnable(scanAndUpdateTask, latch, this.log));
     }
 
     /**
@@ -336,19 +331,19 @@ public abstract class ScannerBase {
     /**
      * Create a runnable to be submitted to the executor service, or run directly.
      *
-     * @param scanAndUpdateTask - The task to submit
-     * @param latch             - The countdown latch, which makes sure the executor service doesn't get more than 3 tasks.
-     *                          If null, the scan was initiated by a change in the project descriptor and the executor
-     *                          service is terminated. In this case, there is no requirement to wait.
+     * @param task  - The task to submit
+     * @param latch - The countdown latch, which makes sure the executor service doesn't get more than 3 tasks.
+     *              If null, the scan was initiated by a change in the project descriptor and the executor
+     *              service is terminated. In this case, there is no requirement to wait.
      */
-    private Runnable createRunnable(Task.Backgroundable scanAndUpdateTask, CountDownLatch latch) {
+    public static Runnable createRunnable(Task.Backgroundable task, CountDownLatch latch, Log log) {
         return () -> {
             // The progress manager is only good for foreground threads.
             if (SwingUtilities.isEventDispatchThread()) {
-                scanAndUpdateTask.queue();
+                task.queue();
             } else {
                 // Run the scan task when the thread is in the foreground.
-                ApplicationManager.getApplication().invokeLater(scanAndUpdateTask::queue);
+                ApplicationManager.getApplication().invokeLater(task::queue);
             }
             try {
                 // Wait for scan to finish, to make sure the thread pool remain full
@@ -395,9 +390,6 @@ public abstract class ScannerBase {
         });
     }
 
-    /**
-     * filter scan components tree model according to the user filters and sort the issues tree.
-     */
     private void addScanResults(List<FileTreeNode> fileTreeNodes) {
         if (fileTreeNodes.isEmpty()) {
             return;

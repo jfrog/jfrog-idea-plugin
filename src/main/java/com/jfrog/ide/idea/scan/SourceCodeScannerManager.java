@@ -1,5 +1,8 @@
 package com.jfrog.ide.idea.scan;
 
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.nodes.*;
@@ -7,18 +10,25 @@ import com.jfrog.ide.common.nodes.subentities.ScanType;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
+import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
 import com.jfrog.ide.idea.scan.data.PackageType;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
+import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.tree.TreeNode;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 
 import static com.jfrog.ide.common.log.Utils.logError;
+import static com.jfrog.ide.idea.scan.ScannerBase.createRunnable;
 import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.*;
 import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
 
@@ -32,8 +42,12 @@ public class SourceCodeScannerManager {
     protected PackageType packageType;
     private static final String SKIP_FOLDERS_SUFFIX = "*/**";
 
-    public SourceCodeScannerManager(Project project, PackageType packageType) {
+    public SourceCodeScannerManager(Project project) {
         this.project = project;
+    }
+
+    public SourceCodeScannerManager(Project project, PackageType packageType) {
+        this(project);
         this.packageType = packageType;
     }
 
@@ -75,17 +89,71 @@ public class SourceCodeScannerManager {
         return createAndUpdateApplicabilityIssueNodes(scanResults, issuesMap);
     }
 
-    public List<FileTreeNode> sourceCodeScan(ProgressIndicator indicator, Runnable checkCanceled) throws IOException, URISyntaxException, InterruptedException {
-        List<JFrogSecurityWarning> results = new ArrayList<>();
+    /**
+     * Launch async source code scans.
+     */
+    void asyncScanAndUpdateResults(ExecutorService executor, Logger log) {
+        // If intellij is still indexing the project, do not scan.
+        if (DumbService.isDumb(project)) {
+            return;
+        }
+        // The tasks run asynchronously. To make sure no more than 3 tasks are running concurrently,
+        // we use a count-down latch that signals to that executor service that it can get more tasks.
+        CountDownLatch latch = new CountDownLatch(1);
+        Task.Backgroundable sourceCodeScanTask = new Task.Backgroundable(null, "Advance source code scanning") {
+            @Override
+            public void run(@NotNull com.intellij.openapi.progress.ProgressIndicator indicator) {
+                if (project.isDisposed()) {
+                    return;
+                }
+                if (!GlobalSettings.getInstance().reloadXrayCredentials()) {
+                    throw new RuntimeException("Xray server is not configured.");
+                }
+                // Prevent multiple simultaneous scans
+                if (!scanInProgress.compareAndSet(false, true)) {
+                    log.info("Advance source code scan is already in progress");
+                    return;
+                }
+                sourceCodeScanAndUpdate(new ProgressIndicatorImpl(indicator), ProgressManager::checkCanceled, log);
+            }
+
+            @Override
+            public void onFinished() {
+                latch.countDown();
+                scanInProgress.set(false);
+            }
+
+            @Override
+            public void onThrowable(@NotNull Throwable error) {
+                log.error(ExceptionUtils.getRootCauseMessage(error));
+            }
+
+        };
+        executor.submit(createRunnable(sourceCodeScanTask, latch, log));
+    }
+
+    private void sourceCodeScanAndUpdate(ProgressIndicator indicator, Runnable checkCanceled, Logger log) {
         indicator.setText("Running advance source code scanning");
         double fraction = 0;
-        for (var scanner : scanners) {
+        for (ScanBinaryExecutor scanner : scanners) {
             checkCanceled.run();
-            results.addAll(scanner.execute(createBasicScannerInput(), checkCanceled));
+            try {
+                List<JFrogSecurityWarning> scanResults = scanner.execute(createBasicScannerInput(), checkCanceled);
+                addSourceCodeScanResults(createFileIssueNodes(scanResults));
+            } catch (IOException | URISyntaxException | InterruptedException e) {
+                logError(log, "", e, true);
+            }
             fraction += 1.0 / scanners.size();
             indicator.setFraction(fraction);
         }
-        return createFileIssueNodes(results);
+    }
+
+    private void addSourceCodeScanResults(List<FileTreeNode> fileTreeNodes) {
+        if (fileTreeNodes.isEmpty()) {
+            return;
+        }
+        LocalComponentsTree componentsTree = LocalComponentsTree.getInstance(project);
+        componentsTree.addScanResults(fileTreeNodes);
     }
 
     private ScanConfig.Builder createBasicScannerInput() {
