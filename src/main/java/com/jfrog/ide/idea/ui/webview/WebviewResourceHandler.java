@@ -20,7 +20,7 @@ import java.net.URLConnection;
 public class WebviewResourceHandler implements CefResourceHandler {
     private URL currUrl;
     private URLConnection connection;
-    private InputStream inputStream;
+    private InputStream webviewInputStream;
     private boolean error;
 
     @Override
@@ -30,10 +30,10 @@ public class WebviewResourceHandler implements CefResourceHandler {
         try {
             //noinspection DataFlowIssue
             connection = currUrl.openConnection();
-            if (inputStream != null) {
-                inputStream.close();
+            if (webviewInputStream != null) {
+                webviewInputStream.close();
             }
-            inputStream = connection.getInputStream();
+            webviewInputStream = connection.getInputStream();
             error = false;
             callback.Continue();
             return true;
@@ -67,10 +67,10 @@ public class WebviewResourceHandler implements CefResourceHandler {
                 response.setMimeType(connection.getContentType());
         }
         try {
-            responseLength.set(inputStream.available());
+            responseLength.set(webviewInputStream.available());
         } catch (IOException e) {
             Logger.getInstance().error("An error occurred while reading webview resource.", e);
-            inputStream = null;
+            webviewInputStream = null;
             response.setError(CefLoadHandler.ErrorCode.ERR_FAILED);
             response.setStatus(500);
             return;
@@ -81,17 +81,17 @@ public class WebviewResourceHandler implements CefResourceHandler {
     @Override
     public boolean readResponse(byte[] dataOut, int bytesToRead, IntRef bytesRead, CefCallback callback) {
         try {
-            int availableSize = inputStream.available();
+            int availableSize = webviewInputStream.available();
             if (availableSize < 1) {
-                inputStream.close();
-                inputStream = null;
+                webviewInputStream.close();
+                webviewInputStream = null;
                 return false;
             }
             int maxBytesToRead = Math.min(availableSize, bytesToRead);
-            bytesRead.set(inputStream.read(dataOut, 0, maxBytesToRead));
+            bytesRead.set(webviewInputStream.read(dataOut, 0, maxBytesToRead));
         } catch (IOException e) {
             Logger.getInstance().error("An error occurred while reading webview resource.", e);
-            inputStream = null;
+            webviewInputStream = null;
             return false;
         }
         return true;
@@ -100,10 +100,12 @@ public class WebviewResourceHandler implements CefResourceHandler {
     @Override
     public void cancel() {
         try {
-            inputStream.close();
+            if (webviewInputStream != null) {
+                webviewInputStream.close();
+            }
         } catch (IOException e) {
             // Do nothing
         }
-        inputStream = null;
+        webviewInputStream = null;
     }
 }
