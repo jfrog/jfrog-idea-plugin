@@ -2,6 +2,8 @@ package com.jfrog.ide.idea.scan;
 
 import com.intellij.testFramework.HeavyPlatformTestCase;
 import com.intellij.util.ConcurrencyUtil;
+import com.jfrog.ide.common.deptree.DepTree;
+import com.jfrog.ide.common.deptree.DepTreeNode;
 import com.jfrog.ide.common.gradle.GradleDriver;
 import com.jfrog.ide.common.scan.GraphScanLogic;
 import org.apache.commons.io.FileUtils;
@@ -9,8 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jetbrains.plugins.gradle.service.project.open.GradleProjectImportUtil;
 import org.jfrog.build.api.util.NullLog;
-import org.jfrog.build.extractor.scan.DependencyTree;
-import org.jfrog.build.extractor.scan.Scope;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import static com.jfrog.ide.idea.TestUtils.assertScopes;
 import static com.jfrog.ide.idea.TestUtils.getAndAssertChild;
 
 /**
@@ -82,21 +81,18 @@ public class GradleScannerTest extends HeavyPlatformTestCase {
         GradleScanner gradleScanner = new GradleScanner(getProject(), globalProjectDir, executorService, new GraphScanLogic(new NullLog()));
 
         // Run and check scan results
-        DependencyTree results = gradleScanner.buildTree();
+        DepTree results = gradleScanner.buildTree();
         assertNotNull(results);
-        assertTrue(results.isMetadata());
-        assertEquals(Paths.get(globalProjectDir).getFileName().toString(), results.getUserObject());
-        assertScopes(results);
-        assertEquals(3, results.getChildCount());
+        assertEquals(Paths.get(globalProjectDir).getFileName().toString(), results.getRootId());
+        assertEquals(3, results.getRootNode().getChildren().size());
 
         // Check module dependency
-        DependencyTree moduleNode = getAndAssertChild(results, "shared");
-        assertTrue(results.isMetadata());
-        assertEquals(1, moduleNode.getChildCount());
+        DepTreeNode moduleNode = getAndAssertChild(results, results.getRootNode(), "org.jfrog.test.gradle.publish:shared:1.0-SNAPSHOT");
+        assertEquals(1, moduleNode.getChildren().size());
+        assertEquals(8, moduleNode.getScopes().size());
 
         // Check dependency
-        DependencyTree dependencyNode = getAndAssertChild(moduleNode, "junit:junit:4.7");
-        assertFalse(dependencyNode.isMetadata());
-        assertContainsElements(dependencyNode.getScopes(), new Scope("TestImplementation"), new Scope("TestRuntimeClasspath"), new Scope("TestCompileClasspath"));
+        DepTreeNode dependencyNode = getAndAssertChild(results, moduleNode, "junit:junit:4.7");
+        assertContainsElements(dependencyNode.getScopes(), "testImplementation", "testRuntimeClasspath", "testCompileClasspath");
     }
 }

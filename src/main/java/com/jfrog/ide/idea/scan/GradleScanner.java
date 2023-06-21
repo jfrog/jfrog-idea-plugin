@@ -10,6 +10,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.util.EnvironmentUtil;
+import com.jfrog.ide.common.deptree.DepTree;
 import com.jfrog.ide.common.gradle.GradleTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
@@ -26,7 +27,6 @@ import org.jetbrains.plugins.gradle.service.settings.GradleConfigurable;
 import org.jetbrains.plugins.gradle.settings.DistributionType;
 import org.jetbrains.plugins.gradle.settings.GradleProjectSettings;
 import org.jetbrains.plugins.gradle.settings.GradleSettings;
-import org.jfrog.build.extractor.scan.DependencyTree;
 
 import java.io.File;
 import java.io.IOException;
@@ -67,7 +67,7 @@ public class GradleScanner extends SingleDescriptorScanner {
         Map<String, String> env = Maps.newHashMap(EnvironmentUtil.getEnvironmentMap());
         Path pluginLibDir = PluginManagerCore.getPlugin(PluginId.findId("org.jfrog.idea")).getPluginPath().resolve("lib");
         env.put("pluginLibDir", pluginLibDir.toAbsolutePath().toString());
-        gradleTreeBuilder = new GradleTreeBuilder(Paths.get(basePath), env, getGradleExeAndJdk(env));
+        gradleTreeBuilder = new GradleTreeBuilder(Paths.get(basePath), descriptorFilePath, env, getGradleExeAndJdk(env));
     }
 
     @Override
@@ -102,7 +102,7 @@ public class GradleScanner extends SingleDescriptorScanner {
     }
 
     @Override
-    protected DependencyTree buildTree() throws IOException {
+    protected DepTree buildTree() throws IOException {
         return gradleTreeBuilder.buildTree(getLog());
     }
 
