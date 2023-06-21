@@ -6,6 +6,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.jfrog.ide.idea.inspections.upgradeversion.GradleGroovyUpgradeVersion;
 import com.jfrog.ide.idea.inspections.upgradeversion.UpgradeVersion;
+import com.jfrog.ide.idea.utils.Descriptor;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.groovy.lang.psi.GroovyElementVisitor;
@@ -32,7 +33,7 @@ public class GradleGroovyInspection extends GradleInspection {
     public static final String GRADLE_VERSION_KEY = "version";
 
     public GradleGroovyInspection() {
-        super("build.gradle");
+        super(Descriptor.GRADLE_GROOVY);
     }
 
     /**

@@ -1,6 +1,8 @@
 package com.jfrog.ide.idea.actions;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.ToolbarLabelAction;
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.idea.scan.ScanManager;
@@ -23,12 +25,17 @@ public class ScanTimeLabelAction extends ToolbarLabelAction {
         }
         Long lastScanTime = LocalComponentsTree.getInstance(project).lastScanTime();
         boolean isScanInProgress = ScanManager.getInstance(project).isScanInProgress();
+        Presentation presentation = e.getPresentation();
         if (!isScanInProgress && lastScanTime != null) {
             DateTimeFormatter format = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
             LocalDateTime lastScanString = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastScanTime), ZoneId.systemDefault());
-            e.getPresentation().setText("Scanned: " + format.format(lastScanString));
+            boolean expired = LocalComponentsTree.getInstance(project).isCacheExpired();
+            String expiredMessage = expired ? " (outdated)" : "";
+            presentation.setText("Last scanned at " + format.format(lastScanString) + expiredMessage);
+            presentation.setIcon(expired ? AllIcons.General.Warning : null);
         } else {
-            e.getPresentation().setText("");
+            presentation.setText("");
+            presentation.setIcon(null);
         }
     }
 }

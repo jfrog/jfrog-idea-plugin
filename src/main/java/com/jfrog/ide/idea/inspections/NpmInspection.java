@@ -9,8 +9,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.jfrog.ide.idea.inspections.upgradeversion.NpmUpgradeVersion;
 import com.jfrog.ide.idea.inspections.upgradeversion.UpgradeVersion;
+import com.jfrog.ide.idea.scan.NpmScanner;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScannerBase;
+import com.jfrog.ide.idea.utils.Descriptor;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +24,7 @@ import java.util.Collection;
 public class NpmInspection extends AbstractInspection {
 
     public NpmInspection() {
-        super("package.json");
+        super(Descriptor.NPM);
     }
 
     @NotNull
@@ -54,8 +56,13 @@ public class NpmInspection extends AbstractInspection {
     ScannerBase getScanner(Project project, String path) {
         return ScanManager.getScanners(project).stream()
                 .filter(manager -> StringUtils.equals(manager.getProjectPath(), path))
+                .filter(this::isMatchingScanner)
                 .findAny()
                 .orElse(null);
+    }
+
+    boolean isMatchingScanner(ScannerBase scanner) {
+        return scanner instanceof NpmScanner;
     }
 
     @Override

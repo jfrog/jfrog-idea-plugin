@@ -23,6 +23,7 @@ import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.scan.ScannerBase;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
+import com.jfrog.ide.idea.utils.Descriptor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -44,8 +45,8 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     // True if the code inspection was automatically triggered after an Xray scan using InspectionEngine.runInspectionOnFile(...).
     private boolean afterScan;
 
-    AbstractInspection(String packageDescriptorName) {
-        this.packageDescriptorName = packageDescriptorName;
+    AbstractInspection(Descriptor descriptor) {
+        this.packageDescriptorName = descriptor.getFileName();
     }
 
     public void setAfterScan(boolean afterScan) {

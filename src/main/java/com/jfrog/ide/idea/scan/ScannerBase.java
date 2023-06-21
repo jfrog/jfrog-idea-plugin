@@ -359,7 +359,7 @@ public abstract class ScannerBase {
     }
 
     void runInspections() {
-        ApplicationManager.getApplication().invokeLater(() -> {
+        DumbService.getInstance(project).smartInvokeLater(() -> {
             PsiFile[] projectDescriptors = getProjectDescriptors();
             if (ArrayUtils.isEmpty(projectDescriptors)) {
                 return;
