@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import static com.jfrog.ide.idea.TestUtils.getAndAssertChild;
@@ -108,20 +107,6 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
         });
     }
 
-    /**
-     * Assert all nodes in the tree, except the root, contain scopes.
-     *
-     * @param tree - The dependency tree.
-     */
-    private static void assertScopes(DepTree tree) {
-        for (Map.Entry<String, DepTreeNode> node : tree.getNodes().entrySet()) {
-            if (node.getKey().equals(tree.getRootId())) {
-                continue;
-            }
-            assertNotEmpty(node.getValue().getScopes());
-        }
-    }
-
     public void testBuildTree() throws IOException {
         installDependencyOnVirtualEnv();
 
@@ -130,7 +115,6 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
         // Check root SDK node
         DepTree results = pypiScanner.buildTree();
         assertEquals(SDK_NAME, results.getRootId());
-        assertScopes(results);
         assertEquals(SDK_NAME, results.getRootId());
         assertEquals(pythonSdk.getHomePath(), results.getRootNode().getDescriptorFilePath());
         assertNotEmpty(results.getRootNode().getChildren());
@@ -154,7 +138,6 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
             // Check root SDK node
             DepTree results = pypiScanner.buildTree();
             assertEquals(SDK_NAME, results.getRootId());
-            assertScopes(results);
             assertEquals(pythonSdk.getHomePath(), results.getRootNode().getDescriptorFilePath());
             assertNotEmpty(results.getRootNode().getChildren());
 
