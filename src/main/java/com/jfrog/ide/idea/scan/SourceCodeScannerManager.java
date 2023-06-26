@@ -6,7 +6,6 @@ import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.nodes.*;
-import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
@@ -199,22 +198,31 @@ public class SourceCodeScannerManager {
                 results.put(warning.getFilePath(), fileNode);
             }
 
-            FileIssueNode issueNode = new FileIssueNode(createTitle(warning.getName(), warning.getReporter()),
+            FileIssueNode issueNode = new FileIssueNode(createTitle(warning),
                     warning.getFilePath(), warning.getLineStart(), warning.getColStart(), warning.getLineEnd(), warning.getColEnd(),
-                    warning.getReason(), warning.getLineSnippet(), warning.getReporter(), warning.getSeverity());
+                    createReason(warning), warning.getLineSnippet(), warning.getReporter(), warning.getSeverity());
             fileNode.addIssue(issueNode);
         }
         return new ArrayList<>(results.values());
     }
 
-    private String createTitle(String name, SourceCodeScanType reporter) {
-        switch (reporter) {
+    private String createReason(JFrogSecurityWarning warning) {
+        switch (warning.getReporter()) {
+            case IAC:
+                return warning.getScannerSearchTarget();
+            default:
+                return warning.getReason();
+        }
+    }
+
+    private String createTitle(JFrogSecurityWarning warning) {
+        switch (warning.getReporter()) {
             case SECRETS:
                 return "Potential Secret";
             case IAC:
                 return "Infrastructure as Code Vulnerability";
             default:
-                return name;
+                return warning.getName();
         }
     }
 

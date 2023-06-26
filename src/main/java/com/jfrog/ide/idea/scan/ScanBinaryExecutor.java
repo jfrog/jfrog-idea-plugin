@@ -8,10 +8,7 @@ import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
-import com.jfrog.ide.idea.scan.data.Output;
-import com.jfrog.ide.idea.scan.data.PackageManagerType;
-import com.jfrog.ide.idea.scan.data.ScanConfig;
-import com.jfrog.ide.idea.scan.data.ScansConfig;
+import com.jfrog.ide.idea.scan.data.*;
 import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.services.entitlements.Feature;
 import net.lingala.zip4j.ZipFile;
@@ -234,6 +231,16 @@ public abstract class ScanBinaryExecutor {
         Output output = getOutputObj(outputFile);
         List<JFrogSecurityWarning> warnings = new ArrayList<>();
         output.getRuns().forEach(run -> run.getResults().forEach(result -> warnings.add(new JFrogSecurityWarning(result, scanType))));
+
+        Optional<Run> run = output.getRuns().stream().findFirst();
+        if (run.isPresent()) {
+            List<Rule> scanners = run.get().getTool().getDriver().getRules();
+            // Adds the scanner search target data
+            for (JFrogSecurityWarning warning : warnings) {
+                String ScannerSearchTarget = scanners.stream().filter(scanner -> scanner.getId().equals(warning.getName())).findFirst().map(Rule::getFullDescription).map(Message::getText).orElse("");
+                warning.setScannerSearchTarget(ScannerSearchTarget);
+            }
+        }
         return warnings;
     }
 

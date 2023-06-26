@@ -3,14 +3,13 @@ package com.jfrog.ide.idea.scan;
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
-import com.jfrog.ide.idea.scan.data.*;
+import com.jfrog.ide.idea.scan.data.PackageManagerType;
+import com.jfrog.ide.idea.scan.data.ScanConfig;
 import com.jfrog.xray.client.services.entitlements.Feature;
 import org.jfrog.build.api.util.Log;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @author Tal Arian
@@ -37,21 +36,4 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
     Feature getScannerFeatureName() {
         return Feature.ContextualAnalysis;
     }
-
-    @Override
-    protected List<JFrogSecurityWarning> parseOutputSarif(Path outputFile) throws IOException {
-        List<JFrogSecurityWarning> results = super.parseOutputSarif(outputFile);
-        Output output = getOutputObj(outputFile);
-        Optional<Run> run = output.getRuns().stream().findFirst();
-        if (run.isPresent()) {
-            List<Rule> scanners = run.get().getTool().getDriver().getRules();
-            // Adds the scanner search target data
-            for (JFrogSecurityWarning warning : results) {
-                String ScannerSearchTarget = scanners.stream().filter(scanner -> scanner.getId().equals(warning.getName())).findFirst().map(scanner -> scanner.getFullDescription().getText()).orElse("");
-                warning.setScannerSearchTarget(ScannerSearchTarget);
-            }
-        }
-        return results;
-    }
-
 }
