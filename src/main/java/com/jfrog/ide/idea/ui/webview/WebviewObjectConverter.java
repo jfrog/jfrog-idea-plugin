@@ -77,10 +77,10 @@ public class WebviewObjectConverter {
         return new Location(
                 fileIssueNodeNode.getFilePath(),
                 Paths.get(fileIssueNodeNode.getFilePath()).getFileName().toString(),
-                fileIssueNodeNode.getRowStart(),
-                fileIssueNodeNode.getColStart(),
-                fileIssueNodeNode.getRowEnd(),
-                fileIssueNodeNode.getColEnd(),
+                fileIssueNodeNode.getRowStart() + 1,
+                fileIssueNodeNode.getColStart() + 1,
+                fileIssueNodeNode.getRowEnd() + 1,
+                fileIssueNodeNode.getColEnd() + 1,
                 fileIssueNodeNode.getLineSnippet());
     }
 
