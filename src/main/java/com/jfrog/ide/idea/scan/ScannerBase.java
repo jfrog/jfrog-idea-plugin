@@ -31,7 +31,7 @@ import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
-import com.jfrog.ide.idea.scan.data.PackageType;
+import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
@@ -122,7 +122,7 @@ public abstract class ScannerBase {
         ApplicationManager.getApplication().invokeLater(() -> Utils.sendUsageReport(getPackageManagerType().getName() + "-deps"));
     }
 
-    protected abstract PackageType getPackageManagerType();
+    protected abstract PackageManagerType getPackageManagerType();
 
     /**
      * Groups a collection of DependencyNodes by the descriptor files of the modules that depend on them.

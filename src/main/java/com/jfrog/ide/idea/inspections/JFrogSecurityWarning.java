@@ -4,7 +4,7 @@ import com.jfrog.ide.common.nodes.subentities.Severity;
 import com.jfrog.ide.idea.scan.data.Message;
 import com.jfrog.ide.idea.scan.data.Region;
 import com.jfrog.ide.idea.scan.data.SarifResult;
-import com.jfrog.ide.common.nodes.subentities.ScanType;
+import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import org.apache.commons.lang.StringUtils;
 
 public class JFrogSecurityWarning {
@@ -17,7 +17,7 @@ public class JFrogSecurityWarning {
     private final String lineSnippet;
     private String scannerSearchTarget;
     private final String name;
-    private final ScanType reporter;
+    private final SourceCodeScanType reporter;
     private final Severity severity;
 
     private final boolean isApplicable;
@@ -29,7 +29,7 @@ public class JFrogSecurityWarning {
             String filePath,
             String name,
             String lineSnippet,
-            ScanType reporter,
+            SourceCodeScanType reporter,
             boolean isApplicable,
             Severity severity
     ) {
@@ -46,7 +46,7 @@ public class JFrogSecurityWarning {
         this.severity = severity;
     }
 
-    public JFrogSecurityWarning(SarifResult result, ScanType reporter) {
+    public JFrogSecurityWarning(SarifResult result, SourceCodeScanType reporter) {
         this(getFirstRegion(result).getStartLine() - 1,
                 getFirstRegion(result).getStartColumn() - 1,
                 getFirstRegion(result).getEndLine() - 1,
@@ -84,7 +84,7 @@ public class JFrogSecurityWarning {
         return filePath;
     }
 
-    public ScanType getReporter() {
+    public SourceCodeScanType getReporter() {
         return reporter;
     }
 

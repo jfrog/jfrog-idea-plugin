@@ -3,12 +3,15 @@ package com.jfrog.ide.idea.scan;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.configuration.ServerConfig;
-import com.jfrog.ide.common.nodes.subentities.ScanType;
+import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
-import com.jfrog.ide.idea.scan.data.*;
+import com.jfrog.ide.idea.scan.data.Output;
+import com.jfrog.ide.idea.scan.data.PackageManagerType;
+import com.jfrog.ide.idea.scan.data.ScanConfig;
+import com.jfrog.ide.idea.scan.data.ScansConfig;
 import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.services.entitlements.Feature;
 import net.lingala.zip4j.ZipFile;
@@ -51,21 +54,15 @@ import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
  * @author Tal Arian
  */
 public abstract class ScanBinaryExecutor {
-    protected final ScanType scanType;
-    protected Collection<PackageType> supportedPackageTypes;
-    private final Log log;
-    private boolean notSupported;
     private static final long MAX_EXECUTION_MINUTES = 10;
+    private static final int UPDATE_INTERVAL = 1;
+    private static final int USER_NOT_ENTITLED = 31;
+    private static final int NOT_SUPPORTED = 13;
+    private static final Path BINARIES_DIR = HOME_PATH.resolve("dependencies").resolve("jfrog-security");
     private static final String SCANNER_BINARY_NAME = "analyzerManager";
     private static final String DEFAULT_BINARY_DOWNLOAD_URL = "xsc-gen-exe-analyzer-manager-local/v1/[RELEASE]";
     private static final String DOWNLOAD_SCANNER_NAME = "analyzerManager.zip";
-    private final String BINARY_DOWNLOAD_URL;
-    private static final Path BINARIES_DIR = HOME_PATH.resolve("dependencies").resolve("jfrog-security");
-    private static Path binaryTargetPath;
-    private static Path archiveTargetPath;
     private static final String MINIMAL_XRAY_VERSION_SUPPORTED_FOR_ENTITLEMENT = "3.66.0";
-    private static final int UPDATE_INTERVAL = 1;
-    private static LocalDateTime nextUpdateCheck;
     private static final String ENV_PLATFORM = "JF_PLATFORM_URL";
     private static final String ENV_USER = "JF_USER";
     private static final String ENV_PASSWORD = "JF_PASS";
@@ -73,13 +70,19 @@ public abstract class ScanBinaryExecutor {
     private static final String ENV_HTTP_PROXY = "HTTP_PROXY";
     private static final String ENV_HTTPS_PROXY = "HTTPS_PROXY";
     private static final String ENV_LOG_DIR = "AM_LOG_DIRECTORY";
-    private static final int USER_NOT_ENTITLED = 31;
-    private static final int NOT_SUPPORTED = 13;
     private static final String JFROG_RELEASES = "https://releases.jfrog.io/artifactory/";
+    private final String BINARY_DOWNLOAD_URL;
+    private static Path binaryTargetPath;
+    private static Path archiveTargetPath;
     private static String osDistribution;
+    private static LocalDateTime nextUpdateCheck;
     private final ArtifactoryManagerBuilder artifactoryManagerBuilder;
+    protected final SourceCodeScanType scanType;
+    protected Collection<PackageManagerType> supportedPackageTypes;
+    private final Log log;
+    private boolean notSupported;
 
-    ScanBinaryExecutor(ScanType scanType, String binaryDownloadUrl, Log log, ServerConfig server, boolean useJFrogReleases) {
+    ScanBinaryExecutor(SourceCodeScanType scanType, String binaryDownloadUrl, Log log, ServerConfig server, boolean useJFrogReleases) {
         this.scanType = scanType;
         this.log = log;
         BINARY_DOWNLOAD_URL = defaultIfEmpty(binaryDownloadUrl, DEFAULT_BINARY_DOWNLOAD_URL);
@@ -116,18 +119,19 @@ public abstract class ScanBinaryExecutor {
         return osDistribution;
     }
 
-    abstract List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException, URISyntaxException;
-
     public String getBinaryDownloadURL() {
         return String.format("%s/%s/%s", BINARY_DOWNLOAD_URL, getOsDistribution(), DOWNLOAD_SCANNER_NAME);
     }
 
     abstract Feature getScannerFeatureName();
 
+    abstract List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException, URISyntaxException;
+
     protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args, Runnable checkCanceled) throws IOException, InterruptedException {
         if (!shouldExecute()) {
             return List.of();
         }
+        checkCanceled.run();
         CommandExecutor commandExecutor = new CommandExecutor(binaryTargetPath.toString(), creatEnvWithCredentials());
         updateBinaryIfNeeded();
         Path outputTempDir = null;
@@ -222,7 +226,7 @@ public abstract class ScanBinaryExecutor {
         }
     }
 
-    protected boolean isPackageTypeSupported(PackageType type) {
+    protected boolean isPackageTypeSupported(PackageManagerType type) {
         return supportedPackageTypes.contains(type);
     }
 

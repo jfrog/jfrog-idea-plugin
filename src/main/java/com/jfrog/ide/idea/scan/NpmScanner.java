@@ -12,7 +12,7 @@ import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.NpmInspection;
-import com.jfrog.ide.idea.scan.data.PackageType;
+import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 
@@ -60,8 +60,8 @@ public class NpmScanner extends SingleDescriptorScanner {
     }
 
     @Override
-    protected PackageType getPackageManagerType() {
-        return PackageType.NPM;
+    protected PackageManagerType getPackageManagerType() {
+        return PackageManagerType.NPM;
     }
 
 }

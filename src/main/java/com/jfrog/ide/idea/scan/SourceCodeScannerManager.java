@@ -6,12 +6,12 @@ import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.nodes.*;
-import com.jfrog.ide.common.nodes.subentities.ScanType;
+import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
-import com.jfrog.ide.idea.scan.data.PackageType;
+import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import org.apache.commons.lang.StringUtils;
@@ -39,14 +39,14 @@ public class SourceCodeScannerManager {
     private final Collection<ScanBinaryExecutor> scanners = initScannersCollection();
 
     protected Project project;
-    protected PackageType packageType;
+    protected PackageManagerType packageType;
     private static final String SKIP_FOLDERS_SUFFIX = "*/**";
 
     public SourceCodeScannerManager(Project project) {
         this.project = project;
     }
 
-    public SourceCodeScannerManager(Project project, PackageType packageType) {
+    public SourceCodeScannerManager(Project project, PackageManagerType packageType) {
         this(project);
         this.packageType = packageType;
     }
@@ -100,7 +100,7 @@ public class SourceCodeScannerManager {
         // The tasks run asynchronously. To make sure no more than 3 tasks are running concurrently,
         // we use a count-down latch that signals to that executor service that it can get more tasks.
         CountDownLatch latch = new CountDownLatch(1);
-        Task.Backgroundable sourceCodeScanTask = new Task.Backgroundable(null, "Advance source code scanning") {
+        Task.Backgroundable sourceCodeScanTask = new Task.Backgroundable(null, "Advanced source code scanning") {
             @Override
             public void run(@NotNull com.intellij.openapi.progress.ProgressIndicator indicator) {
                 if (project.isDisposed()) {
@@ -111,7 +111,7 @@ public class SourceCodeScannerManager {
                 }
                 // Prevent multiple simultaneous scans
                 if (!scanInProgress.compareAndSet(false, true)) {
-                    log.info("Advance source code scan is already in progress");
+                    log.info("Advanced source code scan is already in progress");
                     return;
                 }
                 sourceCodeScanAndUpdate(new ProgressIndicatorImpl(indicator), ProgressManager::checkCanceled, log);
@@ -192,7 +192,6 @@ public class SourceCodeScannerManager {
     private List<FileTreeNode> createFileIssueNodes(List<JFrogSecurityWarning> scanResults) {
         HashMap<String, FileTreeNode> results = new HashMap<>();
         for (JFrogSecurityWarning warning : scanResults) {
-
             // Create FileTreeNodes for files with found issues
             FileTreeNode fileNode = results.get(warning.getFilePath());
             if (fileNode == null) {
@@ -208,12 +207,12 @@ public class SourceCodeScannerManager {
         return new ArrayList<>(results.values());
     }
 
-    private String createTitle(String name, ScanType reporter) {
+    private String createTitle(String name, SourceCodeScanType reporter) {
         switch (reporter) {
             case SECRETS:
                 return "Potential Secret";
             case IAC:
-                return "Infrastructure As Code Vulnerability";
+                return "Infrastructure as Code Vulnerability";
             default:
                 return name;
         }
@@ -245,7 +244,6 @@ public class SourceCodeScannerManager {
                             cve, warning.getLineStart(), warning.getColStart(), warning.getLineEnd(), warning.getColEnd(),
                             warning.getFilePath(), warning.getReason(), warning.getLineSnippet(), warning.getScannerSearchTarget(),
                             issues.get(0));
-                    //noinspection DataFlowIssue
                     fileNode.addIssue(applicableIssue);
                     for (VulnerabilityNode issue : issues) {
                         issue.updateApplicableInfo(applicableIssue);

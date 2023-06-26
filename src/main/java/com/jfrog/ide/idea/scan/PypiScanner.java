@@ -13,7 +13,7 @@ import com.jfrog.ide.common.deptree.DepTreeNode;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
-import com.jfrog.ide.idea.scan.data.PackageType;
+import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import org.apache.commons.collections4.CollectionUtils;
@@ -110,7 +110,7 @@ public class PypiScanner extends SingleDescriptorScanner {
     }
 
     @Override
-    protected PackageType getPackageManagerType() {
-        return PackageType.PYPI;
+    protected PackageManagerType getPackageManagerType() {
+        return PackageManagerType.PYPI;
     }
 }

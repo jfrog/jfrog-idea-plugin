@@ -1,6 +1,6 @@
 package com.jfrog.ide.idea.scan.data;
 
-public enum PackageType {
+public enum PackageManagerType {
     PYPI("pypi"),
     NPM("npm"),
     YARN("yarn"),
@@ -10,7 +10,7 @@ public enum PackageType {
 
     private final String name;
 
-    PackageType(String name) {
+    PackageManagerType(String name) {
         this.name = name;
     }
 

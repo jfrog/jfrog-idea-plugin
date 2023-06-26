@@ -18,7 +18,7 @@ import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.GradleGroovyInspection;
 import com.jfrog.ide.idea.inspections.GradleKotlinInspection;
 import com.jfrog.ide.idea.log.Logger;
-import com.jfrog.ide.idea.scan.data.PackageType;
+import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import org.apache.commons.lang3.StringUtils;
@@ -91,8 +91,8 @@ public class GradleScanner extends SingleDescriptorScanner {
     }
 
     @Override
-    protected PackageType getPackageManagerType() {
-        return PackageType.GRADLE;
+    protected PackageManagerType getPackageManagerType() {
+        return PackageManagerType.GRADLE;
     }
 
     @Override

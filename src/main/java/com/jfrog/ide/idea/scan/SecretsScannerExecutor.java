@@ -2,9 +2,9 @@ package com.jfrog.ide.idea.scan;
 
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
-import com.jfrog.ide.idea.scan.data.PackageType;
+import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
-import com.jfrog.ide.common.nodes.subentities.ScanType;
+import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.xray.client.services.entitlements.Feature;
 import org.jfrog.build.api.util.Log;
 
@@ -17,13 +17,12 @@ import java.util.List;
 public class SecretsScannerExecutor extends ScanBinaryExecutor {
     private static final List<String> SCANNER_ARGS = List.of("sec");
 
-
     public SecretsScannerExecutor(Log log, ServerConfig serverConfig) {
         this(log, serverConfig, null, true);
     }
 
     public SecretsScannerExecutor(Log log, ServerConfig serverConfig, String binaryDownloadUrl, boolean useJFrogReleases) {
-        super(ScanType.SECRETS, binaryDownloadUrl, log, serverConfig, useJFrogReleases);
+        super(SourceCodeScanType.SECRETS, binaryDownloadUrl, log, serverConfig, useJFrogReleases);
     }
 
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException {
@@ -36,8 +35,7 @@ public class SecretsScannerExecutor extends ScanBinaryExecutor {
     }
 
     @Override
-    protected boolean isPackageTypeSupported(PackageType packageType) {
+    protected boolean isPackageTypeSupported(PackageManagerType packageType) {
         return true;
     }
-
 }

@@ -20,7 +20,6 @@ public class SarifResult {
     private List<CodeFlow> codeFlows = new ArrayList<>();
     @JsonProperty("kind")
     private String kind;
-
     @JsonProperty("level")
     private String severity;
 
@@ -84,5 +83,4 @@ public class SarifResult {
         SarifResult rhs = ((SarifResult) other);
         return ((((CollectionUtils.isEqualCollection(this.locations, rhs.locations)) && (Objects.equals(this.message, rhs.message))) && (Objects.equals(this.ruleId, rhs.ruleId))) && (CollectionUtils.isEqualCollection(this.codeFlows, rhs.codeFlows)));
     }
-
 }

@@ -1,6 +1,4 @@
 <idea-plugin>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.python-pro-capable</depends>
-    <extensions defaultExtensionNs="com.intellij">
-    </extensions>
 </idea-plugin>

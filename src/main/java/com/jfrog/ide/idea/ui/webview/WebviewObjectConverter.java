@@ -62,7 +62,7 @@ public class WebviewObjectConverter {
                 .location(convertFileLocation(fileIssueNodeNode));
     }
 
-    private static String ConvertPageType(ScanType reporterType) {
+    private static String ConvertPageType(SourceCodeScanType reporterType) {
         switch (reporterType) {
             case SECRETS:
                 return "SECRETS";
