@@ -43,7 +43,7 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String DIRECT_DEPENDENCY_NAME = "pipgrip";
     private static final String DIRECT_DEPENDENCY_VERSION = "0.6.8";
     private static final String TRANSITIVE_DEPENDENCY_NAME = "anytree";
-    private static final String TRANSITIVE_DEPENDENCY_VERSION = "2.8.0";
+    private static final String TRANSITIVE_DEPENDENCY_VERSION = "2.9.0";
 
 
     private ExecutorService executorService;
