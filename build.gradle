@@ -21,7 +21,7 @@ def intellijType = testPython ? "IC" : "IU"
 intellij {
     version = sandboxVersion
     type = intellijType
-    plugins = ['gradle', 'maven', 'Groovy', 'properties', 'java', 'Kotlin', 'org.jetbrains.plugins.go:221.5080.210', "PythonCore:221.5080.210"]
+    plugins = ['gradle', 'maven', 'Groovy', 'properties', 'java', 'Kotlin', 'org.jetbrains.plugins.go:221.5080.210', "PythonCore:221.5080.216"]
     pluginName = 'JFrog'
     updateSinceUntilBuild = false
 }
