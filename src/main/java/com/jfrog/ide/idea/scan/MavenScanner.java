@@ -101,9 +101,9 @@ public class MavenScanner extends ScannerBase {
     /**
      * Populate recursively the dependency tree with the maven module and its dependencies.
      *
-     * @param nodes        - a map of {@link DepTreeNode}s by their component IDs to be filled with the module's components.
-     * @param parentModule - the root dependencies node
-     * @param mavenProject - the root Maven project
+     * @param nodes        a map of {@link DepTreeNode}s by their component IDs to be filled with the module's components.
+     * @param parentModule the parent dependency node
+     * @param mavenProject the root Maven project
      */
     private void populateMavenModule(Map<String, DepTreeNode> nodes, DepTreeNode parentModule, MavenProject mavenProject) {
         MavenId mavenId = mavenProject.getMavenId();

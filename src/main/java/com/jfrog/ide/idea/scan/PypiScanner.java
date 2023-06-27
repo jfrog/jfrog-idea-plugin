@@ -55,7 +55,7 @@ public class PypiScanner extends SingleDescriptorScanner {
     /**
      * Create a dependency tree for a given Python SDK.
      *
-     * @param pythonSdk - The Python SDK
+     * @param pythonSdk the Python SDK
      * @return dependency tree created for a given Python SDK.
      */
     private DepTree createSdkDependencyTree(Sdk pythonSdk) throws ExecutionException {
@@ -66,6 +66,7 @@ public class PypiScanner extends SingleDescriptorScanner {
 
         // Create dependency mapping
         Map<String, String> compIdByCompName = new HashMap<>();
+        // A set of the direct dependencies IDs. We add the IDs of all packages to the set, and remove the transitive ones below.
         Set<String> directDeps = new HashSet<>();
         for (PyPackage pyPackage : packages) {
             String compId = createComponentId(pyPackage.getName(), pyPackage.getVersion());
@@ -73,6 +74,7 @@ public class PypiScanner extends SingleDescriptorScanner {
             directDeps.add(compId);
         }
 
+        // Populate each node's children
         Map<String, DepTreeNode> nodes = new HashMap<>();
         for (PyPackage pyPackage : packages) {
             String compId = createComponentId(pyPackage.getName(), pyPackage.getVersion());
