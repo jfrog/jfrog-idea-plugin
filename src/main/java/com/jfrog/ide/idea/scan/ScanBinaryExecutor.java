@@ -237,8 +237,8 @@ public abstract class ScanBinaryExecutor {
             List<Rule> scanners = run.get().getTool().getDriver().getRules();
             // Adds the scanner search target data
             for (JFrogSecurityWarning warning : warnings) {
-                String ScannerSearchTarget = scanners.stream().filter(scanner -> scanner.getId().equals(warning.getName())).findFirst().map(Rule::getFullDescription).map(Message::getText).orElse("");
-                warning.setScannerSearchTarget(ScannerSearchTarget);
+                String scannerSearchTarget = scanners.stream().filter(scanner -> scanner.getId().equals(warning.getName())).findFirst().map(Rule::getFullDescription).map(Message::getText).orElse("");
+                warning.setScannerSearchTarget(scannerSearchTarget);
             }
         }
         return warnings;
