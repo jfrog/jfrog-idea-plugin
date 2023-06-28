@@ -90,7 +90,7 @@ public class WebviewObjectConverter {
 
     private static ImpactGraph convertImpactGraph(ImpactTreeNode impactTreeNode) {
         ImpactGraph[] children = impactTreeNode.getChildren().stream().map(WebviewObjectConverter::convertImpactGraph).toArray(ImpactGraph[]::new);
-        return new ImpactGraph(impactTreeNode.getNameWithoutPrefix(), children);
+        return new ImpactGraph(impactTreeNode.getName(), children);
     }
 
     private static Cve convertCve(com.jfrog.ide.common.nodes.subentities.Cve cve, ApplicableDetails applicableDetails) {

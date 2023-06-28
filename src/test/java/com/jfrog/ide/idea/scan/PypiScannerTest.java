@@ -13,6 +13,8 @@ import com.intellij.util.ConcurrencyUtil;
 import com.jetbrains.python.packaging.PyPackageManager;
 import com.jetbrains.python.packaging.PyPackageManagers;
 import com.jetbrains.python.sdk.PythonSdkType;
+import com.jfrog.ide.common.deptree.DepTree;
+import com.jfrog.ide.common.deptree.DepTreeNode;
 import com.jfrog.ide.common.scan.GraphScanLogic;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -21,8 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.executor.CommandExecutor;
 import org.jfrog.build.extractor.executor.CommandResults;
-import org.jfrog.build.extractor.scan.DependencyTree;
-import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
@@ -33,7 +33,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 
-import static com.jfrog.ide.idea.TestUtils.assertScopes;
 import static com.jfrog.ide.idea.TestUtils.getAndAssertChild;
 
 /**
@@ -44,7 +43,7 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String DIRECT_DEPENDENCY_NAME = "pipgrip";
     private static final String DIRECT_DEPENDENCY_VERSION = "0.6.8";
     private static final String TRANSITIVE_DEPENDENCY_NAME = "anytree";
-    private static final String TRANSITIVE_DEPENDENCY_VERSION = "2.8.0";
+    private static final String TRANSITIVE_DEPENDENCY_VERSION = "2.9.0";
 
 
     private ExecutorService executorService;
@@ -108,82 +107,56 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
         });
     }
 
-    public void testBuildTree() {
+    public void testBuildTree() throws IOException {
         installDependencyOnVirtualEnv();
 
         PypiScanner pypiScanner = new PypiScanner(getProject(), pythonSdk, executorService, new GraphScanLogic(new NullLog()));
 
         // Check root SDK node
-        DependencyTree results = pypiScanner.buildTree();
-        assertEquals(SDK_NAME, results.getUserObject());
-        assertScopes(results);
-        assertTrue(results.isMetadata());
-        GeneralInfo generalInfo = results.getGeneralInfo();
-        assertEquals("Python SDK", generalInfo.getPkgType());
-        assertEquals(SDK_NAME, generalInfo.getArtifactId());
-        assertEquals(pythonSdk.getHomePath(), generalInfo.getPath());
-        assertNotEmpty(results.getChildren());
+        DepTree results = pypiScanner.buildTree();
+        assertEquals(SDK_NAME, results.getRootId());
+        assertEquals(SDK_NAME, results.getRootId());
+        assertEquals(pythonSdk.getHomePath(), results.getRootNode().getDescriptorFilePath());
+        assertNotEmpty(results.getRootNode().getChildren());
 
         // Check direct dependency
-        DependencyTree pipGrip = getAndAssertChild(results, DIRECT_DEPENDENCY_NAME + ":" + DIRECT_DEPENDENCY_VERSION);
-        assertFalse(pipGrip.isMetadata());
+        String directDepId = DIRECT_DEPENDENCY_NAME + ":" + DIRECT_DEPENDENCY_VERSION;
+        DepTreeNode pipGrip = getAndAssertChild(results, results.getRootNode(), directDepId);
         assertSize(7, pipGrip.getChildren());
-        generalInfo = pipGrip.getGeneralInfo();
-        assertEquals("pypi", generalInfo.getPkgType());
-        assertEquals(DIRECT_DEPENDENCY_NAME, generalInfo.getArtifactId());
-        assertEquals(DIRECT_DEPENDENCY_VERSION, generalInfo.getVersion());
 
         // Check transitive dependency
-        DependencyTree anyTree = getAndAssertChild(pipGrip, TRANSITIVE_DEPENDENCY_NAME + ":" + TRANSITIVE_DEPENDENCY_VERSION);
-        assertFalse(anyTree.isMetadata());
-        generalInfo = anyTree.getGeneralInfo();
-        assertEquals("pypi", generalInfo.getPkgType());
-        assertEquals(TRANSITIVE_DEPENDENCY_NAME, generalInfo.getArtifactId());
-        assertEquals(TRANSITIVE_DEPENDENCY_VERSION, generalInfo.getVersion());
+        String transitiveDepId = TRANSITIVE_DEPENDENCY_NAME + ":" + TRANSITIVE_DEPENDENCY_VERSION;
+        DepTreeNode anyTree = getAndAssertChild(results, pipGrip, transitiveDepId);
         assertSize(1, anyTree.getChildren());
     }
 
-    public void testBuildTreeCircularDependency() {
+    public void testBuildTreeCircularDependency() throws IOException {
         try (MockedStatic<PyPackageManager> mockController = Mockito.mockStatic(PyPackageManager.class)) {
             mockController.when(() -> PyPackageManager.getInstance(pythonSdk)).thenReturn(new DummyCircularDepSDK());
             PypiScanner pypiScanner = new PypiScanner(getProject(), pythonSdk, executorService, new GraphScanLogic(new NullLog()));
 
             // Check root SDK node
-            DependencyTree results = pypiScanner.buildTree();
-            assertEquals(SDK_NAME, results.getUserObject());
-            assertScopes(results);
-            assertTrue(results.isMetadata());
-            GeneralInfo generalInfo = results.getGeneralInfo();
-            assertEquals("Python SDK", generalInfo.getPkgType());
-            assertEquals(SDK_NAME, generalInfo.getArtifactId());
-            assertEquals(pythonSdk.getHomePath(), generalInfo.getPath());
-            assertNotEmpty(results.getChildren());
+            DepTree results = pypiScanner.buildTree();
+            assertEquals(SDK_NAME, results.getRootId());
+            assertEquals(pythonSdk.getHomePath(), results.getRootNode().getDescriptorFilePath());
+            assertNotEmpty(results.getRootNode().getChildren());
 
             // The expected tree: root -> a-> b -> a
             // Check root
-            DependencyTree root = getAndAssertChild(results, DummyCircularDepSDK.DIRECT_DEPENDENCY_NAME + ":" + DummyCircularDepSDK.DIRECT_DEPENDENCY_VERSION);
+            String directDepId = DummyCircularDepSDK.DIRECT_DEPENDENCY_NAME + ":" + DummyCircularDepSDK.DIRECT_DEPENDENCY_VERSION;
+            DepTreeNode root = getAndAssertChild(results, results.getRootNode(), directDepId);
             assertSize(1, root.getChildren());
-            generalInfo = root.getGeneralInfo();
-            assertEquals("pypi", generalInfo.getPkgType());
-            assertEquals(DummyCircularDepSDK.DIRECT_DEPENDENCY_NAME, generalInfo.getArtifactId());
-            assertEquals(DummyCircularDepSDK.DIRECT_DEPENDENCY_VERSION, generalInfo.getVersion());
-            DependencyTree a = getAndAssertChild(root, DummyCircularDepSDK.CIRCULAR_DEPENDENCY_A + ":" + DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION);
+            String depIdA = DummyCircularDepSDK.CIRCULAR_DEPENDENCY_A + ":" + DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION;
+            DepTreeNode a = getAndAssertChild(results, root, depIdA);
 
             // Check dependency "a"
             assertSize(1, a.getChildren());
-            generalInfo = a.getGeneralInfo();
-            assertEquals("pypi", generalInfo.getPkgType());
-            assertEquals(DummyCircularDepSDK.CIRCULAR_DEPENDENCY_A, generalInfo.getArtifactId());
-            assertEquals(DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION, generalInfo.getVersion());
-            DependencyTree b = getAndAssertChild(a, DummyCircularDepSDK.CIRCULAR_DEPENDENCY_B + ":" + DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION);
+            String depIdB = DummyCircularDepSDK.CIRCULAR_DEPENDENCY_B + ":" + DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION;
+            DepTreeNode b = getAndAssertChild(results, a, depIdB);
 
             // Check dependency "b"
             assertSize(1, b.getChildren());
-            generalInfo = b.getGeneralInfo();
-            assertEquals("pypi", generalInfo.getPkgType());
-            assertEquals(DummyCircularDepSDK.CIRCULAR_DEPENDENCY_B, generalInfo.getArtifactId());
-            assertEquals(DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION, generalInfo.getVersion());
-            getAndAssertChild(b, DummyCircularDepSDK.CIRCULAR_DEPENDENCY_A + ":" + DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION);
+            getAndAssertChild(results, b, DummyCircularDepSDK.CIRCULAR_DEPENDENCY_A + ":" + DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION);
         }
     }
 }

@@ -7,6 +7,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.util.EnvironmentUtil;
+import com.jfrog.ide.common.deptree.DepTree;
 import com.jfrog.ide.common.go.GoTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
@@ -15,7 +16,6 @@ import com.jfrog.ide.idea.inspections.GoInspection;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import com.jfrog.ide.idea.utils.GoUtils;
-import org.jfrog.build.extractor.scan.DependencyTree;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -46,11 +46,11 @@ public class GoScanner extends SingleDescriptorScanner {
         } catch (NoClassDefFoundError error) {
             getLog().warn("Go plugin is not installed. Install it to get a better experience.");
         }
-        goTreeBuilder = new GoTreeBuilder(goExec, Paths.get(basePath), env, getLog());
+        goTreeBuilder = new GoTreeBuilder(goExec, Paths.get(basePath), descriptorFilePath, env, getLog());
     }
 
     @Override
-    protected DependencyTree buildTree() throws IOException {
+    protected DepTree buildTree() throws IOException {
         return goTreeBuilder.buildTree();
     }
 
