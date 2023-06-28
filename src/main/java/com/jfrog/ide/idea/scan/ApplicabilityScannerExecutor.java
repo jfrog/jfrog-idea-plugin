@@ -34,6 +34,6 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
 
     @Override
     Feature getScannerFeatureName() {
-        return Feature.ContextualAnalysis;
+        return Feature.CONTEXTUAL_ANALYSIS;
     }
 }

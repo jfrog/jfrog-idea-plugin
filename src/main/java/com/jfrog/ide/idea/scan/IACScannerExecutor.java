@@ -32,7 +32,7 @@ public class IACScannerExecutor extends ScanBinaryExecutor {
 
     @Override
     public Feature getScannerFeatureName() {
-        return Feature.InfrastructureAsCode;
+        return Feature.INFRASTRUCTURE_AS_CODE;
     }
 
     @Override

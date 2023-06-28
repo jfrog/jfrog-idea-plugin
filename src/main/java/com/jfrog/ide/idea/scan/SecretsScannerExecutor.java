@@ -31,7 +31,7 @@ public class SecretsScannerExecutor extends ScanBinaryExecutor {
 
     @Override
     public Feature getScannerFeatureName() {
-        return Feature.SecretsScanner;
+        return Feature.SECRETS;
     }
 
     @Override
