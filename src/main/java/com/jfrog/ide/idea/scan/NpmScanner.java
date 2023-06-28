@@ -12,6 +12,7 @@ import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.NpmInspection;
+import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 
@@ -23,9 +24,7 @@ import java.util.concurrent.ExecutorService;
  * Created by Yahav Itzhak on 13 Dec 2017.
  */
 public class NpmScanner extends SingleDescriptorScanner {
-
     private final NpmTreeBuilder npmTreeBuilder;
-    private final String PKG_TYPE = "npm";
 
     /**
      * @param project   currently opened IntelliJ project. We'll use this project to retrieve project based services
@@ -61,12 +60,8 @@ public class NpmScanner extends SingleDescriptorScanner {
     }
 
     @Override
-    protected String getPackageManagerName() {
-        return PKG_TYPE;
+    protected PackageManagerType getPackageManagerType() {
+        return PackageManagerType.NPM;
     }
 
-    @Override
-    public String getCodeBaseLanguage() {
-        return "js";
-    }
 }

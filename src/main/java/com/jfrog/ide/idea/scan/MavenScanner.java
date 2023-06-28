@@ -13,6 +13,7 @@ import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.MavenInspection;
+import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import com.jfrog.ide.idea.utils.Utils;
@@ -36,7 +37,6 @@ import static com.jfrog.ide.common.utils.Utils.createComponentId;
  * Created by romang on 3/2/17.
  */
 public class MavenScanner extends ScannerBase {
-    private final String PKG_TYPE = "maven";
     private final String POM_FILE_NAME = "pom.xml";
 
     /**
@@ -94,8 +94,8 @@ public class MavenScanner extends ScannerBase {
     }
 
     @Override
-    protected String getPackageManagerName() {
-        return PKG_TYPE;
+    protected PackageManagerType getPackageManagerType() {
+        return PackageManagerType.MAVEN;
     }
 
     /**
@@ -157,10 +157,5 @@ public class MavenScanner extends ScannerBase {
                 .filter(mavenArtifactChild -> mavenArtifactChild.getState() == MavenArtifactState.ADDED)
                 .forEach(childrenArtifactNode -> updateChildrenNodes(nodes, currentNode, childrenArtifactNode, false));
         parentNode.getChildren().add(compId);
-    }
-
-    @Override
-    public String getCodeBaseLanguage() {
-        return "java";
     }
 }

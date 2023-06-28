@@ -13,6 +13,7 @@ import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.GoInspection;
+import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import com.jfrog.ide.idea.utils.GoUtils;
@@ -27,7 +28,6 @@ import java.util.concurrent.ExecutorService;
  */
 public class GoScanner extends SingleDescriptorScanner {
     private final GoTreeBuilder goTreeBuilder;
-    private final String PKG_TYPE = "go";
 
     /**
      * @param project   currently opened IntelliJ project. We'll use this project to retrieve project based services
@@ -70,12 +70,8 @@ public class GoScanner extends SingleDescriptorScanner {
     }
 
     @Override
-    protected String getPackageManagerName() {
-        return PKG_TYPE;
+    protected PackageManagerType getPackageManagerType() {
+        return PackageManagerType.GO;
     }
 
-    @Override
-    public String getCodeBaseLanguage() {
-        return "go";
-    }
 }

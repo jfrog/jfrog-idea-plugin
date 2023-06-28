@@ -31,6 +31,7 @@ import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
+import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
@@ -84,7 +85,7 @@ public abstract class ScannerBase {
         this.executor = executor;
         this.basePath = basePath;
         this.project = project;
-        this.sourceCodeScannerManager = new SourceCodeScannerManager(project, getCodeBaseLanguage());
+        this.sourceCodeScannerManager = new SourceCodeScannerManager(project, getPackageManagerType());
         this.scanLogic = scanLogic;
     }
 
@@ -118,12 +119,10 @@ public abstract class ScannerBase {
     protected abstract AbstractInspection getInspectionTool();
 
     protected void sendUsageReport() {
-        ApplicationManager.getApplication().invokeLater(() -> Utils.sendUsageReport(getPackageManagerName() + "-deps"));
+        ApplicationManager.getApplication().invokeLater(() -> Utils.sendUsageReport(getPackageManagerType().getName() + "-deps"));
     }
 
-    protected abstract String getPackageManagerName();
-
-    public abstract String getCodeBaseLanguage();
+    protected abstract PackageManagerType getPackageManagerType();
 
     /**
      * Scan and update dependency components.
@@ -151,9 +150,9 @@ public abstract class ScannerBase {
             List<FileTreeNode> fileTreeNodes = walkDepTree(results, depTree);
             addScanResults(fileTreeNodes);
 
-            // Source code scanning
-            List<FileTreeNode> sourceCodeResFileNodes = sourceCodeScannerManager.scanAndUpdate(indicator, results.values());
-            fileTreeNodes.addAll(sourceCodeResFileNodes);
+            // Contextual Analysis
+            List<FileTreeNode> applicabilityScanResults = sourceCodeScannerManager.applicabilityScan(indicator, results.values(), this::checkCanceled);
+            fileTreeNodes.addAll(applicabilityScanResults);
             addScanResults(fileTreeNodes);
 
             // Force inspections run due to changes in the displayed tree
@@ -298,7 +297,7 @@ public abstract class ScannerBase {
             }
 
         };
-        executor.submit(createRunnable(scanAndUpdateTask, latch));
+        executor.submit(createRunnable(scanAndUpdateTask, latch, this.log));
     }
 
     /**
@@ -321,19 +320,19 @@ public abstract class ScannerBase {
     /**
      * Create a runnable to be submitted to the executor service, or run directly.
      *
-     * @param scanAndUpdateTask - The task to submit
-     * @param latch             - The countdown latch, which makes sure the executor service doesn't get more than 3 tasks.
-     *                          If null, the scan was initiated by a change in the project descriptor and the executor
-     *                          service is terminated. In this case, there is no requirement to wait.
+     * @param task  - The task to submit
+     * @param latch - The countdown latch, which makes sure the executor service doesn't get more than 3 tasks.
+     *              If null, the scan was initiated by a change in the project descriptor and the executor
+     *              service is terminated. In this case, there is no requirement to wait.
      */
-    private Runnable createRunnable(Task.Backgroundable scanAndUpdateTask, CountDownLatch latch) {
+    public static Runnable createRunnable(Task.Backgroundable task, CountDownLatch latch, Log log) {
         return () -> {
             // The progress manager is only good for foreground threads.
             if (SwingUtilities.isEventDispatchThread()) {
-                scanAndUpdateTask.queue();
+                task.queue();
             } else {
                 // Run the scan task when the thread is in the foreground.
-                ApplicationManager.getApplication().invokeLater(scanAndUpdateTask::queue);
+                ApplicationManager.getApplication().invokeLater(task::queue);
             }
             try {
                 // Wait for scan to finish, to make sure the thread pool remain full
@@ -380,9 +379,6 @@ public abstract class ScannerBase {
         });
     }
 
-    /**
-     * filter scan components tree model according to the user filters and sort the issues tree.
-     */
     private void addScanResults(List<FileTreeNode> fileTreeNodes) {
         if (fileTreeNodes.isEmpty()) {
             return;

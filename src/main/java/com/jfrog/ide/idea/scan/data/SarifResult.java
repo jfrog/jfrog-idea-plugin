@@ -20,6 +20,8 @@ public class SarifResult {
     private List<CodeFlow> codeFlows = new ArrayList<>();
     @JsonProperty("kind")
     private String kind;
+    @JsonProperty("level")
+    private String severity;
 
     public Message getMessage() {
         return message;
@@ -27,6 +29,10 @@ public class SarifResult {
 
     public String getKind() {
         return StringUtils.defaultString(kind);
+    }
+
+    public String getSeverity() {
+        return StringUtils.defaultString(severity, "warning");
     }
 
     public void setMessage(Message message) {
@@ -77,5 +83,4 @@ public class SarifResult {
         SarifResult rhs = ((SarifResult) other);
         return ((((CollectionUtils.isEqualCollection(this.locations, rhs.locations)) && (Objects.equals(this.message, rhs.message))) && (Objects.equals(this.ruleId, rhs.ruleId))) && (CollectionUtils.isEqualCollection(this.codeFlows, rhs.codeFlows)));
     }
-
 }
