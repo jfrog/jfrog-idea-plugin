@@ -57,7 +57,8 @@ public abstract class ScanBinaryExecutor {
     private static final int NOT_SUPPORTED = 13;
     private static final Path BINARIES_DIR = HOME_PATH.resolve("dependencies").resolve("jfrog-security");
     private static final String SCANNER_BINARY_NAME = "analyzerManager";
-    private static final String DEFAULT_BINARY_DOWNLOAD_URL = "xsc-gen-exe-analyzer-manager-local/v1/[RELEASE]";
+    private static final String SCANNER_BINARY_VERSION = "1.1.9.1786834";
+    private static final String DEFAULT_BINARY_DOWNLOAD_URL = "xsc-gen-exe-analyzer-manager-local/v1/" + SCANNER_BINARY_VERSION;
     private static final String DOWNLOAD_SCANNER_NAME = "analyzerManager.zip";
     private static final String MINIMAL_XRAY_VERSION_SUPPORTED_FOR_ENTITLEMENT = "3.66.0";
     private static final String ENV_PLATFORM = "JF_PLATFORM_URL";
