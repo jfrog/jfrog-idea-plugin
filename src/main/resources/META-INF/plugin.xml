@@ -30,13 +30,15 @@
 
     <change-notes>
         <![CDATA[
-          <li>Bug fix - IndexNotReadyException on plugin startup.</li>
+          <li>Improved cache expiry mechanism.</li>
+          <li>Decreased memory consumption while building dependency trees.</li>
+          <li>Bug fix - Yarn projects inspection not running on plugin startup.</li>
+          <li>Bug fix - usage report to Artifactory not using proxy configuration.</li>
         ]]>
     </change-notes>
 
     <idea-version since-build="221.5080"/>
     <depends>com.intellij.modules.lang</depends>
-    <depends config-file="with-java.xml" optional="true">com.intellij.modules.java</depends>
     <depends config-file="with-gradle.xml" optional="true">com.intellij.gradle</depends>
     <depends config-file="with-groovy.xml" optional="true">org.intellij.groovy</depends>
     <depends config-file="with-kotlin.xml" optional="true">org.jetbrains.kotlin</depends>
