@@ -11,9 +11,9 @@ public class MessagePacker implements MessagePipe {
         this.browser = browser;
     }
 
-    public void send(MessageType type, Object pageData) {
+    public void send(MessageType type, Object data) {
         try {
-            String raw = MessagePipeSupport.Pack(type, pageData);
+            String raw = MessagePipeSupport.Pack(type, data);
             Logger.getInstance().debug("Opening webview page with data: " + raw);
             this.send(raw);
         } catch (JsonProcessingException e) {

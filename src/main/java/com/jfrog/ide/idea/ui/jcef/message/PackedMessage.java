@@ -6,21 +6,17 @@ public class PackedMessage implements Serializable {
     private Object pageData;
     private String type;
 
-    public PackedMessage() {
-        this.pageData = null;
-    }
-
     public PackedMessage(MessageType type, Object data) {
         this.pageData = data;
-        this.type = type.getValue();
+        this.type = type.toString();
     }
 
     public Object getPageData() {
         return pageData;
     }
 
-    public void setPageData(String pageData) {
-        this.pageData = pageData;
+    public void setPageData(String data) {
+        this.pageData = data;
     }
 
     public String getType() {
@@ -28,6 +24,6 @@ public class PackedMessage implements Serializable {
     }
 
     public void setType(MessageType type) {
-        this.type = type.getValue();
+        this.type = type.toString();
     }
 }

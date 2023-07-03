@@ -7,8 +7,8 @@ import static com.jfrog.ide.common.utils.Utils.createMapper;
 
 public class MessagePipeSupport {
 
-    public static String Pack(MessageType type, Object pageData) throws JsonProcessingException {
+    public static String Pack(MessageType type, Object data) throws JsonProcessingException {
         ObjectMapper ow = createMapper();
-        return ow.writeValueAsString(new PackedMessage(type, pageData));
+        return ow.writeValueAsString(new PackedMessage(type, data));
     }
 }

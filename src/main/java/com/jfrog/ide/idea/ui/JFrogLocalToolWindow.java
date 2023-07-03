@@ -260,17 +260,17 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     private void updateIssueOrLicenseInWebview(IssueNode issueNode) {
         if (issueNode instanceof VulnerabilityNode) {
             VulnerabilityNode issue = (VulnerabilityNode) issueNode;
-            webviewManager.sendMessage(MessageType.ShowPage, WebviewObjectConverter.convertIssueToDepPage(issue));
+            webviewManager.sendMessage(MessageType.SHOW_PAGE, WebviewObjectConverter.convertIssueToDepPage(issue));
         } else if (issueNode instanceof ApplicableIssueNode) {
             ApplicableIssueNode node = (ApplicableIssueNode) issueNode;
-            webviewManager.sendMessage(MessageType.ShowPage, WebviewObjectConverter.convertIssueToDepPage(node.getIssue()));
+            webviewManager.sendMessage(MessageType.SHOW_PAGE, WebviewObjectConverter.convertIssueToDepPage(node.getIssue()));
             navigateToFile(node);
         } else if (issueNode instanceof LicenseViolationNode) {
             LicenseViolationNode license = (LicenseViolationNode) issueNode;
-            webviewManager.sendMessage(MessageType.ShowPage, WebviewObjectConverter.convertLicenseToDepPage(license));
+            webviewManager.sendMessage(MessageType.SHOW_PAGE, WebviewObjectConverter.convertLicenseToDepPage(license));
         } else if (issueNode instanceof FileIssueNode) {
             FileIssueNode node = (FileIssueNode) issueNode;
-            webviewManager.sendMessage(MessageType.ShowPage, WebviewObjectConverter.convertFileIssueToIssuePage(node));
+            webviewManager.sendMessage(MessageType.SHOW_PAGE, WebviewObjectConverter.convertFileIssueToIssuePage(node));
             navigateToFile(node);
         }
     }
