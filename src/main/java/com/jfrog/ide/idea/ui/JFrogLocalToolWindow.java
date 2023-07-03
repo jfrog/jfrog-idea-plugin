@@ -15,12 +15,21 @@ import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
-import com.intellij.ui.*;
+import com.intellij.ui.HyperlinkLabel;
+import com.intellij.ui.IdeBorderFactory;
+import com.intellij.ui.OnePixelSplitter;
+import com.intellij.ui.ScrollPaneFactory;
+import com.intellij.ui.SideBorder;
+import com.intellij.ui.TreeSpeedSearch;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.jcef.JBCefApp;
 import com.intellij.util.ui.UIUtil;
-import com.jfrog.ide.common.nodes.*;
+import com.jfrog.ide.common.nodes.ApplicableIssueNode;
+import com.jfrog.ide.common.nodes.FileIssueNode;
+import com.jfrog.ide.common.nodes.IssueNode;
+import com.jfrog.ide.common.nodes.LicenseViolationNode;
+import com.jfrog.ide.common.nodes.VulnerabilityNode;
 import com.jfrog.ide.idea.actions.CollapseAllAction;
 import com.jfrog.ide.idea.actions.ExpandAllAction;
 import com.jfrog.ide.idea.actions.GoToSettingsAction;
@@ -29,6 +38,7 @@ import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.ScanManager;
+import com.jfrog.ide.idea.ui.jcef.message.MessageType;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
 import com.jfrog.ide.idea.ui.webview.WebviewManager;
 import com.jfrog.ide.idea.ui.webview.WebviewObjectConverter;
@@ -250,17 +260,17 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     private void updateIssueOrLicenseInWebview(IssueNode issueNode) {
         if (issueNode instanceof VulnerabilityNode) {
             VulnerabilityNode issue = (VulnerabilityNode) issueNode;
-            webviewManager.sendMessage(WebviewObjectConverter.convertIssueToDepPage(issue));
+            webviewManager.sendMessage(MessageType.SHOW_PAGE, WebviewObjectConverter.convertIssueToDepPage(issue));
         } else if (issueNode instanceof ApplicableIssueNode) {
             ApplicableIssueNode node = (ApplicableIssueNode) issueNode;
-            webviewManager.sendMessage(WebviewObjectConverter.convertIssueToDepPage(node.getIssue()));
+            webviewManager.sendMessage(MessageType.SHOW_PAGE, WebviewObjectConverter.convertIssueToDepPage(node.getIssue()));
             navigateToFile(node);
         } else if (issueNode instanceof LicenseViolationNode) {
             LicenseViolationNode license = (LicenseViolationNode) issueNode;
-            webviewManager.sendMessage(WebviewObjectConverter.convertLicenseToDepPage(license));
+            webviewManager.sendMessage(MessageType.SHOW_PAGE, WebviewObjectConverter.convertLicenseToDepPage(license));
         } else if (issueNode instanceof FileIssueNode) {
             FileIssueNode node = (FileIssueNode) issueNode;
-            webviewManager.sendMessage(WebviewObjectConverter.convertFileIssueToIssuePage(node));
+            webviewManager.sendMessage(MessageType.SHOW_PAGE, WebviewObjectConverter.convertFileIssueToIssuePage(node));
             navigateToFile(node);
         }
     }

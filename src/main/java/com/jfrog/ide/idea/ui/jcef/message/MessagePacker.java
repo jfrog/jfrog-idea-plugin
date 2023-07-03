@@ -11,10 +11,10 @@ public class MessagePacker implements MessagePipe {
         this.browser = browser;
     }
 
-    public void send(Object data) {
+    public void send(MessageType type, Object data) {
         try {
-            String raw = MessagePipeSupport.Pack(data);
-            Logger.getInstance().debug("Opening webview page with data: "+ raw);
+            String raw = MessagePipeSupport.Pack(type, data);
+            Logger.getInstance().debug("Opening webview page with data: " + raw);
             this.send(raw);
         } catch (JsonProcessingException e) {
             Logger.getInstance().error(e.getMessage());
