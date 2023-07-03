@@ -3,25 +3,31 @@ package com.jfrog.ide.idea.ui.jcef.message;
 import java.io.Serializable;
 
 public class PackedMessage implements Serializable {
-
-    public static final String BROWSER_SEND_FUNCTION_NAME = "sendMessageToBrowser";
-    public static final String IDE_SEND_FUNCTION_NAME = "sendMessageToIde";
-
-    private Object data;
+    private Object pageData;
+    private String type;
 
     public PackedMessage() {
-        this.data = null;
+        this.pageData = null;
     }
 
-    public PackedMessage(Object data) {
-        this.data = data;
+    public PackedMessage(MessageType type, Object data) {
+        this.pageData = data;
+        this.type = type.getValue();
     }
 
-    public void setData(String data) {
-        this.data = data;
+    public Object getPageData() {
+        return pageData;
     }
 
-    public Object getData() {
-        return data;
+    public void setPageData(String pageData) {
+        this.pageData = pageData;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(MessageType type) {
+        this.type = type.getValue();
     }
 }
