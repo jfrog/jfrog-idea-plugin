@@ -1,6 +1,7 @@
 package com.jfrog.ide.idea.scan;
 
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.jetbrains.python.packaging.PyPackage;
 import com.jetbrains.python.packaging.PyPackageManager;
@@ -13,12 +14,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class DummyCircularDepSDK extends PyPackageManager {
+public class DummyCircularDepPyPkgManager extends PyPackageManager {
     public static final String DIRECT_DEPENDENCY_NAME = "root";
     public static final String DIRECT_DEPENDENCY_VERSION = "1.0.0";
     public static final String CIRCULAR_DEPENDENCY_A = "a";
     public static final String CIRCULAR_DEPENDENCY_B = "b";
     public static final String CIRCULAR_DEPENDENCY_VERSION = "2.0.0";
+
+    public DummyCircularDepPyPkgManager(@NotNull Sdk sdk) {
+        super(sdk);
+    }
 
     @Override
     public void installManagement() {

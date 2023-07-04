@@ -15,21 +15,12 @@ import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
-import com.intellij.ui.HyperlinkLabel;
-import com.intellij.ui.IdeBorderFactory;
-import com.intellij.ui.OnePixelSplitter;
-import com.intellij.ui.ScrollPaneFactory;
-import com.intellij.ui.SideBorder;
-import com.intellij.ui.TreeSpeedSearch;
+import com.intellij.ui.*;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.jcef.JBCefApp;
 import com.intellij.util.ui.UIUtil;
-import com.jfrog.ide.common.nodes.ApplicableIssueNode;
-import com.jfrog.ide.common.nodes.FileIssueNode;
-import com.jfrog.ide.common.nodes.IssueNode;
-import com.jfrog.ide.common.nodes.LicenseViolationNode;
-import com.jfrog.ide.common.nodes.VulnerabilityNode;
+import com.jfrog.ide.common.nodes.*;
 import com.jfrog.ide.idea.actions.CollapseAllAction;
 import com.jfrog.ide.idea.actions.ExpandAllAction;
 import com.jfrog.ide.idea.actions.GoToSettingsAction;
@@ -118,7 +109,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
      */
     public void registerListeners(JComponent browserComponent) {
         // Xray credentials were set listener
-        appBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () -> ApplicationManager.getApplication().invokeLater(this::onConfigurationChange));
+        appBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, (ApplicationEvents) () -> ApplicationManager.getApplication().invokeLater(this::onConfigurationChange));
 
         // Wrap the browser component in a Panel to avoid display issues that may occur in some versions of IntelliJ in Windows.
         JPanel browserWrapper = new JBPanel<>();
@@ -136,7 +127,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             updateIssueOrLicenseInWebview(selectedIssue);
             verticalSplit.setSecondComponent(browserWrapper);
         });
-        projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_LOCAL_STARTED, () -> {
+        projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_LOCAL_STARTED, (ApplicationEvents) () -> {
             setLeftPanelContent(compTreeView);
             ApplicationManager.getApplication().invokeLater(this::resetViews);
         });
@@ -163,7 +154,6 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         setLeftPanelContent(compTreeView);
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private JComponent createReadyEnvView() {
         JPanel readyEnvPanel = new JBPanel<>();
         readyEnvPanel.setLayout(new BoxLayout(readyEnvPanel, BoxLayout.PAGE_AXIS));
@@ -182,7 +172,6 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         return ComponentUtils.createUnsupportedPanel(readyEnvPanel);
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private JComponent createJcefNotSupportedView() {
         JPanel jcefNotSupportedPanel = new JBPanel<>();
         jcefNotSupportedPanel.setLayout(new BoxLayout(jcefNotSupportedPanel, BoxLayout.PAGE_AXIS));
@@ -248,7 +237,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
      */
     private JComponent createComponentsTreeView() {
         JPanel treePanel = new JBPanel<>(new GridLayout()).withBackground(UIUtil.getTableBackground());
-        TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(componentsTree, ComponentUtils::getPathSearchString, true);
+        TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(componentsTree, true, ComponentUtils::getPathSearchString);
         treeSpeedSearch.getComponent().getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         treePanel.add(treeSpeedSearch.getComponent(), BorderLayout.WEST);
         JScrollPane treeScrollPane = ScrollPaneFactory.createScrollPane(treePanel);
@@ -258,18 +247,15 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     }
 
     private void updateIssueOrLicenseInWebview(IssueNode issueNode) {
-        if (issueNode instanceof VulnerabilityNode) {
-            VulnerabilityNode issue = (VulnerabilityNode) issueNode;
+        if (issueNode instanceof VulnerabilityNode issue) {
             webviewManager.sendMessage(MessageType.SHOW_PAGE, WebviewObjectConverter.convertIssueToDepPage(issue));
         } else if (issueNode instanceof ApplicableIssueNode) {
             ApplicableIssueNode node = (ApplicableIssueNode) issueNode;
             webviewManager.sendMessage(MessageType.SHOW_PAGE, WebviewObjectConverter.convertIssueToDepPage(node.getIssue()));
             navigateToFile(node);
-        } else if (issueNode instanceof LicenseViolationNode) {
-            LicenseViolationNode license = (LicenseViolationNode) issueNode;
+        } else if (issueNode instanceof LicenseViolationNode license) {
             webviewManager.sendMessage(MessageType.SHOW_PAGE, WebviewObjectConverter.convertLicenseToDepPage(license));
-        } else if (issueNode instanceof FileIssueNode) {
-            FileIssueNode node = (FileIssueNode) issueNode;
+        } else if (issueNode instanceof FileIssueNode node) {
             webviewManager.sendMessage(MessageType.SHOW_PAGE, WebviewObjectConverter.convertFileIssueToIssuePage(node));
             navigateToFile(node);
         }

@@ -35,7 +35,6 @@ public class ComponentUtils {
         return label;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     public static JComponent createNoCredentialsView() {
         JPanel noCredentialsPanel = new JBPanel<>();
         noCredentialsPanel.setLayout(new BoxLayout(noCredentialsPanel, BoxLayout.PAGE_AXIS));
@@ -78,7 +77,6 @@ public class ComponentUtils {
         panel.add(component);
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     public static JComponent createNoBuildsView() {
         HyperlinkLabel link = new HyperlinkLabel();
         link.setTextWithHyperlink("No builds detected. To start viewing your builds please follow <hyperlink>this</hyperlink> guide.");
