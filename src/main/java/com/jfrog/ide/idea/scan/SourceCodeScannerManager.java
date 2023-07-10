@@ -132,7 +132,7 @@ public class SourceCodeScannerManager {
     }
 
     private void sourceCodeScanAndUpdate(ProgressIndicator indicator, Runnable checkCanceled, Logger log) {
-        indicator.setText("Running advance source code scanning");
+        indicator.setText("Running advanced source code scanning");
         double fraction = 0;
         for (ScanBinaryExecutor scanner : scanners) {
             checkCanceled.run();

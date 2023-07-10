@@ -132,7 +132,7 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
 
     public void testBuildTreeCircularDependency() throws IOException {
         try (MockedStatic<PyPackageManager> mockController = Mockito.mockStatic(PyPackageManager.class)) {
-            mockController.when(() -> PyPackageManager.getInstance(pythonSdk)).thenReturn(new DummyCircularDepSDK());
+            mockController.when(() -> PyPackageManager.getInstance(pythonSdk)).thenReturn(new DummyCircularDepPyPkgManager(pythonSdk));
             PypiScanner pypiScanner = new PypiScanner(getProject(), pythonSdk, executorService, new GraphScanLogic(new NullLog()));
 
             // Check root SDK node
@@ -143,20 +143,20 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
 
             // The expected tree: root -> a-> b -> a
             // Check root
-            String directDepId = DummyCircularDepSDK.DIRECT_DEPENDENCY_NAME + ":" + DummyCircularDepSDK.DIRECT_DEPENDENCY_VERSION;
+            String directDepId = DummyCircularDepPyPkgManager.DIRECT_DEPENDENCY_NAME + ":" + DummyCircularDepPyPkgManager.DIRECT_DEPENDENCY_VERSION;
             DepTreeNode root = getAndAssertChild(results, results.getRootNode(), directDepId);
             assertSize(1, root.getChildren());
-            String depIdA = DummyCircularDepSDK.CIRCULAR_DEPENDENCY_A + ":" + DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION;
+            String depIdA = DummyCircularDepPyPkgManager.CIRCULAR_DEPENDENCY_A + ":" + DummyCircularDepPyPkgManager.CIRCULAR_DEPENDENCY_VERSION;
             DepTreeNode a = getAndAssertChild(results, root, depIdA);
 
             // Check dependency "a"
             assertSize(1, a.getChildren());
-            String depIdB = DummyCircularDepSDK.CIRCULAR_DEPENDENCY_B + ":" + DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION;
+            String depIdB = DummyCircularDepPyPkgManager.CIRCULAR_DEPENDENCY_B + ":" + DummyCircularDepPyPkgManager.CIRCULAR_DEPENDENCY_VERSION;
             DepTreeNode b = getAndAssertChild(results, a, depIdB);
 
             // Check dependency "b"
             assertSize(1, b.getChildren());
-            getAndAssertChild(results, b, DummyCircularDepSDK.CIRCULAR_DEPENDENCY_A + ":" + DummyCircularDepSDK.CIRCULAR_DEPENDENCY_VERSION);
+            getAndAssertChild(results, b, DummyCircularDepPyPkgManager.CIRCULAR_DEPENDENCY_A + ":" + DummyCircularDepPyPkgManager.CIRCULAR_DEPENDENCY_VERSION);
         }
     }
 }

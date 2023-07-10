@@ -4,9 +4,10 @@ pipelines:
       runtime:
         type: image
         image:
-          custom:
-            name: releases-docker.jfrog.io/jfrog-ecosystem-integration-env
-            tag: 1.10.1
+          auto:
+            language: java
+            versions:
+              - "17"
 
     steps:
       - name: Snapshot

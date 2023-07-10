@@ -163,7 +163,7 @@ public abstract class ScannerBase {
             scanInterrupted.set(true);
         } catch (Exception e) {
             scanInterrupted.set(true);
-            logError(log, "Xray Scan failed", e, true);
+            logError(log, "Xray scan failed", e, true);
         }
     }
 

@@ -41,7 +41,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.jfrog.ide.idea.ui.JFrogToolWindow.*;
-import static com.jfrog.ide.idea.ui.utils.ComponentUtils.*;
+import static com.jfrog.ide.idea.ui.utils.ComponentUtils.createDisabledTextLabel;
+import static com.jfrog.ide.idea.ui.utils.ComponentUtils.createNoBuildsView;
 import static org.apache.commons.lang3.StringUtils.isAnyBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -143,7 +144,7 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
 
         // Add builds selector
         BuildsMenu buildsMenu = new BuildsMenu(project);
-        ((CiComponentsTree) componentsTree).setBuildsMenu(buildsMenu);
+        componentsTree.setBuildsMenu(buildsMenu);
         toolbarPanel.add(buildsMenu.getBuildButton());
 
         // Create parent toolbar containing the builds and the component tree toolbars
@@ -189,7 +190,7 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
 
     public void registerListeners() {
         // Xray credentials were set listener
-        appBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () ->
+        appBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, (ApplicationEvents) () ->
                 ApplicationManager.getApplication().invokeLater(this::onConfigurationChange));
 
         // Component selection listener
@@ -205,13 +206,13 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
 
         issuesTable.addTableSelectionListener(moreInfoPanel);
         componentsTree.addOnProjectChangeListener(projectBusConnection);
-        projectBusConnection.subscribe(ApplicationEvents.ON_CI_FILTER_CHANGE, () -> ApplicationManager.getApplication().invokeLater(() -> {
+        projectBusConnection.subscribe(ApplicationEvents.ON_CI_FILTER_CHANGE, (ApplicationEvents) () -> ApplicationManager.getApplication().invokeLater(() -> {
             CiComponentsTree.getInstance(project).applyFiltersForAllProjects();
             updateIssuesTable();
         }));
-        projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_CI_STARTED, () -> ApplicationManager.getApplication().invokeLater(this::resetViews));
-        projectBusConnection.subscribe(BuildEvents.ON_SELECTED_BUILD, this::setBuildDetails);
-        projectBusConnection.subscribe(ApplicationEvents.ON_BUILDS_CONFIGURATION_CHANGE, () -> ApplicationManager.getApplication().invokeLater(this::onConfigurationChange));
+        projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_CI_STARTED, (ApplicationEvents) () -> ApplicationManager.getApplication().invokeLater(this::resetViews));
+        projectBusConnection.subscribe(BuildEvents.ON_SELECTED_BUILD, (BuildEvents) this::setBuildDetails);
+        projectBusConnection.subscribe(ApplicationEvents.ON_BUILDS_CONFIGURATION_CHANGE, (ApplicationEvents) () -> ApplicationManager.getApplication().invokeLater(this::onConfigurationChange));
     }
 
     /**
@@ -258,14 +259,9 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
             return;
         }
         switch (buildGeneralInfo.getStatus()) {
-            case PASSED:
-                setTextAndIcon(buildStatus, "Status: Success", AllIcons.RunConfigurations.TestPassed);
-                return;
-            case FAILED:
-                setTextAndIcon(buildStatus, "Status: Failed", AllIcons.RunConfigurations.TestFailed);
-                return;
-            default:
-                setTextAndIcon(buildStatus, "Status: Unknown", AllIcons.RunConfigurations.TestUnknown);
+            case PASSED -> setTextAndIcon(buildStatus, "Status: Success", AllIcons.RunConfigurations.TestPassed);
+            case FAILED -> setTextAndIcon(buildStatus, "Status: Failed", AllIcons.RunConfigurations.TestFailed);
+            default -> setTextAndIcon(buildStatus, "Status: Unknown", AllIcons.RunConfigurations.TestUnknown);
         }
     }
 
@@ -333,7 +329,7 @@ public class JFrogCiToolWindow extends AbstractJFrogToolWindow {
         componentsTreeTitle.setFont(componentsTreeTitle.getFont().deriveFont(TITLE_FONT_SIZE));
         componentsTreePanel.add(componentsTreeTitle, BorderLayout.LINE_START);
         JPanel treePanel = new JBPanel<>(new GridLayout()).withBackground(UIUtil.getTableBackground());
-        TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(componentsTree, ComponentUtils::getPathSearchString, true);
+        TreeSpeedSearch treeSpeedSearch = new TreeSpeedSearch(componentsTree, true, ComponentUtils::getPathSearchString);
         treePanel.add(treeSpeedSearch.getComponent(), BorderLayout.WEST);
         JScrollPane treeScrollPane = ScrollPaneFactory.createScrollPane(treePanel);
         treeScrollPane.getVerticalScrollBar().setUnitIncrement(SCROLL_BAR_SCROLLING_UNITS);
