@@ -21,7 +21,6 @@ import com.jfrog.ide.idea.events.ProjectEvents;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
 import com.jfrog.ide.idea.ui.CiComponentsTree;
-import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.CiFilterManager;
 import com.jfrog.ide.idea.utils.Utils;
 import org.apache.commons.lang3.StringUtils;
@@ -186,9 +185,9 @@ public class CiManager extends CiManagerBase implements Disposable {
     }
 
     private void registerOnChangeHandlers() {
-        appBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, () -> asyncRefreshBuilds());
-        projectBusConnection.subscribe(ApplicationEvents.ON_BUILDS_CONFIGURATION_CHANGE, () -> asyncRefreshBuilds());
-        projectBusConnection.subscribe(BuildEvents.ON_SELECTED_BUILD, this::loadBuild);
+        appBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, (ApplicationEvents) this::asyncRefreshBuilds);
+        projectBusConnection.subscribe(ApplicationEvents.ON_BUILDS_CONFIGURATION_CHANGE, (ApplicationEvents) this::asyncRefreshBuilds);
+        projectBusConnection.subscribe(BuildEvents.ON_SELECTED_BUILD, (BuildEvents) this::loadBuild);
     }
 
     @Override

@@ -219,7 +219,7 @@ public abstract class ScannerBase {
                 }
                 DependencyNode existingDep = addedDeps.get(descriptorPath).get(compId);
                 if (existingDep != null) {
-                    existingDep.setIndirect(indirect);
+                    existingDep.setIndirect(indirect && existingDep.isIndirect());
                     continue;
                 }
                 // Each dependency might be a child of more than one descriptor, but DependencyNode is a tree node, so it can have only one parent.
