@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
     private static final List<String> SCANNER_ARGS = List.of("ca");
-    private static final List<PackageManagerType> SUPPORTED_PACKAGE_TYPES = List.of(PackageManagerType.PYPI, PackageManagerType.NPM, PackageManagerType.YARN);
+    private static final List<PackageManagerType> SUPPORTED_PACKAGE_TYPES = List.of(PackageManagerType.PYPI, PackageManagerType.NPM, PackageManagerType.YARN, PackageManagerType.GRADLE, PackageManagerType.MAVEN);
 
 
     public ApplicabilityScannerExecutor(Log log, ServerConfig serverConfig) {
