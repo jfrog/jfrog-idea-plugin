@@ -67,7 +67,7 @@ public class WebviewObjectConverter {
             case SECRETS:
                 return "SECRETS";
             case IAC:
-                return "IaC";
+                return "IAC";
             default:
                 return "EMPTY";
         }
