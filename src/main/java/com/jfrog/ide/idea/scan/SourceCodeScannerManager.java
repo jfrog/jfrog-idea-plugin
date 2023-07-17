@@ -209,6 +209,7 @@ public class SourceCodeScannerManager {
     private String createReason(JFrogSecurityWarning warning) {
         switch (warning.getReporter()) {
             case IAC:
+            case SECRETS:
                 return warning.getScannerSearchTarget();
             default:
                 return warning.getReason();
