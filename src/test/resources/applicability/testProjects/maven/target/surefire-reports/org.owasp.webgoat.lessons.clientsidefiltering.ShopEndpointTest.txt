@@ -1,0 +1,24 @@
+-------------------------------------------------------------------------------
+Test set: org.owasp.webgoat.lessons.clientsidefiltering.ShopEndpointTest
+-------------------------------------------------------------------------------
+Tests run: 4, Failures: 0, Errors: 4, Skipped: 0, Time elapsed: 0.021 s <<< FAILURE! - in org.owasp.webgoat.lessons.clientsidefiltering.ShopEndpointTest
+org.owasp.webgoat.lessons.clientsidefiltering.ShopEndpointTest.fetchAllTheCouponsShouldContainGetItForFree  Time elapsed: 0.001 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to add PropertySource to Environment
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+
+org.owasp.webgoat.lessons.clientsidefiltering.ShopEndpointTest.askForUnknownCouponCode  Time elapsed: 0 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to add PropertySource to Environment
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+
+org.owasp.webgoat.lessons.clientsidefiltering.ShopEndpointTest.getCoupon  Time elapsed: 0 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to add PropertySource to Environment
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+
+org.owasp.webgoat.lessons.clientsidefiltering.ShopEndpointTest.getSuperCoupon  Time elapsed: 0 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to add PropertySource to Environment
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+

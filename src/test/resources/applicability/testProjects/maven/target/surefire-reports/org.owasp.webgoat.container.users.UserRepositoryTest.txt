@@ -1,0 +1,9 @@
+-------------------------------------------------------------------------------
+Test set: org.owasp.webgoat.container.users.UserRepositoryTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.059 s <<< FAILURE! - in org.owasp.webgoat.container.users.UserRepositoryTest
+org.owasp.webgoat.container.users.UserRepositoryTest.userShouldBeSaved  Time elapsed: 0 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: org.springframework.beans.factory.BeanDefinitionStoreException: Failed to parse configuration class [org.owasp.webgoat.container.WebGoatApplication]; nested exception is java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+

@@ -1,0 +1,34 @@
+-------------------------------------------------------------------------------
+Test set: org.owasp.webgoat.lessons.sqlinjection.introduction.SqlInjectionLesson6aTest
+-------------------------------------------------------------------------------
+Tests run: 6, Failures: 0, Errors: 6, Skipped: 0, Time elapsed: 0.022 s <<< FAILURE! - in org.owasp.webgoat.lessons.sqlinjection.introduction.SqlInjectionLesson6aTest
+org.owasp.webgoat.lessons.sqlinjection.introduction.SqlInjectionLesson6aTest.wrongSolution  Time elapsed: 0 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to add PropertySource to Environment
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+
+org.owasp.webgoat.lessons.sqlinjection.introduction.SqlInjectionLesson6aTest.noResultsReturned  Time elapsed: 0 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to add PropertySource to Environment
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+
+org.owasp.webgoat.lessons.sqlinjection.introduction.SqlInjectionLesson6aTest.correctSolution  Time elapsed: 0 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to add PropertySource to Environment
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+
+org.owasp.webgoat.lessons.sqlinjection.introduction.SqlInjectionLesson6aTest.noUnionUsed  Time elapsed: 0 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to add PropertySource to Environment
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+
+org.owasp.webgoat.lessons.sqlinjection.introduction.SqlInjectionLesson6aTest.wrongNumberOfColumns  Time elapsed: 0 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to add PropertySource to Environment
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+
+org.owasp.webgoat.lessons.sqlinjection.introduction.SqlInjectionLesson6aTest.wrongDataTypeOfColumns  Time elapsed: 0 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to add PropertySource to Environment
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+
