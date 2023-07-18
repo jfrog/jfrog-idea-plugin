@@ -30,8 +30,8 @@
 
     <change-notes>
         <![CDATA[
-          <li>Adds new Secrets and IaC scans</li>
-          <li>Adds Contextual Analysis support for Maven and Gradle projects</li>
+          <li>Adds new Secrets and IaC scans.</li>
+          <li>Adds Contextual Analysis support for Maven and Gradle projects.</li>
         ]]>
     </change-notes>
 
