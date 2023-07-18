@@ -24,7 +24,7 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
         scanner = new ApplicabilityScannerExecutor(Logger.getInstance(), serverConfig, binaryDownloadUrl, useReleases);
     }
 
-    public void testApplicabilityScannerNpmProjectNotApplicable() throws IOException, InterruptedException {
+    public void testApplicabilityScannerJsProjectNotApplicable() throws IOException, InterruptedException {
         String testProjectRoot = createTempProjectDir("npm");
         ScanConfig.Builder input = new ScanConfig.Builder()
                 .roots(List.of(testProjectRoot))
@@ -35,7 +35,7 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
         assertFalse(results.stream().anyMatch(JFrogSecurityWarning::isApplicable));
     }
 
-    public void testApplicabilityScannerNpmProject() throws IOException, InterruptedException {
+    public void testApplicabilityScannerJsProject() throws IOException, InterruptedException {
         String testProjectRoot = createTempProjectDir("npm");
         ScanConfig.Builder input = new ScanConfig.Builder()
                 .roots(List.of(testProjectRoot))
@@ -81,7 +81,7 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
         assertTrue(results.get(0).getFilePath().endsWith("main.py"));
     }
 
-    public void testApplicabilityScannerMavenProject() throws IOException, InterruptedException {
+    public void testApplicabilityScannerJavaProject() throws IOException, InterruptedException {
         String testProjectRoot = createTempProjectDir("maven");
         ScanConfig.Builder input = new ScanConfig.Builder()
                 .roots(List.of(testProjectRoot))
