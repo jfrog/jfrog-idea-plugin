@@ -1,0 +1,16 @@
+-------------------------------------------------------------------------------
+Test set: org.owasp.webgoat.lessons.xss.CrossSiteScriptingLesson1Test
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 2, Skipped: 0, Time elapsed: 0.017 s <<< FAILURE! - in org.owasp.webgoat.lessons.xss.CrossSiteScriptingLesson1Test
+org.owasp.webgoat.lessons.xss.CrossSiteScriptingLesson1Test.success  Time elapsed: 0.009 s  <<< ERROR!
+org.springframework.web.util.NestedServletException: Request processing failed; nested exception is org.springframework.context.NoSuchMessageException: No message found under code 'assignment.solved' for locale 'en'.
+	at org.owasp.webgoat.lessons.xss.CrossSiteScriptingLesson1Test.success(CrossSiteScriptingLesson1Test.java:60)
+Caused by: org.springframework.context.NoSuchMessageException: No message found under code 'assignment.solved' for locale 'en'.
+	at org.owasp.webgoat.lessons.xss.CrossSiteScriptingLesson1Test.success(CrossSiteScriptingLesson1Test.java:60)
+
+org.owasp.webgoat.lessons.xss.CrossSiteScriptingLesson1Test.failure  Time elapsed: 0.007 s  <<< ERROR!
+org.springframework.web.util.NestedServletException: Request processing failed; nested exception is org.springframework.context.NoSuchMessageException: No message found under code 'xss.lesson1.failure' for locale 'en'.
+	at org.owasp.webgoat.lessons.xss.CrossSiteScriptingLesson1Test.failure(CrossSiteScriptingLesson1Test.java:68)
+Caused by: org.springframework.context.NoSuchMessageException: No message found under code 'xss.lesson1.failure' for locale 'en'.
+	at org.owasp.webgoat.lessons.xss.CrossSiteScriptingLesson1Test.failure(CrossSiteScriptingLesson1Test.java:68)
+

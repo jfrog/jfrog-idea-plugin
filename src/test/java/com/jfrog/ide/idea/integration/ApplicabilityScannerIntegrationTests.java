@@ -81,6 +81,23 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
         assertTrue(results.get(0).getFilePath().endsWith("main.py"));
     }
 
+    public void testApplicabilityScannerMavenProject() throws IOException, InterruptedException {
+        String testProjectRoot = createTempProjectDir("maven");
+        ScanConfig.Builder input = new ScanConfig.Builder()
+                .roots(List.of(testProjectRoot))
+                .cves(List.of("CVE-2013-7285"));
+        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled);
+        assertEquals(5, results.size());
+        // Expect specific indications
+        assertTrue(results.get(0).isApplicable());
+        assertEquals("xstream.fromXML(payload)", results.get(0).getLineSnippet());
+        assertEquals(56, results.get(0).getLineStart());
+        assertEquals(56, results.get(0).getLineEnd());
+        assertEquals(26, results.get(0).getColStart());
+        assertEquals(50, results.get(0).getColEnd());
+        assertTrue(results.get(0).getFilePath().endsWith("VulnerableComponentsLesson.java"));
+    }
+
     private void dummyCheckCanceled() {
 
     }

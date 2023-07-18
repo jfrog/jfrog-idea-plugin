@@ -1,0 +1,16 @@
+-------------------------------------------------------------------------------
+Test set: org.owasp.webgoat.lessons.challenges.Assignment1Test
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 2, Skipped: 0, Time elapsed: 0.035 s <<< FAILURE! - in org.owasp.webgoat.lessons.challenges.Assignment1Test
+org.owasp.webgoat.lessons.challenges.Assignment1Test.success  Time elapsed: 0.024 s  <<< ERROR!
+org.springframework.web.util.NestedServletException: Request processing failed; nested exception is org.springframework.context.NoSuchMessageException: No message found under code 'challenge.solved' for locale 'en'.
+	at org.owasp.webgoat.lessons.challenges.Assignment1Test.success(Assignment1Test.java:62)
+Caused by: org.springframework.context.NoSuchMessageException: No message found under code 'challenge.solved' for locale 'en'.
+	at org.owasp.webgoat.lessons.challenges.Assignment1Test.success(Assignment1Test.java:62)
+
+org.owasp.webgoat.lessons.challenges.Assignment1Test.wrongPassword  Time elapsed: 0.008 s  <<< ERROR!
+org.springframework.web.util.NestedServletException: Request processing failed; nested exception is org.springframework.context.NoSuchMessageException: No message found under code 'assignment.not.solved' for locale 'en'.
+	at org.owasp.webgoat.lessons.challenges.Assignment1Test.wrongPassword(Assignment1Test.java:78)
+Caused by: org.springframework.context.NoSuchMessageException: No message found under code 'assignment.not.solved' for locale 'en'.
+	at org.owasp.webgoat.lessons.challenges.Assignment1Test.wrongPassword(Assignment1Test.java:78)
+
