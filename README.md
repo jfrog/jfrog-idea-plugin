@@ -24,6 +24,8 @@
     - [Scanning a Project](#scanning-a-project)
     - [Viewing Vulnerability Details](#viewing-vulnerability-details)
     - [Contextual Analysis](#contextual-analysis)
+    - [Secrets Detection](#secrets-detection)
+    - [Infrastructure as Code (IaC) Scan](#infrastructure-as-code-iac-scan)
     - [Severity Icons](#severity-icons)
   - [The CI View](#the-ci-view)
     - [How Does It Work?](#how-does-it-work)
@@ -64,10 +66,12 @@ Check out what our research team is up to and stay updated on newly discovered i
 
 *Requires Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
 
-With advanced [**Contextual Analysis**](#contextual-analysis), understand the applicability of CVEs in your application and utilize JFrog Security scanners to analyze the way you use 3rd party packages in your projects.
+- With advanced [**Contextual Analysis**](#contextual-analysis), understand the applicability of CVEs in your application and utilize JFrog Security scanners to analyze the way you use 3rd party packages in your projects.
 Automatically validate some high-impact vulnerabilities, such as vulnerabilities that have prerequisites for exploitations, and reduce false positives and vulnerability noise with smart CVE analysis.
+- With [**Secrets detection**](#secrets-detection), prevent the expose of keys or credentials that are stored in your source code.
+- With [**Infrastructure as Code (IaC) Scan**](#infrastructure-as-code-iac-scan), secure your IaC files. Critical to keeping your cloud deployment safe and secure.
 
-To learn more, see [here](https://jfrog.com/help/r/jfrog-security-documentation/vulnerability-contextual-analysis).
+To learn more, see [here](https://jfrog.com/xray/).
 
 #### Additional Perks
 
@@ -242,6 +246,21 @@ Contextual Analysis data includes:
 ![](readme-resources/not-applicable.png)
 ![](readme-resources/applicable.png)
 
+### Secrets Detection
+
+*Requires Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
+
+Detect any secrets left exposed inside the code. to prevent any accidental leak of internal tokens or credentials.
+
+![](readme-resources/secrets.png)
+
+### Infrastructure as Code (IaC) Scan
+
+*Requires Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
+
+Scan Infrastructure as Code (Terraform) files for early detection of cloud and infrastructure misconfigurations.
+
+![](readme-resources/iac.png)
 ### Severity Icons
 
 The icon demonstrates the top severity issue of a selected component and its transitive dependencies. The following table describes the severities from highest to lowest:
