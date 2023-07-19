@@ -66,12 +66,10 @@ Check out what our research team is up to and stay updated on newly discovered i
 
 *Requires Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
 
-- With advanced [**Contextual Analysis**](#contextual-analysis), understand the applicability of CVEs in your application and utilize JFrog Security scanners to analyze the way you use 3rd party packages in your projects.
-Automatically validate some high-impact vulnerabilities, such as vulnerabilities that have prerequisites for exploitations, and reduce false positives and vulnerability noise with smart CVE analysis.
-- With [**Secrets detection**](#secrets-detection), prevent the expose of keys or credentials that are stored in your source code.
-- With [**Infrastructure as Code (IaC) Scan**](#infrastructure-as-code-iac-scan), secure your IaC files. Critical to keeping your cloud deployment safe and secure.
-
-To learn more, see [here](https://jfrog.com/xray/).
+- [**Vulnerability Contextual Analysis**](#contextual-analysis): This feature uses the code context to eliminate false positive reports on vulnerable dependencies that are not applicable to the code. 
+Vulnerability Contextual Analysis is currently supported for Python and JavaScript code.
+- [**Secrets Detection**](#secrets-detection): Prevent the expose of keys or credentials that are stored in your source code.
+- [**Infrastructure as Code (IaC) Scan**](#infrastructure-as-code-iac-scan): Secure your IaC files. Critical to keeping your cloud deployment safe and secure.
 
 #### Additional Perks
 
@@ -90,12 +88,14 @@ In addition to IntelliJ IDEA, the plugin also supports the following IDEs:
 
 # Supported Packages
 
-| Features                                          | Go  | Maven | Gradle Groovy | Gradle Kotlin | npm | Yarn v1 | Python |
-|---------------------------------------------------|:---:|:-----:|:-------------:|:-------------:|:---:|:-------:|:------:|
-| SCA                                               |  ✅  |   ✅   |       ✅       |       ✅       |  ✅  |    ✅    |   ✅    |
-| CVE Research and Enrichment                       |  ✅  |   ✅   |       ✅       |       ✅       |  ✅  |    ✅    |   ✅    |
-| Upgrade vulnerable dependencies to fixed versions |  ✅  |   ✅   |       ✅       |       ✅       |  ✅  |    ✅    |   ❌    |
-| Contextual Analysis                               |  ❌  |   ❌   |       ❌       |       ❌       |  ✅  |    ❌    |   ✅    |
+| Features                                          | Go | Maven | Gradle Kotlin | npm | Yarn v1 | Python | Terraform |
+|---------------------------------------------------|:--:|:-----:|:-------------:|:---:|:-------:|:------:|:---------:|
+| Software Composition Analysis (SCA)               | ✅  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ❌     |
+| CVE Research and Enrichment                       | ✅  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ❌     |
+| Upgrade vulnerable dependencies to fixed versions | ✅  |   ✅   |       ✅       |  ✅  |    ✅    |   ❌    |     ❌     |
+| Contextual Analysis                               | ❌  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ❌     |
+| Secrets Detection                                 | ✅  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ✅     |
+| Infrastructure as Code (IaC) Scan                 | ❌  |   ❌   |       ❌       |  ❌  |    ❌    |   ❌    |     ✅     |
 
 # Getting Started
 
@@ -336,11 +336,11 @@ To see the Intellij IDEA log file, depends on the IDE version and OS as describe
 
 # Reporting Issues
 
-Please report issues by opening an issue on [Github](https://github.com/jfrog/jfrog-idea-plugin/issues).
+Please report issues by opening an issue on [GitHub](https://github.com/jfrog/jfrog-idea-plugin/issues).
 
 # Contributions
 
-We welcome community contribution through pull requests. To help us improve this project, please read our [Contribution](./CONTRIBUTING.md#-guidelines) guide.
+We welcome community contribution through pull requests. To help us improve this project, please read our [Contribution](./CONTRIBUTING.md#guidelines) guide.
 
 # Release Notes
 
