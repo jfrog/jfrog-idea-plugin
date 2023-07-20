@@ -71,6 +71,8 @@ Vulnerability Contextual Analysis is currently supported for Python and JavaScri
 - [**Secrets Detection**](#secrets-detection): Prevent the expose of keys or credentials that are stored in your source code.
 - [**Infrastructure as Code (IaC) Scan**](#infrastructure-as-code-iac-scan): Secure your IaC files. Critical to keeping your cloud deployment safe and secure.
 
+You can read more about JFrog Advanced Security [here](https://jfrog.com/xray/#xray-advanced).
+
 #### Additional Perks
 
 - Security issues are easily visible inline.
