@@ -3,6 +3,9 @@ package com.jfrog.ide.idea.inspections.upgradeversion;
 import com.intellij.codeInsight.intention.HighPriorityAction;
 import com.intellij.codeInspection.LocalQuickFix;
 import com.intellij.codeInspection.ProblemDescriptor;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Iconable;
 import com.intellij.util.EnvironmentUtil;
@@ -22,7 +25,6 @@ import java.util.Map;
  * @author michaels
  */
 public abstract class UpgradeVersion implements LocalQuickFix, Iconable, HighPriorityAction {
-
     protected String componentName;
     protected String fixVersion;
     protected String issue;
@@ -50,11 +52,19 @@ public abstract class UpgradeVersion implements LocalQuickFix, Iconable, HighPri
 
     @Override
     public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
-        try {
-            upgradeComponentVersion(project, descriptor);
-        } catch (Exception e) {
-            log.warn("Failed while trying to upgrade component version. Error: " + e);
-        }
+        Task.Backgroundable scanAndUpdateTask = new Task.Backgroundable(project, "Upgrading dependency...") {
+            @Override
+            public void run(@NotNull com.intellij.openapi.progress.ProgressIndicator indicator) {
+                try {
+                    upgradeComponentVersion(project, descriptor);
+                    ApplicationManager.getApplication().invokeLater(() -> descriptor.getPsiElement().getContainingFile().getVirtualFile().refresh(false, false));
+                    log.info("Upgraded " + componentName + " to version " + fixVersion + " successfully.");
+                } catch (Exception e) {
+                    log.error("Failed while trying to upgrade component " + componentName + " to version " + fixVersion + ". Error: " + e);
+                }
+            }
+        };
+        ProgressManager.getInstance().run(scanAndUpdateTask);
     }
 
     abstract public void upgradeComponentVersion(@NotNull Project project, @NotNull ProblemDescriptor descriptor) throws IOException;

@@ -151,7 +151,7 @@ public class GradleGroovyInspection extends GradleInspection {
     }
 
     @Override
-    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issue) {
+    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issue, String descriptorPath) {
         return new GradleGroovyUpgradeVersion(componentName, fixVersion, issue);
     }
 }

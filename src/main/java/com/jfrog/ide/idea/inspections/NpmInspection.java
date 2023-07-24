@@ -71,7 +71,7 @@ public class NpmInspection extends AbstractInspection {
     }
 
     @Override
-    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issue) {
-        return new NpmUpgradeVersion(componentName, fixVersion, issue);
+    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issue, String descriptorPath) {
+        return new NpmUpgradeVersion(componentName, fixVersion, issue, descriptorPath);
     }
 }
