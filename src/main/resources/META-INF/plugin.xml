@@ -30,10 +30,8 @@
 
     <change-notes>
         <![CDATA[
-          <li>Improved cache expiry mechanism.</li>
-          <li>Decreased memory consumption while building dependency trees.</li>
-          <li>Bug fix - Yarn projects inspection not running on plugin startup.</li>
-          <li>Bug fix - usage report to Artifactory not using proxy configuration.</li>
+          <li>Adds new Secrets and IaC scans.</li>
+          <li>Adds Contextual Analysis support for Maven and Gradle projects.</li>
         ]]>
     </change-notes>
 

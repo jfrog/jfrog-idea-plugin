@@ -1,0 +1,24 @@
+-------------------------------------------------------------------------------
+Test set: org.owasp.webgoat.lessons.xxe.ContentTypeAssignmentTest
+-------------------------------------------------------------------------------
+Tests run: 4, Failures: 0, Errors: 4, Skipped: 0, Time elapsed: 0.015 s <<< FAILURE! - in org.owasp.webgoat.lessons.xxe.ContentTypeAssignmentTest
+org.owasp.webgoat.lessons.xxe.ContentTypeAssignmentTest.postingInvalidJsonShouldNotAddComment  Time elapsed: 0 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to add PropertySource to Environment
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+
+org.owasp.webgoat.lessons.xxe.ContentTypeAssignmentTest.workingAttack  Time elapsed: 0 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to add PropertySource to Environment
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+
+org.owasp.webgoat.lessons.xxe.ContentTypeAssignmentTest.postingJsonShouldAddComment  Time elapsed: 0 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to add PropertySource to Environment
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+
+org.owasp.webgoat.lessons.xxe.ContentTypeAssignmentTest.sendingXmlButContentTypeIsJson  Time elapsed: 0 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to add PropertySource to Environment
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+

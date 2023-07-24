@@ -1,0 +1,24 @@
+-------------------------------------------------------------------------------
+Test set: org.owasp.webgoat.lessons.sqlinjection.introduction.SqlInjectionLesson5aTest
+-------------------------------------------------------------------------------
+Tests run: 4, Failures: 0, Errors: 4, Skipped: 0, Time elapsed: 0.014 s <<< FAILURE! - in org.owasp.webgoat.lessons.sqlinjection.introduction.SqlInjectionLesson5aTest
+org.owasp.webgoat.lessons.sqlinjection.introduction.SqlInjectionLesson5aTest.sqlInjection  Time elapsed: 0 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to add PropertySource to Environment
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+
+org.owasp.webgoat.lessons.sqlinjection.introduction.SqlInjectionLesson5aTest.knownAccountShouldDisplayData  Time elapsed: 0 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to add PropertySource to Environment
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+
+org.owasp.webgoat.lessons.sqlinjection.introduction.SqlInjectionLesson5aTest.sqlInjectionWrongShouldDisplayError  Time elapsed: 0 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to add PropertySource to Environment
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+
+org.owasp.webgoat.lessons.sqlinjection.introduction.SqlInjectionLesson5aTest.unknownAccount  Time elapsed: 0 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to add PropertySource to Environment
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+

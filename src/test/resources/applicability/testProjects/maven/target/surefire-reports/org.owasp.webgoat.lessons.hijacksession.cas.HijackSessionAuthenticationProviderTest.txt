@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: org.owasp.webgoat.lessons.hijacksession.cas.HijackSessionAuthenticationProviderTest
+-------------------------------------------------------------------------------
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.023 s - in org.owasp.webgoat.lessons.hijacksession.cas.HijackSessionAuthenticationProviderTest

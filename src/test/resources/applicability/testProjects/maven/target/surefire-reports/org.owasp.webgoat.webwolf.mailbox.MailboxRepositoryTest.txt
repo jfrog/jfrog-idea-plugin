@@ -1,0 +1,24 @@
+-------------------------------------------------------------------------------
+Test set: org.owasp.webgoat.webwolf.mailbox.MailboxRepositoryTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 2, Skipped: 0, Time elapsed: 6.219 s <<< FAILURE! - in org.owasp.webgoat.webwolf.mailbox.MailboxRepositoryTest
+org.owasp.webgoat.webwolf.mailbox.MailboxRepositoryTest.emailShouldBeSaved  Time elapsed: 0.185 s  <<< ERROR!
+org.springframework.dao.InvalidDataAccessResourceUsageException: could not prepare statement; SQL [insert into CONTAINER.email (id, contents, recipient, sender, time, title) values (default, ?, ?, ?, ?, ?)]; nested exception is org.hibernate.exception.SQLGrammarException: could not prepare statement
+	at org.owasp.webgoat.webwolf.mailbox.MailboxRepositoryTest.emailShouldBeSaved(MailboxRepositoryTest.java:46)
+Caused by: org.hibernate.exception.SQLGrammarException: could not prepare statement
+	at org.owasp.webgoat.webwolf.mailbox.MailboxRepositoryTest.emailShouldBeSaved(MailboxRepositoryTest.java:46)
+Caused by: java.sql.SQLSyntaxErrorException: user lacks privilege or object not found: EMAIL in statement [insert into CONTAINER.email (id, contents, recipient, sender, time, title) values (default, ?, ?, ?, ?, ?)]
+	at org.owasp.webgoat.webwolf.mailbox.MailboxRepositoryTest.emailShouldBeSaved(MailboxRepositoryTest.java:46)
+Caused by: org.hsqldb.HsqlException: user lacks privilege or object not found: EMAIL
+	at org.owasp.webgoat.webwolf.mailbox.MailboxRepositoryTest.emailShouldBeSaved(MailboxRepositoryTest.java:46)
+
+org.owasp.webgoat.webwolf.mailbox.MailboxRepositoryTest.savedEmailShouldBeFoundByReceipient  Time elapsed: 0.006 s  <<< ERROR!
+org.springframework.dao.InvalidDataAccessResourceUsageException: could not prepare statement; SQL [insert into CONTAINER.email (id, contents, recipient, sender, time, title) values (default, ?, ?, ?, ?, ?)]; nested exception is org.hibernate.exception.SQLGrammarException: could not prepare statement
+	at org.owasp.webgoat.webwolf.mailbox.MailboxRepositoryTest.savedEmailShouldBeFoundByReceipient(MailboxRepositoryTest.java:57)
+Caused by: org.hibernate.exception.SQLGrammarException: could not prepare statement
+	at org.owasp.webgoat.webwolf.mailbox.MailboxRepositoryTest.savedEmailShouldBeFoundByReceipient(MailboxRepositoryTest.java:57)
+Caused by: java.sql.SQLSyntaxErrorException: user lacks privilege or object not found: EMAIL in statement [insert into CONTAINER.email (id, contents, recipient, sender, time, title) values (default, ?, ?, ?, ?, ?)]
+	at org.owasp.webgoat.webwolf.mailbox.MailboxRepositoryTest.savedEmailShouldBeFoundByReceipient(MailboxRepositoryTest.java:57)
+Caused by: org.hsqldb.HsqlException: user lacks privilege or object not found: EMAIL
+	at org.owasp.webgoat.webwolf.mailbox.MailboxRepositoryTest.savedEmailShouldBeFoundByReceipient(MailboxRepositoryTest.java:57)
+
