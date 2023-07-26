@@ -23,7 +23,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
+
+import static com.jfrog.ide.common.utils.Utils.createSSLContext;
 
 /**
  * Created by romang on 5/8/17.
@@ -70,8 +75,9 @@ public class Utils {
         String pluginVersion = jfrogPlugin.getVersion();
         UsageReporter usageReporter = new ClientIdUsageReporter(PRODUCT_ID + pluginVersion, featureIdArray, log);
         try {
-            usageReporter.reportUsage(serverConfig.getArtifactoryUrl(), serverConfig.getUsername(), serverConfig.getPassword(), serverConfig.getAccessToken(), serverConfig.getProxyConfForTargetUrl(serverConfig.getArtifactoryUrl()), log);
-        } catch (IOException | RuntimeException e) {
+            usageReporter.reportUsage(serverConfig.getArtifactoryUrl(), serverConfig.getUsername(), serverConfig.getPassword(), serverConfig.getAccessToken(), serverConfig.getProxyConfForTargetUrl(serverConfig.getArtifactoryUrl()), createSSLContext(serverConfig), log);
+        } catch (IOException | RuntimeException | NoSuchAlgorithmException | KeyStoreException |
+                 KeyManagementException e) {
             log.debug("Usage report failed: " + ExceptionUtils.getRootCauseMessage(e));
         }
         log.debug("Usage report sent successfully.");

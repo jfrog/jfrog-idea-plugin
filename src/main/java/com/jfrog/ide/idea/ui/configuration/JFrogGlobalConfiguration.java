@@ -20,8 +20,6 @@ import com.jfrog.xray.client.services.system.Version;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.conn.ssl.TrustAllStrategy;
-import org.apache.http.ssl.SSLContextBuilder;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryManagerBuilder;
@@ -38,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.jfrog.ide.common.ci.Utils.createAqlForBuildArtifacts;
+import static com.jfrog.ide.common.utils.Utils.createSSLContext;
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.*;
 import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.DEFAULT_EXCLUSIONS;
 import static com.jfrog.ide.idea.ui.configuration.Utils.clearText;
@@ -312,7 +311,6 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         initHyperlink(watchInstructions, "Create a <hyperlink>Watch</hyperlink> on JFrog Xray and assign your Policy and Project as resources to it.", "https://www.jfrog.com/confluence/display/JFROG/Configuring+Xray+Watches");
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private void initHyperlink(HyperlinkLabel label, String text, String link) {
         label.setTextWithHyperlink("    " + text);
         label.addHyperlinkListener(l -> BrowserUtil.browse(link));
@@ -403,9 +401,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
                 .setAccessToken(serverConfig.getAccessToken())
                 .setProxyConfiguration(serverConfig.getProxyConfForTargetUrl(urlStr))
                 .setLog(Logger.getInstance())
-                .setSslContext(serverConfig.isInsecureTls() ?
-                        SSLContextBuilder.create().loadTrustMaterial(TrustAllStrategy.INSTANCE).build() :
-                        serverConfig.getSslContext());
+                .setSslContext(createSSLContext(serverConfig));
     }
 
     private void loadConfig() {
@@ -462,18 +458,19 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
 
     private void updatePolicyTextFields() {
         switch (ObjectUtils.defaultIfNull(serverConfig.getPolicyType(), ServerConfig.PolicyType.VULNERABILITIES)) {
-            case WATCHES:
+            case WATCHES -> {
                 accordingToWatchesRadioButton.setSelected(true);
                 watches.setEnabled(true);
                 watches.setText(serverConfig.getWatches());
-                return;
-            case PROJECT:
+            }
+            case PROJECT -> {
                 accordingToProjectRadioButton.setSelected(true);
                 watches.setEnabled(false);
-                return;
-            case VULNERABILITIES:
+            }
+            case VULNERABILITIES -> {
                 allVulnerabilitiesRadioButton.setSelected(true);
                 watches.setEnabled(false);
+            }
         }
     }
 }
