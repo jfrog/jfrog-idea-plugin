@@ -30,8 +30,7 @@
 
     <change-notes>
         <![CDATA[
-          <li>Adds new Secrets and IaC scans.</li>
-          <li>Adds Contextual Analysis support for Maven and Gradle projects.</li>
+          <li>Fixed UnsatisfiedLinkError thrown on the plugin startup and sometimes caused IntelliJ crash (in IntelliJ 2023.2).</li>
         ]]>
     </change-notes>
 
