@@ -17,15 +17,14 @@ import org.cef.handler.CefLoadHandlerAdapter;
 public class WebviewManager implements Disposable {
     private JBCefBrowser jbCefBrowser;
     private MessagePacker messagePacker;
+    private boolean schemeHandlerRegistered = false;
 
     public CefBrowser createBrowser(Runnable onLoadEnd) {
         jbCefBrowser = new JBCefBrowser();
         Disposer.register(this, jbCefBrowser);
-        jbCefBrowser.loadURL("http://jfrog-idea-plugin/index.html");
         CefBrowser cefBrowser = jbCefBrowser.getCefBrowser();
         jbCefBrowser.createImmediately();
         jbCefBrowser.setOpenLinksInExternalBrowser(true);
-        CefApp.getInstance().registerSchemeHandlerFactory("http", "jfrog-idea-plugin", new WebviewSchemeHandlerFactory());
         streamConsoleMessagesToLog();
         handleLoadEvent(onLoadEnd);
         messagePacker = new MessagePacker(cefBrowser);
@@ -67,6 +66,13 @@ public class WebviewManager implements Disposable {
     }
 
     public void sendMessage(MessageType type, Object data) {
+        if (!schemeHandlerRegistered) {
+            // Register the scheme handler factory right before the webview is first opened.
+            // Performing this action immediately after opening IntelliJ sometimes results in a crash, particularly in IntelliJ 2022.3.
+            CefApp.getInstance().registerSchemeHandlerFactory("http", "jfrog-idea-plugin", new WebviewSchemeHandlerFactory());
+            jbCefBrowser.loadURL("http://jfrog-idea-plugin/index.html");
+            schemeHandlerRegistered = true;
+        }
         messagePacker.send(type, data);
     }
 
