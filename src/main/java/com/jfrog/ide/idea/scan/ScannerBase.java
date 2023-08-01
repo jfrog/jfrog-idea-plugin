@@ -38,6 +38,7 @@ import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import com.jfrog.ide.idea.utils.Utils;
 import com.jfrog.xray.client.services.summary.Components;
+import lombok.Getter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -63,6 +64,7 @@ public abstract class ScannerBase {
 
     private final ServerConfig serverConfig;
     private final ComponentPrefix prefix;
+    @Getter
     private final Log log;
     // Lock to prevent multiple simultaneous scans
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
@@ -416,9 +418,5 @@ public abstract class ScannerBase {
 
     public String getProjectPath() {
         return this.basePath;
-    }
-
-    public Log getLog() {
-        return log;
     }
 }
