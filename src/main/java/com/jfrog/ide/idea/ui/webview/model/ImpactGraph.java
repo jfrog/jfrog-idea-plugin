@@ -1,21 +1,28 @@
 package com.jfrog.ide.idea.ui.webview.model;
 
 public class ImpactGraph {
-    private final String name;
-    private final ImpactGraph[] children;
+    private final ImpactGraphNode root;
+    private final int pathsCount;
+    private final int pathsLimit;
 
-    public ImpactGraph(String name, ImpactGraph[] children) {
-        this.name = name;
-        this.children = children;
+    public ImpactGraph(ImpactGraphNode root, int pathsCount, int pathsLimit) {
+        this.root = root;
+        this.pathsCount = pathsCount;
+        this.pathsLimit = pathsLimit;
     }
 
     @SuppressWarnings("unused")
-    public String getName() {
-        return name;
+    public ImpactGraphNode getRoot() {
+        return root;
     }
 
     @SuppressWarnings("unused")
-    public ImpactGraph[] getChildren() {
-        return children;
+    public int getPathsCount() {
+        return pathsCount;
+    }
+
+    @SuppressWarnings("unused")
+    public int getPathsLimit() {
+        return pathsLimit;
     }
 }

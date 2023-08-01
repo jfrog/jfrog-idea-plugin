@@ -24,6 +24,7 @@ import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.nodes.DependencyNode;
 import com.jfrog.ide.common.nodes.DescriptorFileTreeNode;
 import com.jfrog.ide.common.nodes.FileTreeNode;
+import com.jfrog.ide.common.nodes.subentities.ImpactTree;
 import com.jfrog.ide.common.nodes.subentities.ImpactTreeNode;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
@@ -58,6 +59,8 @@ import static com.jfrog.ide.common.log.Utils.logError;
  * Created by romang on 4/26/17.
  */
 public abstract class ScannerBase {
+    public static final int IMPACT_PATHS_LIMIT = 10;
+
     private final ServerConfig serverConfig;
     private final ComponentPrefix prefix;
     private final Log log;
@@ -244,10 +247,15 @@ public abstract class ScannerBase {
     }
 
     private void addImpactPathToDependencyNode(DependencyNode dependencyNode, List<String> path) {
-        if (dependencyNode.getImpactPaths() == null) {
-            dependencyNode.setImpactPaths(new ImpactTreeNode(path.get(0)));
+        if (dependencyNode.getImpactTree() == null) {
+            dependencyNode.setImpactTree(new ImpactTree(new ImpactTreeNode(path.get(0))));
         }
-        ImpactTreeNode parentImpactTreeNode = dependencyNode.getImpactPaths();
+        ImpactTree impactTree = dependencyNode.getImpactTree();
+        impactTree.incImpactPathsCount();
+        if (impactTree.getImpactPathsCount() > IMPACT_PATHS_LIMIT) {
+            return;
+        }
+        ImpactTreeNode parentImpactTreeNode = impactTree.getRoot();
         for (int pathNodeIndex = 1; pathNodeIndex < path.size(); pathNodeIndex++) {
             String currPathNode = path.get(pathNodeIndex);
             // Find a child of parentImpactTreeNode with a name equals to currPathNode
