@@ -1,11 +1,12 @@
 package com.jfrog.ide.idea.inspections;
 
+import com.jfrog.ide.common.nodes.subentities.FindingInfo;
 import com.jfrog.ide.common.nodes.subentities.Severity;
-import com.jfrog.ide.idea.scan.data.Message;
-import com.jfrog.ide.idea.scan.data.Region;
-import com.jfrog.ide.idea.scan.data.SarifResult;
 import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
+import com.jfrog.ide.idea.scan.data.*;
 import org.apache.commons.lang.StringUtils;
+
+import java.util.List;
 
 public class JFrogSecurityWarning {
     private final int lineStart;
@@ -20,6 +21,8 @@ public class JFrogSecurityWarning {
     private final SourceCodeScanType reporter;
     private final Severity severity;
 
+    private final FindingInfo[][] codeFlows;
+
     private final boolean isApplicable;
 
     public JFrogSecurityWarning(
@@ -31,7 +34,8 @@ public class JFrogSecurityWarning {
             String lineSnippet,
             SourceCodeScanType reporter,
             boolean isApplicable,
-            Severity severity
+            Severity severity,
+            FindingInfo[][] codeFlows
     ) {
         this.lineStart = lineStart;
         this.colStart = colStart;
@@ -44,6 +48,7 @@ public class JFrogSecurityWarning {
         this.reporter = reporter;
         this.isApplicable = isApplicable;
         this.severity = severity;
+        this.codeFlows = codeFlows;
     }
 
     public JFrogSecurityWarning(SarifResult result, SourceCodeScanType reporter) {
@@ -52,12 +57,42 @@ public class JFrogSecurityWarning {
                 getFirstRegion(result).getEndLine() - 1,
                 getFirstRegion(result).getEndColumn() - 1,
                 result.getMessage().getText(),
-                result.getLocations().size() > 0 ? StringUtils.removeStart(result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri(), "file://") : "",
+                !result.getLocations().isEmpty() ? StringUtils.removeStart(result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri(), "file://") : "",
                 result.getRuleId(),
                 getFirstRegion(result).getSnippet().getText(),
                 reporter,
                 !result.getKind().equals("pass"),
-                Severity.fromSarif(result.getSeverity()));
+                Severity.fromSarif(result.getSeverity()),
+                convertCodeFlowsToFindingInfo(result.getCodeFlows())
+        );
+    }
+
+    private static FindingInfo[][] convertCodeFlowsToFindingInfo(List<CodeFlow> codeFlows) {
+        if (codeFlows.isEmpty()) {
+            return null;
+        }
+        List<ThreadFlow> flows = codeFlows.get(0).getThreadFlows();
+        if (flows.isEmpty()) {
+            return null;
+        }
+        FindingInfo[][] results = new FindingInfo[flows.size()][];
+        for (int i = 0; i < flows.size(); i++) {
+            ThreadFlow flow = flows.get(i);
+            List<ThreadFlowLocation> locations = flow.getLocations();
+            results[i] = new FindingInfo[locations.size()];
+            for (int j = 0; j < locations.size(); j++) {
+                PhysicalLocation location = locations.get(j).getLocation().getPhysicalLocation();
+                results[i][j] = new FindingInfo(
+                        location.getArtifactLocation().getUri(),
+                        location.getRegion().getStartLine(),
+                        location.getRegion().getStartColumn(),
+                        location.getRegion().getEndLine(),
+                        location.getRegion().getEndColumn(),
+                        location.getRegion().getSnippet().getText()
+                );
+            }
+        }
+        return results;
     }
 
     public int getLineStart() {
@@ -99,7 +134,7 @@ public class JFrogSecurityWarning {
     private static Region getFirstRegion(SarifResult result) {
         Region emptyRegion = new Region();
         emptyRegion.setSnippet(new Message());
-        return result.getLocations().size() > 0 ? result.getLocations().get(0).getPhysicalLocation().getRegion() : emptyRegion;
+        return !result.getLocations().isEmpty() ? result.getLocations().get(0).getPhysicalLocation().getRegion() : emptyRegion;
     }
 
     public String getScannerSearchTarget() {
@@ -116,5 +151,9 @@ public class JFrogSecurityWarning {
 
     public String getName() {
         return name;
+    }
+
+    public FindingInfo[][] getCodeFlows() {
+        return codeFlows;
     }
 }

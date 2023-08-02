@@ -1,9 +1,6 @@
 package com.jfrog.ide.idea.ui.webview;
 
-import com.jfrog.ide.common.nodes.DependencyNode;
-import com.jfrog.ide.common.nodes.FileIssueNode;
-import com.jfrog.ide.common.nodes.LicenseViolationNode;
-import com.jfrog.ide.common.nodes.VulnerabilityNode;
+import com.jfrog.ide.common.nodes.*;
 import com.jfrog.ide.common.nodes.subentities.*;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.idea.scan.ScannerBase;
@@ -54,7 +51,6 @@ public class WebviewObjectConverter {
     }
 
     public static IssuePage convertFileIssueToIssuePage(FileIssueNode fileIssueNodeNode) {
-
         return new IssuePage()
                 .type(ConvertPageType(fileIssueNodeNode.getReporterType()))
                 .severity(fileIssueNodeNode.getSeverity().name())
@@ -63,10 +59,35 @@ public class WebviewObjectConverter {
                 .location(convertFileLocation(fileIssueNodeNode));
     }
 
+    public static IssuePage convertEosIssueToEosIssuePage(EosIssueNode eosIssueNode) {
+        return new EosIssuePage(convertFileIssueToIssuePage(eosIssueNode))
+                .setAnalysisSteps(convertCodeFlowsLocations(eosIssueNode.getCodeFlows()));
+    }
+
+    private static Location[] convertCodeFlowsLocations(FindingInfo[][] codeFlows) {
+        if (codeFlows.length > 0) {
+            Location[] locations = new Location[codeFlows[0].length];
+            for (int i = 0; i < codeFlows[0].length; i++) {
+                FindingInfo codeFlow = codeFlows[0][i];
+                locations[i] = new Location(
+                        codeFlow.getFilePath(),
+                        Paths.get(codeFlow.getFilePath()).getFileName().toString(),
+                        codeFlow.getRowStart(),
+                        codeFlow.getColStart(),
+                        codeFlow.getRowEnd(),
+                        codeFlow.getColEnd(),
+                        codeFlow.getLineSnippet());
+            }
+            return locations;
+        }
+        return null;
+    }
+
     private static String ConvertPageType(SourceCodeScanType reporterType) {
         return switch (reporterType) {
             case SECRETS -> "SECRETS";
             case IAC -> "IAC";
+            case EOS -> "EOS";
             default -> "EMPTY";
         };
     }

@@ -172,6 +172,8 @@ public abstract class ScanBinaryExecutor {
         }
     }
 
+    abstract List<FileTreeNode> createSpecificFileIssueNodes(List<JFrogSecurityWarning> warnings);
+
     private void updateBinaryIfNeeded() throws IOException {
         if (!Files.exists(binaryTargetPath)) {
             log.debug(String.format("Resource %s is not found. Downloading it.", binaryTargetPath));

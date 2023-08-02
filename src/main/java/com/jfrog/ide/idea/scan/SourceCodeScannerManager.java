@@ -85,7 +85,7 @@ public class SourceCodeScannerManager {
             scanInProgress.set(false);
             indicator.setFraction(1);
         }
-        return createAndUpdateApplicabilityIssueNodes(scanResults, issuesMap);
+        return applicability.createSpecificFileIssueNodes(scanResults, issuesMap);
     }
 
     /**
@@ -138,7 +138,7 @@ public class SourceCodeScannerManager {
             checkCanceled.run();
             try {
                 List<JFrogSecurityWarning> scanResults = scanner.execute(createBasicScannerInput(), checkCanceled);
-                addSourceCodeScanResults(createFileIssueNodes(scanResults));
+                addSourceCodeScanResults(scanner.createSpecificFileIssueNodes(scanResults));
             } catch (IOException | URISyntaxException | InterruptedException e) {
                 logError(log, "", e, true);
             }
@@ -188,23 +188,6 @@ public class SourceCodeScannerManager {
      * @param scanResults a list of source code scan results.
      * @return a list of new {@link FileTreeNode}s containing source code issues.
      */
-    private List<FileTreeNode> createFileIssueNodes(List<JFrogSecurityWarning> scanResults) {
-        HashMap<String, FileTreeNode> results = new HashMap<>();
-        for (JFrogSecurityWarning warning : scanResults) {
-            // Create FileTreeNodes for files with found issues
-            FileTreeNode fileNode = results.get(warning.getFilePath());
-            if (fileNode == null) {
-                fileNode = new FileTreeNode(warning.getFilePath());
-                results.put(warning.getFilePath(), fileNode);
-            }
-
-            FileIssueNode issueNode = new FileIssueNode(createTitle(warning),
-                    warning.getFilePath(), warning.getLineStart(), warning.getColStart(), warning.getLineEnd(), warning.getColEnd(),
-                    createReason(warning), warning.getLineSnippet(), warning.getReporter(), warning.getSeverity());
-            fileNode.addIssue(issueNode);
-        }
-        return new ArrayList<>(results.values());
-    }
 
     private String createReason(JFrogSecurityWarning warning) {
         return switch (warning.getReporter()) {
@@ -219,47 +202,6 @@ public class SourceCodeScannerManager {
             case IAC -> "Infrastructure as Code Vulnerability";
             default -> warning.getName();
         };
-    }
-
-    /**
-     * Create {@link FileTreeNode}s with applicability issues and update applicability issues in {@link VulnerabilityNode}s.
-     *
-     * @param scanResults a list of source code scan results.
-     * @param issuesMap   a map of {@link VulnerabilityNode}s mapped by their CVEs.
-     * @return a list of new {@link FileTreeNode}s containing source code issues.
-     */
-    private List<FileTreeNode> createAndUpdateApplicabilityIssueNodes(List<JFrogSecurityWarning> scanResults, Map<String, List<VulnerabilityNode>> issuesMap) {
-        HashMap<String, FileTreeNode> results = new HashMap<>();
-        for (JFrogSecurityWarning warning : scanResults) {
-            // Update all VulnerabilityNodes that have the warning's CVE
-            String cve = StringUtils.removeStart(warning.getName(), "applic_");
-            List<VulnerabilityNode> issues = issuesMap.get(cve);
-            if (issues != null) {
-                if (warning.isApplicable()) {
-                    // Create FileTreeNodes for files with applicable issues
-                    FileTreeNode fileNode = results.get(warning.getFilePath());
-                    if (fileNode == null) {
-                        fileNode = new FileTreeNode(warning.getFilePath());
-                        results.put(warning.getFilePath(), fileNode);
-                    }
-
-                    ApplicableIssueNode applicableIssue = new ApplicableIssueNode(
-                            cve, warning.getLineStart(), warning.getColStart(), warning.getLineEnd(), warning.getColEnd(),
-                            warning.getFilePath(), warning.getReason(), warning.getLineSnippet(), warning.getScannerSearchTarget(),
-                            issues.get(0));
-                    fileNode.addIssue(applicableIssue);
-                    for (VulnerabilityNode issue : issues) {
-                        issue.updateApplicableInfo(applicableIssue);
-                    }
-                } else {
-                    // Mark non-applicable vulnerabilities.
-                    for (VulnerabilityNode issue : issues) {
-                        issue.setNotApplicable();
-                    }
-                }
-            }
-        }
-        return new ArrayList<>(results.values());
     }
 
     /**
@@ -298,7 +240,8 @@ public class SourceCodeScannerManager {
     private Collection<ScanBinaryExecutor> initScannersCollection() {
         return List.of(
                 new SecretsScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig()),
-                new IACScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig())
+                new IACScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig()),
+                new EosScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig())
         );
     }
 }

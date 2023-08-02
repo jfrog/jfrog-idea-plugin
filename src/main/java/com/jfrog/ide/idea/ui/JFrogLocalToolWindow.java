@@ -253,12 +253,14 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     private void updateIssueOrLicenseInWebview(IssueNode issueNode) {
         if (issueNode instanceof VulnerabilityNode issue) {
             webviewManager.sendMessage(SHOW_PAGE, WebviewObjectConverter.convertIssueToDepPage(issue));
-        } else if (issueNode instanceof ApplicableIssueNode) {
-            ApplicableIssueNode node = (ApplicableIssueNode) issueNode;
+        } else if (issueNode instanceof ApplicableIssueNode node) {
             webviewManager.sendMessage(SHOW_PAGE, WebviewObjectConverter.convertIssueToDepPage(node.getIssue()));
             navigateToFile(node);
         } else if (issueNode instanceof LicenseViolationNode license) {
             webviewManager.sendMessage(SHOW_PAGE, WebviewObjectConverter.convertLicenseToDepPage(license));
+        } else if (issueNode instanceof EosIssueNode node) {
+            webviewManager.sendMessage(SHOW_PAGE, WebviewObjectConverter.convertEosIssueToEosIssuePage(node));
+            navigateToFile(node);
         } else if (issueNode instanceof FileIssueNode node) {
             webviewManager.sendMessage(SHOW_PAGE, WebviewObjectConverter.convertFileIssueToIssuePage(node));
             navigateToFile(node);
