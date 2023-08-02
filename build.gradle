@@ -123,7 +123,8 @@ tasks.register('verifyWebview', Verify) {
 }
 
 tasks.register('extractWebview', Copy) {
-    from tarTree(new File(buildDir, webviewFileName))
+//    from tarTree(new File(buildDir, webviewFileName))
+    from tarTree(new File("/Users/tala/dev/forks/jfrog-ide-webview/jfrog-ide-webview-0.2.1.tgz"))
     into Paths.get('src', 'main', 'resources', 'jfrog-ide-webview').toFile()
     include '**/build/**/*'
     eachFile {
@@ -137,7 +138,8 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 tasks.withType(ProcessResources).configureEach {
-    dependsOn('downloadWebview')
+    dependsOn('extractWebview')
+//    dependsOn('downloadWebview')
 }
 
 publishing {
