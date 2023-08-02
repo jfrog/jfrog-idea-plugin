@@ -51,10 +51,8 @@ public class JumpToCode {
         VirtualFile file = getVirtualFile(filePath);
         if (file == null) return;
         ApplicationManager.getApplication().invokeLater(() -> {
-            ApplicationManager.getApplication().invokeAndWait(() -> {
-                openFileInEditor(file);
-                highlightCode(startRow, endRow, startColumn, endColumn);
-            });
+            openFileInEditor(file);
+            highlightCode(startRow, endRow, startColumn, endColumn);
         });
     }
 
