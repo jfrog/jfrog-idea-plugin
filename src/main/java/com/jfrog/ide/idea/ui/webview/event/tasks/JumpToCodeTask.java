@@ -13,7 +13,7 @@ public class JumpToCodeTask {
     JumpToCode jumpToCode;
 
     public JumpToCodeTask(@NotNull Project project) {
-        jumpToCode = new JumpToCode(project);
+        jumpToCode = JumpToCode.getInstance(project);
     }
 
     public void execute(Location location) {

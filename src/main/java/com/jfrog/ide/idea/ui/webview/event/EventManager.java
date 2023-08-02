@@ -6,13 +6,13 @@ import com.jfrog.ide.idea.ui.webview.event.model.WebviewEvent;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * The EventManager responsible for managing events between the IDE and the Webview.
+ * The EventManager is responsible for managing events between the IDE and the Webview.
  * It handles the creation of a receiver and sender, allowing communication between the components.
  */
 public class EventManager {
-    public static String ideSendFuncName = "sendMessageToIdeFunc";
-    Receiver receiver;
-    Sender sender;
+    private final static String ideSendFuncName = "sendMessageToIdeFunc";
+    private final Receiver receiver;
+    private final Sender sender;
 
     /**
      * Constructs a new EventManager with the provided JBCefBrowser and Project.

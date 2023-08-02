@@ -262,7 +262,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     }
 
     private void navigateToFile(FileIssueNode node) {
-        new JumpToCode(project).execute(node.getFilePath(), node.getRowStart(), node.getRowEnd(), node.getColStart(), node.getColEnd());
+        JumpToCode.getInstance(project).execute(node.getFilePath(), node.getRowStart(), node.getRowEnd(), node.getColStart(), node.getColEnd());
     }
 
     /**

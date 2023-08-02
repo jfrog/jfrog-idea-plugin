@@ -22,7 +22,7 @@ public class WebviewManager implements Disposable {
 
     public WebviewManager(@NotNull Project project) {
         jbCefBrowser = new JBCefBrowser();
-        // EventManager creation must be created before the webview is initialized
+        // EventManager must be created before the webview is initialized
         eventManager = new EventManager(jbCefBrowser, project);
         Disposer.register(this, jbCefBrowser);
         jbCefBrowser.loadURL("http://jfrog-idea-plugin/index.html");

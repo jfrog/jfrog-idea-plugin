@@ -59,7 +59,7 @@ public class Sender {
     public void sendEvent(WebviewEvent.Type type, Object data) {
         try {
             String raw = pack(type, data);
-            Logger.getInstance().debug("Sending data to jfrog  webview: " + raw);
+            Logger.getInstance().debug("Sending data to jfrog webview: " + raw);
             this.send("window.postMessage(" + raw + ")");
         } catch (JsonProcessingException e) {
             Logger.getInstance().error(e.getMessage());

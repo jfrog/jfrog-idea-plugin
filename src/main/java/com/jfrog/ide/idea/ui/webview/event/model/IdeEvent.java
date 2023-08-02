@@ -1,7 +1,7 @@
 package com.jfrog.ide.idea.ui.webview.event.model;
 
 /**
- * Represents an IDE-specific event that can be sent from the IDE to the Webview.
+ * Represents an IDE-specific event that can be sent from the Webview to the IDE.
  */
 public class IdeEvent extends Event {
     private Type type;
@@ -18,5 +18,5 @@ public class IdeEvent extends Event {
         this.type = type;
     }
 
-    public enum Type {SHOW_CODE}
+    public enum Type {JUMP_TO_CODE}
 }

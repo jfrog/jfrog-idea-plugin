@@ -1,7 +1,7 @@
 package com.jfrog.ide.idea.ui.webview.event.model;
 
 /**
- * Represents a Webview-specific event that can be sent from the Webview to the IDE.
+ * Represents a Webview-specific event that can be sent from the IDE to the Webview.
  */
 public class WebviewEvent extends Event {
     private Type type;

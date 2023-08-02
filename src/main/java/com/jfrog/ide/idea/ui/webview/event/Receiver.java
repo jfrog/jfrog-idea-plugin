@@ -38,7 +38,7 @@ public class Receiver {
         query = JBCefJSQuery.create((JBCefBrowserBase) jbBrowser);
         query.addHandler((raw) -> {
             try {
-                this.handler(unPack(raw));
+                this.handler(unpack(raw));
             } catch (JsonProcessingException e) {
                 Logger.getInstance().error(e.getMessage());
             }
@@ -53,7 +53,7 @@ public class Receiver {
      * @return The unpacked IdeEvent.
      * @throws JsonProcessingException If an error occurs during JSON processing.
      */
-    public static IdeEvent unPack(String raw) throws JsonProcessingException {
+    public static IdeEvent unpack(String raw) throws JsonProcessingException {
         ObjectMapper ow = createMapper();
         return ow.readValue(raw, IdeEvent.class);
     }
@@ -74,9 +74,9 @@ public class Receiver {
      * @param event The received IdeEvent to handle.
      */
     private void handler(IdeEvent event) {
-        if (Objects.requireNonNull(event.getType()) == IdeEvent.Type.SHOW_CODE) {
+        if (Objects.requireNonNull(event.getType()) == IdeEvent.Type.JUMP_TO_CODE) {
             new JumpToCodeTask(this.project).execute(createMapper().convertValue(event.getData(), Location.class));
-            Logger.getInstance().error("Jump to " + event.getType());
+            Logger.getInstance().debug("Jump to " + event.getType());
         } else {
             Logger.getInstance().error("Received unknown event from the webview: " + event.getType());
         }

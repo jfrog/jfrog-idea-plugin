@@ -28,9 +28,13 @@ public class JumpToCode {
      *
      * @param project The current project.
      */
-    public JumpToCode(@NotNull Project project) {
+    private JumpToCode(@NotNull Project project) {
         this.project = project;
         fileEditorManager = FileEditorManager.getInstance(project);
+    }
+
+    public static JumpToCode getInstance(@NotNull Project project) {
+        return project.getService(JumpToCode.class);
     }
 
     /**
@@ -50,7 +54,6 @@ public class JumpToCode {
             ApplicationManager.getApplication().invokeAndWait(() -> {
                 openFileInEditor(file);
                 highlightCode(startRow, endRow, startColumn, endColumn);
-
             });
         });
     }
