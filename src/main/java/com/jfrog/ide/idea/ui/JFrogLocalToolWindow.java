@@ -8,43 +8,45 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.impl.jdkDownloader.RuntimeChooserUtil;
 import com.intellij.openapi.util.Disposer;
-import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.openapi.vfs.LocalFileSystem;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.pom.Navigatable;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiManager;
-import com.intellij.ui.*;
+import com.intellij.ui.HyperlinkLabel;
+import com.intellij.ui.IdeBorderFactory;
+import com.intellij.ui.OnePixelSplitter;
+import com.intellij.ui.ScrollPaneFactory;
+import com.intellij.ui.SideBorder;
+import com.intellij.ui.TreeSpeedSearch;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.jcef.JBCefApp;
+import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.util.ui.UIUtil;
-import com.jfrog.ide.common.nodes.*;
+import com.jfrog.ide.common.nodes.ApplicableIssueNode;
+import com.jfrog.ide.common.nodes.FileIssueNode;
+import com.jfrog.ide.common.nodes.IssueNode;
+import com.jfrog.ide.common.nodes.LicenseViolationNode;
+import com.jfrog.ide.common.nodes.VulnerabilityNode;
 import com.jfrog.ide.idea.actions.CollapseAllAction;
 import com.jfrog.ide.idea.actions.ExpandAllAction;
 import com.jfrog.ide.idea.actions.GoToSettingsAction;
 import com.jfrog.ide.idea.actions.ScanTimeLabelAction;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.events.ApplicationEvents;
+import com.jfrog.ide.idea.inspections.JumpToCode;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.ScanManager;
-import com.jfrog.ide.idea.ui.jcef.message.MessageType;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
 import com.jfrog.ide.idea.ui.webview.WebviewManager;
 import com.jfrog.ide.idea.ui.webview.WebviewObjectConverter;
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.cef.browser.CefBrowser;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static com.jfrog.ide.idea.ui.JFrogToolWindow.SCROLL_BAR_SCROLLING_UNITS;
+import static com.jfrog.ide.idea.ui.webview.event.model.WebviewEvent.Type.SHOW_PAGE;
 
 /**
  * @author yahavi
@@ -72,10 +74,10 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             leftPanel.add(createJcefNotSupportedView(), 0);
             return;
         }
+        JBCefBrowser jbCefBrowser;
 
-        JComponent browserComponent;
         try {
-            browserComponent = initVulnerabilityInfoBrowser();
+            jbCefBrowser = initVulnerabilityInfoBrowser(project);
         } catch (IOException | URISyntaxException e) {
             Logger.getInstance().error("Local view couldn't be initialized.", e);
             leftPanel.removeAll();
@@ -92,7 +94,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
         alertIfCacheExpired();
         refreshView();
-        registerListeners(browserComponent);
+        registerListeners(jbCefBrowser.getComponent());
         isInitialized = true;
     }
 
@@ -222,12 +224,10 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         leftPanelContent.add(component, 0);
     }
 
-    private JComponent initVulnerabilityInfoBrowser() throws IOException, URISyntaxException {
-        webviewManager = new WebviewManager();
+    private JBCefBrowser initVulnerabilityInfoBrowser(@NotNull Project project) throws IOException, URISyntaxException {
+        webviewManager = new WebviewManager(project);
         Disposer.register(this, webviewManager);
-
-        CefBrowser browser = webviewManager.createBrowser(() -> updateIssueOrLicenseInWebview(selectedIssue));
-        return (JComponent) browser.getUIComponent();
+        return webviewManager.getBrowser();
     }
 
     /**
@@ -248,35 +248,21 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
     private void updateIssueOrLicenseInWebview(IssueNode issueNode) {
         if (issueNode instanceof VulnerabilityNode issue) {
-            webviewManager.sendMessage(MessageType.SHOW_PAGE, WebviewObjectConverter.convertIssueToDepPage(issue));
+            webviewManager.sendMessage(SHOW_PAGE, WebviewObjectConverter.convertIssueToDepPage(issue));
         } else if (issueNode instanceof ApplicableIssueNode) {
             ApplicableIssueNode node = (ApplicableIssueNode) issueNode;
-            webviewManager.sendMessage(MessageType.SHOW_PAGE, WebviewObjectConverter.convertIssueToDepPage(node.getIssue()));
+            webviewManager.sendMessage(SHOW_PAGE, WebviewObjectConverter.convertIssueToDepPage(node.getIssue()));
             navigateToFile(node);
         } else if (issueNode instanceof LicenseViolationNode license) {
-            webviewManager.sendMessage(MessageType.SHOW_PAGE, WebviewObjectConverter.convertLicenseToDepPage(license));
+            webviewManager.sendMessage(SHOW_PAGE, WebviewObjectConverter.convertLicenseToDepPage(license));
         } else if (issueNode instanceof FileIssueNode node) {
-            webviewManager.sendMessage(MessageType.SHOW_PAGE, WebviewObjectConverter.convertFileIssueToIssuePage(node));
+            webviewManager.sendMessage(SHOW_PAGE, WebviewObjectConverter.convertFileIssueToIssuePage(node));
             navigateToFile(node);
         }
     }
 
     private void navigateToFile(FileIssueNode node) {
-        ApplicationManager.getApplication().invokeLater(() -> {
-            VirtualFile sourceCodeFile = LocalFileSystem.getInstance().findFileByIoFile(new File(node.getFilePath()));
-            if (sourceCodeFile == null) {
-                return;
-            }
-            PsiFile targetFile = PsiManager.getInstance(project).findFile(sourceCodeFile);
-            if (targetFile == null) {
-                return;
-            }
-            int lineOffset = StringUtil.lineColToOffset(targetFile.getText(), node.getRowStart(), node.getColStart());
-            PsiElement element = targetFile.findElementAt(lineOffset);
-            if (element instanceof Navigatable) {
-                ((Navigatable) element).navigate(true);
-            } else targetFile.navigate(true);
-        });
+        JumpToCode.getInstance(project).execute(node.getFilePath(), node.getRowStart(), node.getRowEnd(), node.getColStart(), node.getColEnd());
     }
 
     /**

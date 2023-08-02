@@ -1,35 +1,44 @@
 package com.jfrog.ide.idea.ui.webview;
 
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.project.DumbService;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.jfrog.ide.idea.log.Logger;
-import com.jfrog.ide.idea.ui.JfrogContextMenuHandler;
-import com.jfrog.ide.idea.ui.jcef.message.MessagePacker;
-import com.jfrog.ide.idea.ui.jcef.message.MessageType;
+import com.jfrog.ide.idea.ui.webview.event.EventManager;
+import com.jfrog.ide.idea.ui.webview.event.model.WebviewEvent;
 import org.cef.CefApp;
 import org.cef.CefSettings;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.handler.CefDisplayHandlerAdapter;
 import org.cef.handler.CefLoadHandlerAdapter;
+import org.jetbrains.annotations.NotNull;
 
 public class WebviewManager implements Disposable {
-    private JBCefBrowser jbCefBrowser;
-    private MessagePacker messagePacker;
-    private boolean schemeHandlerRegistered = false;
+    private final JBCefBrowser jbCefBrowser;
+    public EventManager eventManager;
 
-    public CefBrowser createBrowser(Runnable onLoadEnd) {
+    public WebviewManager(@NotNull Project project) {
         jbCefBrowser = new JBCefBrowser();
+        // EventManager must be created before the webview is initialized
+        eventManager = new EventManager(jbCefBrowser, project);
         Disposer.register(this, jbCefBrowser);
-        CefBrowser cefBrowser = jbCefBrowser.getCefBrowser();
         jbCefBrowser.createImmediately();
         jbCefBrowser.setOpenLinksInExternalBrowser(true);
         streamConsoleMessagesToLog();
-        handleLoadEvent(onLoadEnd);
-        messagePacker = new MessagePacker(cefBrowser);
-        jbCefBrowser.getJBCefClient().addContextMenuHandler(new JfrogContextMenuHandler(), jbCefBrowser.getCefBrowser());
-        return cefBrowser;
+        handleLoadEvent(() -> eventManager.onWebviewLoadEnd());
+        DumbService.getInstance(project).smartInvokeLater(() -> {
+            // Register the scheme handler factory when in smart mode.
+            // Performing this action immediately after opening IntelliJ sometimes results in a crash, particularly in IntelliJ 2022.3.
+            CefApp.getInstance().registerSchemeHandlerFactory("http", "jfrog-idea-plugin", new WebviewSchemeHandlerFactory());
+            jbCefBrowser.loadURL("http://jfrog-idea-plugin/index.html");
+        });
+    }
+
+    public JBCefBrowser getBrowser() {
+        return jbCefBrowser;
     }
 
     private void handleLoadEvent(Runnable onLoadEnd) {
@@ -65,15 +74,8 @@ public class WebviewManager implements Disposable {
         }, jbCefBrowser.getCefBrowser());
     }
 
-    public void sendMessage(MessageType type, Object data) {
-        if (!schemeHandlerRegistered) {
-            // Register the scheme handler factory right before the webview is first opened.
-            // Performing this action immediately after opening IntelliJ sometimes results in a crash, particularly in IntelliJ 2022.3.
-            CefApp.getInstance().registerSchemeHandlerFactory("http", "jfrog-idea-plugin", new WebviewSchemeHandlerFactory());
-            jbCefBrowser.loadURL("http://jfrog-idea-plugin/index.html");
-            schemeHandlerRegistered = true;
-        }
-        messagePacker.send(type, data);
+    public void sendMessage(WebviewEvent.Type type, Object data) {
+        eventManager.send(type, data);
     }
 
     @Override
