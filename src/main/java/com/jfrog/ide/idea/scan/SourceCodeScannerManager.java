@@ -157,7 +157,7 @@ public class SourceCodeScannerManager {
 
     private ScanConfig.Builder createBasicScannerInput() {
         String excludePattern = GlobalSettings.getInstance().getServerConfig().getExcludedPaths();
-        return new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).skippedFolders(convertToSkippedFolders(excludePattern));
+        return new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toAbsolutePath().toString())).skippedFolders(convertToSkippedFolders(excludePattern));
     }
 
     /**

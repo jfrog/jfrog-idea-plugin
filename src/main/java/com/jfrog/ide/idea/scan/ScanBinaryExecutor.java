@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -140,10 +141,10 @@ public abstract class ScanBinaryExecutor {
             inputFileBuilder.output(outputFilePath.toString());
             inputFileBuilder.scanType(scanType);
             ScanConfig inputParams = inputFileBuilder.Build();
-            CommandExecutor commandExecutor = new CommandExecutor(inputParams.getRoots().get(0), creatEnvWithCredentials());
+            CommandExecutor commandExecutor = new CommandExecutor(binaryTargetPath.toString(), creatEnvWithCredentials());
+            args = new ArrayList<>(args);
             if (creatInputFile) {
                 inputFile = createTempRunInputFile(new ScansConfig(List.of(inputParams)));
-                args = new ArrayList<>(args);
                 args.add(inputFile.toString());
             } else {
                 args.add(outputFilePath.toString());
@@ -154,7 +155,7 @@ public abstract class ScanBinaryExecutor {
             //  As it is an internal binary execution, the message should be printed for DEBUG use only.
             log.debug(String.format("Executing command: %s %s", binaryTargetPath.toString(), join(" ", args)));
             // Execute the external process
-            CommandResults commandResults = commandExecutor.exeCommand(binaryTargetPath.toFile().getParentFile(), args,
+            CommandResults commandResults = commandExecutor.exeCommand(Paths.get(inputParams.getRoots().get(0)).toFile(), args,
                     null, new NullLog(), MAX_EXECUTION_MINUTES, TimeUnit.MINUTES);
             if (commandResults.getExitValue() == USER_NOT_ENTITLED) {
                 log.debug("User not entitled for advance security scan");
