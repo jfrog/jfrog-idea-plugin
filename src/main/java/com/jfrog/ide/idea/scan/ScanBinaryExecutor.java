@@ -3,6 +3,7 @@ package com.jfrog.ide.idea.scan;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.configuration.ServerConfig;
+import com.jfrog.ide.common.nodes.FileTreeNode;
 import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
@@ -125,12 +126,11 @@ public abstract class ScanBinaryExecutor {
 
     abstract List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException, URISyntaxException;
 
-    protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args, Runnable checkCanceled) throws IOException, InterruptedException {
+    protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args, Runnable checkCanceled, boolean creatInputFile) throws IOException, InterruptedException {
         if (!shouldExecute()) {
             return List.of();
         }
         checkCanceled.run();
-        CommandExecutor commandExecutor = new CommandExecutor(binaryTargetPath.toString(), creatEnvWithCredentials());
         updateBinaryIfNeeded();
         Path outputTempDir = null;
         Path inputFile = null;
@@ -139,9 +139,15 @@ public abstract class ScanBinaryExecutor {
             Path outputFilePath = Files.createTempFile(outputTempDir, "", ".sarif");
             inputFileBuilder.output(outputFilePath.toString());
             inputFileBuilder.scanType(scanType);
-            inputFile = createTempRunInputFile(new ScansConfig(List.of(inputFileBuilder.Build())));
-            args = new ArrayList<>(args);
-            args.add(inputFile.toString());
+            ScanConfig inputParams = inputFileBuilder.Build();
+            CommandExecutor commandExecutor = new CommandExecutor(inputParams.getRoots().get(0), creatEnvWithCredentials());
+            if (creatInputFile) {
+                inputFile = createTempRunInputFile(new ScansConfig(List.of(inputParams)));
+                args = new ArrayList<>(args);
+                args.add(inputFile.toString());
+            } else {
+                args.add(outputFilePath.toString());
+            }
 
             Logger log = Logger.getInstance();
             // The following logging is done outside the commandExecutor because the commandExecutor log level is set to INFO.

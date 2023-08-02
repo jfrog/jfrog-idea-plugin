@@ -21,6 +21,7 @@ import java.util.List;
  */
 public class EosScannerExecutor extends ScanBinaryExecutor {
     private static final List<String> SCANNER_ARGS = List.of("zd");
+    private static final boolean RUN_WITH_CONFIG_FILE = false;
 
     public EosScannerExecutor(Log log, ServerConfig serverConfig) {
         this(log, serverConfig, null, true);
@@ -32,7 +33,7 @@ public class EosScannerExecutor extends ScanBinaryExecutor {
 
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException {
         inputFileBuilder.language(PackageManagerType.PYPI.getProgramingLanguage());
-        return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled);
+        return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled, RUN_WITH_CONFIG_FILE);
     }
 
     @Override
