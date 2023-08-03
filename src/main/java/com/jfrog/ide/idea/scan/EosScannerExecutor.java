@@ -22,6 +22,8 @@ import java.util.List;
 public class EosScannerExecutor extends ScanBinaryExecutor {
     private static final List<String> SCANNER_ARGS = List.of("zd");
     private static final boolean RUN_WITH_CONFIG_FILE = false;
+    private static final List<PackageManagerType> SUPPORTED_PACKAGE_TYPES = List.of(PackageManagerType.PYPI, PackageManagerType.NPM, PackageManagerType.YARN, PackageManagerType.GRADLE, PackageManagerType.MAVEN);
+
 
     public EosScannerExecutor(Log log, ServerConfig serverConfig) {
         this(log, serverConfig, null, true);
@@ -32,7 +34,6 @@ public class EosScannerExecutor extends ScanBinaryExecutor {
     }
 
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException {
-        inputFileBuilder.language(PackageManagerType.PYPI.getProgramingLanguage());
         return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled, RUN_WITH_CONFIG_FILE);
     }
 
@@ -63,6 +64,6 @@ public class EosScannerExecutor extends ScanBinaryExecutor {
 
     @Override
     protected boolean isPackageTypeSupported(PackageManagerType packageType) {
-        return packageType == PackageManagerType.PYPI;
+        return packageType != null && SUPPORTED_PACKAGE_TYPES.contains(packageType);
     }
 }

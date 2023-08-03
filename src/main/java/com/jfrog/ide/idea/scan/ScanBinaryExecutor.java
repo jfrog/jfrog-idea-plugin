@@ -12,6 +12,7 @@ import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.data.*;
 import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.services.entitlements.Feature;
+import lombok.Getter;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.UnzipParameters;
@@ -74,6 +75,7 @@ public abstract class ScanBinaryExecutor {
     private final String BINARY_DOWNLOAD_URL;
     private static Path binaryTargetPath;
     private static Path archiveTargetPath;
+    @Getter
     private static String osDistribution;
     private static LocalDateTime nextUpdateCheck;
     private final ArtifactoryManagerBuilder artifactoryManagerBuilder;
@@ -114,10 +116,6 @@ public abstract class ScanBinaryExecutor {
             log.warn(e.getMessage());
             notSupported = true;
         }
-    }
-
-    public static String getOsDistribution() {
-        return osDistribution;
     }
 
     public String getBinaryDownloadURL() {
@@ -235,7 +233,7 @@ public abstract class ScanBinaryExecutor {
     }
 
     protected boolean isPackageTypeSupported(PackageManagerType type) {
-        return supportedPackageTypes.contains(type);
+        return type != null && supportedPackageTypes.contains(type);
     }
 
     protected List<JFrogSecurityWarning> parseOutputSarif(Path outputFile) throws IOException {

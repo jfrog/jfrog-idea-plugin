@@ -4,10 +4,12 @@ import com.jfrog.ide.common.nodes.subentities.FindingInfo;
 import com.jfrog.ide.common.nodes.subentities.Severity;
 import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.scan.data.*;
+import lombok.Getter;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
 
+@Getter
 public class JFrogSecurityWarning {
     private final int lineStart;
     private final int colStart;
@@ -57,7 +59,7 @@ public class JFrogSecurityWarning {
                 getFirstRegion(result).getEndLine() - 1,
                 getFirstRegion(result).getEndColumn() - 1,
                 result.getMessage().getText(),
-                !result.getLocations().isEmpty() ? StringUtils.removeStart(result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri(), "file://") : "",
+                !result.getLocations().isEmpty() ? uriToPath(result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri()) : "",
                 result.getRuleId(),
                 getFirstRegion(result).getSnippet().getText(),
                 reporter,
@@ -68,11 +70,11 @@ public class JFrogSecurityWarning {
     }
 
     private static FindingInfo[][] convertCodeFlowsToFindingInfo(List<CodeFlow> codeFlows) {
-        if (codeFlows.isEmpty()) {
+        if (codeFlows == null || codeFlows.isEmpty()) {
             return null;
         }
         List<ThreadFlow> flows = codeFlows.get(0).getThreadFlows();
-        if (flows.isEmpty()) {
+        if (flows == null || flows.isEmpty()) {
             return null;
         }
         FindingInfo[][] results = new FindingInfo[flows.size()][];
@@ -83,7 +85,7 @@ public class JFrogSecurityWarning {
             for (int j = 0; j < locations.size(); j++) {
                 PhysicalLocation location = locations.get(j).getLocation().getPhysicalLocation();
                 results[i][j] = new FindingInfo(
-                        location.getArtifactLocation().getUri(),
+                        uriToPath(location.getArtifactLocation().getUri()),
                         location.getRegion().getStartLine(),
                         location.getRegion().getStartColumn(),
                         location.getRegion().getEndLine(),
@@ -93,38 +95,6 @@ public class JFrogSecurityWarning {
             }
         }
         return results;
-    }
-
-    public int getLineStart() {
-        return lineStart;
-    }
-
-    public int getColStart() {
-        return colStart;
-    }
-
-    public int getLineEnd() {
-        return lineEnd;
-    }
-
-    public int getColEnd() {
-        return colEnd;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public String getFilePath() {
-        return filePath;
-    }
-
-    public SourceCodeScanType getReporter() {
-        return reporter;
-    }
-
-    public String getLineSnippet() {
-        return lineSnippet;
     }
 
     public boolean isApplicable() {
@@ -137,23 +107,11 @@ public class JFrogSecurityWarning {
         return !result.getLocations().isEmpty() ? result.getLocations().get(0).getPhysicalLocation().getRegion() : emptyRegion;
     }
 
-    public String getScannerSearchTarget() {
-        return scannerSearchTarget;
-    }
-
     public void setScannerSearchTarget(String scannerSearchTarget) {
         this.scannerSearchTarget = scannerSearchTarget;
     }
 
-    public Severity getSeverity() {
-        return severity;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public FindingInfo[][] getCodeFlows() {
-        return codeFlows;
+    private static String uriToPath(String path) {
+        return StringUtils.removeStart(path, "file://");
     }
 }
