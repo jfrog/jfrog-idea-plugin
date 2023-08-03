@@ -21,8 +21,7 @@ import java.util.List;
 public class IACScannerExecutor extends ScanBinaryExecutor {
     private static final List<String> SCANNER_ARGS = List.of("iac");
     private static final boolean RUN_WITH_CONFIG_FILE = true;
-
-
+    
     public IACScannerExecutor(Log log, ServerConfig serverConfig) {
         this(log, serverConfig, null, true);
     }

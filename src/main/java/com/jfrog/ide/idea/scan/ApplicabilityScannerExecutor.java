@@ -24,7 +24,6 @@ import java.util.Map;
 public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
     private static final List<String> SCANNER_ARGS = List.of("ca");
     private static final boolean RUN_WITH_CONFIG_FILE = true;
-
     private static final List<PackageManagerType> SUPPORTED_PACKAGE_TYPES = List.of(PackageManagerType.PYPI, PackageManagerType.NPM, PackageManagerType.YARN, PackageManagerType.GRADLE, PackageManagerType.MAVEN);
 
 

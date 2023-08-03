@@ -22,9 +22,7 @@ public class JFrogSecurityWarning {
     private final String name;
     private final SourceCodeScanType reporter;
     private final Severity severity;
-
     private final FindingInfo[][] codeFlows;
-
     private final boolean isApplicable;
 
     public JFrogSecurityWarning(
