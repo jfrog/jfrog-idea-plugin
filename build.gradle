@@ -47,8 +47,6 @@ repositories {
 }
 
 def buildInfoVersion = '2.41.4'
-
-
 dependencies {
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.15.2'
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-extractor', version: buildInfoVersion
@@ -129,8 +127,7 @@ tasks.register('verifyWebview', Verify) {
 }
 
 tasks.register('extractWebview', Copy) {
-//    from tarTree(new File(buildDir, webviewFileName))
-    from tarTree(new File("/Users/tala/dev/forks/jfrog-ide-webview/jfrog-ide-webview-0.2.1.tgz"))
+    from tarTree(new File(buildDir, webviewFileName))
     into Paths.get('src', 'main', 'resources', 'jfrog-ide-webview').toFile()
     include '**/build/**/*'
     eachFile {
@@ -144,8 +141,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 tasks.withType(ProcessResources).configureEach {
-    dependsOn('extractWebview')
-//    dependsOn('downloadWebview')
+    dependsOn('downloadWebview')
 }
 
 publishing {
