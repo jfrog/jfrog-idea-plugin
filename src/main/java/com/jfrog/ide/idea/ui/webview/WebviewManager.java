@@ -72,8 +72,8 @@ public class WebviewManager implements Disposable {
 
     public void sendMessage(WebviewEvent.Type type, Object data) {
         if (!schemeHandlerRegistered) {
-            // Register the scheme handler factory when in smart mode.
-            // Performing this action immediately after opening IntelliJ sometimes results in a crash, particularly in IntelliJ 2022.3.
+            // Register the scheme handler factory right before the webview is first opened.
+            // Performing this action earlier sometimes results in a crash or a fatal error, particularly in IntelliJ 2022.3.
             CefApp.getInstance().registerSchemeHandlerFactory("http", "jfrog-idea-plugin", new WebviewSchemeHandlerFactory());
             jbCefBrowser.loadURL("http://jfrog-idea-plugin/index.html");
             schemeHandlerRegistered = true;
