@@ -5,7 +5,6 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.content.ContentManager;
-import com.jfrog.ide.idea.log.Logger;
 import org.jetbrains.annotations.NotNull;
 
 
@@ -26,7 +25,7 @@ public class JFrogToolWindow {
     }
 
     private void addContent(ContentManager contentManager, JFrogLocalToolWindow jfrogLocalContent, JFrogCiToolWindow jfrogBuildsContent) {
-        ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
+        ContentFactory contentFactory = ContentFactory.getInstance();
         Content localContent = contentFactory.createContent(jfrogLocalContent, "Local", false);
         contentManager.addContent(localContent);
         Content buildsContent = contentFactory.createContent(jfrogBuildsContent, "CI", false);

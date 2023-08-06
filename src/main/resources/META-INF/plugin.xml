@@ -30,13 +30,13 @@
 
     <change-notes>
         <![CDATA[
-          <li>Bug fix - IndexNotReadyException on plugin startup.</li>
+          <li>Adds new Secrets and IaC scans.</li>
+          <li>Adds Contextual Analysis support for Maven and Gradle projects.</li>
         ]]>
     </change-notes>
 
-    <idea-version since-build="221.5080"/>
+    <idea-version since-build="223.4884.69"/>
     <depends>com.intellij.modules.lang</depends>
-    <depends config-file="with-java.xml" optional="true">com.intellij.modules.java</depends>
     <depends config-file="with-gradle.xml" optional="true">com.intellij.gradle</depends>
     <depends config-file="with-groovy.xml" optional="true">org.intellij.groovy</depends>
     <depends config-file="with-kotlin.xml" optional="true">org.jetbrains.kotlin</depends>
@@ -84,7 +84,7 @@
                          enabledByDefault="true"
                          implementationClass="com.jfrog.ide.idea.inspections.YarnInspection"/>
         <annotator language="JSON" implementationClass="com.jfrog.ide.idea.inspections.YarnInspection"/>
-        <externalAnnotator language="JavaScript"
+        <externalAnnotator language=""
                            implementationClass="com.jfrog.ide.idea.inspections.JFrogSecurityAnnotator"/>
     </extensions>
 

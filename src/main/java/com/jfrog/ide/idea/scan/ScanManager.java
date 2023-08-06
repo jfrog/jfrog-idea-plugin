@@ -34,11 +34,13 @@ public class ScanManager {
     private final int SCAN_TIMEOUT_MINUTES = 10;
     private final Project project;
     private final ScannerFactory factory;
+    private final SourceCodeScannerManager sourceCodeScannerManager;
     private Map<Integer, ScannerBase> scanners = Maps.newHashMap();
 
     private ScanManager(@NotNull Project project) {
         this.project = project;
         factory = new ScannerFactory(project);
+        sourceCodeScannerManager = new SourceCodeScannerManager(project);
     }
 
     public static ScanManager getInstance(@NotNull Project project) {
@@ -84,6 +86,9 @@ public class ScanManager {
         Thread currScanThread = new Thread(() -> {
             ExecutorService executor = Executors.newFixedThreadPool(3);
             try {
+                // Source code scanners
+                sourceCodeScannerManager.asyncScanAndUpdateResults(executor, Logger.getInstance());
+                // Dependencies scanners
                 ScanLogic scanLogic = createScanLogic();
                 refreshScanners(scanLogic, executor);
                 NavigationService.clearNavigationMap(project);

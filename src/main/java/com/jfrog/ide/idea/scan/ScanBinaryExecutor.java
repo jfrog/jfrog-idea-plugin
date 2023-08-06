@@ -3,13 +3,12 @@ package com.jfrog.ide.idea.scan;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.configuration.ServerConfig;
+import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
-import com.jfrog.ide.idea.scan.data.Output;
-import com.jfrog.ide.idea.scan.data.ScanConfig;
-import com.jfrog.ide.idea.scan.data.ScansConfig;
+import com.jfrog.ide.idea.scan.data.*;
 import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.services.entitlements.Feature;
 import net.lingala.zip4j.ZipFile;
@@ -35,10 +34,8 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static com.jfrog.ide.common.utils.ArtifactoryConnectionUtils.createAnonymousAccessArtifactoryManagerBuilder;
 import static com.jfrog.ide.common.utils.ArtifactoryConnectionUtils.createArtifactoryManagerBuilder;
@@ -48,21 +45,22 @@ import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBui
 import static com.jfrog.ide.idea.scan.ScanUtils.getOSAndArc;
 import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
 import static java.lang.String.join;
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 
 /**
  * @author Tal Arian
  */
 public abstract class ScanBinaryExecutor {
-    final String scanType;
-    protected List<String> supportedLanguages;
-    private static final Path BINARIES_DIR = HOME_PATH.resolve("dependencies").resolve("jfrog-security");
-    private static Path binaryTargetPath;
-    private static Path archiveTargetPath;
-    private static final String MINIMAL_XRAY_VERSION_SUPPORTED_FOR_ENTITLEMENT = "3.66.0";
+    private static final long MAX_EXECUTION_MINUTES = 10;
     private static final int UPDATE_INTERVAL = 1;
-    private static LocalDateTime nextUpdateCheck;
-    private final Log log;
-    private boolean notSupported;
+    private static final int USER_NOT_ENTITLED = 31;
+    private static final int NOT_SUPPORTED = 13;
+    private static final Path BINARIES_DIR = HOME_PATH.resolve("dependencies").resolve("jfrog-security");
+    private static final String SCANNER_BINARY_NAME = "analyzerManager";
+    private static final String SCANNER_BINARY_VERSION = "1.2.4.1858388";
+    private static final String DEFAULT_BINARY_DOWNLOAD_URL = "xsc-gen-exe-analyzer-manager-local/v1/" + SCANNER_BINARY_VERSION;
+    private static final String DOWNLOAD_SCANNER_NAME = "analyzerManager.zip";
+    private static final String MINIMAL_XRAY_VERSION_SUPPORTED_FOR_ENTITLEMENT = "3.66.0";
     private static final String ENV_PLATFORM = "JF_PLATFORM_URL";
     private static final String ENV_USER = "JF_USER";
     private static final String ENV_PASSWORD = "JF_PASS";
@@ -70,18 +68,25 @@ public abstract class ScanBinaryExecutor {
     private static final String ENV_HTTP_PROXY = "HTTP_PROXY";
     private static final String ENV_HTTPS_PROXY = "HTTPS_PROXY";
     private static final String ENV_LOG_DIR = "AM_LOG_DIRECTORY";
-    private static final int USER_NOT_ENTITLED = 31;
     private static final String JFROG_RELEASES = "https://releases.jfrog.io/artifactory/";
-
+    private final String BINARY_DOWNLOAD_URL;
+    private static Path binaryTargetPath;
+    private static Path archiveTargetPath;
     private static String osDistribution;
+    private static LocalDateTime nextUpdateCheck;
     private final ArtifactoryManagerBuilder artifactoryManagerBuilder;
+    protected final SourceCodeScanType scanType;
+    protected Collection<PackageManagerType> supportedPackageTypes;
+    private final Log log;
+    private boolean notSupported;
 
-    ScanBinaryExecutor(String scanType, String binaryName, String archiveName, Log log, ServerConfig server, boolean useJFrogReleases) {
+    ScanBinaryExecutor(SourceCodeScanType scanType, String binaryDownloadUrl, Log log, ServerConfig server, boolean useJFrogReleases) {
         this.scanType = scanType;
         this.log = log;
-        String executable = SystemUtils.IS_OS_WINDOWS ? binaryName + ".exe" : binaryName;
-        binaryTargetPath = BINARIES_DIR.resolve(binaryName).resolve(executable);
-        archiveTargetPath = BINARIES_DIR.resolve(archiveName);
+        BINARY_DOWNLOAD_URL = defaultIfEmpty(binaryDownloadUrl, DEFAULT_BINARY_DOWNLOAD_URL);
+        String executable = SystemUtils.IS_OS_WINDOWS ? SCANNER_BINARY_NAME + ".exe" : SCANNER_BINARY_NAME;
+        binaryTargetPath = BINARIES_DIR.resolve(SCANNER_BINARY_NAME).resolve(executable);
+        archiveTargetPath = BINARIES_DIR.resolve(DOWNLOAD_SCANNER_NAME);
         artifactoryManagerBuilder = createManagerBuilder(useJFrogReleases, server);
         setOsDistribution();
     }
@@ -112,16 +117,19 @@ public abstract class ScanBinaryExecutor {
         return osDistribution;
     }
 
-    abstract List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder) throws IOException, InterruptedException, URISyntaxException;
-
-    abstract String getBinaryDownloadURL();
+    public String getBinaryDownloadURL() {
+        return String.format("%s/%s/%s", BINARY_DOWNLOAD_URL, getOsDistribution(), DOWNLOAD_SCANNER_NAME);
+    }
 
     abstract Feature getScannerFeatureName();
 
-    protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args) throws IOException, InterruptedException {
+    abstract List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException, URISyntaxException;
+
+    protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args, Runnable checkCanceled) throws IOException, InterruptedException {
         if (!shouldExecute()) {
             return List.of();
         }
+        checkCanceled.run();
         CommandExecutor commandExecutor = new CommandExecutor(binaryTargetPath.toString(), creatEnvWithCredentials());
         updateBinaryIfNeeded();
         Path outputTempDir = null;
@@ -140,9 +148,14 @@ public abstract class ScanBinaryExecutor {
             //  As it is an internal binary execution, the message should be printed for DEBUG use only.
             log.debug(String.format("Executing command: %s %s", binaryTargetPath.toString(), join(" ", args)));
             // Execute the external process
-            CommandResults commandResults = commandExecutor.exeCommand(binaryTargetPath.toFile().getParentFile(), args, null, new NullLog());
+            CommandResults commandResults = commandExecutor.exeCommand(binaryTargetPath.toFile().getParentFile(), args,
+                    null, new NullLog(), MAX_EXECUTION_MINUTES, TimeUnit.MINUTES);
             if (commandResults.getExitValue() == USER_NOT_ENTITLED) {
                 log.debug("User not entitled for advance security scan");
+                return List.of();
+            }
+            if (commandResults.getExitValue() == NOT_SUPPORTED) {
+                log.debug(String.format("Scanner %s is not supported in the current Analyzer Manager version.", scanType));
                 return List.of();
             }
             if (!commandResults.isOk()) {
@@ -211,14 +224,24 @@ public abstract class ScanBinaryExecutor {
         }
     }
 
-    protected List<String> getSupportedLanguages() {
-        return supportedLanguages;
+    protected boolean isPackageTypeSupported(PackageManagerType type) {
+        return supportedPackageTypes.contains(type);
     }
 
     protected List<JFrogSecurityWarning> parseOutputSarif(Path outputFile) throws IOException {
         Output output = getOutputObj(outputFile);
         List<JFrogSecurityWarning> warnings = new ArrayList<>();
-        output.getRuns().forEach(run -> run.getResults().forEach(result -> warnings.add(new JFrogSecurityWarning(result))));
+        output.getRuns().forEach(run -> run.getResults().forEach(result -> warnings.add(new JFrogSecurityWarning(result, scanType))));
+
+        Optional<Run> run = output.getRuns().stream().findFirst();
+        if (run.isPresent()) {
+            List<Rule> scanners = run.get().getTool().getDriver().getRules();
+            // Adds the scanner search target data
+            for (JFrogSecurityWarning warning : warnings) {
+                String scannerSearchTarget = scanners.stream().filter(scanner -> scanner.getId().equals(warning.getName())).findFirst().map(Rule::getFullDescription).map(Message::getText).orElse("");
+                warning.setScannerSearchTarget(scannerSearchTarget);
+            }
+        }
         return warnings;
     }
 

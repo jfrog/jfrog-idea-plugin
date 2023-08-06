@@ -4,7 +4,9 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.jfrog.ide.idea.log.Logger;
+import com.jfrog.ide.idea.ui.JfrogContextMenuHandler;
 import com.jfrog.ide.idea.ui.jcef.message.MessagePacker;
+import com.jfrog.ide.idea.ui.jcef.message.MessageType;
 import org.cef.CefApp;
 import org.cef.CefSettings;
 import org.cef.browser.CefBrowser;
@@ -27,6 +29,7 @@ public class WebviewManager implements Disposable {
         streamConsoleMessagesToLog();
         handleLoadEvent(onLoadEnd);
         messagePacker = new MessagePacker(cefBrowser);
+        jbCefBrowser.getJBCefClient().addContextMenuHandler(new JfrogContextMenuHandler(), jbCefBrowser.getCefBrowser());
         return cefBrowser;
     }
 
@@ -63,8 +66,8 @@ public class WebviewManager implements Disposable {
         }, jbCefBrowser.getCefBrowser());
     }
 
-    public void sendMessage(Object data) {
-        messagePacker.send(data);
+    public void sendMessage(MessageType type, Object data) {
+        messagePacker.send(type, data);
     }
 
     @Override

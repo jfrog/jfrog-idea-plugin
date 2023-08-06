@@ -1,24 +1,33 @@
 package com.jfrog.ide.idea.scan;
 
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.common.log.ProgressIndicator;
-import com.jfrog.ide.common.nodes.ApplicableIssueNode;
-import com.jfrog.ide.common.nodes.DependencyNode;
-import com.jfrog.ide.common.nodes.FileTreeNode;
-import com.jfrog.ide.common.nodes.VulnerabilityNode;
+import com.jfrog.ide.common.nodes.*;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
+import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
+import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
+import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.tree.TreeNode;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 
 import static com.jfrog.ide.common.log.Utils.logError;
+import static com.jfrog.ide.idea.scan.ScannerBase.createRunnable;
 import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.*;
 import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
 
@@ -26,23 +35,29 @@ public class SourceCodeScannerManager {
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
     private final ApplicabilityScannerExecutor applicability = new ApplicabilityScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig());
 
+    private final Collection<ScanBinaryExecutor> scanners = initScannersCollection();
+
     protected Project project;
-    protected String codeBaseLanguage;
+    protected PackageManagerType packageType;
     private static final String SKIP_FOLDERS_SUFFIX = "*/**";
 
-    public SourceCodeScannerManager(Project project, String codeBaseLanguage) {
+    public SourceCodeScannerManager(Project project) {
         this.project = project;
-        this.codeBaseLanguage = codeBaseLanguage.toLowerCase();
+    }
+
+    public SourceCodeScannerManager(Project project, PackageManagerType packageType) {
+        this(project);
+        this.packageType = packageType;
     }
 
     /**
-     * Source code scan and update components.
+     * Applicability source code scanning (Contextual Analysis).
      *
      * @param indicator      the progress indicator.
      * @param depScanResults collection of DependencyNodes.
      * @return A list of FileTreeNodes having the source code issues as their children.
      */
-    public List<FileTreeNode> scanAndUpdate(ProgressIndicator indicator, Collection<DependencyNode> depScanResults) {
+    public List<FileTreeNode> applicabilityScan(ProgressIndicator indicator, Collection<DependencyNode> depScanResults, Runnable checkCanceled) {
         if (project.isDisposed()) {
             return Collections.emptyList();
         }
@@ -52,16 +67,15 @@ public class SourceCodeScannerManager {
         }
         List<JFrogSecurityWarning> scanResults = new ArrayList<>();
         Map<String, List<VulnerabilityNode>> issuesMap = mapDirectIssuesByCve(depScanResults);
-        String excludePattern = GlobalSettings.getInstance().getServerConfig().getExcludedPaths();
 
         try {
-            if (applicability.getSupportedLanguages().contains(codeBaseLanguage)) {
+            if (applicability.isPackageTypeSupported(packageType)) {
                 indicator.setText("Running applicability scan");
                 indicator.setFraction(0.25);
                 Set<String> directIssuesCVEs = issuesMap.keySet();
                 // If no direct dependencies with issues are found by Xray, the applicability scan is irrelevant.
                 if (directIssuesCVEs.size() > 0) {
-                    List<JFrogSecurityWarning> applicabilityResults = applicability.execute(new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).cves(List.copyOf(directIssuesCVEs)).skippedFolders(convertToSkippedFolders(excludePattern)));
+                    List<JFrogSecurityWarning> applicabilityResults = applicability.execute(createBasicScannerInput().cves(List.copyOf(directIssuesCVEs)), checkCanceled);
                     scanResults.addAll(applicabilityResults);
                 }
             }
@@ -71,7 +85,79 @@ public class SourceCodeScannerManager {
             scanInProgress.set(false);
             indicator.setFraction(1);
         }
-        return createAndUpdateNodes(scanResults, issuesMap);
+        return createAndUpdateApplicabilityIssueNodes(scanResults, issuesMap);
+    }
+
+    /**
+     * Launch async source code scans.
+     */
+    void asyncScanAndUpdateResults(ExecutorService executor, Logger log) {
+        // If intellij is still indexing the project, do not scan.
+        if (DumbService.isDumb(project)) {
+            return;
+        }
+        // The tasks run asynchronously. To make sure no more than 3 tasks are running concurrently,
+        // we use a count-down latch that signals to that executor service that it can get more tasks.
+        CountDownLatch latch = new CountDownLatch(1);
+        Task.Backgroundable sourceCodeScanTask = new Task.Backgroundable(null, "Advanced source code scanning") {
+            @Override
+            public void run(@NotNull com.intellij.openapi.progress.ProgressIndicator indicator) {
+                if (project.isDisposed()) {
+                    return;
+                }
+                if (!GlobalSettings.getInstance().reloadXrayCredentials()) {
+                    throw new RuntimeException("Xray server is not configured.");
+                }
+                // Prevent multiple simultaneous scans
+                if (!scanInProgress.compareAndSet(false, true)) {
+                    log.info("Advanced source code scan is already in progress");
+                    return;
+                }
+                sourceCodeScanAndUpdate(new ProgressIndicatorImpl(indicator), ProgressManager::checkCanceled, log);
+            }
+
+            @Override
+            public void onFinished() {
+                latch.countDown();
+                scanInProgress.set(false);
+            }
+
+            @Override
+            public void onThrowable(@NotNull Throwable error) {
+                log.error(ExceptionUtils.getRootCauseMessage(error));
+            }
+
+        };
+        executor.submit(createRunnable(sourceCodeScanTask, latch, log));
+    }
+
+    private void sourceCodeScanAndUpdate(ProgressIndicator indicator, Runnable checkCanceled, Logger log) {
+        indicator.setText("Running advanced source code scanning");
+        double fraction = 0;
+        for (ScanBinaryExecutor scanner : scanners) {
+            checkCanceled.run();
+            try {
+                List<JFrogSecurityWarning> scanResults = scanner.execute(createBasicScannerInput(), checkCanceled);
+                addSourceCodeScanResults(createFileIssueNodes(scanResults));
+            } catch (IOException | URISyntaxException | InterruptedException e) {
+                logError(log, "", e, true);
+            }
+            fraction += 1.0 / scanners.size();
+            indicator.setFraction(fraction);
+        }
+    }
+
+    private void addSourceCodeScanResults(List<FileTreeNode> fileTreeNodes) {
+        if (fileTreeNodes.isEmpty()) {
+            return;
+        }
+        LocalComponentsTree componentsTree = LocalComponentsTree.getInstance(project);
+        componentsTree.addScanResults(fileTreeNodes);
+    }
+
+    private ScanConfig.Builder createBasicScannerInput() {
+        String excludePattern = GlobalSettings.getInstance().getServerConfig().getExcludedPaths();
+        return new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toString())).skippedFolders(convertToSkippedFolders(excludePattern));
     }
 
     /**
@@ -97,13 +183,58 @@ public class SourceCodeScannerManager {
     }
 
     /**
+     * Create {@link FileTreeNode}s with file issues nodes.
+     *
+     * @param scanResults a list of source code scan results.
+     * @return a list of new {@link FileTreeNode}s containing source code issues.
+     */
+    private List<FileTreeNode> createFileIssueNodes(List<JFrogSecurityWarning> scanResults) {
+        HashMap<String, FileTreeNode> results = new HashMap<>();
+        for (JFrogSecurityWarning warning : scanResults) {
+            // Create FileTreeNodes for files with found issues
+            FileTreeNode fileNode = results.get(warning.getFilePath());
+            if (fileNode == null) {
+                fileNode = new FileTreeNode(warning.getFilePath());
+                results.put(warning.getFilePath(), fileNode);
+            }
+
+            FileIssueNode issueNode = new FileIssueNode(createTitle(warning),
+                    warning.getFilePath(), warning.getLineStart(), warning.getColStart(), warning.getLineEnd(), warning.getColEnd(),
+                    createReason(warning), warning.getLineSnippet(), warning.getReporter(), warning.getSeverity());
+            fileNode.addIssue(issueNode);
+        }
+        return new ArrayList<>(results.values());
+    }
+
+    private String createReason(JFrogSecurityWarning warning) {
+        switch (warning.getReporter()) {
+            case IAC:
+            case SECRETS:
+                return warning.getScannerSearchTarget();
+            default:
+                return warning.getReason();
+        }
+    }
+
+    private String createTitle(JFrogSecurityWarning warning) {
+        switch (warning.getReporter()) {
+            case SECRETS:
+                return "Potential Secret";
+            case IAC:
+                return "Infrastructure as Code Vulnerability";
+            default:
+                return warning.getName();
+        }
+    }
+
+    /**
      * Create {@link FileTreeNode}s with applicability issues and update applicability issues in {@link VulnerabilityNode}s.
      *
      * @param scanResults a list of source code scan results.
      * @param issuesMap   a map of {@link VulnerabilityNode}s mapped by their CVEs.
      * @return a list of new {@link FileTreeNode}s containing source code issues.
      */
-    private List<FileTreeNode> createAndUpdateNodes(List<JFrogSecurityWarning> scanResults, Map<String, List<VulnerabilityNode>> issuesMap) {
+    private List<FileTreeNode> createAndUpdateApplicabilityIssueNodes(List<JFrogSecurityWarning> scanResults, Map<String, List<VulnerabilityNode>> issuesMap) {
         HashMap<String, FileTreeNode> results = new HashMap<>();
         for (JFrogSecurityWarning warning : scanResults) {
             // Update all VulnerabilityNodes that have the warning's CVE
@@ -113,7 +244,7 @@ public class SourceCodeScannerManager {
                 if (warning.isApplicable()) {
                     // Create FileTreeNodes for files with applicable issues
                     FileTreeNode fileNode = results.get(warning.getFilePath());
-                    if (fileNode == null && warning.isApplicable()) {
+                    if (fileNode == null) {
                         fileNode = new FileTreeNode(warning.getFilePath());
                         results.put(warning.getFilePath(), fileNode);
                     }
@@ -122,7 +253,6 @@ public class SourceCodeScannerManager {
                             cve, warning.getLineStart(), warning.getColStart(), warning.getLineEnd(), warning.getColEnd(),
                             warning.getFilePath(), warning.getReason(), warning.getLineSnippet(), warning.getScannerSearchTarget(),
                             issues.get(0));
-                    //noinspection DataFlowIssue
                     fileNode.addIssue(applicableIssue);
                     for (VulnerabilityNode issue : issues) {
                         issue.updateApplicableInfo(applicableIssue);
@@ -167,5 +297,12 @@ public class SourceCodeScannerManager {
             }
         }
         return issues;
+    }
+
+    private Collection<ScanBinaryExecutor> initScannersCollection() {
+        return List.of(
+                new SecretsScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig()),
+                new IACScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig())
+        );
     }
 }

@@ -1,0 +1,14 @@
+-------------------------------------------------------------------------------
+Test set: org.owasp.webgoat.lessons.jwt.JWTDecodeEndpointTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 2, Skipped: 0, Time elapsed: 0.011 s <<< FAILURE! - in org.owasp.webgoat.lessons.jwt.JWTDecodeEndpointTest
+org.owasp.webgoat.lessons.jwt.JWTDecodeEndpointTest.solveAssignment  Time elapsed: 0 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to add PropertySource to Environment
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+
+org.owasp.webgoat.lessons.jwt.JWTDecodeEndpointTest.wrongUserShouldNotSolveAssignment  Time elapsed: 0.001 s  <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext
+Caused by: java.lang.IllegalStateException: Failed to add PropertySource to Environment
+Caused by: java.io.FileNotFoundException: class path resource [application-webgoat.properties] cannot be opened because it does not exist
+

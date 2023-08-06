@@ -74,7 +74,7 @@ public class GoInspection extends AbstractInspection {
     }
 
     @Override
-    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issue) {
-        return new GoUpgradeVersion(componentName, fixVersion, issue);
+    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issue, String descriptorPath) {
+        return new GoUpgradeVersion(componentName, fixVersion, issue, descriptorPath);
     }
 }

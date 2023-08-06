@@ -6,14 +6,15 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.util.EnvironmentUtil;
+import com.jfrog.ide.common.deptree.DepTree;
 import com.jfrog.ide.common.npm.NpmTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.NpmInspection;
+import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
-import org.jfrog.build.extractor.scan.DependencyTree;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -23,9 +24,7 @@ import java.util.concurrent.ExecutorService;
  * Created by Yahav Itzhak on 13 Dec 2017.
  */
 public class NpmScanner extends SingleDescriptorScanner {
-
     private final NpmTreeBuilder npmTreeBuilder;
-    private final String PKG_TYPE = "npm";
 
     /**
      * @param project   currently opened IntelliJ project. We'll use this project to retrieve project based services
@@ -37,11 +36,11 @@ public class NpmScanner extends SingleDescriptorScanner {
     NpmScanner(Project project, String basePath, ExecutorService executor, ScanLogic scanLogic) {
         super(project, basePath, ComponentPrefix.NPM, executor, Paths.get(basePath, "package.json").toString(), scanLogic);
         getLog().info("Found npm project: " + getProjectPath());
-        npmTreeBuilder = new NpmTreeBuilder(Paths.get(basePath), EnvironmentUtil.getEnvironmentMap());
+        npmTreeBuilder = new NpmTreeBuilder(Paths.get(basePath), descriptorFilePath, EnvironmentUtil.getEnvironmentMap());
     }
 
     @Override
-    protected DependencyTree buildTree() throws IOException {
+    protected DepTree buildTree() throws IOException {
         return npmTreeBuilder.buildTree(getLog());
     }
 
@@ -61,12 +60,8 @@ public class NpmScanner extends SingleDescriptorScanner {
     }
 
     @Override
-    protected String getPackageManagerName() {
-        return PKG_TYPE;
+    protected PackageManagerType getPackageManagerType() {
+        return PackageManagerType.NPM;
     }
 
-    @Override
-    public String getCodeBaseLanguage() {
-        return "js";
-    }
 }

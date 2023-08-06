@@ -10,6 +10,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.util.EnvironmentUtil;
+import com.jfrog.ide.common.deptree.DepTree;
 import com.jfrog.ide.common.gradle.GradleTreeBuilder;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
@@ -17,6 +18,7 @@ import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.GradleGroovyInspection;
 import com.jfrog.ide.idea.inspections.GradleKotlinInspection;
 import com.jfrog.ide.idea.log.Logger;
+import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +28,6 @@ import org.jetbrains.plugins.gradle.service.settings.GradleConfigurable;
 import org.jetbrains.plugins.gradle.settings.DistributionType;
 import org.jetbrains.plugins.gradle.settings.GradleProjectSettings;
 import org.jetbrains.plugins.gradle.settings.GradleSettings;
-import org.jfrog.build.extractor.scan.DependencyTree;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,8 +43,6 @@ import static com.jfrog.ide.common.log.Utils.logError;
  * Created by Yahav Itzhak on 9 Nov 2017.
  */
 public class GradleScanner extends SingleDescriptorScanner {
-
-    private final String PKG_TYPE = "gradle";
     private final GradleTreeBuilder gradleTreeBuilder;
     private boolean kotlin;
 
@@ -67,7 +66,7 @@ public class GradleScanner extends SingleDescriptorScanner {
         Map<String, String> env = Maps.newHashMap(EnvironmentUtil.getEnvironmentMap());
         Path pluginLibDir = PluginManagerCore.getPlugin(PluginId.findId("org.jfrog.idea")).getPluginPath().resolve("lib");
         env.put("pluginLibDir", pluginLibDir.toAbsolutePath().toString());
-        gradleTreeBuilder = new GradleTreeBuilder(Paths.get(basePath), env, getGradleExeAndJdk(env));
+        gradleTreeBuilder = new GradleTreeBuilder(Paths.get(basePath), descriptorFilePath, env, getGradleExeAndJdk(env));
     }
 
     @Override
@@ -92,17 +91,12 @@ public class GradleScanner extends SingleDescriptorScanner {
     }
 
     @Override
-    protected String getPackageManagerName() {
-        return PKG_TYPE;
+    protected PackageManagerType getPackageManagerType() {
+        return PackageManagerType.GRADLE;
     }
 
     @Override
-    public String getCodeBaseLanguage() {
-        return "java";
-    }
-
-    @Override
-    protected DependencyTree buildTree() throws IOException {
+    protected DepTree buildTree() throws IOException {
         return gradleTreeBuilder.buildTree(getLog());
     }
 

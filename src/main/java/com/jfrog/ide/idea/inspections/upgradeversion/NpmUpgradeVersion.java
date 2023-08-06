@@ -3,10 +3,11 @@ package com.jfrog.ide.idea.inspections.upgradeversion;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.common.npm.NpmComponentUpdater;
-import com.jfrog.ide.idea.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 
 /**
@@ -15,14 +16,17 @@ import java.util.Collection;
  * @author michaels
  */
 public class NpmUpgradeVersion extends UpgradeVersion {
+    private final String descriptorPath;
 
-    public NpmUpgradeVersion(String componentName, String fixVersion, Collection<String> issue) {
+    public NpmUpgradeVersion(String componentName, String fixVersion, Collection<String> issue, String descriptorPath) {
         super(componentName, fixVersion, issue);
+        this.descriptorPath = descriptorPath;
     }
 
     @Override
     public void upgradeComponentVersion(@NotNull Project project, @NotNull ProblemDescriptor descriptor) throws IOException {
-        NpmComponentUpdater npmComponentUpdater = new NpmComponentUpdater(Utils.getProjectBasePath(project), this.log, this.env);
+        Path modulePath = Paths.get(descriptorPath).getParent();
+        NpmComponentUpdater npmComponentUpdater = new NpmComponentUpdater(modulePath, this.log, this.env);
         npmComponentUpdater.run(componentName, fixVersion);
     }
 

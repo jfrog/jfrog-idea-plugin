@@ -24,6 +24,8 @@
     - [Scanning a Project](#scanning-a-project)
     - [Viewing Vulnerability Details](#viewing-vulnerability-details)
     - [Contextual Analysis](#contextual-analysis)
+    - [Secrets Detection](#secrets-detection)
+    - [Infrastructure as Code (IaC) Scan](#infrastructure-as-code-iac-scan)
     - [Severity Icons](#severity-icons)
   - [The CI View](#the-ci-view)
     - [How Does It Work?](#how-does-it-work)
@@ -37,7 +39,7 @@
 # About this Plugin
 
 The plugin allows developers to find and fix security vulnerabilities in their projects and to see valuable information
-about the status of their code by continuously scanning it locally with [JFrog Xray](https://jfrog.com/xray/).
+about the status of their code by continuously scanning it locally with [JFrog Security](https://jfrog.com/xray/).
 
 ### What security capabilities do we provide?
 
@@ -64,10 +66,12 @@ Check out what our research team is up to and stay updated on newly discovered i
 
 *Requires Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
 
-With advanced [**Contextual Analysis**](#contextual-analysis), understand the applicability of CVEs in your application and utilize JFrog Security scanners to analyze the way you use 3rd party packages in your projects.
-Automatically validate some high-impact vulnerabilities, such as vulnerabilities that have prerequisites for exploitations, and reduce false positives and vulnerability noise with smart CVE analysis.
+- [**Vulnerability Contextual Analysis**](#contextual-analysis): This feature uses the code context to eliminate false positive reports on vulnerable dependencies that are not applicable to the code. 
+Vulnerability Contextual Analysis is currently supported for Python and JavaScript code.
+- [**Secrets Detection**](#secrets-detection): Prevent the expose of keys or credentials that are stored in your source code.
+- [**Infrastructure as Code (IaC) Scan**](#infrastructure-as-code-iac-scan): Secure your IaC files. Critical to keeping your cloud deployment safe and secure.
 
-To learn more, see [here](https://jfrog.com/help/r/jfrog-security-documentation/vulnerability-contextual-analysis).
+You can read more about JFrog Advanced Security [here](https://jfrog.com/xray/#xray-advanced).
 
 #### Additional Perks
 
@@ -86,12 +90,14 @@ In addition to IntelliJ IDEA, the plugin also supports the following IDEs:
 
 # Supported Packages
 
-| Features                                          | Go  | Maven | Gradle Groovy | Gradle Kotlin | npm | Yarn v1 | Python |
-|---------------------------------------------------|:---:|:-----:|:-------------:|:-------------:|:---:|:-------:|:------:|
-| SCA                                               |  ✅  |   ✅   |       ✅       |       ✅       |  ✅  |    ✅    |   ✅    |
-| CVE Research and Enrichment                       |  ✅  |   ✅   |       ✅       |       ✅       |  ✅  |    ✅    |   ✅    |
-| Upgrade vulnerable dependencies to fixed versions |  ✅  |   ✅   |       ✅       |       ✅       |  ✅  |    ✅    |   ❌    |
-| Contextual Analysis                               |  ❌  |   ❌   |       ❌       |       ❌       |  ✅  |    ❌    |   ✅    |
+| Features                                          | Go | Maven | Gradle Kotlin | npm | Yarn v1 | Python | Terraform |
+|---------------------------------------------------|:--:|:-----:|:-------------:|:---:|:-------:|:------:|:---------:|
+| Software Composition Analysis (SCA)               | ✅  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ❌     |
+| CVE Research and Enrichment                       | ✅  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ❌     |
+| Upgrade vulnerable dependencies to fixed versions | ✅  |   ✅   |       ✅       |  ✅  |    ✅    |   ❌    |     ❌     |
+| Contextual Analysis                               | ❌  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ❌     |
+| Secrets Detection                                 | ✅  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ✅     |
+| Infrastructure as Code (IaC) Scan                 | ❌  |   ❌   |       ❌       |  ❌  |    ❌    |   ❌    |     ✅     |
 
 # Getting Started
 
@@ -242,6 +248,21 @@ Contextual Analysis data includes:
 ![](readme-resources/not-applicable.png)
 ![](readme-resources/applicable.png)
 
+### Secrets Detection
+
+*Requires Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
+
+Detect any secrets left exposed inside the code. to prevent any accidental leak of internal tokens or credentials.
+
+![](readme-resources/secrets.png)
+
+### Infrastructure as Code (IaC) Scan
+
+*Requires Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
+
+Scan Infrastructure as Code (Terraform) files for early detection of cloud and infrastructure misconfigurations.
+
+![](readme-resources/iac.png)
 ### Severity Icons
 
 The icon demonstrates the top severity issue of a selected component and its transitive dependencies. The following table describes the severities from highest to lowest:
@@ -317,11 +338,11 @@ To see the Intellij IDEA log file, depends on the IDE version and OS as describe
 
 # Reporting Issues
 
-Please report issues by opening an issue on [Github](https://github.com/jfrog/jfrog-idea-plugin/issues).
+Please report issues by opening an issue on [GitHub](https://github.com/jfrog/jfrog-idea-plugin/issues).
 
 # Contributions
 
-We welcome community contribution through pull requests. To help us improve this project, please read our [Contribution](./CONTRIBUTING.md#-guidelines) guide.
+We welcome community contribution through pull requests. To help us improve this project, please read our [Contribution](./CONTRIBUTING.md#guidelines) guide.
 
 # Release Notes
 

@@ -141,8 +141,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         Set<DescriptorFileTreeNode> fileDescriptors = new HashSet<>();
         Enumeration<TreeNode> roots = ((SortableChildrenTreeNode) componentsTree.getModel().getRoot()).children();
         for (TreeNode root : Collections.list(roots)) {
-            if (root instanceof DescriptorFileTreeNode) {
-                DescriptorFileTreeNode fileNode = (DescriptorFileTreeNode) root;
+            if (root instanceof DescriptorFileTreeNode fileNode) {
                 if (fileNode.getFilePath().equals(element.getContainingFile().getVirtualFile().getPath())) {
                     fileDescriptors.add(fileNode);
                 }
@@ -238,7 +237,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         return StringUtils.equals(artifactID, componentName) || impactPath.contains(componentName);
     }
 
-    abstract UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issues);
+    abstract UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issues, String descriptorPath);
 
     void registerProblem(ProblemsHolder problemsHolder, DependencyNode dependency, PsiElement element, String componentName) {
         boolean isTransitive = dependency.isIndirect() || !StringUtils.contains(dependency.getTitle(), componentName);
@@ -256,8 +255,9 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
                 }
             });
 
+            String descriptorPath = element.getContainingFile().getVirtualFile().getPath();
             fixVersionToCves.asMap().forEach((fixedVersion, issues) -> {
-                UpgradeVersion upgradeVersion = getUpgradeVersion(dependency.getArtifactId(), fixedVersion, issues);
+                UpgradeVersion upgradeVersion = getUpgradeVersion(dependency.getArtifactId(), fixedVersion, issues, descriptorPath);
                 quickFixes.add(upgradeVersion);
             });
         }

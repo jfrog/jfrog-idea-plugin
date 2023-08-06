@@ -24,23 +24,23 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
         scanner = new ApplicabilityScannerExecutor(Logger.getInstance(), serverConfig, binaryDownloadUrl, useReleases);
     }
 
-    public void testApplicabilityScannerNpmProjectNotApplicable() throws IOException, InterruptedException {
+    public void testApplicabilityScannerJsProjectNotApplicable() throws IOException, InterruptedException {
         String testProjectRoot = createTempProjectDir("npm");
         ScanConfig.Builder input = new ScanConfig.Builder()
                 .roots(List.of(testProjectRoot))
                 .cves(List.of("CVE-2021-3918", "CVE-2021-3807"));
-        List<JFrogSecurityWarning> results = scanner.execute(input);
+        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled);
         assertEquals(2, results.size());
         // Expect all issues to be not applicable to this test project
         assertFalse(results.stream().anyMatch(JFrogSecurityWarning::isApplicable));
     }
 
-    public void testApplicabilityScannerNpmProject() throws IOException, InterruptedException {
+    public void testApplicabilityScannerJsProject() throws IOException, InterruptedException {
         String testProjectRoot = createTempProjectDir("npm");
         ScanConfig.Builder input = new ScanConfig.Builder()
                 .roots(List.of(testProjectRoot))
                 .cves(List.of("CVE-2022-25878"));
-        List<JFrogSecurityWarning> results = scanner.execute(input);
+        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled);
         assertEquals(2, results.size());
         // Expect all issues to be applicable.
         assertTrue(results.stream().allMatch(JFrogSecurityWarning::isApplicable));
@@ -58,7 +58,7 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
         ScanConfig.Builder input = new ScanConfig.Builder()
                 .roots(List.of(testProjectRoot))
                 .cves(List.of("CVE-2021-3918", "CVE-2019-15605"));
-        List<JFrogSecurityWarning> results = scanner.execute(input);
+        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled);
         assertEquals(2, results.size());
         // Expect all issues to be not applicable to this test project
         assertFalse(results.stream().anyMatch(JFrogSecurityWarning::isApplicable));
@@ -69,7 +69,7 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
         ScanConfig.Builder input = new ScanConfig.Builder()
                 .roots(List.of(testProjectRoot))
                 .cves(List.of("CVE-2019-20907"));
-        List<JFrogSecurityWarning> results = scanner.execute(input);
+        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled);
         assertEquals(1, results.size());
         // Expect specific indications
         assertTrue(results.get(0).isApplicable());
@@ -79,5 +79,26 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
         assertEquals(6, results.get(0).getColStart());
         assertEquals(24, results.get(0).getColEnd());
         assertTrue(results.get(0).getFilePath().endsWith("main.py"));
+    }
+
+    public void testApplicabilityScannerJavaProject() throws IOException, InterruptedException {
+        String testProjectRoot = createTempProjectDir("maven");
+        ScanConfig.Builder input = new ScanConfig.Builder()
+                .roots(List.of(testProjectRoot))
+                .cves(List.of("CVE-2013-7285"));
+        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled);
+        assertEquals(5, results.size());
+        // Expect specific indications
+        assertTrue(results.get(0).isApplicable());
+        assertEquals("xstream.fromXML(payload)", results.get(0).getLineSnippet());
+        assertEquals(56, results.get(0).getLineStart());
+        assertEquals(56, results.get(0).getLineEnd());
+        assertEquals(26, results.get(0).getColStart());
+        assertEquals(50, results.get(0).getColEnd());
+        assertTrue(results.get(0).getFilePath().endsWith("VulnerableComponentsLesson.java"));
+    }
+
+    private void dummyCheckCanceled() {
+
     }
 }

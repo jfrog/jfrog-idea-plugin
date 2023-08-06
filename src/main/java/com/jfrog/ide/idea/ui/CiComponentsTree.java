@@ -47,7 +47,7 @@ public class CiComponentsTree extends ComponentsTree {
     }
 
     public void addOnProjectChangeListener(MessageBusConnection busConnection) {
-        busConnection.subscribe(ProjectEvents.ON_SCAN_CI_CHANGE, this::applyFilters);
+        busConnection.subscribe(ProjectEvents.ON_SCAN_CI_CHANGE, (ProjectEvents) this::applyFilters);
     }
 
     private void appendProjectWhenReady(DependencyTree filteredRoot) {

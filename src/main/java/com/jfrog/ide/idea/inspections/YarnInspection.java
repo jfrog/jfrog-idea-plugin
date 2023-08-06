@@ -18,7 +18,7 @@ public class YarnInspection extends NpmInspection {
     }
 
     @Override
-    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issue) {
-        return new YarnUpgradeVersion(componentName, fixVersion, issue);
+    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issue, String descriptorPath) {
+        return new YarnUpgradeVersion(componentName, fixVersion, issue, descriptorPath);
     }
 }

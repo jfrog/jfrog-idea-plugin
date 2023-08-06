@@ -18,8 +18,11 @@ import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import com.jfrog.ide.common.configuration.ServerConfig;
+import com.jfrog.ide.common.deptree.DepTree;
+import com.jfrog.ide.common.deptree.DepTreeNode;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.nodes.DependencyNode;
+import com.jfrog.ide.common.nodes.DescriptorFileTreeNode;
 import com.jfrog.ide.common.nodes.FileTreeNode;
 import com.jfrog.ide.common.nodes.subentities.ImpactTreeNode;
 import com.jfrog.ide.common.scan.ComponentPrefix;
@@ -28,6 +31,7 @@ import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
+import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
@@ -38,7 +42,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.util.Log;
-import org.jfrog.build.extractor.scan.DependencyTree;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -82,7 +85,7 @@ public abstract class ScannerBase {
         this.executor = executor;
         this.basePath = basePath;
         this.project = project;
-        this.sourceCodeScannerManager = new SourceCodeScannerManager(project, getCodeBaseLanguage());
+        this.sourceCodeScannerManager = new SourceCodeScannerManager(project, getPackageManagerType());
         this.scanLogic = scanLogic;
     }
 
@@ -98,7 +101,7 @@ public abstract class ScannerBase {
      * Collect and return {@link Components} to be scanned by JFrog Xray.
      * Implementation should be project type specific.
      */
-    protected abstract DependencyTree buildTree() throws IOException;
+    protected abstract DepTree buildTree() throws IOException;
 
     /**
      * Return all project descriptors under the scan-manager project, which need to be inspected by the corresponding {@link LocalInspectionTool}.
@@ -116,23 +119,10 @@ public abstract class ScannerBase {
     protected abstract AbstractInspection getInspectionTool();
 
     protected void sendUsageReport() {
-        ApplicationManager.getApplication().invokeLater(() -> Utils.sendUsageReport(getPackageManagerName() + "-deps"));
+        ApplicationManager.getApplication().invokeLater(() -> Utils.sendUsageReport(getPackageManagerType().getName() + "-deps"));
     }
 
-    protected abstract String getPackageManagerName();
-
-    /**
-     * Groups a collection of DependencyNodes by the descriptor files of the modules that depend on them.
-     * The returned DependencyNodes inside the FileTreeNodes might be clones of the ones in depScanResults, but it's not
-     * guaranteed.
-     *
-     * @param depScanResults - collection of DependencyNodes.
-     * @param depMap         - a map of DependencyTree objects by their component ID.
-     * @return A list of FileTreeNodes (that are all DescriptorFileTreeNodes) having the DependencyNodes as their children.
-     */
-    protected abstract List<FileTreeNode> groupDependenciesToDescriptorNodes(Collection<DependencyNode> depScanResults, Map<String, List<DependencyTree>> depMap);
-
-    public abstract String getCodeBaseLanguage();
+    protected abstract PackageManagerType getPackageManagerType();
 
     /**
      * Scan and update dependency components.
@@ -145,28 +135,24 @@ public abstract class ScannerBase {
 
             // Building dependency tree
             indicator.setText("1/3: Building dependency tree");
-            DependencyTree dependencyTree = buildTree();
+            DepTree depTree = buildTree();
 
             // Sending the dependency tree to Xray for scanning
             indicator.setText("2/3: Xray scanning project dependencies");
             log.debug("Start scan for '" + basePath + "'.");
-            Map<String, DependencyNode> results = scanLogic.scanArtifacts(dependencyTree, serverConfig, indicator, prefix, this::checkCanceled);
+            Map<String, DependencyNode> results = scanLogic.scanArtifacts(depTree, serverConfig, indicator, prefix, this::checkCanceled);
 
             indicator.setText("3/3: Finalizing");
             if (results == null || results.isEmpty()) {
                 // No violations/vulnerabilities or no components to scan or an error was thrown
                 return;
             }
-            Map<String, List<DependencyTree>> depMap = new HashMap<>();
-            mapDependencyTree(depMap, dependencyTree);
-
-            createImpactPaths(results, depMap, dependencyTree);
-            List<FileTreeNode> fileTreeNodes = new ArrayList<>(groupDependenciesToDescriptorNodes(results.values(), depMap));
+            List<FileTreeNode> fileTreeNodes = walkDepTree(results, depTree);
             addScanResults(fileTreeNodes);
 
-            // Source code scanning
-            List<FileTreeNode> sourceCodeResFileNodes = sourceCodeScannerManager.scanAndUpdate(indicator, results.values());
-            fileTreeNodes.addAll(sourceCodeResFileNodes);
+            // Contextual Analysis
+            List<FileTreeNode> applicabilityScanResults = sourceCodeScannerManager.applicabilityScan(indicator, results.values(), this::checkCanceled);
+            fileTreeNodes.addAll(applicabilityScanResults);
             addScanResults(fileTreeNodes);
 
             // Force inspections run due to changes in the displayed tree
@@ -177,55 +163,101 @@ public abstract class ScannerBase {
             scanInterrupted.set(true);
         } catch (Exception e) {
             scanInterrupted.set(true);
-            logError(log, "Xray Scan failed", e, true);
+            logError(log, "Xray scan failed", e, true);
         }
     }
 
     /**
-     * Maps a DependencyTree and its children (direct and indirect) by their component IDs.
+     * Walks through a {@link DepTree}'s nodes.
+     * Builds impact paths for {@link DependencyNode} objects and groups them in {@link DescriptorFileTreeNode}s.
      *
-     * @param depMap - a Map that the entries will be added to. This Map must be initialized.
-     * @param root   - the DependencyTree to map.
+     * @param dependencies a map of component IDs and the DependencyNode object matching each of them.
+     * @param depTree      the project's dependency tree to walk through.
      */
-    private void mapDependencyTree(Map<String, List<DependencyTree>> depMap, DependencyTree root) {
-        depMap.putIfAbsent(root.getComponentId(), new ArrayList<>());
-        depMap.get(root.getComponentId()).add(root);
-        for (DependencyTree child : root.getChildren()) {
-            mapDependencyTree(depMap, child);
-        }
+    private List<FileTreeNode> walkDepTree(Map<String, DependencyNode> dependencies, DepTree depTree) {
+        Map<String, DescriptorFileTreeNode> descriptorNodes = new HashMap<>();
+        visitDepTreeNode(dependencies, depTree, Collections.singletonList(depTree.getRootId()), descriptorNodes, new ArrayList<>(), new HashMap<>());
+        return new ArrayList<>(descriptorNodes.values());
     }
 
     /**
-     * Builds impact paths for DependencyNode objects.
+     * Visit a node in the {@link DepTree} and walk through its children.
+     * Each impact path to a vulnerable dependency is added in its {@link DependencyNode}.
+     * Each DependencyNode is added to the relevant {@link DescriptorFileTreeNode}s.
      *
-     * @param dependencies - a map of component IDs and the DependencyNode object matching each of them.
-     * @param depMap       - a map of component IDs and lists of DependencyTree objects matching each of them.
-     * @param root         - the DependencyTree object of the root component of the project/module.
+     * @param dependencies    a map of {@link DependencyNode}s by their component IDs.
+     * @param depTree         the project's dependency tree.
+     * @param path            a path of nodes (represented by their component IDs) from the root to the current node.
+     * @param descriptorNodes a map of {@link DescriptorFileTreeNode}s by the descriptor file path. Missing DescriptorFileTreeNodes will be added to this map.
+     * @param descriptorPaths a list of descriptor file paths that their matching components are in the path to the current node.
+     * @param addedDeps       a map of all {@link DependencyNode}s already grouped to {@link DescriptorFileTreeNode}s. Newly grouped DependencyNodes will be added to this map.
      */
-    private void createImpactPaths(Map<String, DependencyNode> dependencies, Map<String, List<DependencyTree>> depMap, DependencyTree root) {
-        for (Map.Entry<String, DependencyNode> depEntry : dependencies.entrySet()) {
-            Map<DependencyTree, ImpactTreeNode> impactTreeNodes = new HashMap<>();
-            for (DependencyTree depTree : depMap.get(depEntry.getKey())) {
-                addImpactPath(impactTreeNodes, depTree);
+    private void visitDepTreeNode(Map<String, DependencyNode> dependencies, DepTree depTree, List<String> path,
+                                  Map<String, DescriptorFileTreeNode> descriptorNodes, List<String> descriptorPaths,
+                                  Map<String, Map<String, DependencyNode>> addedDeps) {
+        String compId = path.get(path.size() - 1);
+        DepTreeNode compNode = depTree.getNodes().get(compId);
+        List<String> innerDescriptorPaths = descriptorPaths;
+        if (compNode.getDescriptorFilePath() != null) {
+            innerDescriptorPaths = new ArrayList<>(descriptorPaths);
+            innerDescriptorPaths.add(compNode.getDescriptorFilePath());
+        }
+        if (dependencies.containsKey(compId)) {
+            DependencyNode dependencyNode = dependencies.get(compId);
+            addImpactPathToDependencyNode(dependencyNode, path);
+
+            DepTreeNode parentCompNode = null;
+            if (path.size() >= 2) {
+                String parentCompId = path.get(path.size() - 2);
+                parentCompNode = depTree.getNodes().get(parentCompId);
             }
-            depEntry.getValue().setImpactPaths(impactTreeNodes.get(root));
+            for (String descriptorPath : innerDescriptorPaths) {
+                boolean indirect = parentCompNode != null && !descriptorPath.equals(parentCompNode.getDescriptorFilePath());
+                if (!descriptorNodes.containsKey(descriptorPath)) {
+                    descriptorNodes.put(descriptorPath, new DescriptorFileTreeNode(descriptorPath));
+                    addedDeps.put(descriptorPath, new HashMap<>());
+                }
+                DependencyNode existingDep = addedDeps.get(descriptorPath).get(compId);
+                if (existingDep != null) {
+                    // If this dependency has any direct path, then it's direct
+                    if (existingDep.isIndirect() && !indirect) {
+                        existingDep.setIndirect(false);
+                    }
+                    continue;
+                }
+                // Each dependency might be a child of more than one descriptor, but DependencyNode is a tree node, so it can have only one parent.
+                // The solution for this is to clone the dependency before adding it as a child of the POM.
+                DependencyNode clonedDep = (DependencyNode) dependencyNode.clone();
+                clonedDep.setIndirect(indirect);
+                descriptorNodes.get(descriptorPath).addDependency(clonedDep);
+                addedDeps.get(descriptorPath).put(compId, clonedDep);
+            }
+        }
+
+        for (String childId : compNode.getChildren()) {
+            List<String> pathToChild = new ArrayList<>(path);
+            pathToChild.add(childId);
+            if (!path.contains(childId)) {
+                visitDepTreeNode(dependencies, depTree, pathToChild, descriptorNodes, innerDescriptorPaths, addedDeps);
+            }
         }
     }
 
-    private ImpactTreeNode addImpactPath(Map<DependencyTree, ImpactTreeNode> impactTreeNodes, DependencyTree depTreeNode) {
-        if (impactTreeNodes.containsKey(depTreeNode)) {
-            return impactTreeNodes.get(depTreeNode);
+    private void addImpactPathToDependencyNode(DependencyNode dependencyNode, List<String> path) {
+        if (dependencyNode.getImpactPaths() == null) {
+            dependencyNode.setImpactPaths(new ImpactTreeNode(path.get(0)));
         }
-        ImpactTreeNode parentImpactTreeNode = null;
-        if (depTreeNode.getParent() != null) {
-            parentImpactTreeNode = addImpactPath(impactTreeNodes, (DependencyTree) depTreeNode.getParent());
+        ImpactTreeNode parentImpactTreeNode = dependencyNode.getImpactPaths();
+        for (int pathNodeIndex = 1; pathNodeIndex < path.size(); pathNodeIndex++) {
+            String currPathNode = path.get(pathNodeIndex);
+            // Find a child of parentImpactTreeNode with a name equals to currPathNode
+            ImpactTreeNode currImpactTreeNode = parentImpactTreeNode.getChildren().stream().filter(impactTreeNode -> impactTreeNode.getName().equals(currPathNode)).findFirst().orElse(null);
+            if (currImpactTreeNode == null) {
+                currImpactTreeNode = new ImpactTreeNode(currPathNode);
+                parentImpactTreeNode.getChildren().add(currImpactTreeNode);
+            }
+            parentImpactTreeNode = currImpactTreeNode;
         }
-        ImpactTreeNode currImpactTreeNode = new ImpactTreeNode(depTreeNode.getComponentId());
-        if (parentImpactTreeNode != null) {
-            parentImpactTreeNode.getChildren().add(currImpactTreeNode);
-        }
-        impactTreeNodes.put(depTreeNode, currImpactTreeNode);
-        return currImpactTreeNode;
     }
 
     /**
@@ -268,7 +300,7 @@ public abstract class ScannerBase {
             }
 
         };
-        executor.submit(createRunnable(scanAndUpdateTask, latch));
+        executor.submit(createRunnable(scanAndUpdateTask, latch, this.log));
     }
 
     /**
@@ -291,19 +323,19 @@ public abstract class ScannerBase {
     /**
      * Create a runnable to be submitted to the executor service, or run directly.
      *
-     * @param scanAndUpdateTask - The task to submit
-     * @param latch             - The countdown latch, which makes sure the executor service doesn't get more than 3 tasks.
-     *                          If null, the scan was initiated by a change in the project descriptor and the executor
-     *                          service is terminated. In this case, there is no requirement to wait.
+     * @param task  - The task to submit
+     * @param latch - The countdown latch, which makes sure the executor service doesn't get more than 3 tasks.
+     *              If null, the scan was initiated by a change in the project descriptor and the executor
+     *              service is terminated. In this case, there is no requirement to wait.
      */
-    private Runnable createRunnable(Task.Backgroundable scanAndUpdateTask, CountDownLatch latch) {
+    public static Runnable createRunnable(Task.Backgroundable task, CountDownLatch latch, Log log) {
         return () -> {
             // The progress manager is only good for foreground threads.
             if (SwingUtilities.isEventDispatchThread()) {
-                scanAndUpdateTask.queue();
+                task.queue();
             } else {
                 // Run the scan task when the thread is in the foreground.
-                ApplicationManager.getApplication().invokeLater(scanAndUpdateTask::queue);
+                ApplicationManager.getApplication().invokeLater(task::queue);
             }
             try {
                 // Wait for scan to finish, to make sure the thread pool remain full
@@ -350,9 +382,6 @@ public abstract class ScannerBase {
         });
     }
 
-    /**
-     * filter scan components tree model according to the user filters and sort the issues tree.
-     */
     private void addScanResults(List<FileTreeNode> fileTreeNodes) {
         if (fileTreeNodes.isEmpty()) {
             return;

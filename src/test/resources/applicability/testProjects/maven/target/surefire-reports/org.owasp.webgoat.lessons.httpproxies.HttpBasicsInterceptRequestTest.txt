@@ -1,0 +1,34 @@
+-------------------------------------------------------------------------------
+Test set: org.owasp.webgoat.lessons.httpproxies.HttpBasicsInterceptRequestTest
+-------------------------------------------------------------------------------
+Tests run: 5, Failures: 0, Errors: 5, Skipped: 0, Time elapsed: 0.045 s <<< FAILURE! - in org.owasp.webgoat.lessons.httpproxies.HttpBasicsInterceptRequestTest
+org.owasp.webgoat.lessons.httpproxies.HttpBasicsInterceptRequestTest.success  Time elapsed: 0.012 s  <<< ERROR!
+org.springframework.web.util.NestedServletException: Request processing failed; nested exception is org.springframework.context.NoSuchMessageException: No message found under code 'http-proxies.intercept.success' for locale 'en'.
+	at org.owasp.webgoat.lessons.httpproxies.HttpBasicsInterceptRequestTest.success(HttpBasicsInterceptRequestTest.java:53)
+Caused by: org.springframework.context.NoSuchMessageException: No message found under code 'http-proxies.intercept.success' for locale 'en'.
+	at org.owasp.webgoat.lessons.httpproxies.HttpBasicsInterceptRequestTest.success(HttpBasicsInterceptRequestTest.java:53)
+
+org.owasp.webgoat.lessons.httpproxies.HttpBasicsInterceptRequestTest.missingHeader  Time elapsed: 0.008 s  <<< ERROR!
+org.springframework.web.util.NestedServletException: Request processing failed; nested exception is org.springframework.context.NoSuchMessageException: No message found under code 'http-proxies.intercept.failure' for locale 'en'.
+	at org.owasp.webgoat.lessons.httpproxies.HttpBasicsInterceptRequestTest.missingHeader(HttpBasicsInterceptRequestTest.java:97)
+Caused by: org.springframework.context.NoSuchMessageException: No message found under code 'http-proxies.intercept.failure' for locale 'en'.
+	at org.owasp.webgoat.lessons.httpproxies.HttpBasicsInterceptRequestTest.missingHeader(HttpBasicsInterceptRequestTest.java:97)
+
+org.owasp.webgoat.lessons.httpproxies.HttpBasicsInterceptRequestTest.missingParam  Time elapsed: 0.008 s  <<< ERROR!
+org.springframework.web.util.NestedServletException: Request processing failed; nested exception is org.springframework.context.NoSuchMessageException: No message found under code 'http-proxies.intercept.failure' for locale 'en'.
+	at org.owasp.webgoat.lessons.httpproxies.HttpBasicsInterceptRequestTest.missingParam(HttpBasicsInterceptRequestTest.java:83)
+Caused by: org.springframework.context.NoSuchMessageException: No message found under code 'http-proxies.intercept.failure' for locale 'en'.
+	at org.owasp.webgoat.lessons.httpproxies.HttpBasicsInterceptRequestTest.missingParam(HttpBasicsInterceptRequestTest.java:83)
+
+org.owasp.webgoat.lessons.httpproxies.HttpBasicsInterceptRequestTest.failure  Time elapsed: 0.008 s  <<< ERROR!
+org.springframework.web.util.NestedServletException: Request processing failed; nested exception is org.springframework.context.NoSuchMessageException: No message found under code 'http-proxies.intercept.failure' for locale 'en'.
+	at org.owasp.webgoat.lessons.httpproxies.HttpBasicsInterceptRequestTest.failure(HttpBasicsInterceptRequestTest.java:68)
+Caused by: org.springframework.context.NoSuchMessageException: No message found under code 'http-proxies.intercept.failure' for locale 'en'.
+	at org.owasp.webgoat.lessons.httpproxies.HttpBasicsInterceptRequestTest.failure(HttpBasicsInterceptRequestTest.java:68)
+
+org.owasp.webgoat.lessons.httpproxies.HttpBasicsInterceptRequestTest.whenPostAssignmentShouldNotPass  Time elapsed: 0.008 s  <<< ERROR!
+org.springframework.web.util.NestedServletException: Request processing failed; nested exception is org.springframework.context.NoSuchMessageException: No message found under code 'http-proxies.intercept.failure' for locale 'en'.
+	at org.owasp.webgoat.lessons.httpproxies.HttpBasicsInterceptRequestTest.whenPostAssignmentShouldNotPass(HttpBasicsInterceptRequestTest.java:111)
+Caused by: org.springframework.context.NoSuchMessageException: No message found under code 'http-proxies.intercept.failure' for locale 'en'.
+	at org.owasp.webgoat.lessons.httpproxies.HttpBasicsInterceptRequestTest.whenPostAssignmentShouldNotPass(HttpBasicsInterceptRequestTest.java:111)
+

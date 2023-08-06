@@ -44,7 +44,7 @@ public class MavenInspection extends AbstractInspection {
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
         return new XmlElementVisitor() {
             @Override
-            public void visitXmlTag(XmlTag element) {
+            public void visitXmlTag(@NotNull XmlTag element) {
                 if (isDependencyOrPlugin(element)) {
                     MavenInspection.this.visitElement(holder, element, isOnTheFly);
                 }
@@ -99,7 +99,7 @@ public class MavenInspection extends AbstractInspection {
     }
 
     @Override
-    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issue) {
+    UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issue, String descriptorPath) {
         return new MavenUpgradeVersion(componentName, fixVersion, issue);
     }
 }

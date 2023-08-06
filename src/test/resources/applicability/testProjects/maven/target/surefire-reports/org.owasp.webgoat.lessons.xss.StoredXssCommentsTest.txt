@@ -1,0 +1,16 @@
+-------------------------------------------------------------------------------
+Test set: org.owasp.webgoat.lessons.xss.StoredXssCommentsTest
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 0, Errors: 2, Skipped: 0, Time elapsed: 0.045 s <<< FAILURE! - in org.owasp.webgoat.lessons.xss.StoredXssCommentsTest
+org.owasp.webgoat.lessons.xss.StoredXssCommentsTest.success  Time elapsed: 0.025 s  <<< ERROR!
+org.springframework.web.util.NestedServletException: Request processing failed; nested exception is org.springframework.context.NoSuchMessageException: No message found under code 'xss-stored-comment-success' for locale 'en'.
+	at org.owasp.webgoat.lessons.xss.StoredXssCommentsTest.success(StoredXssCommentsTest.java:57)
+Caused by: org.springframework.context.NoSuchMessageException: No message found under code 'xss-stored-comment-success' for locale 'en'.
+	at org.owasp.webgoat.lessons.xss.StoredXssCommentsTest.success(StoredXssCommentsTest.java:57)
+
+org.owasp.webgoat.lessons.xss.StoredXssCommentsTest.failure  Time elapsed: 0.008 s  <<< ERROR!
+org.springframework.web.util.NestedServletException: Request processing failed; nested exception is org.springframework.context.NoSuchMessageException: No message found under code 'xss-stored-comment-failure' for locale 'en'.
+	at org.owasp.webgoat.lessons.xss.StoredXssCommentsTest.failure(StoredXssCommentsTest.java:70)
+Caused by: org.springframework.context.NoSuchMessageException: No message found under code 'xss-stored-comment-failure' for locale 'en'.
+	at org.owasp.webgoat.lessons.xss.StoredXssCommentsTest.failure(StoredXssCommentsTest.java:70)
+
