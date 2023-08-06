@@ -66,9 +66,9 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             "1. Ensure that the JFrog Platform URL is correct\n" +
             "2. The SSO login option is supported since Artifactory 7.57.0";
     // All UI components
-    private Set<JComponent> CONNECTION_DETAILS_ENABLED_COMPONENTS, CONNECTION_DETAILS_VISIBLE_COMPONENTS;
-    private Set<JComponent> WEB_LOGIN_ENABLED_COMPONENTS, WEB_LOGIN_VISIBLE_COMPONENTS;
-    private Set<JComponent> ALL_UI_COMPONENTS;
+    private Set<JComponent> connectionDetailsEnabledComponents, connectionDetailsVisibleComponents;
+    private Set<JComponent> webLoginEnabledComponents, webLoginVisibleComponents;
+    private Set<JComponent> allUiComponents;
     private static final int SSO_WAIT_BETWEEN_RETRIES_MILLIS = 2 * Time.SECOND;
     private static final int SSO_RETRIES = 30;
 
@@ -191,13 +191,13 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
      * Initialize all UI components sets in order to show/hide them according to the user's choice.
      */
     private void initEnabledComponentSets() {
-        ALL_UI_COMPONENTS = Sets.newHashSet(infoPanel, platformUrlTitle, platformUrl, xrayUrlTitle, xrayUrl,
+        allUiComponents = Sets.newHashSet(infoPanel, platformUrlTitle, platformUrl, xrayUrlTitle, xrayUrl,
                 artifactoryUrlTitle, artifactoryUrl, username, password, accessTokenTitle, accessToken, accessTokenRadioButton, usernamePasswordRadioButton,
                 loginButton, authenticationMethodTitle, usernameTitle, passwordTitle, advancedExpandButton, setSeparately, advancedExpandButton);
 
-        WEB_LOGIN_ENABLED_COMPONENTS = WEB_LOGIN_VISIBLE_COMPONENTS = Sets.newHashSet(infoPanel, platformUrlTitle, platformUrl, loginButton);
+        webLoginEnabledComponents = webLoginVisibleComponents = Sets.newHashSet(infoPanel, platformUrlTitle, platformUrl, loginButton);
 
-        CONNECTION_DETAILS_ENABLED_COMPONENTS = CONNECTION_DETAILS_VISIBLE_COMPONENTS = Sets.newHashSet(infoPanel, platformUrlTitle, platformUrl,
+        connectionDetailsEnabledComponents = connectionDetailsVisibleComponents = Sets.newHashSet(infoPanel, platformUrlTitle, platformUrl,
                 authenticationMethodTitle, usernamePasswordRadioButton, accessTokenRadioButton, usernameTitle, username,
                 passwordTitle, password, accessTokenTitle, accessToken, advancedExpandButton, setSeparately, artifactoryUrlTitle,
                 artifactoryUrl, xrayUrlTitle, xrayUrl);
@@ -513,10 +513,10 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
      */
     private void initCredentialsTypeSelection() {
         setCredentialsManuallySelection.addItemListener(e -> {
-            enableAndShowFields(e, CONNECTION_DETAILS_ENABLED_COMPONENTS, CONNECTION_DETAILS_VISIBLE_COMPONENTS);
+            enableAndShowFields(e, connectionDetailsEnabledComponents, connectionDetailsVisibleComponents);
             initAuthMethodSelection();
         });
-        ssoLoginSelection.addItemListener(e -> enableAndShowFields(e, WEB_LOGIN_ENABLED_COMPONENTS, WEB_LOGIN_VISIBLE_COMPONENTS));
+        ssoLoginSelection.addItemListener(e -> enableAndShowFields(e, webLoginEnabledComponents, webLoginVisibleComponents));
     }
 
     /**
@@ -528,7 +528,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
      */
     private void enableAndShowFields(ItemEvent event, Set<JComponent> enabledComponents, Set<JComponent> visibleComponents) {
         JRadioButton cb = (JRadioButton) event.getSource();
-        ALL_UI_COMPONENTS.forEach(component -> {
+        allUiComponents.forEach(component -> {
             component.setEnabled(cb.isSelected() && enabledComponents.contains(component));
             component.setVisible(cb.isSelected() && visibleComponents.contains(component));
         });
