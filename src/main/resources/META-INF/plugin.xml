@@ -30,8 +30,7 @@
 
     <change-notes>
         <![CDATA[
-          <li>Adds new Secrets and IaC scans.</li>
-          <li>Adds Contextual Analysis support for Maven and Gradle projects.</li>
+          <li>Fixed UnsatisfiedLinkError thrown on the plugin startup and sometimes caused IntelliJ crash (in IntelliJ 2023.2).</li>
         ]]>
     </change-notes>
 
@@ -64,6 +63,7 @@
         <projectService serviceImplementation="com.jfrog.ide.idea.ui.CiComponentsTree"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.ui.JFrogToolWindow"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.navigation.NavigationService"/>
+        <projectService serviceImplementation="com.jfrog.ide.idea.inspections.JumpToCode"/>
         <toolWindow id="JFrog" anchor="bottom" icon="/icons/jfrog_icon.svg"
                     factoryClass="com.jfrog.ide.idea.ui.JFrogToolWindowFactory" canCloseContents="false"/>
         <notificationGroup id="JFrog Errors" displayType="BALLOON" isLogByDefault="false"/>

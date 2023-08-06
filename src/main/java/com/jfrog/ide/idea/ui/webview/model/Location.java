@@ -1,25 +1,36 @@
 package com.jfrog.ide.idea.ui.webview.model;
 
-public class Location {
-    private final String file;
-    private final String fileName;
-    private final int startRow;
-    private final int startColumn;
-    private final int endRow;
-    private final int endColumn;
-    private final String snippet;
+import java.io.Serializable;
+
+public class Location implements Serializable {
+    private String file;
+    private String fileName;
+    private String snippet;
+    private int startRow;
+    private int startColumn;
+    private int endRow;
+    private int endColumn;
+
+    public Location() {
+        this.file = "";
+        this.fileName = "";
+        this.snippet = "";
+        this.startRow = 0;
+        this.startColumn = 0;
+        this.endRow = 0;
+        this.endColumn = 0;
+    }
 
     public Location(String file, String fileName, int startRow, int startColumn, int endRow, int endColumn, String snippet) {
         this.file = file;
         this.fileName = fileName;
+        this.snippet = snippet;
         this.startRow = startRow;
         this.startColumn = startColumn;
         this.endRow = endRow;
         this.endColumn = endColumn;
-        this.snippet = snippet;
     }
 
-    @SuppressWarnings("unused")
     public String getFile() {
         return file;
     }
@@ -30,27 +41,51 @@ public class Location {
     }
 
     @SuppressWarnings("unused")
+    public String getSnippet() {
+        return snippet;
+    }
+
     public int getStartRow() {
         return startRow;
     }
 
-    @SuppressWarnings("unused")
     public int getStartColumn() {
         return startColumn;
     }
 
-    @SuppressWarnings("unused")
     public int getEndRow() {
         return endRow;
     }
 
-    @SuppressWarnings("unused")
     public int getEndColumn() {
         return endColumn;
     }
 
-    @SuppressWarnings("unused")
-    public String getSnippet() {
-        return snippet;
+    public void setSnippet(String snippet) {
+        this.snippet = snippet;
+    }
+
+    public void setFile(String file) {
+        this.file = file;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public void setStartRow(int startRow) {
+        this.startRow = startRow;
+    }
+
+    public void setStartColumn(int startColumn) {
+        this.startColumn = startColumn;
+    }
+
+    public void setEndRow(int endRow) {
+        this.endRow = endRow;
+    }
+
+    public void setEndColumn(int endColumn) {
+        this.endColumn = endColumn;
     }
 }

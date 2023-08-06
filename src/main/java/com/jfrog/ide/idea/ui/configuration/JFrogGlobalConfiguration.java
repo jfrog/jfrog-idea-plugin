@@ -48,8 +48,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static com.jfrog.ide.common.ci.Utils.createAqlForBuildArtifacts;
-import static com.jfrog.ide.common.utils.Utils.resolveArtifactoryUrl;
-import static com.jfrog.ide.common.utils.Utils.resolveXrayUrl;
+import static com.jfrog.ide.common.utils.Utils.*;
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.isSupportedInXrayVersion;
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.testComponentPermission;
 import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.DEFAULT_EXCLUSIONS;
@@ -415,9 +414,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
                 .setAccessToken(String.valueOf(accessToken.getPassword()))
                 .setProxyConfiguration(serverConfig.getProxyConfForTargetUrl(artifactoryUrl))
                 .setLog(Logger.getInstance())
-                .setSslContext(serverConfig.isInsecureTls() ?
-                        SSLContextBuilder.create().loadTrustMaterial(TrustAllStrategy.INSTANCE).build() :
-                        serverConfig.getSslContext());
+                .setSslContext(createSSLContext(serverConfig));
     }
 
     /**
@@ -596,12 +593,8 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             return;
         }
         switch (serverConfig.getConnectionType()) {
-            case SSO:
-                ssoLoginSelection.setSelected(true);
-                break;
-            case CONNECTION_DETAILS:
-                setCredentialsManuallySelection.setSelected(true);
-                break;
+            case SSO -> ssoLoginSelection.setSelected(true);
+            case CONNECTION_DETAILS -> setCredentialsManuallySelection.setSelected(true);
         }
     }
 
@@ -633,18 +626,19 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
      */
     void updatePolicyTextFields() {
         switch (ObjectUtils.defaultIfNull(serverConfig.getPolicyType(), ServerConfig.PolicyType.VULNERABILITIES)) {
-            case WATCHES:
+            case WATCHES -> {
                 accordingToWatchesRadioButton.setSelected(true);
                 watches.setEnabled(true);
                 watches.setText(serverConfig.getWatches());
-                return;
-            case PROJECT:
+            }
+            case PROJECT -> {
                 accordingToProjectRadioButton.setSelected(true);
                 watches.setEnabled(false);
-                return;
-            case VULNERABILITIES:
+            }
+            case VULNERABILITIES -> {
                 allVulnerabilitiesRadioButton.setSelected(true);
                 watches.setEnabled(false);
+            }
         }
     }
 
