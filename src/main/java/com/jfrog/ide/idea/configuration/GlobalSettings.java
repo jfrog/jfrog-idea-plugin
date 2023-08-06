@@ -62,15 +62,11 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         serverConfig.setPolicyType(this.serverConfig.getPolicyType());
         serverConfig.setProject(this.serverConfig.getProject());
         serverConfig.setWatches(this.serverConfig.getWatches());
-        serverConfig.setConnectionDetailsFromEnv(this.serverConfig.isConnectionDetailsFromEnv());
         serverConfig.setConnectionRetries(this.serverConfig.getConnectionRetries());
         serverConfig.setConnectionTimeout(this.serverConfig.getConnectionTimeout());
+
         GlobalSettings settings = new GlobalSettings();
         settings.serverConfig = serverConfig;
-        if (this.serverConfig.isConnectionDetailsFromEnv()) {
-            return settings;
-        }
-
         settings.serverConfig.setPassword(null);
         settings.serverConfig.setUsername(null);
         settings.serverConfig.setUrl(this.serverConfig.getUrl());
@@ -96,19 +92,10 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
     /**
      * Method is called by Idea IS for reading the previously saved config file 'jfrogConfig.xml' from the disk.
      * Check if previous configurations contain credentials, perform migration if necessary.
-     * If connection details loaded from environment, don't override them.
      *
      * @param serverConfig - configurations read from file.
      */
     public void setServerConfig(@NotNull ServerConfigImpl serverConfig) {
-        if (serverConfig.isConnectionDetailsFromEnv()) {
-            // Load connection details from environment variables.
-            setAdvancedSettings(serverConfig);
-            this.serverConfig.setConnectionDetailsFromEnv(this.serverConfig.readConnectionDetailsFromEnv());
-            return;
-        }
-
-        // Load configuration from state.
         setCommonConfigFields(serverConfig);
         this.serverConfig.setCredentials(serverConfig.getCredentialsFromPasswordSafe());
     }
@@ -119,16 +106,6 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
      * @param serverConfig - the new configurations to update.
      */
     public void updateConfig(ServerConfigImpl serverConfig) {
-        if (serverConfig.isConnectionDetailsFromEnv()) {
-            if (this.serverConfig.getUrl() != null) {
-                this.serverConfig.removeCredentialsFromPasswordSafe();
-            }
-            this.serverConfig.setConnectionDetailsFromEnv(true);
-            this.serverConfig.readConnectionDetailsFromEnv();
-            setAdvancedSettings(serverConfig);
-            return;
-        }
-
         if (this.serverConfig.getUrl() != null && !this.serverConfig.getUrl().equals(serverConfig.getUrl())) {
             this.serverConfig.removeCredentialsFromPasswordSafe();
         }
@@ -143,10 +120,10 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
     }
 
     public void setCommonConfigFields(ServerConfigImpl serverConfig) {
+        this.serverConfig.setConnectionType(serverConfig.getConnectionType());
         this.serverConfig.setUrl(serverConfig.getUrl());
         this.serverConfig.setXrayUrl(serverConfig.getXrayUrl());
         this.serverConfig.setArtifactoryUrl(serverConfig.getArtifactoryUrl());
-        this.serverConfig.setConnectionDetailsFromEnv(serverConfig.isConnectionDetailsFromEnv());
         this.serverConfig.setJFrogSettingsCredentialsKey(serverConfig.getJFrogSettingsCredentialsKey());
         setAdvancedSettings(serverConfig);
     }
@@ -169,12 +146,16 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         if (serverConfig.isXrayConfigured()) {
             return true;
         }
-        serverConfig.setConnectionDetailsFromEnv(serverConfig.readConnectionDetailsFromEnv());
+        serverConfig.readConnectionDetailsFromEnv();
         if (serverConfig.isXrayConfigured()) {
             return true;
         }
         loadConnectionDetailsFromJfrogCli();
         return serverConfig.isXrayConfigured();
+    }
+
+    public boolean areXrayCredentialsSet() {
+        return serverConfig != null && serverConfig.isXrayConfigured();
     }
 
     public boolean areArtifactoryCredentialsSet() {
