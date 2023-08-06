@@ -183,28 +183,6 @@ public class SourceCodeScannerManager {
     }
 
     /**
-     * Create {@link FileTreeNode}s with file issues nodes.
-     *
-     * @param scanResults a list of source code scan results.
-     * @return a list of new {@link FileTreeNode}s containing source code issues.
-     */
-
-    private String createReason(JFrogSecurityWarning warning) {
-        return switch (warning.getReporter()) {
-            case IAC, SECRETS -> warning.getScannerSearchTarget();
-            default -> warning.getReason();
-        };
-    }
-
-    private String createTitle(JFrogSecurityWarning warning) {
-        return switch (warning.getReporter()) {
-            case SECRETS -> "Potential Secret";
-            case IAC -> "Infrastructure as Code Vulnerability";
-            default -> warning.getName();
-        };
-    }
-
-    /**
      * Maps direct dependencies  issues (vulnerabilities and security violations) by their CVE IDs.
      * Issues without a CVE ID are ignored.
      *

@@ -47,7 +47,7 @@ public class SecretsScannerExecutor extends ScanBinaryExecutor {
 
             FileIssueNode issueNode = new FileIssueNode("Potential Secret",
                     warning.getFilePath(), warning.getLineStart(), warning.getColStart(), warning.getLineEnd(), warning.getColEnd(),
-                    warning.getScannerSearchTarget(), warning.getLineSnippet(), warning.getReporter(), warning.getSeverity());
+                    warning.getScannerSearchTarget(), warning.getLineSnippet(), warning.getReporter(), warning.getSeverity(), warning.getRuleID());
             fileNode.addIssue(issueNode);
         }
         return new ArrayList<>(results.values());

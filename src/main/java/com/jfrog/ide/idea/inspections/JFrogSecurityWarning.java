@@ -19,7 +19,7 @@ public class JFrogSecurityWarning {
     private final String filePath;
     private final String lineSnippet;
     private String scannerSearchTarget;
-    private final String name;
+    private final String ruleID;
     private final SourceCodeScanType reporter;
     private final Severity severity;
     private final FindingInfo[][] codeFlows;
@@ -30,7 +30,7 @@ public class JFrogSecurityWarning {
             int colStart, int lineEnd,
             int colEnd, String reason,
             String filePath,
-            String name,
+            String ruleID,
             String lineSnippet,
             SourceCodeScanType reporter,
             boolean isApplicable,
@@ -43,7 +43,7 @@ public class JFrogSecurityWarning {
         this.colEnd = colEnd;
         this.reason = reason;
         this.filePath = filePath;
-        this.name = name;
+        this.ruleID = ruleID;
         this.lineSnippet = lineSnippet;
         this.reporter = reporter;
         this.isApplicable = isApplicable;

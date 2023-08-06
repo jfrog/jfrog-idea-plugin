@@ -48,9 +48,9 @@ public class EosScannerExecutor extends ScanBinaryExecutor {
                 results.put(warning.getFilePath(), fileNode);
             }
 
-            FileIssueNode issueNode = new EosIssueNode(warning.getName(),
+            FileIssueNode issueNode = new EosIssueNode(warning.getRuleID(),
                     warning.getFilePath(), warning.getLineStart(), warning.getColStart(), warning.getLineEnd(), warning.getColEnd(),
-                    warning.getScannerSearchTarget(), warning.getLineSnippet(), warning.getCodeFlows(), warning.getSeverity());
+                    warning.getScannerSearchTarget(), warning.getLineSnippet(), warning.getCodeFlows(), warning.getSeverity(), warning.getRuleID());
             fileNode.addIssue(issueNode);
         }
         return new ArrayList<>(results.values());

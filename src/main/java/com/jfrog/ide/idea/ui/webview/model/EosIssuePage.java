@@ -1,12 +1,14 @@
 package com.jfrog.ide.idea.ui.webview.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 
+@Getter
 public class EosIssuePage extends IssuePage {
     @JsonProperty("analysisStep")
     private Location[] analysisSteps;
-
     private String[] remediation;
+    private String ruleId;
 
     @SuppressWarnings("unused")
     public EosIssuePage() {
@@ -16,23 +18,13 @@ public class EosIssuePage extends IssuePage {
         super(issuePage);
     }
 
-    @SuppressWarnings("unused")
-    public Location[] getAnalysisSteps() {
-        return analysisSteps;
-    }
-
     public EosIssuePage setAnalysisSteps(Location[] analysisSteps) {
         this.analysisSteps = analysisSteps;
         return this;
     }
 
-    @SuppressWarnings("unused")
-    public String[] getRemediation() {
-        return remediation;
-    }
-
-    @SuppressWarnings("unused")
-    public void setRemediation(String[] remediation) {
-        this.remediation = remediation;
+    public EosIssuePage setRuleID(String ruleID) {
+        this.ruleId = ruleID;
+        return this;
     }
 }

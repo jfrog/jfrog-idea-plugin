@@ -49,7 +49,7 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
         HashMap<String, FileTreeNode> results = new HashMap<>();
         for (JFrogSecurityWarning warning : warnings) {
             // Update all VulnerabilityNodes that have the warning's CVE
-            String cve = StringUtils.removeStart(warning.getName(), "applic_");
+            String cve = StringUtils.removeStart(warning.getRuleID(), "applic_");
             List<VulnerabilityNode> issues = issuesMap.get(cve);
             if (issues != null) {
                 if (warning.isApplicable()) {
@@ -63,7 +63,7 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
                     ApplicableIssueNode applicableIssue = new ApplicableIssueNode(
                             cve, warning.getLineStart(), warning.getColStart(), warning.getLineEnd(), warning.getColEnd(),
                             warning.getFilePath(), warning.getReason(), warning.getLineSnippet(), warning.getScannerSearchTarget(),
-                            issues.get(0));
+                            issues.get(0), warning.getRuleID());
                     fileNode.addIssue(applicableIssue);
                     for (VulnerabilityNode issue : issues) {
                         issue.updateApplicableInfo(applicableIssue);
