@@ -225,7 +225,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     }
 
     private JBCefBrowser initVulnerabilityInfoBrowser(@NotNull Project project) throws IOException, URISyntaxException {
-        webviewManager = new WebviewManager(project);
+        webviewManager = new WebviewManager(project, () -> updateIssueOrLicenseInWebview(selectedIssue));
         Disposer.register(this, webviewManager);
         return webviewManager.getBrowser();
     }
