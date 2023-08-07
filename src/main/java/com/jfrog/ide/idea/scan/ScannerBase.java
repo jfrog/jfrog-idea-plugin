@@ -151,7 +151,7 @@ public abstract class ScannerBase {
             addScanResults(fileTreeNodes);
 
             // Contextual Analysis
-            List<FileTreeNode> applicabilityScanResults = sourceCodeScannerManager.applicabilityScan(indicator, results.values(), this::checkCanceled);
+            List<FileTreeNode> applicabilityScanResults = sourceCodeScannerManager.applicabilityScan(indicator, fileTreeNodes, this::checkCanceled);
             fileTreeNodes.addAll(applicabilityScanResults);
             addScanResults(fileTreeNodes);
 
