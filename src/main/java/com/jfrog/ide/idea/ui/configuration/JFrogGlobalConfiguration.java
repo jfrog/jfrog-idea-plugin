@@ -61,9 +61,13 @@ import static org.apache.commons.lang3.StringUtils.*;
  */
 public class JFrogGlobalConfiguration implements Configurable, Configurable.NoScroll {
     public static final String USER_AGENT = "jfrog-idea-plugin/" + JFrogGlobalConfiguration.class.getPackage().getImplementationVersion();
-    private static final String SSO_LOGIN_FAILURE = "The SSO login option isn't available.\nCause: %s\n\nHints:\n" +
-            "1. Ensure that the JFrog Platform URL is correct\n" +
-            "2. The SSO login option is supported since Artifactory 7.57.0";
+    private static final String SSO_LOGIN_FAILURE = """
+            The SSO login option isn't available.
+            Cause: %s
+
+            Hints:
+            1. Ensure that the JFrog Platform URL is correct
+            2. The SSO login option is supported since Artifactory 7.64.0""";
     // All UI components
     private Set<JComponent> connectionDetailsEnabledComponents, connectionDetailsVisibleComponents;
     private Set<JComponent> webLoginEnabledComponents, webLoginVisibleComponents;
