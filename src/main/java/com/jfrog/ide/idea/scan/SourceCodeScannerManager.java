@@ -266,7 +266,7 @@ public class SourceCodeScannerManager {
      * Maps direct dependencies  issues (vulnerabilities and security violations) by their CVE IDs.
      * Issues without a CVE ID are ignored.
      *
-     * @param fileTreeNodes - collection of FileTreeNodes.
+     * @param fileTreeNodes collection of FileTreeNodes.
      * @return a map of CVE IDs to lists of issues with them.
      */
     private Map<String, List<VulnerabilityNode>> mapDirectIssuesByCve(Collection<FileTreeNode> fileTreeNodes) {
