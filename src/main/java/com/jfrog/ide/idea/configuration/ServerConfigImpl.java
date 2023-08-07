@@ -57,6 +57,10 @@ import static org.apache.commons.lang3.StringUtils.*;
  */
 @Immutable
 public class ServerConfigImpl implements ServerConfig {
+    public enum ConnectionType {
+        SSO, CONNECTION_DETAILS
+    }
+
     private static final String JFROG_SETTINGS_CREDENTIALS_KEY = "credentials";
     static final String ARTIFACTORY_URL_ENV = "JFROG_IDE_ARTIFACTORY_URL";
     public static final String JFROG_SETTINGS_KEY = "com.jfrog.idea";
@@ -67,6 +71,8 @@ public class ServerConfigImpl implements ServerConfig {
     static final String ACCESS_TOKEN_ENV = "JFROG_IDE_ACCESS_TOKEN";
     static final String PROJECT_ENV = "JFROG_IDE_PROJECT";
 
+    @OptionTag
+    private ConnectionType connectionType;
     @OptionTag
     private String url;
     @OptionTag
@@ -91,8 +97,6 @@ public class ServerConfigImpl implements ServerConfig {
     @Tag
     private String excludedPaths;
     @Tag
-    private boolean connectionDetailsFromEnv;
-    @Tag
     private Integer connectionRetries;
     @Tag
     private Integer connectionTimeout;
@@ -104,6 +108,7 @@ public class ServerConfigImpl implements ServerConfig {
     }
 
     ServerConfigImpl(Builder builder) {
+        this.connectionType = builder.connectionType;
         this.url = builder.url;
         this.xrayUrl = builder.xrayUrl;
         this.artifactoryUrl = builder.artifactoryUrl;
@@ -114,18 +119,17 @@ public class ServerConfigImpl implements ServerConfig {
         this.project = builder.project;
         this.watches = builder.watches;
         this.excludedPaths = builder.excludedPaths;
-        this.connectionDetailsFromEnv = builder.connectionDetailsFromEnv;
         this.connectionRetries = builder.connectionRetries;
         this.connectionTimeout = builder.connectionTimeout;
         this.jfrogSettingsCredentialsKey = builder.jfrogSettingsCredentialsKey;
     }
 
     public boolean isXrayConfigured() {
-        return isNotBlank(xrayUrl) && isAuthenticationConfigured();
+        return !isAllBlank(url, xrayUrl) && isAuthenticationConfigured();
     }
 
     public boolean isArtifactoryConfigured() {
-        return isNotBlank(artifactoryUrl) && isAuthenticationConfigured();
+        return !isAllBlank(url, xrayUrl) && isAuthenticationConfigured();
     }
 
     private boolean isAuthenticationConfigured() {
@@ -139,7 +143,8 @@ public class ServerConfigImpl implements ServerConfig {
         }
         ServerConfigImpl other = (ServerConfigImpl) o;
 
-        return Objects.equals(getUrl(), other.getUrl()) &&
+        return Objects.equals(getConnectionType(), other.getConnectionType()) &&
+                Objects.equals(getUrl(), other.getUrl()) &&
                 Objects.equals(getXrayUrl(), other.getXrayUrl()) &&
                 Objects.equals(getArtifactoryUrl(), other.getArtifactoryUrl()) &&
                 Objects.equals(getPassword(), other.getPassword()) &&
@@ -149,15 +154,14 @@ public class ServerConfigImpl implements ServerConfig {
                 Objects.equals(getProject(), other.getProject()) &&
                 Objects.equals(getWatches(), other.getWatches()) &&
                 Objects.equals(getExcludedPaths(), other.getExcludedPaths()) &&
-                isConnectionDetailsFromEnv() == other.isConnectionDetailsFromEnv() &&
                 getConnectionRetries() == other.getConnectionRetries() &&
                 getConnectionTimeout() == other.getConnectionTimeout();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getUrl(), getXrayUrl(), getArtifactoryUrl(), getPassword(), getAccessToken(), getUsername(), getProject(),
-                getExcludedPaths(), isConnectionDetailsFromEnv(), getConnectionRetries(), getConnectionTimeout());
+        return Objects.hash(getConnectionType(), getUrl(), getXrayUrl(), getArtifactoryUrl(), getPassword(), getAccessToken(),
+                getUsername(), getProject(), getExcludedPaths(), getConnectionRetries(), getConnectionTimeout());
     }
 
     @Override
@@ -189,6 +193,14 @@ public class ServerConfigImpl implements ServerConfig {
     @Override
     public String getAccessToken() {
         return accessToken;
+    }
+
+    public void setConnectionType(ConnectionType connectionType) {
+        this.connectionType = connectionType;
+    }
+
+    public ConnectionType getConnectionType() {
+        return connectionType;
     }
 
     public Credentials getCredentialsFromPasswordSafe() {
@@ -268,7 +280,7 @@ public class ServerConfigImpl implements ServerConfig {
      * Get proxy configuration as configured under 'Appearance & Behavior' -> 'System Settings' -> 'HTTP Proxy'
      *
      * @param targetUrl - The target URL. The URL is necessary to determine whether to bypass proxy or to pick the relevant
-     *                proxy configuration for the target URL as configured in *.pac file.
+     *                  proxy configuration for the target URL as configured in *.pac file.
      * @return the proxy configuration as configured in IDEA settings.
      */
     @Override
@@ -380,14 +392,6 @@ public class ServerConfigImpl implements ServerConfig {
         }
     }
 
-    void setConnectionDetailsFromEnv(boolean connectionDetailsFromEnv) {
-        this.connectionDetailsFromEnv = connectionDetailsFromEnv;
-    }
-
-    public boolean isConnectionDetailsFromEnv() {
-        return connectionDetailsFromEnv;
-    }
-
     void setConnectionRetries(int connectionRetries) {
         this.connectionRetries = connectionRetries;
     }
@@ -403,10 +407,8 @@ public class ServerConfigImpl implements ServerConfig {
     /**
      * Read connection details from environment variables.
      * All connection details must be provided from env, otherwise don't use them.
-     *
-     * @return true if connection details loaded from env.
      */
-    public boolean readConnectionDetailsFromEnv() {
+    public void readConnectionDetailsFromEnv() {
         String platformUrlEnv = EnvironmentUtil.getValue(PLATFORM_URL_ENV);
         String xrayUrlEnv = EnvironmentUtil.getValue(XRAY_URL_ENV);
         String artifactoryUrlEnv = EnvironmentUtil.getValue(ARTIFACTORY_URL_ENV);
@@ -421,7 +423,7 @@ public class ServerConfigImpl implements ServerConfig {
             setUsername("");
             setPassword("");
             setAccessToken("");
-            return false;
+            return;
         }
 
         setUrl(platformUrlEnv);
@@ -445,7 +447,6 @@ public class ServerConfigImpl implements ServerConfig {
             setUsername(usernameEnv);
             setPassword(passwordEnv);
         }
-        return true;
     }
 
     /**
@@ -486,6 +487,7 @@ public class ServerConfigImpl implements ServerConfig {
     }
 
     public static class Builder {
+        private ConnectionType connectionType;
         private String jfrogSettingsCredentialsKey = JFROG_SETTINGS_KEY;
         private String url;
         private String xrayUrl;
@@ -497,12 +499,16 @@ public class ServerConfigImpl implements ServerConfig {
         private PolicyType policyType;
         private String project;
         private String watches;
-        private boolean connectionDetailsFromEnv;
         private int connectionRetries;
         private int connectionTimeout;
 
         public ServerConfigImpl build() {
             return new ServerConfigImpl(this);
+        }
+
+        public Builder setConnectionType(ConnectionType connectionType) {
+            this.connectionType = connectionType;
+            return this;
         }
 
         public Builder setUrl(String url) {
@@ -552,11 +558,6 @@ public class ServerConfigImpl implements ServerConfig {
 
         public Builder setWatches(@Nullable String watches) {
             this.watches = watches;
-            return this;
-        }
-
-        public Builder setConnectionDetailsFromEnv(boolean connectionDetailsFromEnv) {
-            this.connectionDetailsFromEnv = connectionDetailsFromEnv;
             return this;
         }
 

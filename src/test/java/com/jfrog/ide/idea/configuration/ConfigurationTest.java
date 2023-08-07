@@ -74,7 +74,6 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
 
         // Check that the server in the global settings was overridden.
         ServerConfigImpl actualServerConfig = globalSettings.getServerConfig();
-        assertFalse(actualServerConfig.isConnectionDetailsFromEnv());
         assertEquals(PLATFORM_URL, actualServerConfig.getUrl());
         assertEquals(XRAY_URL, actualServerConfig.getXrayUrl());
         assertEquals(ARTIFACTORY_URL, actualServerConfig.getArtifactoryUrl());
@@ -128,13 +127,14 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
             GlobalSettings globalSettings = new GlobalSettings();
             ServerConfigImpl overrideServerConfig = createServerConfig(false, false);
 
-            // Make sure that readConnectionDetailsFromEnv indeed returned true when the connection details environment variables set
-            overrideServerConfig.setConnectionDetailsFromEnv(overrideServerConfig.readConnectionDetailsFromEnv());
-
             // Check that the server in the global settings was overridden by the environment variables
             globalSettings.setServerConfig(overrideServerConfig);
             ServerConfigImpl actualServerConfig = globalSettings.getServerConfig();
-            assertTrue(actualServerConfig.readConnectionDetailsFromEnv());
+            assertFalse(actualServerConfig.isXrayConfigured());
+            assertFalse(actualServerConfig.isArtifactoryConfigured());
+            actualServerConfig.readConnectionDetailsFromEnv();
+            assertTrue(actualServerConfig.isXrayConfigured());
+            assertTrue(actualServerConfig.isArtifactoryConfigured());
             assertEquals("https://tython.jfrog.io", actualServerConfig.getUrl());
             assertEquals("https://tython.jfrog.io/xray", actualServerConfig.getXrayUrl());
             assertEquals("https://tython.jfrog.io/artifactory", actualServerConfig.getArtifactoryUrl());
