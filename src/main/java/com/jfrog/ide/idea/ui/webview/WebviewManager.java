@@ -41,7 +41,7 @@ public class WebviewManager implements Disposable {
         jbCefBrowser.getJBCefClient().addLoadHandler(new CefLoadHandlerAdapter() {
             @Override
             public void onLoadEnd(CefBrowser browser, CefFrame frame, int httpStatusCode) {
-                Logger.getInstance().info("Issue details view loading ended with status code " + httpStatusCode);
+                Logger.getInstance().debug("Issue details view loading ended with status code " + httpStatusCode);
                 super.onLoadEnd(browser, frame, httpStatusCode);
                 if (onLoadEnd != null) {
                     onLoadEnd.run();

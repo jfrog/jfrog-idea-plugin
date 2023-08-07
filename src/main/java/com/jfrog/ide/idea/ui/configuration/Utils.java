@@ -3,10 +3,18 @@ package com.jfrog.ide.idea.ui.configuration;
 import com.intellij.credentialStore.CredentialAttributes;
 import com.intellij.credentialStore.CredentialAttributesKt;
 import com.intellij.credentialStore.Credentials;
+import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.passwordSafe.PasswordSafe;
+import com.intellij.openapi.ui.MessageType;
+import com.intellij.openapi.ui.popup.JBPopupFactory;
+import com.intellij.ui.HyperlinkLabel;
+import com.intellij.util.Time;
 import com.intellij.util.ui.UIUtil;
 
 import javax.swing.*;
+import javax.swing.text.JTextComponent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.util.Arrays;
 
 import static org.apache.commons.lang3.StringUtils.*;
@@ -94,5 +102,51 @@ public class Utils {
      */
     public static CredentialAttributes createCredentialAttributes(String subsystem, String key) {
         return new CredentialAttributes(CredentialAttributesKt.generateServiceName(subsystem, key));
+    }
+
+    /**
+     * Set the input HyperlinkLabel
+     *
+     * @param label - The hyperlink label to set
+     * @param text  - The text
+     * @param link  - The link
+     */
+    @SuppressWarnings("UnstableApiUsage")
+    public static void initHyperlinkLabel(HyperlinkLabel label, String text, String link) {
+        label.setTextWithHyperlink("    " + text);
+        label.addHyperlinkListener(l -> BrowserUtil.browse(link));
+        label.setForeground(UIUtil.getInactiveTextColor());
+    }
+
+    /**
+     * Create the connection results balloon.
+     *
+     * @param message   - Connection results text
+     * @param component - The component to show the results on
+     */
+    public static void createConnectionResultsBalloon(String message, JComponent component) {
+        JBPopupFactory.getInstance().createHtmlTextBalloonBuilder(message, MessageType.ERROR, null)
+                .setHideOnClickOutside(true)
+                .setHideOnKeyOutside(true)
+                .setFadeoutTime(Time.SECOND * 10)
+                .setDialogMode(true)
+                .setTitle("Connection Testing")
+                .createBalloon().showInCenterOf(component);
+    }
+
+    /**
+     * Add a temporary red border to a text component. The border disappear after gaining the focus.
+     *
+     * @param component - The text component
+     */
+    public static void addRedBorder(JTextComponent component) {
+        component.setBorder(BorderFactory.createLineBorder(UIUtil.getErrorForeground()));
+        component.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                component.setBorder(UIUtil.getTextFieldBorder());
+                component.removeFocusListener(this);
+            }
+        });
     }
 }

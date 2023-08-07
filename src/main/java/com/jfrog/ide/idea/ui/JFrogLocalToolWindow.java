@@ -93,7 +93,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         compTreeView = createComponentsTreeView();
 
         alertIfCacheExpired();
-        refreshView();
+        refreshView(true);
         registerListeners(jbCefBrowser.getComponent());
         isInitialized = true;
     }
@@ -144,8 +144,10 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         }
     }
 
-    private void refreshView() {
-        if (!GlobalSettings.getInstance().reloadXrayCredentials()) {
+    private void refreshView(boolean reloadCredentials) {
+        GlobalSettings globalSettings = GlobalSettings.getInstance();
+        if ((!reloadCredentials && !globalSettings.areXrayCredentialsSet()) ||
+                !globalSettings.reloadXrayCredentials()) {
             setLeftPanelContent(ComponentUtils.createNoCredentialsView());
             return;
         }
@@ -287,14 +289,14 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             }
         }
         super.onConfigurationChange();
-        refreshView();
+        refreshView(false);
     }
 
     @Override
     public void updateUI() {
         super.updateUI();
         if (isInitialized) {
-            refreshView();
+            refreshView(true);
         }
     }
 }
