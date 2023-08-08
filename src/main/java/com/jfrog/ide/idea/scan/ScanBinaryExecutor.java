@@ -239,7 +239,7 @@ public abstract class ScanBinaryExecutor {
     protected List<JFrogSecurityWarning> parseOutputSarif(Path outputFile) throws IOException {
         Output output = getOutputObj(outputFile);
         List<JFrogSecurityWarning> warnings = new ArrayList<>();
-        output.getRuns().forEach(run -> run.getResults().forEach(result -> warnings.add(new JFrogSecurityWarning(result, scanType))));
+        output.getRuns().forEach(run -> run.getResults().stream().filter(SarifResult::isNotSuppressed).forEach(result -> warnings.add(new JFrogSecurityWarning(result, scanType))));
 
         Optional<Run> run = output.getRuns().stream().findFirst();
         if (run.isPresent()) {
