@@ -71,6 +71,11 @@ public class WebviewManager implements Disposable {
     }
 
     public void sendMessage(WebviewEvent.Type type, Object data) {
+        loadPageIfNeeded();
+        eventManager.send(type, data);
+    }
+
+    private void loadPageIfNeeded() {
         if (!schemeHandlerRegistered) {
             // Register the scheme handler factory right before the webview is first opened.
             // Performing this action earlier sometimes results in a crash or a fatal error, particularly in IntelliJ 2022.3.
@@ -78,7 +83,6 @@ public class WebviewManager implements Disposable {
             jbCefBrowser.loadURL("http://jfrog-idea-plugin/index.html");
             schemeHandlerRegistered = true;
         }
-        eventManager.send(type, data);
     }
 
     @Override
