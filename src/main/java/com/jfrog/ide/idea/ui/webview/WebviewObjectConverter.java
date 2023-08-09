@@ -6,6 +6,7 @@ import com.jfrog.ide.common.nodes.LicenseViolationNode;
 import com.jfrog.ide.common.nodes.VulnerabilityNode;
 import com.jfrog.ide.common.nodes.subentities.*;
 import com.jfrog.ide.common.scan.ComponentPrefix;
+import com.jfrog.ide.idea.scan.ScannerBase;
 import com.jfrog.ide.idea.ui.webview.model.Cve;
 import com.jfrog.ide.idea.ui.webview.model.Evidence;
 import com.jfrog.ide.idea.ui.webview.model.License;
@@ -46,7 +47,7 @@ public class WebviewObjectConverter {
                 .infectedVersion(convertVersionRanges(vulnerabilityNode.getInfectedVersions()))
                 .references(convertReferences(vulnerabilityNode.getReferences()))
                 .cve(convertCve(vulnerabilityNode.getCve(), convertApplicableDetails(vulnerabilityNode.getApplicableInfo())))
-                .impactGraph(convertImpactGraph(dependency.getImpactPaths()))
+                .impactGraph(convertImpactGraph(dependency.getImpactTree()))
                 .watchName(watchNames)
                 .edited(vulnerabilityNode.getLastUpdated())
                 .extendedInformation(extendedInformation);
@@ -63,14 +64,11 @@ public class WebviewObjectConverter {
     }
 
     private static String ConvertPageType(SourceCodeScanType reporterType) {
-        switch (reporterType) {
-            case SECRETS:
-                return "SECRETS";
-            case IAC:
-                return "IAC";
-            default:
-                return "EMPTY";
-        }
+        return switch (reporterType) {
+            case SECRETS -> "SECRETS";
+            case IAC -> "IAC";
+            default -> "EMPTY";
+        };
     }
 
     private static Location convertFileLocation(FileIssueNode fileIssueNodeNode) {
@@ -117,14 +115,18 @@ public class WebviewObjectConverter {
                 .version(dependency.getVersion())
                 .severity(license.getSeverity().name())
                 .references(convertReferences(license.getReferences()))
-                .impactGraph(convertImpactGraph(dependency.getImpactPaths()))
+                .impactGraph(convertImpactGraph(dependency.getImpactTree()))
                 .watchName(watchNames)
                 .edited(license.getLastUpdated());
     }
 
-    private static ImpactGraph convertImpactGraph(ImpactTreeNode impactTreeNode) {
-        ImpactGraph[] children = impactTreeNode.getChildren().stream().map(WebviewObjectConverter::convertImpactGraph).toArray(ImpactGraph[]::new);
-        return new ImpactGraph(impactTreeNode.getName(), children);
+    private static ImpactGraph convertImpactGraph(ImpactTree impactTree) {
+        return new ImpactGraph(convertImpactGraphNode(impactTree.getRoot()), impactTree.getImpactPathsCount(), ScannerBase.IMPACT_PATHS_LIMIT);
+    }
+
+    private static ImpactGraphNode convertImpactGraphNode(ImpactTreeNode impactTreeNode) {
+        ImpactGraphNode[] children = impactTreeNode.getChildren().stream().map(WebviewObjectConverter::convertImpactGraphNode).toArray(ImpactGraphNode[]::new);
+        return new ImpactGraphNode(impactTreeNode.getName(), children);
     }
 
     private static Cve convertCve(com.jfrog.ide.common.nodes.subentities.Cve cve, ApplicableDetails applicableDetails) {
