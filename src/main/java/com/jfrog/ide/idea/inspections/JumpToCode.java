@@ -65,8 +65,8 @@ public class JumpToCode {
         if (editor == null) return;
         Document document = getDocument(editor);
         if (document == null) return;
-        int startOffset = getOffset(document, startRow - 1, startColumn - 1);
-        int endOffset = getOffset(document, endRow - 1, endColumn - 1);
+        int startOffset = getOffset(document, startRow, startColumn);
+        int endOffset = getOffset(document, endRow, endColumn);
         highlightCode(editor, startOffset, endOffset);
         scrollToHighlightedCode(editor, startOffset);
     }
