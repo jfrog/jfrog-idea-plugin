@@ -29,10 +29,16 @@ public class EventManager {
     /**
      * Invoked when the webview finishes loading.
      * Creates the IDE send function body and sends it to the webview.
+     * Finally, it runs onLoadEvent, if provided.
+     *
+     * @param onLoadEnd A {@link Runnable} to run when the webview finishes loading.
      */
-    public void onWebviewLoadEnd() {
+    public void onWebviewLoadEnd(Runnable onLoadEnd) {
         String ideSendFuncBody = this.receiver.createIdeSendFuncBody(ideSendFuncName);
         this.sender.sendIdeSendFunc(ideSendFuncName, ideSendFuncBody);
+        if (onLoadEnd != null) {
+            onLoadEnd.run();
+        }
     }
 
     /**
