@@ -59,7 +59,7 @@ import static com.jfrog.ide.common.log.Utils.logError;
  * Created by romang on 4/26/17.
  */
 public abstract class ScannerBase {
-    public static final int IMPACT_PATHS_LIMIT = 10;
+    public static final int IMPACT_PATHS_LIMIT = 50;
 
     private final ServerConfig serverConfig;
     private final ComponentPrefix prefix;
