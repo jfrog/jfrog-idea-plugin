@@ -30,7 +30,9 @@
 
     <change-notes>
         <![CDATA[
-          <li>Fixed UnsatisfiedLinkError thrown on the plugin startup and sometimes caused IntelliJ crash (in IntelliJ 2023.2).</li>
+          <li>Added support for logging in to JFrog Platform using Single Sign-On (SSO).</li>
+          <li>Improved performance by limiting the size of the Impact Graph.</li>
+          <li>Resolved issues with missing Contextual Analysis information and errors when retrieving cached scan results.</li>
         ]]>
     </change-notes>
 
