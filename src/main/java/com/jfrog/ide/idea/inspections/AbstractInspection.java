@@ -17,7 +17,7 @@ import com.jfrog.ide.common.nodes.DependencyNode;
 import com.jfrog.ide.common.nodes.DescriptorFileTreeNode;
 import com.jfrog.ide.common.nodes.SortableChildrenTreeNode;
 import com.jfrog.ide.common.nodes.VulnerabilityNode;
-import com.jfrog.ide.common.nodes.subentities.ImpactTreeNode;
+import com.jfrog.ide.common.nodes.subentities.ImpactTree;
 import com.jfrog.ide.idea.inspections.upgradeversion.UpgradeVersion;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.scan.ScannerBase;
@@ -233,8 +233,8 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
      */
     boolean isNodeMatch(DependencyNode node, String componentName) {
         String artifactID = node.getComponentIdWithoutPrefix();
-        ImpactTreeNode impactPath = node.getImpactPaths();
-        return StringUtils.equals(artifactID, componentName) || impactPath.contains(componentName);
+        ImpactTree impactTree = node.getImpactTree();
+        return StringUtils.equals(artifactID, componentName) || impactTree.contains(componentName);
     }
 
     abstract UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issues, String descriptorPath);
