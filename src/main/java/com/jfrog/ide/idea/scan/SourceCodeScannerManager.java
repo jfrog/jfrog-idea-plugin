@@ -53,11 +53,11 @@ public class SourceCodeScannerManager {
     /**
      * Applicability source code scanning (Contextual Analysis).
      *
-     * @param indicator      the progress indicator.
-     * @param depScanResults collection of DependencyNodes.
+     * @param indicator     the progress indicator.
+     * @param fileTreeNodes collection of FileTreeNodes.
      * @return A list of FileTreeNodes having the source code issues as their children.
      */
-    public List<FileTreeNode> applicabilityScan(ProgressIndicator indicator, Collection<DependencyNode> depScanResults, Runnable checkCanceled) {
+    public List<FileTreeNode> applicabilityScan(ProgressIndicator indicator, Collection<FileTreeNode> fileTreeNodes, Runnable checkCanceled) {
         if (project.isDisposed()) {
             return Collections.emptyList();
         }
@@ -66,7 +66,7 @@ public class SourceCodeScannerManager {
             return Collections.emptyList();
         }
         List<JFrogSecurityWarning> scanResults = new ArrayList<>();
-        Map<String, List<VulnerabilityNode>> issuesMap = mapDirectIssuesByCve(depScanResults);
+        Map<String, List<VulnerabilityNode>> issuesMap = mapDirectIssuesByCve(fileTreeNodes);
 
         try {
             if (applicability.isPackageTypeSupported(packageType)) {
@@ -74,7 +74,7 @@ public class SourceCodeScannerManager {
                 indicator.setFraction(0.25);
                 Set<String> directIssuesCVEs = issuesMap.keySet();
                 // If no direct dependencies with issues are found by Xray, the applicability scan is irrelevant.
-                if (directIssuesCVEs.size() > 0) {
+                if (!directIssuesCVEs.isEmpty()) {
                     List<JFrogSecurityWarning> applicabilityResults = applicability.execute(createBasicScannerInput().cves(List.copyOf(directIssuesCVEs)), checkCanceled);
                     scanResults.addAll(applicabilityResults);
                 }
@@ -207,24 +207,18 @@ public class SourceCodeScannerManager {
     }
 
     private String createReason(JFrogSecurityWarning warning) {
-        switch (warning.getReporter()) {
-            case IAC:
-            case SECRETS:
-                return warning.getScannerSearchTarget();
-            default:
-                return warning.getReason();
-        }
+        return switch (warning.getReporter()) {
+            case IAC, SECRETS -> warning.getScannerSearchTarget();
+            default -> warning.getReason();
+        };
     }
 
     private String createTitle(JFrogSecurityWarning warning) {
-        switch (warning.getReporter()) {
-            case SECRETS:
-                return "Potential Secret";
-            case IAC:
-                return "Infrastructure as Code Vulnerability";
-            default:
-                return warning.getName();
-        }
+        return switch (warning.getReporter()) {
+            case SECRETS -> "Potential Secret";
+            case IAC -> "Infrastructure as Code Vulnerability";
+            default -> warning.getName();
+        };
     }
 
     /**
@@ -272,28 +266,30 @@ public class SourceCodeScannerManager {
      * Maps direct dependencies  issues (vulnerabilities and security violations) by their CVE IDs.
      * Issues without a CVE ID are ignored.
      *
-     * @param depScanResults - collection of DependencyNodes.
+     * @param fileTreeNodes collection of FileTreeNodes.
      * @return a map of CVE IDs to lists of issues with them.
      */
-    private Map<String, List<VulnerabilityNode>> mapDirectIssuesByCve(Collection<DependencyNode> depScanResults) {
+    private Map<String, List<VulnerabilityNode>> mapDirectIssuesByCve(Collection<FileTreeNode> fileTreeNodes) {
         Map<String, List<VulnerabilityNode>> issues = new HashMap<>();
-        for (DependencyNode dep : depScanResults) {
-            if (dep.isIndirect()) {
-                continue;
-            }
-            Enumeration<TreeNode> treeNodeEnumeration = dep.children();
-            while (treeNodeEnumeration.hasMoreElements()) {
-                TreeNode node = treeNodeEnumeration.nextElement();
-                if (!(node instanceof VulnerabilityNode)) {
+        for (FileTreeNode fileTreeNode : fileTreeNodes) {
+            for (TreeNode treeNode : fileTreeNode.getChildren()) {
+                DependencyNode dep = (DependencyNode) treeNode;
+                if (dep.isIndirect()) {
                     continue;
                 }
-                VulnerabilityNode vulnerabilityNode = (VulnerabilityNode) node;
-                String cveId = vulnerabilityNode.getCve().getCveId();
-                if (vulnerabilityNode.getCve() == null || StringUtils.isBlank(cveId)) {
-                    continue;
+                Enumeration<TreeNode> treeNodeEnumeration = dep.children();
+                while (treeNodeEnumeration.hasMoreElements()) {
+                    TreeNode node = treeNodeEnumeration.nextElement();
+                    if (!(node instanceof VulnerabilityNode vulnerabilityNode)) {
+                        continue;
+                    }
+                    if (vulnerabilityNode.getCve() == null || StringUtils.isBlank(vulnerabilityNode.getCve().getCveId())) {
+                        continue;
+                    }
+                    String cveId = vulnerabilityNode.getCve().getCveId();
+                    issues.putIfAbsent(cveId, new ArrayList<>());
+                    issues.get(cveId).add(vulnerabilityNode);
                 }
-                issues.putIfAbsent(cveId, new ArrayList<>());
-                issues.get(cveId).add(vulnerabilityNode);
             }
         }
         return issues;
