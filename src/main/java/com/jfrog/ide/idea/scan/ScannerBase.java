@@ -325,7 +325,7 @@ public abstract class ScannerBase {
             // IllegalArgumentException: 'other' is different type of Path
             relativePath = projectBasePath.relativize(wsBasePath).toString();
         }
-        return "JFrog Xray scanning " + StringUtils.defaultIfBlank(relativePath, project.getName());
+        return "JFrog scanning " + StringUtils.defaultIfBlank(relativePath, project.getName());
     }
 
     /**

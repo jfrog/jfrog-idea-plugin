@@ -33,7 +33,7 @@ public class Logger implements Log {
     private static Notification lastNotification;
 
     private static final String INFORMATION_TITLE = "JFrog";
-    private static final String ERROR_TITLE = "JFrog Xray scan failed";
+    private static final String ERROR_TITLE = "JFrog scan failed";
 
     public static Logger getInstance() {
         return ApplicationManager.getApplication().getService(Logger.class);
