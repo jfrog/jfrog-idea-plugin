@@ -204,7 +204,7 @@ Opening the JFrog panel displays two views:
 
 ## The Local View
 
-The JFrog IntelliJ IDEA Plugin continuously scans your project with the JFrog Platform and displays security related information under the Local view.
+The JFrog IntelliJ IDEA Plugin enables continuous scans of your project with the JFrog Platform. The security related information will be displayed under the Local view.
 It allows developers to view vulnerability information about their dependencies and source code in their IDE.
 With this information, a developer can make an informed decision on whether to use a component or not before it gets entrenched into the organization’s product.
 

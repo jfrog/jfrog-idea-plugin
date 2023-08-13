@@ -22,7 +22,7 @@
         </p>
 
         <h3>Advanced Scans</h3>
-        <p>Vulnerability Contextual Analysis: This feature uses the code context to eliminate false positive reports on vulnerable dependencies that are not applicable to the code. Vulnerability Contextual Analysis is currently supported for Python, JavaScript and Maven code.</p>
+        <p>Vulnerability Contextual Analysis: This feature uses the code context to eliminate false positive reports on vulnerable dependencies that are not applicable to the code. Vulnerability Contextual Analysis is currently supported for Python, JavaScript, and Java code.</p>
         <p>Secrets Detection: Prevent the expose of keys or credentials that are stored in your source code.</p>
         <p>Infrastructure as Code (IaC) Scans: Secure your IaC files. Critical to keeping your cloud deployment safe and secure.</p>
         <br>

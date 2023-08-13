@@ -1,5 +1,0 @@
-- params:
-    git:
-      repoName: jfrog-idea-plugin
-      branches:
-        - master
