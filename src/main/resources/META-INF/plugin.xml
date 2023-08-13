@@ -4,7 +4,7 @@
     <vendor email="support@jfrog.com" url="https://www.jfrog.com">JFrog</vendor>
 
     <description><![CDATA[
-        <p>The plugin allows developers to find and fix security vulnerabilities in their projects and to see valuable information about the status of their code by continuously scanning it locally with JFrog Xray.</p>
+        <p>The plugin allows developers to find and fix security vulnerabilities in their projects and to see valuable information about the status of their code by continuously scanning it locally with the <a href="https://jfrog.com/xray/">JFrog Platform</a>.</p>
 
         <h3>Software Composition Analysis (SCA)</h3>
         <p>Scan your project dependencies for security issues. The plugin offers an automatic upgrade of the vulnerable dependencies to versions which include fixes.</p>
@@ -21,10 +21,12 @@
         Check out what our research team is up to and stay updated on newly discovered issues by clicking on this link: https://research.jfrog.com
         </p>
 
-        <h3>Advanced Scans in the form of Vulnerability Contextual Analysis</h3>
-        <p>Vulnerability Contextual Analysis eliminates false positive reports on CVEs that are not applicable to your code. Xray automatically validates some high and very high impact vulnerabilities, such as vulnerabilities that have prerequisites for exploitations, and provides contextual analysis information for these vulnerabilities, to assist you in figuring out which vulnerabilities are applicable to a specific artifact.
-        Advanced Scans require Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.</p><br>
-
+        <h3>Advanced Scans</h3>
+        <p>Vulnerability Contextual Analysis: This feature uses the code context to eliminate false positive reports on vulnerable dependencies that are not applicable to the code. Vulnerability Contextual Analysis is currently supported for Python, JavaScript, and Java code.</p>
+        <p>Secrets Detection: Prevent the expose of keys or credentials that are stored in your source code.</p>
+        <p>Infrastructure as Code (IaC) Scans: Secure your IaC files. Critical to keeping your cloud deployment safe and secure.</p>
+        <br>
+        <p>Advanced Scans require Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.</p>
         <p>For more information about the plugin see the <a href="https://github.com/jfrog/jfrog-idea-plugin#readme">README</a>.</p>
     ]]></description>
 

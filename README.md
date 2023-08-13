@@ -197,14 +197,14 @@ After the JFrog Plugin is installed, a new JFrog panel is added at the bottom of
 Opening the JFrog panel displays two views:
 
 - The **Local** view displays information about the local code as it is being developed in the IDE.
-  JFrog Xray continuously scans the project's dependencies and source code locally.
+  You can continuously scan your project locally.
   The information is displayed in the **Local** view.
 - The **CI** view allows the tracking of the code as it is built, tested and scanned by the CI server.
   It displays information about the status of the build and includes a link to the build log on the CI server.
 
 ## The Local View
 
-The JFrog IntelliJ IDEA Plugin continuously scans your project's dependencies with JFrog Xray and displays this information under the Local view.
+The JFrog IntelliJ IDEA Plugin enables continuous scans of your project with the JFrog Platform. The security related information will be displayed under the Local view.
 It allows developers to view vulnerability information about their dependencies and source code in their IDE.
 With this information, a developer can make an informed decision on whether to use a component or not before it gets entrenched into the organization’s product.
 
