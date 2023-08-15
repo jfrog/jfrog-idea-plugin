@@ -1,0 +1,297 @@
+{
+  "format_version": "1.1",
+  "terraform_version": "1.3.5",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_codebuild_project.vulnerable_example",
+          "mode": "managed",
+          "type": "aws_codebuild_project",
+          "name": "vulnerable_example",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "schema_version": 0,
+          "values": {
+            "artifacts": [
+              {
+                "artifact_identifier": null,
+                "bucket_owner_access": null,
+                "encryption_disabled": true,
+                "location": null,
+                "name": null,
+                "namespace_type": null,
+                "override_artifact_name": false,
+                "packaging": null,
+                "path": null,
+                "type": "NO_ARTIFACTS"
+              }
+            ],
+            "badge_enabled": false,
+            "build_batch_config": [],
+            "build_timeout": 60,
+            "cache": [],
+            "concurrent_build_limit": null,
+            "environment": [
+              {
+                "certificate": null,
+                "compute_type": "BUILD_GENERAL1_SMALL",
+                "environment_variable": [],
+                "image": "dummy",
+                "image_pull_credentials_type": "CODEBUILD",
+                "privileged_mode": false,
+                "registry_credential": [],
+                "type": "LINUX_CONTAINER"
+              }
+            ],
+            "file_system_locations": [],
+            "logs_config": [],
+            "name": "dummy",
+            "project_visibility": "PRIVATE",
+            "queued_timeout": 480,
+            "resource_access_role": null,
+            "secondary_artifacts": [],
+            "secondary_source_version": [],
+            "secondary_sources": [],
+            "service_role": "arn:aws:iam::123456789012:user/johndoe",
+            "source": [
+              {
+                "auth": [],
+                "build_status_config": [],
+                "buildspec": null,
+                "git_clone_depth": null,
+                "git_submodules_config": [],
+                "insecure_ssl": null,
+                "location": null,
+                "report_build_status": null,
+                "type": "GITHUB"
+              }
+            ],
+            "source_version": null,
+            "tags": null,
+            "vpc_config": []
+          },
+          "sensitive_values": {
+            "artifacts": [
+              {}
+            ],
+            "build_batch_config": [],
+            "cache": [],
+            "environment": [
+              {
+                "environment_variable": [],
+                "registry_credential": []
+              }
+            ],
+            "file_system_locations": [],
+            "logs_config": [],
+            "secondary_artifacts": [],
+            "secondary_source_version": [],
+            "secondary_sources": [],
+            "source": [
+              {
+                "auth": [],
+                "build_status_config": [],
+                "git_submodules_config": []
+              }
+            ],
+            "tags_all": {},
+            "vpc_config": []
+          }
+        }
+      ]
+    }
+  },
+  "resource_changes": [
+    {
+      "address": "aws_codebuild_project.vulnerable_example",
+      "mode": "managed",
+      "type": "aws_codebuild_project",
+      "name": "vulnerable_example",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "artifacts": [
+            {
+              "artifact_identifier": null,
+              "bucket_owner_access": null,
+              "encryption_disabled": true,
+              "location": null,
+              "name": null,
+              "namespace_type": null,
+              "override_artifact_name": false,
+              "packaging": null,
+              "path": null,
+              "type": "NO_ARTIFACTS"
+            }
+          ],
+          "badge_enabled": false,
+          "build_batch_config": [],
+          "build_timeout": 60,
+          "cache": [],
+          "concurrent_build_limit": null,
+          "environment": [
+            {
+              "certificate": null,
+              "compute_type": "BUILD_GENERAL1_SMALL",
+              "environment_variable": [],
+              "image": "dummy",
+              "image_pull_credentials_type": "CODEBUILD",
+              "privileged_mode": false,
+              "registry_credential": [],
+              "type": "LINUX_CONTAINER"
+            }
+          ],
+          "file_system_locations": [],
+          "logs_config": [],
+          "name": "dummy",
+          "project_visibility": "PRIVATE",
+          "queued_timeout": 480,
+          "resource_access_role": null,
+          "secondary_artifacts": [],
+          "secondary_source_version": [],
+          "secondary_sources": [],
+          "service_role": "arn:aws:iam::123456789012:user/johndoe",
+          "source": [
+            {
+              "auth": [],
+              "build_status_config": [],
+              "buildspec": null,
+              "git_clone_depth": null,
+              "git_submodules_config": [],
+              "insecure_ssl": null,
+              "location": null,
+              "report_build_status": null,
+              "type": "GITHUB"
+            }
+          ],
+          "source_version": null,
+          "tags": null,
+          "vpc_config": []
+        },
+        "after_unknown": {
+          "arn": true,
+          "artifacts": [
+            {}
+          ],
+          "badge_url": true,
+          "build_batch_config": [],
+          "cache": [],
+          "description": true,
+          "encryption_key": true,
+          "environment": [
+            {
+              "environment_variable": [],
+              "registry_credential": []
+            }
+          ],
+          "file_system_locations": [],
+          "id": true,
+          "logs_config": [],
+          "public_project_alias": true,
+          "secondary_artifacts": [],
+          "secondary_source_version": [],
+          "secondary_sources": [],
+          "source": [
+            {
+              "auth": [],
+              "build_status_config": [],
+              "git_submodules_config": []
+            }
+          ],
+          "tags_all": true,
+          "vpc_config": []
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "artifacts": [
+            {}
+          ],
+          "build_batch_config": [],
+          "cache": [],
+          "environment": [
+            {
+              "environment_variable": [],
+              "registry_credential": []
+            }
+          ],
+          "file_system_locations": [],
+          "logs_config": [],
+          "secondary_artifacts": [],
+          "secondary_source_version": [],
+          "secondary_sources": [],
+          "source": [
+            {
+              "auth": [],
+              "build_status_config": [],
+              "git_submodules_config": []
+            }
+          ],
+          "tags_all": {},
+          "vpc_config": []
+        }
+      }
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "name": "aws",
+        "full_name": "registry.terraform.io/hashicorp/aws"
+      }
+    },
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_codebuild_project.vulnerable_example",
+          "mode": "managed",
+          "type": "aws_codebuild_project",
+          "name": "vulnerable_example",
+          "provider_config_key": "aws",
+          "expressions": {
+            "artifacts": [
+              {
+                "encryption_disabled": {
+                  "constant_value": true
+                },
+                "type": {
+                  "constant_value": "NO_ARTIFACTS"
+                }
+              }
+            ],
+            "environment": [
+              {
+                "compute_type": {
+                  "constant_value": "BUILD_GENERAL1_SMALL"
+                },
+                "image": {
+                  "constant_value": "dummy"
+                },
+                "type": {
+                  "constant_value": "LINUX_CONTAINER"
+                }
+              }
+            ],
+            "name": {
+              "constant_value": "dummy"
+            },
+            "service_role": {
+              "constant_value": "arn:aws:iam::123456789012:user/johndoe"
+            },
+            "source": [
+              {
+                "type": {
+                  "constant_value": "GITHUB"
+                }
+              }
+            ]
+          },
+          "schema_version": 0
+        }
+      ]
+    }
+  }
+}

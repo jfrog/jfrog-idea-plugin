@@ -1,0 +1,108 @@
+{
+  "format_version": "1.1",
+  "terraform_version": "1.3.5",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_api_gateway_domain_name.vulnerable_example",
+          "mode": "managed",
+          "type": "aws_api_gateway_domain_name",
+          "name": "vulnerable_example",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "schema_version": 0,
+          "values": {
+            "certificate_arn": null,
+            "certificate_body": null,
+            "certificate_chain": null,
+            "certificate_name": null,
+            "certificate_private_key": null,
+            "domain_name": "dummy",
+            "mutual_tls_authentication": [],
+            "regional_certificate_arn": null,
+            "regional_certificate_name": null,
+            "tags": null
+          },
+          "sensitive_values": {
+            "endpoint_configuration": [],
+            "mutual_tls_authentication": [],
+            "tags_all": {}
+          }
+        }
+      ]
+    }
+  },
+  "resource_changes": [
+    {
+      "address": "aws_api_gateway_domain_name.vulnerable_example",
+      "mode": "managed",
+      "type": "aws_api_gateway_domain_name",
+      "name": "vulnerable_example",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "certificate_arn": null,
+          "certificate_body": null,
+          "certificate_chain": null,
+          "certificate_name": null,
+          "certificate_private_key": null,
+          "domain_name": "dummy",
+          "mutual_tls_authentication": [],
+          "regional_certificate_arn": null,
+          "regional_certificate_name": null,
+          "tags": null
+        },
+        "after_unknown": {
+          "arn": true,
+          "certificate_upload_date": true,
+          "cloudfront_domain_name": true,
+          "cloudfront_zone_id": true,
+          "endpoint_configuration": true,
+          "id": true,
+          "mutual_tls_authentication": [],
+          "ownership_verification_certificate_arn": true,
+          "regional_domain_name": true,
+          "regional_zone_id": true,
+          "security_policy": true,
+          "tags_all": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "certificate_private_key": true,
+          "endpoint_configuration": [],
+          "mutual_tls_authentication": [],
+          "tags_all": {}
+        }
+      }
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "name": "aws",
+        "full_name": "registry.terraform.io/hashicorp/aws"
+      }
+    },
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_api_gateway_domain_name.vulnerable_example",
+          "mode": "managed",
+          "type": "aws_api_gateway_domain_name",
+          "name": "vulnerable_example",
+          "provider_config_key": "aws",
+          "expressions": {
+            "domain_name": {
+              "constant_value": "dummy"
+            }
+          },
+          "schema_version": 0
+        }
+      ]
+    }
+  }
+}

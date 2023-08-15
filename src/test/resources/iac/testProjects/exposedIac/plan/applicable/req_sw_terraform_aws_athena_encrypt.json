@@ -1,0 +1,92 @@
+{
+  "format_version": "1.1",
+  "terraform_version": "1.3.5",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_athena_database.vulnerable_example",
+          "mode": "managed",
+          "type": "aws_athena_database",
+          "name": "vulnerable_example",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "schema_version": 0,
+          "values": {
+            "acl_configuration": [],
+            "bucket": null,
+            "comment": null,
+            "encryption_configuration": [],
+            "expected_bucket_owner": null,
+            "force_destroy": false,
+            "name": "dummy",
+            "properties": null
+          },
+          "sensitive_values": {
+            "acl_configuration": [],
+            "encryption_configuration": []
+          }
+        }
+      ]
+    }
+  },
+  "resource_changes": [
+    {
+      "address": "aws_athena_database.vulnerable_example",
+      "mode": "managed",
+      "type": "aws_athena_database",
+      "name": "vulnerable_example",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "acl_configuration": [],
+          "bucket": null,
+          "comment": null,
+          "encryption_configuration": [],
+          "expected_bucket_owner": null,
+          "force_destroy": false,
+          "name": "dummy",
+          "properties": null
+        },
+        "after_unknown": {
+          "acl_configuration": [],
+          "encryption_configuration": [],
+          "id": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "acl_configuration": [],
+          "encryption_configuration": []
+        }
+      }
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "name": "aws",
+        "full_name": "registry.terraform.io/hashicorp/aws"
+      }
+    },
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_athena_database.vulnerable_example",
+          "mode": "managed",
+          "type": "aws_athena_database",
+          "name": "vulnerable_example",
+          "provider_config_key": "aws",
+          "expressions": {
+            "name": {
+              "constant_value": "dummy"
+            }
+          },
+          "schema_version": 0
+        }
+      ]
+    }
+  }
+}

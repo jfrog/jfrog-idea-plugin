@@ -1,0 +1,119 @@
+{
+  "format_version": "1.1",
+  "terraform_version": "1.3.5",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_docdb_cluster.docdb",
+          "mode": "managed",
+          "type": "aws_docdb_cluster",
+          "name": "docdb",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "schema_version": 0,
+          "values": {
+            "backup_retention_period": 1,
+            "deletion_protection": null,
+            "enabled_cloudwatch_logs_exports": null,
+            "engine": "docdb",
+            "final_snapshot_identifier": null,
+            "global_cluster_identifier": null,
+            "master_password": null,
+            "port": 27017,
+            "skip_final_snapshot": false,
+            "snapshot_identifier": null,
+            "storage_encrypted": null,
+            "tags": null,
+            "timeouts": null
+          },
+          "sensitive_values": {
+            "availability_zones": [],
+            "cluster_members": [],
+            "tags_all": {},
+            "vpc_security_group_ids": []
+          }
+        }
+      ]
+    }
+  },
+  "resource_changes": [
+    {
+      "address": "aws_docdb_cluster.docdb",
+      "mode": "managed",
+      "type": "aws_docdb_cluster",
+      "name": "docdb",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "backup_retention_period": 1,
+          "deletion_protection": null,
+          "enabled_cloudwatch_logs_exports": null,
+          "engine": "docdb",
+          "final_snapshot_identifier": null,
+          "global_cluster_identifier": null,
+          "master_password": null,
+          "port": 27017,
+          "skip_final_snapshot": false,
+          "snapshot_identifier": null,
+          "storage_encrypted": null,
+          "tags": null,
+          "timeouts": null
+        },
+        "after_unknown": {
+          "apply_immediately": true,
+          "arn": true,
+          "availability_zones": true,
+          "cluster_identifier": true,
+          "cluster_identifier_prefix": true,
+          "cluster_members": true,
+          "cluster_resource_id": true,
+          "db_cluster_parameter_group_name": true,
+          "db_subnet_group_name": true,
+          "endpoint": true,
+          "engine_version": true,
+          "hosted_zone_id": true,
+          "id": true,
+          "kms_key_id": true,
+          "master_username": true,
+          "preferred_backup_window": true,
+          "preferred_maintenance_window": true,
+          "reader_endpoint": true,
+          "tags_all": true,
+          "vpc_security_group_ids": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "availability_zones": [],
+          "cluster_members": [],
+          "master_password": true,
+          "tags_all": {},
+          "vpc_security_group_ids": []
+        }
+      }
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "name": "aws",
+        "full_name": "registry.terraform.io/hashicorp/aws"
+      }
+    },
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_docdb_cluster.docdb",
+          "mode": "managed",
+          "type": "aws_docdb_cluster",
+          "name": "docdb",
+          "provider_config_key": "aws",
+          "schema_version": 0
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "format_version": "1.1",
+  "terraform_version": "1.3.5",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_lb_listener.secure_lb_listener",
+          "mode": "managed",
+          "type": "aws_lb_listener",
+          "name": "secure_lb_listener",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "schema_version": 0,
+          "values": {
+            "alpn_policy": null,
+            "certificate_arn": "arn:aws:iam::187416307283:server-certificate/test_cert_rab3wuqwgja25ct3n4jdj2tzu4",
+            "default_action": [
+              {
+                "authenticate_cognito": [],
+                "authenticate_oidc": [],
+                "fixed_response": [],
+                "forward": [],
+                "redirect": [],
+                "target_group_arn": "arn:aws:iam::123456789012:user/johndoe",
+                "type": "forward"
+              }
+            ],
+            "load_balancer_arn": "arn:aws:iam::123456789012:user/johndoe",
+            "port": 443,
+            "protocol": "HTTP",
+            "ssl_policy": "ELBSecurityPolicy-2016-08",
+            "tags": null,
+            "timeouts": null
+          },
+          "sensitive_values": {
+            "default_action": [
+              {
+                "authenticate_cognito": [],
+                "authenticate_oidc": [],
+                "fixed_response": [],
+                "forward": [],
+                "redirect": []
+              }
+            ],
+            "tags_all": {}
+          }
+        }
+      ]
+    }
+  },
+  "resource_changes": [
+    {
+      "address": "aws_lb_listener.secure_lb_listener",
+      "mode": "managed",
+      "type": "aws_lb_listener",
+      "name": "secure_lb_listener",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "alpn_policy": null,
+          "certificate_arn": "arn:aws:iam::187416307283:server-certificate/test_cert_rab3wuqwgja25ct3n4jdj2tzu4",
+          "default_action": [
+            {
+              "authenticate_cognito": [],
+              "authenticate_oidc": [],
+              "fixed_response": [],
+              "forward": [],
+              "redirect": [],
+              "target_group_arn": "arn:aws:iam::123456789012:user/johndoe",
+              "type": "forward"
+            }
+          ],
+          "load_balancer_arn": "arn:aws:iam::123456789012:user/johndoe",
+          "port": 443,
+          "protocol": "HTTP",
+          "ssl_policy": "ELBSecurityPolicy-2016-08",
+          "tags": null,
+          "timeouts": null
+        },
+        "after_unknown": {
+          "arn": true,
+          "default_action": [
+            {
+              "authenticate_cognito": [],
+              "authenticate_oidc": [],
+              "fixed_response": [],
+              "forward": [],
+              "order": true,
+              "redirect": []
+            }
+          ],
+          "id": true,
+          "tags_all": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "default_action": [
+            {
+              "authenticate_cognito": [],
+              "authenticate_oidc": [],
+              "fixed_response": [],
+              "forward": [],
+              "redirect": []
+            }
+          ],
+          "tags_all": {}
+        }
+      }
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "name": "aws",
+        "full_name": "registry.terraform.io/hashicorp/aws"
+      }
+    },
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_lb_listener.secure_lb_listener",
+          "mode": "managed",
+          "type": "aws_lb_listener",
+          "name": "secure_lb_listener",
+          "provider_config_key": "aws",
+          "expressions": {
+            "certificate_arn": {
+              "constant_value": "arn:aws:iam::187416307283:server-certificate/test_cert_rab3wuqwgja25ct3n4jdj2tzu4"
+            },
+            "default_action": [
+              {
+                "target_group_arn": {
+                  "constant_value": "arn:aws:iam::123456789012:user/johndoe"
+                },
+                "type": {
+                  "constant_value": "forward"
+                }
+              }
+            ],
+            "load_balancer_arn": {
+              "constant_value": "arn:aws:iam::123456789012:user/johndoe"
+            },
+            "port": {
+              "constant_value": "443"
+            },
+            "protocol": {
+              "constant_value": "HTTP"
+            },
+            "ssl_policy": {
+              "constant_value": "ELBSecurityPolicy-2016-08"
+            }
+          },
+          "schema_version": 0
+        }
+      ]
+    }
+  }
+}

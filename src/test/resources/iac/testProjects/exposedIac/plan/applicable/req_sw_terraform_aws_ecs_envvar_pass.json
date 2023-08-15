@@ -1,0 +1,199 @@
+{
+  "format_version": "1.1",
+  "terraform_version": "1.3.5",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_ecs_task_definition.service",
+          "mode": "managed",
+          "type": "aws_ecs_task_definition",
+          "name": "service",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "schema_version": 1,
+          "values": {
+            "container_definitions": "[{\"cpu\":10,\"environment\":[{\"name\":\"FSX_NAME\",\"value\":\"my-fsx-name\"},{\"name\":\"FSX_PASSWORD\",\"value\":\"my-fsx-password\"}],\"essential\":true,\"image\":\"service-first\",\"memory\":512,\"name\":\"first\",\"portMappings\":[{\"containerPort\":80,\"hostPort\":80}]},{\"cpu\":10,\"essential\":true,\"image\":\"service-second\",\"memory\":256,\"name\":\"second\",\"portMappings\":[{\"containerPort\":443,\"hostPort\":443}]}]",
+            "cpu": null,
+            "ephemeral_storage": [],
+            "execution_role_arn": null,
+            "family": "service",
+            "inference_accelerator": [],
+            "ipc_mode": null,
+            "memory": null,
+            "pid_mode": null,
+            "placement_constraints": [
+              {
+                "expression": "attribute:ecs.availability-zone in [us-west-2a, us-west-2b]",
+                "type": "memberOf"
+              }
+            ],
+            "proxy_configuration": [],
+            "requires_compatibilities": null,
+            "runtime_platform": [],
+            "skip_destroy": false,
+            "tags": null,
+            "task_role_arn": null,
+            "volume": [
+              {
+                "docker_volume_configuration": [],
+                "efs_volume_configuration": [],
+                "fsx_windows_file_server_volume_configuration": [],
+                "host_path": "/ecs/service-storage",
+                "name": "service-storage"
+              }
+            ]
+          },
+          "sensitive_values": {
+            "ephemeral_storage": [],
+            "inference_accelerator": [],
+            "placement_constraints": [
+              {}
+            ],
+            "proxy_configuration": [],
+            "runtime_platform": [],
+            "tags_all": {},
+            "volume": [
+              {
+                "docker_volume_configuration": [],
+                "efs_volume_configuration": [],
+                "fsx_windows_file_server_volume_configuration": []
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "resource_changes": [
+    {
+      "address": "aws_ecs_task_definition.service",
+      "mode": "managed",
+      "type": "aws_ecs_task_definition",
+      "name": "service",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "container_definitions": "[{\"cpu\":10,\"environment\":[{\"name\":\"FSX_NAME\",\"value\":\"my-fsx-name\"},{\"name\":\"FSX_PASSWORD\",\"value\":\"my-fsx-password\"}],\"essential\":true,\"image\":\"service-first\",\"memory\":512,\"name\":\"first\",\"portMappings\":[{\"containerPort\":80,\"hostPort\":80}]},{\"cpu\":10,\"essential\":true,\"image\":\"service-second\",\"memory\":256,\"name\":\"second\",\"portMappings\":[{\"containerPort\":443,\"hostPort\":443}]}]",
+          "cpu": null,
+          "ephemeral_storage": [],
+          "execution_role_arn": null,
+          "family": "service",
+          "inference_accelerator": [],
+          "ipc_mode": null,
+          "memory": null,
+          "pid_mode": null,
+          "placement_constraints": [
+            {
+              "expression": "attribute:ecs.availability-zone in [us-west-2a, us-west-2b]",
+              "type": "memberOf"
+            }
+          ],
+          "proxy_configuration": [],
+          "requires_compatibilities": null,
+          "runtime_platform": [],
+          "skip_destroy": false,
+          "tags": null,
+          "task_role_arn": null,
+          "volume": [
+            {
+              "docker_volume_configuration": [],
+              "efs_volume_configuration": [],
+              "fsx_windows_file_server_volume_configuration": [],
+              "host_path": "/ecs/service-storage",
+              "name": "service-storage"
+            }
+          ]
+        },
+        "after_unknown": {
+          "arn": true,
+          "ephemeral_storage": [],
+          "id": true,
+          "inference_accelerator": [],
+          "network_mode": true,
+          "placement_constraints": [
+            {}
+          ],
+          "proxy_configuration": [],
+          "revision": true,
+          "runtime_platform": [],
+          "tags_all": true,
+          "volume": [
+            {
+              "docker_volume_configuration": [],
+              "efs_volume_configuration": [],
+              "fsx_windows_file_server_volume_configuration": []
+            }
+          ]
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "ephemeral_storage": [],
+          "inference_accelerator": [],
+          "placement_constraints": [
+            {}
+          ],
+          "proxy_configuration": [],
+          "runtime_platform": [],
+          "tags_all": {},
+          "volume": [
+            {
+              "docker_volume_configuration": [],
+              "efs_volume_configuration": [],
+              "fsx_windows_file_server_volume_configuration": []
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "name": "aws",
+        "full_name": "registry.terraform.io/hashicorp/aws"
+      }
+    },
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_ecs_task_definition.service",
+          "mode": "managed",
+          "type": "aws_ecs_task_definition",
+          "name": "service",
+          "provider_config_key": "aws",
+          "expressions": {
+            "container_definitions": {},
+            "family": {
+              "constant_value": "service"
+            },
+            "placement_constraints": [
+              {
+                "expression": {
+                  "constant_value": "attribute:ecs.availability-zone in [us-west-2a, us-west-2b]"
+                },
+                "type": {
+                  "constant_value": "memberOf"
+                }
+              }
+            ],
+            "volume": [
+              {
+                "host_path": {
+                  "constant_value": "/ecs/service-storage"
+                },
+                "name": {
+                  "constant_value": "service-storage"
+                }
+              }
+            ]
+          },
+          "schema_version": 1
+        }
+      ]
+    }
+  }
+}

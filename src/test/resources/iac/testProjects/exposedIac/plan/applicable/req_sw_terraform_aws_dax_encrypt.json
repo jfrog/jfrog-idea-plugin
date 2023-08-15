@@ -1,0 +1,120 @@
+{
+  "format_version": "1.1",
+  "terraform_version": "1.3.5",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_dax_cluster.vulnerable_example",
+          "mode": "managed",
+          "type": "aws_dax_cluster",
+          "name": "vulnerable_example",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "schema_version": 0,
+          "values": {
+            "availability_zones": null,
+            "cluster_endpoint_encryption_type": null,
+            "cluster_name": "cluster-example",
+            "description": null,
+            "iam_role_arn": "arn:aws:iam::123456789012:user/johndoe",
+            "node_type": "dax.r4.large",
+            "notification_topic_arn": null,
+            "replication_factor": 1,
+            "server_side_encryption": [],
+            "tags": null,
+            "timeouts": null
+          },
+          "sensitive_values": {
+            "nodes": [],
+            "security_group_ids": [],
+            "server_side_encryption": [],
+            "tags_all": {}
+          }
+        }
+      ]
+    }
+  },
+  "resource_changes": [
+    {
+      "address": "aws_dax_cluster.vulnerable_example",
+      "mode": "managed",
+      "type": "aws_dax_cluster",
+      "name": "vulnerable_example",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "availability_zones": null,
+          "cluster_endpoint_encryption_type": null,
+          "cluster_name": "cluster-example",
+          "description": null,
+          "iam_role_arn": "arn:aws:iam::123456789012:user/johndoe",
+          "node_type": "dax.r4.large",
+          "notification_topic_arn": null,
+          "replication_factor": 1,
+          "server_side_encryption": [],
+          "tags": null,
+          "timeouts": null
+        },
+        "after_unknown": {
+          "arn": true,
+          "cluster_address": true,
+          "configuration_endpoint": true,
+          "id": true,
+          "maintenance_window": true,
+          "nodes": true,
+          "parameter_group_name": true,
+          "port": true,
+          "security_group_ids": true,
+          "server_side_encryption": [],
+          "subnet_group_name": true,
+          "tags_all": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "nodes": [],
+          "security_group_ids": [],
+          "server_side_encryption": [],
+          "tags_all": {}
+        }
+      }
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "name": "aws",
+        "full_name": "registry.terraform.io/hashicorp/aws"
+      }
+    },
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_dax_cluster.vulnerable_example",
+          "mode": "managed",
+          "type": "aws_dax_cluster",
+          "name": "vulnerable_example",
+          "provider_config_key": "aws",
+          "expressions": {
+            "cluster_name": {
+              "constant_value": "cluster-example"
+            },
+            "iam_role_arn": {
+              "constant_value": "arn:aws:iam::123456789012:user/johndoe"
+            },
+            "node_type": {
+              "constant_value": "dax.r4.large"
+            },
+            "replication_factor": {
+              "constant_value": 1
+            }
+          },
+          "schema_version": 0
+        }
+      ]
+    }
+  }
+}

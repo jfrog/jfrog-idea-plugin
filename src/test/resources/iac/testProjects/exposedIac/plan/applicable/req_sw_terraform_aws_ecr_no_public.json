@@ -1,0 +1,76 @@
+{
+  "format_version": "1.1",
+  "terraform_version": "1.3.5",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_ecr_repository_policy.not_secure_policy",
+          "mode": "managed",
+          "type": "aws_ecr_repository_policy",
+          "name": "not_secure_policy",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "schema_version": 0,
+          "values": {
+            "policy": "{\n    \"Version\": \"2008-10-17\",\n    \"Statement\": [\n        {\n            \"Sid\": \"new policy\",\n            \"Effect\": \"Allow\",\n            \"Principal\": \"*\",\n            \"Action\": [\n                \"ecr:GetDownloadUrlForLayer\",\n                \"ecr:BatchGetImage\",\n                \"ecr:BatchCheckLayerAvailability\",\n                \"ecr:PutImage\",\n                \"ecr:InitiateLayerUpload\",\n                \"ecr:UploadLayerPart\",\n                \"ecr:CompleteLayerUpload\",\n                \"ecr:DescribeRepositories\",\n                \"ecr:GetRepositoryPolicy\",\n                \"ecr:ListImages\",\n                \"ecr:DeleteRepository\",\n                \"ecr:BatchDeleteImage\",\n                \"ecr:SetRepositoryPolicy\",\n                \"ecr:DeleteRepositoryPolicy\"\n            ]\n        }\n    ]\n}\n",
+            "repository": "dummy"
+          },
+          "sensitive_values": {}
+        }
+      ]
+    }
+  },
+  "resource_changes": [
+    {
+      "address": "aws_ecr_repository_policy.not_secure_policy",
+      "mode": "managed",
+      "type": "aws_ecr_repository_policy",
+      "name": "not_secure_policy",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "policy": "{\n    \"Version\": \"2008-10-17\",\n    \"Statement\": [\n        {\n            \"Sid\": \"new policy\",\n            \"Effect\": \"Allow\",\n            \"Principal\": \"*\",\n            \"Action\": [\n                \"ecr:GetDownloadUrlForLayer\",\n                \"ecr:BatchGetImage\",\n                \"ecr:BatchCheckLayerAvailability\",\n                \"ecr:PutImage\",\n                \"ecr:InitiateLayerUpload\",\n                \"ecr:UploadLayerPart\",\n                \"ecr:CompleteLayerUpload\",\n                \"ecr:DescribeRepositories\",\n                \"ecr:GetRepositoryPolicy\",\n                \"ecr:ListImages\",\n                \"ecr:DeleteRepository\",\n                \"ecr:BatchDeleteImage\",\n                \"ecr:SetRepositoryPolicy\",\n                \"ecr:DeleteRepositoryPolicy\"\n            ]\n        }\n    ]\n}\n",
+          "repository": "dummy"
+        },
+        "after_unknown": {
+          "id": true,
+          "registry_id": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": {}
+      }
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "name": "aws",
+        "full_name": "registry.terraform.io/hashicorp/aws"
+      }
+    },
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_ecr_repository_policy.not_secure_policy",
+          "mode": "managed",
+          "type": "aws_ecr_repository_policy",
+          "name": "not_secure_policy",
+          "provider_config_key": "aws",
+          "expressions": {
+            "policy": {
+              "constant_value": "{\n    \"Version\": \"2008-10-17\",\n    \"Statement\": [\n        {\n            \"Sid\": \"new policy\",\n            \"Effect\": \"Allow\",\n            \"Principal\": \"*\",\n            \"Action\": [\n                \"ecr:GetDownloadUrlForLayer\",\n                \"ecr:BatchGetImage\",\n                \"ecr:BatchCheckLayerAvailability\",\n                \"ecr:PutImage\",\n                \"ecr:InitiateLayerUpload\",\n                \"ecr:UploadLayerPart\",\n                \"ecr:CompleteLayerUpload\",\n                \"ecr:DescribeRepositories\",\n                \"ecr:GetRepositoryPolicy\",\n                \"ecr:ListImages\",\n                \"ecr:DeleteRepository\",\n                \"ecr:BatchDeleteImage\",\n                \"ecr:SetRepositoryPolicy\",\n                \"ecr:DeleteRepositoryPolicy\"\n            ]\n        }\n    ]\n}\n"
+            },
+            "repository": {
+              "constant_value": "dummy"
+            }
+          },
+          "schema_version": 0
+        }
+      ]
+    }
+  }
+}

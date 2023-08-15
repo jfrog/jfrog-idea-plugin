@@ -33,7 +33,6 @@ public class SecretsScannerIntegrationTests extends BaseIntegrationTest {
         assertEquals(0, secretIndication.getLineEnd());
         assertEquals(6, secretIndication.getColStart());
         assertEquals(118, secretIndication.getColEnd());
-        assertEquals(118, secretIndication.getColEnd());
         assertTrue(secretIndication.getFilePath().endsWith("applicable_base64.js"));
         assertEquals(SourceCodeScanType.SECRETS, secretIndication.getReporter());
         assertTrue(StringUtils.isNotBlank(secretIndication.getScannerSearchTarget()));
