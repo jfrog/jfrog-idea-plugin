@@ -14,13 +14,18 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.DEFAULT_EXCLUSIONS;
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 
 public abstract class BaseIntegrationTest extends HeavyPlatformTestCase {
     public static final String ENV_PLATFORM_URL = "JFROG_IDE_PLATFORM_URL";
     public static final String ENV_ACCESS_TOKEN = "JFROG_IDE_ACCESS_TOKEN";
-    private final static Path TEST_PROJECT_PATH = new File("src/test/resources/applicability/testProjects").toPath();
-
+    protected String binaryDownloadUrl;
+    protected boolean useReleases;
     protected ServerConfigImpl serverConfig;
+    private final static Path TEST_PROJECT_PATH = new File("src/test/resources/").toPath();
+    private static final String ENV_BINARY_DOWNLOAD_URL = "JFROG_IDE_ANALYZER_MANAGER_DOWNLOAD_URL";
+    private static final String ENV_DOWNLOAD_FROM_JFROG_RELEASES = "JFROG_IDE_DOWNLOAD_FROM_JFROG_RELEASES";
+
 
     @Override
     protected void setUp() throws Exception {
@@ -35,6 +40,8 @@ public abstract class BaseIntegrationTest extends HeavyPlatformTestCase {
         if (!serverConfig.isXrayConfigured()) {
             failSetup();
         }
+        binaryDownloadUrl = System.getenv(ENV_BINARY_DOWNLOAD_URL);
+        useReleases = Boolean.parseBoolean(defaultIfEmpty(System.getenv(ENV_DOWNLOAD_FROM_JFROG_RELEASES), "true"));
     }
 
     private ServerConfigImpl createServerConfigFromEnv() {
@@ -69,7 +76,7 @@ public abstract class BaseIntegrationTest extends HeavyPlatformTestCase {
     }
 
     protected String createTempProjectDir(String projectName) throws IOException {
-        String tempProjectDir = getTempDir().createVirtualDir(projectName).toNioPath().toString();
+        String tempProjectDir = getTempDir().createVirtualDir().toNioPath().toString();
         FileUtils.copyDirectory(TEST_PROJECT_PATH.resolve(projectName).toFile(), new File(tempProjectDir));
         return tempProjectDir;
     }
