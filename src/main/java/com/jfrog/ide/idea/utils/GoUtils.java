@@ -4,7 +4,6 @@ import com.goide.GoConstants;
 import com.goide.sdk.GoSdkUtil;
 import com.goide.vgo.configuration.VgoProjectSettings;
 import com.google.common.collect.Lists;
-import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import org.apache.commons.lang3.StringUtils;
 
@@ -30,7 +29,7 @@ public class GoUtils {
      * @throws NoClassDefFoundError if the Go plugin is not installed.
      */
     public static String getGoExeAndSetEnv(Map<String, String> env, Project project) throws NoClassDefFoundError {
-        String goPath = GoSdkUtil.retrieveGoPath(project, ModuleManager.getInstance(project).getModules()[0]);
+        String goPath = GoSdkUtil.retrieveGoPath(project, null);
         if (StringUtils.isNotBlank(goPath)) {
             env.put(GoConstants.GO_PATH, goPath);
         }
@@ -49,5 +48,4 @@ public class GoUtils {
         }
         return null;
     }
-
 }
