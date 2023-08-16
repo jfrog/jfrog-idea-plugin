@@ -21,6 +21,7 @@ import java.util.List;
 public class SecretsScannerExecutor extends ScanBinaryExecutor {
     private static final List<String> SCANNER_ARGS = List.of("sec");
     private static final boolean RUN_WITH_CONFIG_FILE = true;
+    private static final String ISSUE_TITLE = "Potential Secret";
 
     public SecretsScannerExecutor(Log log, ServerConfig serverConfig) {
         this(log, serverConfig, null, true);
@@ -45,7 +46,7 @@ public class SecretsScannerExecutor extends ScanBinaryExecutor {
                 results.put(warning.getFilePath(), fileNode);
             }
 
-            FileIssueNode issueNode = new FileIssueNode("Potential Secret",
+            FileIssueNode issueNode = new FileIssueNode(ISSUE_TITLE,
                     warning.getFilePath(), warning.getLineStart(), warning.getColStart(), warning.getLineEnd(), warning.getColEnd(),
                     warning.getScannerSearchTarget(), warning.getLineSnippet(), warning.getReporter(), warning.getSeverity(), warning.getRuleID());
             fileNode.addIssue(issueNode);

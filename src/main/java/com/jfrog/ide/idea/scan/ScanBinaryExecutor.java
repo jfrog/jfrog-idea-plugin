@@ -126,7 +126,7 @@ public abstract class ScanBinaryExecutor {
 
     abstract List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException, URISyntaxException;
 
-    protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args, Runnable checkCanceled, boolean creatInputFile) throws IOException, InterruptedException {
+    protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args, Runnable checkCanceled, boolean createInputFile) throws IOException, InterruptedException {
         if (!shouldExecute()) {
             return List.of();
         }
@@ -140,9 +140,9 @@ public abstract class ScanBinaryExecutor {
             inputFileBuilder.output(outputFilePath.toString());
             inputFileBuilder.scanType(scanType);
             ScanConfig inputParams = inputFileBuilder.Build();
-            CommandExecutor commandExecutor = new CommandExecutor(binaryTargetPath.toString(), creatEnvWithCredentials());
+            CommandExecutor commandExecutor = new CommandExecutor(binaryTargetPath.toString(), createEnvWithCredentials());
             args = new ArrayList<>(args);
-            if (creatInputFile) {
+            if (createInputFile) {
                 inputFile = createTempRunInputFile(new ScansConfig(List.of(inputParams)));
                 args.add(inputFile.toString());
             } else {
@@ -153,7 +153,8 @@ public abstract class ScanBinaryExecutor {
             // The following logging is done outside the commandExecutor because the commandExecutor log level is set to INFO.
             //  As it is an internal binary execution, the message should be printed for DEBUG use only.
             log.debug(String.format("Executing command: %s %s", binaryTargetPath.toString(), join(" ", args)));
-            // Execute the external process
+            // Execute the external process in the project's root directory.
+            // inputParams root should always contain a single root project in our use cases.
             CommandResults commandResults = commandExecutor.exeCommand(Paths.get(inputParams.getRoots().get(0)).toFile(), args,
                     null, new NullLog(), MAX_EXECUTION_MINUTES, TimeUnit.MINUTES);
             if (commandResults.getExitValue() == USER_NOT_ENTITLED) {
@@ -291,7 +292,7 @@ public abstract class ScanBinaryExecutor {
         return inputPath;
     }
 
-    private Map<String, String> creatEnvWithCredentials() {
+    private Map<String, String> createEnvWithCredentials() {
         Map<String, String> env = new HashMap<>(EnvironmentUtil.getEnvironmentMap());
         ServerConfigImpl serverConfig = GlobalSettings.getInstance().getServerConfig();
         env.put(ENV_PLATFORM, serverConfig.getUrl());

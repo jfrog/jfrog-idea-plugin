@@ -7,7 +7,6 @@ import lombok.Getter;
 public class EosIssuePage extends IssuePage {
     @JsonProperty("analysisStep")
     private Location[] analysisSteps;
-    private String[] remediation;
     private String ruleId;
 
     @SuppressWarnings("unused")

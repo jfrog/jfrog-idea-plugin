@@ -61,12 +61,11 @@ public class WebviewObjectConverter {
 
     public static IssuePage convertEosIssueToEosIssuePage(EosIssueNode eosIssueNode) {
         return new EosIssuePage(convertFileIssueToIssuePage(eosIssueNode))
-                .setAnalysisSteps(convertCodeFlowsLocations(eosIssueNode.getCodeFlows()))
+                .setAnalysisSteps(convertCodeFlowsToLocations(eosIssueNode.getCodeFlows()))
                 .setRuleID(eosIssueNode.getRuleID());
-
     }
 
-    private static Location[] convertCodeFlowsLocations(FindingInfo[][] codeFlows) {
+    private static Location[] convertCodeFlowsToLocations(FindingInfo[][] codeFlows) {
         if (codeFlows.length > 0) {
             Location[] locations = new Location[codeFlows[0].length];
             for (int i = 0; i < codeFlows[0].length; i++) {

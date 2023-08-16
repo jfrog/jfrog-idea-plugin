@@ -24,6 +24,8 @@ public class SarifResult {
     private String kind;
     @JsonProperty("level")
     private String severity;
+    @JsonProperty("suppressions")
+    private AnalyzeSuppression[] suppressions;
 
     public void setKind(String kind) {
         this.kind = kind;
@@ -36,9 +38,6 @@ public class SarifResult {
     public void setSuppressions(AnalyzeSuppression[] suppressions) {
         this.suppressions = suppressions;
     }
-
-    @JsonProperty("suppressions")
-    private AnalyzeSuppression[] suppressions;
 
     public String getKind() {
         return StringUtils.defaultString(kind);
