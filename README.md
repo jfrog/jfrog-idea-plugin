@@ -42,13 +42,14 @@ The plugin allows developers to find and fix security vulnerabilities in their p
 about the status of their code by continuously scanning it locally with [JFrog Security](https://jfrog.com/xray/).
 
 ### What security capabilities do we provide?
-
-#### Software Composition Analysis (SCA)
-
+#### Basic
+<details>
+  <summary>Software Composition Analysis (SCA)</summary>
 Scan your project dependencies for security issues.
+</details>
 
-#### CVE Research and Enrichment
-
+<details>
+  <summary>CVE Research and Enrichment</summary>
 For selected security issues, get leverage-enhanced CVE data that is provided by our JFrog Security Research team.
 Prioritize the CVEs based on:
 
@@ -61,17 +62,26 @@ This means that you should put effort into fixing them as soon as possible.
 You can learn more about enriched CVEs [here](https://jfrog.com/help/r/jfrog-security-documentation/jfrog-security-cve-research-and-enrichment).
 
 Check out what our research team is up to and stay updated on newly discovered issues by clicking on this link: <https://research.jfrog.com>
+</details>
 
-#### Advanced Scans
+#### Advanced
+*Requires Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with [Advanced DevSecOps](https://jfrog.com/xray/#xray-advanced)).*
 
-*Requires Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
+<details>
+  <summary>Vulnerability Contextual Analysis</summary>
+[Vulnerability Contextual Analysis](#contextual-analysis) uses the code context to eliminate false positive reports on vulnerable dependencies that are not applicable to the code. 
+Vulnerability Contextual Analysis is currently supported for Python, Java and JavaScript code.
+</details>
 
-- [**Vulnerability Contextual Analysis**](#contextual-analysis): This feature uses the code context to eliminate false positive reports on vulnerable dependencies that are not applicable to the code. 
-Vulnerability Contextual Analysis is currently supported for Python and JavaScript code.
-- [**Secrets Detection**](#secrets-detection): Prevent the expose of keys or credentials that are stored in your source code.
-- [**Infrastructure as Code (IaC) Scan**](#infrastructure-as-code-iac-scan): Secure your IaC files. Critical to keeping your cloud deployment safe and secure.
+<details>
+  <summary>Secrets Detection</summary>
+[Secrets Detection](#secrets-detection) prevents the exposure of keys or credentials that are stored in your source code.
+</details>
 
-You can read more about JFrog Advanced Security [here](https://jfrog.com/xray/#xray-advanced).
+<details>
+  <summary>Infrastructure as Code (IaC) Scan</summary>
+[Infrastructure as Code (IaC) Scan](#infrastructure-as-code-iac-scan) secures your IaC files. Critical to keeping your cloud deployment safe and secure.
+</details>
 
 #### Additional Perks
 
