@@ -45,7 +45,7 @@ about the status of their code by continuously scanning it locally with [JFrog S
 #### Basic
 <details>
   <summary>Software Composition Analysis (SCA)</summary>
-Scan your project dependencies for security issues.
+Scans your project dependencies for security issues and shows you which dependencies are vulnerable. If the vulnerabilities have a fix, you can upgrade to the version with the fix in a click of a button.
 </details>
 
 <details>
@@ -69,18 +69,18 @@ Check out what our research team is up to and stay updated on newly discovered i
 
 <details>
   <summary>Vulnerability Contextual Analysis</summary>
-[Vulnerability Contextual Analysis](#contextual-analysis) uses the code context to eliminate false positive reports on vulnerable dependencies that are not applicable to the code. 
+Uses the code context to eliminate false positive reports on vulnerable dependencies that are not applicable to the code. 
 Vulnerability Contextual Analysis is currently supported for Python, Java and JavaScript code.
 </details>
 
 <details>
   <summary>Secrets Detection</summary>
-[Secrets Detection](#secrets-detection) prevents the exposure of keys or credentials that are stored in your source code.
+Prevents the exposure of keys or credentials that are stored in your source code.
 </details>
 
 <details>
   <summary>Infrastructure as Code (IaC) Scan</summary>
-[Infrastructure as Code (IaC) Scan](#infrastructure-as-code-iac-scan) secures your IaC files. Critical to keeping your cloud deployment safe and secure.
+Secures your IaC files. Critical to keeping your cloud deployment safe and secure.
 </details>
 
 #### Additional Perks
