@@ -23,7 +23,7 @@
   - [The Local View](#the-local-view)
     - [Scanning a Project](#scanning-a-project)
     - [Viewing Vulnerability Details](#viewing-vulnerability-details)
-    - [Contextual Analysis](#contextual-analysis)
+    - [Vulnerability Contextual Analysis](#vulnerability-contextual-analysis)
     - [Secrets Detection](#secrets-detection)
     - [Infrastructure as Code (IaC) Scan](#infrastructure-as-code-iac-scan)
     - [Severity Icons](#severity-icons)
@@ -105,7 +105,7 @@ In addition to IntelliJ IDEA, the plugin also supports the following IDEs:
 | Software Composition Analysis (SCA)               | ✅  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ❌     |
 | CVE Research and Enrichment                       | ✅  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ❌     |
 | Upgrade vulnerable dependencies to fixed versions | ✅  |   ✅   |       ✅       |  ✅  |    ✅    |   ❌    |     ❌     |
-| Contextual Analysis                               | ❌  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ❌     |
+| Vulnerability Contextual Analysis                 | ❌  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ❌     |
 | Secrets Detection                                 | ✅  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ✅     |
 | Infrastructure as Code (IaC) Scan                 | ❌  |   ❌   |       ❌       |  ❌  |    ❌    |   ❌    |     ✅     |
 
@@ -239,13 +239,13 @@ This view contains information about the vulnerability, the vulnerable component
 ![](readme-resources/vuln-details.png)
 ![](readme-resources/vuln-impact-graph.png)
 
-### Contextual Analysis
+### Vulnerability Contextual Analysis
 
 *Requires Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
 
 Xray automatically validates some high and very high impact vulnerabilities, such as vulnerabilities that have prerequisites for exploitations, and provides contextual analysis information for these vulnerabilities, to assist you in figuring out which vulnerabilities need to be fixed.
 
-Contextual Analysis data includes:
+Vulnerability Contextual Analysis data includes:
 
 - **Contextual Analysis status**: Contextual Analysis results indicating if a CVE was found applicable in your application or not applicable.
 - **Contextual Analysis breakdown**: An explanation provided by our research team as to why the CVE was found applicable or not applicable.
