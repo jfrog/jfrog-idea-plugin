@@ -118,8 +118,7 @@ In addition to IntelliJ IDEA, the plugin also supports the following IDEs:
 ## Connecting to Your JFrog Environment
 
 <details>
-  <summary>Set Up a FREE JFrog Environment in the Cloud</summary>
-
+  <summary>Optionally set up a free JFrog Environment in the Cloud</summary>
 Need a FREE JFrog environment in the Cloud, so that JFrog IntelliJ IDEA Plugin can connect to it? Just run one of the following commands in your terminal. The commands will do the following:
 
 1. Install JFrog CLI on your machine.
