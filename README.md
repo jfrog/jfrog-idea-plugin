@@ -212,29 +212,26 @@ Opening the JFrog panel displays two views:
   It displays information about the status of the build and includes a link to the build log on the CI server.
 
 ## The Local View
-
+### General
 The JFrog IntelliJ IDEA Plugin enables continuous scans of your project with the JFrog Platform. The security related information will be displayed under the Local view.
 It allows developers to view vulnerability information about their dependencies and source code in their IDE.
 With this information, a developer can make an informed decision on whether to use a component or not before it gets entrenched into the organization’s product.
 
-### Scanning a Project
-
 Scan your project by clicking the Run Scan ![](readme-resources/run-scan-button.png) button.
 After the scan is done, a list of vulnerable files will appear.
 
-Each descriptor file (like pom.xml in Maven, go.mod in Go, etc.) in the list contains vulnerable dependencies, and each dependency contains the vulnerabilities themselves.
+### Software Composition Analysis (SCA)
+Each descriptor file (like pom.xml in Maven, go.mod in Go, etc.) displayed in the JFrog Panel contains vulnerable dependencies, and each dependency contains the vulnerabilities themselves.
 
-By right-clicking on a dependency line, you can jump to the dependency's declaration in the descriptor file (if it's a direct dependency), or to direct dependencies that depend on the vulnerable component (if any).
+By right-clicking on a dependency line, you can jump to the dependency's declaration in the descriptor file or have the depedency upgraded to a version with a fix. 
 
 ![](readme-resources/jump-to-descriptor.png)
 
-By right-clicking on a vulnerability line, you can create an [Ignore Rule](https://jfrog.com/help/r/jfrog-security-documentation/ignore-rules) in Xray.
+You can also create an [Ignore Rule](https://jfrog.com/help/r/jfrog-security-documentation/ignore-rules) in Xray.
 
 *Creating Ignore Rules is only available [when a JFrog Project or Watch is defined](#apply-xray-policies).*
 
 ![](readme-resources/create-ignore-rule.png)
-
-### Viewing Vulnerability Details
 
 Clicking a vulnerability in the list will open the vulnerability details view.
 This view contains information about the vulnerability, the vulnerable component, fixed versions, impact paths and much more.
