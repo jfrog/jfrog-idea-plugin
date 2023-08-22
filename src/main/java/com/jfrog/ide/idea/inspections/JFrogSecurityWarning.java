@@ -5,8 +5,12 @@ import com.jfrog.ide.idea.scan.data.Message;
 import com.jfrog.ide.idea.scan.data.Region;
 import com.jfrog.ide.idea.scan.data.SarifResult;
 import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
-import org.apache.commons.lang.StringUtils;
+import lombok.Getter;
 
+import java.net.URI;
+import java.nio.file.Paths;
+
+@Getter
 public class JFrogSecurityWarning {
     private final int lineStart;
     private final int colStart;
@@ -52,44 +56,12 @@ public class JFrogSecurityWarning {
                 getFirstRegion(result).getEndLine() - 1,
                 getFirstRegion(result).getEndColumn() - 1,
                 result.getMessage().getText(),
-                result.getLocations().size() > 0 ? StringUtils.removeStart(result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri(), "file://") : "",
+                !result.getLocations().isEmpty() ? Paths.get(URI.create(result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri())).toString() : "",
                 result.getRuleId(),
                 getFirstRegion(result).getSnippet().getText(),
                 reporter,
                 !result.getKind().equals("pass"),
                 Severity.fromSarif(result.getSeverity()));
-    }
-
-    public int getLineStart() {
-        return lineStart;
-    }
-
-    public int getColStart() {
-        return colStart;
-    }
-
-    public int getLineEnd() {
-        return lineEnd;
-    }
-
-    public int getColEnd() {
-        return colEnd;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public String getFilePath() {
-        return filePath;
-    }
-
-    public SourceCodeScanType getReporter() {
-        return reporter;
-    }
-
-    public String getLineSnippet() {
-        return lineSnippet;
     }
 
     public boolean isApplicable() {
@@ -99,22 +71,10 @@ public class JFrogSecurityWarning {
     private static Region getFirstRegion(SarifResult result) {
         Region emptyRegion = new Region();
         emptyRegion.setSnippet(new Message());
-        return result.getLocations().size() > 0 ? result.getLocations().get(0).getPhysicalLocation().getRegion() : emptyRegion;
-    }
-
-    public String getScannerSearchTarget() {
-        return scannerSearchTarget;
+        return !result.getLocations().isEmpty() ? result.getLocations().get(0).getPhysicalLocation().getRegion() : emptyRegion;
     }
 
     public void setScannerSearchTarget(String scannerSearchTarget) {
         this.scannerSearchTarget = scannerSearchTarget;
-    }
-
-    public Severity getSeverity() {
-        return severity;
-    }
-
-    public String getName() {
-        return name;
     }
 }
