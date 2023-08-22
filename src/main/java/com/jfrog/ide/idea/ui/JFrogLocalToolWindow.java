@@ -8,22 +8,13 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.impl.jdkDownloader.RuntimeChooserUtil;
 import com.intellij.openapi.util.Disposer;
-import com.intellij.ui.HyperlinkLabel;
-import com.intellij.ui.IdeBorderFactory;
-import com.intellij.ui.OnePixelSplitter;
-import com.intellij.ui.ScrollPaneFactory;
-import com.intellij.ui.SideBorder;
-import com.intellij.ui.TreeSpeedSearch;
+import com.intellij.ui.*;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.jcef.JBCefApp;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.util.ui.UIUtil;
-import com.jfrog.ide.common.nodes.ApplicableIssueNode;
-import com.jfrog.ide.common.nodes.FileIssueNode;
-import com.jfrog.ide.common.nodes.IssueNode;
-import com.jfrog.ide.common.nodes.LicenseViolationNode;
-import com.jfrog.ide.common.nodes.VulnerabilityNode;
+import com.jfrog.ide.common.nodes.*;
 import com.jfrog.ide.idea.actions.CollapseAllAction;
 import com.jfrog.ide.idea.actions.ExpandAllAction;
 import com.jfrog.ide.idea.actions.GoToSettingsAction;
@@ -253,12 +244,14 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     private void updateIssueOrLicenseInWebview(IssueNode issueNode) {
         if (issueNode instanceof VulnerabilityNode issue) {
             webviewManager.sendMessage(SHOW_PAGE, WebviewObjectConverter.convertIssueToDepPage(issue));
-        } else if (issueNode instanceof ApplicableIssueNode) {
-            ApplicableIssueNode node = (ApplicableIssueNode) issueNode;
+        } else if (issueNode instanceof ApplicableIssueNode node) {
             webviewManager.sendMessage(SHOW_PAGE, WebviewObjectConverter.convertIssueToDepPage(node.getIssue()));
             navigateToFile(node);
         } else if (issueNode instanceof LicenseViolationNode license) {
             webviewManager.sendMessage(SHOW_PAGE, WebviewObjectConverter.convertLicenseToDepPage(license));
+        } else if (issueNode instanceof EosIssueNode node) {
+            webviewManager.sendMessage(SHOW_PAGE, WebviewObjectConverter.convertEosIssueToEosIssuePage(node));
+            navigateToFile(node);
         } else if (issueNode instanceof FileIssueNode node) {
             webviewManager.sendMessage(SHOW_PAGE, WebviewObjectConverter.convertFileIssueToIssuePage(node));
             navigateToFile(node);

@@ -113,13 +113,11 @@ public class Logger implements Log {
     }
 
     private static String prependPrefix(String message, NotificationType notificationType) {
-        switch (notificationType) {
-            case WARNING:
-                return "[WARN] " + message;
-            case ERROR:
-                return "[ERROR] " + message;
-        }
-        return "[INFO] " + message;
+        return switch (notificationType) {
+            case WARNING -> "[WARN] " + message;
+            case ERROR -> "[ERROR] " + message;
+            default -> "[INFO] " + message;
+        };
     }
 
     /**

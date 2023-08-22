@@ -54,8 +54,8 @@ public class ScanBinaryExecutorTest extends TestCase {
     public void testSarifParser() throws IOException {
         List<JFrogSecurityWarning> parsedOutput = scanner.parseOutputSarif(SIMPLE_OUTPUT);
         assertEquals(2, parsedOutput.size());
-        assertEquals("applic_CVE-2022-25878", parsedOutput.get(0).getName());
-        assertEquals("CVE-2022-25978", parsedOutput.get(1).getName());
+        assertEquals("applic_CVE-2022-25878", parsedOutput.get(0).getRuleID());
+        assertEquals("CVE-2022-25978", parsedOutput.get(1).getRuleID());
         assertEquals("examples/applic-demo/../applic-demo/index.js", parsedOutput.get(0).getFilePath());
         assertEquals("examples/applic-demo/../applic-demo/index.js", parsedOutput.get(1).getFilePath());
         assertEquals("The vulnerable function protobufjs.load is called", parsedOutput.get(0).getReason());
@@ -74,14 +74,14 @@ public class ScanBinaryExecutorTest extends TestCase {
         List<JFrogSecurityWarning> parsedOutput = scanner.parseOutputSarif(NOT_APPLIC_OUTPUT);
         assertEquals(4, parsedOutput.size());
         // 2 known applicable results (code evidence returned)
-        assertEquals("applic_CVE-2022-25878", parsedOutput.get(0).getName());
+        assertEquals("applic_CVE-2022-25878", parsedOutput.get(0).getRuleID());
         assertTrue(parsedOutput.get(0).isApplicable());
-        assertEquals("CVE-2022-25978", parsedOutput.get(1).getName());
+        assertEquals("CVE-2022-25978", parsedOutput.get(1).getRuleID());
         assertTrue(parsedOutput.get(1).isApplicable());
         // 2 known no-applicable results (have a scanner but no code evidence returned)
-        assertEquals("applic_CVE-2021-25878", parsedOutput.get(2).getName());
+        assertEquals("applic_CVE-2021-25878", parsedOutput.get(2).getRuleID());
         assertFalse(parsedOutput.get(2).isApplicable());
-        assertEquals("applic_CVE-2022-29019", parsedOutput.get(3).getName());
+        assertEquals("applic_CVE-2022-29019", parsedOutput.get(3).getRuleID());
         assertFalse(parsedOutput.get(3).isApplicable());
 
     }

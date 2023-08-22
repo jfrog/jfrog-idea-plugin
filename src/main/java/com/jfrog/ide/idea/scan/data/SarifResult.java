@@ -1,15 +1,17 @@
 package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Getter
 public class SarifResult {
-
     @JsonProperty("message")
     private Message message;
     @JsonProperty("locations")
@@ -22,9 +24,19 @@ public class SarifResult {
     private String kind;
     @JsonProperty("level")
     private String severity;
+    @JsonProperty("suppressions")
+    private AnalyzeSuppression[] suppressions;
 
-    public Message getMessage() {
-        return message;
+    public void setKind(String kind) {
+        this.kind = kind;
+    }
+
+    public void setSeverity(String severity) {
+        this.severity = severity;
+    }
+
+    public void setSuppressions(AnalyzeSuppression[] suppressions) {
+        this.suppressions = suppressions;
     }
 
     public String getKind() {
@@ -39,17 +51,9 @@ public class SarifResult {
         this.message = message;
     }
 
-    public List<Location> getLocations() {
-        return locations;
-    }
-
     @SuppressWarnings({"unused"})
     public void setLocations(List<Location> locations) {
         this.locations = locations;
-    }
-
-    public String getRuleId() {
-        return ruleId;
     }
 
     @SuppressWarnings({"unused"})
@@ -82,5 +86,9 @@ public class SarifResult {
         }
         SarifResult rhs = ((SarifResult) other);
         return ((((CollectionUtils.isEqualCollection(this.locations, rhs.locations)) && (Objects.equals(this.message, rhs.message))) && (Objects.equals(this.ruleId, rhs.ruleId))) && (CollectionUtils.isEqualCollection(this.codeFlows, rhs.codeFlows)));
+    }
+
+    public boolean isNotSuppressed() {
+        return ArrayUtils.isEmpty(suppressions);
     }
 }
