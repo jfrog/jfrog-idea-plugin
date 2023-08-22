@@ -1,0 +1,390 @@
+{
+  "format_version": "1.1",
+  "terraform_version": "1.3.5",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_cloudfront_distribution.vulnerable_example",
+          "mode": "managed",
+          "type": "aws_cloudfront_distribution",
+          "name": "vulnerable_example",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "schema_version": 1,
+          "values": {
+            "aliases": null,
+            "comment": null,
+            "custom_error_response": [],
+            "default_cache_behavior": [
+              {
+                "allowed_methods": [
+                  "dummy"
+                ],
+                "cache_policy_id": null,
+                "cached_methods": [
+                  "dummy"
+                ],
+                "compress": false,
+                "field_level_encryption_id": null,
+                "forwarded_values": [],
+                "function_association": [],
+                "lambda_function_association": [],
+                "min_ttl": 0,
+                "origin_request_policy_id": null,
+                "realtime_log_config_arn": null,
+                "response_headers_policy_id": null,
+                "smooth_streaming": null,
+                "target_origin_id": "dummy",
+                "viewer_protocol_policy": "allow-all"
+              }
+            ],
+            "default_root_object": null,
+            "enabled": true,
+            "http_version": "http2",
+            "is_ipv6_enabled": false,
+            "logging_config": [],
+            "ordered_cache_behavior": [],
+            "origin": [
+              {
+                "connection_attempts": 3,
+                "connection_timeout": 10,
+                "custom_header": [],
+                "custom_origin_config": [],
+                "domain_name": "dummy",
+                "origin_access_control_id": "",
+                "origin_id": "dummy",
+                "origin_path": "",
+                "origin_shield": [],
+                "s3_origin_config": []
+              }
+            ],
+            "origin_group": [],
+            "price_class": "PriceClass_All",
+            "restrictions": [
+              {
+                "geo_restriction": [
+                  {
+                    "restriction_type": "none"
+                  }
+                ]
+              }
+            ],
+            "retain_on_delete": false,
+            "tags": null,
+            "viewer_certificate": [
+              {
+                "acm_certificate_arn": null,
+                "cloudfront_default_certificate": null,
+                "iam_certificate_id": null,
+                "minimum_protocol_version": "TLSv1",
+                "ssl_support_method": null
+              }
+            ],
+            "wait_for_deployment": true,
+            "web_acl_id": null
+          },
+          "sensitive_values": {
+            "custom_error_response": [],
+            "default_cache_behavior": [
+              {
+                "allowed_methods": [
+                  false
+                ],
+                "cached_methods": [
+                  false
+                ],
+                "forwarded_values": [],
+                "function_association": [],
+                "lambda_function_association": [],
+                "trusted_key_groups": [],
+                "trusted_signers": []
+              }
+            ],
+            "logging_config": [],
+            "ordered_cache_behavior": [],
+            "origin": [
+              {
+                "custom_header": [],
+                "custom_origin_config": [],
+                "origin_shield": [],
+                "s3_origin_config": []
+              }
+            ],
+            "origin_group": [],
+            "restrictions": [
+              {
+                "geo_restriction": [
+                  {
+                    "locations": []
+                  }
+                ]
+              }
+            ],
+            "tags_all": {},
+            "trusted_key_groups": [],
+            "trusted_signers": [],
+            "viewer_certificate": [
+              {}
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "resource_changes": [
+    {
+      "address": "aws_cloudfront_distribution.vulnerable_example",
+      "mode": "managed",
+      "type": "aws_cloudfront_distribution",
+      "name": "vulnerable_example",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "aliases": null,
+          "comment": null,
+          "custom_error_response": [],
+          "default_cache_behavior": [
+            {
+              "allowed_methods": [
+                "dummy"
+              ],
+              "cache_policy_id": null,
+              "cached_methods": [
+                "dummy"
+              ],
+              "compress": false,
+              "field_level_encryption_id": null,
+              "forwarded_values": [],
+              "function_association": [],
+              "lambda_function_association": [],
+              "min_ttl": 0,
+              "origin_request_policy_id": null,
+              "realtime_log_config_arn": null,
+              "response_headers_policy_id": null,
+              "smooth_streaming": null,
+              "target_origin_id": "dummy",
+              "viewer_protocol_policy": "allow-all"
+            }
+          ],
+          "default_root_object": null,
+          "enabled": true,
+          "http_version": "http2",
+          "is_ipv6_enabled": false,
+          "logging_config": [],
+          "ordered_cache_behavior": [],
+          "origin": [
+            {
+              "connection_attempts": 3,
+              "connection_timeout": 10,
+              "custom_header": [],
+              "custom_origin_config": [],
+              "domain_name": "dummy",
+              "origin_access_control_id": "",
+              "origin_id": "dummy",
+              "origin_path": "",
+              "origin_shield": [],
+              "s3_origin_config": []
+            }
+          ],
+          "origin_group": [],
+          "price_class": "PriceClass_All",
+          "restrictions": [
+            {
+              "geo_restriction": [
+                {
+                  "restriction_type": "none"
+                }
+              ]
+            }
+          ],
+          "retain_on_delete": false,
+          "tags": null,
+          "viewer_certificate": [
+            {
+              "acm_certificate_arn": null,
+              "cloudfront_default_certificate": null,
+              "iam_certificate_id": null,
+              "minimum_protocol_version": "TLSv1",
+              "ssl_support_method": null
+            }
+          ],
+          "wait_for_deployment": true,
+          "web_acl_id": null
+        },
+        "after_unknown": {
+          "arn": true,
+          "caller_reference": true,
+          "custom_error_response": [],
+          "default_cache_behavior": [
+            {
+              "allowed_methods": [
+                false
+              ],
+              "cached_methods": [
+                false
+              ],
+              "default_ttl": true,
+              "forwarded_values": [],
+              "function_association": [],
+              "lambda_function_association": [],
+              "max_ttl": true,
+              "trusted_key_groups": true,
+              "trusted_signers": true
+            }
+          ],
+          "domain_name": true,
+          "etag": true,
+          "hosted_zone_id": true,
+          "id": true,
+          "in_progress_validation_batches": true,
+          "last_modified_time": true,
+          "logging_config": [],
+          "ordered_cache_behavior": [],
+          "origin": [
+            {
+              "custom_header": [],
+              "custom_origin_config": [],
+              "origin_shield": [],
+              "s3_origin_config": []
+            }
+          ],
+          "origin_group": [],
+          "restrictions": [
+            {
+              "geo_restriction": [
+                {
+                  "locations": true
+                }
+              ]
+            }
+          ],
+          "status": true,
+          "tags_all": true,
+          "trusted_key_groups": true,
+          "trusted_signers": true,
+          "viewer_certificate": [
+            {}
+          ]
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "custom_error_response": [],
+          "default_cache_behavior": [
+            {
+              "allowed_methods": [
+                false
+              ],
+              "cached_methods": [
+                false
+              ],
+              "forwarded_values": [],
+              "function_association": [],
+              "lambda_function_association": [],
+              "trusted_key_groups": [],
+              "trusted_signers": []
+            }
+          ],
+          "logging_config": [],
+          "ordered_cache_behavior": [],
+          "origin": [
+            {
+              "custom_header": [],
+              "custom_origin_config": [],
+              "origin_shield": [],
+              "s3_origin_config": []
+            }
+          ],
+          "origin_group": [],
+          "restrictions": [
+            {
+              "geo_restriction": [
+                {
+                  "locations": []
+                }
+              ]
+            }
+          ],
+          "tags_all": {},
+          "trusted_key_groups": [],
+          "trusted_signers": [],
+          "viewer_certificate": [
+            {}
+          ]
+        }
+      }
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "name": "aws",
+        "full_name": "registry.terraform.io/hashicorp/aws"
+      }
+    },
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_cloudfront_distribution.vulnerable_example",
+          "mode": "managed",
+          "type": "aws_cloudfront_distribution",
+          "name": "vulnerable_example",
+          "provider_config_key": "aws",
+          "expressions": {
+            "default_cache_behavior": [
+              {
+                "allowed_methods": {
+                  "constant_value": [
+                    "dummy"
+                  ]
+                },
+                "cached_methods": {
+                  "constant_value": [
+                    "dummy"
+                  ]
+                },
+                "target_origin_id": {
+                  "constant_value": "dummy"
+                },
+                "viewer_protocol_policy": {
+                  "constant_value": "allow-all"
+                }
+              }
+            ],
+            "enabled": {
+              "constant_value": true
+            },
+            "origin": [
+              {
+                "domain_name": {
+                  "constant_value": "dummy"
+                },
+                "origin_id": {
+                  "constant_value": "dummy"
+                }
+              }
+            ],
+            "restrictions": [
+              {
+                "geo_restriction": [
+                  {
+                    "restriction_type": {
+                      "constant_value": "none"
+                    }
+                  }
+                ]
+              }
+            ],
+            "viewer_certificate": [
+              {}
+            ]
+          },
+          "schema_version": 1
+        }
+      ]
+    }
+  }
+}

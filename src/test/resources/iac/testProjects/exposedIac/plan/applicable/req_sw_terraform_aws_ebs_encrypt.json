@@ -1,0 +1,97 @@
+{
+  "format_version": "1.1",
+  "terraform_version": "1.3.5",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_ebs_volume.vulnerable_example",
+          "mode": "managed",
+          "type": "aws_ebs_volume",
+          "name": "vulnerable_example",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "schema_version": 0,
+          "values": {
+            "availability_zone": "dummy",
+            "final_snapshot": false,
+            "multi_attach_enabled": null,
+            "outpost_arn": null,
+            "size": 40,
+            "tags": null,
+            "timeouts": null
+          },
+          "sensitive_values": {
+            "tags_all": {}
+          }
+        }
+      ]
+    }
+  },
+  "resource_changes": [
+    {
+      "address": "aws_ebs_volume.vulnerable_example",
+      "mode": "managed",
+      "type": "aws_ebs_volume",
+      "name": "vulnerable_example",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "availability_zone": "dummy",
+          "final_snapshot": false,
+          "multi_attach_enabled": null,
+          "outpost_arn": null,
+          "size": 40,
+          "tags": null,
+          "timeouts": null
+        },
+        "after_unknown": {
+          "arn": true,
+          "encrypted": true,
+          "id": true,
+          "iops": true,
+          "kms_key_id": true,
+          "snapshot_id": true,
+          "tags_all": true,
+          "throughput": true,
+          "type": true
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "tags_all": {}
+        }
+      }
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "name": "aws",
+        "full_name": "registry.terraform.io/hashicorp/aws"
+      }
+    },
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_ebs_volume.vulnerable_example",
+          "mode": "managed",
+          "type": "aws_ebs_volume",
+          "name": "vulnerable_example",
+          "provider_config_key": "aws",
+          "expressions": {
+            "availability_zone": {
+              "constant_value": "dummy"
+            },
+            "size": {
+              "constant_value": 40
+            }
+          },
+          "schema_version": 0
+        }
+      ]
+    }
+  }
+}

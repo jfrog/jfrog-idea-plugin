@@ -1,0 +1,120 @@
+{
+  "format_version": "1.1",
+  "terraform_version": "1.3.5",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_api_gateway_method_settings.path_specific",
+          "mode": "managed",
+          "type": "aws_api_gateway_method_settings",
+          "name": "path_specific",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "schema_version": 0,
+          "values": {
+            "method_path": "MyMethodPath",
+            "rest_api_id": "MyApiId",
+            "settings": [
+              {
+                "caching_enabled": true,
+                "throttling_burst_limit": -1,
+                "throttling_rate_limit": -1
+              }
+            ],
+            "stage_name": "MyStageName"
+          },
+          "sensitive_values": {
+            "settings": [
+              {}
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "resource_changes": [
+    {
+      "address": "aws_api_gateway_method_settings.path_specific",
+      "mode": "managed",
+      "type": "aws_api_gateway_method_settings",
+      "name": "path_specific",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "method_path": "MyMethodPath",
+          "rest_api_id": "MyApiId",
+          "settings": [
+            {
+              "caching_enabled": true,
+              "throttling_burst_limit": -1,
+              "throttling_rate_limit": -1
+            }
+          ],
+          "stage_name": "MyStageName"
+        },
+        "after_unknown": {
+          "id": true,
+          "settings": [
+            {
+              "cache_data_encrypted": true,
+              "cache_ttl_in_seconds": true,
+              "data_trace_enabled": true,
+              "logging_level": true,
+              "metrics_enabled": true,
+              "require_authorization_for_cache_control": true,
+              "unauthorized_cache_control_header_strategy": true
+            }
+          ]
+        },
+        "before_sensitive": false,
+        "after_sensitive": {
+          "settings": [
+            {}
+          ]
+        }
+      }
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "name": "aws",
+        "full_name": "registry.terraform.io/hashicorp/aws"
+      }
+    },
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_api_gateway_method_settings.path_specific",
+          "mode": "managed",
+          "type": "aws_api_gateway_method_settings",
+          "name": "path_specific",
+          "provider_config_key": "aws",
+          "expressions": {
+            "method_path": {
+              "constant_value": "MyMethodPath"
+            },
+            "rest_api_id": {
+              "constant_value": "MyApiId"
+            },
+            "settings": [
+              {
+                "caching_enabled": {
+                  "constant_value": true
+                }
+              }
+            ],
+            "stage_name": {
+              "constant_value": "MyStageName"
+            }
+          },
+          "schema_version": 0
+        }
+      ]
+    }
+  }
+}

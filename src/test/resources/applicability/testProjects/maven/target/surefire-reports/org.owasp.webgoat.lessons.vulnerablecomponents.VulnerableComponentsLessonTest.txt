@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: org.owasp.webgoat.lessons.vulnerablecomponents.VulnerableComponentsLessonTest
--------------------------------------------------------------------------------
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 1, Time elapsed: 0.012 s - in org.owasp.webgoat.lessons.vulnerablecomponents.VulnerableComponentsLessonTest
