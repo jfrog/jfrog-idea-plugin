@@ -39,7 +39,6 @@ public class IACScannerIntegrationTests extends BaseIntegrationTest {
         assertTrue(StringUtils.isNotBlank(iacIndication.getReason()));
     }
 
-
     private void dummyCheckCanceled() {
     }
 

@@ -25,8 +25,6 @@ public abstract class BaseIntegrationTest extends HeavyPlatformTestCase {
     private final static Path TEST_PROJECT_PATH = new File("src/test/resources/").toPath();
     private static final String ENV_BINARY_DOWNLOAD_URL = "JFROG_IDE_ANALYZER_MANAGER_DOWNLOAD_URL";
     private static final String ENV_DOWNLOAD_FROM_JFROG_RELEASES = "JFROG_IDE_DOWNLOAD_FROM_JFROG_RELEASES";
-
-
     @Override
     protected void setUp() throws Exception {
         super.setUp();
