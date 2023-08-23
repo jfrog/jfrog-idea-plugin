@@ -12,6 +12,7 @@ import org.jfrog.build.api.util.NullLog;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static com.jfrog.ide.common.utils.Utils.createYAMLMapper;
@@ -53,11 +54,12 @@ public class ScanBinaryExecutorTest extends TestCase {
 
     public void testSarifParser() throws IOException {
         List<JFrogSecurityWarning> parsedOutput = scanner.parseOutputSarif(SIMPLE_OUTPUT);
+        String expectedPath = Paths.get("/examples/applic-demo/index.js").toString();
         assertEquals(2, parsedOutput.size());
         assertEquals("applic_CVE-2022-25878", parsedOutput.get(0).getRuleID());
         assertEquals("CVE-2022-25978", parsedOutput.get(1).getRuleID());
-        assertEquals("/examples/applic-demo/index.js", parsedOutput.get(0).getFilePath());
-        assertEquals("/examples/applic-demo/index.js", parsedOutput.get(1).getFilePath());
+        assertEquals(expectedPath, parsedOutput.get(0).getFilePath());
+        assertEquals(expectedPath, parsedOutput.get(1).getFilePath());
         assertEquals("The vulnerable function protobufjs.load is called", parsedOutput.get(0).getReason());
         assertEquals("The vulnerable function protobufjs.parse is called.", parsedOutput.get(1).getReason());
         assertEquals(19, parsedOutput.get(0).getLineStart());
