@@ -12,6 +12,8 @@ import com.jfrog.xray.client.services.entitlements.Feature;
 import org.jfrog.build.api.util.Log;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +36,10 @@ public class EosScannerExecutor extends ScanBinaryExecutor {
     }
 
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException {
-        return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled, RUN_WITH_CONFIG_FILE);
+        // The EOS scanner is expected to run on the project's root directory without a config file.
+        // inputFileBuilder roots should always contain a single root project in our use cases.
+        Path executionDir = Paths.get(inputFileBuilder.Build().getRoots().get(0));
+        return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled, RUN_WITH_CONFIG_FILE, executionDir.toFile());
     }
 
     @Override
