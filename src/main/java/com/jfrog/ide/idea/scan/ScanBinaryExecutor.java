@@ -91,8 +91,7 @@ public abstract class ScanBinaryExecutor {
         String executable = SystemUtils.IS_OS_WINDOWS ? SCANNER_BINARY_NAME + ".exe" : SCANNER_BINARY_NAME;
         binaryTargetPath = BINARIES_DIR.resolve(SCANNER_BINARY_NAME).resolve(executable);
         archiveTargetPath = BINARIES_DIR.resolve(DOWNLOAD_SCANNER_NAME);
-        // For beta only, use the configured Artifactory instead of JFrog releases.
-        artifactoryManagerBuilder = createManagerBuilder(false, server);
+        artifactoryManagerBuilder = createManagerBuilder(useJFrogReleases, server);
         setOsDistribution();
     }
 
