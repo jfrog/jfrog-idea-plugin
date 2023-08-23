@@ -71,7 +71,7 @@
                         {
                             "physicalLocation": {
                                 "artifactLocation": {
-                                    "uri": "examples/applic-demo/../applic-demo/index.js"
+                                    "uri": "file:///examples/applic-demo/index.js"
                                 },
                                 "region": {
                                     "endColumn": 17,
@@ -95,7 +95,7 @@
                         {
                             "physicalLocation": {
                                 "artifactLocation": {
-                                    "uri": "file://examples/applic-demo/../applic-demo/index.js"
+                                    "uri": "file:///examples/applic-demo/index.js"
                                 },
                                 "region": {
                                     "endColumn": 73,
