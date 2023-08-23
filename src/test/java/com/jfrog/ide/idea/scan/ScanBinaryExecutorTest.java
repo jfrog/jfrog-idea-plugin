@@ -56,8 +56,8 @@ public class ScanBinaryExecutorTest extends TestCase {
         assertEquals(2, parsedOutput.size());
         assertEquals("applic_CVE-2022-25878", parsedOutput.get(0).getRuleID());
         assertEquals("CVE-2022-25978", parsedOutput.get(1).getRuleID());
-        assertEquals("examples/applic-demo/../applic-demo/index.js", parsedOutput.get(0).getFilePath());
-        assertEquals("examples/applic-demo/../applic-demo/index.js", parsedOutput.get(1).getFilePath());
+        assertEquals("examples/applic-demo/index.js", parsedOutput.get(0).getFilePath());
+        assertEquals("examples/applic-demo/index.js", parsedOutput.get(1).getFilePath());
         assertEquals("The vulnerable function protobufjs.load is called", parsedOutput.get(0).getReason());
         assertEquals("The vulnerable function protobufjs.parse is called.", parsedOutput.get(1).getReason());
         assertEquals(19, parsedOutput.get(0).getLineStart());
