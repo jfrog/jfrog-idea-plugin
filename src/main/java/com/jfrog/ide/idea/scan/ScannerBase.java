@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -180,7 +181,7 @@ public abstract class ScannerBase {
     private List<FileTreeNode> walkDepTree(Map<String, DependencyNode> dependencies, DepTree depTree) {
         Map<String, DescriptorFileTreeNode> descriptorNodes = new HashMap<>();
         visitDepTreeNode(dependencies, depTree, Collections.singletonList(depTree.getRootId()), descriptorNodes, new ArrayList<>(), new HashMap<>());
-        return new ArrayList<>(descriptorNodes.values());
+        return new CopyOnWriteArrayList<>(descriptorNodes.values());
     }
 
     /**

@@ -1,14 +1,15 @@
 package com.jfrog.ide.idea.inspections;
 
+import com.jfrog.ide.common.nodes.subentities.FindingInfo;
 import com.jfrog.ide.common.nodes.subentities.Severity;
-import com.jfrog.ide.idea.scan.data.Message;
-import com.jfrog.ide.idea.scan.data.Region;
-import com.jfrog.ide.idea.scan.data.SarifResult;
 import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
+import com.jfrog.ide.idea.scan.data.*;
 import lombok.Getter;
+import org.apache.commons.lang.StringUtils;
 
 import java.net.URI;
 import java.nio.file.Paths;
+import java.util.List;
 
 @Getter
 public class JFrogSecurityWarning {
@@ -20,10 +21,10 @@ public class JFrogSecurityWarning {
     private final String filePath;
     private final String lineSnippet;
     private String scannerSearchTarget;
-    private final String name;
+    private final String ruleID;
     private final SourceCodeScanType reporter;
     private final Severity severity;
-
+    private final FindingInfo[][] codeFlows;
     private final boolean isApplicable;
 
     public JFrogSecurityWarning(
@@ -31,11 +32,12 @@ public class JFrogSecurityWarning {
             int colStart, int lineEnd,
             int colEnd, String reason,
             String filePath,
-            String name,
+            String ruleID,
             String lineSnippet,
             SourceCodeScanType reporter,
             boolean isApplicable,
-            Severity severity
+            Severity severity,
+            FindingInfo[][] codeFlows
     ) {
         this.lineStart = lineStart;
         this.colStart = colStart;
@@ -43,11 +45,12 @@ public class JFrogSecurityWarning {
         this.colEnd = colEnd;
         this.reason = reason;
         this.filePath = filePath;
-        this.name = name;
+        this.ruleID = ruleID;
         this.lineSnippet = lineSnippet;
         this.reporter = reporter;
         this.isApplicable = isApplicable;
         this.severity = severity;
+        this.codeFlows = codeFlows;
     }
 
     public JFrogSecurityWarning(SarifResult result, SourceCodeScanType reporter) {
@@ -56,12 +59,42 @@ public class JFrogSecurityWarning {
                 getFirstRegion(result).getEndLine() - 1,
                 getFirstRegion(result).getEndColumn() - 1,
                 result.getMessage().getText(),
-                !result.getLocations().isEmpty() ? Paths.get(URI.create(result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri())).toString() : "",
+                !result.getLocations().isEmpty() ? uriToPath(result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri()) : "",
                 result.getRuleId(),
                 getFirstRegion(result).getSnippet().getText(),
                 reporter,
                 !result.getKind().equals("pass"),
-                Severity.fromSarif(result.getSeverity()));
+                Severity.fromSarif(result.getSeverity()),
+                convertCodeFlowsToFindingInfo(result.getCodeFlows())
+        );
+    }
+
+    private static FindingInfo[][] convertCodeFlowsToFindingInfo(List<CodeFlow> codeFlows) {
+        if (codeFlows == null || codeFlows.isEmpty()) {
+            return null;
+        }
+        List<ThreadFlow> flows = codeFlows.get(0).getThreadFlows();
+        if (flows == null || flows.isEmpty()) {
+            return null;
+        }
+        FindingInfo[][] results = new FindingInfo[flows.size()][];
+        for (int i = 0; i < flows.size(); i++) {
+            ThreadFlow flow = flows.get(i);
+            List<ThreadFlowLocation> locations = flow.getLocations();
+            results[i] = new FindingInfo[locations.size()];
+            for (int j = 0; j < locations.size(); j++) {
+                PhysicalLocation location = locations.get(j).getLocation().getPhysicalLocation();
+                results[i][j] = new FindingInfo(
+                        uriToPath(location.getArtifactLocation().getUri()),
+                        location.getRegion().getStartLine(),
+                        location.getRegion().getStartColumn(),
+                        location.getRegion().getEndLine(),
+                        location.getRegion().getEndColumn(),
+                        location.getRegion().getSnippet().getText()
+                );
+            }
+        }
+        return results;
     }
 
     public boolean isApplicable() {
@@ -76,5 +109,9 @@ public class JFrogSecurityWarning {
 
     public void setScannerSearchTarget(String scannerSearchTarget) {
         this.scannerSearchTarget = scannerSearchTarget;
+    }
+
+    private static String uriToPath(String path) {
+        return Paths.get(URI.create(path)).toString();
     }
 }

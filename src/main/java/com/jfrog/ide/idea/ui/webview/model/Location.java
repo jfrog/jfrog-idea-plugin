@@ -31,6 +31,11 @@ public class Location implements Serializable {
         this.endColumn = endColumn;
     }
 
+    public Location(Location other) {
+        this(other.file, other.fileName, other.startRow, other.startColumn, other.endRow, other.endColumn, other.snippet);
+    }
+
+    @SuppressWarnings("unused")
     public String getFile() {
         return file;
     }

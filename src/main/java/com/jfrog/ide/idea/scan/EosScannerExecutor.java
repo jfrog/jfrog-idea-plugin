@@ -1,6 +1,7 @@
 package com.jfrog.ide.idea.scan;
 
 import com.jfrog.ide.common.configuration.ServerConfig;
+import com.jfrog.ide.common.nodes.EosIssueNode;
 import com.jfrog.ide.common.nodes.FileIssueNode;
 import com.jfrog.ide.common.nodes.FileTreeNode;
 import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
@@ -18,17 +19,18 @@ import java.util.List;
 /**
  * @author Tal Arian
  */
-public class IACScannerExecutor extends ScanBinaryExecutor {
-    private static final List<String> SCANNER_ARGS = List.of("iac");
-    private static final boolean RUN_WITH_CONFIG_FILE = true;
-    private static final String ISSUE_TITLE = "Infrastructure as Code Vulnerability";
-    
-    public IACScannerExecutor(Log log, ServerConfig serverConfig) {
+public class EosScannerExecutor extends ScanBinaryExecutor {
+    private static final List<String> SCANNER_ARGS = List.of("zd");
+    private static final boolean RUN_WITH_CONFIG_FILE = false;
+    private static final List<PackageManagerType> SUPPORTED_PACKAGE_TYPES = List.of(PackageManagerType.PYPI, PackageManagerType.NPM, PackageManagerType.YARN, PackageManagerType.GRADLE, PackageManagerType.MAVEN);
+
+
+    public EosScannerExecutor(Log log, ServerConfig serverConfig) {
         this(log, serverConfig, null, true);
     }
 
-    public IACScannerExecutor(Log log, ServerConfig serverConfig, String binaryDownloadUrl, boolean useJFrogReleases) {
-        super(SourceCodeScanType.IAC, binaryDownloadUrl, log, serverConfig, useJFrogReleases);
+    public EosScannerExecutor(Log log, ServerConfig serverConfig, String binaryDownloadUrl, boolean useJFrogReleases) {
+        super(SourceCodeScanType.EOS, binaryDownloadUrl, log, serverConfig, useJFrogReleases);
     }
 
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException {
@@ -46,9 +48,9 @@ public class IACScannerExecutor extends ScanBinaryExecutor {
                 results.put(warning.getFilePath(), fileNode);
             }
 
-            FileIssueNode issueNode = new FileIssueNode(ISSUE_TITLE,
+            FileIssueNode issueNode = new EosIssueNode(warning.getRuleID(),
                     warning.getFilePath(), warning.getLineStart(), warning.getColStart(), warning.getLineEnd(), warning.getColEnd(),
-                    warning.getScannerSearchTarget(), warning.getLineSnippet(), warning.getReporter(), warning.getSeverity(),warning.getRuleID());
+                    warning.getScannerSearchTarget(), warning.getLineSnippet(), warning.getCodeFlows(), warning.getSeverity(), warning.getRuleID());
             fileNode.addIssue(issueNode);
         }
         return new ArrayList<>(results.values());
@@ -56,12 +58,12 @@ public class IACScannerExecutor extends ScanBinaryExecutor {
 
     @Override
     public Feature getScannerFeatureName() {
-        return Feature.INFRASTRUCTURE_AS_CODE;
+        // TODO: change to EOS feature when Xray entitlement service support it.
+        return Feature.CONTEXTUAL_ANALYSIS;
     }
 
     @Override
     protected boolean isPackageTypeSupported(PackageManagerType packageType) {
-        return true;
+        return packageType != null && SUPPORTED_PACKAGE_TYPES.contains(packageType);
     }
-
 }

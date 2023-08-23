@@ -13,6 +13,10 @@ public class Finding {
         this.does = does;
     }
 
+    public Finding(Finding other) {
+        this(other.happen, other.meaning, other.snippet, other.does);
+    }
+
     @SuppressWarnings("unused")
     public String getHappen() {
         return happen;

@@ -12,6 +12,19 @@ public class IssuePage {
     public IssuePage() {
     }
 
+    public IssuePage(IssuePage other) {
+        if (other == null) {
+            return;
+        }
+        this.pageType = other.pageType;
+        this.header = other.header;
+        this.severity = other.severity;
+        this.abbreviation = other.abbreviation;
+        this.location = other.location != null ? new Location(other.location) : null;
+        this.description = other.description;
+        this.finding = other.finding != null ? new Finding(other.finding) : null;
+    }
+
     @SuppressWarnings("unused")
     public String getHeader() {
         return header;

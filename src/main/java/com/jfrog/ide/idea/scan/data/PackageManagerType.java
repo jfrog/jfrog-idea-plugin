@@ -1,5 +1,8 @@
 package com.jfrog.ide.idea.scan.data;
 
+import lombok.Getter;
+
+@Getter
 public enum PackageManagerType {
     PYPI("pypi"),
     NPM("npm"),
@@ -12,10 +15,6 @@ public enum PackageManagerType {
 
     PackageManagerType(String name) {
         this.name = name;
-    }
-
-    public String getName() {
-        return this.name;
     }
 
 }
