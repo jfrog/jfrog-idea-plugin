@@ -32,9 +32,11 @@
 
     <change-notes>
         <![CDATA[
-          <li>Added support for logging in to JFrog Platform using Single Sign-On (SSO).</li>
-          <li>Improved performance by limiting the size of the Impact Graph.</li>
-          <li>Resolved issues with missing Contextual Analysis information and errors when retrieving cached scan results.</li>
+          <li>Added the ability to suppress false positive secrets detection by adding 'jfrog-ignore' phrase above the unwanted result line.</li>
+          <li>Bug fix - Fixed error thrown when Go project has no modules.</li>
+          <li>Bug fix - Fixed ConcurrentModificationException thrown during a scan.</li>
+          <li>Bug fix - Fixed converting file paths in Windows.</li>
+          <li>Bug fix - Fixed errors when scanning projects using Gradle <7.6.</li>
         ]]>
     </change-notes>
 
