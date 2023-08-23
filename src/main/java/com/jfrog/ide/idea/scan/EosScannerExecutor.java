@@ -36,7 +36,7 @@ public class EosScannerExecutor extends ScanBinaryExecutor {
     }
 
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException {
-        // The EOS scanner is expected to run on the project's root directory. without a config file.
+        // The EOS scanner is expected to run on the project's root directory without a config file.
         // inputFileBuilder roots should always contain a single root project in our use cases.
         Path executionDir = Paths.get(inputFileBuilder.Build().getRoots().get(0));
         return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled, RUN_WITH_CONFIG_FILE, executionDir.toFile());
