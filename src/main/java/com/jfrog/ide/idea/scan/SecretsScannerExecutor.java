@@ -20,7 +20,6 @@ import java.util.List;
  */
 public class SecretsScannerExecutor extends ScanBinaryExecutor {
     private static final List<String> SCANNER_ARGS = List.of("sec");
-    private static final boolean RUN_WITH_CONFIG_FILE = true;
     private static final String ISSUE_TITLE = "Potential Secret";
 
     public SecretsScannerExecutor(Log log, ServerConfig serverConfig) {
@@ -32,7 +31,7 @@ public class SecretsScannerExecutor extends ScanBinaryExecutor {
     }
 
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException {
-        return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled, RUN_WITH_CONFIG_FILE);
+        return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled);
     }
 
     @Override

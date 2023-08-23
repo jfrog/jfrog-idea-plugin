@@ -23,7 +23,6 @@ import java.util.Map;
  */
 public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
     private static final List<String> SCANNER_ARGS = List.of("ca");
-    private static final boolean RUN_WITH_CONFIG_FILE = true;
     private static final List<PackageManagerType> SUPPORTED_PACKAGE_TYPES = List.of(PackageManagerType.PYPI, PackageManagerType.NPM, PackageManagerType.YARN, PackageManagerType.GRADLE, PackageManagerType.MAVEN);
 
 
@@ -37,7 +36,7 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
     }
 
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException {
-        return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled, RUN_WITH_CONFIG_FILE);
+        return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled);
     }
 
     @Override

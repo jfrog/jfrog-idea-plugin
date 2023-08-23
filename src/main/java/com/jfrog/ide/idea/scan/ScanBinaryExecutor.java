@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -125,7 +124,11 @@ public abstract class ScanBinaryExecutor {
 
     abstract List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException, URISyntaxException;
 
-    protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args, Runnable checkCanceled, boolean createInputFile) throws IOException, InterruptedException {
+    protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args, Runnable checkCanceled) throws IOException, InterruptedException {
+        return execute(inputFileBuilder, args, checkCanceled, true, binaryTargetPath.toFile().getParentFile());
+    }
+
+    protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args, Runnable checkCanceled, boolean createInputFile, File executionDir) throws IOException, InterruptedException {
         if (!shouldExecute()) {
             return List.of();
         }
@@ -152,9 +155,7 @@ public abstract class ScanBinaryExecutor {
             // The following logging is done outside the commandExecutor because the commandExecutor log level is set to INFO.
             //  As it is an internal binary execution, the message should be printed for DEBUG use only.
             log.debug(String.format("Executing command: %s %s", binaryTargetPath.toString(), join(" ", args)));
-            // Execute the external process in the project's root directory.
-            // inputParams root should always contain a single root project in our use cases.
-            CommandResults commandResults = commandExecutor.exeCommand(Paths.get(inputParams.getRoots().get(0)).toFile(), args,
+            CommandResults commandResults = commandExecutor.exeCommand(executionDir, args,
                     null, new NullLog(), MAX_EXECUTION_MINUTES, TimeUnit.MINUTES);
             if (commandResults.getExitValue() == USER_NOT_ENTITLED) {
                 log.debug("User not entitled for advance security scan");

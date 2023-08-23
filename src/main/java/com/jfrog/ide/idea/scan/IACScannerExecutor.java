@@ -20,9 +20,8 @@ import java.util.List;
  */
 public class IACScannerExecutor extends ScanBinaryExecutor {
     private static final List<String> SCANNER_ARGS = List.of("iac");
-    private static final boolean RUN_WITH_CONFIG_FILE = true;
     private static final String ISSUE_TITLE = "Infrastructure as Code Vulnerability";
-    
+
     public IACScannerExecutor(Log log, ServerConfig serverConfig) {
         this(log, serverConfig, null, true);
     }
@@ -32,7 +31,7 @@ public class IACScannerExecutor extends ScanBinaryExecutor {
     }
 
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException {
-        return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled, RUN_WITH_CONFIG_FILE);
+        return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled);
     }
 
     @Override
@@ -48,7 +47,7 @@ public class IACScannerExecutor extends ScanBinaryExecutor {
 
             FileIssueNode issueNode = new FileIssueNode(ISSUE_TITLE,
                     warning.getFilePath(), warning.getLineStart(), warning.getColStart(), warning.getLineEnd(), warning.getColEnd(),
-                    warning.getScannerSearchTarget(), warning.getLineSnippet(), warning.getReporter(), warning.getSeverity(),warning.getRuleID());
+                    warning.getScannerSearchTarget(), warning.getLineSnippet(), warning.getReporter(), warning.getSeverity(), warning.getRuleID());
             fileNode.addIssue(issueNode);
         }
         return new ArrayList<>(results.values());
