@@ -5,7 +5,6 @@ import com.jfrog.ide.common.nodes.subentities.Severity;
 import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.scan.data.*;
 import lombok.Getter;
-import org.apache.commons.lang.StringUtils;
 
 import java.net.URI;
 import java.nio.file.Paths;
