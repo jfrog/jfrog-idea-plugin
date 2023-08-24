@@ -27,6 +27,7 @@ import com.intellij.util.messages.MessageBus;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.log.Logger;
+import lombok.Getter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,6 +36,7 @@ import java.io.IOException;
 /**
  * @author yahavi
  */
+@Getter
 @State(name = "GlobalSettings", storages = {@Storage("jfrogConfig.xml")})
 public final class GlobalSettings implements PersistentStateComponent<GlobalSettings> {
     private ServerConfigImpl serverConfig;
@@ -45,7 +47,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
     }
 
     public static GlobalSettings getInstance() {
-        return ApplicationManager.getApplication().getComponent(GlobalSettings.class);
+        return ApplicationManager.getApplication().getService(GlobalSettings.class);
     }
 
     /**
@@ -83,10 +85,6 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
     @Override
     public void noStateLoaded() {
         reloadXrayCredentials();
-    }
-
-    public ServerConfigImpl getServerConfig() {
-        return this.serverConfig;
     }
 
     /**

@@ -50,18 +50,13 @@
     <depends config-file="with-python.xml" optional="true">com.intellij.modules.python</depends>
     <depends config-file="with-python-ce.xml" optional="true">PythonCore</depends>
 
-    <application-components>
-        <component>
-            <implementation-class>com.jfrog.ide.idea.configuration.GlobalSettings</implementation-class>
-        </component>
-    </application-components>
-
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable id="JFrogGlobal" displayName="JFrog Global Configuration"
                                  instance="com.jfrog.ide.idea.ui.configuration.JFrogGlobalConfiguration"/>
         <projectConfigurable id="JFrogCi" displayName="JFrog CI Integration"
                              instance="com.jfrog.ide.idea.ui.configuration.JFrogProjectConfiguration"/>
         <applicationService serviceImplementation="com.jfrog.ide.idea.log.Logger"/>
+        <applicationService serviceImplementation="com.jfrog.ide.idea.configuration.GlobalSettings"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.ui.menus.filtermanager.CiFilterManager"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.scan.ScanManager"/>
         <projectService serviceImplementation="com.jfrog.ide.idea.ci.CiManager"/>
