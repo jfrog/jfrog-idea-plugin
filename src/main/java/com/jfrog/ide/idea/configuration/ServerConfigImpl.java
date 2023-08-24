@@ -208,6 +208,7 @@ public class ServerConfigImpl implements ServerConfig {
     }
 
     public void addCredentialsToPasswordSafe() {
+        // jfrog-ignore
         String password = isNotBlank(accessToken) ? getAccessToken() : getPassword();
         Credentials credentials = new Credentials(getUsername(), password);
         storeCredentialsInPasswordSafe(jfrogSettingsCredentialsKey, JFROG_SETTINGS_CREDENTIALS_KEY, credentials);
@@ -377,6 +378,7 @@ public class ServerConfigImpl implements ServerConfig {
     }
 
     public void setAccessToken(String accessToken) {
+        // jfrog-ignore
         this.accessToken = accessToken;
     }
 
@@ -466,7 +468,9 @@ public class ServerConfigImpl implements ServerConfig {
         String xrayUrlCli = cliServerConfig.getXrayUrl();
         String artifactoryUrlCli = cliServerConfig.getArtifactoryUrl();
         String usernameCli = cliServerConfig.getUsername();
+        // jfrog-ignore
         String passwordCli = cliServerConfig.getPassword();
+        // jfrog-ignore
         String accessToken = cliServerConfig.getAccessToken();
 
         if ((isAnyBlank(usernameCli, passwordCli) && isBlank(accessToken)) || isAnyBlank(platformUrlCli, xrayUrlCli, artifactoryUrlCli)) {
@@ -532,11 +536,13 @@ public class ServerConfigImpl implements ServerConfig {
         }
 
         public Builder setPassword(@Nullable String password) {
+            // jfrog-ignore
             this.password = defaultString(password);
             return this;
         }
 
         public Builder setAccessToken(@Nullable String accessToken) {
+            // jfrog-ignore
             this.accessToken = accessToken;
             return this;
         }
