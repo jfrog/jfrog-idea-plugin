@@ -86,7 +86,6 @@ public class PypiScanner extends SingleDescriptorScanner {
                     continue;
                 }
                 node.getChildren().add(depId);
-                directDeps.remove(depId);
             }
             nodes.put(compId, node);
         }
