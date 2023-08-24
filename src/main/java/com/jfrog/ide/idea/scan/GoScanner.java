@@ -1,6 +1,7 @@
 package com.jfrog.ide.idea.scan;
 
 import com.google.common.collect.Maps;
+import com.intellij.diagnostic.PluginException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -18,6 +19,7 @@ import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import com.jfrog.ide.idea.utils.GoUtils;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -65,8 +67,15 @@ public class GoScanner extends SingleDescriptorScanner {
     }
 
     @Override
-    protected AbstractInspection getInspectionTool() {
-        return new GoInspection();
+    protected @Nullable AbstractInspection getInspectionTool() {
+        try {
+            return new GoInspection();
+        } catch (PluginException e) {
+            // Go plugin is disabled or not installed
+            getLog().warn("Inspections for Go projects require the Go language plugin to be installed and enabled. " +
+                    "Please make sure the Go plugin is installed and enabled for a complete experience.");
+            return null;
+        }
     }
 
     @Override
