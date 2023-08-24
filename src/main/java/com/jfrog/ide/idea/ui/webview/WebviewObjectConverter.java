@@ -66,7 +66,7 @@ public class WebviewObjectConverter {
     }
 
     private static Location[] convertCodeFlowsToLocations(FindingInfo[][] codeFlows) {
-        if (codeFlows.length > 0) {
+        if (codeFlows != null && codeFlows.length > 0) {
             Location[] locations = new Location[codeFlows[0].length];
             for (int i = 0; i < codeFlows[0].length; i++) {
                 FindingInfo codeFlow = codeFlows[0][i];
