@@ -101,7 +101,7 @@ In addition to IntelliJ IDEA, the plugin also supports the following IDEs:
 # Supported Packages
 
 | Features                                          | Go | Maven | Gradle / Kotlin | npm | Yarn v1 | Python | Terraform |
-|---------------------------------------------------|:--:|:-----:|:-------==------:|:---:|:-------:|:------:|:---------:|
+|---------------------------------------------------|:--:|:-----:|:---------------:|:---:|:-------:|:------:|:---------:|
 | Software Composition Analysis (SCA)               | ✅  | ✅   | ✅              |  ✅ | ✅      |  ✅    |  ❌       |
 | CVE Research and Enrichment                       | ✅  | ✅   | ✅              |  ✅ | ✅      |  ✅    |  ❌       |
 | Upgrade vulnerable dependencies to fixed versions | ✅  | ✅   | ✅              |  ✅ | ✅      |  ❌    |  ❌       |
