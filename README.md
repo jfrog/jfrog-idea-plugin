@@ -23,7 +23,7 @@
   - [The Local View](#the-local-view)
     - [Scanning a Project](#scanning-a-project)
     - [Viewing Vulnerability Details](#viewing-vulnerability-details)
-    - [Vulnerability Contextual Analysis](#vulnerability-contextual-analysis)
+    - [CVEs Contextual Analysis](#cves-contextual-analysis)
     - [Secrets Detection](#secrets-detection)
     - [Infrastructure as Code (IaC) Scan](#infrastructure-as-code-iac-scan)
     - [Severity Icons](#severity-icons)
@@ -68,9 +68,9 @@ Check out what our research team is up to and stay updated on newly discovered i
 *Requires Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with [Advanced DevSecOps](https://jfrog.com/xray/#xray-advanced)).*
 
 <details>
-  <summary>Vulnerability Contextual Analysis</summary>
+  <summary>CVEs Contextual Analysis</summary>
 Uses the code context to eliminate false positive reports on vulnerable dependencies that are not applicable to the code. 
-Vulnerability Contextual Analysis is currently supported for Python, Java and JavaScript code.
+CVEs Contextual Analysis is currently supported for Python, Java and JavaScript code.
 </details>
 
 <details>
@@ -100,14 +100,14 @@ In addition to IntelliJ IDEA, the plugin also supports the following IDEs:
 
 # Supported Packages
 
-| Features                                          | Go | Maven | Gradle Kotlin | npm | Yarn v1 | Python | Terraform |
-|---------------------------------------------------|:--:|:-----:|:-------------:|:---:|:-------:|:------:|:---------:|
-| Software Composition Analysis (SCA)               | ✅  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ❌     |
-| CVE Research and Enrichment                       | ✅  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ❌     |
-| Upgrade vulnerable dependencies to fixed versions | ✅  |   ✅   |       ✅       |  ✅  |    ✅    |   ❌    |     ❌     |
-| Vulnerability Contextual Analysis                 | ❌  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ❌     |
-| Secrets Detection                                 | ✅  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ✅     |
-| Infrastructure as Code (IaC) Scan                 | ❌  |   ❌   |       ❌       |  ❌  |    ❌    |   ❌    |     ✅     |
+| Features                                          | Go | Maven | Gradle / Kotlin | npm | Yarn v1 | Python | Terraform |
+|---------------------------------------------------|:--:|:-----:|:-------==------:|:---:|:-------:|:------:|:---------:|
+| Software Composition Analysis (SCA)               | ✅  | ✅   | ✅              |  ✅ | ✅      |  ✅    |  ❌       |
+| CVE Research and Enrichment                       | ✅  | ✅   | ✅              |  ✅ | ✅      |  ✅    |  ❌       |
+| Upgrade vulnerable dependencies to fixed versions | ✅  | ✅   | ✅              |  ✅ | ✅      |  ❌    |  ❌       |
+| CVEs Contextual Analysis                          | ❌  | ✅   | ✅              |  ✅ | ✅      |  ✅    |  ❌       |
+| Secrets Detection                                 | ✅  | ✅   | ✅              |  ✅ | ✅      |  ✅    |  ✅       |
+| Infrastructure as Code (IaC) Scan                 | ❌  | ❌   | ❌              |  ❌ | ❌      |  ❌    |  ✅       |
 
 # Getting Started
 
@@ -119,7 +119,7 @@ In addition to IntelliJ IDEA, the plugin also supports the following IDEs:
 
 <details>
   <summary>Optionally set up a free JFrog Environment in the Cloud</summary>
-Need a FREE JFrog environment in the Cloud, so that JFrog IntelliJ IDEA Plugin can connect to it? Just run one of the following commands in your terminal. The commands will do the following:
+Need a free JFrog environment in the Cloud, so that JFrog IntelliJ IDEA Plugin can connect to it? Just run one of the following commands in your terminal. The commands will do the following:
 
 1. Install JFrog CLI on your machine.
 2. Create a FREE JFrog environment in the Cloud for you.
@@ -239,13 +239,13 @@ This view contains information about the vulnerability, the vulnerable component
 ![](readme-resources/vuln-details.png)
 ![](readme-resources/vuln-impact-graph.png)
 
-### Vulnerability Contextual Analysis
+### CVEs Contextual Analysis
 
 *Requires Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
 
 Xray automatically validates some high and very high impact vulnerabilities, such as vulnerabilities that have prerequisites for exploitations, and provides contextual analysis information for these vulnerabilities, to assist you in figuring out which vulnerabilities need to be fixed.
 
-Vulnerability Contextual Analysis data includes:
+CVEs Contextual Analysis data includes:
 
 - **Contextual Analysis status**: Contextual Analysis results indicating if a CVE was found applicable in your application or not applicable.
 - **Contextual Analysis breakdown**: An explanation provided by our research team as to why the CVE was found applicable or not applicable.
