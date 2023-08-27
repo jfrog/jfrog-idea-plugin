@@ -258,7 +258,7 @@ CVEs Contextual Analysis data includes:
 *Requires Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
 
 Detect any secrets left exposed inside the code. to prevent any accidental leak of internal tokens or credentials.
-> **NOTE:**  To ignore detected secrets, you can add a comment which includes the phrase jfrog-ignore above the line with the secret.
+> **NOTE:**  To ignore detected secrets, you can add a comment which includes the phrase **jfrog-ignore** above the line with the secret.
 
 ![](readme-resources/secrets.png)
 
