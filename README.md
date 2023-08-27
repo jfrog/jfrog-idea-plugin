@@ -23,7 +23,7 @@
   - [The Local View](#the-local-view)
     - [Scanning a Project](#scanning-a-project)
     - [Viewing Vulnerability Details](#viewing-vulnerability-details)
-    - [Contextual Analysis](#contextual-analysis)
+    - [CVEs Contextual Analysis](#cves-contextual-analysis)
     - [Secrets Detection](#secrets-detection)
     - [Infrastructure as Code (IaC) Scan](#infrastructure-as-code-iac-scan)
     - [Severity Icons](#severity-icons)
@@ -42,13 +42,14 @@ The plugin allows developers to find and fix security vulnerabilities in their p
 about the status of their code by continuously scanning it locally with [JFrog Security](https://jfrog.com/xray/).
 
 ### What security capabilities do we provide?
+#### Basic
+<details>
+  <summary>Software Composition Analysis (SCA)</summary>
+Scans your project dependencies for security issues and shows you which dependencies are vulnerable. If the vulnerabilities have a fix, you can upgrade to the version with the fix in a click of a button.
+</details>
 
-#### Software Composition Analysis (SCA)
-
-Scan your project dependencies for security issues.
-
-#### CVE Research and Enrichment
-
+<details>
+  <summary>CVE Research and Enrichment</summary>
 For selected security issues, get leverage-enhanced CVE data that is provided by our JFrog Security Research team.
 Prioritize the CVEs based on:
 
@@ -61,17 +62,26 @@ This means that you should put effort into fixing them as soon as possible.
 You can learn more about enriched CVEs [here](https://jfrog.com/help/r/jfrog-security-documentation/jfrog-security-cve-research-and-enrichment).
 
 Check out what our research team is up to and stay updated on newly discovered issues by clicking on this link: <https://research.jfrog.com>
+</details>
 
-#### Advanced Scans
+#### Advanced
+*Requires Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with [Advanced DevSecOps](https://jfrog.com/xray/#xray-advanced)).*
 
-*Requires Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
+<details>
+  <summary>CVEs Contextual Analysis</summary>
+Uses the code context to eliminate false positive reports on vulnerable dependencies that are not applicable to the code. 
+CVEs Contextual Analysis is currently supported for Python, Java and JavaScript code.
+</details>
 
-- [**Vulnerability Contextual Analysis**](#contextual-analysis): This feature uses the code context to eliminate false positive reports on vulnerable dependencies that are not applicable to the code. 
-Vulnerability Contextual Analysis is currently supported for Python and JavaScript code.
-- [**Secrets Detection**](#secrets-detection): Prevent the expose of keys or credentials that are stored in your source code.
-- [**Infrastructure as Code (IaC) Scan**](#infrastructure-as-code-iac-scan): Secure your IaC files. Critical to keeping your cloud deployment safe and secure.
+<details>
+  <summary>Secrets Detection</summary>
+Prevents the exposure of keys or credentials that are stored in your source code.
+</details>
 
-You can read more about JFrog Advanced Security [here](https://jfrog.com/xray/#xray-advanced).
+<details>
+  <summary>Infrastructure as Code (IaC) Scan</summary>
+Secures your IaC files. Critical to keeping your cloud deployment safe and secure.
+</details>
 
 #### Additional Perks
 
@@ -90,14 +100,14 @@ In addition to IntelliJ IDEA, the plugin also supports the following IDEs:
 
 # Supported Packages
 
-| Features                                          | Go | Maven | Gradle Kotlin | npm | Yarn v1 | Python | Terraform |
-|---------------------------------------------------|:--:|:-----:|:-------------:|:---:|:-------:|:------:|:---------:|
-| Software Composition Analysis (SCA)               | ✅  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ❌     |
-| CVE Research and Enrichment                       | ✅  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ❌     |
-| Upgrade vulnerable dependencies to fixed versions | ✅  |   ✅   |       ✅       |  ✅  |    ✅    |   ❌    |     ❌     |
-| Contextual Analysis                               | ❌  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ❌     |
-| Secrets Detection                                 | ✅  |   ✅   |       ✅       |  ✅  |    ✅    |   ✅    |     ✅     |
-| Infrastructure as Code (IaC) Scan                 | ❌  |   ❌   |       ❌       |  ❌  |    ❌    |   ❌    |     ✅     |
+| Features                                          | Go | Maven | Gradle / Kotlin | npm | Yarn v1 | Python | Terraform |
+|---------------------------------------------------|:--:|:-----:|:---------------:|:---:|:-------:|:------:|:---------:|
+| Software Composition Analysis (SCA)               | ✅  | ✅   | ✅              |  ✅ | ✅      |  ✅    |  ❌       |
+| CVE Research and Enrichment                       | ✅  | ✅   | ✅              |  ✅ | ✅      |  ✅    |  ❌       |
+| Upgrade vulnerable dependencies to fixed versions | ✅  | ✅   | ✅              |  ✅ | ✅      |  ❌    |  ❌       |
+| CVEs Contextual Analysis                          | ❌  | ✅   | ✅              |  ✅ | ✅      |  ✅    |  ❌       |
+| Secrets Detection                                 | ✅  | ✅   | ✅              |  ✅ | ✅      |  ✅    |  ✅       |
+| Infrastructure as Code (IaC) Scan                 | ❌  | ❌   | ❌              |  ❌ | ❌      |  ❌    |  ✅       |
 
 # Getting Started
 
@@ -108,9 +118,8 @@ In addition to IntelliJ IDEA, the plugin also supports the following IDEs:
 ## Connecting to Your JFrog Environment
 
 <details>
-  <summary>Set Up a FREE JFrog Environment in the Cloud</summary>
-
-Need a FREE JFrog environment in the Cloud, so that JFrog IntelliJ IDEA Plugin can connect to it? Just run one of the following commands in your terminal. The commands will do the following:
+  <summary>Optionally set up a free JFrog Environment in the Cloud</summary>
+Need a free JFrog environment in the Cloud, so that JFrog IntelliJ IDEA Plugin can connect to it? Just run one of the following commands in your terminal. The commands will do the following:
 
 1. Install JFrog CLI on your machine.
 2. Create a FREE JFrog environment in the Cloud for you.
@@ -131,12 +140,12 @@ powershell "Start-Process -Wait -Verb RunAs powershell '-NoProfile iwr https://r
 </details>
 
 <details>
-  <summary>Connect the Plugin to an Existing JFrog Environment</summary>
+  <summary>Connect the JFrog Plugin to an existing JFrog Environment</summary>
 
-You can connect the plugin to your JFrog environment:
+You can connect the plugin to your JFrog environment using one of the following methods:
 
 <details>
-  <summary>In the IDE Settings</summary>
+  <summary>Using the IDE Settings</summary>
   Once the plugin is successfully installed, connect the plugin to your instance of the JFrog Platform:
 
   1. If your JFrog Platform instance is behind an HTTP proxy, configure the proxy settings as described [here](https://www.jetbrains.com/help/idea/settings-http-proxy.html).
@@ -157,7 +166,7 @@ The plugin also supports connecting to your JFrog environment using environment 
 
 You may provide basic auth credentials or access token as follows:
 
-*Note: For security reasons, it is recommended to unset the environment variables after launching the IDE.*
+> **_NOTE:_**  For security reasons, it is recommended to unset the environment variables after launching the IDE.
 
 - `JFROG_IDE_PLATFORM_URL` - JFrog Platform URL
 - `JFROG_IDE_USERNAME` - JFrog Platform username
@@ -167,11 +176,10 @@ You may provide basic auth credentials or access token as follows:
 </details>
 </details>
 
-**Notes:**
-
-- If your JFrog Platform instance uses a domain with a self-signed certificate, add the certificate to IDEA as described [here](https://www.jetbrains.com/help/idea/settings-tools-server-certificates.html).
-- From JFrog Xray version **1.9** to **2.x**, IntelliJ IDEA users connecting to Xray from IntelliJ are required to be granted the ‘View Components’ action in Xray.
-- From JFrog Xray version **3.x**, as part of the JFrog Platform, IntelliJ IDEA users connecting to Xray from IntelliJ require ‘Read’ permission. For more information, see [here](https://jfrog.com/help/r/jfrog-platform-administration-documentation/permissions).
+> **NOTES:**
+> - If your JFrog Platform instance uses a domain with a self-signed certificate, add the certificate to IDEA as described [here](https://www.jetbrains.com/help/idea/settings-tools-server-certificates.html).
+> - From JFrog Xray version **1.9** to **2.x**, IntelliJ IDEA users connecting to Xray from IntelliJ are required to be granted the ‘View Components’ action in Xray.
+> - From JFrog Xray version **3.x**, as part of the JFrog Platform, IntelliJ IDEA users connecting to Xray from IntelliJ require ‘Read’ permission. For more information, see [here](https://jfrog.com/help/r/jfrog-platform-administration-documentation/permissions).
 
 ## Apply Xray Policies
 
@@ -203,29 +211,26 @@ Opening the JFrog panel displays two views:
   It displays information about the status of the build and includes a link to the build log on the CI server.
 
 ## The Local View
-
+### General
 The JFrog IntelliJ IDEA Plugin enables continuous scans of your project with the JFrog Platform. The security related information will be displayed under the Local view.
 It allows developers to view vulnerability information about their dependencies and source code in their IDE.
 With this information, a developer can make an informed decision on whether to use a component or not before it gets entrenched into the organization’s product.
 
-### Scanning a Project
-
 Scan your project by clicking the Run Scan ![](readme-resources/run-scan-button.png) button.
 After the scan is done, a list of vulnerable files will appear.
 
-Each descriptor file (like pom.xml in Maven, go.mod in Go, etc.) in the list contains vulnerable dependencies, and each dependency contains the vulnerabilities themselves.
+### Software Composition Analysis (SCA)
+Each descriptor file (like pom.xml in Maven, go.mod in Go, etc.) displayed in the JFrog Panel contains vulnerable dependencies, and each dependency contains the vulnerabilities themselves.
 
-By right-clicking on a dependency line, you can jump to the dependency's declaration in the descriptor file (if it's a direct dependency), or to direct dependencies that depend on the vulnerable component (if any).
+By right-clicking on a dependency line, you can jump to the dependency's declaration in the descriptor file or have the depedency upgraded to a version with a fix. 
 
 ![](readme-resources/jump-to-descriptor.png)
 
-By right-clicking on a vulnerability line, you can create an [Ignore Rule](https://jfrog.com/help/r/jfrog-security-documentation/ignore-rules) in Xray.
+You can also create an [Ignore Rule](https://jfrog.com/help/r/jfrog-security-documentation/ignore-rules) in Xray.
 
 *Creating Ignore Rules is only available [when a JFrog Project or Watch is defined](#apply-xray-policies).*
 
 ![](readme-resources/create-ignore-rule.png)
-
-### Viewing Vulnerability Details
 
 Clicking a vulnerability in the list will open the vulnerability details view.
 This view contains information about the vulnerability, the vulnerable component, fixed versions, impact paths and much more.
@@ -233,13 +238,13 @@ This view contains information about the vulnerability, the vulnerable component
 ![](readme-resources/vuln-details.png)
 ![](readme-resources/vuln-impact-graph.png)
 
-### Contextual Analysis
+### CVEs Contextual Analysis
 
 *Requires Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
 
 Xray automatically validates some high and very high impact vulnerabilities, such as vulnerabilities that have prerequisites for exploitations, and provides contextual analysis information for these vulnerabilities, to assist you in figuring out which vulnerabilities need to be fixed.
 
-Contextual Analysis data includes:
+CVEs Contextual Analysis data includes:
 
 - **Contextual Analysis status**: Contextual Analysis results indicating if a CVE was found applicable in your application or not applicable.
 - **Contextual Analysis breakdown**: An explanation provided by our research team as to why the CVE was found applicable or not applicable.
@@ -253,6 +258,7 @@ Contextual Analysis data includes:
 *Requires Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
 
 Detect any secrets left exposed inside the code. to prevent any accidental leak of internal tokens or credentials.
+> **NOTE:**  To ignore detected secrets, you can add a comment which includes the phrase **jfrog-ignore** above the line with the secret.
 
 ![](readme-resources/secrets.png)
 
