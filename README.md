@@ -176,7 +176,7 @@ You may provide basic auth credentials or access token as follows:
 </details>
 </details>
 
-> **Notes:_**
+> **Notes:**
 > - If your JFrog Platform instance uses a domain with a self-signed certificate, add the certificate to IDEA as described [here](https://www.jetbrains.com/help/idea/settings-tools-server-certificates.html).
 > - From JFrog Xray version **1.9** to **2.x**, IntelliJ IDEA users connecting to Xray from IntelliJ are required to be granted the ‘View Components’ action in Xray.
 > - From JFrog Xray version **3.x**, as part of the JFrog Platform, IntelliJ IDEA users connecting to Xray from IntelliJ require ‘Read’ permission. For more information, see [here](https://jfrog.com/help/r/jfrog-platform-administration-documentation/permissions).
@@ -258,7 +258,7 @@ CVEs Contextual Analysis data includes:
 *Requires Xray version 3.66.5 or above and Enterprise X / Enterprise+ subscription with Advanced DevSecOps.*
 
 Detect any secrets left exposed inside the code. to prevent any accidental leak of internal tokens or credentials.
-> **_NOTE:_**  To ignore detected secrets, you can add a comment which includes the phrase jfrog-ignore above the line with the secret.
+> **_NOTE:**  To ignore detected secrets, you can add a comment which includes the phrase jfrog-ignore above the line with the secret.
 
 ![](readme-resources/secrets.png)
 
