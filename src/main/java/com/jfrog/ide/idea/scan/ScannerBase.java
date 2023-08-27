@@ -6,7 +6,6 @@ import com.intellij.codeInspection.GlobalInspectionContext;
 import com.intellij.codeInspection.InspectionEngine;
 import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
-import com.intellij.codeInspection.ex.InspectionManagerEx;
 import com.intellij.codeInspection.ex.LocalInspectionToolWrapper;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileEditor.FileEditor;
@@ -38,12 +37,14 @@ import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import com.jfrog.ide.idea.utils.Utils;
 import com.jfrog.xray.client.services.summary.Components;
+import lombok.Getter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.api.util.Log;
 
+import javax.annotation.Nullable;
 import javax.swing.*;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -64,6 +65,7 @@ public abstract class ScannerBase {
 
     private final ServerConfig serverConfig;
     private final ComponentPrefix prefix;
+    @Getter
     private final Log log;
     // Lock to prevent multiple simultaneous scans
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
@@ -120,7 +122,7 @@ public abstract class ScannerBase {
      *
      * @return the Inspection tool corresponding to the scan-manager type.
      */
-    protected abstract AbstractInspection getInspectionTool();
+    protected @Nullable abstract AbstractInspection getInspectionTool();
 
     protected void sendUsageReport() {
         ApplicationManager.getApplication().invokeLater(() -> Utils.sendUsageReport(getPackageManagerType().getName() + "-deps"));
@@ -375,9 +377,11 @@ public abstract class ScannerBase {
             if (ArrayUtils.isEmpty(projectDescriptors)) {
                 return;
             }
-            InspectionManagerEx inspectionManagerEx = (InspectionManagerEx) InspectionManager.getInstance(project);
-            GlobalInspectionContext context = inspectionManagerEx.createNewGlobalContext(false);
+            GlobalInspectionContext context = InspectionManager.getInstance(project).createNewGlobalContext();
             AbstractInspection localInspectionTool = getInspectionTool();
+            if (localInspectionTool == null) {
+                return;
+            }
             localInspectionTool.setAfterScan(true);
             for (PsiFile descriptor : projectDescriptors) {
                 // Run inspection on descriptor.
@@ -417,9 +421,5 @@ public abstract class ScannerBase {
 
     public String getProjectPath() {
         return this.basePath;
-    }
-
-    public Log getLog() {
-        return log;
     }
 }
