@@ -82,6 +82,7 @@ public abstract class ScanBinaryExecutor {
     protected Collection<PackageManagerType> supportedPackageTypes;
     private final Log log;
     private boolean notSupported;
+    private final static Object downloadLock = new Object();
 
     ScanBinaryExecutor(SourceCodeScanType scanType, String binaryDownloadUrl, Log log, ServerConfig server, boolean useJFrogReleases) {
         this.scanType = scanType;
@@ -182,21 +183,24 @@ public abstract class ScanBinaryExecutor {
     abstract List<FileTreeNode> createSpecificFileIssueNodes(List<JFrogSecurityWarning> warnings);
 
     private void updateBinaryIfNeeded() throws IOException {
-        if (!Files.exists(binaryTargetPath)) {
-            log.debug(String.format("Resource %s is not found. Downloading it.", binaryTargetPath));
-            downloadBinary();
-            return;
-        }
-        LocalDateTime currentTime = LocalDateTime.now();
-        if (nextUpdateCheck == null || currentTime.isAfter(nextUpdateCheck)) {
-            nextUpdateCheck = currentTime.plusDays(UPDATE_INTERVAL);
-            // Check for new version of the binary
-            try (FileInputStream archiveBinaryFile = new FileInputStream(archiveTargetPath.toFile())) {
-                String latestBinaryChecksum = getFileChecksumFromServer();
-                String currentBinaryCheckSum = DigestUtils.sha256Hex(archiveBinaryFile);
-                if (!latestBinaryChecksum.equals(currentBinaryCheckSum)) {
-                    log.debug(String.format("Resource %s is not up to date. Downloading it.", archiveTargetPath));
-                    downloadBinary();
+        // Allow only one thread to check and update the binary at any time.
+        synchronized (downloadLock) {
+            if (!Files.exists(binaryTargetPath)) {
+                log.debug(String.format("Resource %s is not found. Downloading it.", binaryTargetPath));
+                downloadBinary();
+                return;
+            }
+            LocalDateTime currentTime = LocalDateTime.now();
+            if (nextUpdateCheck == null || currentTime.isAfter(nextUpdateCheck)) {
+                nextUpdateCheck = currentTime.plusDays(UPDATE_INTERVAL);
+                // Check for new version of the binary
+                try (FileInputStream archiveBinaryFile = new FileInputStream(archiveTargetPath.toFile())) {
+                    String latestBinaryChecksum = getFileChecksumFromServer();
+                    String currentBinaryCheckSum = DigestUtils.sha256Hex(archiveBinaryFile);
+                    if (!latestBinaryChecksum.equals(currentBinaryCheckSum)) {
+                        log.debug(String.format("Resource %s is not up to date. Downloading it.", archiveTargetPath));
+                        downloadBinary();
+                    }
                 }
             }
         }
