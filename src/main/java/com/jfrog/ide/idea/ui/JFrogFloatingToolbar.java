@@ -13,7 +13,9 @@ import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.utils.Descriptor;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -21,14 +23,14 @@ import java.util.Set;
  **/
 public class JFrogFloatingToolbar extends AbstractFloatingToolbarProvider implements Disposable {
     private MessageBusConnection projectBusConnection;
+    private Map<String, FloatingToolbarComponent> filesToolbarComponents;
     private Set<String> changedFiles;
-    private Set<FloatingToolbarComponent> components;
 
 
     public JFrogFloatingToolbar() {
         super("JFrog.Floating");
+        filesToolbarComponents = new HashMap<>();
         changedFiles = new HashSet<>();
-        components = new HashSet<>();
     }
 
     @Override
@@ -51,38 +53,38 @@ public class JFrogFloatingToolbar extends AbstractFloatingToolbarProvider implem
             projectBusConnection = project.getMessageBus().connect(this);
             registerOnChangeHandlers();
         }
+        filesToolbarComponents.put(fileEditor.getFile().getPath(), component);
         if (changedFiles.contains(fileEditor.getFile().getPath())) {
             component.scheduleShow();
-            components.add(component);
-            return;
-        } else {
-            component.scheduleHide();
         }
+
         Descriptor descriptor = Descriptor.fromFileName(fileEditor.getFile().getName());
         if (descriptor == null) {
             return;
         }
-
         LocalComponentsTree localComponentsTree = LocalComponentsTree.getInstance(project);
         if (localComponentsTree.isCacheEmpty() || localComponentsTree.isCacheExpired()) {
             component.scheduleShow();
-            components.add(component);
         }
     }
 
     private void registerOnChangeHandlers() {
-        projectBusConnection.subscribe(AnnotationEvents.ON_IRRELEVANT_RESULT, (AnnotationEvents) this::updateChangedFiles);
+        projectBusConnection.subscribe(AnnotationEvents.ON_IRRELEVANT_RESULT, (AnnotationEvents) this::updateFileChanged);
         projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_LOCAL_STARTED, (ApplicationEvents) this::clear);
     }
 
     private void clear() {
         this.changedFiles = new HashSet<>();
-        components.forEach(FloatingToolbarComponent::scheduleHide);
-        components = new HashSet<>();
+        filesToolbarComponents.values().forEach(FloatingToolbarComponent::scheduleHide);
+        filesToolbarComponents = new HashMap<>();
     }
 
-    private void updateChangedFiles(String s) {
-        this.changedFiles.add(s);
+    private void updateFileChanged(String s) {
+        changedFiles.add(s);
+        FloatingToolbarComponent jfrogToolBar = filesToolbarComponents.get(s);
+        if (jfrogToolBar != null) {
+            jfrogToolBar.scheduleShow();
+        }
     }
 
     @Override
