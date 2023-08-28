@@ -3,14 +3,12 @@ package com.jfrog.ide.idea.inspections;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.ExternalAnnotator;
 import com.intellij.lang.annotation.HighlightSeverity;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
-import com.intellij.util.messages.MessageBus;
 import com.jfrog.ide.common.nodes.FileIssueNode;
 import com.jfrog.ide.common.nodes.FileTreeNode;
 import com.jfrog.ide.common.nodes.SortableChildrenTreeNode;
@@ -90,8 +88,7 @@ public class JFrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<File
             }
             // Notify outdated scan result
             else {
-                MessageBus messageBus = ApplicationManager.getApplication().getMessageBus();
-                messageBus.syncPublisher(AnnotationEvents.ON_IRRELEVANT_RESULT).update(warning.getFilePath());
+                file.getProject().getMessageBus().syncPublisher(AnnotationEvents.ON_IRRELEVANT_RESULT).update(warning.getFilePath());
             }
         });
     }

@@ -3,7 +3,6 @@ package com.jfrog.ide.idea.ui;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.toolbar.floating.AbstractFloatingToolbarProvider;
 import com.intellij.openapi.editor.toolbar.floating.FloatingToolbarComponent;
 import com.intellij.openapi.fileEditor.FileEditor;
@@ -21,7 +20,7 @@ import java.util.Set;
  * @author yahavi
  **/
 public class JFrogFloatingToolbar extends AbstractFloatingToolbarProvider implements Disposable {
-    private final MessageBusConnection appBusConnection;
+    private MessageBusConnection projectBusConnection;
     private Set<String> changedFiles;
     private Set<FloatingToolbarComponent> components;
 
@@ -30,8 +29,6 @@ public class JFrogFloatingToolbar extends AbstractFloatingToolbarProvider implem
         super("JFrog.Floating");
         changedFiles = new HashSet<>();
         components = new HashSet<>();
-        this.appBusConnection = ApplicationManager.getApplication().getMessageBus().connect(this);
-        registerOnChangeHandlers();
     }
 
     @Override
@@ -46,6 +43,14 @@ public class JFrogFloatingToolbar extends AbstractFloatingToolbarProvider implem
         if (fileEditor == null || fileEditor.getFile() == null) {
             return;
         }
+        Project project = dataContext.getData(PlatformDataKeys.PROJECT);
+        if (project == null) {
+            return;
+        }
+        if (projectBusConnection == null) {
+            projectBusConnection = project.getMessageBus().connect(this);
+            registerOnChangeHandlers();
+        }
         if (changedFiles.contains(fileEditor.getFile().getPath())) {
             component.scheduleShow();
             components.add(component);
@@ -58,10 +63,6 @@ public class JFrogFloatingToolbar extends AbstractFloatingToolbarProvider implem
             return;
         }
 
-        Project project = dataContext.getData(PlatformDataKeys.PROJECT);
-        if (project == null) {
-            return;
-        }
         LocalComponentsTree localComponentsTree = LocalComponentsTree.getInstance(project);
         if (localComponentsTree.isCacheEmpty() || localComponentsTree.isCacheExpired()) {
             component.scheduleShow();
@@ -70,8 +71,8 @@ public class JFrogFloatingToolbar extends AbstractFloatingToolbarProvider implem
     }
 
     private void registerOnChangeHandlers() {
-        appBusConnection.subscribe(AnnotationEvents.ON_IRRELEVANT_RESULT, (AnnotationEvents) this::updateChangedFiles);
-        appBusConnection.subscribe(ApplicationEvents.ON_SCAN_LOCAL_STARTED, (ApplicationEvents) this::clear);
+        projectBusConnection.subscribe(AnnotationEvents.ON_IRRELEVANT_RESULT, (AnnotationEvents) this::updateChangedFiles);
+        projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_LOCAL_STARTED, (ApplicationEvents) this::clear);
     }
 
     private void clear() {
@@ -87,6 +88,6 @@ public class JFrogFloatingToolbar extends AbstractFloatingToolbarProvider implem
     @Override
     public void dispose() {
         // Disconnect and release resources from the application bus connection
-        appBusConnection.disconnect();
+        projectBusConnection.disconnect();
     }
 }
