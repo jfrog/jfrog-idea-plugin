@@ -17,6 +17,6 @@ public class JumpToCodeTask {
     }
 
     public void execute(Location location) {
-        this.jumpToCode.execute(location.getFile(), location.getStartRow(), location.getEndRow(), location.getStartColumn(), location.getEndColumn());
+        this.jumpToCode.execute(location.getFile(), location.getStartRow() - 1, location.getEndRow() - 1, location.getStartColumn() - 1, location.getEndColumn() - 1);
     }
 }

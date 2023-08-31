@@ -26,7 +26,6 @@ public class EosScannerExecutor extends ScanBinaryExecutor {
     private static final boolean RUN_WITH_CONFIG_FILE = false;
     private static final List<PackageManagerType> SUPPORTED_PACKAGE_TYPES = List.of(PackageManagerType.PYPI, PackageManagerType.NPM, PackageManagerType.YARN, PackageManagerType.GRADLE, PackageManagerType.MAVEN);
 
-
     public EosScannerExecutor(Log log, ServerConfig serverConfig) {
         this(log, serverConfig, null, true);
     }
