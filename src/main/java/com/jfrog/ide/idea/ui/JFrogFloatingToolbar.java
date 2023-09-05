@@ -79,9 +79,9 @@ public class JFrogFloatingToolbar extends AbstractFloatingToolbarProvider implem
         filesToolbarComponents = new HashMap<>();
     }
 
-    private void updateFileChanged(String s) {
-        changedFiles.add(s);
-        FloatingToolbarComponent jfrogToolBar = filesToolbarComponents.get(s);
+    private void updateFileChanged(String filePath) {
+        changedFiles.add(filePath);
+        FloatingToolbarComponent jfrogToolBar = filesToolbarComponents.get(filePath);
         if (jfrogToolBar != null) {
             jfrogToolBar.scheduleShow();
         }
