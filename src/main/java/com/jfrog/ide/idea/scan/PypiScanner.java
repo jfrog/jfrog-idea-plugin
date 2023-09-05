@@ -66,12 +66,11 @@ public class PypiScanner extends SingleDescriptorScanner {
 
         // Create dependency mapping
         Map<String, String> compIdByCompName = new HashMap<>();
-        // A set of the direct dependencies IDs. We add the IDs of all packages to the set, and remove the transitive ones below.
-        Set<String> directDeps = new HashSet<>();
+        Set<String> dependencies = new HashSet<>();
         for (PyPackage pyPackage : packages) {
             String compId = createComponentId(pyPackage.getName(), pyPackage.getVersion());
             compIdByCompName.put(pyPackage.getName().toLowerCase(), compId);
-            directDeps.add(compId);
+            dependencies.add(compId);
         }
 
         // Populate each node's children
@@ -86,7 +85,6 @@ public class PypiScanner extends SingleDescriptorScanner {
                     continue;
                 }
                 node.getChildren().add(depId);
-                directDeps.remove(depId);
             }
             nodes.put(compId, node);
         }
@@ -94,7 +92,7 @@ public class PypiScanner extends SingleDescriptorScanner {
         // Create root SDK node
         String rootCompId = pythonSdk.getName();
         DepTreeNode sdkNode = new DepTreeNode().descriptorFilePath(pythonSdk.getHomePath());
-        sdkNode.children(directDeps);
+        sdkNode.children(dependencies);
         nodes.put(rootCompId, sdkNode);
         return new DepTree(rootCompId, nodes);
     }
