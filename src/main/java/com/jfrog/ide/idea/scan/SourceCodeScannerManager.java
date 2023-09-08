@@ -1,25 +1,36 @@
 package com.jfrog.ide.idea.scan;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.common.log.ProgressIndicator;
-import com.jfrog.ide.common.nodes.*;
+import com.jfrog.ide.common.nodes.DependencyNode;
+import com.jfrog.ide.common.nodes.FileTreeNode;
+import com.jfrog.ide.common.nodes.VulnerabilityNode;
+import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
 import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
+import com.jfrog.ide.idea.scan.data.applications.JFrogApplicationsConfig;
+import com.jfrog.ide.idea.scan.data.applications.ModuleConfig;
+import com.jfrog.ide.idea.scan.data.applications.ScannerConfig;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.tree.TreeNode;
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -27,16 +38,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 
 import static com.jfrog.ide.common.log.Utils.logError;
+import static com.jfrog.ide.common.utils.Utils.createYAMLMapper;
 import static com.jfrog.ide.idea.scan.ScannerBase.createRunnable;
 import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.*;
 import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 
 public class SourceCodeScannerManager {
+    private final Path jfrogApplictionsConfigPath;
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
     private final ApplicabilityScannerExecutor applicability = new ApplicabilityScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig());
-
-    private final Collection<ScanBinaryExecutor> scanners = initScannersCollection();
-
+    private final Map<SourceCodeScanType, ScanBinaryExecutor> scanners = initScannersCollection();
     protected Project project;
     protected PackageManagerType packageType;
     private static final String SKIP_FOLDERS_SUFFIX = "*/**";
@@ -44,6 +56,7 @@ public class SourceCodeScannerManager {
 
     public SourceCodeScannerManager(Project project) {
         this.project = project;
+        jfrogApplictionsConfigPath = getProjectBasePath(project).resolve(".jfrog").resolve("jfrog-apps-config.yml");
     }
 
     public SourceCodeScannerManager(Project project, PackageManagerType packageType) {
@@ -114,8 +127,12 @@ public class SourceCodeScannerManager {
                     log.info("Advanced source code scan is already in progress");
                     return;
                 }
-                progressIndicator = indicator;
-                sourceCodeScanAndUpdate(new ProgressIndicatorImpl(indicator), ProgressManager::checkCanceled, log);
+                try {
+                    progressIndicator = indicator;
+                    sourceCodeScanAndUpdate(new ProgressIndicatorImpl(indicator), ProgressManager::checkCanceled, log);
+                } catch (IOException e) {
+                    logError(Logger.getInstance(), "Failed to run advanced source code scanning.", e, true);
+                }
             }
 
             @Override
@@ -133,13 +150,35 @@ public class SourceCodeScannerManager {
         executor.submit(createRunnable(sourceCodeScanTask, latch, progressIndicator, log));
     }
 
-    private void sourceCodeScanAndUpdate(ProgressIndicator indicator, Runnable checkCanceled, Logger log) {
+    private void sourceCodeScanAndUpdate(ProgressIndicator indicator, Runnable checkCanceled, Logger log) throws IOException {
         indicator.setText("Running advanced source code scanning");
+        JFrogApplicationsConfig projectConfig = parseJFrogApplicationsConfig();
+
+        if (projectConfig != null) {
+            for (ModuleConfig moduleConfig : projectConfig.getModules())
+                scan(moduleConfig, indicator, checkCanceled, log);
+        }
+        scan(null, indicator, checkCanceled, log);
+    }
+
+    private void scan(ModuleConfig moduleConfig, ProgressIndicator indicator, Runnable checkCanceled, Logger log) {
         double fraction = 0;
-        for (ScanBinaryExecutor scanner : scanners) {
+        for (SourceCodeScanType scannerType : scanners.keySet()) {
             checkCanceled.run();
+            ScanBinaryExecutor scanner = scanners.get(scannerType);
+            ScannerConfig scannerConfig = null;
+            if (moduleConfig != null) {
+                //  If requested skip the scanner.
+                if (moduleConfig.getExcludeScanners() != null && moduleConfig.getExcludeScanners().contains(scannerType.toString().toLowerCase())) {
+                    log.debug(String.format("Skipping %s scanning", scannerType.toString().toLowerCase()));
+                    continue;
+                }
+                if (moduleConfig.getScanners() != null) {
+                    scannerConfig = moduleConfig.getScanners().get(scannerType.toString().toLowerCase());
+                }
+            }
             try {
-                List<JFrogSecurityWarning> scanResults = scanner.execute(createBasicScannerInput(), checkCanceled);
+                List<JFrogSecurityWarning> scanResults = scanner.execute(createBasicScannerInput(moduleConfig, scannerConfig), checkCanceled);
                 addSourceCodeScanResults(scanner.createSpecificFileIssueNodes(scanResults));
             } catch (IOException | URISyntaxException | InterruptedException e) {
                 logError(log, "", e, true);
@@ -147,6 +186,15 @@ public class SourceCodeScannerManager {
             fraction += 1.0 / scanners.size();
             indicator.setFraction(fraction);
         }
+    }
+
+    private JFrogApplicationsConfig parseJFrogApplicationsConfig() throws IOException {
+        ObjectMapper mapper = createYAMLMapper();
+        File config = jfrogApplictionsConfigPath.toFile();
+        if (config.exists()) {
+            return mapper.readValue(config, JFrogApplicationsConfig.class);
+        }
+        return null;
     }
 
     private void addSourceCodeScanResults(List<FileTreeNode> fileTreeNodes) {
@@ -160,6 +208,44 @@ public class SourceCodeScannerManager {
     private ScanConfig.Builder createBasicScannerInput() {
         String excludePattern = GlobalSettings.getInstance().getServerConfig().getExcludedPaths();
         return new ScanConfig.Builder().roots(List.of(getProjectBasePath(project).toAbsolutePath().toString())).skippedFolders(convertToSkippedFolders(excludePattern));
+    }
+
+    private ScanConfig.Builder createBasicScannerInput(ModuleConfig config, ScannerConfig scannerConfig) {
+        if (config == null) {
+            return createBasicScannerInput();
+        }
+
+        // Scanner's working dirs (roots)
+        List<String> workingDirs = new ArrayList<>();
+        String projectBasePath = defaultIfEmpty(config.getSourceRoot(), getProjectBasePath(project).toAbsolutePath().toString());
+        if (scannerConfig != null && CollectionUtils.isEmpty(scannerConfig.getWorkingDirs())) {
+            for (String workingDir : scannerConfig.getWorkingDirs()) {
+                workingDirs.add(Paths.get(projectBasePath).resolve(workingDir).toAbsolutePath().toString());
+            }
+        } else {
+            // Default: ".", the application's root directory.
+            workingDirs.add(projectBasePath);
+        }
+
+        // Module exclude patterns
+        List<String> skippedFolders = new ArrayList<>(config.getExcludePatterns());
+        if (scannerConfig != null) {
+            // Adds scanner specific exclude patterns if exists
+            skippedFolders.addAll(scannerConfig.getExcludePatterns());
+        }
+        String excludePattern = GlobalSettings.getInstance().getServerConfig().getExcludedPaths();
+        // If exclude patterns was not provided, use the configured IDE patterns.
+        skippedFolders = skippedFolders.isEmpty() ? convertToSkippedFolders(excludePattern) : skippedFolders;
+
+        // Extra scanners params
+        List<String> excludeRules = null;
+        String language = null;
+        if (scannerConfig != null) {
+            excludeRules = scannerConfig.getExcludedRules();
+            language = scannerConfig.getLanguage();
+        }
+
+        return new ScanConfig.Builder().roots(workingDirs).skippedFolders(skippedFolders).excludedRules(excludeRules).language(language);
     }
 
     /**
@@ -217,11 +303,11 @@ public class SourceCodeScannerManager {
         return issues;
     }
 
-    private Collection<ScanBinaryExecutor> initScannersCollection() {
-        return List.of(
-                new SecretsScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig()),
-                new IACScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig()),
-                new EosScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig())
-        );
+    private Map<SourceCodeScanType, ScanBinaryExecutor> initScannersCollection() {
+        Map<SourceCodeScanType, ScanBinaryExecutor> scanners = new HashMap<>();
+        scanners.put(SourceCodeScanType.SECRETS, new SecretsScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig()));
+        scanners.put(SourceCodeScanType.IAC, new IACScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig()));
+        scanners.put(SourceCodeScanType.SAST, new SastScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig()));
+        return scanners;
     }
 }

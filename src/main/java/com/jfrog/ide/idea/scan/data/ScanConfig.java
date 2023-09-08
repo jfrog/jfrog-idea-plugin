@@ -2,12 +2,15 @@ package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
+import lombok.Getter;
 
 import java.util.List;
 
+@Getter
 public class ScanConfig {
     @JsonProperty("type")
     private SourceCodeScanType scanType;
+
     @JsonProperty("language")
     private String language;
     @JsonProperty("roots")
@@ -16,12 +19,12 @@ public class ScanConfig {
     private String output;
     @JsonProperty("grep-disable")
     private Boolean grepDisable;
-
     @JsonProperty("cve-whitelist")
     private List<String> cves;
-
     @JsonProperty("skipped-folders")
     private List<String> skippedFolders;
+    @JsonProperty("excluded-rules")
+    private List<String> excludedRules;
 
     @SuppressWarnings("unused")
     ScanConfig() {
@@ -35,6 +38,7 @@ public class ScanConfig {
         this.cves = builder.cves;
         this.grepDisable = builder.grepDisable;
         this.skippedFolders = builder.skippedFolders;
+        this.excludedRules = builder.excludedRules;
     }
 
     @SuppressWarnings("unused")
@@ -47,25 +51,13 @@ public class ScanConfig {
         this.scanType = scanType;
     }
 
-    public String getLanguage() {
-        return language;
-    }
-
     public void setLanguage(String language) {
         this.language = language;
-    }
-
-    public List<String> getRoots() {
-        return roots;
     }
 
     @SuppressWarnings("unused")
     public void setRoots(List<String> roots) {
         this.roots = roots;
-    }
-
-    public String getOutput() {
-        return output;
     }
 
     @SuppressWarnings("unused")
@@ -112,6 +104,7 @@ public class ScanConfig {
         private Boolean grepDisable;
         private List<String> cves;
         private List<String> skippedFolders;
+        private List<String> excludedRules;
 
         public Builder() {
         }
@@ -152,6 +145,12 @@ public class ScanConfig {
         @SuppressWarnings("unused")
         public Builder skippedFolders(List<String> skippedFolders) {
             this.skippedFolders = skippedFolders;
+            return this;
+        }
+
+        @SuppressWarnings("unused")
+        public Builder excludedRules(List<String> excludedRules) {
+            this.excludedRules = excludedRules;
             return this;
         }
 

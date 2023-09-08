@@ -59,10 +59,10 @@ public class WebviewObjectConverter {
                 .location(convertFileLocation(fileIssueNodeNode));
     }
 
-    public static IssuePage convertEosIssueToEosIssuePage(EosIssueNode eosIssueNode) {
-        return new EosIssuePage(convertFileIssueToIssuePage(eosIssueNode))
-                .setAnalysisSteps(convertCodeFlowsToLocations(eosIssueNode.getCodeFlows()))
-                .setRuleID(eosIssueNode.getRuleID());
+    public static IssuePage convertSastIssueToSastIssuePage(SastIssueNode sastIssueNode) {
+        return new SastIssuePage(convertFileIssueToIssuePage(sastIssueNode))
+                .setAnalysisSteps(convertCodeFlowsToLocations(sastIssueNode.getCodeFlows()))
+                .setRuleID(sastIssueNode.getRuleID());
     }
 
     private static Location[] convertCodeFlowsToLocations(FindingInfo[][] codeFlows) {
@@ -88,7 +88,7 @@ public class WebviewObjectConverter {
         return switch (reporterType) {
             case SECRETS -> "SECRETS";
             case IAC -> "IAC";
-            case EOS -> "EOS";
+            case SAST -> "EOS";
             default -> "EMPTY";
         };
     }
