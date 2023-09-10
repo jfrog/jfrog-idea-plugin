@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import lombok.Getter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 public class ScanConfig {
     @JsonProperty("type")
     private SourceCodeScanType scanType;
-
     @JsonProperty("language")
     private String language;
     @JsonProperty("roots")
@@ -107,6 +107,10 @@ public class ScanConfig {
         private List<String> excludedRules;
 
         public Builder() {
+            roots = new ArrayList<>();
+            cves = new ArrayList<>();
+            skippedFolders = new ArrayList<>();
+            excludedRules = new ArrayList<>();
         }
 
         @SuppressWarnings("UnusedReturnValue")

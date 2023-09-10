@@ -143,8 +143,11 @@ public abstract class ScanBinaryExecutor {
             inputFileBuilder.scanType(scanType);
             ScanConfig inputParams = inputFileBuilder.Build();
             args = new ArrayList<>(args);
-            inputFile = newConfigFormat ? createTempRunInputFile(new NewScanConfig(inputParams)) : createTempRunInputFile(new ScansConfig(List.of(inputParams)));
+            inputFile = newConfigFormat ? createTempRunInputFile(new NewScansConfig(new NewScanConfig(inputParams))) : createTempRunInputFile(new ScansConfig(List.of(inputParams)));
             args.add(inputFile.toString());
+            if (newConfigFormat) {
+                args.add(outputFilePath.toString());
+            }
 
             Logger log = Logger.getInstance();
             // The following logging is done outside the commandExecutor because the commandExecutor log level is set to INFO.

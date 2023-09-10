@@ -16,6 +16,7 @@ import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.xray.client.impl.XrayClient;
 import com.jfrog.xray.client.impl.util.JFrogInactiveEnvironmentException;
 import com.jfrog.xray.client.services.system.Version;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -109,7 +110,7 @@ public class ScanManager {
             } catch (JFrogInactiveEnvironmentException e) {
                 handleJfrogInactiveEnvironment(e.getRedirectUrl());
             } catch (IOException | RuntimeException | InterruptedException e) {
-                logError(Logger.getInstance(), "", e, true);
+                logError(Logger.getInstance(), ExceptionUtils.getRootCauseMessage(e), e, true);
             } finally {
                 executor.shutdownNow();
                 if (isScanCompleted.get()) {

@@ -155,10 +155,12 @@ public class SourceCodeScannerManager {
         JFrogApplicationsConfig projectConfig = parseJFrogApplicationsConfig();
 
         if (projectConfig != null) {
-            for (ModuleConfig moduleConfig : projectConfig.getModules())
+            for (ModuleConfig moduleConfig : projectConfig.getModules()) {
                 scan(moduleConfig, indicator, checkCanceled, log);
+            }
+        } else {
+            scan(null, indicator, checkCanceled, log);
         }
-        scan(null, indicator, checkCanceled, log);
     }
 
     private void scan(ModuleConfig moduleConfig, ProgressIndicator indicator, Runnable checkCanceled, Logger log) {
@@ -218,9 +220,9 @@ public class SourceCodeScannerManager {
         // Scanner's working dirs (roots)
         List<String> workingDirs = new ArrayList<>();
         String projectBasePath = defaultIfEmpty(config.getSourceRoot(), getProjectBasePath(project).toAbsolutePath().toString());
-        if (scannerConfig != null && CollectionUtils.isEmpty(scannerConfig.getWorkingDirs())) {
+        if (scannerConfig != null && !CollectionUtils.isEmpty(scannerConfig.getWorkingDirs())) {
             for (String workingDir : scannerConfig.getWorkingDirs()) {
-                workingDirs.add(Paths.get(projectBasePath).resolve(workingDir).toAbsolutePath().toString());
+                workingDirs.add(Paths.get(projectBasePath).resolve(workingDir).toString());
             }
         } else {
             // Default: ".", the application's root directory.
@@ -228,8 +230,11 @@ public class SourceCodeScannerManager {
         }
 
         // Module exclude patterns
-        List<String> skippedFolders = new ArrayList<>(config.getExcludePatterns());
-        if (scannerConfig != null) {
+        List<String> skippedFolders = new ArrayList<>();
+        if (config.getExcludePatterns() != null) {
+            skippedFolders.addAll(config.getExcludePatterns());
+        }
+        if (scannerConfig != null && scannerConfig.getExcludePatterns() != null) {
             // Adds scanner specific exclude patterns if exists
             skippedFolders.addAll(scannerConfig.getExcludePatterns());
         }
