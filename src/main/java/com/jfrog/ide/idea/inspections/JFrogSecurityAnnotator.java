@@ -12,6 +12,7 @@ import com.intellij.psi.PsiFile;
 import com.jfrog.ide.common.nodes.FileIssueNode;
 import com.jfrog.ide.common.nodes.FileTreeNode;
 import com.jfrog.ide.common.nodes.SortableChildrenTreeNode;
+import com.jfrog.ide.idea.events.AnnotationEvents;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import org.jetbrains.annotations.NotNull;
@@ -84,6 +85,10 @@ public class JFrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<File
                         .range(range)
                         .gutterIconRenderer(iconRenderer)
                         .create();
+            }
+            // Notify outdated scan result
+            else {
+                file.getProject().getMessageBus().syncPublisher(AnnotationEvents.ON_IRRELEVANT_RESULT).update(warning.getFilePath());
             }
         });
     }
