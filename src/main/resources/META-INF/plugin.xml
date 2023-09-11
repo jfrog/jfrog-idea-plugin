@@ -32,11 +32,7 @@
 
     <change-notes>
         <![CDATA[
-          <li>Added the ability to suppress false positive secrets detection by adding 'jfrog-ignore' phrase above the unwanted result line.</li>
-          <li>Bug fix - Fixed error thrown when Go project has no modules.</li>
-          <li>Bug fix - Fixed ConcurrentModificationException thrown during a scan.</li>
-          <li>Bug fix - Fixed converting file paths in Windows.</li>
-          <li>Bug fix - Fixed errors when scanning projects using Gradle <7.6.</li>
+          For the latest release notes, please visit our <a href="https://github.com/jfrog/jfrog-idea-plugin/releases">Release Notes</a> page.
         ]]>
     </change-notes>
 
