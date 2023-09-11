@@ -69,7 +69,6 @@ public abstract class ScanBinaryExecutor {
     private static final String ENV_ACCESS_TOKEN = "JF_TOKEN";
     private static final String ENV_HTTP_PROXY = "HTTP_PROXY";
     private static final String ENV_HTTPS_PROXY = "HTTPS_PROXY";
-    private static final String ENV_LOG_DIR = "AM_LOG_DIRECTORY";
     private static final String JFROG_RELEASES = "https://releases.jfrog.io/artifactory/";
     private final String BINARY_DOWNLOAD_URL;
     private static Path binaryTargetPath;
@@ -158,18 +157,26 @@ public abstract class ScanBinaryExecutor {
             log.debug(String.format("Executing command: %s %s", binaryTargetPath.toString(), join(" ", args)));
             CommandResults commandResults = commandExecutor.exeCommand(executionDir, args,
                     null, new NullLog(), MAX_EXECUTION_MINUTES, TimeUnit.MINUTES);
-            if (commandResults.getExitValue() == USER_NOT_ENTITLED) {
-                log.debug("User not entitled for advance security scan");
-                return List.of();
+
+            if (commandResults.isOk()) {
+                log.debug(commandResults.getRes());
+                return parseOutputSarif(outputFilePath);
+            } else {
+                switch (commandResults.getExitValue()) {
+                    case USER_NOT_ENTITLED -> {
+                        log.debug("User not entitled for advance security scan");
+                        return List.of();
+                    }
+                    case NOT_SUPPORTED -> {
+                        log.debug(String.format("Scanner %s is not supported in the current Analyzer Manager version.", scanType));
+                        return List.of();
+                    }
+                    default -> {
+                        log.info(commandResults.getRes());
+                        throw new IOException(commandResults.getErr());
+                    }
+                }
             }
-            if (commandResults.getExitValue() == NOT_SUPPORTED) {
-                log.debug(String.format("Scanner %s is not supported in the current Analyzer Manager version.", scanType));
-                return List.of();
-            }
-            if (!commandResults.isOk()) {
-                throw new IOException(commandResults.getErr());
-            }
-            return parseOutputSarif(outputFilePath);
         } finally {
             if (outputTempDir != null) {
                 FileUtils.deleteQuietly(outputTempDir.toFile());
@@ -316,7 +323,6 @@ public abstract class ScanBinaryExecutor {
             env.put(ENV_HTTP_PROXY, "http://" + proxyUrl);
             env.put(ENV_HTTPS_PROXY, "https://" + proxyUrl);
         }
-        env.put(ENV_LOG_DIR, BINARIES_DIR.toAbsolutePath().toString());
         return env;
     }
 
