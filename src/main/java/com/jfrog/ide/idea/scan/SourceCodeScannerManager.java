@@ -170,7 +170,7 @@ public class SourceCodeScannerManager {
             ScanBinaryExecutor scanner = scanners.get(scannerType);
             ScannerConfig scannerConfig = null;
             if (moduleConfig != null) {
-                //  If requested skip the scanner.
+                // Skip the scanner If requested.
                 if (moduleConfig.getExcludeScanners() != null && moduleConfig.getExcludeScanners().contains(scannerType.toString().toLowerCase())) {
                     log.debug(String.format("Skipping %s scanning", scannerType.toString().toLowerCase()));
                     continue;

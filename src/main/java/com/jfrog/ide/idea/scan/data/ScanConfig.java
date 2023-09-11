@@ -161,6 +161,5 @@ public class ScanConfig {
         public ScanConfig Build() {
             return new ScanConfig(this);
         }
-
     }
 }

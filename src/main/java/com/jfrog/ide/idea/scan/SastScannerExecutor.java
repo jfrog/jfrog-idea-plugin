@@ -1,9 +1,9 @@
 package com.jfrog.ide.idea.scan;
 
 import com.jfrog.ide.common.configuration.ServerConfig;
-import com.jfrog.ide.common.nodes.SastIssueNode;
 import com.jfrog.ide.common.nodes.FileIssueNode;
 import com.jfrog.ide.common.nodes.FileTreeNode;
+import com.jfrog.ide.common.nodes.SastIssueNode;
 import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.scan.data.PackageManagerType;
@@ -12,8 +12,6 @@ import com.jfrog.xray.client.services.entitlements.Feature;
 import org.jfrog.build.api.util.Log;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +21,9 @@ import java.util.List;
  */
 public class SastScannerExecutor extends ScanBinaryExecutor {
     private static final List<String> SCANNER_ARGS = List.of("zd");
+    // This variable is used to indicate that this scanner support only the new config (input) format.
+    // In the near future, when all scanners will use only the new input file structure this variable as well
+    // as the ScanConfig and ScanConfigs classes can be safely removed.
     private static final boolean RUN_WITH_NEW_CONFIG_FILE = true;
     private static final List<PackageManagerType> SUPPORTED_PACKAGE_TYPES = List.of(PackageManagerType.PYPI, PackageManagerType.NPM, PackageManagerType.YARN, PackageManagerType.GRADLE, PackageManagerType.MAVEN);
 
