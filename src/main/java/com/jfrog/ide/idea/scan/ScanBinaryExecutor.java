@@ -161,20 +161,19 @@ public abstract class ScanBinaryExecutor {
             if (commandResults.isOk()) {
                 log.debug(commandResults.getRes());
                 return parseOutputSarif(outputFilePath);
-            } else {
-                switch (commandResults.getExitValue()) {
-                    case USER_NOT_ENTITLED -> {
-                        log.debug("User not entitled for advance security scan");
-                        return List.of();
-                    }
-                    case NOT_SUPPORTED -> {
-                        log.debug(String.format("Scanner %s is not supported in the current Analyzer Manager version.", scanType));
-                        return List.of();
-                    }
-                    default -> {
-                        log.info(commandResults.getRes());
-                        throw new IOException(commandResults.getErr());
-                    }
+            }
+            switch (commandResults.getExitValue()) {
+                case USER_NOT_ENTITLED -> {
+                    log.debug("User not entitled for advance security scan");
+                    return List.of();
+                }
+                case NOT_SUPPORTED -> {
+                    log.debug(String.format("Scanner %s is not supported in the current Analyzer Manager version.", scanType));
+                    return List.of();
+                }
+                default -> {
+                    log.info(commandResults.getRes());
+                    throw new IOException(commandResults.getErr());
                 }
             }
         } finally {
