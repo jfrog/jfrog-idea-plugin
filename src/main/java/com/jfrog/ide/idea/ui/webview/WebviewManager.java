@@ -51,6 +51,11 @@ public class WebviewManager implements Disposable {
             @Override
             public void onLoadError(CefBrowser browser, CefFrame frame, ErrorCode errorCode, String errorText, String failedUrl) {
                 super.onLoadError(browser, frame, errorCode, errorText, failedUrl);
+                // When opening links in external browser, JBCef cancels the page redirection and opens the page in a new browser window.
+                // This cancelation causes CEF to throw an ERR_ABORTED error.
+                if (errorCode == ErrorCode.ERR_ABORTED) {
+                    return;
+                }
                 Logger.getInstance().error("An error occurred while opening the issue details view: " + errorText);
             }
         }, jbCefBrowser.getCefBrowser());
