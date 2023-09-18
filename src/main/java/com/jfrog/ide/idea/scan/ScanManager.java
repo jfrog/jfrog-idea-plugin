@@ -96,7 +96,6 @@ public class ScanManager {
                     scanner.asyncScanAndUpdateResults();
                 }
                 executor.shutdown();
-                //noinspection ResultOfMethodCallIgnored
                 if (!executor.awaitTermination(SCAN_TIMEOUT_MINUTES, TimeUnit.MINUTES)) {
                     logError(Logger.getInstance(), "Scan timeout of " + SCAN_TIMEOUT_MINUTES + " minutes elapsed. The scan is being canceled.", true);
                 }
