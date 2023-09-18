@@ -31,7 +31,7 @@ import static com.jfrog.ide.common.log.Utils.logError;
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBuilder;
 
 public class ScanManager {
-    private final int SCAN_TIMEOUT_MINUTES = 10;
+    private final int SCAN_TIMEOUT_MINUTES = 60;
     private final Project project;
     private final ScannerFactory factory;
     private final SourceCodeScannerManager sourceCodeScannerManager;
@@ -97,7 +97,9 @@ public class ScanManager {
                 }
                 executor.shutdown();
                 //noinspection ResultOfMethodCallIgnored
-                executor.awaitTermination(SCAN_TIMEOUT_MINUTES, TimeUnit.MINUTES);
+                if (!executor.awaitTermination(SCAN_TIMEOUT_MINUTES, TimeUnit.MINUTES)) {
+                    logError(Logger.getInstance(), "Scan timeout of " + SCAN_TIMEOUT_MINUTES + " minutes elapsed. The scan is being canceled.", true);
+                }
                 // Cache tree only if no errors occurred during scan.
                 if (scanners.values().stream().anyMatch(ScannerBase::isScanInterrupted)) {
                     componentsTree.deleteCachedTree();
