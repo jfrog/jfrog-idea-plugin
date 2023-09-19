@@ -150,8 +150,9 @@ public class CiManager extends CiManagerBase implements Disposable {
         String buildNumber = StringUtils.substringAfterLast(buildIdentifier, "/");
         return (BuildGeneralInfo) root.getChildren().stream()
                 .map(DependencyTree::getGeneralInfo)
-                .filter(generalInfo -> StringUtils.equals(buildName, generalInfo.getArtifactId()))
-                .filter(generalInfo -> StringUtils.equals(buildNumber, generalInfo.getVersion()))
+                .map(generalInfo -> (BuildGeneralInfo) generalInfo)
+                .filter(generalInfo -> StringUtils.equals(buildName, generalInfo.getBuildName()))
+                .filter(generalInfo -> StringUtils.equals(buildNumber, generalInfo.getBuildNumber()))
                 .findAny().orElse(null);
     }
 
