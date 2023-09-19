@@ -40,6 +40,7 @@ public class SourceCodeScannerManager {
     protected Project project;
     protected PackageManagerType packageType;
     private static final String SKIP_FOLDERS_SUFFIX = "*/**";
+    private com.intellij.openapi.progress.ProgressIndicator progressIndicator;
 
     public SourceCodeScannerManager(Project project) {
         this.project = project;
@@ -113,6 +114,7 @@ public class SourceCodeScannerManager {
                     log.info("Advanced source code scan is already in progress");
                     return;
                 }
+                progressIndicator = indicator;
                 sourceCodeScanAndUpdate(new ProgressIndicatorImpl(indicator), ProgressManager::checkCanceled, log);
             }
 
@@ -128,7 +130,7 @@ public class SourceCodeScannerManager {
             }
 
         };
-        executor.submit(createRunnable(sourceCodeScanTask, latch, log));
+        executor.submit(createRunnable(sourceCodeScanTask, latch, progressIndicator, log));
     }
 
     private void sourceCodeScanAndUpdate(ProgressIndicator indicator, Runnable checkCanceled, Logger log) {
