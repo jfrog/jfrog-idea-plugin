@@ -53,6 +53,7 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jfrog.ide.common.log.Utils.logError;
@@ -75,6 +76,7 @@ public abstract class ScannerBase {
     protected SourceCodeScannerManager sourceCodeScannerManager;
     String basePath;
     private ExecutorService executor;
+    private com.intellij.openapi.progress.ProgressIndicator progressIndicator;
 
     /**
      * @param project   currently opened IntelliJ project. We'll use this project to retrieve project based services
@@ -295,6 +297,7 @@ public abstract class ScannerBase {
                     log.info("Scan already in progress");
                     return;
                 }
+                progressIndicator = indicator;
                 scanAndUpdate(new ProgressIndicatorImpl(indicator));
             }
 
@@ -311,7 +314,7 @@ public abstract class ScannerBase {
             }
 
         };
-        executor.submit(createRunnable(scanAndUpdateTask, latch, this.log));
+        executor.submit(createRunnable(scanAndUpdateTask, latch, progressIndicator, log));
     }
 
     /**
@@ -334,12 +337,13 @@ public abstract class ScannerBase {
     /**
      * Create a runnable to be submitted to the executor service, or run directly.
      *
-     * @param task  - The task to submit
-     * @param latch - The countdown latch, which makes sure the executor service doesn't get more than 3 tasks.
-     *              If null, the scan was initiated by a change in the project descriptor and the executor
-     *              service is terminated. In this case, there is no requirement to wait.
+     * @param task              The task to submit
+     * @param latch             The countdown latch, which makes sure the executor service doesn't get more than 3 tasks.
+     *                          If null, the scan was initiated by a change in the project descriptor and the executor
+     *                          service is terminated. In this case, there is no requirement to wait.
+     * @param progressIndicator The task's {@link com.intellij.openapi.progress.ProgressIndicator} object.
      */
-    public static Runnable createRunnable(Task.Backgroundable task, CountDownLatch latch, Log log) {
+    public static Runnable createRunnable(Task.Backgroundable task, CountDownLatch latch, com.intellij.openapi.progress.ProgressIndicator progressIndicator, Log log) {
         return () -> {
             // The progress manager is only good for foreground threads.
             if (SwingUtilities.isEventDispatchThread()) {
@@ -354,7 +358,9 @@ public abstract class ScannerBase {
                     latch.await();
                 }
             } catch (InterruptedException e) {
-                logError(log, ExceptionUtils.getRootCauseMessage(e), e, true);
+                // This exception is thrown when this thread is interrupted (e.g. when the scan timeout has elapsed).
+                logError(log, ExceptionUtils.getRootCauseMessage(e), e, false);
+                progressIndicator.cancel();
             }
         };
     }
