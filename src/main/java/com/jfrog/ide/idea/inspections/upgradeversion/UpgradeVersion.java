@@ -4,6 +4,7 @@ import com.intellij.codeInsight.intention.HighPriorityAction;
 import com.intellij.codeInspection.LocalQuickFix;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
@@ -55,13 +56,17 @@ public abstract class UpgradeVersion implements LocalQuickFix, Iconable, HighPri
         Task.Backgroundable scanAndUpdateTask = new Task.Backgroundable(project, "Upgrading dependency...") {
             @Override
             public void run(@NotNull com.intellij.openapi.progress.ProgressIndicator indicator) {
-                try {
-                    upgradeComponentVersion(project, descriptor);
-                    ApplicationManager.getApplication().invokeLater(() -> descriptor.getPsiElement().getContainingFile().getVirtualFile().refresh(false, false));
-                    log.info("Upgraded " + componentName + " to version " + fixVersion + " successfully.");
-                } catch (Exception e) {
-                    log.error("Failed while trying to upgrade component " + componentName + " to version " + fixVersion + ". Error: " + e);
-                }
+                ApplicationManager.getApplication().invokeAndWait(() -> {
+                        WriteCommandAction.runWriteCommandAction(project, () -> {
+                            try {
+                                upgradeComponentVersion(project, descriptor);
+                                log.info("Upgraded " + componentName + " to version " + fixVersion + " successfully.");
+                            } catch (IOException e) {
+                                log.error("Failed while trying to upgrade component " + componentName + " to version " + fixVersion + ". Error: " + e);
+                            }
+                        });
+                    descriptor.getPsiElement().getContainingFile().getVirtualFile().refresh(false, false);
+                });
             }
         };
         ProgressManager.getInstance().run(scanAndUpdateTask);
