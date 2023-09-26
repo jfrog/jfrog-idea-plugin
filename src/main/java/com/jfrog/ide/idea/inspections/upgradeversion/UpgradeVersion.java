@@ -60,12 +60,12 @@ public abstract class UpgradeVersion implements LocalQuickFix, Iconable, HighPri
                         WriteCommandAction.runWriteCommandAction(project, () -> {
                             try {
                                 upgradeComponentVersion(project, descriptor);
+                                log.info("Upgraded " + componentName + " to version " + fixVersion + " successfully.");
                             } catch (IOException e) {
                                 log.error("Failed while trying to upgrade component " + componentName + " to version " + fixVersion + ". Error: " + e);
                             }
                         });
                     descriptor.getPsiElement().getContainingFile().getVirtualFile().refresh(false, false);
-                    log.info("Upgraded " + componentName + " to version " + fixVersion + " successfully.");
                 });
             }
         };
