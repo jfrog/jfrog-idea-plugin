@@ -21,7 +21,7 @@ import java.util.List;
  */
 public class SastScannerExecutor extends ScanBinaryExecutor {
     private static final List<String> SCANNER_ARGS = List.of("zd");
-    // This variable is used to indicate that this scanner support only the new config (input) format.
+    // This variable is used to indicate that this scanner supports only the new config (input) format.
     // In the near future, when all scanners will use only the new input file structure this variable as well
     // as the ScanConfig and ScanConfigs classes can be safely removed.
     private static final boolean RUN_WITH_NEW_CONFIG_FILE = true;
@@ -60,7 +60,7 @@ public class SastScannerExecutor extends ScanBinaryExecutor {
 
     @Override
     public Feature getScannerFeatureName() {
-        // TODO: change to SASST feature when Xray entitlement service support it.
+        // TODO: change to SAST feature when Xray entitlement service supports it.
         return Feature.CONTEXTUAL_ANALYSIS;
     }
 

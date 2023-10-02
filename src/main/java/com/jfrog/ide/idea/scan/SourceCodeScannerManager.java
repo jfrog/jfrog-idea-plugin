@@ -56,7 +56,7 @@ public class SourceCodeScannerManager {
 
     public SourceCodeScannerManager(Project project) {
         this.project = project;
-        jfrogApplictionsConfigPath = getProjectBasePath(project).resolve(".jfrog").resolve("jfrog-apps-config.yml");
+        this.jfrogApplictionsConfigPath = getProjectBasePath(project).resolve(".jfrog").resolve("jfrog-apps-config.yml");
     }
 
     public SourceCodeScannerManager(Project project, PackageManagerType packageType) {
@@ -154,12 +154,8 @@ public class SourceCodeScannerManager {
         indicator.setText("Running advanced source code scanning");
         JFrogApplicationsConfig projectConfig = parseJFrogApplicationsConfig();
 
-        if (projectConfig != null) {
-            for (ModuleConfig moduleConfig : projectConfig.getModules()) {
-                scan(moduleConfig, indicator, checkCanceled, log);
-            }
-        } else {
-            scan(null, indicator, checkCanceled, log);
+        for (ModuleConfig moduleConfig : projectConfig.getModules()) {
+            scan(moduleConfig, indicator, checkCanceled, log);
         }
     }
 
@@ -196,7 +192,7 @@ public class SourceCodeScannerManager {
         if (config.exists()) {
             return mapper.readValue(config, JFrogApplicationsConfig.class);
         }
-        return null;
+        return new JFrogApplicationsConfig(true);
     }
 
     private void addSourceCodeScanResults(List<FileTreeNode> fileTreeNodes) {
