@@ -47,19 +47,21 @@ repositories {
 }
 
 def buildInfoVersion = '2.41.6'
+def idePluginsCommonVersion = '2.2.x-20231003.090427-2'
+
 dependencies {
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.15.2'
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-extractor', version: buildInfoVersion
+    implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: idePluginsCommonVersion
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-client', version: buildInfoVersion
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.15.2'
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-api', version: buildInfoVersion
-    implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.4'
     implementation group: 'com.jfrog.xray.client', name: 'xray-client-java', version: '0.14.1'
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
     implementation group: 'org.jfrog.filespecs', name: 'file-specs-java', version: '1.1.2'
-    implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: '2.2.6'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
     implementation group: 'com.google.guava', name: 'guava', version: '32.0.1-jre'
+    implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.4'
 
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
