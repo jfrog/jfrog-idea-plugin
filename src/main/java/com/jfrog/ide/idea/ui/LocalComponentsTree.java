@@ -63,22 +63,27 @@ public class LocalComponentsTree extends ComponentsTree {
 
     public void addScanResults(List<FileTreeNode> fileTreeNodes) {
         setCellRenderer(new ComponentsTreeCellRenderer());
-        for (FileTreeNode node : fileTreeNodes) {
-            ApplicationManager.getApplication().invokeLater(() -> appendProject(node));
-        }
-    }
+        ApplicationManager.getApplication().invokeLater(() -> {
+            SortableChildrenTreeNode root;
+            if (getModel() == null) {
+                root = new SortableChildrenTreeNode();
+            } else {
+                root = (SortableChildrenTreeNode) getModel().getRoot();
+            }
 
-    private void appendProject(FileTreeNode filteredRoot) {
-        SortableChildrenTreeNode root;
-        if (getModel() == null) {
-            root = new SortableChildrenTreeNode();
-        } else {
-            root = (SortableChildrenTreeNode) getModel().getRoot();
-        }
-
-        root.add(filteredRoot);
-        root.sortChildren();
-        populateTree(root);
+            for (FileTreeNode node : fileTreeNodes) {
+                if (root.getChildren() != null) {
+                    FileTreeNode existingNode = (FileTreeNode) root.getChildren().stream().filter(treeNode -> ((FileTreeNode) treeNode).getFilePath().equals(node.getFilePath())).findFirst().orElse(null);
+                    if (existingNode != null) {
+                        existingNode.mergeFileTreeNode(node);
+                        continue;
+                    }
+                }
+                root.add(node);
+            }
+            root.sortChildren();
+            populateTree(root);
+        });
     }
 
     private void populateTree(DefaultMutableTreeNode root) {
