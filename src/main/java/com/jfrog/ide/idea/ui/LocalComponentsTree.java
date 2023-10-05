@@ -64,20 +64,15 @@ public class LocalComponentsTree extends ComponentsTree {
     public void addScanResults(List<FileTreeNode> fileTreeNodes) {
         setCellRenderer(new ComponentsTreeCellRenderer());
         ApplicationManager.getApplication().invokeLater(() -> {
-            SortableChildrenTreeNode root;
-            if (getModel() == null) {
-                root = new SortableChildrenTreeNode();
-            } else {
-                root = (SortableChildrenTreeNode) getModel().getRoot();
-            }
-
+            SortableChildrenTreeNode root = getModel() != null ? (SortableChildrenTreeNode) getModel().getRoot() : new SortableChildrenTreeNode();
             for (FileTreeNode node : fileTreeNodes) {
-                if (root.getChildren() != null) {
-                    FileTreeNode existingNode = (FileTreeNode) root.getChildren().stream().filter(treeNode -> ((FileTreeNode) treeNode).getFilePath().equals(node.getFilePath())).findFirst().orElse(null);
-                    if (existingNode != null) {
-                        existingNode.mergeFileTreeNode(node);
-                        continue;
-                    }
+                FileTreeNode existingNode =(FileTreeNode) Optional.ofNullable(root.getChildren())
+                        .orElseGet(Vector::new).stream()
+                        .filter(treeNode -> ((FileTreeNode) treeNode).getFilePath().equals(node.getFilePath()))
+                        .findFirst().orElse(null);
+                if (existingNode != null) {
+                    existingNode.mergeFileTreeNode(node);
+                    continue;
                 }
                 root.add(node);
             }
