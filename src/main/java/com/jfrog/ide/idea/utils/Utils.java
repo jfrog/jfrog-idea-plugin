@@ -6,16 +6,18 @@ import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.jfrog.ide.common.utils.usage.EcosystemUsageReporter;
+import com.jfrog.ide.common.utils.usage.UsageReport;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
 import com.jfrog.ide.idea.log.Logger;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.jfrog.build.extractor.usageReport.ClientIdUsageReporter;
-import org.jfrog.build.extractor.usageReport.UsageReporter;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -29,7 +31,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 
 import static com.jfrog.ide.common.utils.Utils.createSSLContext;
-
 import static com.jfrog.ide.common.utils.Utils.resolveArtifactoryUrl;
 
 /**
@@ -75,10 +76,12 @@ public class Utils {
             return;
         }
         String pluginVersion = jfrogPlugin.getVersion();
-        UsageReporter usageReporter = new ClientIdUsageReporter(PRODUCT_ID + pluginVersion, featureIdArray, log);
+        ClientIdUsageReporter artifactoryUsageReporter = new ClientIdUsageReporter(PRODUCT_ID + pluginVersion, featureIdArray, log);
+        EcosystemUsageReporter ecosystemUsageReporter = new EcosystemUsageReporter(log);
         String artifactoryUrl = resolveArtifactoryUrl(serverConfig.getArtifactoryUrl(), serverConfig.getUrl());
         try {
-            usageReporter.reportUsage(artifactoryUrl, serverConfig.getUsername(), serverConfig.getPassword(), serverConfig.getAccessToken(), serverConfig.getProxyConfForTargetUrl(artifactoryUrl), createSSLContext(serverConfig), log);
+            artifactoryUsageReporter.reportUsage(artifactoryUrl, serverConfig.getUsername(), serverConfig.getPassword(), serverConfig.getAccessToken(), serverConfig.getProxyConfForTargetUrl(artifactoryUrl), createSSLContext(serverConfig), log);
+            ecosystemUsageReporter.reportUsage(new UsageReport(PRODUCT_ID + pluginVersion, new String(DigestUtils.md5(serverConfig.getXrayUrl())), artifactoryUsageReporter.getUniqueClientId(), featureIdArray), createSSLContext(serverConfig));
         } catch (IOException | RuntimeException | NoSuchAlgorithmException | KeyStoreException |
                  KeyManagementException e) {
             log.debug("Usage report failed: " + ExceptionUtils.getRootCauseMessage(e));
