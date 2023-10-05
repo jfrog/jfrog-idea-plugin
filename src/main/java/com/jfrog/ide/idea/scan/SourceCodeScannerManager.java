@@ -40,6 +40,7 @@ import java.util.regex.Matcher;
 import static com.jfrog.ide.common.log.Utils.logError;
 import static com.jfrog.ide.common.utils.Utils.createYAMLMapper;
 import static com.jfrog.ide.idea.scan.ScannerBase.createRunnable;
+import static com.jfrog.ide.idea.scan.data.applications.JFrogApplicationsConfig.createApplicationConfigWithDefaultModule;
 import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.*;
 import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
@@ -171,6 +172,7 @@ public class SourceCodeScannerManager {
                     log.debug(String.format("Skipping %s scanning", scannerType.toString().toLowerCase()));
                     continue;
                 }
+                // Use specific scanner config if exists.
                 if (moduleConfig.getScanners() != null) {
                     scannerConfig = moduleConfig.getScanners().get(scannerType.toString().toLowerCase());
                 }
@@ -192,7 +194,7 @@ public class SourceCodeScannerManager {
         if (config.exists()) {
             return mapper.readValue(config, JFrogApplicationsConfig.class);
         }
-        return new JFrogApplicationsConfig(true);
+        return createApplicationConfigWithDefaultModule(project);
     }
 
     private void addSourceCodeScanResults(List<FileTreeNode> fileTreeNodes) {
@@ -255,7 +257,7 @@ public class SourceCodeScannerManager {
      *
      * @return a list of equivalent patterns without the use of "{}"
      */
-    static List<String> convertToSkippedFolders(String excludePattern) {
+    public static List<String> convertToSkippedFolders(String excludePattern) {
         List<String> skippedFoldersPatterns = new ArrayList<>();
         if (StringUtils.isNotBlank(excludePattern)) {
             Matcher matcher = EXCLUSIONS_REGEX_PATTERN.matcher(excludePattern);

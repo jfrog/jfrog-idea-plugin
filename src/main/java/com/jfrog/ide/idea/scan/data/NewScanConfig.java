@@ -2,11 +2,15 @@ package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class NewScanConfig {
     @JsonProperty("type")
     private SourceCodeScanType scanType;
@@ -21,24 +25,12 @@ public class NewScanConfig {
     @JsonProperty("excluded-rules")
     private List<String> excludedRules;
 
-    @SuppressWarnings("unused")
-    public NewScanConfig() {
-    }
-
-    public NewScanConfig(SourceCodeScanType scanType, List<String> roots, String language, List<String> excludePatterns, List<String> excludedRules, String output) {
-        this.scanType = scanType;
-        this.roots = roots;
-        this.language = language;
-        this.excludePatterns = excludePatterns;
-        this.excludedRules = excludedRules;
-        this.output = output;
-    }
-
     public NewScanConfig(ScanConfig inputParams) {
         this(inputParams.getScanType(),
                 inputParams.getRoots(),
                 inputParams.getLanguage(),
-                inputParams.getSkippedFolders(), inputParams.getExcludedRules(),
-                inputParams.getOutput());
+                inputParams.getOutput(),
+                inputParams.getSkippedFolders(),
+                inputParams.getExcludedRules());
     }
 }
