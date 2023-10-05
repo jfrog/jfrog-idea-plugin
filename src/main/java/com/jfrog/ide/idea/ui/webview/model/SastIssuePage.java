@@ -4,25 +4,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 
 @Getter
-public class EosIssuePage extends IssuePage {
+public class SastIssuePage extends IssuePage {
     @JsonProperty("analysisStep")
     private Location[] analysisSteps;
     private String ruleId;
 
     @SuppressWarnings("unused")
-    public EosIssuePage() {
+    public SastIssuePage() {
     }
 
-    public EosIssuePage(IssuePage issuePage) {
+    public SastIssuePage(IssuePage issuePage) {
         super(issuePage);
     }
 
-    public EosIssuePage setAnalysisSteps(Location[] analysisSteps) {
+    public SastIssuePage setAnalysisSteps(Location[] analysisSteps) {
         this.analysisSteps = analysisSteps;
         return this;
     }
 
-    public EosIssuePage setRuleID(String ruleID) {
+    public SastIssuePage setRuleID(String ruleID) {
         this.ruleId = ruleID;
         return this;
     }
