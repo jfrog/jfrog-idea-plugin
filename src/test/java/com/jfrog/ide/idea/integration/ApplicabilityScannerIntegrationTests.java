@@ -11,7 +11,7 @@ import java.util.List;
 
 public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
     private ApplicabilityScannerExecutor scanner;
-    private final static String TEST_PROJECT_PREFIX = "applicability/testProjects/";
+    private final static String TEST_PROJECT_PREFIX = "sourceCode/testProjects/";
 
     @Override
     protected void setUp() throws Exception {

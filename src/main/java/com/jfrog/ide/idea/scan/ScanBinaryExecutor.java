@@ -125,10 +125,10 @@ public abstract class ScanBinaryExecutor {
     abstract List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException, URISyntaxException;
 
     protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args, Runnable checkCanceled) throws IOException, InterruptedException {
-        return execute(inputFileBuilder, args, checkCanceled, true, binaryTargetPath.toFile().getParentFile());
+        return execute(inputFileBuilder, args, checkCanceled, false);
     }
 
-    protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args, Runnable checkCanceled, boolean createInputFile, File executionDir) throws IOException, InterruptedException {
+    protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args, Runnable checkCanceled, boolean newConfigFormat) throws IOException, InterruptedException {
         if (!shouldExecute()) {
             return List.of();
         }
@@ -142,12 +142,10 @@ public abstract class ScanBinaryExecutor {
             inputFileBuilder.output(outputFilePath.toString());
             inputFileBuilder.scanType(scanType);
             ScanConfig inputParams = inputFileBuilder.Build();
-            CommandExecutor commandExecutor = new CommandExecutor(binaryTargetPath.toString(), createEnvWithCredentials());
             args = new ArrayList<>(args);
-            if (createInputFile) {
-                inputFile = createTempRunInputFile(new ScansConfig(List.of(inputParams)));
-                args.add(inputFile.toString());
-            } else {
+            inputFile = newConfigFormat ? createTempRunInputFile(new NewScansConfig(new NewScanConfig(inputParams))) : createTempRunInputFile(new ScansConfig(List.of(inputParams)));
+            args.add(inputFile.toString());
+            if (newConfigFormat) {
                 args.add(outputFilePath.toString());
             }
 
@@ -155,7 +153,8 @@ public abstract class ScanBinaryExecutor {
             // The following logging is done outside the commandExecutor because the commandExecutor log level is set to INFO.
             //  As it is an internal binary execution, the message should be printed for DEBUG use only.
             log.debug(String.format("Executing command: %s %s", binaryTargetPath.toString(), join(" ", args)));
-            CommandResults commandResults = commandExecutor.exeCommand(executionDir, args,
+            CommandExecutor commandExecutor = new CommandExecutor(binaryTargetPath.toString(), createEnvWithCredentials());
+            CommandResults commandResults = commandExecutor.exeCommand(binaryTargetPath.toFile().getParentFile(), args,
                     null, new NullLog(), MAX_EXECUTION_MINUTES, TimeUnit.MINUTES);
 
             if (commandResults.isOk()) {
@@ -294,7 +293,7 @@ public abstract class ScanBinaryExecutor {
         }
     }
 
-    Path createTempRunInputFile(ScansConfig scanInput) throws IOException {
+    Path createTempRunInputFile(Object scanInput) throws IOException {
         ObjectMapper om = createYAMLMapper();
         Path tempDir = Files.createTempDirectory("");
         Path inputPath = Files.createTempFile(tempDir, "", ".yaml");

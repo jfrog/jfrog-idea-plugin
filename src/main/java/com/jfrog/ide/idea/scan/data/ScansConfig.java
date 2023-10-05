@@ -1,9 +1,11 @@
 package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 
 import java.util.List;
 
+@Getter
 public class ScansConfig {
     @JsonProperty("scans")
     private List<ScanConfig> scans;
@@ -14,10 +16,6 @@ public class ScansConfig {
 
     public ScansConfig(List<ScanConfig> scans) {
         this.scans = scans;
-    }
-
-    public List<ScanConfig> getScans() {
-        return scans;
     }
 
     @SuppressWarnings("unused")

@@ -1,9 +1,9 @@
 package com.jfrog.ide.idea.scan;
 
 import com.jfrog.ide.common.configuration.ServerConfig;
-import com.jfrog.ide.common.nodes.EosIssueNode;
 import com.jfrog.ide.common.nodes.FileIssueNode;
 import com.jfrog.ide.common.nodes.FileTreeNode;
+import com.jfrog.ide.common.nodes.SastIssueNode;
 import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.scan.data.PackageManagerType;
@@ -12,8 +12,6 @@ import com.jfrog.xray.client.services.entitlements.Feature;
 import org.jfrog.build.api.util.Log;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,24 +19,24 @@ import java.util.List;
 /**
  * @author Tal Arian
  */
-public class EosScannerExecutor extends ScanBinaryExecutor {
+public class SastScannerExecutor extends ScanBinaryExecutor {
     private static final List<String> SCANNER_ARGS = List.of("zd");
-    private static final boolean RUN_WITH_CONFIG_FILE = false;
+    // This variable is used to indicate that this scanner supports only the new config (input) format.
+    // In the near future, when all scanners will use only the new input file structure this variable as well
+    // as the ScanConfig and ScanConfigs classes can be safely removed.
+    private static final boolean RUN_WITH_NEW_CONFIG_FILE = true;
     private static final List<PackageManagerType> SUPPORTED_PACKAGE_TYPES = List.of(PackageManagerType.PYPI, PackageManagerType.NPM, PackageManagerType.YARN, PackageManagerType.GRADLE, PackageManagerType.MAVEN);
 
-    public EosScannerExecutor(Log log, ServerConfig serverConfig) {
+    public SastScannerExecutor(Log log, ServerConfig serverConfig) {
         this(log, serverConfig, null, true);
     }
 
-    public EosScannerExecutor(Log log, ServerConfig serverConfig, String binaryDownloadUrl, boolean useJFrogReleases) {
-        super(SourceCodeScanType.EOS, binaryDownloadUrl, log, serverConfig, useJFrogReleases);
+    public SastScannerExecutor(Log log, ServerConfig serverConfig, String binaryDownloadUrl, boolean useJFrogReleases) {
+        super(SourceCodeScanType.SAST, binaryDownloadUrl, log, serverConfig, useJFrogReleases);
     }
 
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException {
-        // The EOS scanner is expected to run on the project's root directory without a config file.
-        // inputFileBuilder roots should always contain a single root project in our use cases.
-        Path executionDir = Paths.get(inputFileBuilder.Build().getRoots().get(0));
-        return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled, RUN_WITH_CONFIG_FILE, executionDir.toFile());
+        return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled, RUN_WITH_NEW_CONFIG_FILE);
     }
 
     @Override
@@ -52,7 +50,7 @@ public class EosScannerExecutor extends ScanBinaryExecutor {
                 results.put(warning.getFilePath(), fileNode);
             }
 
-            FileIssueNode issueNode = new EosIssueNode(warning.getRuleID(),
+            FileIssueNode issueNode = new SastIssueNode(warning.getRuleID(),
                     warning.getFilePath(), warning.getLineStart(), warning.getColStart(), warning.getLineEnd(), warning.getColEnd(),
                     warning.getScannerSearchTarget(), warning.getLineSnippet(), warning.getCodeFlows(), warning.getSeverity(), warning.getRuleID());
             fileNode.addIssue(issueNode);
@@ -62,7 +60,7 @@ public class EosScannerExecutor extends ScanBinaryExecutor {
 
     @Override
     public Feature getScannerFeatureName() {
-        // TODO: change to EOS feature when Xray entitlement service support it.
+        // TODO: change to SAST feature when Xray entitlement service supports it.
         return Feature.CONTEXTUAL_ANALYSIS;
     }
 

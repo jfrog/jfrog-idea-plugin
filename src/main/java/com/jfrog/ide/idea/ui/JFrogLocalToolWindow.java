@@ -249,8 +249,8 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             navigateToFile(node);
         } else if (issueNode instanceof LicenseViolationNode license) {
             webviewManager.sendMessage(SHOW_PAGE, WebviewObjectConverter.convertLicenseToDepPage(license));
-        } else if (issueNode instanceof EosIssueNode node) {
-            webviewManager.sendMessage(SHOW_PAGE, WebviewObjectConverter.convertEosIssueToEosIssuePage(node));
+        } else if (issueNode instanceof SastIssueNode node) {
+            webviewManager.sendMessage(SHOW_PAGE, WebviewObjectConverter.convertSastIssueToSastIssuePage(node));
             navigateToFile(node);
         } else if (issueNode instanceof FileIssueNode node) {
             webviewManager.sendMessage(SHOW_PAGE, WebviewObjectConverter.convertFileIssueToIssuePage(node));
