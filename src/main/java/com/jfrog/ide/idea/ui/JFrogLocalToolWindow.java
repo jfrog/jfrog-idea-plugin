@@ -94,6 +94,8 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         DefaultActionGroup actionGroup = new DefaultActionGroup(new CollapseAllAction(componentsTree), new ExpandAllAction(componentsTree),
                 new GoToSettingsAction(), new Separator(), new ScanTimeLabelAction());
         actionGroup.addAction(ActionManager.getInstance().getAction("JFrog.StartLocalScan"), Constraints.FIRST);
+        actionGroup.addAction(ActionManager.getInstance().getAction("JFrog.StopLocalScan"), Constraints.FIRST);
+
         return createJFrogToolbar(actionGroup);
     }
 

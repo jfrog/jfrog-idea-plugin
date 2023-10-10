@@ -53,7 +53,6 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jfrog.ide.common.log.Utils.logError;
@@ -76,6 +75,8 @@ public abstract class ScannerBase {
     protected SourceCodeScannerManager sourceCodeScannerManager;
     String basePath;
     private ExecutorService executor;
+
+    @Getter
     private com.intellij.openapi.progress.ProgressIndicator progressIndicator;
 
     /**
@@ -144,6 +145,7 @@ public abstract class ScannerBase {
             // Building dependency tree
             indicator.setText("1/3: Building dependency tree");
             DepTree depTree = buildTree();
+            checkCanceled();
 
             // Sending the dependency tree to Xray for scanning
             indicator.setText("2/3: Xray scanning project dependencies");

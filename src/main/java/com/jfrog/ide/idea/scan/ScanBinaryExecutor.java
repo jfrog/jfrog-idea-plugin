@@ -157,6 +157,8 @@ public abstract class ScanBinaryExecutor {
             CommandResults commandResults = commandExecutor.exeCommand(binaryTargetPath.toFile().getParentFile(), args,
                     null, new NullLog(), MAX_EXECUTION_MINUTES, TimeUnit.MINUTES);
 
+            checkCanceled.run();
+
             if (commandResults.isOk()) {
                 log.debug(commandResults.getRes());
                 return parseOutputSarif(outputFilePath);

@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Created by romang on 3/6/17.
  */
-public class StartLocalScanAction extends AnAction {
+public class StopLocalScanAction extends AnAction {
     @Override
     public @NotNull ActionUpdateThread getActionUpdateThread() {
         return ActionUpdateThread.BGT;
@@ -22,7 +22,7 @@ public class StartLocalScanAction extends AnAction {
         if (project == null) {
             return;
         }
-        ScanManager.getInstance(project).startScan();
+        ScanManager.getInstance(project).stopScan();
     }
 
     @Override
@@ -32,6 +32,6 @@ public class StartLocalScanAction extends AnAction {
             return;
         }
         boolean isScanInProgress = ScanManager.getInstance(project).isScanInProgress();
-        e.getPresentation().setVisible(!isScanInProgress);
+        e.getPresentation().setVisible(isScanInProgress);
     }
 }
