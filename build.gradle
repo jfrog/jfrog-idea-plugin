@@ -47,7 +47,7 @@ repositories {
 }
 
 def buildInfoVersion = '2.41.6'
-def idePluginsCommonVersion = '2.2.x-20231003.090427-2'
+def idePluginsCommonVersion = '2.2.x-20231010.092858-3'
 
 dependencies {
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.15.2'
