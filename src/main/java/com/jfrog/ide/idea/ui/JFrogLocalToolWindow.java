@@ -126,6 +126,9 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             setLeftPanelContent(compTreeView);
             ApplicationManager.getApplication().invokeLater(this::resetViews);
         });
+        projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_LOCAL_CANCEL, (ApplicationEvents) () -> {
+            ApplicationManager.getApplication().invokeLater(this::initialView);
+        });
         componentsTree.addRightClickListener();
     }
 
@@ -295,5 +298,8 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         if (isInitialized) {
             refreshView(true);
         }
+    }
+    public void initialView() {
+        setLeftPanelContent(createReadyEnvView());
     }
 }

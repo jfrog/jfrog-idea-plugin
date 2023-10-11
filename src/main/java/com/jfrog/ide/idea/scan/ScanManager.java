@@ -37,6 +37,9 @@ public class ScanManager {
     private final ScannerFactory factory;
     private final SourceCodeScannerManager sourceCodeScannerManager;
     private Map<Integer, ScannerBase> scanners = Maps.newHashMap();
+    private ExecutorService executor;
+    private AtomicBoolean isScanCompleted = new AtomicBoolean(false);
+
 
     private ScanManager(@NotNull Project project) {
         this.project = project;
@@ -83,9 +86,8 @@ public class ScanManager {
         project.getMessageBus().syncPublisher(ApplicationEvents.ON_SCAN_LOCAL_STARTED).update();
         LocalComponentsTree componentsTree = LocalComponentsTree.getInstance(project);
         componentsTree.setScanningEmptyText();
-        AtomicBoolean isScanCompleted = new AtomicBoolean(false);
         Thread currScanThread = new Thread(() -> {
-            ExecutorService executor = Executors.newFixedThreadPool(3);
+            executor = Executors.newFixedThreadPool(3);
             try {
                 // Source code scanners
                 sourceCodeScannerManager.asyncScanAndUpdateResults(executor, Logger.getInstance());
@@ -123,6 +125,19 @@ public class ScanManager {
         currScanThread.start();
     }
 
+    public void stopScan() {
+        scanners.values().forEach(scanner -> {
+            if (scanner.getProgressIndicator() != null) {
+                scanner.getProgressIndicator().cancel();
+            }
+        });
+        sourceCodeScannerManager.stopScan();
+
+        project.getMessageBus().syncPublisher(ApplicationEvents.ON_SCAN_LOCAL_CANCEL).update();
+        executor.shutdownNow();
+
+    }
+
     /**
      * Handle inactive JFrog platform (free-tier) by displaying a clear warning message and a reactivation link.
      *
@@ -141,7 +156,7 @@ public class ScanManager {
     }
 
     public boolean isScanInProgress() {
-        return scanners.values().stream().anyMatch(ScannerBase::isScanInProgress);
+        return scanners.values().stream().anyMatch(ScannerBase::isScanInProgress) || sourceCodeScannerManager.isScanInProgress();
     }
 
     /**

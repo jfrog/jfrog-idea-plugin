@@ -10,6 +10,7 @@ import com.intellij.util.messages.Topic;
 public interface ApplicationEvents {
     // Scan started
     Topic<ApplicationEvents> ON_SCAN_LOCAL_STARTED = Topic.create("Local scan started", ApplicationEvents.class);
+    Topic<ApplicationEvents> ON_SCAN_LOCAL_CANCEL = Topic.create("Local scan canceled", ApplicationEvents.class);
     Topic<ApplicationEvents> ON_SCAN_CI_STARTED = Topic.create("CI scan started", ApplicationEvents.class);
 
     // Configuration changed
