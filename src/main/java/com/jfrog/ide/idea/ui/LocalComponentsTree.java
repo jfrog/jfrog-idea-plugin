@@ -61,21 +61,31 @@ public class LocalComponentsTree extends ComponentsTree {
     public void addScanResults(List<FileTreeNode> fileTreeNodes) {
         setCellRenderer(new ComponentsTreeCellRenderer());
         ApplicationManager.getApplication().invokeLater(() -> {
-            SortableChildrenTreeNode root = getModel() != null ? (SortableChildrenTreeNode) getModel().getRoot() : new SortableChildrenTreeNode();
-            for (FileTreeNode node : fileTreeNodes) {
-                FileTreeNode existingNode =(FileTreeNode) Optional.ofNullable(root.getChildren())
-                        .orElseGet(Vector::new).stream()
-                        .filter(treeNode -> ((FileTreeNode) treeNode).getFilePath().equals(node.getFilePath()))
-                        .findFirst().orElse(null);
-                if (existingNode != null) {
-                    existingNode.mergeFileTreeNode(node);
-                    continue;
-                }
-                root.add(node);
-            }
-            root.sortChildren();
-            populateTree(root);
+            doAddScanResults(fileTreeNodes);
         });
+    }
+
+    /**
+     * The primary logic of adding scan results to the components tree.
+     * NOTE: This method must be run inside EDT. It's recommended to use {@link #addScanResults(List)} instead.
+     *
+     * @param fileTreeNodes File nodes to add to the components tree.
+     */
+    void doAddScanResults(List<FileTreeNode> fileTreeNodes) {
+        SortableChildrenTreeNode root = getModel() != null ? (SortableChildrenTreeNode) getModel().getRoot() : new SortableChildrenTreeNode();
+        for (FileTreeNode node : fileTreeNodes) {
+            FileTreeNode existingNode =(FileTreeNode) Optional.ofNullable(root.getChildren())
+                    .orElseGet(Vector::new).stream()
+                    .filter(treeNode -> ((FileTreeNode) treeNode).getFilePath().equals(node.getFilePath()))
+                    .findFirst().orElse(null);
+            if (existingNode != null) {
+                existingNode.mergeFileTreeNode(node);
+                continue;
+            }
+            root.add(node);
+        }
+        root.sortChildren();
+        populateTree(root);
     }
 
     private void populateTree(DefaultMutableTreeNode root) {
