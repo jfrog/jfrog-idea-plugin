@@ -25,7 +25,10 @@ public class LocalComponentsTreeTest extends HeavyPlatformTestCase {
                 createFileTreeNodeWithIssue("path/to/file3.txt", "issue4")
         );
         ApplicationManager.getApplication().invokeAndWait(() -> tree.doAddScanResults(nodes2));
-        assertEquals(3, getTreeFileNodes(tree).size());
+        List<FileTreeNode> actualNodes = getTreeFileNodes(tree);
+        assertEquals(3, actualNodes.size());
+        FileTreeNode file1Node = actualNodes.stream().filter(fileTreeNode -> fileTreeNode.getFilePath().equals("path/to/file1.txt")).findFirst().get();
+        assertEquals(2, file1Node.getChildren().size());
     }
 
     private FileTreeNode createFileTreeNodeWithIssue(String filePath, String... issueNames) {
