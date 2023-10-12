@@ -39,7 +39,7 @@ import static com.jfrog.ide.common.utils.Utils.resolveArtifactoryUrl;
 public class Utils {
 
     public static final Path HOME_PATH = Paths.get(System.getProperty("user.home"), ".jfrog-idea-plugin");
-    public static final String PRODUCT_ID = "jfrog-idea-plugin/";
+    public static final String PRODUCT_ID = "jfrog-idea-plugin";
     public static final String PLUGIN_ID = "org.jfrog.idea";
 
     public static Path getProjectBasePath(Project project) {
@@ -76,12 +76,12 @@ public class Utils {
             return;
         }
         String pluginVersion = jfrogPlugin.getVersion();
-        ClientIdUsageReporter artifactoryUsageReporter = new ClientIdUsageReporter(PRODUCT_ID + pluginVersion, featureIdArray, log);
+        ClientIdUsageReporter artifactoryUsageReporter = new ClientIdUsageReporter(PRODUCT_ID + "/" + pluginVersion, featureIdArray, log);
         EcosystemUsageReporter ecosystemUsageReporter = new EcosystemUsageReporter(log);
         String artifactoryUrl = resolveArtifactoryUrl(serverConfig.getArtifactoryUrl(), serverConfig.getUrl());
         try {
             artifactoryUsageReporter.reportUsage(artifactoryUrl, serverConfig.getUsername(), serverConfig.getPassword(), serverConfig.getAccessToken(), serverConfig.getProxyConfForTargetUrl(artifactoryUrl), createSSLContext(serverConfig), log);
-            ecosystemUsageReporter.reportUsage(new UsageReport(PRODUCT_ID + pluginVersion, new String(DigestUtils.md5(serverConfig.getXrayUrl())), artifactoryUsageReporter.getUniqueClientId(), featureIdArray), createSSLContext(serverConfig));
+            ecosystemUsageReporter.reportUsage(new UsageReport(PRODUCT_ID, new String(DigestUtils.md5(serverConfig.getXrayUrl())), artifactoryUsageReporter.getUniqueClientId(), featureIdArray), createSSLContext(serverConfig));
         } catch (IOException | RuntimeException | NoSuchAlgorithmException | KeyStoreException |
                  KeyManagementException e) {
             log.debug("Usage report failed: " + ExceptionUtils.getRootCauseMessage(e));
