@@ -125,8 +125,8 @@ public abstract class ScannerBase {
      *
      * @return the Inspection tool corresponding to the scan-manager type.
      */
-    protected @Nullable
-    abstract AbstractInspection getInspectionTool();
+    @Nullable
+    protected abstract AbstractInspection getInspectionTool();
 
     protected void sendUsageReport() {
         ApplicationManager.getApplication().invokeLater(() -> Utils.sendUsageReport(getPackageManagerType().getName() + "-deps"));
