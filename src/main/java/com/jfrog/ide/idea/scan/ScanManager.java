@@ -103,13 +103,13 @@ public class ScanManager {
                 // Cache tree only if no errors occurred during scan.
                 if (scanners.values().stream().anyMatch(ScannerBase::isScanErrorOccurred)) {
                     componentsTree.deleteCachedTree();
+                    componentsTree.setScanErrorEmptyText();
                 } else if (scanners.values().stream().anyMatch(ScannerBase::isScanCanceled)) {
                     project.getMessageBus().syncPublisher(ApplicationEvents.ON_SCAN_LOCAL_CANCELED).update();
                 } else {
                     componentsTree.cacheTree();
-                    componentsTree.setScanErrorEmptyText();
+                    componentsTree.setNoIssuesEmptyText();
                 }
-                componentsTree.setNoIssuesEmptyText();
             } catch (JFrogInactiveEnvironmentException e) {
                 handleJfrogInactiveEnvironment(e.getRedirectUrl());
                 componentsTree.setScanErrorEmptyText();
