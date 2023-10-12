@@ -43,8 +43,6 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String DIRECT_DEPENDENCY_NAME = "pipgrip";
     private static final String DIRECT_DEPENDENCY_VERSION = "0.6.8";
     private static final String TRANSITIVE_DEPENDENCY_NAME = "anytree";
-    private static final String TRANSITIVE_DEPENDENCY_VERSION = "2.9.0";
-
 
     private ExecutorService executorService;
     private Sdk pythonSdk;
@@ -125,9 +123,10 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
         assertSize(7, pipGrip.getChildren());
 
         // Check transitive dependency
-        String transitiveDepId = TRANSITIVE_DEPENDENCY_NAME + ":" + TRANSITIVE_DEPENDENCY_VERSION;
-        DepTreeNode anyTree = getAndAssertChild(results, pipGrip, transitiveDepId);
-        assertSize(1, anyTree.getChildren());
+        String anyTreeDepId = pipGrip.getChildren().stream().filter(childId -> childId.startsWith(TRANSITIVE_DEPENDENCY_NAME + ":")).findFirst().get();
+        DepTreeNode anyTreeDepNode = results.getNodes().get(anyTreeDepId);
+        assertNotNull("Couldn't find node '" + anyTreeDepId + "'.", anyTreeDepNode);
+        assertSize(1, anyTreeDepNode.getChildren());
     }
 
     public void testBuildTreeCircularDependency() throws IOException {

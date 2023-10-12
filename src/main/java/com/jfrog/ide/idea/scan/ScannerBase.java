@@ -164,8 +164,7 @@ public abstract class ScannerBase {
 
             // Contextual Analysis
             List<FileTreeNode> applicabilityScanResults = sourceCodeScannerManager.applicabilityScan(indicator, fileTreeNodes, this::checkCanceled);
-            fileTreeNodes.addAll(applicabilityScanResults);
-            addScanResults(fileTreeNodes);
+            addScanResults(applicabilityScanResults);
 
             // Force inspections run due to changes in the displayed tree
             runInspections();

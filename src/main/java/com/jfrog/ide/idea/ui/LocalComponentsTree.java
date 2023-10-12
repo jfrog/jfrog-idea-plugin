@@ -27,10 +27,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -63,20 +60,30 @@ public class LocalComponentsTree extends ComponentsTree {
 
     public void addScanResults(List<FileTreeNode> fileTreeNodes) {
         setCellRenderer(new ComponentsTreeCellRenderer());
-        for (FileTreeNode node : fileTreeNodes) {
-            ApplicationManager.getApplication().invokeLater(() -> appendProject(node));
-        }
+        ApplicationManager.getApplication().invokeLater(() -> {
+            doAddScanResults(fileTreeNodes);
+        });
     }
 
-    private void appendProject(FileTreeNode filteredRoot) {
-        SortableChildrenTreeNode root;
-        if (getModel() == null) {
-            root = new SortableChildrenTreeNode();
-        } else {
-            root = (SortableChildrenTreeNode) getModel().getRoot();
+    /**
+     * The primary logic of adding scan results to the components tree.
+     * NOTE: This method must be run inside EDT. It's recommended to use {@link #addScanResults(List)} instead.
+     *
+     * @param fileTreeNodes File nodes to add to the components tree.
+     */
+    void doAddScanResults(List<FileTreeNode> fileTreeNodes) {
+        SortableChildrenTreeNode root = getModel() != null ? (SortableChildrenTreeNode) getModel().getRoot() : new SortableChildrenTreeNode();
+        for (FileTreeNode node : fileTreeNodes) {
+            FileTreeNode existingNode =(FileTreeNode) Optional.ofNullable(root.getChildren())
+                    .orElseGet(Vector::new).stream()
+                    .filter(treeNode -> ((FileTreeNode) treeNode).getFilePath().equals(node.getFilePath()))
+                    .findFirst().orElse(null);
+            if (existingNode != null) {
+                existingNode.mergeFileTreeNode(node);
+                continue;
+            }
+            root.add(node);
         }
-
-        root.add(filteredRoot);
         root.sortChildren();
         populateTree(root);
     }
