@@ -7,11 +7,4 @@ pluginManagement {
     }
 }
 
-sourceControl {
-    gitRepository("https://github.com/asafgabai/ide-plugins-common.git") {
-        producesModule("com.jfrog.ide:ide-plugins-common")
-    }
-}
-
-
 rootProject.name = 'jfrog-idea-plugin'
