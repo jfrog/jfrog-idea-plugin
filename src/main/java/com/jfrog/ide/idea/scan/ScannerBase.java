@@ -75,8 +75,6 @@ public abstract class ScannerBase {
     protected SourceCodeScannerManager sourceCodeScannerManager;
     String basePath;
     private ExecutorService executor;
-
-    @Getter
     private com.intellij.openapi.progress.ProgressIndicator progressIndicator;
 
     /**
@@ -125,7 +123,8 @@ public abstract class ScannerBase {
      *
      * @return the Inspection tool corresponding to the scan-manager type.
      */
-    protected @Nullable abstract AbstractInspection getInspectionTool();
+    protected @Nullable
+    abstract AbstractInspection getInspectionTool();
 
     protected void sendUsageReport() {
         ApplicationManager.getApplication().invokeLater(() -> Utils.sendUsageReport(getPackageManagerType().getName() + "-deps"));
@@ -317,6 +316,15 @@ public abstract class ScannerBase {
 
         };
         executor.submit(createRunnable(scanAndUpdateTask, latch, progressIndicator, log));
+    }
+
+    /**
+     * Stop the current scan.
+     */
+    void stopScan() {
+        if (progressIndicator != null) {
+            progressIndicator.cancel();
+        }
     }
 
     /**

@@ -126,7 +126,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             setLeftPanelContent(compTreeView);
             ApplicationManager.getApplication().invokeLater(this::resetViews);
         });
-        projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_LOCAL_CANCEL, (ApplicationEvents) () -> {
+        projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_LOCAL_CANCELED, (ApplicationEvents) () -> {
             ApplicationManager.getApplication().invokeLater(this::initialView);
         });
         componentsTree.addRightClickListener();
@@ -148,7 +148,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             return;
         }
         if (componentsTree.isCacheEmpty() && !ScanManager.getInstance(project).isScanInProgress()) {
-            setLeftPanelContent(createReadyEnvView());
+            initialView();
             return;
         }
         setLeftPanelContent(compTreeView);
@@ -299,6 +299,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             refreshView(true);
         }
     }
+
     public void initialView() {
         setLeftPanelContent(createReadyEnvView());
     }

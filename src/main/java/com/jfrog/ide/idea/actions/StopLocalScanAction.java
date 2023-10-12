@@ -8,7 +8,7 @@ import com.jfrog.ide.idea.scan.ScanManager;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Created by romang on 3/6/17.
+ * Created by tala on 10/10/23.
  */
 public class StopLocalScanAction extends AnAction {
     @Override

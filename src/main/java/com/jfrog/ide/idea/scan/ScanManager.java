@@ -38,7 +38,6 @@ public class ScanManager {
     private final SourceCodeScannerManager sourceCodeScannerManager;
     private Map<Integer, ScannerBase> scanners = Maps.newHashMap();
     private ExecutorService executor;
-    private AtomicBoolean isScanCompleted = new AtomicBoolean(false);
 
 
     private ScanManager(@NotNull Project project) {
@@ -86,6 +85,7 @@ public class ScanManager {
         project.getMessageBus().syncPublisher(ApplicationEvents.ON_SCAN_LOCAL_STARTED).update();
         LocalComponentsTree componentsTree = LocalComponentsTree.getInstance(project);
         componentsTree.setScanningEmptyText();
+        AtomicBoolean isScanCompleted = new AtomicBoolean(false);
         Thread currScanThread = new Thread(() -> {
             executor = Executors.newFixedThreadPool(3);
             try {
@@ -112,6 +112,7 @@ public class ScanManager {
             } catch (JFrogInactiveEnvironmentException e) {
                 handleJfrogInactiveEnvironment(e.getRedirectUrl());
             } catch (IOException | RuntimeException | InterruptedException e) {
+                isScanCompleted.set(true);
                 logError(Logger.getInstance(), ExceptionUtils.getRootCauseMessage(e), e, true);
             } finally {
                 executor.shutdownNow();
@@ -126,16 +127,10 @@ public class ScanManager {
     }
 
     public void stopScan() {
-        scanners.values().forEach(scanner -> {
-            if (scanner.getProgressIndicator() != null) {
-                scanner.getProgressIndicator().cancel();
-            }
-        });
+        executor.shutdown();
+        scanners.values().forEach(ScannerBase::stopScan);
         sourceCodeScannerManager.stopScan();
-
-        project.getMessageBus().syncPublisher(ApplicationEvents.ON_SCAN_LOCAL_CANCEL).update();
-        executor.shutdownNow();
-
+        project.getMessageBus().syncPublisher(ApplicationEvents.ON_SCAN_LOCAL_CANCELED).update();
     }
 
     /**
