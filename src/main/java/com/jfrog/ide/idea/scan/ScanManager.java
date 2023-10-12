@@ -26,7 +26,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jfrog.ide.common.log.Utils.logError;
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBuilder;
@@ -85,7 +84,6 @@ public class ScanManager {
         project.getMessageBus().syncPublisher(ApplicationEvents.ON_SCAN_LOCAL_STARTED).update();
         LocalComponentsTree componentsTree = LocalComponentsTree.getInstance(project);
         componentsTree.setScanningEmptyText();
-        AtomicBoolean isScanCompleted = new AtomicBoolean(false);
         Thread currScanThread = new Thread(() -> {
             executor = Executors.newFixedThreadPool(3);
             try {
@@ -103,24 +101,23 @@ public class ScanManager {
                     logError(Logger.getInstance(), "Scan timeout of " + SCAN_TIMEOUT_MINUTES + " minutes elapsed. The scan is being canceled.", true);
                 }
                 // Cache tree only if no errors occurred during scan.
-                if (scanners.values().stream().anyMatch(ScannerBase::isScanInterrupted)) {
+                if (scanners.values().stream().anyMatch(ScannerBase::isScanErrorOccurred)) {
                     componentsTree.deleteCachedTree();
+                } else if (scanners.values().stream().anyMatch(ScannerBase::isScanCanceled)) {
+                    project.getMessageBus().syncPublisher(ApplicationEvents.ON_SCAN_LOCAL_CANCELED).update();
                 } else {
-                    isScanCompleted.set(true);
                     componentsTree.cacheTree();
-                }
-            } catch (JFrogInactiveEnvironmentException e) {
-                handleJfrogInactiveEnvironment(e.getRedirectUrl());
-            } catch (IOException | RuntimeException | InterruptedException e) {
-                isScanCompleted.set(true);
-                logError(Logger.getInstance(), ExceptionUtils.getRootCauseMessage(e), e, true);
-            } finally {
-                executor.shutdownNow();
-                if (isScanCompleted.get()) {
-                    componentsTree.setNoIssuesEmptyText();
-                } else {
                     componentsTree.setScanErrorEmptyText();
                 }
+                componentsTree.setNoIssuesEmptyText();
+            } catch (JFrogInactiveEnvironmentException e) {
+                handleJfrogInactiveEnvironment(e.getRedirectUrl());
+                componentsTree.setScanErrorEmptyText();
+            } catch (IOException | RuntimeException | InterruptedException e) {
+                logError(Logger.getInstance(), ExceptionUtils.getRootCauseMessage(e), e, true);
+                componentsTree.setScanErrorEmptyText();
+            } finally {
+                executor.shutdownNow();
             }
         });
         currScanThread.start();
@@ -130,7 +127,6 @@ public class ScanManager {
         executor.shutdown();
         scanners.values().forEach(ScannerBase::stopScan);
         sourceCodeScannerManager.stopScan();
-        project.getMessageBus().syncPublisher(ApplicationEvents.ON_SCAN_LOCAL_CANCELED).update();
     }
 
     /**

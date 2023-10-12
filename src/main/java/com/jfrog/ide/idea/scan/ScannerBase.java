@@ -69,7 +69,9 @@ public abstract class ScannerBase {
     private final Log log;
     // Lock to prevent multiple simultaneous scans
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
-    private final AtomicBoolean scanInterrupted = new AtomicBoolean(false);
+    private final AtomicBoolean scanError = new AtomicBoolean(false);
+    private final AtomicBoolean scanCanceled = new AtomicBoolean(false);
+
     private ScanLogic scanLogic;
     protected Project project;
     protected SourceCodeScannerManager sourceCodeScannerManager;
@@ -150,6 +152,7 @@ public abstract class ScannerBase {
             indicator.setText("2/3: Xray scanning project dependencies");
             log.debug("Start scan for '" + basePath + "'.");
             Map<String, DependencyNode> results = scanLogic.scanArtifacts(depTree, serverConfig, indicator, prefix, this::checkCanceled);
+            checkCanceled();
 
             indicator.setText("3/3: Finalizing");
             if (results == null || results.isEmpty()) {
@@ -169,9 +172,9 @@ public abstract class ScannerBase {
 
         } catch (ProcessCanceledException e) {
             log.info("Xray scan was canceled");
-            scanInterrupted.set(true);
+            scanCanceled.set(true);
         } catch (Exception e) {
-            scanInterrupted.set(true);
+            scanError.set(true);
             logError(log, "Xray scan failed", e, true);
         }
     }
@@ -311,7 +314,7 @@ public abstract class ScannerBase {
             @Override
             public void onThrowable(@NotNull Throwable error) {
                 log.error(ExceptionUtils.getRootCauseMessage(error));
-                scanInterrupted.set(true);
+                scanError.set(true);
             }
 
         };
@@ -431,8 +434,12 @@ public abstract class ScannerBase {
         return this.scanInProgress.get();
     }
 
-    boolean isScanInterrupted() {
-        return this.scanInterrupted.get();
+    boolean isScanErrorOccurred() {
+        return this.scanError.get();
+    }
+
+    boolean isScanCanceled() {
+        return this.scanCanceled.get();
     }
 
     public String getProjectPath() {
