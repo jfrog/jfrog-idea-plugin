@@ -94,7 +94,9 @@ public class SourceCodeScannerManager {
                     scanResults.addAll(applicabilityResults);
                 }
             }
-        } catch (IOException | InterruptedException | NullPointerException e) {
+        } catch (InterruptedException e) {
+            logError(Logger.getInstance(), "Scan canceled due to a user request or timeout.", false);
+        } catch (IOException | NullPointerException e) {
             logError(Logger.getInstance(), "Failed to scan source code", e, true);
         } finally {
             scanInProgress.set(false);
@@ -149,6 +151,12 @@ public class SourceCodeScannerManager {
 
         };
         executor.submit(createRunnable(sourceCodeScanTask, latch, progressIndicator, log));
+    }
+
+    public void stopScan() {
+        if (progressIndicator != null) {
+            progressIndicator.cancel();
+        }
     }
 
     private void sourceCodeScanAndUpdate(ProgressIndicator indicator, Runnable checkCanceled, Logger log) throws IOException {
@@ -312,5 +320,9 @@ public class SourceCodeScannerManager {
         scanners.put(SourceCodeScanType.IAC, new IACScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig()));
         scanners.put(SourceCodeScanType.SAST, new SastScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig()));
         return scanners;
+    }
+
+    public boolean isScanInProgress() {
+        return this.scanInProgress.get();
     }
 }
