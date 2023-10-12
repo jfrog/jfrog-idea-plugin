@@ -90,14 +90,19 @@
             <action id="JFrog.FloatingStartLocalScan"
                     class="com.jfrog.ide.idea.actions.StartLocalScanAction"
                     text="Trigger Scan"
-                    description="Trigger JFrog Scan"
+                    description="Trigger JFrog scan"
                     icon="/icons/jfrog_icon.svg"/>
         </group>
         <action id="JFrog.StartLocalScan"
                 class="com.jfrog.ide.idea.actions.StartLocalScanAction"
                 text="Trigger Scan"
-                description="Trigger JFrog Scan"
+                description="Trigger JFrog scan"
                 icon="AllIcons.Actions.Execute"/>
+        <action id="JFrog.StopLocalScan"
+                class="com.jfrog.ide.idea.actions.StopLocalScanAction"
+                text="Stop Scan"
+                description="Cancel all JFrog scan tasks"
+                icon="AllIcons.Actions.Suspend"/>
         <action id="JFrog.RefreshBuilds"
                 class="com.jfrog.ide.idea.actions.RefreshBuildsAction"
                 text="Refresh Builds"

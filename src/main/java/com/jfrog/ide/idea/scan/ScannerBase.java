@@ -53,7 +53,6 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jfrog.ide.common.log.Utils.logError;
@@ -70,7 +69,9 @@ public abstract class ScannerBase {
     private final Log log;
     // Lock to prevent multiple simultaneous scans
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
-    private final AtomicBoolean scanInterrupted = new AtomicBoolean(false);
+    private final AtomicBoolean scanError = new AtomicBoolean(false);
+    private final AtomicBoolean scanCanceled = new AtomicBoolean(false);
+
     private ScanLogic scanLogic;
     protected Project project;
     protected SourceCodeScannerManager sourceCodeScannerManager;
@@ -124,7 +125,8 @@ public abstract class ScannerBase {
      *
      * @return the Inspection tool corresponding to the scan-manager type.
      */
-    protected @Nullable abstract AbstractInspection getInspectionTool();
+    @Nullable
+    protected abstract AbstractInspection getInspectionTool();
 
     protected void sendUsageReport() {
         ApplicationManager.getApplication().invokeLater(() -> Utils.sendUsageReport(getPackageManagerType().getName() + "-deps"));
@@ -144,11 +146,13 @@ public abstract class ScannerBase {
             // Building dependency tree
             indicator.setText("1/3: Building dependency tree");
             DepTree depTree = buildTree();
+            checkCanceled();
 
             // Sending the dependency tree to Xray for scanning
             indicator.setText("2/3: Xray scanning project dependencies");
             log.debug("Start scan for '" + basePath + "'.");
             Map<String, DependencyNode> results = scanLogic.scanArtifacts(depTree, serverConfig, indicator, prefix, this::checkCanceled);
+            checkCanceled();
 
             indicator.setText("3/3: Finalizing");
             if (results == null || results.isEmpty()) {
@@ -167,9 +171,9 @@ public abstract class ScannerBase {
 
         } catch (ProcessCanceledException e) {
             log.info("Xray scan was canceled");
-            scanInterrupted.set(true);
+            scanCanceled.set(true);
         } catch (Exception e) {
-            scanInterrupted.set(true);
+            scanError.set(true);
             logError(log, "Xray scan failed", e, true);
         }
     }
@@ -309,11 +313,20 @@ public abstract class ScannerBase {
             @Override
             public void onThrowable(@NotNull Throwable error) {
                 log.error(ExceptionUtils.getRootCauseMessage(error));
-                scanInterrupted.set(true);
+                scanError.set(true);
             }
 
         };
         executor.submit(createRunnable(scanAndUpdateTask, latch, progressIndicator, log));
+    }
+
+    /**
+     * Stop the current scan.
+     */
+    void stopScan() {
+        if (progressIndicator != null) {
+            progressIndicator.cancel();
+        }
     }
 
     /**
@@ -420,8 +433,12 @@ public abstract class ScannerBase {
         return this.scanInProgress.get();
     }
 
-    boolean isScanInterrupted() {
-        return this.scanInterrupted.get();
+    boolean isScanErrorOccurred() {
+        return this.scanError.get();
+    }
+
+    boolean isScanCanceled() {
+        return this.scanCanceled.get();
     }
 
     public String getProjectPath() {

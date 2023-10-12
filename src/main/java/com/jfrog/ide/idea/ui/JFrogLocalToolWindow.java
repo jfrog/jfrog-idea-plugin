@@ -94,6 +94,8 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         DefaultActionGroup actionGroup = new DefaultActionGroup(new CollapseAllAction(componentsTree), new ExpandAllAction(componentsTree),
                 new GoToSettingsAction(), new Separator(), new ScanTimeLabelAction());
         actionGroup.addAction(ActionManager.getInstance().getAction("JFrog.StartLocalScan"), Constraints.FIRST);
+        actionGroup.addAction(ActionManager.getInstance().getAction("JFrog.StopLocalScan"), Constraints.FIRST);
+
         return createJFrogToolbar(actionGroup);
     }
 
@@ -124,6 +126,9 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             setLeftPanelContent(compTreeView);
             ApplicationManager.getApplication().invokeLater(this::resetViews);
         });
+        projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_LOCAL_CANCELED, (ApplicationEvents) () -> {
+            ApplicationManager.getApplication().invokeLater(this::initialView);
+        });
         componentsTree.addRightClickListener();
     }
 
@@ -143,7 +148,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             return;
         }
         if (componentsTree.isCacheEmpty() && !ScanManager.getInstance(project).isScanInProgress()) {
-            setLeftPanelContent(createReadyEnvView());
+            initialView();
             return;
         }
         setLeftPanelContent(compTreeView);
@@ -293,5 +298,9 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         if (isInitialized) {
             refreshView(true);
         }
+    }
+
+    public void initialView() {
+        setLeftPanelContent(createReadyEnvView());
     }
 }
