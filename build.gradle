@@ -24,15 +24,15 @@ intellij {
     type = intellijType
     plugins = ['gradle', 'maven', 'Groovy', 'properties', 'java', 'Kotlin', 'org.jetbrains.plugins.go:223.8617.56', "PythonCore:223.8617.56"]
     pluginName = 'JFrog'
-    updateSinceUntilBuild = false
-}
-
-runPluginVerifier {
-    ideVersions = [intellijType + "-" + sandboxVersion]
 }
 
 runIde {
     jvmArgs '-Xmx2G'
+}
+
+patchPluginXml {
+    sinceBuild = "223.4884.69"
+    untilBuild = ""
 }
 
 repositories {
