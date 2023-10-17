@@ -7,7 +7,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.jfrog.ide.idea.inspections.upgradeversion.GradleKotlinUpgradeVersion;
 import com.jfrog.ide.idea.inspections.upgradeversion.UpgradeVersion;
 import com.jfrog.ide.idea.utils.Descriptor;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.psi.*;
 

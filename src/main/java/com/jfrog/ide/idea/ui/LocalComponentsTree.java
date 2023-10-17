@@ -15,7 +15,7 @@ import com.jfrog.ide.idea.navigation.NavigationTarget;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.ui.menus.ToolbarPopupMenu;
 import com.jfrog.ide.idea.utils.Utils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;

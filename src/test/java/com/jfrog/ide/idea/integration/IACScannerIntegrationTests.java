@@ -5,7 +5,7 @@ import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.IACScannerExecutor;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.List;

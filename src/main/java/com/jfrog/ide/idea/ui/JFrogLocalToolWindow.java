@@ -27,7 +27,7 @@ import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
 import com.jfrog.ide.idea.ui.webview.WebviewManager;
 import com.jfrog.ide.idea.ui.webview.WebviewObjectConverter;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;

@@ -12,7 +12,7 @@ import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
 import com.jfrog.ide.idea.log.Logger;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jfrog.build.extractor.scan.DependencyTree;
