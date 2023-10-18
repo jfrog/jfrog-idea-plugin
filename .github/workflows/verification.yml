@@ -1,12 +1,10 @@
-name: Test
+name: "Compatibility verification"
 
 on: [ push, pull_request ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
     name: Compatibility verification
     steps:
       - uses: actions/checkout@v3
