@@ -36,7 +36,7 @@ patchPluginXml {
 }
 
 runPluginVerifier {
-    freeArgs = ["-Dplugin.verifier.cache.dir.max.space=2048"]
+    freeArgs = ["-Dplugin.verifier.cache.dir.max.space=8192"]
 }
 
 repositories {
