@@ -35,6 +35,10 @@ patchPluginXml {
     untilBuild = ""
 }
 
+runPluginVerifier {
+    freeArgs = ["-Dplugin.verifier.cache.dir.max.space=2048"]
+}
+
 repositories {
     mavenLocal()
     mavenCentral()
