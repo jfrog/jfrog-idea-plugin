@@ -32,11 +32,9 @@ runIde {
 
 patchPluginXml {
     sinceBuild = "223.4884.69"
+    // Explicitly setting this to an empty string makes the plugin compatible with all IDE versions up to the latest one.
+    // Removing this line will limit compatibility to IDE versions up to 'sandboxVersion'.
     untilBuild = ""
-}
-
-runPluginVerifier {
-    freeArgs = ["-Dplugin.verifier.cache.dir.max.space=8192"]
 }
 
 repositories {
