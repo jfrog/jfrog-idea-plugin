@@ -9,7 +9,7 @@ import com.jfrog.ide.idea.ui.menus.SelectAllCheckbox;
 import com.jfrog.ide.idea.ui.menus.SelectionCheckbox;
 import com.jfrog.ide.idea.ui.menus.ToolbarPopupMenu;
 import org.apache.commons.compress.utils.Lists;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;

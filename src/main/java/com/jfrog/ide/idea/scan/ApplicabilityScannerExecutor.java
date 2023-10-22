@@ -9,7 +9,7 @@ import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
 import com.jfrog.xray.client.services.entitlements.Feature;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.api.util.Log;
 
 import java.io.IOException;

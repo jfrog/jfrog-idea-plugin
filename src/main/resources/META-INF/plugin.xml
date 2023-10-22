@@ -36,7 +36,6 @@
         ]]>
     </change-notes>
 
-    <idea-version since-build="223.4884.69"/>
     <depends>com.intellij.modules.lang</depends>
     <depends config-file="with-gradle.xml" optional="true">com.intellij.gradle</depends>
     <depends config-file="with-groovy.xml" optional="true">org.intellij.groovy</depends>

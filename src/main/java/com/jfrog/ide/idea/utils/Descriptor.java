@@ -1,6 +1,6 @@
 package com.jfrog.ide.idea.utils;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Represents all supported file descriptor types.

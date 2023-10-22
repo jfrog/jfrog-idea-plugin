@@ -9,7 +9,7 @@ import com.jfrog.ide.common.nodes.subentities.Severity;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.ui.utils.IconUtils;
 import com.jfrog.ide.idea.utils.Utils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

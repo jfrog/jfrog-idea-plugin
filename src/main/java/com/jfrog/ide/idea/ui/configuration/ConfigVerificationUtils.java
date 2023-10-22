@@ -2,7 +2,7 @@ package com.jfrog.ide.idea.ui.configuration;
 
 import com.intellij.openapi.options.ConfigurationException;
 import com.jfrog.ide.common.configuration.ServerConfig;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.nio.file.FileSystems;
