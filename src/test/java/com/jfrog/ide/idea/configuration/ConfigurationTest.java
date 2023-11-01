@@ -21,6 +21,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String JFROG_PROJECT = "ideaTest";
     private static final int CONNECTION_TIMEOUT = 70;
     private static final int CONNECTION_RETRIES = 5;
+    private static final String CUSTOM_RESOURCES_REPO = "releases";
     private static final String PASSWORD = "prince";
     private static final String USERNAME = "diana";
     private static final String WATCH = "heimdall";
@@ -81,6 +82,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
         assertEquals(PASSWORD, actualServerConfig.getPassword());
         assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
         assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
+        assertEquals(CUSTOM_RESOURCES_REPO, actualServerConfig.getCustomResourcesRepo());
         assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
         assertEquals(JFROG_PROJECT, actualServerConfig.getProject());
         assertEquals(WATCH, actualServerConfig.getWatches());
@@ -165,6 +167,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
                 .setPassword(PASSWORD)
                 .setConnectionRetries(CONNECTION_RETRIES)
                 .setConnectionTimeout(CONNECTION_TIMEOUT)
+                .setCustomResourcesRepo(CUSTOM_RESOURCES_REPO)
                 .setExcludedPaths(EXCLUDED_PATHS)
                 .setProject(JFROG_PROJECT)
                 .setWatches(WATCH)

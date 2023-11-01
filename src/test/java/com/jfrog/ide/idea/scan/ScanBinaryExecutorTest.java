@@ -1,7 +1,6 @@
 package com.jfrog.ide.idea.scan;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jfrog.ide.idea.ServerConfigStub;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
 import com.jfrog.ide.idea.scan.data.ScansConfig;
@@ -21,10 +20,9 @@ import static com.jfrog.ide.common.utils.Utils.createYAMLMapper;
  * @author tala
  **/
 public class ScanBinaryExecutorTest extends TestCase {
-    private final ScanBinaryExecutor scanner = new ApplicabilityScannerExecutor(new NullLog(), new ServerConfigStub());
+    private final ScanBinaryExecutor scanner = new ApplicabilityScannerExecutor(new NullLog());
     private final Path SIMPLE_OUTPUT = new File("src/test/resources/sourceCode/simple_output.sarif").toPath();
     private final Path NOT_APPLIC_OUTPUT = new File("src/test/resources/sourceCode/not_applic_output.sarif").toPath();
-
 
     public void testInputBuilder() throws IOException {
         ScanConfig.Builder inputFileBuilder = new ScanConfig.Builder();
@@ -85,7 +83,17 @@ public class ScanBinaryExecutorTest extends TestCase {
         assertFalse(parsedOutput.get(2).isApplicable());
         assertEquals("applic_CVE-2022-29019", parsedOutput.get(3).getRuleID());
         assertFalse(parsedOutput.get(3).isApplicable());
+    }
 
+    public void testGetBinaryDownloadURL() {
+        final String customRepoName = "test-releases-repo";
+        final String expectedCustomRepoUrl = "test-releases-repo/artifactory/xsc-gen-exe-analyzer-manager-local/";
+        final String expectedNoCustomRepoUrl = "xsc-gen-exe-analyzer-manager-local/";
+
+        String actualNoCustomRepoUrl = scanner.getBinaryDownloadURL(null);
+        assertTrue(actualNoCustomRepoUrl.startsWith(expectedNoCustomRepoUrl));
+        String actualCustomRepoUrl = scanner.getBinaryDownloadURL(customRepoName);
+        assertTrue(actualCustomRepoUrl.startsWith(expectedCustomRepoUrl));
     }
 
     private ScansConfig readScansConfigYAML(Path inputPath) throws IOException {

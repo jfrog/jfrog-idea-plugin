@@ -18,7 +18,7 @@ public class IACScannerIntegrationTests extends BaseIntegrationTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        scanner = new IACScannerExecutor(Logger.getInstance(), serverConfig, binaryDownloadUrl, useReleases);
+        scanner = new IACScannerExecutor(Logger.getInstance());
     }
 
     public void testIACScanner() throws IOException, InterruptedException {

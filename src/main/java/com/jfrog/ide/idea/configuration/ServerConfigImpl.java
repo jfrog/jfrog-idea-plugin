@@ -100,6 +100,8 @@ public class ServerConfigImpl implements ServerConfig {
     private Integer connectionRetries;
     @Tag
     private Integer connectionTimeout;
+    @Tag
+    private String customResourcesRepo;
     // The subsystem key of the plugin configuration in the PasswordSafe
     @Transient
     private String jfrogSettingsCredentialsKey = JFROG_SETTINGS_KEY;
@@ -121,6 +123,7 @@ public class ServerConfigImpl implements ServerConfig {
         this.excludedPaths = builder.excludedPaths;
         this.connectionRetries = builder.connectionRetries;
         this.connectionTimeout = builder.connectionTimeout;
+        this.customResourcesRepo = builder.customResourcesRepo;
         this.jfrogSettingsCredentialsKey = builder.jfrogSettingsCredentialsKey;
     }
 
@@ -155,13 +158,14 @@ public class ServerConfigImpl implements ServerConfig {
                 Objects.equals(getWatches(), other.getWatches()) &&
                 Objects.equals(getExcludedPaths(), other.getExcludedPaths()) &&
                 getConnectionRetries() == other.getConnectionRetries() &&
-                getConnectionTimeout() == other.getConnectionTimeout();
+                getConnectionTimeout() == other.getConnectionTimeout() &&
+                getCustomResourcesRepo() == other.getCustomResourcesRepo();
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(getConnectionType(), getUrl(), getXrayUrl(), getArtifactoryUrl(), getPassword(), getAccessToken(),
-                getUsername(), getProject(), getExcludedPaths(), getConnectionRetries(), getConnectionTimeout());
+                getUsername(), getProject(), getExcludedPaths(), getConnectionRetries(), getConnectionTimeout(), getCustomResourcesRepo());
     }
 
     @Override
@@ -255,6 +259,11 @@ public class ServerConfigImpl implements ServerConfig {
     @Override
     public int getConnectionTimeout() {
         return defaultIfNull(this.connectionTimeout, ConnectionTimeoutSpinner.RANGE.initial);
+    }
+
+    @Override
+    public String getCustomResourcesRepo() {
+        return this.customResourcesRepo;
     }
 
     public String getJFrogSettingsCredentialsKey() {
@@ -402,6 +411,10 @@ public class ServerConfigImpl implements ServerConfig {
         this.connectionTimeout = connectionTimeout;
     }
 
+    void setCustomResourcesRepo(String customResourcesRepo) {
+        this.customResourcesRepo = customResourcesRepo;
+    }
+
     public void setJFrogSettingsCredentialsKey(String jfrogSettingsCredentialsKey) {
         this.jfrogSettingsCredentialsKey = jfrogSettingsCredentialsKey;
     }
@@ -505,6 +518,7 @@ public class ServerConfigImpl implements ServerConfig {
         private String watches;
         private int connectionRetries;
         private int connectionTimeout;
+        private String customResourcesRepo;
 
         public ServerConfigImpl build() {
             return new ServerConfigImpl(this);
@@ -574,6 +588,11 @@ public class ServerConfigImpl implements ServerConfig {
 
         public Builder setConnectionTimeout(int connectionTimeout) {
             this.connectionTimeout = connectionTimeout;
+            return this;
+        }
+
+        public Builder setCustomResourcesRepo(String customResourcesRepo) {
+            this.customResourcesRepo = customResourcesRepo;
             return this;
         }
 

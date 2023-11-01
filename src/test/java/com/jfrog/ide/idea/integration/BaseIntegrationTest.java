@@ -19,12 +19,9 @@ import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 public abstract class BaseIntegrationTest extends HeavyPlatformTestCase {
     public static final String ENV_PLATFORM_URL = "JFROG_IDE_PLATFORM_URL";
     public static final String ENV_ACCESS_TOKEN = "JFROG_IDE_ACCESS_TOKEN";
-    protected String binaryDownloadUrl;
-    protected boolean useReleases;
     protected ServerConfigImpl serverConfig;
     private final static Path TEST_PROJECT_PATH = new File("src/test/resources/").toPath();
-    private static final String ENV_BINARY_DOWNLOAD_URL = "JFROG_IDE_ANALYZER_MANAGER_DOWNLOAD_URL";
-    private static final String ENV_DOWNLOAD_FROM_JFROG_RELEASES = "JFROG_IDE_DOWNLOAD_FROM_JFROG_RELEASES";
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -38,8 +35,6 @@ public abstract class BaseIntegrationTest extends HeavyPlatformTestCase {
         if (!serverConfig.isXrayConfigured()) {
             failSetup();
         }
-        binaryDownloadUrl = System.getenv(ENV_BINARY_DOWNLOAD_URL);
-        useReleases = Boolean.parseBoolean(defaultIfEmpty(System.getenv(ENV_DOWNLOAD_FROM_JFROG_RELEASES), "true"));
     }
 
     private ServerConfigImpl createServerConfigFromEnv() {
@@ -69,7 +64,7 @@ public abstract class BaseIntegrationTest extends HeavyPlatformTestCase {
     }
 
     private void failSetup() {
-        String message = String.format("Failed to load JFrog platform credentials.\n Looking for Environment variables %s and %s\n Or installed JFrog CLI with configured server.", ENV_PLATFORM_URL, ENV_ACCESS_TOKEN);
+        String message = String.format("Failed to load JFrog Platform credentials.\nLooking for environment variables %s and %s\nor installed JFrog CLI with configured server.", ENV_PLATFORM_URL, ENV_ACCESS_TOKEN);
         Assert.fail(message);
     }
 

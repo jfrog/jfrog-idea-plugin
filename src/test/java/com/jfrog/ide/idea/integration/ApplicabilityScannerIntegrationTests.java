@@ -16,7 +16,7 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        scanner = new ApplicabilityScannerExecutor(Logger.getInstance(), serverConfig, binaryDownloadUrl, useReleases);
+        scanner = new ApplicabilityScannerExecutor(Logger.getInstance());
     }
 
     public void testApplicabilityScannerJsProjectNotApplicable() throws IOException, InterruptedException {

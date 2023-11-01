@@ -66,6 +66,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         serverConfig.setWatches(this.serverConfig.getWatches());
         serverConfig.setConnectionRetries(this.serverConfig.getConnectionRetries());
         serverConfig.setConnectionTimeout(this.serverConfig.getConnectionTimeout());
+        serverConfig.setCustomResourcesRepo(this.serverConfig.getCustomResourcesRepo());
 
         GlobalSettings settings = new GlobalSettings();
         settings.serverConfig = serverConfig;
@@ -130,6 +131,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         this.serverConfig.setExcludedPaths(serverConfig.getExcludedPaths());
         this.serverConfig.setConnectionRetries(serverConfig.getConnectionRetries());
         this.serverConfig.setConnectionTimeout(serverConfig.getConnectionTimeout());
+        this.serverConfig.setCustomResourcesRepo(serverConfig.getCustomResourcesRepo());
         this.serverConfig.setPolicyType(serverConfig.getPolicyType());
         this.serverConfig.setProject(serverConfig.getProject());
         this.serverConfig.setWatches(serverConfig.getWatches());

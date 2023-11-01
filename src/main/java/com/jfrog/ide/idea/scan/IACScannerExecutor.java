@@ -22,12 +22,8 @@ public class IACScannerExecutor extends ScanBinaryExecutor {
     private static final List<String> SCANNER_ARGS = List.of("iac");
     private static final String ISSUE_TITLE = "Infrastructure as Code Vulnerability";
 
-    public IACScannerExecutor(Log log, ServerConfig serverConfig) {
-        this(log, serverConfig, null, true);
-    }
-
-    public IACScannerExecutor(Log log, ServerConfig serverConfig, String binaryDownloadUrl, boolean useJFrogReleases) {
-        super(SourceCodeScanType.IAC, binaryDownloadUrl, log, serverConfig, useJFrogReleases);
+    public IACScannerExecutor(Log log) {
+        super(SourceCodeScanType.IAC, log);
     }
 
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException {

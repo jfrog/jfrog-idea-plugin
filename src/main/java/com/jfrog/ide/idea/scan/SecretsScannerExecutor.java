@@ -22,12 +22,8 @@ public class SecretsScannerExecutor extends ScanBinaryExecutor {
     private static final List<String> SCANNER_ARGS = List.of("sec");
     private static final String ISSUE_TITLE = "Potential Secret";
 
-    public SecretsScannerExecutor(Log log, ServerConfig serverConfig) {
-        this(log, serverConfig, null, true);
-    }
-
-    public SecretsScannerExecutor(Log log, ServerConfig serverConfig, String binaryDownloadUrl, boolean useJFrogReleases) {
-        super(SourceCodeScanType.SECRETS, binaryDownloadUrl, log, serverConfig, useJFrogReleases);
+    public SecretsScannerExecutor(Log log) {
+        super(SourceCodeScanType.SECRETS, log);
     }
 
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException {
