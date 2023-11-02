@@ -47,7 +47,6 @@ import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBui
 import static com.jfrog.ide.idea.scan.ScanUtils.getOSAndArc;
 import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
 import static java.lang.String.join;
-import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 
 /**
  * @author Tal Arian
@@ -112,10 +111,10 @@ public abstract class ScanBinaryExecutor {
         }
     }
 
-    String getBinaryDownloadURL(String customResourcesRepo) {
+    String getBinaryDownloadURL(String externalResourcesRepo) {
         String downloadUrlPrefix = "";
-        if (!StringUtils.isEmpty(customResourcesRepo)) {
-            downloadUrlPrefix = String.format("%s/artifactory/", customResourcesRepo);
+        if (!StringUtils.isEmpty(externalResourcesRepo)) {
+            downloadUrlPrefix = String.format("%s/artifactory/", externalResourcesRepo);
         }
         return String.format("%s%s/%s/%s", downloadUrlPrefix, BINARY_DOWNLOAD_URL, getOsDistribution(), DOWNLOAD_SCANNER_NAME);
     }
@@ -197,13 +196,13 @@ public abstract class ScanBinaryExecutor {
                 return;
             }
             ServerConfig server = GlobalSettings.getInstance().getServerConfig();
-            String customResourcesRepo = server.getCustomResourcesRepo();
-            ArtifactoryManagerBuilder artifactoryManagerBuilder = createManagerBuilder(StringUtils.isEmpty(customResourcesRepo), server);
+            String externalResourcesRepo = server.getExternalResourcesRepo();
+            ArtifactoryManagerBuilder artifactoryManagerBuilder = createManagerBuilder(StringUtils.isEmpty(externalResourcesRepo), server);
             try (ArtifactoryManager artifactoryManager = artifactoryManagerBuilder.build()) {
                 if (Files.exists(binaryTargetPath)) {
                     // Check for new version of the binary
                     try (FileInputStream archiveBinaryFile = new FileInputStream(archiveTargetPath.toFile())) {
-                        String latestBinaryChecksum = getFileChecksumFromServer(artifactoryManager, customResourcesRepo);
+                        String latestBinaryChecksum = getFileChecksumFromServer(artifactoryManager, externalResourcesRepo);
                         String currentBinaryCheckSum = DigestUtils.sha256Hex(archiveBinaryFile);
                         if (latestBinaryChecksum.equals(currentBinaryCheckSum)) {
                             nextUpdateCheck = currentTime.plusDays(UPDATE_INTERVAL);
@@ -215,13 +214,13 @@ public abstract class ScanBinaryExecutor {
                 } else {
                     log.debug(String.format("Resource %s is not found. Downloading it.", binaryTargetPath));
                 }
-                downloadBinary(artifactoryManager, customResourcesRepo);
+                downloadBinary(artifactoryManager, externalResourcesRepo);
             }
         }
     }
 
-    public String getFileChecksumFromServer(ArtifactoryManager artifactoryManager, String customResourcesRepo) throws IOException {
-        String url = getBinaryDownloadURL(customResourcesRepo);
+    public String getFileChecksumFromServer(ArtifactoryManager artifactoryManager, String externalResourcesRepo) throws IOException {
+        String url = getBinaryDownloadURL(externalResourcesRepo);
         Header[] headers = artifactoryManager.downloadHeaders(url);
         for (Header header : headers) {
             if (StringUtils.equalsIgnoreCase(header.getName(), "x-checksum-sha256")) {
@@ -276,8 +275,8 @@ public abstract class ScanBinaryExecutor {
         return om.readValue(outputFile.toFile(), Output.class);
     }
 
-    protected void downloadBinary(ArtifactoryManager artifactoryManager, String customResourcesRepo) throws IOException {
-        String downloadUrl = getBinaryDownloadURL(customResourcesRepo);
+    protected void downloadBinary(ArtifactoryManager artifactoryManager, String externalResourcesRepo) throws IOException {
+        String downloadUrl = getBinaryDownloadURL(externalResourcesRepo);
         File downloadArchive = artifactoryManager.downloadToFile(downloadUrl, archiveTargetPath.toString());
         log.debug(String.format("Downloading: %s", downloadUrl));
         if (downloadArchive == null) {

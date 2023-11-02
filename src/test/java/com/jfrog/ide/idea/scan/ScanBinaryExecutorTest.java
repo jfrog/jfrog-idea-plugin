@@ -86,14 +86,14 @@ public class ScanBinaryExecutorTest extends TestCase {
     }
 
     public void testGetBinaryDownloadURL() {
-        final String customRepoName = "test-releases-repo";
-        final String expectedCustomRepoUrl = "test-releases-repo/artifactory/xsc-gen-exe-analyzer-manager-local/";
-        final String expectedNoCustomRepoUrl = "xsc-gen-exe-analyzer-manager-local/";
+        final String externalRepoName = "test-releases-repo";
+        final String expectedExternalRepoUrl = "test-releases-repo/artifactory/xsc-gen-exe-analyzer-manager-local/";
+        final String expectedNoExternalRepoUrl = "xsc-gen-exe-analyzer-manager-local/";
 
-        String actualNoCustomRepoUrl = scanner.getBinaryDownloadURL(null);
-        assertTrue(actualNoCustomRepoUrl.startsWith(expectedNoCustomRepoUrl));
-        String actualCustomRepoUrl = scanner.getBinaryDownloadURL(customRepoName);
-        assertTrue(actualCustomRepoUrl.startsWith(expectedCustomRepoUrl));
+        String actualNoExternalRepoUrl = scanner.getBinaryDownloadURL(null);
+        assertTrue(actualNoExternalRepoUrl.startsWith(expectedNoExternalRepoUrl));
+        String actualExternalRepoUrl = scanner.getBinaryDownloadURL(externalRepoName);
+        assertTrue(actualExternalRepoUrl.startsWith(expectedExternalRepoUrl));
     }
 
     private ScansConfig readScansConfigYAML(Path inputPath) throws IOException {

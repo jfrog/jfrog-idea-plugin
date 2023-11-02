@@ -122,7 +122,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private JBTextField excludedPaths;
     private ActionLink scanOptionsRestoreDefaultsActionLink;
     private ActionLink connectionOptionsRestoreDefaultsActionLink;
-    private JCheckBox useCustomRepositoryCheckBox;
+    private JCheckBox useExternalRepositoryCheckBox;
     private JLabel repositoryNameJLabel;
     private JBTextField repositoryNameJBTextField;
     private JLabel repositoryNameDescJLabel;
@@ -148,7 +148,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         // Advanced
         initConnectionOptionsRestoreDefaultsActionLink();
         initScanOptionsRestoreDefaultsActionLink();
-        initUseCustomRepositoryCheckBox();
+        initUseExternalRepositoryCheckBox();
 
         loadConfig();
     }
@@ -233,8 +233,8 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
                 .setWatches(watches.getText())
                 .setConnectionRetries(connectionRetries.getNumber())
                 .setConnectionTimeout(connectionTimeout.getNumber());
-        if (useCustomRepositoryCheckBox.isSelected()) {
-            builder.setCustomResourcesRepo(repositoryNameJBTextField.getText());
+        if (useExternalRepositoryCheckBox.isSelected()) {
+            builder.setExternalResourcesRepo(repositoryNameJBTextField.getText());
         }
         return builder.build();
     }
@@ -284,11 +284,11 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             watches.setText(serverConfig.getWatches());
             connectionRetries.setValue(serverConfig.getConnectionRetries());
             connectionTimeout.setValue(serverConfig.getConnectionTimeout());
-            if (!StringUtils.isEmpty(serverConfig.getCustomResourcesRepo())) {
-                useCustomRepositoryCheckBox.setSelected(true);
-                repositoryNameJBTextField.setText(serverConfig.getCustomResourcesRepo());
+            if (!StringUtils.isEmpty(serverConfig.getExternalResourcesRepo())) {
+                useExternalRepositoryCheckBox.setSelected(true);
+                repositoryNameJBTextField.setText(serverConfig.getExternalResourcesRepo());
             } else {
-                useCustomRepositoryCheckBox.setSelected(false);
+                useExternalRepositoryCheckBox.setSelected(false);
             }
         } else {
             clearText(platformUrl, xrayUrl, artifactoryUrl, username, password);
@@ -299,9 +299,9 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             connectionRetries.setValue(ConnectionRetriesSpinner.RANGE.initial);
             connectionTimeout.setValue(ConnectionTimeoutSpinner.RANGE.initial);
             ssoLoginSelection.setSelected(true);
-            useCustomRepositoryCheckBox.setSelected(false);
+            useExternalRepositoryCheckBox.setSelected(false);
         }
-        updateCustomRepositoryFields();
+        updateExternalRepositoryFields();
         initAuthMethodSelection();
     }
 
@@ -684,16 +684,16 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     }
 
     /**
-     * Initialize the "Use custom repository" checkbox in the "Advanced" tab.
+     * Initialize the "Use external repository" checkbox in the "Advanced" tab.
      */
-    private void initUseCustomRepositoryCheckBox() {
-        useCustomRepositoryCheckBox.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            updateCustomRepositoryFields();
+    private void initUseExternalRepositoryCheckBox() {
+        useExternalRepositoryCheckBox.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            updateExternalRepositoryFields();
         }));
     }
 
-    private void updateCustomRepositoryFields() {
-        boolean enabled = useCustomRepositoryCheckBox.isSelected();
+    private void updateExternalRepositoryFields() {
+        boolean enabled = useExternalRepositoryCheckBox.isSelected();
         repositoryNameJLabel.setEnabled(enabled);
         repositoryNameJBTextField.setEnabled(enabled);
         repositoryNameDescJLabel.setEnabled(enabled);

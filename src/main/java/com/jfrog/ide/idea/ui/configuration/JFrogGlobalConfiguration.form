@@ -585,12 +585,12 @@
               <text value="Resources"/>
             </properties>
           </component>
-          <component id="d3948" class="javax.swing.JCheckBox" binding="useCustomRepositoryCheckBox">
+          <component id="d3948" class="javax.swing.JCheckBox" binding="useExternalRepositoryCheckBox">
             <constraints>
               <grid row="7" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="2" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Use custom repository for downloading resources"/>
+              <text value="Use external repository for downloading resources"/>
             </properties>
           </component>
           <component id="3d960" class="javax.swing.JLabel" binding="repositoryNameJLabel">
@@ -622,7 +622,7 @@
             <properties>
               <font size="11"/>
               <foreground color="-6513248"/>
-              <text value="&lt;html&gt;&#10;Specify the name of a custom repository within your Artifactory instance for resource downloads.&#10;&lt;/html&gt;"/>
+              <text value="&lt;html&gt; Specify the name of an external repository within your Artifactory instance for resource downloads. &lt;/html&gt;"/>
             </properties>
           </component>
         </children>

@@ -33,6 +33,7 @@ import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.idea.ui.configuration.ConnectionRetriesSpinner;
 import com.jfrog.ide.idea.ui.configuration.ConnectionTimeoutSpinner;
 import org.apache.commons.collections4.CollectionUtils;
+import org.codehaus.plexus.util.StringUtils;
 import org.jfrog.build.client.ProxyConfiguration;
 
 import javax.annotation.CheckForNull;
@@ -62,14 +63,15 @@ public class ServerConfigImpl implements ServerConfig {
     }
 
     private static final String JFROG_SETTINGS_CREDENTIALS_KEY = "credentials";
-    static final String ARTIFACTORY_URL_ENV = "JFROG_IDE_ARTIFACTORY_URL";
     public static final String JFROG_SETTINGS_KEY = "com.jfrog.idea";
     static final String PLATFORM_URL_ENV = "JFROG_IDE_PLATFORM_URL";
+    static final String ARTIFACTORY_URL_ENV = "JFROG_IDE_ARTIFACTORY_URL";
     static final String XRAY_URL_ENV = "JFROG_IDE_XRAY_URL";
     static final String USERNAME_ENV = "JFROG_IDE_USERNAME";
     static final String PASSWORD_ENV = "JFROG_IDE_PASSWORD";
     static final String ACCESS_TOKEN_ENV = "JFROG_IDE_ACCESS_TOKEN";
     static final String PROJECT_ENV = "JFROG_IDE_PROJECT";
+    static final String EXTERNAL_RESOURCES_REPO_ENV = "JFROG_IDE_RELEASES_REPO";
 
     @OptionTag
     private ConnectionType connectionType;
@@ -101,7 +103,7 @@ public class ServerConfigImpl implements ServerConfig {
     @Tag
     private Integer connectionTimeout;
     @Tag
-    private String customResourcesRepo;
+    private String externalResourcesRepo;
     // The subsystem key of the plugin configuration in the PasswordSafe
     @Transient
     private String jfrogSettingsCredentialsKey = JFROG_SETTINGS_KEY;
@@ -123,7 +125,7 @@ public class ServerConfigImpl implements ServerConfig {
         this.excludedPaths = builder.excludedPaths;
         this.connectionRetries = builder.connectionRetries;
         this.connectionTimeout = builder.connectionTimeout;
-        this.customResourcesRepo = builder.customResourcesRepo;
+        this.externalResourcesRepo = builder.externalResourcesRepo;
         this.jfrogSettingsCredentialsKey = builder.jfrogSettingsCredentialsKey;
     }
 
@@ -159,13 +161,13 @@ public class ServerConfigImpl implements ServerConfig {
                 Objects.equals(getExcludedPaths(), other.getExcludedPaths()) &&
                 getConnectionRetries() == other.getConnectionRetries() &&
                 getConnectionTimeout() == other.getConnectionTimeout() &&
-                getCustomResourcesRepo() == other.getCustomResourcesRepo();
+                getExternalResourcesRepo() == other.getExternalResourcesRepo();
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(getConnectionType(), getUrl(), getXrayUrl(), getArtifactoryUrl(), getPassword(), getAccessToken(),
-                getUsername(), getProject(), getExcludedPaths(), getConnectionRetries(), getConnectionTimeout(), getCustomResourcesRepo());
+                getUsername(), getProject(), getExcludedPaths(), getConnectionRetries(), getConnectionTimeout(), getExternalResourcesRepo());
     }
 
     @Override
@@ -262,8 +264,8 @@ public class ServerConfigImpl implements ServerConfig {
     }
 
     @Override
-    public String getCustomResourcesRepo() {
-        return this.customResourcesRepo;
+    public String getExternalResourcesRepo() {
+        return this.externalResourcesRepo;
     }
 
     public String getJFrogSettingsCredentialsKey() {
@@ -411,8 +413,8 @@ public class ServerConfigImpl implements ServerConfig {
         this.connectionTimeout = connectionTimeout;
     }
 
-    void setCustomResourcesRepo(String customResourcesRepo) {
-        this.customResourcesRepo = customResourcesRepo;
+    void setExternalResourcesRepo(String externalResourcesRepo) {
+        this.externalResourcesRepo = externalResourcesRepo;
     }
 
     public void setJFrogSettingsCredentialsKey(String jfrogSettingsCredentialsKey) {
@@ -461,6 +463,18 @@ public class ServerConfigImpl implements ServerConfig {
         } else {
             setUsername(usernameEnv);
             setPassword(passwordEnv);
+        }
+    }
+
+    /**
+     * Read missing configuration from environment variables.
+     */
+    public void readMissingConfFromEnv() {
+        if (isBlank(getExternalResourcesRepo())) {
+            String externalResourcesRepoEnv = EnvironmentUtil.getValue(EXTERNAL_RESOURCES_REPO_ENV);
+            if (isNotBlank(externalResourcesRepoEnv)) {
+                setExternalResourcesRepo(externalResourcesRepoEnv);
+            }
         }
     }
 
@@ -518,7 +532,7 @@ public class ServerConfigImpl implements ServerConfig {
         private String watches;
         private int connectionRetries;
         private int connectionTimeout;
-        private String customResourcesRepo;
+        private String externalResourcesRepo;
 
         public ServerConfigImpl build() {
             return new ServerConfigImpl(this);
@@ -591,8 +605,8 @@ public class ServerConfigImpl implements ServerConfig {
             return this;
         }
 
-        public Builder setCustomResourcesRepo(String customResourcesRepo) {
-            this.customResourcesRepo = customResourcesRepo;
+        public Builder setExternalResourcesRepo(String externalResourcesRepo) {
+            this.externalResourcesRepo = externalResourcesRepo;
             return this;
         }
 
