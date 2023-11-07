@@ -122,10 +122,13 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private JBTextField excludedPaths;
     private ActionLink scanOptionsRestoreDefaultsActionLink;
     private ActionLink connectionOptionsRestoreDefaultsActionLink;
-    private JCheckBox useExternalRepositoryCheckBox;
+    private JRadioButton downloadResourcesFromReleasesRadioButton;
+    private JRadioButton downloadResourcesThroughArtifactoryRadioButton;
     private JLabel repositoryNameJLabel;
     private JBTextField repositoryNameJBTextField;
     private JLabel repositoryNameDescJLabel;
+    private JBLabel pluginResourcesDescJBLabel;
+    private JBLabel releasesRepoLinkJBLabel;
 
     private int selectedTabIndex;
 
@@ -148,7 +151,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         // Advanced
         initConnectionOptionsRestoreDefaultsActionLink();
         initScanOptionsRestoreDefaultsActionLink();
-        initUseExternalRepositoryCheckBox();
+        initPluginResourcesComponents();
 
         loadConfig();
     }
@@ -233,7 +236,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
                 .setWatches(watches.getText())
                 .setConnectionRetries(connectionRetries.getNumber())
                 .setConnectionTimeout(connectionTimeout.getNumber());
-        if (useExternalRepositoryCheckBox.isSelected()) {
+        if (downloadResourcesThroughArtifactoryRadioButton.isSelected()) {
             builder.setExternalResourcesRepo(repositoryNameJBTextField.getText());
         }
         return builder.build();
@@ -285,10 +288,10 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             connectionRetries.setValue(serverConfig.getConnectionRetries());
             connectionTimeout.setValue(serverConfig.getConnectionTimeout());
             if (!StringUtils.isEmpty(serverConfig.getExternalResourcesRepo())) {
-                useExternalRepositoryCheckBox.setSelected(true);
+                downloadResourcesThroughArtifactoryRadioButton.setSelected(true);
                 repositoryNameJBTextField.setText(serverConfig.getExternalResourcesRepo());
             } else {
-                useExternalRepositoryCheckBox.setSelected(false);
+                downloadResourcesFromReleasesRadioButton.setSelected(true);
             }
         } else {
             clearText(platformUrl, xrayUrl, artifactoryUrl, username, password);
@@ -299,7 +302,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             connectionRetries.setValue(ConnectionRetriesSpinner.RANGE.initial);
             connectionTimeout.setValue(ConnectionTimeoutSpinner.RANGE.initial);
             ssoLoginSelection.setSelected(true);
-            useExternalRepositoryCheckBox.setSelected(false);
+            downloadResourcesFromReleasesRadioButton.setSelected(true);
         }
         updateExternalRepositoryFields();
         initAuthMethodSelection();
@@ -684,16 +687,23 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     }
 
     /**
-     * Initialize the "Use external repository" checkbox in the "Advanced" tab.
+     * Initialize the "Plugin Resources" components in the "Advanced" tab.
      */
-    private void initUseExternalRepositoryCheckBox() {
-        useExternalRepositoryCheckBox.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
+    private void initPluginResourcesComponents() {
+        downloadResourcesFromReleasesRadioButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
             updateExternalRepositoryFields();
         }));
+        downloadResourcesThroughArtifactoryRadioButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            updateExternalRepositoryFields();
+        }));
+
+        // This is needed for the links in the labels to work
+        pluginResourcesDescJBLabel.setCopyable(true);
+        releasesRepoLinkJBLabel.setCopyable(true);
     }
 
     private void updateExternalRepositoryFields() {
-        boolean enabled = useExternalRepositoryCheckBox.isSelected();
+        boolean enabled = downloadResourcesThroughArtifactoryRadioButton.isSelected();
         repositoryNameJLabel.setEnabled(enabled);
         repositoryNameJBTextField.setEnabled(enabled);
         repositoryNameDescJLabel.setEnabled(enabled);

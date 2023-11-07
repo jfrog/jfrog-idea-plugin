@@ -454,7 +454,7 @@
           </component>
         </children>
       </grid>
-      <grid id="b5e9b" binding="advanced" layout-manager="GridLayoutManager" row-count="11" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="b5e9b" binding="advanced" layout-manager="GridLayoutManager" row-count="13" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <tabbedpane title="Advanced"/>
@@ -553,7 +553,7 @@
           </component>
           <vspacer id="1a765">
             <constraints>
-              <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+              <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
             </constraints>
           </vspacer>
           <hspacer id="c34be">
@@ -567,6 +567,7 @@
             </constraints>
             <properties>
               <label value="Restore Defaults"/>
+              <text value="Restore Defaults"/>
             </properties>
           </component>
           <component id="772b2" class="com.intellij.ui.components.ActionLink" binding="connectionOptionsRestoreDefaultsActionLink">
@@ -582,20 +583,12 @@
               <grid row="6" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Resources"/>
-            </properties>
-          </component>
-          <component id="d3948" class="javax.swing.JCheckBox" binding="useExternalRepositoryCheckBox">
-            <constraints>
-              <grid row="7" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="2" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="Use external repository for downloading resources"/>
+              <text value="Plugin Resources"/>
             </properties>
           </component>
           <component id="3d960" class="javax.swing.JLabel" binding="repositoryNameJLabel">
             <constraints>
-              <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="4" use-parent-layout="false">
+              <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="4" use-parent-layout="false">
                 <preferred-size width="109" height="16"/>
               </grid>
             </constraints>
@@ -606,18 +599,17 @@
           </component>
           <component id="b2960" class="com.intellij.ui.components.JBTextField" binding="repositoryNameJBTextField">
             <constraints>
-              <grid row="8" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="0" indent="0" use-parent-layout="false">
+              <grid row="9" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="0" indent="0" use-parent-layout="false">
                 <preferred-size width="200" height="-1"/>
               </grid>
             </constraints>
             <properties>
               <text value=""/>
-              <toolTipText value="Pattern of project paths to exclude from Xray scanning for npm and Go projects."/>
             </properties>
           </component>
           <component id="a8bbd" class="javax.swing.JLabel" binding="repositoryNameDescJLabel">
             <constraints>
-              <grid row="9" column="1" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="10" column="1" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <font size="11"/>
@@ -625,6 +617,56 @@
               <text value="&lt;html&gt; Specify the name of an external repository within your Artifactory instance for resource downloads. &lt;/html&gt;"/>
             </properties>
           </component>
+          <component id="25d51" class="javax.swing.JRadioButton" binding="downloadResourcesThroughArtifactoryRadioButton">
+            <constraints>
+              <grid row="8" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="2" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Download resources through Artifactory"/>
+            </properties>
+          </component>
+          <component id="a9c14" class="com.intellij.ui.components.JBLabel" binding="pluginResourcesDescJBLabel">
+            <constraints>
+              <grid row="11" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="2" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <focusCycleRoot value="true"/>
+              <focusable value="false"/>
+              <font size="11"/>
+              <foreground color="-6513248"/>
+              <text value="&lt;html&gt;&#10;The plugin requires some of its resources to be downloaded.&#10;&lt;br&gt;&#10;Here you can choose where these resources will be downloaded from.&#10;&lt;br&gt;&#10;&lt;a href=&quot;https://www.jetbrains.com/toolbox-app/?utm_source=productutm_medium=linkutm_campaign=toolbox_app_in_IDE_updatewindowutm_content=we_recommend&quot;&gt;Read more&lt;icon src=&quot;AllIcons.Ide.External_link_arrow&quot;&gt;&lt;/a&gt;&#10;&lt;/html&gt;&#10;"/>
+            </properties>
+          </component>
+          <grid id="124a" layout-manager="GridLayoutManager" row-count="1" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="2" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
+            <constraints>
+              <grid row="7" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="2e24c" class="javax.swing.JRadioButton" binding="downloadResourcesFromReleasesRadioButton">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="2" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="&lt;html&gt;&#10;Download resources from JFrog Releases Repository&#10;&lt;/html&gt;"/>
+                </properties>
+              </component>
+              <component id="a9393" class="com.intellij.ui.components.JBLabel" binding="releasesRepoLinkJBLabel">
+                <constraints>
+                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <focusCycleRoot value="true"/>
+                  <focusable value="false"/>
+                  <font/>
+                  <foreground color="-2104859"/>
+                  <text value="&lt;html&gt;&#10;(&lt;a href=&quot;https://releases.jfrog.io/&quot;&gt;https://releases.jfrog.io/&lt;/a&gt;) (default)&#10;&lt;/html&gt;&#10;"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
         </children>
       </grid>
     </children>
@@ -644,6 +686,10 @@
       <member id="9138c"/>
       <member id="4a8e4"/>
       <member id="a8c73"/>
+    </group>
+    <group name="resourcesRepo">
+      <member id="2e24c"/>
+      <member id="25d51"/>
     </group>
   </buttonGroups>
 </form>
