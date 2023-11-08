@@ -71,7 +71,7 @@ public class ServerConfigImpl implements ServerConfig {
     static final String PASSWORD_ENV = "JFROG_IDE_PASSWORD";
     static final String ACCESS_TOKEN_ENV = "JFROG_IDE_ACCESS_TOKEN";
     static final String PROJECT_ENV = "JFROG_IDE_PROJECT";
-    static final String EXTERNAL_RESOURCES_REPO_ENV = "JFROG_IDE_RELEASES_REPO";
+    public static final String EXTERNAL_RESOURCES_REPO_ENV = "JFROG_IDE_RELEASES_REPO";
 
     @OptionTag
     private ConnectionType connectionType;

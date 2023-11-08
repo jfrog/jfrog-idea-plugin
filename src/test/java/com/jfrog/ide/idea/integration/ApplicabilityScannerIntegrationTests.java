@@ -87,10 +87,6 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
         assertEquals(SourceCodeScanType.CONTEXTUAL, results.get(0).getReporter());
     }
 
-    private void dummyCheckCanceled() {
-
-    }
-
     @Override
     protected String createTempProjectDir(String projectName) throws IOException {
         return super.createTempProjectDir(TEST_PROJECT_PREFIX + projectName);

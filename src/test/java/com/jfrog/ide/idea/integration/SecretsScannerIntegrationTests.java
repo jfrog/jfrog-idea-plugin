@@ -47,9 +47,6 @@ public class SecretsScannerIntegrationTests extends BaseIntegrationTest {
         assertEquals(0, results.size());
     }
 
-    private void dummyCheckCanceled() {
-    }
-
     @Override
     protected String createTempProjectDir(String projectName) throws IOException {
         return super.createTempProjectDir(TEST_PROJECT_PREFIX + projectName);

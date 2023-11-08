@@ -614,7 +614,7 @@
             <properties>
               <font size="11"/>
               <foreground color="-6513248"/>
-              <text value="&lt;html&gt; Specify the name of an external repository within your Artifactory instance for resource downloads. &lt;/html&gt;"/>
+              <text value="&lt;html&gt; Specify the name of a repository within your Artifactory instance for resource downloads. &lt;/html&gt;"/>
             </properties>
           </component>
           <component id="25d51" class="javax.swing.JRadioButton" binding="downloadResourcesThroughArtifactoryRadioButton">
@@ -662,7 +662,7 @@
                   <focusable value="false"/>
                   <font/>
                   <foreground color="-2104859"/>
-                  <text value="&lt;html&gt;&#10;(&lt;a href=&quot;https://releases.jfrog.io/&quot;&gt;https://releases.jfrog.io/&lt;/a&gt;) (default)&#10;&lt;/html&gt;&#10;"/>
+                  <text value="&lt;html&gt;&#10;(&lt;a href=&quot;https://releases.jfrog.io/&quot;&gt;releases.jfrog.io&lt;/a&gt;) (default)&#10;&lt;/html&gt;&#10;"/>
                 </properties>
               </component>
             </children>

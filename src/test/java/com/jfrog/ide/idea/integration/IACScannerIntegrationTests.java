@@ -39,9 +39,6 @@ public class IACScannerIntegrationTests extends BaseIntegrationTest {
         assertTrue(StringUtils.isNotBlank(iacIndication.getReason()));
     }
 
-    private void dummyCheckCanceled() {
-    }
-
     @Override
     protected String createTempProjectDir(String projectName) throws IOException {
         return super.createTempProjectDir(TEST_PROJECT_PREFIX + projectName);

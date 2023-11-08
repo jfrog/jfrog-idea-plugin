@@ -52,11 +52,11 @@ import static java.lang.String.join;
  * @author Tal Arian
  */
 public abstract class ScanBinaryExecutor {
+    public static final Path BINARIES_DIR = HOME_PATH.resolve("dependencies").resolve("jfrog-security");
     private static final long MAX_EXECUTION_MINUTES = 10;
     private static final int UPDATE_INTERVAL = 1;
     private static final int USER_NOT_ENTITLED = 31;
     private static final int NOT_SUPPORTED = 13;
-    private static final Path BINARIES_DIR = HOME_PATH.resolve("dependencies").resolve("jfrog-security");
     private static final String SCANNER_BINARY_NAME = "analyzerManager";
     private static final String SCANNER_BINARY_VERSION = "1.3.2.2019257";
     private static final String BINARY_DOWNLOAD_URL = "xsc-gen-exe-analyzer-manager-local/v1/" + SCANNER_BINARY_VERSION;

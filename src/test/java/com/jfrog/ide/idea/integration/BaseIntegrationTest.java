@@ -17,10 +17,10 @@ import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.DEFAUL
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 
 public abstract class BaseIntegrationTest extends HeavyPlatformTestCase {
-    public static final String ENV_PLATFORM_URL = "JFROG_IDE_PLATFORM_URL";
-    public static final String ENV_ACCESS_TOKEN = "JFROG_IDE_ACCESS_TOKEN";
+    private static final String ENV_PLATFORM_URL = "JFROG_IDE_PLATFORM_URL";
+    private static final String ENV_ACCESS_TOKEN = "JFROG_IDE_ACCESS_TOKEN";
+    private static final Path TEST_PROJECT_PATH = new File("src/test/resources/").toPath();
     protected ServerConfigImpl serverConfig;
-    private final static Path TEST_PROJECT_PATH = new File("src/test/resources/").toPath();
 
     @Override
     protected void setUp() throws Exception {
@@ -72,5 +72,8 @@ public abstract class BaseIntegrationTest extends HeavyPlatformTestCase {
         String tempProjectDir = getTempDir().createVirtualDir().toNioPath().toString();
         FileUtils.copyDirectory(TEST_PROJECT_PATH.resolve(projectName).toFile(), new File(tempProjectDir));
         return tempProjectDir;
+    }
+
+    protected void dummyCheckCanceled() {
     }
 }
