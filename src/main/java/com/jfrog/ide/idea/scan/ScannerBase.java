@@ -185,7 +185,7 @@ public abstract class ScannerBase {
      * @param vulnerableDependencies a map of component IDs and the DependencyNode object matching each of them.
      * @param depTree                the project's dependency tree to walk through.
      */
-    protected List<FileTreeNode> walkDepTree(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) throws IOException {
+    private List<FileTreeNode> walkDepTree(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) {
         Map<String, DescriptorFileTreeNode> descriptorNodes = new HashMap<>();
         visitDepTreeNode(vulnerableDependencies, depTree, Collections.singletonList(depTree.getRootId()), descriptorNodes, new ArrayList<>(), new HashMap<>());
         return new CopyOnWriteArrayList<>(descriptorNodes.values());

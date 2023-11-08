@@ -7,9 +7,6 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.deptree.DepTree;
-import com.jfrog.ide.common.nodes.DependencyNode;
-import com.jfrog.ide.common.nodes.DescriptorFileTreeNode;
-import com.jfrog.ide.common.nodes.FileTreeNode;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.common.yarn.YarnTreeBuilder;
@@ -18,13 +15,9 @@ import com.jfrog.ide.idea.inspections.YarnInspection;
 import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -69,33 +62,6 @@ public class YarnScanner extends SingleDescriptorScanner {
     @Override
     protected PackageManagerType getPackageManagerType() {
         return PackageManagerType.YARN;
-    }
-
-    private Map<String, Set<String>> getPackageNameToVersionsMap(Set<String> packages) {
-        Map<String, Set<String>> packageNameToVersions = new HashMap<>();
-        for (String fullNamePackage : CollectionUtils.emptyIfNull(packages)) {
-            String[] packageSplit = StringUtils.split(fullNamePackage, ":");
-            String packageName = packageSplit[0];
-            String packageVersion = packageSplit[1];
-            packageNameToVersions.putIfAbsent(packageName, new HashSet<>());
-            packageNameToVersions.get(packageName).add(packageVersion);
-        }
-        return packageNameToVersions;
-    }
-
-    @Override
-    protected List<FileTreeNode> walkDepTree(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) throws IOException {
-        Map<String, DescriptorFileTreeNode> descriptorNodes = new HashMap<>();
-
-        Map<String, Set<String>> packageNameToVersions = getPackageNameToVersionsMap(vulnerableDependencies.keySet());
-
-        for (Map.Entry<String, Set<String>> entry : packageNameToVersions.entrySet()) {
-            String packageName = entry.getKey();
-            Set<String> packageVersions = entry.getValue();
-            DepTree depTree1 = yarnTreeBuilder.findDependencyPath(getLog(), packageName, packageVersions);
-        }
-
-        return new CopyOnWriteArrayList<>(descriptorNodes.values());
     }
 }
 
