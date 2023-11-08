@@ -182,12 +182,12 @@ public abstract class ScannerBase {
      * Walks through a {@link DepTree}'s nodes.
      * Builds impact paths for {@link DependencyNode} objects and groups them in {@link DescriptorFileTreeNode}s.
      *
-     * @param dependencies a map of component IDs and the DependencyNode object matching each of them.
-     * @param depTree      the project's dependency tree to walk through.
+     * @param vulnerableDependencies a map of component IDs and the DependencyNode object matching each of them.
+     * @param depTree                the project's dependency tree to walk through.
      */
-    private List<FileTreeNode> walkDepTree(Map<String, DependencyNode> dependencies, DepTree depTree) {
+    protected List<FileTreeNode> walkDepTree(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) throws IOException {
         Map<String, DescriptorFileTreeNode> descriptorNodes = new HashMap<>();
-        visitDepTreeNode(dependencies, depTree, Collections.singletonList(depTree.getRootId()), descriptorNodes, new ArrayList<>(), new HashMap<>());
+        visitDepTreeNode(vulnerableDependencies, depTree, Collections.singletonList(depTree.getRootId()), descriptorNodes, new ArrayList<>(), new HashMap<>());
         return new CopyOnWriteArrayList<>(descriptorNodes.values());
     }
 
@@ -196,14 +196,14 @@ public abstract class ScannerBase {
      * Each impact path to a vulnerable dependency is added in its {@link DependencyNode}.
      * Each DependencyNode is added to the relevant {@link DescriptorFileTreeNode}s.
      *
-     * @param dependencies    a map of {@link DependencyNode}s by their component IDs.
-     * @param depTree         the project's dependency tree.
-     * @param path            a path of nodes (represented by their component IDs) from the root to the current node.
-     * @param descriptorNodes a map of {@link DescriptorFileTreeNode}s by the descriptor file path. Missing DescriptorFileTreeNodes will be added to this map.
-     * @param descriptorPaths a list of descriptor file paths that their matching components are in the path to the current node.
-     * @param addedDeps       a map of all {@link DependencyNode}s already grouped to {@link DescriptorFileTreeNode}s. Newly grouped DependencyNodes will be added to this map.
+     * @param vulnerableDependencies a map of {@link DependencyNode}s by their component IDs.
+     * @param depTree                the project's dependency tree.
+     * @param path                   a path of nodes (represented by their component IDs) from the root to the current node.
+     * @param descriptorNodes        a map of {@link DescriptorFileTreeNode}s by the descriptor file path. Missing DescriptorFileTreeNodes will be added to this map.
+     * @param descriptorPaths        a list of descriptor file paths that their matching components are in the path to the current node.
+     * @param addedDeps              a map of all {@link DependencyNode}s already grouped to {@link DescriptorFileTreeNode}s. Newly grouped DependencyNodes will be added to this map.
      */
-    private void visitDepTreeNode(Map<String, DependencyNode> dependencies, DepTree depTree, List<String> path,
+    private void visitDepTreeNode(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree, List<String> path,
                                   Map<String, DescriptorFileTreeNode> descriptorNodes, List<String> descriptorPaths,
                                   Map<String, Map<String, DependencyNode>> addedDeps) {
         String compId = path.get(path.size() - 1);
@@ -213,8 +213,8 @@ public abstract class ScannerBase {
             innerDescriptorPaths = new ArrayList<>(descriptorPaths);
             innerDescriptorPaths.add(compNode.getDescriptorFilePath());
         }
-        if (dependencies.containsKey(compId)) {
-            DependencyNode dependencyNode = dependencies.get(compId);
+        if (vulnerableDependencies.containsKey(compId)) {
+            DependencyNode dependencyNode = vulnerableDependencies.get(compId);
             addImpactPathToDependencyNode(dependencyNode, path);
 
             DepTreeNode parentCompNode = null;
@@ -249,7 +249,7 @@ public abstract class ScannerBase {
             List<String> pathToChild = new ArrayList<>(path);
             pathToChild.add(childId);
             if (!path.contains(childId)) {
-                visitDepTreeNode(dependencies, depTree, pathToChild, descriptorNodes, innerDescriptorPaths, addedDeps);
+                visitDepTreeNode(vulnerableDependencies, depTree, pathToChild, descriptorNodes, innerDescriptorPaths, addedDeps);
             }
         }
     }
