@@ -1,12 +1,18 @@
 package com.jfrog.ide.idea.scan;
 
 import com.intellij.openapi.project.Project;
+import com.jfrog.ide.common.deptree.DepTree;
+import com.jfrog.ide.common.nodes.DependencyNode;
+import com.jfrog.ide.common.nodes.FileTreeNode;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 public abstract class SingleDescriptorScanner extends ScannerBase {
@@ -38,5 +44,9 @@ public abstract class SingleDescriptorScanner extends ScannerBase {
     SingleDescriptorScanner(@NotNull Project project, String basePath, ComponentPrefix prefix, ExecutorService executor,
                             ScanLogic scanLogic) {
         this(project, basePath, prefix, executor, "", scanLogic);
+    }
+
+    protected List<FileTreeNode> walkDepTree(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) throws IOException {
+        return super.walkDepTree(vulnerableDependencies, depTree);
     }
 }
