@@ -3,7 +3,6 @@ package com.jfrog.ide.idea.ui.webview;
 import com.jfrog.ide.common.nodes.*;
 import com.jfrog.ide.common.nodes.subentities.*;
 import com.jfrog.ide.common.scan.ComponentPrefix;
-import com.jfrog.ide.idea.scan.ScannerBase;
 import com.jfrog.ide.idea.ui.webview.model.Cve;
 import com.jfrog.ide.idea.ui.webview.model.Evidence;
 import com.jfrog.ide.idea.ui.webview.model.License;
@@ -143,7 +142,7 @@ public class WebviewObjectConverter {
     }
 
     private static ImpactGraph convertImpactGraph(ImpactTree impactTree) {
-        return new ImpactGraph(convertImpactGraphNode(impactTree.getRoot()), impactTree.getImpactPathsCount(), ScannerBase.IMPACT_PATHS_LIMIT);
+        return new ImpactGraph(convertImpactGraphNode(impactTree.getRoot()), impactTree.getImpactPathsCount(), ImpactTree.IMPACT_PATHS_LIMIT);
     }
 
     private static ImpactGraphNode convertImpactGraphNode(ImpactTreeNode impactTreeNode) {

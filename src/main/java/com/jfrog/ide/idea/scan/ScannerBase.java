@@ -61,8 +61,6 @@ import static com.jfrog.ide.common.log.Utils.logError;
  * Created by romang on 4/26/17.
  */
 public abstract class ScannerBase {
-    public static final int IMPACT_PATHS_LIMIT = 50;
-
     private final ServerConfig serverConfig;
     private final ComponentPrefix prefix;
     @Getter
@@ -254,13 +252,12 @@ public abstract class ScannerBase {
         }
     }
 
-    private void addImpactPathToDependencyNode(DependencyNode dependencyNode, List<String> path) {
+    protected void addImpactPathToDependencyNode(DependencyNode dependencyNode, List<String> path) {
         if (dependencyNode.getImpactTree() == null) {
             dependencyNode.setImpactTree(new ImpactTree(new ImpactTreeNode(path.get(0))));
         }
         ImpactTree impactTree = dependencyNode.getImpactTree();
-        impactTree.incImpactPathsCount();
-        if (impactTree.getImpactPathsCount() > IMPACT_PATHS_LIMIT) {
+        if (impactTree.getImpactPathsCount() > ImpactTree.IMPACT_PATHS_LIMIT) {
             return;
         }
         ImpactTreeNode parentImpactTreeNode = impactTree.getRoot();
@@ -271,6 +268,9 @@ public abstract class ScannerBase {
             if (currImpactTreeNode == null) {
                 currImpactTreeNode = new ImpactTreeNode(currPathNode);
                 parentImpactTreeNode.getChildren().add(currImpactTreeNode);
+                if (pathNodeIndex == path.size() - 1) {
+                    impactTree.incImpactPathsCount();
+                }
             }
             parentImpactTreeNode = currImpactTreeNode;
         }

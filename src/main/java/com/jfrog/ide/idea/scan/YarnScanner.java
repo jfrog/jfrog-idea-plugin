@@ -85,17 +85,30 @@ public class YarnScanner extends SingleDescriptorScanner {
 
     @Override
     protected List<FileTreeNode> walkDepTree(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) throws IOException {
-        Map<String, DescriptorFileTreeNode> descriptorNodes = new HashMap<>();
-
+        DescriptorFileTreeNode descriptorNode = new DescriptorFileTreeNode(depTree.getRootNode().getDescriptorFilePath());
         Map<String, Set<String>> packageNameToVersions = getPackageNameToVersionsMap(vulnerableDependencies.keySet());
 
         for (Map.Entry<String, Set<String>> entry : packageNameToVersions.entrySet()) {
             String packageName = entry.getKey();
             Set<String> packageVersions = entry.getValue();
-            DepTree depTree1 = yarnTreeBuilder.findDependencyPath(getLog(), packageName, packageVersions);
+            Map<String, List<List<String>>> packageVersionsImpactPaths = yarnTreeBuilder.findDependencyImpactPaths(getLog(), depTree.getRootId(), packageName, packageVersions);
+            for (Map.Entry<String, List<List<String>>> packageVersionImpactPaths : packageVersionsImpactPaths.entrySet()) {
+                String packageFullName = packageVersionImpactPaths.getKey();
+                List<List<String>> impactPaths = packageVersionImpactPaths.getValue();
+                DependencyNode dependencyNode = vulnerableDependencies.get(packageFullName);
+                boolean indirect = true;
+                for (List<String> impactPath : impactPaths) {
+                    this.addImpactPathToDependencyNode(dependencyNode, impactPath);
+                    if (impactPath.size() == 2) {
+                        indirect = false;
+                    }
+                }
+                dependencyNode.setIndirect(indirect);
+                descriptorNode.addDependency(dependencyNode);
+            }
         }
 
-        return new CopyOnWriteArrayList<>(descriptorNodes.values());
+        return new CopyOnWriteArrayList<>(Collections.singletonList(descriptorNode));
     }
 }
 
