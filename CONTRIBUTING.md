@@ -13,8 +13,9 @@ To build the plugin sources, please follow these steps:
     ./gradlew clean build
     ```
 
-After the build finishes, you'll find the zip file in the *build/distributions* directory, located under the *jfrog-idea-plugin* directory.
-The zip file can be loaded into IntelliJ
+After the build finishes, you'll find the zip file in the *build/distributions* directory, located under the
+*jfrog-idea-plugin* directory.
+The zip file can be loaded into IntelliJ.
 
 ## Additional Tests Suits
 
@@ -25,10 +26,14 @@ The zip file can be loaded into IntelliJ
     ```
 
 2. In order to run the integration tests:
-   - Make sure you have JFrog platform Instance with JAS enabled.
-   - If you are using JFrog CLI, just make sure the current configured server is the one you want to use.
-    Alternatively, Set the JFROG_IDE_PLATFORM_URL, JFROG_IDE_ACCESS_TOKEN environment variables with your JFrog platform URL, and access token.
-    Run the following command:
+    - Make sure you have JFrog platform Instance with JAS enabled.
+    - If you are using JFrog CLI, just make sure the current configured server is the one you want to use.
+      Alternatively, you can set JFROG_IDE_PLATFORM_URL and JFROG_IDE_ACCESS_TOKEN environment variables with your JFrog
+      Platform URL and access token, respectively.
+    - Set the JFROG_IDE_TEST_EXTERNAL_RESOURCES_REPO environment variable to the name of a remote repository in your
+      Artifactory instance that proxies https://releases.jfrog.io/.
+
+   Run the following command:
 
      ```bash
      ./gradlew integrationTests
