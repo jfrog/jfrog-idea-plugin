@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.jfrog.ide.idea.log.Logger;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
 import java.io.IOException;
@@ -49,7 +50,7 @@ public class ScanUtils {
         }
         // Mac
         if (SystemUtils.IS_OS_MAC) {
-            if (arch.equals("arm64")) {
+            if (StringUtils.equalsAny(arch, "aarch64", "arm64")) {
                 return "mac-arm64";
             } else {
                 return "mac-amd64";
