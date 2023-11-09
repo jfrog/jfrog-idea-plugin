@@ -192,14 +192,15 @@ public abstract class ScanBinaryExecutor {
         // Allow only one thread to check and update the binary at any time.
         synchronized (downloadLock) {
             LocalDateTime currentTime = LocalDateTime.now();
-            if (nextUpdateCheck != null && currentTime.isBefore(nextUpdateCheck)) {
+            boolean targetExists = Files.exists(binaryTargetPath);
+            if (targetExists && nextUpdateCheck != null && currentTime.isBefore(nextUpdateCheck)) {
                 return;
             }
             ServerConfig server = GlobalSettings.getInstance().getServerConfig();
             String externalResourcesRepo = server.getExternalResourcesRepo();
             ArtifactoryManagerBuilder artifactoryManagerBuilder = createManagerBuilder(StringUtils.isEmpty(externalResourcesRepo), server);
             try (ArtifactoryManager artifactoryManager = artifactoryManagerBuilder.build()) {
-                if (Files.exists(binaryTargetPath)) {
+                if (targetExists) {
                     // Check for new version of the binary
                     try (FileInputStream archiveBinaryFile = new FileInputStream(archiveTargetPath.toFile())) {
                         String latestBinaryChecksum = getFileChecksumFromServer(artifactoryManager, externalResourcesRepo);
