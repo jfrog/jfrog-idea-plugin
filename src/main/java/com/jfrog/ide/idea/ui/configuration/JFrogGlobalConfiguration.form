@@ -634,7 +634,7 @@
               <focusable value="false"/>
               <font size="11"/>
               <foreground color="-6513248"/>
-              <text value="&lt;html&gt;&#10;The plugin requires some of its resources to be downloaded.&#10;&lt;br&gt;&#10;Here you can choose where these resources will be downloaded from.&#10;&lt;br&gt;&#10;&lt;a href=&quot;https://www.jetbrains.com/toolbox-app/?utm_source=productutm_medium=linkutm_campaign=toolbox_app_in_IDE_updatewindowutm_content=we_recommend&quot;&gt;Read more&lt;icon src=&quot;AllIcons.Ide.External_link_arrow&quot;&gt;&lt;/a&gt;&#10;&lt;/html&gt;&#10;"/>
+              <text value="&lt;html&gt;&#10;The plugin requires some of its resources to be downloaded.&#10;&lt;br&gt;&#10;Here you can choose where these resources will be downloaded from.&#10;&lt;/html&gt;&#10;"/>
             </properties>
           </component>
           <grid id="124a" layout-manager="GridLayoutManager" row-count="1" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="2" vgap="-1">
