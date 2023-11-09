@@ -483,7 +483,7 @@
               </grid>
             </constraints>
             <properties>
-              <text value="&quot;**/*{.idea,test,node_modules}*&quot;"/>
+              <text value="&quot;**/*{.git,.idea,test,node_modules}*&quot;"/>
               <toolTipText value="Pattern of project paths to exclude from Xray scanning for npm and Go projects."/>
             </properties>
           </component>
