@@ -293,9 +293,6 @@ public abstract class ScannerBase {
                 if (project.isDisposed()) {
                     return;
                 }
-                if (!GlobalSettings.getInstance().reloadXrayCredentials()) {
-                    throw new RuntimeException("Xray server is not configured.");
-                }
                 // Prevent multiple simultaneous scans
                 if (!scanInProgress.compareAndSet(false, true)) {
                     log.info("Scan already in progress");

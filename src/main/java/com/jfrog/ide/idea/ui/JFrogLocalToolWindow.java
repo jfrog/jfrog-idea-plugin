@@ -143,7 +143,7 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
     private void refreshView(boolean reloadCredentials) {
         GlobalSettings globalSettings = GlobalSettings.getInstance();
         if ((!reloadCredentials && !globalSettings.areXrayCredentialsSet()) ||
-                !globalSettings.reloadXrayCredentials()) {
+                !globalSettings.reloadMissingConfiguration()) {
             setLeftPanelContent(ComponentUtils.createNoCredentialsView());
             return;
         }

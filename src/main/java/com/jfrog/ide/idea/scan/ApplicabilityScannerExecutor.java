@@ -25,13 +25,8 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
     private static final List<String> SCANNER_ARGS = List.of("ca");
     private static final List<PackageManagerType> SUPPORTED_PACKAGE_TYPES = List.of(PackageManagerType.PYPI, PackageManagerType.NPM, PackageManagerType.YARN, PackageManagerType.GRADLE, PackageManagerType.MAVEN);
 
-
-    public ApplicabilityScannerExecutor(Log log, ServerConfig serverConfig) {
-        this(log, serverConfig, "", true);
-    }
-
-    public ApplicabilityScannerExecutor(Log log, ServerConfig serverConfig, String binaryDownloadUrl, boolean useJFrogReleases) {
-        super(SourceCodeScanType.CONTEXTUAL, binaryDownloadUrl, log, serverConfig, useJFrogReleases);
+    public ApplicabilityScannerExecutor(Log log) {
+        super(SourceCodeScanType.CONTEXTUAL, log);
         supportedPackageTypes = SUPPORTED_PACKAGE_TYPES;
     }
 

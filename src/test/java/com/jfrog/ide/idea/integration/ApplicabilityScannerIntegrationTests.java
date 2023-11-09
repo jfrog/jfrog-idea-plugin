@@ -16,7 +16,7 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        scanner = new ApplicabilityScannerExecutor(Logger.getInstance(), serverConfig, binaryDownloadUrl, useReleases);
+        scanner = new ApplicabilityScannerExecutor(Logger.getInstance());
     }
 
     public void testApplicabilityScannerJsProjectNotApplicable() throws IOException, InterruptedException {
@@ -85,10 +85,6 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
         assertEquals(50, results.get(0).getColEnd());
         assertTrue(results.get(0).getFilePath().endsWith("VulnerableComponentsLesson.java"));
         assertEquals(SourceCodeScanType.CONTEXTUAL, results.get(0).getReporter());
-    }
-
-    private void dummyCheckCanceled() {
-
     }
 
     @Override

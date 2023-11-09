@@ -18,7 +18,7 @@ public class SecretsScannerIntegrationTests extends BaseIntegrationTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        scanner = new SecretsScannerExecutor(Logger.getInstance(), serverConfig, binaryDownloadUrl, useReleases);
+        scanner = new SecretsScannerExecutor(Logger.getInstance());
     }
 
     public void testSecretsScanner() throws IOException, InterruptedException {
@@ -45,9 +45,6 @@ public class SecretsScannerIntegrationTests extends BaseIntegrationTest {
                 .roots(List.of(testProjectRoot));
         List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled);
         assertEquals(0, results.size());
-    }
-
-    private void dummyCheckCanceled() {
     }
 
     @Override

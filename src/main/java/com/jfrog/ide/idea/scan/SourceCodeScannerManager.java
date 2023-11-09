@@ -48,7 +48,7 @@ import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 public class SourceCodeScannerManager {
     private final Path jfrogApplictionsConfigPath;
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
-    private final ApplicabilityScannerExecutor applicability = new ApplicabilityScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig());
+    private final ApplicabilityScannerExecutor applicability = new ApplicabilityScannerExecutor(Logger.getInstance());
     private final Map<SourceCodeScanType, ScanBinaryExecutor> scanners = initScannersCollection();
     protected Project project;
     protected PackageManagerType packageType;
@@ -121,9 +121,6 @@ public class SourceCodeScannerManager {
             public void run(@NotNull com.intellij.openapi.progress.ProgressIndicator indicator) {
                 if (project.isDisposed()) {
                     return;
-                }
-                if (!GlobalSettings.getInstance().reloadXrayCredentials()) {
-                    throw new RuntimeException("Xray server is not configured.");
                 }
                 // Prevent multiple simultaneous scans
                 if (!scanInProgress.compareAndSet(false, true)) {
@@ -316,9 +313,9 @@ public class SourceCodeScannerManager {
 
     private Map<SourceCodeScanType, ScanBinaryExecutor> initScannersCollection() {
         Map<SourceCodeScanType, ScanBinaryExecutor> scanners = new HashMap<>();
-        scanners.put(SourceCodeScanType.SECRETS, new SecretsScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig()));
-        scanners.put(SourceCodeScanType.IAC, new IACScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig()));
-        scanners.put(SourceCodeScanType.SAST, new SastScannerExecutor(Logger.getInstance(), GlobalSettings.getInstance().getServerConfig()));
+        scanners.put(SourceCodeScanType.SECRETS, new SecretsScannerExecutor(Logger.getInstance()));
+        scanners.put(SourceCodeScanType.IAC, new IACScannerExecutor(Logger.getInstance()));
+        scanners.put(SourceCodeScanType.SAST, new SastScannerExecutor(Logger.getInstance()));
         return scanners;
     }
 
