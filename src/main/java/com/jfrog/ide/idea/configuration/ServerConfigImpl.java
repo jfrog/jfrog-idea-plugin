@@ -33,7 +33,6 @@ import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.idea.ui.configuration.ConnectionRetriesSpinner;
 import com.jfrog.ide.idea.ui.configuration.ConnectionTimeoutSpinner;
 import org.apache.commons.collections4.CollectionUtils;
-import org.codehaus.plexus.util.StringUtils;
 import org.jfrog.build.client.ProxyConfiguration;
 
 import javax.annotation.CheckForNull;
@@ -471,10 +470,7 @@ public class ServerConfigImpl implements ServerConfig {
      */
     public void readMissingConfFromEnv() {
         if (isBlank(getExternalResourcesRepo())) {
-            String externalResourcesRepoEnv = EnvironmentUtil.getValue(EXTERNAL_RESOURCES_REPO_ENV);
-            if (isNotBlank(externalResourcesRepoEnv)) {
-                setExternalResourcesRepo(externalResourcesRepoEnv);
-            }
+            setExternalResourcesRepo(EnvironmentUtil.getValue(EXTERNAL_RESOURCES_REPO_ENV));
         }
     }
 

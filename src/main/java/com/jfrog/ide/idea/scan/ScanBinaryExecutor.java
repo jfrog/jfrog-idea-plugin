@@ -207,9 +207,8 @@ public abstract class ScanBinaryExecutor {
                         if (latestBinaryChecksum.equals(currentBinaryCheckSum)) {
                             nextUpdateCheck = currentTime.plusDays(UPDATE_INTERVAL);
                             return;
-                        } else {
-                            log.debug(String.format("Resource %s is not up to date. Downloading it.", archiveTargetPath));
                         }
+                        log.debug(String.format("Resource %s is not up to date. Downloading it.", archiveTargetPath));
                     }
                 } else {
                     log.debug(String.format("Resource %s is not found. Downloading it.", binaryTargetPath));
