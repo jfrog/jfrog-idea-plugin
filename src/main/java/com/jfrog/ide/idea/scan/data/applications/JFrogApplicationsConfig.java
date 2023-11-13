@@ -6,11 +6,12 @@ import com.jfrog.ide.idea.configuration.GlobalSettings;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static com.jfrog.ide.idea.scan.SourceCodeScannerManager.convertToSkippedFolders;
-import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
 
 @Getter
 @NoArgsConstructor
@@ -22,15 +23,16 @@ public class JFrogApplicationsConfig {
 
     public static JFrogApplicationsConfig createApplicationConfigWithDefaultModule(Project project) {
         JFrogApplicationsConfig applicationsConfig = new JFrogApplicationsConfig();
-
-        ModuleConfig defualtModuleConfig = new ModuleConfig();
-        defualtModuleConfig.setSourceRoot(getProjectBasePath(project).toAbsolutePath().toString());
-        defualtModuleConfig.setExcludePatterns(convertToSkippedFolders(GlobalSettings.getInstance().getServerConfig().getExcludedPaths()));
-
+        Set<Path> paths = com.jfrog.ide.idea.scan.ScanUtils.createScanPaths(project);
         applicationsConfig.modules = new ArrayList<>();
-        applicationsConfig.modules.add(defualtModuleConfig);
+
+        for (Path path : paths) {
+            ModuleConfig defualtModuleConfig = new ModuleConfig();
+            defualtModuleConfig.setSourceRoot(path.toString());
+            defualtModuleConfig.setExcludePatterns(convertToSkippedFolders(GlobalSettings.getInstance().getServerConfig().getExcludedPaths()));
+            applicationsConfig.modules.add(defualtModuleConfig);
+        }
 
         return applicationsConfig;
     }
-
 }

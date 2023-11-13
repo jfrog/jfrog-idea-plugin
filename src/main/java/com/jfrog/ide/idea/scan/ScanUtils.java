@@ -12,8 +12,6 @@ import org.apache.commons.lang3.SystemUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -28,7 +26,7 @@ public class ScanUtils {
      * @param project     - the project
      * @return local scan paths
      */
-    static Set<Path> createScanPaths(Map<Integer, ScannerBase> scannersMap, Project project) {
+    public static Set<Path> createScanPaths(Project project) {
         final Set<Path> paths = Sets.newHashSet();
         paths.add(com.jfrog.ide.idea.utils.Utils.getProjectBasePath(project));
         for (Module module : ModuleManager.getInstance(project).getModules()) {
@@ -37,7 +35,6 @@ public class ScanUtils {
                 paths.add(modulePath.toNioPath());
             }
         }
-        scannersMap.values().stream().map(ScannerBase::getProjectPaths).flatMap(Collection::stream).forEach(paths::add);
         Logger.getInstance().debug("Scanning projects in the following paths: " + paths);
         return paths;
     }
