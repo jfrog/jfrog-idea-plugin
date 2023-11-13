@@ -269,6 +269,7 @@ public abstract class ScannerBase {
                 currImpactTreeNode = new ImpactTreeNode(currPathNode);
                 parentImpactTreeNode.getChildren().add(currImpactTreeNode);
                 if (pathNodeIndex == path.size() - 1) {
+                    // if a new leaf was added, thus a new impact path was added (impact paths don't collide after they split)
                     impactTree.incImpactPathsCount();
                 }
             }
