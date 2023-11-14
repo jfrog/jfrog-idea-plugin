@@ -6,6 +6,7 @@ import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.jfrog.ide.common.utils.Utils;
 import com.jfrog.ide.idea.log.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -25,7 +26,7 @@ public class ScanUtils {
      * @return local scan paths
      */
     public static Set<Path> createScanPaths(Project project) {
-        final Set<Path> paths = Sets.newHashSet();
+        Set<Path> paths = Sets.newHashSet();
         paths.add(com.jfrog.ide.idea.utils.Utils.getProjectBasePath(project));
         for (Module module : ModuleManager.getInstance(project).getModules()) {
             VirtualFile modulePath = ProjectUtil.guessModuleDir(module);
@@ -33,6 +34,7 @@ public class ScanUtils {
                 paths.add(modulePath.toNioPath());
             }
         }
+        paths = Utils.consolidatePaths(paths);
         Logger.getInstance().debug("Scanning projects in the following paths: " + paths);
         return paths;
     }

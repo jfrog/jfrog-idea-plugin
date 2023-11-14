@@ -2,7 +2,6 @@ package com.jfrog.ide.idea.scan.data.applications;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.intellij.openapi.project.Project;
-import com.jfrog.ide.common.utils.Utils;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,7 +26,7 @@ public class JFrogApplicationsConfig {
         Set<Path> paths = com.jfrog.ide.idea.scan.ScanUtils.createScanPaths(project);
         applicationsConfig.modules = new ArrayList<>();
 
-        for (Path path : Utils.consolidatePaths(paths)) {
+        for (Path path : paths) {
             ModuleConfig defaultModuleConfig = new ModuleConfig();
             defaultModuleConfig.setSourceRoot(path.toString());
             defaultModuleConfig.setExcludePatterns(convertToSkippedFolders(GlobalSettings.getInstance().getServerConfig().getExcludedPaths()));
