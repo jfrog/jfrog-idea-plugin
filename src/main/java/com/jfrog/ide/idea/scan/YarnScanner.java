@@ -33,6 +33,7 @@ import java.util.concurrent.ExecutorService;
 public class YarnScanner extends SingleDescriptorScanner {
 
     private final YarnTreeBuilder yarnTreeBuilder;
+
     /**
      * @param project   currently opened IntelliJ project. We'll use this project to retrieve project based services
      *                  like {@link ConsistentFilterManager} and {@link ComponentsTree}.
@@ -99,7 +100,7 @@ public class YarnScanner extends SingleDescriptorScanner {
      * @return - The impact graph attached to package.json DescriptorFileTreeNode
      */
     @Override
-    protected List<FileTreeNode> walkDepTree(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) {
+    protected List<FileTreeNode> walkDepTree(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) throws IOException {
         DescriptorFileTreeNode descriptorNode = new DescriptorFileTreeNode(depTree.getRootNode().getDescriptorFilePath());
         // Build a map of package name to versions, to avoid running 'yarn why' multiple times for the same package.
         Map<String, Set<String>> packageNameToVersions = this.getPackageNameToVersionsMap(vulnerableDependencies.keySet());
@@ -108,28 +109,21 @@ public class YarnScanner extends SingleDescriptorScanner {
             String packageName = entry.getKey();
             Set<String> packageVersions = entry.getValue();
             // find the impact paths for each package for all its vulnerable versions
-            try {
-                Map<String, List<List<String>>> packageVersionsImpactPaths = yarnTreeBuilder.findDependencyImpactPaths(getLog(), depTree.getRootId(), packageName, packageVersions);
-                for (Map.Entry<String, List<List<String>>> aPackageVersionImpactPaths : packageVersionsImpactPaths.entrySet()) {
-                    String packageFullName = aPackageVersionImpactPaths.getKey();
-                    List<List<String>> impactPaths = aPackageVersionImpactPaths.getValue();
-                    DependencyNode dependencyNode = vulnerableDependencies.get(packageFullName);
-                    boolean indirect = true;
-                    // build the impact graph for each vulnerable dependency out of its impact paths
-                    for (List<String> impactPath : impactPaths) {
-                        this.addImpactPathToDependencyNode(dependencyNode, impactPath);
-                        if (impactPath.size() == 2) {
-                            indirect = false; // If the impact path is of length 2 (root -> dependency), this dependency is direct
-                        }
+            Map<String, List<List<String>>> packageVersionsImpactPaths = yarnTreeBuilder.findDependencyImpactPaths(getLog(), depTree.getRootId(), packageName, packageVersions);
+            for (Map.Entry<String, List<List<String>>> aPackageVersionImpactPaths : packageVersionsImpactPaths.entrySet()) {
+                String packageFullName = aPackageVersionImpactPaths.getKey();
+                List<List<String>> impactPaths = aPackageVersionImpactPaths.getValue();
+                DependencyNode dependencyNode = vulnerableDependencies.get(packageFullName);
+                boolean indirect = true;
+                // build the impact graph for each vulnerable dependency out of its impact paths
+                for (List<String> impactPath : impactPaths) {
+                    this.addImpactPathToDependencyNode(dependencyNode, impactPath);
+                    if (impactPath.size() == 2) {
+                        indirect = false; // If the impact path is of length 2 (root -> dependency), this dependency is direct
                     }
-                    dependencyNode.setIndirect(indirect);
-                    descriptorNode.addDependency(dependencyNode);
                 }
-            }
-
-            // TODO: How to handle this exception?
-            catch (IOException e) {
-                this.getLog().error("Failed to find impact paths for package: " + packageName, e);
+                dependencyNode.setIndirect(indirect);
+                descriptorNode.addDependency(dependencyNode);
             }
         }
 
