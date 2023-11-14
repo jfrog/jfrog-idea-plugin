@@ -20,10 +20,8 @@ import java.util.Set;
 public class ScanUtils {
     /**
      * This method gets a set of modules from IDEA, and searches for projects to be scanned.
-     * It appends the root path of each module it finds into a set.
      *
-     * @param scannersMap - current scanners
-     * @param project     - the project
+     * @param project - the project
      * @return local scan paths
      */
     public static Set<Path> createScanPaths(Project project) {
