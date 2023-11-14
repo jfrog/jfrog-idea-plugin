@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -45,7 +46,8 @@ public class ScannerFactory {
         Map<Integer, ScannerBase> scanners = Maps.newHashMap();
         refreshMavenScanner(scanners, oldScanners, executor, scanLogic);
         refreshPypiScanners(scanners, oldScanners, executor, scanLogic);
-        Set<Path> scanPaths = createScanPaths(oldScanners, project);
+        Set<Path> scanPaths = createScanPaths(project);
+        oldScanners.values().stream().map(ScannerBase::getProjectPaths).flatMap(Collection::stream).forEach(scanPaths::add);
         refreshGenericScanners(scanners, oldScanners, scanPaths, executor, scanLogic);
         return scanners;
     }
