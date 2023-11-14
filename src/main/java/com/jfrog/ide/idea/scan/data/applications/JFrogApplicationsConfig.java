@@ -3,6 +3,7 @@ package com.jfrog.ide.idea.scan.data.applications;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
+import com.jfrog.ide.idea.scan.ScanUtils;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -23,7 +24,7 @@ public class JFrogApplicationsConfig {
 
     public static JFrogApplicationsConfig createApplicationConfigWithDefaultModule(Project project) {
         JFrogApplicationsConfig applicationsConfig = new JFrogApplicationsConfig();
-        Set<Path> paths = com.jfrog.ide.idea.scan.ScanUtils.createScanPaths(project);
+        Set<Path> paths = ScanUtils.createScanPaths(project);
         applicationsConfig.modules = new ArrayList<>();
 
         for (Path path : paths) {
