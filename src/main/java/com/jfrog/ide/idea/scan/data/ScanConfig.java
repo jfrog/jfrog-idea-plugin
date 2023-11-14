@@ -95,6 +95,19 @@ public class ScanConfig {
         this.skippedFolders = skippedFolders;
     }
 
+    @Override
+    public String toString() {
+        return "ScanConfig{" +
+                "scanType=" + scanType +
+                ", language='" + language + '\'' +
+                ", roots=" + roots +
+                ", output='" + output + '\'' +
+                ", grepDisable=" + grepDisable +
+                ", cves=" + cves +
+                ", skippedFolders=" + skippedFolders +
+                ", excludedRules=" + excludedRules +
+                '}';
+    }
 
     public static class Builder {
         private SourceCodeScanType scanType;
