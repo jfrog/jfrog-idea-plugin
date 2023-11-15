@@ -76,7 +76,7 @@ In addition to IntelliJ IDEA, the plugin also supports the following IDEs:
 
 # 🏁 Getting Started
 
-Read the the [documentation](https://docs.jfrog-applications.jfrog.io/jfrog-applications/ide/jetbrains-ides) to get started.
+Read the [documentation](https://docs.jfrog-applications.jfrog.io/jfrog-applications/ide/jetbrains-ides) to get started.
 
 # 🔥 Reporting Issues
 
@@ -88,4 +88,4 @@ We welcome community contribution through pull requests. To help us improve this
 
 # 🥏 Release Notes
 
-The release notes are available on [Marketplace](https://plugins.jetbrains.com/plugin/9834-jfrog/versions).
+The release notes are available [here](https://github.com/jfrog/jfrog-idea-plugin/releases).
