@@ -68,7 +68,6 @@ import static java.lang.String.join;
  */
 public abstract class ScanBinaryExecutor {
     public static final Path BINARIES_DIR = HOME_PATH.resolve("dependencies").resolve("jfrog-security");
-    private static final long MAX_EXECUTION_MINUTES = 10;
     private static final int UPDATE_INTERVAL = 1;
     private static final int USER_NOT_ENTITLED = 31;
     private static final int NOT_SUPPORTED = 13;
@@ -175,7 +174,7 @@ public abstract class ScanBinaryExecutor {
                     %s""", cmd, inputParams));
             CommandExecutor commandExecutor = new CommandExecutor(binaryTargetPath.toString(), createEnvWithCredentials());
             CommandResults commandResults = commandExecutor.exeCommand(binaryTargetPath.toFile().getParentFile(), args,
-                    null, new NullLog(), MAX_EXECUTION_MINUTES, TimeUnit.MINUTES);
+                    null, new NullLog(), Long.MAX_VALUE, TimeUnit.MINUTES);
 
             checkCanceled.run();
 
