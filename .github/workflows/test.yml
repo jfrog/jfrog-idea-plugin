@@ -36,7 +36,7 @@ jobs:
           check-latest: true
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
+          python-version: '3.11.5'
       # Install JFrog CLI for ConnectionDetailsFromCliTest
       - name: Install JFrog CLI
         run: curl -fL https://install-cli.jfrog.io | sh
