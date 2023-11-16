@@ -74,7 +74,7 @@ In addition to IntelliJ IDEA, the plugin also supports the following IDEs:
 - Android Studio
 - GoLand
 
-# 🏁 Getting Started
+# 🏁 Documentation
 
 Read the [documentation](https://docs.jfrog-applications.jfrog.io/jfrog-applications/ide/jetbrains-ides) to get started.
 
