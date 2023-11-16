@@ -73,12 +73,12 @@ public class YarnScanner extends SingleDescriptorScanner {
     }
 
     /**
-     * Builds a map of package name to versions.
+     * Builds a map of package name to versions out of a set of <package-name>:<version> Strings.
      *
      * @param packages - A set of packages in the format of 'package-name:version'.
      * @return - A map of package name to a set of versions.
      */
-    private Map<String, Set<String>> getPackageNameToVersionsMap(Set<String> packages) {
+    Map<String, Set<String>> getPackageNameToVersionsMap(Set<String> packages) {
         Map<String, Set<String>> packageNameToVersions = new HashMap<>();
         for (String fullNamePackage : CollectionUtils.emptyIfNull(packages)) {
             String[] packageSplit = StringUtils.split(fullNamePackage, ":");
