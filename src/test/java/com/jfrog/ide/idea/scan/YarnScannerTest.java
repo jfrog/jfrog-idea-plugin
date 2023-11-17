@@ -30,11 +30,17 @@ public class YarnScannerTest extends HeavyPlatformTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        executorService.shutdown();
-        super.tearDown();
+        try {
+            executorService.shutdown();
+        } finally {
+            super.tearDown();
+        }
+//        executorService.shutdown();
+//        super.tearDown();
     }
 
     private String createTempProjectDir(String projectName) throws IOException {
+        // Using a virtual directory allows each test to have its own isolated workspace, preventing interference between tests.
         String tempProjectDir = getTempDir().createVirtualDir(projectName).toNioPath().toString();
         FileUtils.copyDirectory(YARN_ROOT.resolve(projectName).toFile(), FileUtils.getFile(tempProjectDir));
         return tempProjectDir;
