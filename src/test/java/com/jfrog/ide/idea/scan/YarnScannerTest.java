@@ -33,10 +33,9 @@ public class YarnScannerTest extends HeavyPlatformTestCase {
         try {
             executorService.shutdown();
         } finally {
+            // Ensure that tearDown gets executed even if an exception is thrown
             super.tearDown();
         }
-//        executorService.shutdown();
-//        super.tearDown();
     }
 
     private String createTempProjectDir(String projectName) throws IOException {
