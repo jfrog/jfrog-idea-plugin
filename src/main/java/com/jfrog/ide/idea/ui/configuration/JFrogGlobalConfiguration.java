@@ -7,10 +7,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.ui.HyperlinkLabel;
-import com.intellij.ui.components.JBLabel;
-import com.intellij.ui.components.JBPasswordField;
-import com.intellij.ui.components.JBTabbedPane;
-import com.intellij.ui.components.JBTextField;
+import com.intellij.ui.components.*;
 import com.intellij.util.Time;
 import com.intellij.util.ui.AsyncProcessIcon;
 import com.jfrog.ide.common.configuration.ServerConfig;
@@ -23,6 +20,7 @@ import com.jfrog.xray.client.impl.XrayClientBuilder;
 import com.jfrog.xray.client.impl.util.JFrogInactiveEnvironmentException;
 import com.jfrog.xray.client.services.system.Version;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.conn.ssl.TrustAllStrategy;
@@ -121,8 +119,16 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     // Advanced tab
     private ConnectionRetriesSpinner connectionRetries;
     private ConnectionTimeoutSpinner connectionTimeout;
-    private JButton defaultValuesButton;
     private JBTextField excludedPaths;
+    private ActionLink scanOptionsRestoreDefaultsActionLink;
+    private ActionLink connectionOptionsRestoreDefaultsActionLink;
+    private JRadioButton downloadResourcesFromReleasesRadioButton;
+    private JRadioButton downloadResourcesThroughArtifactoryRadioButton;
+    private JLabel repositoryNameJLabel;
+    private JBTextField repositoryNameJBTextField;
+    private JLabel repositoryNameDescJLabel;
+    private JBLabel pluginResourcesDescJBLabel;
+    private JBLabel releasesRepoLinkJBLabel;
 
     private int selectedTabIndex;
 
@@ -141,7 +147,11 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         // Settings
         initPolicy();
         initLinks();
-        initDefaultValuesButton();
+
+        // Advanced
+        initConnectionOptionsRestoreDefaultsActionLink();
+        initScanOptionsRestoreDefaultsActionLink();
+        initPluginResourcesComponents();
 
         loadConfig();
     }
@@ -212,7 +222,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
      * @return a new server config.
      */
     private ServerConfigImpl createServerConfig() {
-        return new ServerConfigImpl.Builder()
+        ServerConfigImpl.Builder builder = new ServerConfigImpl.Builder()
                 .setConnectionType(getConnectionType())
                 .setUrl(platformUrl.getText())
                 .setArtifactoryUrl(artifactoryUrl.getText())
@@ -225,8 +235,11 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
                 .setProject(project.getText())
                 .setWatches(watches.getText())
                 .setConnectionRetries(connectionRetries.getNumber())
-                .setConnectionTimeout(connectionTimeout.getNumber())
-                .build();
+                .setConnectionTimeout(connectionTimeout.getNumber());
+        if (downloadResourcesThroughArtifactoryRadioButton.isSelected()) {
+            builder.setExternalResourcesRepo(repositoryNameJBTextField.getText());
+        }
+        return builder.build();
     }
 
     /**
@@ -274,6 +287,12 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             watches.setText(serverConfig.getWatches());
             connectionRetries.setValue(serverConfig.getConnectionRetries());
             connectionTimeout.setValue(serverConfig.getConnectionTimeout());
+            if (!StringUtils.isEmpty(serverConfig.getExternalResourcesRepo())) {
+                downloadResourcesThroughArtifactoryRadioButton.setSelected(true);
+                repositoryNameJBTextField.setText(serverConfig.getExternalResourcesRepo());
+            } else {
+                downloadResourcesFromReleasesRadioButton.setSelected(true);
+            }
         } else {
             clearText(platformUrl, xrayUrl, artifactoryUrl, username, password);
             excludedPaths.setText(DEFAULT_EXCLUSIONS);
@@ -283,7 +302,9 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             connectionRetries.setValue(ConnectionRetriesSpinner.RANGE.initial);
             connectionTimeout.setValue(ConnectionTimeoutSpinner.RANGE.initial);
             ssoLoginSelection.setSelected(true);
+            downloadResourcesFromReleasesRadioButton.setSelected(true);
         }
+        updateExternalRepositoryFields();
         initAuthMethodSelection();
     }
 
@@ -647,13 +668,44 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     }
 
     /**
-     * Initialize the "Default values" button in the "Advanced" tab.
+     * Initialize the "Restore Defaults" button of the "Connection Options" section in the "Advanced" tab.
      */
-    private void initDefaultValuesButton() {
-        defaultValuesButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
-            excludedPaths.setText(DEFAULT_EXCLUSIONS);
+    private void initConnectionOptionsRestoreDefaultsActionLink() {
+        connectionOptionsRestoreDefaultsActionLink.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
             connectionRetries.setValue(ConnectionRetriesSpinner.RANGE.initial);
             connectionTimeout.setValue(ConnectionTimeoutSpinner.RANGE.initial);
         }));
+    }
+
+    /**
+     * Initialize the "Restore Defaults" button of the "Scan Options" section in the "Advanced" tab.
+     */
+    private void initScanOptionsRestoreDefaultsActionLink() {
+        scanOptionsRestoreDefaultsActionLink.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            excludedPaths.setText(DEFAULT_EXCLUSIONS);
+        }));
+    }
+
+    /**
+     * Initialize the "Plugin Resources" components in the "Advanced" tab.
+     */
+    private void initPluginResourcesComponents() {
+        downloadResourcesFromReleasesRadioButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            updateExternalRepositoryFields();
+        }));
+        downloadResourcesThroughArtifactoryRadioButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
+            updateExternalRepositoryFields();
+        }));
+
+        // This is needed for the links in the labels to work
+        pluginResourcesDescJBLabel.setCopyable(true);
+        releasesRepoLinkJBLabel.setCopyable(true);
+    }
+
+    private void updateExternalRepositoryFields() {
+        boolean enabled = downloadResourcesThroughArtifactoryRadioButton.isSelected();
+        repositoryNameJLabel.setEnabled(enabled);
+        repositoryNameJBTextField.setEnabled(enabled);
+        repositoryNameDescJLabel.setEnabled(enabled);
     }
 }

@@ -47,20 +47,19 @@ import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBui
 import static com.jfrog.ide.idea.scan.ScanUtils.getOSAndArc;
 import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
 import static java.lang.String.join;
-import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 
 /**
  * @author Tal Arian
  */
 public abstract class ScanBinaryExecutor {
+    public static final Path BINARIES_DIR = HOME_PATH.resolve("dependencies").resolve("jfrog-security");
     private static final long MAX_EXECUTION_MINUTES = 10;
     private static final int UPDATE_INTERVAL = 1;
     private static final int USER_NOT_ENTITLED = 31;
     private static final int NOT_SUPPORTED = 13;
-    private static final Path BINARIES_DIR = HOME_PATH.resolve("dependencies").resolve("jfrog-security");
     private static final String SCANNER_BINARY_NAME = "analyzerManager";
     private static final String SCANNER_BINARY_VERSION = "1.3.2.2019257";
-    private static final String DEFAULT_BINARY_DOWNLOAD_URL = "xsc-gen-exe-analyzer-manager-local/v1/" + SCANNER_BINARY_VERSION;
+    private static final String BINARY_DOWNLOAD_URL = "xsc-gen-exe-analyzer-manager-local/v1/" + SCANNER_BINARY_VERSION;
     private static final String DOWNLOAD_SCANNER_NAME = "analyzerManager.zip";
     private static final String MINIMAL_XRAY_VERSION_SUPPORTED_FOR_ENTITLEMENT = "3.66.0";
     private static final String ENV_PLATFORM = "JF_PLATFORM_URL";
@@ -70,27 +69,23 @@ public abstract class ScanBinaryExecutor {
     private static final String ENV_HTTP_PROXY = "HTTP_PROXY";
     private static final String ENV_HTTPS_PROXY = "HTTPS_PROXY";
     private static final String JFROG_RELEASES = "https://releases.jfrog.io/artifactory/";
-    private final String BINARY_DOWNLOAD_URL;
     private static Path binaryTargetPath;
     private static Path archiveTargetPath;
     @Getter
     private static String osDistribution;
     private static LocalDateTime nextUpdateCheck;
-    private final ArtifactoryManagerBuilder artifactoryManagerBuilder;
     protected final SourceCodeScanType scanType;
     protected Collection<PackageManagerType> supportedPackageTypes;
     private final Log log;
     private boolean notSupported;
     private final static Object downloadLock = new Object();
 
-    ScanBinaryExecutor(SourceCodeScanType scanType, String binaryDownloadUrl, Log log, ServerConfig server, boolean useJFrogReleases) {
+    ScanBinaryExecutor(SourceCodeScanType scanType, Log log) {
         this.scanType = scanType;
         this.log = log;
-        BINARY_DOWNLOAD_URL = defaultIfEmpty(binaryDownloadUrl, DEFAULT_BINARY_DOWNLOAD_URL);
         String executable = SystemUtils.IS_OS_WINDOWS ? SCANNER_BINARY_NAME + ".exe" : SCANNER_BINARY_NAME;
         binaryTargetPath = BINARIES_DIR.resolve(SCANNER_BINARY_NAME).resolve(executable);
         archiveTargetPath = BINARIES_DIR.resolve(DOWNLOAD_SCANNER_NAME);
-        artifactoryManagerBuilder = createManagerBuilder(useJFrogReleases, server);
         setOsDistribution();
     }
 
@@ -116,8 +111,12 @@ public abstract class ScanBinaryExecutor {
         }
     }
 
-    public String getBinaryDownloadURL() {
-        return String.format("%s/%s/%s", BINARY_DOWNLOAD_URL, getOsDistribution(), DOWNLOAD_SCANNER_NAME);
+    String getBinaryDownloadURL(String externalResourcesRepo) {
+        String downloadUrlPrefix = "";
+        if (!StringUtils.isEmpty(externalResourcesRepo)) {
+            downloadUrlPrefix = String.format("%s/artifactory/", externalResourcesRepo);
+        }
+        return String.format("%s%s/%s/%s", downloadUrlPrefix, BINARY_DOWNLOAD_URL, getOsDistribution(), DOWNLOAD_SCANNER_NAME);
     }
 
     abstract Feature getScannerFeatureName();
@@ -192,38 +191,44 @@ public abstract class ScanBinaryExecutor {
     private void updateBinaryIfNeeded() throws IOException {
         // Allow only one thread to check and update the binary at any time.
         synchronized (downloadLock) {
-            if (!Files.exists(binaryTargetPath)) {
-                log.debug(String.format("Resource %s is not found. Downloading it.", binaryTargetPath));
-                downloadBinary();
+            LocalDateTime currentTime = LocalDateTime.now();
+            boolean targetExists = Files.exists(binaryTargetPath);
+            if (targetExists && nextUpdateCheck != null && currentTime.isBefore(nextUpdateCheck)) {
                 return;
             }
-            LocalDateTime currentTime = LocalDateTime.now();
-            if (nextUpdateCheck == null || currentTime.isAfter(nextUpdateCheck)) {
-                nextUpdateCheck = currentTime.plusDays(UPDATE_INTERVAL);
-                // Check for new version of the binary
-                try (FileInputStream archiveBinaryFile = new FileInputStream(archiveTargetPath.toFile())) {
-                    String latestBinaryChecksum = getFileChecksumFromServer();
-                    String currentBinaryCheckSum = DigestUtils.sha256Hex(archiveBinaryFile);
-                    if (!latestBinaryChecksum.equals(currentBinaryCheckSum)) {
+            ServerConfig server = GlobalSettings.getInstance().getServerConfig();
+            String externalResourcesRepo = server.getExternalResourcesRepo();
+            ArtifactoryManagerBuilder artifactoryManagerBuilder = createManagerBuilder(StringUtils.isEmpty(externalResourcesRepo), server);
+            try (ArtifactoryManager artifactoryManager = artifactoryManagerBuilder.build()) {
+                if (targetExists) {
+                    // Check for new version of the binary
+                    try (FileInputStream archiveBinaryFile = new FileInputStream(archiveTargetPath.toFile())) {
+                        String latestBinaryChecksum = getFileChecksumFromServer(artifactoryManager, externalResourcesRepo);
+                        String currentBinaryCheckSum = DigestUtils.sha256Hex(archiveBinaryFile);
+                        if (latestBinaryChecksum.equals(currentBinaryCheckSum)) {
+                            nextUpdateCheck = currentTime.plusDays(UPDATE_INTERVAL);
+                            return;
+                        }
                         log.debug(String.format("Resource %s is not up to date. Downloading it.", archiveTargetPath));
-                        downloadBinary();
                     }
+                } else {
+                    log.debug(String.format("Resource %s is not found. Downloading it.", binaryTargetPath));
                 }
+                downloadBinary(artifactoryManager, externalResourcesRepo);
             }
         }
     }
 
-    public String getFileChecksumFromServer() throws IOException {
-        try (ArtifactoryManager artifactoryManager = artifactoryManagerBuilder.build()) {
-            Header[] headers = artifactoryManager.downloadHeaders(getBinaryDownloadURL());
-            for (Header header : headers) {
-                if (StringUtils.equalsIgnoreCase(header.getName(), "x-checksum-sha256")) {
-                    return header.getValue();
-                }
+    public String getFileChecksumFromServer(ArtifactoryManager artifactoryManager, String externalResourcesRepo) throws IOException {
+        String url = getBinaryDownloadURL(externalResourcesRepo);
+        Header[] headers = artifactoryManager.downloadHeaders(url);
+        for (Header header : headers) {
+            if (StringUtils.equalsIgnoreCase(header.getName(), "x-checksum-sha256")) {
+                return header.getValue();
             }
-            log.warn(String.format("Failed to retrieve file checksum from: %s/%s ", artifactoryManager.getUrl(), getBinaryDownloadURL()));
-            return "";
         }
+        log.warn(String.format("Failed to retrieve file checksum from: %s/%s ", artifactoryManager.getUrl(), url));
+        return "";
     }
 
     protected boolean shouldExecute() {
@@ -270,28 +275,26 @@ public abstract class ScanBinaryExecutor {
         return om.readValue(outputFile.toFile(), Output.class);
     }
 
-    protected void downloadBinary() throws IOException {
-        try (ArtifactoryManager artifactoryManager = artifactoryManagerBuilder.build()) {
-            String downloadUrl = getBinaryDownloadURL();
-            File downloadArchive = artifactoryManager.downloadToFile(downloadUrl, archiveTargetPath.toString());
-            log.debug(String.format("Downloading: %s", downloadUrl));
-            if (downloadArchive == null) {
-                throw new IOException("An empty response received from Artifactory.");
-            }
-            // Delete current scanners
-            FileUtils.deleteDirectory(binaryTargetPath.toFile().getParentFile());
-            // Extract archive
-            UnzipParameters params = new UnzipParameters();
-            params.setExtractSymbolicLinks(false);
-            try (ZipFile zip = new ZipFile(archiveTargetPath.toFile())) {
-                zip.extractAll(binaryTargetPath.toFile().getParentFile().toString(), params);
-            } catch (ZipException exception) {
-                throw new IOException("An error occurred while trying to unarchived the JFrog executable:\n" + exception.getMessage());
-            }
-            // Set executable permissions to the downloaded scanner
-            if (!binaryTargetPath.toFile().setExecutable(true)) {
-                throw new IOException("An error occurred while trying to give access permissions to the JFrog executable.");
-            }
+    protected void downloadBinary(ArtifactoryManager artifactoryManager, String externalResourcesRepo) throws IOException {
+        String downloadUrl = getBinaryDownloadURL(externalResourcesRepo);
+        File downloadArchive = artifactoryManager.downloadToFile(downloadUrl, archiveTargetPath.toString());
+        log.debug(String.format("Downloading: %s", downloadUrl));
+        if (downloadArchive == null) {
+            throw new IOException("An empty response received from Artifactory.");
+        }
+        // Delete current scanners
+        FileUtils.deleteDirectory(binaryTargetPath.toFile().getParentFile());
+        // Extract archive
+        UnzipParameters params = new UnzipParameters();
+        params.setExtractSymbolicLinks(false);
+        try (ZipFile zip = new ZipFile(archiveTargetPath.toFile())) {
+            zip.extractAll(binaryTargetPath.toFile().getParentFile().toString(), params);
+        } catch (ZipException exception) {
+            throw new IOException("An error occurred while trying to unarchived the JFrog executable:\n" + exception.getMessage());
+        }
+        // Set executable permissions to the downloaded scanner
+        if (!binaryTargetPath.toFile().setExecutable(true)) {
+            throw new IOException("An error occurred while trying to give access permissions to the JFrog executable.");
         }
     }
 

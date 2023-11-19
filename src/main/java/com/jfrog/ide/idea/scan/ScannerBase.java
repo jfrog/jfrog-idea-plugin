@@ -238,6 +238,7 @@ public abstract class ScannerBase {
                 // The solution for this is to clone the dependency before adding it as a child of the POM.
                 DependencyNode clonedDep = (DependencyNode) dependencyNode.clone();
                 clonedDep.setIndirect(indirect);
+
                 descriptorNodes.get(descriptorPath).addDependency(clonedDep);
                 addedDeps.get(descriptorPath).put(compId, clonedDep);
             }
@@ -292,9 +293,6 @@ public abstract class ScannerBase {
             public void run(@NotNull com.intellij.openapi.progress.ProgressIndicator indicator) {
                 if (project.isDisposed()) {
                     return;
-                }
-                if (!GlobalSettings.getInstance().reloadXrayCredentials()) {
-                    throw new RuntimeException("Xray server is not configured.");
                 }
                 // Prevent multiple simultaneous scans
                 if (!scanInProgress.compareAndSet(false, true)) {

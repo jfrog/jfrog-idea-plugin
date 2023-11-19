@@ -28,6 +28,7 @@ import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import com.jfrog.ide.idea.log.Logger;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -66,6 +67,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         serverConfig.setWatches(this.serverConfig.getWatches());
         serverConfig.setConnectionRetries(this.serverConfig.getConnectionRetries());
         serverConfig.setConnectionTimeout(this.serverConfig.getConnectionTimeout());
+        serverConfig.setExternalResourcesRepo(this.serverConfig.getExternalResourcesRepo());
 
         GlobalSettings settings = new GlobalSettings();
         settings.serverConfig = serverConfig;
@@ -80,11 +82,12 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
     @Override
     public void loadState(@NotNull GlobalSettings state) {
         XmlSerializerUtil.copyBean(state, this);
+        serverConfig.readMissingConfFromEnv();
     }
 
     @Override
     public void noStateLoaded() {
-        reloadXrayCredentials();
+        reloadMissingConfiguration();
     }
 
     /**
@@ -130,17 +133,19 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         this.serverConfig.setExcludedPaths(serverConfig.getExcludedPaths());
         this.serverConfig.setConnectionRetries(serverConfig.getConnectionRetries());
         this.serverConfig.setConnectionTimeout(serverConfig.getConnectionTimeout());
+        this.serverConfig.setExternalResourcesRepo(serverConfig.getExternalResourcesRepo());
         this.serverConfig.setPolicyType(serverConfig.getPolicyType());
         this.serverConfig.setProject(serverConfig.getProject());
         this.serverConfig.setWatches(serverConfig.getWatches());
     }
 
     /**
-     * Reloads Xray credentials.
+     * Reloads missing configuration from the plugin settings, environment variables or JFrog CLI configuration.
      *
      * @return true if credentials exist and Xray is configured, false otherwise.
      */
-    public boolean reloadXrayCredentials() {
+    public boolean reloadMissingConfiguration() {
+        serverConfig.readMissingConfFromEnv();
         if (serverConfig.isXrayConfigured()) {
             return true;
         }

@@ -21,6 +21,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String JFROG_PROJECT = "ideaTest";
     private static final int CONNECTION_TIMEOUT = 70;
     private static final int CONNECTION_RETRIES = 5;
+    private static final String EXTERNAL_RESOURCES_REPO = "releases";
     private static final String PASSWORD = "prince";
     private static final String USERNAME = "diana";
     private static final String WATCH = "heimdall";
@@ -41,7 +42,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
      * Test credentials storage.
      */
     public void testStoreCredentials() {
-        ServerConfigImpl serverConfig = createServerConfig(true, true);
+        ServerConfigImpl serverConfig = createServerConfig(true, true, true);
 
         // Add credentials
         serverConfig.addCredentialsToPasswordSafe();
@@ -63,7 +64,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
     public void testSetServerConfig() {
         // Create overriding server config
         GlobalSettings globalSettings = new GlobalSettings();
-        ServerConfigImpl overrideServerConfig = createServerConfig(true, true);
+        ServerConfigImpl overrideServerConfig = createServerConfig(true, true, true);
 
         // Save credentials in the PasswordSafe and delete credentials from the overriding server.
         // We do this to simulate GlobalSettings load from file.
@@ -81,6 +82,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
         assertEquals(PASSWORD, actualServerConfig.getPassword());
         assertEquals(CONNECTION_RETRIES, actualServerConfig.getConnectionRetries());
         assertEquals(CONNECTION_TIMEOUT, actualServerConfig.getConnectionTimeout());
+        assertEquals(EXTERNAL_RESOURCES_REPO, actualServerConfig.getExternalResourcesRepo());
         assertEquals(EXCLUDED_PATHS, actualServerConfig.getExcludedPaths());
         assertEquals(JFROG_PROJECT, actualServerConfig.getProject());
         assertEquals(WATCH, actualServerConfig.getWatches());
@@ -125,7 +127,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
 
             // Create overriding server config
             GlobalSettings globalSettings = new GlobalSettings();
-            ServerConfigImpl overrideServerConfig = createServerConfig(false, false);
+            ServerConfigImpl overrideServerConfig = createServerConfig(false, false, false);
 
             // Check that the server in the global settings was overridden by the environment variables
             globalSettings.setServerConfig(overrideServerConfig);
@@ -148,6 +150,22 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
         }
     }
 
+    public void testReadMissingConfFromEnv() {
+        try (MockedStatic<EnvironmentUtil> mockController = Mockito.mockStatic(EnvironmentUtil.class)) {
+            mockController.when(() -> EnvironmentUtil.getValue(EXTERNAL_RESOURCES_REPO_ENV)).thenReturn("releases-test");
+
+            // Create overriding server config
+            GlobalSettings globalSettings = new GlobalSettings();
+            ServerConfigImpl overrideServerConfig = createServerConfig(true, true, false);
+            globalSettings.setServerConfig(overrideServerConfig);
+
+            // Check that the external resources repository field was overridden
+            ServerConfigImpl actualServerConfig = globalSettings.getServerConfig();
+            actualServerConfig.readMissingConfFromEnv();
+            assertEquals("releases-test", actualServerConfig.getExternalResourcesRepo());
+        }
+    }
+
     /**
      * Create server config for the tests.
      *
@@ -155,7 +173,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
      * @param artifactoryUrl - True if should set Artifactory URL
      * @return server config
      */
-    ServerConfigImpl createServerConfig(boolean xrayUrl, boolean artifactoryUrl) {
+    ServerConfigImpl createServerConfig(boolean xrayUrl, boolean artifactoryUrl, boolean externalResourcesRepo) {
         return new ServerConfigImpl.Builder()
                 .setJFrogSettingsCredentialsKey(JFROG_SETTINGS_CREDENTIALS_KEY)
                 .setUrl(PLATFORM_URL)
@@ -165,6 +183,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
                 .setPassword(PASSWORD)
                 .setConnectionRetries(CONNECTION_RETRIES)
                 .setConnectionTimeout(CONNECTION_TIMEOUT)
+                .setExternalResourcesRepo(externalResourcesRepo ? EXTERNAL_RESOURCES_REPO : null)
                 .setExcludedPaths(EXCLUDED_PATHS)
                 .setProject(JFROG_PROJECT)
                 .setWatches(WATCH)
@@ -175,6 +194,6 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
      * Clean up PasswordSafe.
      */
     private void cleanUp() {
-        createServerConfig(true, true).removeCredentialsFromPasswordSafe();
+        createServerConfig(true, true, true).removeCredentialsFromPasswordSafe();
     }
 }

@@ -18,7 +18,7 @@ public class IACScannerIntegrationTests extends BaseIntegrationTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        scanner = new IACScannerExecutor(Logger.getInstance(), serverConfig, binaryDownloadUrl, useReleases);
+        scanner = new IACScannerExecutor(Logger.getInstance());
     }
 
     public void testIACScanner() throws IOException, InterruptedException {
@@ -37,9 +37,6 @@ public class IACScannerIntegrationTests extends BaseIntegrationTest {
         assertEquals(SourceCodeScanType.IAC, iacIndication.getReporter());
         assertTrue(StringUtils.isNotBlank(iacIndication.getScannerSearchTarget()));
         assertTrue(StringUtils.isNotBlank(iacIndication.getReason()));
-    }
-
-    private void dummyCheckCanceled() {
     }
 
     @Override

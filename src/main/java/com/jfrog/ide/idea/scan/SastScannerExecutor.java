@@ -27,12 +27,8 @@ public class SastScannerExecutor extends ScanBinaryExecutor {
     private static final boolean RUN_WITH_NEW_CONFIG_FILE = true;
     private static final List<PackageManagerType> SUPPORTED_PACKAGE_TYPES = List.of(PackageManagerType.PYPI, PackageManagerType.NPM, PackageManagerType.YARN, PackageManagerType.GRADLE, PackageManagerType.MAVEN);
 
-    public SastScannerExecutor(Log log, ServerConfig serverConfig) {
-        this(log, serverConfig, null, true);
-    }
-
-    public SastScannerExecutor(Log log, ServerConfig serverConfig, String binaryDownloadUrl, boolean useJFrogReleases) {
-        super(SourceCodeScanType.SAST, binaryDownloadUrl, log, serverConfig, useJFrogReleases);
+    public SastScannerExecutor(Log log) {
+        super(SourceCodeScanType.SAST, log);
     }
 
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException {

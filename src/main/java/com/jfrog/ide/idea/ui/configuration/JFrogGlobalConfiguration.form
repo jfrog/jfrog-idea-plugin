@@ -454,7 +454,7 @@
           </component>
         </children>
       </grid>
-      <grid id="b5e9b" binding="advanced" layout-manager="GridLayoutManager" row-count="12" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="b5e9b" binding="advanced" layout-manager="GridLayoutManager" row-count="13" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <tabbedpane title="Advanced"/>
@@ -467,62 +467,39 @@
         <children>
           <component id="4bae3" class="javax.swing.JLabel">
             <constraints>
-              <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="1" anchor="8" fill="0" indent="0" use-parent-layout="false">
+              <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="2" use-parent-layout="false">
                 <preferred-size width="109" height="16"/>
               </grid>
             </constraints>
             <properties>
-              <text value="    Excluded directories"/>
+              <text value="Excluded directories:"/>
               <toolTipText value=""/>
             </properties>
           </component>
           <component id="a1d59" class="com.intellij.ui.components.JBTextField" binding="excludedPaths">
             <constraints>
-              <grid row="5" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
+              <grid row="4" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="133" height="30"/>
               </grid>
             </constraints>
             <properties>
-              <text value="&quot;**/*{.idea,test,node_modules}*&quot;"/>
+              <text value="&quot;**/*{.git,.idea,test,node_modules}*&quot;"/>
               <toolTipText value="Pattern of project paths to exclude from Xray scanning for npm and Go projects."/>
             </properties>
           </component>
           <component id="72110" class="javax.swing.JLabel">
             <constraints>
-              <grid row="6" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
-                <preferred-size width="133" height="16"/>
-              </grid>
+              <grid row="5" column="1" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <enabled value="false"/>
-              <text value="    A glob pattern from the shape of **/*{dir-1, dir-2 ...dir-n}* ."/>
-            </properties>
-          </component>
-          <component id="11a3e" class="javax.swing.JLabel">
-            <constraints>
-              <grid row="8" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
-                <preferred-size width="133" height="16"/>
-              </grid>
-            </constraints>
-            <properties>
-              <enabled value="false"/>
-              <text value="    For example, package.json files under directories named testdata will not be scanned."/>
-            </properties>
-          </component>
-          <component id="5b666" class="javax.swing.JLabel">
-            <constraints>
-              <grid row="9" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
-                <preferred-size width="133" height="16"/>
-              </grid>
-            </constraints>
-            <properties>
-              <enabled value="false"/>
-              <text value="    This is supported only by Gradle, npm and Go projects."/>
+              <font size="11"/>
+              <foreground color="-6513248"/>
+              <text value="&lt;html&gt;&#10;A glob pattern in the shape of **/*{dir-1, dir-2 ...dir-n}*&#10;&lt;br&gt;&#10;This is used to exclude specific local directory paths from being scanned by the plugin.&#10;&lt;br&gt;&#10;For example, to avoid a package.json file under a directory named testdata from being scanned.&#10;&lt;br&gt;&#10;This is supported only by Gradle, npm, and Go projects.&#10;&lt;/html&gt;"/>
             </properties>
           </component>
           <component id="b50f7" class="com.intellij.ui.TitledSeparator">
             <constraints>
-              <grid row="4" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="3" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Scan Options"/>
@@ -530,7 +507,7 @@
           </component>
           <component id="52b21" class="com.intellij.ui.TitledSeparator">
             <constraints>
-              <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Connection Options"/>
@@ -538,29 +515,25 @@
           </component>
           <component id="50914" class="javax.swing.JLabel">
             <constraints>
-              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
-                <preferred-size width="109" height="16"/>
-              </grid>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="2" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="    Connection retries"/>
+              <text value="Connection retries:"/>
               <toolTipText value=""/>
             </properties>
           </component>
           <component id="4e0ed" class="javax.swing.JLabel">
             <constraints>
-              <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
-                <preferred-size width="109" height="16"/>
-              </grid>
+              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="2" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="    Connection timeout"/>
+              <text value="Connection timeout:"/>
               <toolTipText value="Time in seconds"/>
             </properties>
           </component>
           <component id="11827" class="com.jfrog.ide.idea.ui.configuration.ConnectionRetriesSpinner" binding="connectionRetries">
             <constraints>
-              <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="1" anchor="8" fill="0" indent="0" use-parent-layout="false">
+              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="1" anchor="8" fill="0" indent="0" use-parent-layout="false">
                 <preferred-size width="0" height="0"/>
               </grid>
             </constraints>
@@ -568,7 +541,7 @@
           </component>
           <component id="17168" class="com.jfrog.ide.idea.ui.configuration.ConnectionTimeoutSpinner" binding="connectionTimeout">
             <constraints>
-              <grid row="3" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="1" anchor="8" fill="0" indent="0" use-parent-layout="false">
+              <grid row="2" column="1" row-span="1" col-span="3" vsize-policy="0" hsize-policy="1" anchor="8" fill="0" indent="0" use-parent-layout="false">
                 <preferred-size width="0" height="0"/>
               </grid>
             </constraints>
@@ -578,47 +551,122 @@
               <toolTipText value="Time in seconds"/>
             </properties>
           </component>
-          <hspacer id="3db93">
-            <constraints>
-              <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
-                <preferred-size width="477" height="11"/>
-              </grid>
-            </constraints>
-          </hspacer>
-          <hspacer id="580e8">
-            <constraints>
-              <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-            </constraints>
-          </hspacer>
           <vspacer id="1a765">
             <constraints>
-              <grid row="11" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+              <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
             </constraints>
           </vspacer>
-          <hspacer id="4cdb6">
+          <hspacer id="c34be">
             <constraints>
-              <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="2" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
           </hspacer>
-          <component id="a57cb" class="javax.swing.JButton" binding="defaultValuesButton">
+          <component id="5b819" class="com.intellij.ui.components.ActionLink" binding="scanOptionsRestoreDefaultsActionLink">
             <constraints>
-              <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Restore Default Values"/>
+              <label value="Restore Defaults"/>
+              <text value="Restore Defaults"/>
             </properties>
           </component>
-          <component id="e3fb8" class="javax.swing.JLabel">
+          <component id="772b2" class="com.intellij.ui.components.ActionLink" binding="connectionOptionsRestoreDefaultsActionLink">
             <constraints>
-              <grid row="7" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
-                <preferred-size width="133" height="16"/>
+              <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <label value="Restore Defaults"/>
+            </properties>
+          </component>
+          <component id="d9984" class="com.intellij.ui.TitledSeparator">
+            <constraints>
+              <grid row="6" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Plugin Resources"/>
+            </properties>
+          </component>
+          <component id="3d960" class="javax.swing.JLabel" binding="repositoryNameJLabel">
+            <constraints>
+              <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="4" use-parent-layout="false">
+                <preferred-size width="109" height="16"/>
               </grid>
             </constraints>
             <properties>
-              <enabled value="false"/>
-              <text value="    Which is used to exclude specific local directories paths from being scanned by the plugin."/>
+              <text value="Repository name:"/>
+              <toolTipText value=""/>
             </properties>
           </component>
+          <component id="b2960" class="com.intellij.ui.components.JBTextField" binding="repositoryNameJBTextField">
+            <constraints>
+              <grid row="9" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                <preferred-size width="200" height="-1"/>
+              </grid>
+            </constraints>
+            <properties>
+              <text value=""/>
+            </properties>
+          </component>
+          <component id="a8bbd" class="javax.swing.JLabel" binding="repositoryNameDescJLabel">
+            <constraints>
+              <grid row="10" column="1" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <font size="11"/>
+              <foreground color="-6513248"/>
+              <text value="&lt;html&gt; Specify the name of a repository within your Artifactory instance for resource downloads. &lt;/html&gt;"/>
+            </properties>
+          </component>
+          <component id="25d51" class="javax.swing.JRadioButton" binding="downloadResourcesThroughArtifactoryRadioButton">
+            <constraints>
+              <grid row="8" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="2" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Download resources through Artifactory"/>
+            </properties>
+          </component>
+          <component id="a9c14" class="com.intellij.ui.components.JBLabel" binding="pluginResourcesDescJBLabel">
+            <constraints>
+              <grid row="11" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="2" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <focusCycleRoot value="true"/>
+              <focusable value="false"/>
+              <font size="11"/>
+              <foreground color="-6513248"/>
+              <text value="&lt;html&gt;&#10;The plugin requires some of its resources to be downloaded.&#10;&lt;br&gt;&#10;Here you can choose where these resources will be downloaded from.&#10;&lt;/html&gt;&#10;"/>
+            </properties>
+          </component>
+          <grid id="124a" layout-manager="GridLayoutManager" row-count="1" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="2" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
+            <constraints>
+              <grid row="7" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="2e24c" class="javax.swing.JRadioButton" binding="downloadResourcesFromReleasesRadioButton">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="2" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="&lt;html&gt;&#10;Download resources from JFrog Releases Repository&#10;&lt;/html&gt;"/>
+                </properties>
+              </component>
+              <component id="a9393" class="com.intellij.ui.components.JBLabel" binding="releasesRepoLinkJBLabel">
+                <constraints>
+                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <focusCycleRoot value="true"/>
+                  <focusable value="false"/>
+                  <font/>
+                  <foreground color="-2104859"/>
+                  <text value="&lt;html&gt;&#10;(&lt;a href=&quot;https://releases.jfrog.io/&quot;&gt;releases.jfrog.io&lt;/a&gt;) (default)&#10;&lt;/html&gt;&#10;"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
         </children>
       </grid>
     </children>
@@ -638,6 +686,10 @@
       <member id="9138c"/>
       <member id="4a8e4"/>
       <member id="a8c73"/>
+    </group>
+    <group name="resourcesRepo">
+      <member id="2e24c"/>
+      <member id="25d51"/>
     </group>
   </buttonGroups>
 </form>

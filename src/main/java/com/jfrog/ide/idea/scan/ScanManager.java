@@ -76,7 +76,7 @@ public class ScanManager {
             return;
         }
 
-        if (!GlobalSettings.getInstance().reloadXrayCredentials()) {
+        if (!GlobalSettings.getInstance().reloadMissingConfiguration()) {
             Logger.getInstance().error("Xray server is not configured.");
             return;
         }
