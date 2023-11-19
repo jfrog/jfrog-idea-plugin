@@ -24,7 +24,7 @@ public class YarnScannerTest extends HeavyPlatformTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        tempProjectDir = createTempProjectDir("example-yarn-package");
+        tempProjectDir = createTempProjectDir("exampleYarnPackage");
         executorService = ConcurrencyUtil.newSameThreadExecutorService();
     }
 
