@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.jetbrains.plugins.gradle.service.project.open.GradleProjectImportUtil;
 import org.jfrog.build.api.util.NullLog;
 
+import javax.swing.tree.TreeNode;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,9 +25,9 @@ public class YarnScannerTest extends HeavyPlatformTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        tempProjectDir = createTempProjectDir("exampleYarnPackage");
         executorService = ConcurrencyUtil.newSameThreadExecutorService();
     }
+
 
     @Override
     protected void tearDown() throws Exception {
@@ -45,7 +46,8 @@ public class YarnScannerTest extends HeavyPlatformTestCase {
         return tempProjectDir;
     }
 
-    public void testGetPackageNameToVersionsMap() {
+    public void testGetPackageNameToVersionsMap() throws IOException {
+        tempProjectDir = createTempProjectDir("exampleYarnPackage");
         YarnScanner yarnScanner = new YarnScanner(getProject(), tempProjectDir, executorService, new GraphScanLogic(new NullLog()));
         Set<String> packages = new HashSet<>(Arrays.asList("package1:1.0.123", "package2:2.0.9", "package1:1.0.123", "package2:2.1.7"));
         Map<String, Set<String>> packageNameToVersions = yarnScanner.getPackageNameToVersionsMap(packages);
@@ -59,7 +61,20 @@ public class YarnScannerTest extends HeavyPlatformTestCase {
         assertEquals(new HashSet<>(Arrays.asList("2.0.9", "2.1.7")), packageNameToVersions.get("package2"));
     }
 
+    private Map<String, DependencyNode> vulnerableDependenciesMapInit(String[] vulnerableDependencies) {
+        Map<String, DependencyNode> vulnerableDependenciesMap = new HashMap<>();
+        for (String vulnerableDependency : vulnerableDependencies) {
+            DependencyNode dependencyNode = new DependencyNode();
+            dependencyNode.componentId(vulnerableDependency);
+            // Insert a dummy node and remove it to init the children vector.
+            dependencyNode.insert(new DependencyNode(), 0);
+            dependencyNode.remove(0);
+            vulnerableDependenciesMap.put(vulnerableDependency, dependencyNode);
+        }
+        return vulnerableDependenciesMap;
+    }
     public void testWalkDepTree() throws IOException {
+        tempProjectDir = createTempProjectDir("exampleYarnPackage");
         GradleProjectImportUtil.linkAndRefreshGradleProject(tempProjectDir, getProject());
         YarnScanner yarnScanner = new YarnScanner(getProject(), tempProjectDir, executorService, new GraphScanLogic(new NullLog()));
 
@@ -71,15 +86,8 @@ public class YarnScannerTest extends HeavyPlatformTestCase {
         // Test the walkDepTree method:
         // Init params
         String[] vulnerableDependencies = {"lodash:4.16.2", "tough-cookie:2.3.1"};
-        Map<String, DependencyNode> vulnerableDependenciesMap = new HashMap<>();
-        for (String vulnerableDependency : vulnerableDependencies) {
-            DependencyNode dependencyNode = new DependencyNode();
-            dependencyNode.componentId(vulnerableDependency);
-            // Insert a dummy node and remove it to init the children vector.
-            dependencyNode.insert(new DependencyNode(), 0);
-            dependencyNode.remove(0);
-            vulnerableDependenciesMap.put(vulnerableDependency, dependencyNode);
-        }
+        Map<String, DependencyNode> vulnerableDependenciesMap = vulnerableDependenciesMapInit(vulnerableDependencies);
+
         // Run the method
         List<FileTreeNode> fileTreeNodes = yarnScanner.walkDepTree(vulnerableDependenciesMap, depTree);
         // Check there is only one file tree node and it's package.json
@@ -88,7 +96,7 @@ public class YarnScannerTest extends HeavyPlatformTestCase {
 
         // Check the impact graphs is attached to the package.json node.
         FileTreeNode packageJsonNode = fileTreeNodes.get(0);
-        assertEquals(2, packageJsonNode.getChildren().size());
+        assertEquals(vulnerableDependencies.length, packageJsonNode.getChildren().size());
 
         // Check the impact graph correctness.
         DependencyNode toughCookieDep = (DependencyNode) packageJsonNode.getChildren().get(0);
@@ -108,6 +116,56 @@ public class YarnScannerTest extends HeavyPlatformTestCase {
         assertEquals("tough-cookie:2.3.1", toughCookieDep.getComponentId());
         assertTrue(toughCookieDep.isIndirect());
         assertEquals(2, toughCookieDep.getImpactTree().getImpactPathsCount());
+    }
 
+    public void testWalkDepTreeMonorepo() throws IOException {
+        tempProjectDir = createTempProjectDir("exampleYarnMonorepo");
+        GradleProjectImportUtil.linkAndRefreshGradleProject(tempProjectDir, getProject());
+        YarnScanner yarnScanner = new YarnScanner(getProject(), tempProjectDir, executorService, new GraphScanLogic(new NullLog()));
+
+        // Sanity check - make sure the dependency tree is generated.
+        DepTree depTree = yarnScanner.buildTree();
+        assertNotNull(depTree);
+        assertEquals(depTree.getRootId(), "example-monorepo:1.0.0");
+
+        // Test the walkDepTree method:
+        // Init params
+        String[] vulnerableDependencies = {"lodash:4.16.2", "axios:1.5.1", "cli-table:0.3.1"};
+        Map<String, DependencyNode> vulnerableDependenciesMap = vulnerableDependenciesMapInit(vulnerableDependencies);
+
+        // Run the method
+        List<FileTreeNode> fileTreeNodes = yarnScanner.walkDepTree(vulnerableDependenciesMap, depTree);
+        // Check there is only one file tree node and it's package.json
+        assertEquals(1, fileTreeNodes.size());
+        assertEquals("package.json", fileTreeNodes.get(0).getTitle());
+
+        // Check the impact graphs is attached to the package.json node.
+        FileTreeNode packageJsonNode = fileTreeNodes.get(0);
+        assertEquals(vulnerableDependencies.length, packageJsonNode.getChildren().size());
+
+        // Check the impact graph correctness.
+        String packageId = null;
+        boolean isIndirect = false;
+        int actualImpactPathsCount = 0;
+        for (TreeNode treeNode : packageJsonNode.getChildren()) {
+            DependencyNode dependencyNode = (DependencyNode) treeNode;
+            if (dependencyNode.getComponentId().equals("axios:1.5.1")) {
+                packageId = "axios:1.5.1";
+                isIndirect = false;
+                actualImpactPathsCount = 3;
+            } else if (dependencyNode.getComponentId().equals("lodash:4.16.2")) {
+                packageId = "lodash:4.16.2";
+                isIndirect = true;
+                actualImpactPathsCount = 1;
+            } else if (dependencyNode.getComponentId().equals("cli-table:0.3.1")) {
+                packageId = "cli-table:0.3.1";
+                isIndirect = false;
+                actualImpactPathsCount = 1;
+            } else {
+                fail("Unexpected dependency " + dependencyNode.getComponentId());
+            }
+            assertEquals(isIndirect, dependencyNode.isIndirect());
+            assertEquals(actualImpactPathsCount, dependencyNode.getImpactTree().getImpactPathsCount());
+        }
     }
 }
