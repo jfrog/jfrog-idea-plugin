@@ -144,25 +144,24 @@ public class YarnScannerTest extends HeavyPlatformTestCase {
         assertEquals(vulnerableDependencies.length, packageJsonNode.getChildren().size());
 
         // Check the impact graph correctness.
-        String packageId = null;
         boolean isIndirect = false;
         int actualImpactPathsCount = 0;
         for (TreeNode treeNode : packageJsonNode.getChildren()) {
             DependencyNode dependencyNode = (DependencyNode) treeNode;
-            if (dependencyNode.getComponentId().equals("axios:1.5.1")) {
-                packageId = "axios:1.5.1";
-                isIndirect = false;
-                actualImpactPathsCount = 3;
-            } else if (dependencyNode.getComponentId().equals("lodash:4.16.2")) {
-                packageId = "lodash:4.16.2";
-                isIndirect = true;
-                actualImpactPathsCount = 1;
-            } else if (dependencyNode.getComponentId().equals("cli-table:0.3.1")) {
-                packageId = "cli-table:0.3.1";
-                isIndirect = false;
-                actualImpactPathsCount = 1;
-            } else {
-                fail("Unexpected dependency " + dependencyNode.getComponentId());
+            switch (dependencyNode.getComponentId()) {
+                case "axios:1.5.1" -> {
+                    isIndirect = false;
+                    actualImpactPathsCount = 3;
+                }
+                case "lodash:4.16.2" -> {
+                    isIndirect = true;
+                    actualImpactPathsCount = 1;
+                }
+                case "cli-table:0.3.1" -> {
+                    isIndirect = false;
+                    actualImpactPathsCount = 1;
+                }
+                default -> fail("Unexpected dependency " + dependencyNode.getComponentId());
             }
             assertEquals(isIndirect, dependencyNode.isIndirect());
             assertEquals(actualImpactPathsCount, dependencyNode.getImpactTree().getImpactPathsCount());
