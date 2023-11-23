@@ -44,12 +44,12 @@ public class YarnScanner extends SingleDescriptorScanner {
     YarnScanner(Project project, String basePath, ExecutorService executor, ScanLogic scanLogic) {
         super(project, basePath, ComponentPrefix.NPM, executor, Paths.get(basePath, "package.json").toString(), scanLogic);
         getLog().info("Found yarn project: " + getProjectPath());
-        yarnTreeBuilder = new YarnTreeBuilder(Paths.get(basePath), descriptorFilePath, EnvironmentUtil.getEnvironmentMap());
+        yarnTreeBuilder = new YarnTreeBuilder(Paths.get(basePath), descriptorFilePath, EnvironmentUtil.getEnvironmentMap(), getLog());
     }
 
     @Override
     protected DepTree buildTree() throws IOException {
-        return yarnTreeBuilder.buildTree(getLog());
+        return yarnTreeBuilder.buildTree();
     }
 
     @Override
@@ -109,7 +109,7 @@ public class YarnScanner extends SingleDescriptorScanner {
             String packageName = entry.getKey();
             Set<String> packageVersions = entry.getValue();
             // find the impact paths for each package for all its vulnerable versions
-            Map<String, List<List<String>>> packageVersionsImpactPaths = yarnTreeBuilder.findDependencyImpactPaths(getLog(), depTree.getRootId(), packageName, packageVersions);
+            Map<String, List<List<String>>> packageVersionsImpactPaths = yarnTreeBuilder.findDependencyImpactPaths(depTree.getRootId(), packageName, packageVersions);
             for (Map.Entry<String, List<List<String>>> aPackageVersionImpactPaths : packageVersionsImpactPaths.entrySet()) {
                 String packageFullName = aPackageVersionImpactPaths.getKey();
                 List<List<String>> impactPaths = aPackageVersionImpactPaths.getValue();
