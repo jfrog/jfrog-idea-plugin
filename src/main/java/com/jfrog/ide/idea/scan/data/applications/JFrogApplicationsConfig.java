@@ -3,7 +3,7 @@ package com.jfrog.ide.idea.scan.data.applications;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.intellij.openapi.project.Project;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
-import com.jfrog.ide.idea.scan.ScanUtils;
+import com.jfrog.ide.idea.scan.utils.ScanUtils;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

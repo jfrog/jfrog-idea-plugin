@@ -21,10 +21,7 @@ import com.jfrog.ide.common.deptree.DepTree;
 import com.jfrog.ide.common.deptree.DepTreeNode;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.nodes.DependencyNode;
-import com.jfrog.ide.common.nodes.DescriptorFileTreeNode;
 import com.jfrog.ide.common.nodes.FileTreeNode;
-import com.jfrog.ide.common.nodes.subentities.ImpactTree;
-import com.jfrog.ide.common.nodes.subentities.ImpactTreeNode;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
@@ -32,6 +29,7 @@ import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.log.ProgressIndicatorImpl;
 import com.jfrog.ide.idea.scan.data.PackageManagerType;
+import com.jfrog.ide.idea.scan.utils.ImpactTreeBuilder;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
@@ -50,7 +48,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -61,8 +58,6 @@ import static com.jfrog.ide.common.log.Utils.logError;
  * Created by romang on 4/26/17.
  */
 public abstract class ScannerBase {
-    public static final int IMPACT_PATHS_LIMIT = 50;
-
     private final ServerConfig serverConfig;
     private final ComponentPrefix prefix;
     @Getter
@@ -135,6 +130,18 @@ public abstract class ScannerBase {
     protected abstract PackageManagerType getPackageManagerType();
 
     /**
+     * Groups a collection of {@link DependencyNode}s by the descriptor files of the modules that depend on them.
+     * The returned DependencyNodes inside the {@link FileTreeNode}s might be clones of the ones in depScanResults, but
+     * it's not guaranteed.
+     *
+     * @param depScanResults collection of DependencyNodes
+     * @param depTree        the project's dependency tree
+     * @param parents        a map of components by their IDs and their parents in the dependency tree
+     * @return a list of FileTreeNodes (that are all DescriptorFileTreeNodes) having the DependencyNodes as their children
+     */
+    protected abstract List<FileTreeNode> groupDependenciesToDescriptorNodes(Collection<DependencyNode> depScanResults, DepTree depTree, Map<String, Set<String>> parents);
+
+    /**
      * Scan and update dependency components.
      *
      * @param indicator - The progress indicator
@@ -159,7 +166,10 @@ public abstract class ScannerBase {
                 // No violations/vulnerabilities or no components to scan or an error was thrown
                 return;
             }
-            List<FileTreeNode> fileTreeNodes = walkDepTree(results, depTree);
+
+            Map<String, Set<String>> parents = getParents(depTree);
+            ImpactTreeBuilder.populateImpactTrees(results, parents, depTree.getRootId());
+            List<FileTreeNode> fileTreeNodes = groupDependenciesToDescriptorNodes(results.values(), depTree, parents);
             addScanResults(fileTreeNodes);
 
             // Contextual Analysis
@@ -179,102 +189,22 @@ public abstract class ScannerBase {
     }
 
     /**
-     * Walks through a {@link DepTree}'s nodes.
-     * Builds impact paths for {@link DependencyNode} objects and groups them in {@link DescriptorFileTreeNode}s.
+     * Find the parents of each node in the given {@link DepTree}.
+     * Nodes without parents (the root) don't appear in the returned map.
      *
-     * @param vulnerableDependencies a map of component IDs and the DependencyNode object matching each of them.
-     * @param depTree                the project's dependency tree to walk through.
+     * @param depTree the {@link DepTree} to find the parents of its nodes
+     * @return a map of nodes from the {@link DepTree} amd each one's parents
      */
-    private List<FileTreeNode> walkDepTree(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) {
-        Map<String, DescriptorFileTreeNode> descriptorNodes = new HashMap<>();
-        visitDepTreeNode(vulnerableDependencies, depTree, Collections.singletonList(depTree.getRootId()), descriptorNodes, new ArrayList<>(), new HashMap<>());
-        return new CopyOnWriteArrayList<>(descriptorNodes.values());
-    }
-
-    /**
-     * Visit a node in the {@link DepTree} and walk through its children.
-     * Each impact path to a vulnerable dependency is added in its {@link DependencyNode}.
-     * Each DependencyNode is added to the relevant {@link DescriptorFileTreeNode}s.
-     *
-     * @param vulnerableDependencies a map of {@link DependencyNode}s by their component IDs.
-     * @param depTree                the project's dependency tree.
-     * @param path                   a path of nodes (represented by their component IDs) from the root to the current node.
-     * @param descriptorNodes        a map of {@link DescriptorFileTreeNode}s by the descriptor file path. Missing DescriptorFileTreeNodes will be added to this map.
-     * @param descriptorPaths        a list of descriptor file paths that their matching components are in the path to the current node.
-     * @param addedDeps              a map of all {@link DependencyNode}s already grouped to {@link DescriptorFileTreeNode}s. Newly grouped DependencyNodes will be added to this map.
-     */
-    private void visitDepTreeNode(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree, List<String> path,
-                                  Map<String, DescriptorFileTreeNode> descriptorNodes, List<String> descriptorPaths,
-                                  Map<String, Map<String, DependencyNode>> addedDeps) {
-        String compId = path.get(path.size() - 1);
-        DepTreeNode compNode = depTree.getNodes().get(compId);
-        List<String> innerDescriptorPaths = descriptorPaths;
-        if (compNode.getDescriptorFilePath() != null) {
-            innerDescriptorPaths = new ArrayList<>(descriptorPaths);
-            innerDescriptorPaths.add(compNode.getDescriptorFilePath());
-        }
-        if (vulnerableDependencies.containsKey(compId)) {
-            DependencyNode dependencyNode = vulnerableDependencies.get(compId);
-            addImpactPathToDependencyNode(dependencyNode, path);
-
-            DepTreeNode parentCompNode = null;
-            if (path.size() >= 2) {
-                String parentCompId = path.get(path.size() - 2);
-                parentCompNode = depTree.getNodes().get(parentCompId);
-            }
-            for (String descriptorPath : innerDescriptorPaths) {
-                boolean indirect = parentCompNode != null && !descriptorPath.equals(parentCompNode.getDescriptorFilePath());
-                if (!descriptorNodes.containsKey(descriptorPath)) {
-                    descriptorNodes.put(descriptorPath, new DescriptorFileTreeNode(descriptorPath));
-                    addedDeps.put(descriptorPath, new HashMap<>());
-                }
-                DependencyNode existingDep = addedDeps.get(descriptorPath).get(compId);
-                if (existingDep != null) {
-                    // If this dependency has any direct path, then it's direct
-                    if (existingDep.isIndirect() && !indirect) {
-                        existingDep.setIndirect(false);
-                    }
-                    continue;
-                }
-                // Each dependency might be a child of more than one descriptor, but DependencyNode is a tree node, so it can have only one parent.
-                // The solution for this is to clone the dependency before adding it as a child of the POM.
-                DependencyNode clonedDep = (DependencyNode) dependencyNode.clone();
-                clonedDep.setIndirect(indirect);
-
-                descriptorNodes.get(descriptorPath).addDependency(clonedDep);
-                addedDeps.get(descriptorPath).put(compId, clonedDep);
+    static Map<String, Set<String>> getParents(DepTree depTree) {
+        Map<String, Set<String>> parents = new HashMap<>();
+        for (Map.Entry<String, DepTreeNode> node : depTree.getNodes().entrySet()) {
+            String parentId = node.getKey();
+            for (String childId : node.getValue().getChildren()) {
+                parents.putIfAbsent(childId, new HashSet<>());
+                parents.get(childId).add(parentId);
             }
         }
-
-        for (String childId : compNode.getChildren()) {
-            List<String> pathToChild = new ArrayList<>(path);
-            pathToChild.add(childId);
-            if (!path.contains(childId)) {
-                visitDepTreeNode(vulnerableDependencies, depTree, pathToChild, descriptorNodes, innerDescriptorPaths, addedDeps);
-            }
-        }
-    }
-
-    private void addImpactPathToDependencyNode(DependencyNode dependencyNode, List<String> path) {
-        if (dependencyNode.getImpactTree() == null) {
-            dependencyNode.setImpactTree(new ImpactTree(new ImpactTreeNode(path.get(0))));
-        }
-        ImpactTree impactTree = dependencyNode.getImpactTree();
-        impactTree.incImpactPathsCount();
-        if (impactTree.getImpactPathsCount() > IMPACT_PATHS_LIMIT) {
-            return;
-        }
-        ImpactTreeNode parentImpactTreeNode = impactTree.getRoot();
-        for (int pathNodeIndex = 1; pathNodeIndex < path.size(); pathNodeIndex++) {
-            String currPathNode = path.get(pathNodeIndex);
-            // Find a child of parentImpactTreeNode with a name equals to currPathNode
-            ImpactTreeNode currImpactTreeNode = parentImpactTreeNode.getChildren().stream().filter(impactTreeNode -> impactTreeNode.getName().equals(currPathNode)).findFirst().orElse(null);
-            if (currImpactTreeNode == null) {
-                currImpactTreeNode = new ImpactTreeNode(currPathNode);
-                parentImpactTreeNode.getChildren().add(currImpactTreeNode);
-            }
-            parentImpactTreeNode = currImpactTreeNode;
-        }
+        return parents;
     }
 
     /**
