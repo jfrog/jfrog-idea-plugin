@@ -9,18 +9,19 @@ import com.jfrog.ide.common.nodes.LicenseViolationNode;
 import com.jfrog.ide.common.nodes.subentities.Severity;
 import org.junit.Test;
 
+import java.nio.file.Paths;
 import java.util.*;
 
 public class SingleDescriptorScannerTest extends BasePlatformTestCase {
     public void testGroupDependenciesToDescriptorNodes() {
         final String ROOT_ID = "npm-example:0.0.3";
-        final String ROOT_PATH = "/path/to/project";
+        final String ROOT_PATH = Paths.get("path", "to", "project").toString();
         final String SEND_COMP_ID = "send:0.5.0";
         final String DEBUG_COMP_ID = "debug:1.0.2";
         final String MS_COMP_ID = "ms:0.6.2";
 
         DepTree depTree = new DepTree(ROOT_ID, new HashMap<>() {{
-            put(ROOT_ID, new DepTreeNode().descriptorFilePath(ROOT_PATH + "/package.json").children(Set.of(SEND_COMP_ID, MS_COMP_ID)));
+            put(ROOT_ID, new DepTreeNode().descriptorFilePath(Paths.get(ROOT_PATH, "package.json").toString()).children(Set.of(SEND_COMP_ID, MS_COMP_ID)));
             put(SEND_COMP_ID, new DepTreeNode().children(Set.of(DEBUG_COMP_ID, MS_COMP_ID)));
             put(DEBUG_COMP_ID, new DepTreeNode().children(Set.of()));
             put(MS_COMP_ID, new DepTreeNode().children(Set.of()));
