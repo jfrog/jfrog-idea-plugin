@@ -167,11 +167,7 @@ public abstract class ScanBinaryExecutor {
             //  As it is an internal binary execution, the message should be printed for DEBUG use only.
             indicator.setText(String.format("Running %s scan at %s", scanType.toString().toLowerCase(), String.join(" ", inputParams.getRoots())));
             String cmd = String.format("%s %s", binaryTargetPath.toString(), join(" ", args));
-            log.info(String.format("""
-                    Executing JAS scanner
-                    %s
-                    with config:
-                    %s""", cmd, inputParams));
+            log.info(String.format("Executing JAS scanner %s with config: %s", cmd, inputParams));
             CommandExecutor commandExecutor = new CommandExecutor(binaryTargetPath.toString(), createEnvWithCredentials());
             CommandResults commandResults = commandExecutor.exeCommand(binaryTargetPath.toFile().getParentFile(), args,
                     null, new NullLog(), Long.MAX_VALUE, TimeUnit.MINUTES);
@@ -186,7 +182,7 @@ public abstract class ScanBinaryExecutor {
             log.info(String.format("Failed to run command: %s", cmd));
             switch (commandResults.getExitValue()) {
                 case USER_NOT_ENTITLED -> {
-                    log.info("User not entitled for advance security scan");
+                    log.debug("User not entitled for advance security scan");
                     return List.of();
                 }
                 case NOT_SUPPORTED -> {
