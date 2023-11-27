@@ -95,7 +95,7 @@ public class YarnScannerTest extends HeavyPlatformTestCase {
         Map<String, DependencyNode> vulnerableDependenciesMap = vulnerableDependenciesMapInit(vulnerableDependencies);
 
         // Run the method
-        List<FileTreeNode> fileTreeNodes = yarnScanner.walkDepTree(vulnerableDependenciesMap, depTree);
+        List<FileTreeNode> fileTreeNodes = yarnScanner.buildImpactGraph(vulnerableDependenciesMap, depTree);
 
         // Check there is only one file tree node and it's package.json
         assertEquals(1, fileTreeNodes.size());

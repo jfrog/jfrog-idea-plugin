@@ -157,7 +157,7 @@ public abstract class ScannerBase {
                 // No violations/vulnerabilities or no components to scan or an error was thrown
                 return;
             }
-            List<FileTreeNode> fileTreeNodes = walkDepTree(results, depTree);
+            List<FileTreeNode> fileTreeNodes = buildImpactGraph(results, depTree);
             addScanResults(fileTreeNodes);
 
             // Contextual Analysis
@@ -183,7 +183,7 @@ public abstract class ScannerBase {
      * @param vulnerableDependencies a map of component IDs and the DependencyNode object matching each of them.
      * @param depTree                the project's dependency tree to walk through.
      */
-    protected List<FileTreeNode> walkDepTree(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) throws IOException {
+    protected List<FileTreeNode> buildImpactGraph(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) throws IOException {
         Map<String, DescriptorFileTreeNode> descriptorNodes = new HashMap<>();
         visitDepTreeNode(vulnerableDependencies, depTree, Collections.singletonList(depTree.rootId()), descriptorNodes, new ArrayList<>(), new HashMap<>());
         return new CopyOnWriteArrayList<>(descriptorNodes.values());

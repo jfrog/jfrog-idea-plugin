@@ -122,7 +122,7 @@ public class YarnScanner extends SingleDescriptorScanner {
      * @return - The impact graph attached to package.json DescriptorFileTreeNode
      */
     @Override
-    protected List<FileTreeNode> walkDepTree(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) throws IOException {
+    protected List<FileTreeNode> buildImpactGraph(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) throws IOException {
         DescriptorFileTreeNode descriptorNode = new DescriptorFileTreeNode(depTree.getRootNodeDescriptorFilePath());
         // Build a map of package name to versions, to avoid running 'yarn why' multiple times for the same package.
         Map<String, Set<String>> packageNameToVersions = this.getPackageNameToVersionsMap(vulnerableDependencies.keySet());
