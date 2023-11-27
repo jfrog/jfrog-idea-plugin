@@ -1,5 +1,6 @@
 package com.jfrog.ide.idea.integration;
 
+import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
@@ -9,6 +10,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.List;
+
+import static org.mockito.Mockito.mock;
 
 public class SecretsScannerIntegrationTests extends BaseIntegrationTest {
 
@@ -25,7 +28,9 @@ public class SecretsScannerIntegrationTests extends BaseIntegrationTest {
         String testProjectRoot = createTempProjectDir("exposedSecrets");
         ScanConfig.Builder input = new ScanConfig.Builder()
                 .roots(List.of(testProjectRoot));
-        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled);
+        ProgressIndicator indicator = mock(ProgressIndicator.class);
+
+        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled, indicator);
         assertEquals(8, results.size());
         // Expect specific indications
         JFrogSecurityWarning secretIndication = results.get(0);
@@ -43,7 +48,8 @@ public class SecretsScannerIntegrationTests extends BaseIntegrationTest {
         String testProjectRoot = createTempProjectDir("dummy");
         ScanConfig.Builder input = new ScanConfig.Builder()
                 .roots(List.of(testProjectRoot));
-        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled);
+        ProgressIndicator indicator = mock(ProgressIndicator.class);
+        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled, indicator);
         assertEquals(0, results.size());
     }
 

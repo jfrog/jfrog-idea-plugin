@@ -3,11 +3,13 @@ package com.jfrog.ide.idea.scan.data;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@ToString
 public class ScanConfig {
     @JsonProperty("type")
     private SourceCodeScanType scanType;
@@ -94,7 +96,6 @@ public class ScanConfig {
     public void setSkippedFolders(List<String> skippedFolders) {
         this.skippedFolders = skippedFolders;
     }
-
 
     public static class Builder {
         private SourceCodeScanType scanType;

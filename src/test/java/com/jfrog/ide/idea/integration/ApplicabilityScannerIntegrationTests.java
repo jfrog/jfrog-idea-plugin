@@ -1,5 +1,6 @@
 package com.jfrog.ide.idea.integration;
 
+import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
@@ -8,6 +9,8 @@ import com.jfrog.ide.idea.scan.data.ScanConfig;
 
 import java.io.IOException;
 import java.util.List;
+
+import static org.mockito.Mockito.mock;
 
 public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
     private ApplicabilityScannerExecutor scanner;
@@ -22,7 +25,8 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
     public void testApplicabilityScannerJsProjectNotApplicable() throws IOException, InterruptedException {
         String testProjectRoot = createTempProjectDir("npm");
         ScanConfig.Builder input = new ScanConfig.Builder().roots(List.of(testProjectRoot)).cves(List.of("CVE-2021-3918", "CVE-2021-3807"));
-        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled);
+        ProgressIndicator indicator = mock(ProgressIndicator.class);
+        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled, indicator);
         assertEquals(2, results.size());
         // Expect all issues to be not applicable to this test project
         assertFalse(results.stream().anyMatch(JFrogSecurityWarning::isApplicable));
@@ -31,7 +35,8 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
     public void testApplicabilityScannerJsProject() throws IOException, InterruptedException {
         String testProjectRoot = createTempProjectDir("npm");
         ScanConfig.Builder input = new ScanConfig.Builder().roots(List.of(testProjectRoot)).cves(List.of("CVE-2022-25878"));
-        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled);
+        ProgressIndicator indicator = mock(ProgressIndicator.class);
+        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled, indicator);
         assertEquals(2, results.size());
         // Expect all issues to be applicable.
         assertTrue(results.stream().allMatch(JFrogSecurityWarning::isApplicable));
@@ -49,7 +54,8 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
     public void testApplicabilityScannerPythonProjectNotApplicable() throws IOException, InterruptedException {
         String testProjectRoot = createTempProjectDir("python");
         ScanConfig.Builder input = new ScanConfig.Builder().roots(List.of(testProjectRoot)).cves(List.of("CVE-2021-3918", "CVE-2019-15605"));
-        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled);
+        ProgressIndicator indicator = mock(ProgressIndicator.class);
+        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled, indicator);
         assertEquals(2, results.size());
         // Expect all issues to be not applicable to this test project
         assertFalse(results.stream().anyMatch(JFrogSecurityWarning::isApplicable));
@@ -58,7 +64,8 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
     public void testApplicabilityScannerPythonProject() throws IOException, InterruptedException {
         String testProjectRoot = createTempProjectDir("python");
         ScanConfig.Builder input = new ScanConfig.Builder().roots(List.of(testProjectRoot)).cves(List.of("CVE-2019-20907"));
-        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled);
+        ProgressIndicator indicator = mock(ProgressIndicator.class);
+        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled, indicator);
         assertEquals(1, results.size());
         // Expect specific indications
         assertTrue(results.get(0).isApplicable());
@@ -74,7 +81,8 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
     public void testApplicabilityScannerJavaProject() throws IOException, InterruptedException {
         String testProjectRoot = createTempProjectDir("maven");
         ScanConfig.Builder input = new ScanConfig.Builder().roots(List.of(testProjectRoot)).cves(List.of("CVE-2013-7285"));
-        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled);
+        ProgressIndicator indicator = mock(ProgressIndicator.class);
+        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled, indicator);
         assertEquals(2, results.size());
         // Expect specific indications
         assertTrue(results.get(0).isApplicable());

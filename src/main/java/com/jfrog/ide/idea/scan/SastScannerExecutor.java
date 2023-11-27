@@ -1,6 +1,6 @@
 package com.jfrog.ide.idea.scan;
 
-import com.jfrog.ide.common.configuration.ServerConfig;
+import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.nodes.FileIssueNode;
 import com.jfrog.ide.common.nodes.FileTreeNode;
 import com.jfrog.ide.common.nodes.SastIssueNode;
@@ -31,8 +31,8 @@ public class SastScannerExecutor extends ScanBinaryExecutor {
         super(SourceCodeScanType.SAST, log);
     }
 
-    public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException {
-        return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled, RUN_WITH_NEW_CONFIG_FILE);
+    public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled, ProgressIndicator indicator) throws IOException, InterruptedException {
+        return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled, RUN_WITH_NEW_CONFIG_FILE, indicator);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.jfrog.ide.idea.integration;
 
+import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
@@ -9,6 +10,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.List;
+
+import static org.mockito.Mockito.mock;
 
 public class IACScannerIntegrationTests extends BaseIntegrationTest {
 
@@ -25,7 +28,8 @@ public class IACScannerIntegrationTests extends BaseIntegrationTest {
         String testProjectRoot = createTempProjectDir("exposedIac");
         ScanConfig.Builder input = new ScanConfig.Builder()
                 .roots(List.of(testProjectRoot));
-        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled);
+        ProgressIndicator indicator = mock(ProgressIndicator.class);
+        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled, indicator);
         assertEquals(11, results.size());
         // Expect specific indications
         JFrogSecurityWarning iacIndication = results.get(0);

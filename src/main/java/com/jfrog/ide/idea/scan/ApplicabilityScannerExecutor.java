@@ -1,6 +1,6 @@
 package com.jfrog.ide.idea.scan;
 
-import com.jfrog.ide.common.configuration.ServerConfig;
+import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.nodes.ApplicableIssueNode;
 import com.jfrog.ide.common.nodes.FileTreeNode;
 import com.jfrog.ide.common.nodes.VulnerabilityNode;
@@ -30,8 +30,8 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
         supportedPackageTypes = SUPPORTED_PACKAGE_TYPES;
     }
 
-    public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException {
-        return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled);
+    public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled, ProgressIndicator indicator) throws IOException, InterruptedException {
+        return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled, indicator);
     }
 
     @Override

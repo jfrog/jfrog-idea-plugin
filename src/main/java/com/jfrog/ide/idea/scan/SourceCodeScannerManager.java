@@ -31,7 +31,14 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -41,7 +48,9 @@ import static com.jfrog.ide.common.log.Utils.logError;
 import static com.jfrog.ide.common.utils.Utils.createYAMLMapper;
 import static com.jfrog.ide.idea.scan.ScannerBase.createRunnable;
 import static com.jfrog.ide.idea.scan.data.applications.JFrogApplicationsConfig.createApplicationConfigWithDefaultModule;
-import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.*;
+import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.EXCLUSIONS_PREFIX;
+import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.EXCLUSIONS_REGEX_PATTERN;
+import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.EXCLUSIONS_SUFFIX;
 import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 
@@ -90,7 +99,7 @@ public class SourceCodeScannerManager {
                 Set<String> directIssuesCVEs = issuesMap.keySet();
                 // If no direct dependencies with issues are found by Xray, the applicability scan is irrelevant.
                 if (!directIssuesCVEs.isEmpty()) {
-                    List<JFrogSecurityWarning> applicabilityResults = applicability.execute(createBasicScannerInput().cves(List.copyOf(directIssuesCVEs)), checkCanceled);
+                    List<JFrogSecurityWarning> applicabilityResults = applicability.execute(createBasicScannerInput().cves(List.copyOf(directIssuesCVEs)), checkCanceled, indicator);
                     scanResults.addAll(applicabilityResults);
                 }
             }
@@ -183,7 +192,7 @@ public class SourceCodeScannerManager {
                 }
             }
             try {
-                List<JFrogSecurityWarning> scanResults = scanner.execute(createBasicScannerInput(moduleConfig, scannerConfig), checkCanceled);
+                List<JFrogSecurityWarning> scanResults = scanner.execute(createBasicScannerInput(moduleConfig, scannerConfig), checkCanceled, indicator);
                 addSourceCodeScanResults(scanner.createSpecificFileIssueNodes(scanResults));
             } catch (IOException | URISyntaxException | InterruptedException e) {
                 logError(log, "", e, true);
