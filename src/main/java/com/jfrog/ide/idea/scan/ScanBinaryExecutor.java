@@ -3,13 +3,23 @@ package com.jfrog.ide.idea.scan;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.configuration.ServerConfig;
+import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.nodes.FileTreeNode;
 import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
-import com.jfrog.ide.idea.scan.data.*;
+import com.jfrog.ide.idea.scan.data.Message;
+import com.jfrog.ide.idea.scan.data.NewScanConfig;
+import com.jfrog.ide.idea.scan.data.NewScansConfig;
+import com.jfrog.ide.idea.scan.data.Output;
+import com.jfrog.ide.idea.scan.data.PackageManagerType;
+import com.jfrog.ide.idea.scan.data.Rule;
+import com.jfrog.ide.idea.scan.data.Run;
+import com.jfrog.ide.idea.scan.data.SarifResult;
+import com.jfrog.ide.idea.scan.data.ScanConfig;
+import com.jfrog.ide.idea.scan.data.ScansConfig;
 import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.services.entitlements.Feature;
 import lombok.Getter;
@@ -36,7 +46,12 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static com.jfrog.ide.common.utils.ArtifactoryConnectionUtils.createAnonymousAccessArtifactoryManagerBuilder;
@@ -53,12 +68,11 @@ import static java.lang.String.join;
  */
 public abstract class ScanBinaryExecutor {
     public static final Path BINARIES_DIR = HOME_PATH.resolve("dependencies").resolve("jfrog-security");
-    private static final long MAX_EXECUTION_MINUTES = 10;
     private static final int UPDATE_INTERVAL = 1;
     private static final int USER_NOT_ENTITLED = 31;
     private static final int NOT_SUPPORTED = 13;
     private static final String SCANNER_BINARY_NAME = "analyzerManager";
-    private static final String SCANNER_BINARY_VERSION = "1.3.2.2019257";
+    private static final String SCANNER_BINARY_VERSION = "1.4.0.2021123";
     private static final String BINARY_DOWNLOAD_URL = "xsc-gen-exe-analyzer-manager-local/v1/" + SCANNER_BINARY_VERSION;
     private static final String DOWNLOAD_SCANNER_NAME = "analyzerManager.zip";
     private static final String MINIMAL_XRAY_VERSION_SUPPORTED_FOR_ENTITLEMENT = "3.66.0";
@@ -121,13 +135,13 @@ public abstract class ScanBinaryExecutor {
 
     abstract Feature getScannerFeatureName();
 
-    abstract List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled) throws IOException, InterruptedException, URISyntaxException;
+    abstract List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled, ProgressIndicator indicator) throws IOException, InterruptedException, URISyntaxException;
 
-    protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args, Runnable checkCanceled) throws IOException, InterruptedException {
-        return execute(inputFileBuilder, args, checkCanceled, false);
+    protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args, Runnable checkCanceled, ProgressIndicator indicator) throws IOException, InterruptedException {
+        return execute(inputFileBuilder, args, checkCanceled, false, indicator);
     }
 
-    protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args, Runnable checkCanceled, boolean newConfigFormat) throws IOException, InterruptedException {
+    protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args, Runnable checkCanceled, boolean newConfigFormat, ProgressIndicator indicator) throws IOException, InterruptedException {
         if (!shouldExecute()) {
             return List.of();
         }
@@ -151,24 +165,28 @@ public abstract class ScanBinaryExecutor {
             Logger log = Logger.getInstance();
             // The following logging is done outside the commandExecutor because the commandExecutor log level is set to INFO.
             //  As it is an internal binary execution, the message should be printed for DEBUG use only.
-            log.debug(String.format("Executing command: %s %s", binaryTargetPath.toString(), join(" ", args)));
+            indicator.setText(String.format("Running %s scan at %s", scanType.toString().toLowerCase(), String.join(" ", inputParams.getRoots())));
+            String cmd = String.format("%s %s", binaryTargetPath.toString(), join(" ", args));
+            log.info(String.format("Executing JAS scanner %s with config: %s", cmd, inputParams));
             CommandExecutor commandExecutor = new CommandExecutor(binaryTargetPath.toString(), createEnvWithCredentials());
             CommandResults commandResults = commandExecutor.exeCommand(binaryTargetPath.toFile().getParentFile(), args,
-                    null, new NullLog(), MAX_EXECUTION_MINUTES, TimeUnit.MINUTES);
+                    null, new NullLog(), Long.MAX_VALUE, TimeUnit.MINUTES);
 
             checkCanceled.run();
 
             if (commandResults.isOk()) {
+                log.info(String.format("Finished successfully to run command: %s", cmd));
                 log.debug(commandResults.getRes());
                 return parseOutputSarif(outputFilePath);
             }
+            log.info(String.format("Failed to run command: %s", cmd));
             switch (commandResults.getExitValue()) {
                 case USER_NOT_ENTITLED -> {
                     log.debug("User not entitled for advance security scan");
                     return List.of();
                 }
                 case NOT_SUPPORTED -> {
-                    log.debug(String.format("Scanner %s is not supported in the current Analyzer Manager version.", scanType));
+                    log.info(String.format("Scanner %s is not supported in the current Analyzer Manager version.", scanType));
                     return List.of();
                 }
                 default -> {

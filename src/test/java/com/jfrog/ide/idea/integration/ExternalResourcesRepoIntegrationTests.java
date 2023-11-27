@@ -1,5 +1,6 @@
 package com.jfrog.ide.idea.integration;
 
+import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
@@ -15,6 +16,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+
+import static org.mockito.Mockito.mock;
 
 public class ExternalResourcesRepoIntegrationTests extends BaseIntegrationTest {
     private static final String TEST_PROJECT_PREFIX = "secrets/testProjects/";
@@ -42,7 +45,9 @@ public class ExternalResourcesRepoIntegrationTests extends BaseIntegrationTest {
         String testProjectRoot = createTempProjectDir("exposedSecrets");
         ScanConfig.Builder input = new ScanConfig.Builder()
                 .roots(List.of(testProjectRoot));
-        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled);
+
+        ProgressIndicator indicator = mock(ProgressIndicator.class);
+        List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled, indicator);
         assertEquals(8, results.size());
 
         // Restore the original ServerConfig in GlobalSettings
@@ -61,7 +66,8 @@ public class ExternalResourcesRepoIntegrationTests extends BaseIntegrationTest {
         String testProjectRoot = createTempProjectDir("exposedSecrets");
         ScanConfig.Builder input = new ScanConfig.Builder()
                 .roots(List.of(testProjectRoot));
-        assertThrows(FileNotFoundException.class, () -> scanner.execute(input, this::dummyCheckCanceled));
+        ProgressIndicator indicator = mock(ProgressIndicator.class);
+        assertThrows(FileNotFoundException.class, () -> scanner.execute(input, this::dummyCheckCanceled, indicator));
         // Restore the original ServerConfig in GlobalSettings
         GlobalSettings.getInstance().setServerConfig(originalServerConfig);
     }
