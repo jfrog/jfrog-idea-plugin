@@ -82,12 +82,34 @@ public class YarnScanner extends SingleDescriptorScanner {
         Map<String, Set<String>> packageNameToVersions = new HashMap<>();
         for (String fullNamePackage : CollectionUtils.emptyIfNull(packages)) {
             String[] packageSplit = StringUtils.split(fullNamePackage, ":");
+            if (packageSplit.length != 2) {
+                this.getLog().error("Illegal package name: " + fullNamePackage + ". Skipping package, the dependency tree may be incomplete.");
+                continue;
+            }
             String packageName = packageSplit[0];
             String packageVersion = packageSplit[1];
             packageNameToVersions.putIfAbsent(packageName, new HashSet<>());
             packageNameToVersions.get(packageName).add(packageVersion);
         }
         return packageNameToVersions;
+    }
+
+    private void buildImpactGraphFromPaths(DescriptorFileTreeNode descriptorNode, Map<String, DependencyNode> vulnerableDependencies, Map<String, List<List<String>>> packageVersionsImpactPaths) {
+        for (Map.Entry<String, List<List<String>>> aPackageVersionImpactPaths : packageVersionsImpactPaths.entrySet()) {
+            String packageFullName = aPackageVersionImpactPaths.getKey();
+            List<List<String>> impactPaths = aPackageVersionImpactPaths.getValue();
+            DependencyNode dependencyNode = vulnerableDependencies.get(packageFullName);
+
+            // build the impact graph for each vulnerable dependency out of its impact paths
+            for (List<String> impactPath : impactPaths) {
+                this.addImpactPathToDependencyNode(dependencyNode, impactPath);
+            }
+
+            boolean direct = impactPaths.stream().map(List::size).anyMatch(size -> size == 2);
+
+            dependencyNode.setIndirect(!direct);
+            descriptorNode.addDependency(dependencyNode);
+        }
     }
 
     /**
@@ -101,30 +123,15 @@ public class YarnScanner extends SingleDescriptorScanner {
      */
     @Override
     protected List<FileTreeNode> walkDepTree(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) throws IOException {
-        DescriptorFileTreeNode descriptorNode = new DescriptorFileTreeNode(depTree.getRootNode().getDescriptorFilePath());
+        DescriptorFileTreeNode descriptorNode = new DescriptorFileTreeNode(depTree.getRootNodeDescriptorFilePath());
         // Build a map of package name to versions, to avoid running 'yarn why' multiple times for the same package.
         Map<String, Set<String>> packageNameToVersions = this.getPackageNameToVersionsMap(vulnerableDependencies.keySet());
 
         for (Map.Entry<String, Set<String>> entry : packageNameToVersions.entrySet()) {
-            String packageName = entry.getKey();
-            Set<String> packageVersions = entry.getValue();
-            // find the impact paths for each package for all its vulnerable versions
-            Map<String, List<List<String>>> packageVersionsImpactPaths = yarnTreeBuilder.findDependencyImpactPaths(depTree.getRootId(), packageName, packageVersions);
-            for (Map.Entry<String, List<List<String>>> aPackageVersionImpactPaths : packageVersionsImpactPaths.entrySet()) {
-                String packageFullName = aPackageVersionImpactPaths.getKey();
-                List<List<String>> impactPaths = aPackageVersionImpactPaths.getValue();
-                DependencyNode dependencyNode = vulnerableDependencies.get(packageFullName);
-                boolean indirect = true;
-                // build the impact graph for each vulnerable dependency out of its impact paths
-                for (List<String> impactPath : impactPaths) {
-                    this.addImpactPathToDependencyNode(dependencyNode, impactPath);
-                    if (impactPath.size() == 2) {
-                        indirect = false; // If the impact path is of length 2 (root -> dependency), this dependency is direct
-                    }
-                }
-                dependencyNode.setIndirect(indirect);
-                descriptorNode.addDependency(dependencyNode);
-            }
+            // Find the impact paths for each package for all its vulnerable versions
+            Map<String, List<List<String>>> packageVersionsImpactPaths = yarnTreeBuilder.findDependencyImpactPaths(depTree.rootId(), entry.getKey(), entry.getValue());
+            // Build the impact graph for each vulnerable dependency out of its impact paths, set Indirect flag and add it to the descriptor node
+            buildImpactGraphFromPaths(descriptorNode, vulnerableDependencies, packageVersionsImpactPaths);
         }
 
         // Return a list of one element - the descriptor node for package.json
