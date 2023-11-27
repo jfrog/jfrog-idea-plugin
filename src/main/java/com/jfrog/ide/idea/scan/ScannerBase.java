@@ -185,7 +185,7 @@ public abstract class ScannerBase {
      */
     protected List<FileTreeNode> walkDepTree(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) throws IOException {
         Map<String, DescriptorFileTreeNode> descriptorNodes = new HashMap<>();
-        visitDepTreeNode(vulnerableDependencies, depTree, Collections.singletonList(depTree.getRootId()), descriptorNodes, new ArrayList<>(), new HashMap<>());
+        visitDepTreeNode(vulnerableDependencies, depTree, Collections.singletonList(depTree.rootId()), descriptorNodes, new ArrayList<>(), new HashMap<>());
         return new CopyOnWriteArrayList<>(descriptorNodes.values());
     }
 
@@ -205,7 +205,7 @@ public abstract class ScannerBase {
                                   Map<String, DescriptorFileTreeNode> descriptorNodes, List<String> descriptorPaths,
                                   Map<String, Map<String, DependencyNode>> addedDeps) {
         String compId = path.get(path.size() - 1);
-        DepTreeNode compNode = depTree.getNodes().get(compId);
+        DepTreeNode compNode = depTree.nodes().get(compId);
         List<String> innerDescriptorPaths = descriptorPaths;
         if (compNode.getDescriptorFilePath() != null) {
             innerDescriptorPaths = new ArrayList<>(descriptorPaths);
@@ -218,7 +218,7 @@ public abstract class ScannerBase {
             DepTreeNode parentCompNode = null;
             if (path.size() >= 2) {
                 String parentCompId = path.get(path.size() - 2);
-                parentCompNode = depTree.getNodes().get(parentCompId);
+                parentCompNode = depTree.nodes().get(parentCompId);
             }
             for (String descriptorPath : innerDescriptorPaths) {
                 boolean indirect = parentCompNode != null && !descriptorPath.equals(parentCompNode.getDescriptorFilePath());
@@ -254,11 +254,9 @@ public abstract class ScannerBase {
     }
 
     protected void addImpactPathToDependencyNode(DependencyNode dependencyNode, List<String> path) {
-        if (dependencyNode.getImpactTree() == null) {
-            dependencyNode.setImpactTree(new ImpactTree(new ImpactTreeNode(path.get(0))));
-        }
+        dependencyNode.setImpactTree(new ImpactTree(new ImpactTreeNode(path.get(0))));
         ImpactTree impactTree = dependencyNode.getImpactTree();
-        if (impactTree.getImpactPathsCount() > ImpactTree.IMPACT_PATHS_LIMIT) {
+        if (impactTree.getImpactPathsCount() == ImpactTree.IMPACT_PATHS_LIMIT) {
             return;
         }
         ImpactTreeNode parentImpactTreeNode = impactTree.getRoot();
