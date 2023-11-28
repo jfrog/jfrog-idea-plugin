@@ -112,9 +112,9 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
 
         // Check root SDK node
         DepTree results = pypiScanner.buildTree();
-        assertEquals(SDK_NAME, results.getRootId());
-        assertEquals(SDK_NAME, results.getRootId());
-        assertEquals(pythonSdk.getHomePath(), results.getRootNode().getDescriptorFilePath());
+        assertEquals(SDK_NAME, results.rootId());
+        assertEquals(SDK_NAME, results.rootId());
+        assertEquals(pythonSdk.getHomePath(), results.getRootNodeDescriptorFilePath());
         assertNotEmpty(results.getRootNode().getChildren());
 
         // Check direct dependency
@@ -124,7 +124,7 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
 
         // Check transitive dependency
         String anyTreeDepId = pipGrip.getChildren().stream().filter(childId -> childId.startsWith(TRANSITIVE_DEPENDENCY_NAME + ":")).findFirst().get();
-        DepTreeNode anyTreeDepNode = results.getNodes().get(anyTreeDepId);
+        DepTreeNode anyTreeDepNode = results.nodes().get(anyTreeDepId);
         assertNotNull("Couldn't find node '" + anyTreeDepId + "'.", anyTreeDepNode);
         assertSize(1, anyTreeDepNode.getChildren());
     }
@@ -136,8 +136,8 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
 
             // Check root SDK node
             DepTree results = pypiScanner.buildTree();
-            assertEquals(SDK_NAME, results.getRootId());
-            assertEquals(pythonSdk.getHomePath(), results.getRootNode().getDescriptorFilePath());
+            assertEquals(SDK_NAME, results.rootId());
+            assertEquals(pythonSdk.getHomePath(), results.getRootNodeDescriptorFilePath());
             assertNotEmpty(results.getRootNode().getChildren());
 
             // The expected tree: root -> a-> b -> a

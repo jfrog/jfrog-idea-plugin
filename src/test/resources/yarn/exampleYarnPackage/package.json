@@ -1,0 +1,24 @@
+{
+  "name": "example-yarn-package",
+  "version": "1.0.0",
+  "description": "An example package to demonstrate Yarn",
+  "main": "index.js",
+  "repository": {
+    "url": "github.com/yarnpkg/example-yarn-package",
+    "type": "git"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Yarn Contributors",
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "lodash": "^4.16.2"
+  },
+  "devDependencies": {
+    "jest-cli": "15.1.1"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  }
+}

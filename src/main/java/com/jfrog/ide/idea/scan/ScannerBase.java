@@ -61,8 +61,6 @@ import static com.jfrog.ide.common.log.Utils.logError;
  * Created by romang on 4/26/17.
  */
 public abstract class ScannerBase {
-    public static final int IMPACT_PATHS_LIMIT = 50;
-
     private final ServerConfig serverConfig;
     private final ComponentPrefix prefix;
     @Getter
@@ -159,7 +157,7 @@ public abstract class ScannerBase {
                 // No violations/vulnerabilities or no components to scan or an error was thrown
                 return;
             }
-            List<FileTreeNode> fileTreeNodes = walkDepTree(results, depTree);
+            List<FileTreeNode> fileTreeNodes = buildImpactGraph(results, depTree);
             addScanResults(fileTreeNodes);
 
             // Contextual Analysis
@@ -185,9 +183,9 @@ public abstract class ScannerBase {
      * @param vulnerableDependencies a map of component IDs and the DependencyNode object matching each of them.
      * @param depTree                the project's dependency tree to walk through.
      */
-    private List<FileTreeNode> walkDepTree(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) {
+    protected List<FileTreeNode> buildImpactGraph(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) throws IOException {
         Map<String, DescriptorFileTreeNode> descriptorNodes = new HashMap<>();
-        visitDepTreeNode(vulnerableDependencies, depTree, Collections.singletonList(depTree.getRootId()), descriptorNodes, new ArrayList<>(), new HashMap<>());
+        visitDepTreeNode(vulnerableDependencies, depTree, Collections.singletonList(depTree.rootId()), descriptorNodes, new ArrayList<>(), new HashMap<>());
         return new CopyOnWriteArrayList<>(descriptorNodes.values());
     }
 
@@ -207,7 +205,7 @@ public abstract class ScannerBase {
                                   Map<String, DescriptorFileTreeNode> descriptorNodes, List<String> descriptorPaths,
                                   Map<String, Map<String, DependencyNode>> addedDeps) {
         String compId = path.get(path.size() - 1);
-        DepTreeNode compNode = depTree.getNodes().get(compId);
+        DepTreeNode compNode = depTree.nodes().get(compId);
         List<String> innerDescriptorPaths = descriptorPaths;
         if (compNode.getDescriptorFilePath() != null) {
             innerDescriptorPaths = new ArrayList<>(descriptorPaths);
@@ -220,7 +218,7 @@ public abstract class ScannerBase {
             DepTreeNode parentCompNode = null;
             if (path.size() >= 2) {
                 String parentCompId = path.get(path.size() - 2);
-                parentCompNode = depTree.getNodes().get(parentCompId);
+                parentCompNode = depTree.nodes().get(parentCompId);
             }
             for (String descriptorPath : innerDescriptorPaths) {
                 boolean indirect = parentCompNode != null && !descriptorPath.equals(parentCompNode.getDescriptorFilePath());
@@ -255,13 +253,10 @@ public abstract class ScannerBase {
         }
     }
 
-    private void addImpactPathToDependencyNode(DependencyNode dependencyNode, List<String> path) {
-        if (dependencyNode.getImpactTree() == null) {
-            dependencyNode.setImpactTree(new ImpactTree(new ImpactTreeNode(path.get(0))));
-        }
+    protected void addImpactPathToDependencyNode(DependencyNode dependencyNode, List<String> path) {
+        dependencyNode.setImpactTree(new ImpactTree(new ImpactTreeNode(path.get(0))));
         ImpactTree impactTree = dependencyNode.getImpactTree();
-        impactTree.incImpactPathsCount();
-        if (impactTree.getImpactPathsCount() > IMPACT_PATHS_LIMIT) {
+        if (impactTree.getImpactPathsCount() == ImpactTree.IMPACT_PATHS_LIMIT) {
             return;
         }
         ImpactTreeNode parentImpactTreeNode = impactTree.getRoot();
@@ -272,6 +267,10 @@ public abstract class ScannerBase {
             if (currImpactTreeNode == null) {
                 currImpactTreeNode = new ImpactTreeNode(currPathNode);
                 parentImpactTreeNode.getChildren().add(currImpactTreeNode);
+                if (pathNodeIndex == path.size() - 1) {
+                    // If a new leaf was added, thus a new impact path was added (impact paths don't collide after they split)
+                    impactTree.incImpactPathsCount();
+                }
             }
             parentImpactTreeNode = currImpactTreeNode;
         }
