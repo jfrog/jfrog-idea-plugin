@@ -180,7 +180,7 @@ public class MavenScanner extends ScannerBase {
             String vulnerableDepId = dependencyNode.getComponentIdWithoutPrefix();
             Set<String> affectedModulesIds = getDependentModules(vulnerableDepId, depTree, parents, visitedComponents);
             for (String descriptorId : affectedModulesIds) {
-                String descriptorPath = depTree.getNodes().get(descriptorId).getDescriptorFilePath();
+                String descriptorPath = depTree.nodes().get(descriptorId).getDescriptorFilePath();
                 descriptorMap.putIfAbsent(descriptorPath, new DescriptorFileTreeNode(descriptorPath));
 
                 // Each dependency might be a child of more than one POM file, but Artifact is a tree node, so it can have only one parent.
@@ -207,7 +207,7 @@ public class MavenScanner extends ScannerBase {
             return visitedComponents.get(compId);
         }
         Set<String> modulesIds = new HashSet<>();
-        if (depTree.getNodes().get(compId).getDescriptorFilePath() != null) {
+        if (depTree.nodes().get(compId).getDescriptorFilePath() != null) {
             modulesIds.add(compId);
         }
         if (parents.containsKey(compId)) {

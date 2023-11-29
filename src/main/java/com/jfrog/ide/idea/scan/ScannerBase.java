@@ -166,10 +166,7 @@ public abstract class ScannerBase {
                 // No violations/vulnerabilities or no components to scan or an error was thrown
                 return;
             }
-
-            Map<String, Set<String>> parents = getParents(depTree);
-            ImpactTreeBuilder.populateImpactTrees(results, parents, depTree.getRootId());
-            List<FileTreeNode> fileTreeNodes = groupDependenciesToDescriptorNodes(results.values(), depTree, parents);
+            List<FileTreeNode> fileTreeNodes = buildImpactGraph(results, depTree);
             addScanResults(fileTreeNodes);
 
             // Contextual Analysis
@@ -188,6 +185,12 @@ public abstract class ScannerBase {
         }
     }
 
+    protected List<FileTreeNode> buildImpactGraph(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) throws IOException {
+        Map<String, Set<String>> parents = getParents(depTree);
+        ImpactTreeBuilder.populateImpactTrees(vulnerableDependencies, parents, depTree.rootId());
+        return groupDependenciesToDescriptorNodes(vulnerableDependencies.values(), depTree, parents);
+    }
+
     /**
      * Find the parents of each node in the given {@link DepTree}.
      * Nodes without parents (the root) don't appear in the returned map.
@@ -197,7 +200,7 @@ public abstract class ScannerBase {
      */
     static Map<String, Set<String>> getParents(DepTree depTree) {
         Map<String, Set<String>> parents = new HashMap<>();
-        for (Map.Entry<String, DepTreeNode> node : depTree.getNodes().entrySet()) {
+        for (Map.Entry<String, DepTreeNode> node : depTree.nodes().entrySet()) {
             String parentId = node.getKey();
             for (String childId : node.getValue().getChildren()) {
                 parents.putIfAbsent(childId, new HashSet<>());

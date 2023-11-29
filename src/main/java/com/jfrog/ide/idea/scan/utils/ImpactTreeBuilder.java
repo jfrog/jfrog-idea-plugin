@@ -53,7 +53,7 @@ public class ImpactTreeBuilder {
         }
     }
 
-    static void addImpactPathToDependencyNode(DependencyNode dependencyNode, List<String> path) {
+    public static void addImpactPathToDependencyNode(DependencyNode dependencyNode, List<String> path) {
         if (dependencyNode.getImpactTree() == null) {
             dependencyNode.setImpactTree(new ImpactTree(new ImpactTreeNode(path.get(0))));
         }

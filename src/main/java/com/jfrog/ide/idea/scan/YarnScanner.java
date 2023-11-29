@@ -16,6 +16,7 @@ import com.jfrog.ide.common.yarn.YarnTreeBuilder;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
 import com.jfrog.ide.idea.inspections.YarnInspection;
 import com.jfrog.ide.idea.scan.data.PackageManagerType;
+import com.jfrog.ide.idea.scan.utils.ImpactTreeBuilder;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import org.apache.commons.collections4.CollectionUtils;
@@ -102,7 +103,7 @@ public class YarnScanner extends SingleDescriptorScanner {
 
             // build the impact graph for each vulnerable dependency out of its impact paths
             for (List<String> impactPath : impactPaths) {
-                this.addImpactPathToDependencyNode(dependencyNode, impactPath);
+                ImpactTreeBuilder.addImpactPathToDependencyNode(dependencyNode, impactPath);
             }
 
             boolean direct = impactPaths.stream().map(List::size).anyMatch(size -> size == 2);
