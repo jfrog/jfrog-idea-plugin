@@ -14,11 +14,10 @@ public class ImpactTreeBuilder {
     /**
      * Builds impact paths for {@link DependencyNode} objects.
      *
-     * @param vulnerableDependencies a map of component IDs and the DependencyNode object matching each of them
+     * @param vulnerableDependencies a map of component IDs and the {@link DependencyNode} object matching each of them.
+     *                               Impact paths will be built for these DependencyNodes
      * @param parents                a map of all dependencies and their parents
      * @param rootId                 the project's root component ID
-     * @return list of {@link FileTreeNode}s which are all {@link DescriptorFileTreeNode}s with the given
-     * {@link DependencyNode}s inside them
      */
     public static void populateImpactTrees(Map<String, DependencyNode> vulnerableDependencies, Map<String, Set<String>> parents, String rootId) {
         for (DependencyNode vulnDep : vulnerableDependencies.values()) {
