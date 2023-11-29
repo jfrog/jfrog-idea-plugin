@@ -83,7 +83,7 @@ public class GradleScannerTest extends HeavyPlatformTestCase {
         // Run and check scan results
         DepTree results = gradleScanner.buildTree();
         assertNotNull(results);
-        assertEquals(Paths.get(globalProjectDir).getFileName().toString(), results.getRootId());
+        assertEquals(Paths.get(globalProjectDir).getFileName().toString(), results.rootId());
         assertEquals(3, results.getRootNode().getChildren().size());
 
         // Check module dependency

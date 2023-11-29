@@ -31,13 +31,11 @@ import static com.jfrog.ide.common.log.Utils.logError;
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBuilder;
 
 public class ScanManager {
-    private final int SCAN_TIMEOUT_MINUTES = 60;
     private final Project project;
     private final ScannerFactory factory;
     private final SourceCodeScannerManager sourceCodeScannerManager;
     private Map<Integer, ScannerBase> scanners = Maps.newHashMap();
     private ExecutorService executor;
-
 
     private ScanManager(@NotNull Project project) {
         this.project = project;
@@ -97,8 +95,8 @@ public class ScanManager {
                     scanner.asyncScanAndUpdateResults();
                 }
                 executor.shutdown();
-                if (!executor.awaitTermination(SCAN_TIMEOUT_MINUTES, TimeUnit.MINUTES)) {
-                    logError(Logger.getInstance(), "Scan timeout of " + SCAN_TIMEOUT_MINUTES + " minutes elapsed. The scan is being canceled.", true);
+                if (!executor.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES)) {
+                    logError(Logger.getInstance(), "Scan timeout elapsed. The scan is being canceled.", true);
                 }
                 // Cache tree only if no errors occurred during scan.
                 if (scanners.values().stream().anyMatch(ScannerBase::isScanErrorOccurred)) {
