@@ -59,7 +59,7 @@ import static com.jfrog.ide.common.utils.ArtifactoryConnectionUtils.createArtifa
 import static com.jfrog.ide.common.utils.Utils.createMapper;
 import static com.jfrog.ide.common.utils.Utils.createYAMLMapper;
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBuilder;
-import static com.jfrog.ide.idea.scan.ScanUtils.getOSAndArc;
+import static com.jfrog.ide.idea.scan.utils.ScanUtils.getOSAndArc;
 import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
 import static java.lang.String.join;
 

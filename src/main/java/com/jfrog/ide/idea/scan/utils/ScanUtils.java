@@ -1,4 +1,4 @@
-package com.jfrog.ide.idea.scan;
+package com.jfrog.ide.idea.scan.utils;
 
 import com.google.common.collect.Sets;
 import com.intellij.openapi.module.Module;
@@ -39,7 +39,7 @@ public class ScanUtils {
         return paths;
     }
 
-    static String getOSAndArc() throws IOException {
+    public static String getOSAndArc() throws IOException {
         String arch = SystemUtils.OS_ARCH;
         // Windows
         if (SystemUtils.IS_OS_WINDOWS) {

@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-import static com.jfrog.ide.idea.scan.ScanUtils.createScanPaths;
+import static com.jfrog.ide.idea.scan.utils.ScanUtils.createScanPaths;
 import static com.jfrog.ide.idea.utils.Utils.getProjectBasePath;
 
 /**

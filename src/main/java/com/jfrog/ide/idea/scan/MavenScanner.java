@@ -9,6 +9,9 @@ import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.jfrog.ide.common.deptree.DepTree;
 import com.jfrog.ide.common.deptree.DepTreeNode;
+import com.jfrog.ide.common.nodes.DependencyNode;
+import com.jfrog.ide.common.nodes.DescriptorFileTreeNode;
+import com.jfrog.ide.common.nodes.FileTreeNode;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
@@ -28,6 +31,7 @@ import org.jetbrains.idea.maven.project.MavenProjectsManager;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
@@ -157,5 +161,61 @@ public class MavenScanner extends ScannerBase {
                 .filter(mavenArtifactChild -> mavenArtifactChild.getState() == MavenArtifactState.ADDED)
                 .forEach(childrenArtifactNode -> updateChildrenNodes(nodes, currentNode, childrenArtifactNode, false));
         parentNode.getChildren().add(compId);
+    }
+
+    /**
+     * Groups a collection of {@link DependencyNode}s by the descriptor files of the modules that depend on them.
+     * The returned DependencyNodes inside the {@link FileTreeNode}s are clones of the ones in depScanResults.
+     *
+     * @param depScanResults collection of DependencyNodes
+     * @param depTree        the project's dependency tree
+     * @param parents        a map of components by their IDs and their parents in the dependency tree
+     * @return a list of FileTreeNodes (that are all DescriptorFileTreeNodes) having the DependencyNodes as their children
+     */
+    @Override
+    protected List<FileTreeNode> groupDependenciesToDescriptorNodes(Collection<DependencyNode> depScanResults, DepTree depTree, Map<String, Set<String>> parents) {
+        Map<String, DescriptorFileTreeNode> descriptorMap = new HashMap<>();
+        Map<String, Set<String>> visitedComponents = new HashMap<>();
+        for (DependencyNode dependencyNode : depScanResults) {
+            String vulnerableDepId = dependencyNode.getComponentIdWithoutPrefix();
+            Set<String> affectedModulesIds = getDependentModules(vulnerableDepId, depTree, parents, visitedComponents);
+            for (String descriptorId : affectedModulesIds) {
+                String descriptorPath = depTree.nodes().get(descriptorId).getDescriptorFilePath();
+                descriptorMap.putIfAbsent(descriptorPath, new DescriptorFileTreeNode(descriptorPath));
+
+                // Each dependency might be a child of more than one POM file, but Artifact is a tree node, so it can have only one parent.
+                // The solution for this is to clone the dependency before adding it as a child of the POM.
+                DependencyNode clonedDep = (DependencyNode) dependencyNode.clone();
+                clonedDep.setIndirect(!parents.get(vulnerableDepId).contains(descriptorId));
+                descriptorMap.get(descriptorPath).addDependency(clonedDep);
+            }
+        }
+        return new CopyOnWriteArrayList<>(descriptorMap.values());
+    }
+
+    /**
+     * Retrieve component IDs of all modules in the project that are dependent on the specified component.
+     *
+     * @param compId            the component ID to identify modules depending on it
+     * @param depTree           the project's dependency tree
+     * @param parents           a map of components by their IDs and their parents in the dependency tree
+     * @param visitedComponents a map of components for which dependent modules have already been found
+     * @return a set of component IDs representing modules dependent on the specified component
+     */
+    Set<String> getDependentModules(String compId, DepTree depTree, Map<String, Set<String>> parents, Map<String, Set<String>> visitedComponents) {
+        if (visitedComponents.containsKey(compId)) {
+            return visitedComponents.get(compId);
+        }
+        Set<String> modulesIds = new HashSet<>();
+        if (depTree.nodes().get(compId).getDescriptorFilePath() != null) {
+            modulesIds.add(compId);
+        }
+        if (parents.containsKey(compId)) {
+            for (String parentId : parents.get(compId)) {
+                modulesIds.addAll(getDependentModules(parentId, depTree, parents, visitedComponents));
+            }
+        }
+        visitedComponents.put(compId, modulesIds);
+        return modulesIds;
     }
 }
