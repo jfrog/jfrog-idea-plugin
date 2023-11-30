@@ -143,7 +143,7 @@ public class WebviewObjectConverter {
     }
 
     private static ImpactGraph convertImpactGraph(ImpactTree impactTree) {
-        return new ImpactGraph(convertImpactGraphNode(impactTree.getRoot()), impactTree.getImpactPathsCount() >= ImpactTreeBuilder.IMPACT_PATHS_LIMIT ? impactTree.getImpactPathsCount() : -1);
+        return new ImpactGraph(convertImpactGraphNode(impactTree.getRoot()), impactTree.getImpactPathsCount() >= ImpactTree.IMPACT_PATHS_LIMIT ? impactTree.getImpactPathsCount() : -1);
     }
 
     private static ImpactGraphNode convertImpactGraphNode(ImpactTreeNode impactTreeNode) {

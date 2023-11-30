@@ -9,8 +9,6 @@ import com.jfrog.ide.common.nodes.subentities.ImpactTreeNode;
 import java.util.*;
 
 public class ImpactTreeBuilder {
-    public static final int IMPACT_PATHS_LIMIT = 20;
-
     /**
      * Builds impact paths for {@link DependencyNode} objects.
      *
@@ -35,7 +33,7 @@ public class ImpactTreeBuilder {
      */
     private static void walkParents(DependencyNode depNode, Map<String, Set<String>> parents, String rootId, List<String> path) {
         String currParentId = path.get(0);
-        if (depNode.getImpactTree() != null && depNode.getImpactTree().getImpactPathsCount() >= IMPACT_PATHS_LIMIT) {
+        if (depNode.getImpactTree() != null && depNode.getImpactTree().getImpactPathsCount() >= ImpactTree.IMPACT_PATHS_LIMIT) {
             return;
         }
         // If we arrived at the root, add the path to the impact tree
@@ -58,8 +56,7 @@ public class ImpactTreeBuilder {
             dependencyNode.setImpactTree(new ImpactTree(new ImpactTreeNode(path.get(0))));
         }
         ImpactTree impactTree = dependencyNode.getImpactTree();
-        impactTree.incImpactPathsCount();
-        if (impactTree.getImpactPathsCount() > IMPACT_PATHS_LIMIT) {
+        if (impactTree.getImpactPathsCount() >= ImpactTree.IMPACT_PATHS_LIMIT) {
             return;
         }
         ImpactTreeNode parentImpactTreeNode = impactTree.getRoot();
@@ -70,6 +67,10 @@ public class ImpactTreeBuilder {
             if (currImpactTreeNode == null) {
                 currImpactTreeNode = new ImpactTreeNode(currPathNode);
                 parentImpactTreeNode.getChildren().add(currImpactTreeNode);
+                if (pathNodeIndex == path.size() - 1) {
+                    // If a new leaf was added, thus a new impact path was added (impact paths don't collide after they split)
+                    impactTree.incImpactPathsCount();
+                }
             }
             parentImpactTreeNode = currImpactTreeNode;
         }
