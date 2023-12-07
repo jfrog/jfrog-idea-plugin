@@ -130,6 +130,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private JBLabel pluginResourcesDescJBLabel;
     private JBLabel releasesRepoLinkJBLabel;
     private JLabel ssoLoginInstructionsLabel;
+    private JLabel SSOCode;
 
     private int selectedTabIndex;
 
@@ -472,6 +473,8 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
      * Init the "Login" button that do the SSO login.
      */
     private void initLoginViaBrowserButton() {
+        SSOCode.setText("");
+        ssoLoginInstructionsLabel.setText("");
         loginButton.setIcon(AllIcons.Ide.External_link_arrow);
         loginButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
             if (isBlank(platformUrl.getText())) {
@@ -488,7 +491,8 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private void doSsoLogin() {
         String uuid = UUID.randomUUID().toString();
         String code = uuid.substring(uuid.length() - 4);
-        ssoLoginInstructionsLabel.setText("Please wait while we open your browser and enter the code: " + code);
+        SSOCode.setText("Verification code: " + code);
+        ssoLoginInstructionsLabel.setText("After you login using the browser, you’ll be asked to enter the verification code above.");
 
         AsyncProcessIcon asyncProcessIcon = new AsyncProcessIcon("Connecting...");
         clearText(artifactoryUrl, xrayUrl, accessToken, username, password);
@@ -506,9 +510,10 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
                     SSLContextBuilder.create().loadTrustMaterial(TrustAllStrategy.INSTANCE).build() :
                     serverConfig.getSslContext());
 
+            Thread.sleep(SSO_WAIT_BETWEEN_RETRIES_MILLIS);
             accessManager.sendBrowserLoginRequest(uuid);
             BrowserUtil.browse(removeEnd(platformUrl.getText(), "/") + "/ui/login?jfClientSession=" + uuid +
-                    "&jfClientDisplayName=IDEA");
+                    "&jfClientName=IDEA&jfClientCode=1");
 
             for (int i = 0; i < SSO_RETRIES; i++) {
                 CreateAccessTokenResponse response = accessManager.getBrowserLoginRequestToken(uuid);
