@@ -129,6 +129,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private JLabel repositoryNameDescJLabel;
     private JBLabel pluginResourcesDescJBLabel;
     private JBLabel releasesRepoLinkJBLabel;
+    private JLabel ssoLoginInstructionsLabel;
 
     private int selectedTabIndex;
 
@@ -206,9 +207,9 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private void initEnabledComponentSets() {
         allUiComponents = Sets.newHashSet(infoPanel, platformUrlTitle, platformUrl, xrayUrlTitle, xrayUrl,
                 artifactoryUrlTitle, artifactoryUrl, username, password, accessTokenTitle, accessToken, accessTokenRadioButton, usernamePasswordRadioButton,
-                loginButton, authenticationMethodTitle, usernameTitle, passwordTitle, advancedExpandButton, setSeparately, advancedExpandButton);
+                loginButton, authenticationMethodTitle, usernameTitle, passwordTitle, advancedExpandButton, setSeparately, advancedExpandButton, ssoLoginInstructionsLabel);
 
-        webLoginEnabledComponents = webLoginVisibleComponents = Sets.newHashSet(infoPanel, platformUrlTitle, platformUrl, loginButton);
+        webLoginEnabledComponents = webLoginVisibleComponents = Sets.newHashSet(infoPanel, platformUrlTitle, platformUrl, loginButton, ssoLoginInstructionsLabel);
 
         connectionDetailsEnabledComponents = connectionDetailsVisibleComponents = Sets.newHashSet(infoPanel, platformUrlTitle, platformUrl,
                 authenticationMethodTitle, usernamePasswordRadioButton, accessTokenRadioButton, usernameTitle, username,
@@ -486,6 +487,8 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
      */
     private void doSsoLogin() {
         String uuid = UUID.randomUUID().toString();
+        String code = uuid.substring(uuid.length() - 4);
+        ssoLoginInstructionsLabel.setText("Please wait while we open your browser and enter the code: " + code);
 
         AsyncProcessIcon asyncProcessIcon = new AsyncProcessIcon("Connecting...");
         clearText(artifactoryUrl, xrayUrl, accessToken, username, password);
@@ -505,7 +508,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
 
             accessManager.sendBrowserLoginRequest(uuid);
             BrowserUtil.browse(removeEnd(platformUrl.getText(), "/") + "/ui/login?jfClientSession=" + uuid +
-                    "&jfClientName=IDEA");
+                    "&jfClientDisplayName=IDEA");
 
             for (int i = 0; i < SSO_RETRIES; i++) {
                 CreateAccessTokenResponse response = accessManager.getBrowserLoginRequestToken(uuid);
