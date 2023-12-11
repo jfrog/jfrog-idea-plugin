@@ -129,8 +129,8 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private JLabel repositoryNameDescJLabel;
     private JBLabel pluginResourcesDescJBLabel;
     private JBLabel releasesRepoLinkJBLabel;
-    private JLabel ssoLoginInstructionsLabel;
-    private JTextPane ssoCode;
+    private JBLabel ssoLoginInstructionsLabel;
+    private JBTextArea ssoCode;
 
     private int selectedTabIndex;
 
@@ -474,6 +474,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
      * Init the "Login" button that do the SSO login.
      */
     private void initLoginViaBrowserButton() {
+        ssoCode.setText("");
         ssoLoginInstructionsLabel.setText("");
         loginButton.setIcon(AllIcons.Ide.External_link_arrow);
         loginButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
