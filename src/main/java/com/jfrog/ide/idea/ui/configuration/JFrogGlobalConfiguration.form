@@ -252,19 +252,21 @@
           </component>
           <component id="fd2cc" class="javax.swing.JLabel" binding="ssoLoginInstructionsLabel">
             <constraints>
-              <grid row="8" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="7" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="SSO login instructions"/>
             </properties>
           </component>
-          <component id="a0ab" class="javax.swing.JLabel" binding="ssoCode">
+          <component id="ef448" class="javax.swing.JTextPane" binding="ssoCode">
             <constraints>
-              <grid row="7" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="8" column="0" row-span="1" col-span="2" vsize-policy="6" hsize-policy="6" anchor="8" fill="2" indent="0" use-parent-layout="false">
+                <preferred-size width="150" height="50"/>
+              </grid>
             </constraints>
             <properties>
-              <font size="20"/>
-              <text value="SSO code"/>
+              <editable value="false"/>
+              <font name="JetBrains Mono" size="28" style="1"/>
             </properties>
           </component>
         </children>

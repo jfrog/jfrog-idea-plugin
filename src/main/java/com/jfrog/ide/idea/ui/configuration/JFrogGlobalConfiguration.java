@@ -130,7 +130,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private JBLabel pluginResourcesDescJBLabel;
     private JBLabel releasesRepoLinkJBLabel;
     private JLabel ssoLoginInstructionsLabel;
-    private JLabel ssoCode;
+    private JTextPane ssoCode;
 
     private int selectedTabIndex;
 
@@ -474,7 +474,6 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
      * Init the "Login" button that do the SSO login.
      */
     private void initLoginViaBrowserButton() {
-        ssoCode.setText("");
         ssoLoginInstructionsLabel.setText("");
         loginButton.setIcon(AllIcons.Ide.External_link_arrow);
         loginButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
@@ -492,8 +491,8 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private void doSsoLogin() {
         String uuid = UUID.randomUUID().toString();
         String code = uuid.substring(uuid.length() - 4);
-        ssoCode.setText("Verification code: " + code);
-        ssoLoginInstructionsLabel.setText("After you login using the browser, you’ll be asked to enter the verification code above.");
+        ssoCode.setText(code);
+        ssoLoginInstructionsLabel.setText("After logging in via your web browser, please enter the code if prompted: ");
 
         AsyncProcessIcon asyncProcessIcon = new AsyncProcessIcon("Connecting...");
         clearText(artifactoryUrl, xrayUrl, accessToken, username, password);
@@ -536,6 +535,8 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             loginButton.setText("Login");
             loginButton.setIcon(AllIcons.Ide.External_link_arrow);
             loginButton.setEnabled(true);
+            ssoCode.setText("");
+            ssoLoginInstructionsLabel.setText("");
         }
     }
 
