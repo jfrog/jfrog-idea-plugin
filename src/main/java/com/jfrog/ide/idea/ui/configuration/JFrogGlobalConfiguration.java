@@ -130,7 +130,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private JBLabel pluginResourcesDescJBLabel;
     private JBLabel releasesRepoLinkJBLabel;
     private JLabel ssoLoginInstructionsLabel;
-    private JLabel SSOCode;
+    private JLabel ssoCode;
 
     private int selectedTabIndex;
 
@@ -208,9 +208,10 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private void initEnabledComponentSets() {
         allUiComponents = Sets.newHashSet(infoPanel, platformUrlTitle, platformUrl, xrayUrlTitle, xrayUrl,
                 artifactoryUrlTitle, artifactoryUrl, username, password, accessTokenTitle, accessToken, accessTokenRadioButton, usernamePasswordRadioButton,
-                loginButton, authenticationMethodTitle, usernameTitle, passwordTitle, advancedExpandButton, setSeparately, advancedExpandButton, ssoLoginInstructionsLabel);
+                loginButton, authenticationMethodTitle, usernameTitle, passwordTitle, advancedExpandButton, setSeparately, advancedExpandButton,
+                ssoLoginInstructionsLabel, ssoCode);
 
-        webLoginEnabledComponents = webLoginVisibleComponents = Sets.newHashSet(infoPanel, platformUrlTitle, platformUrl, loginButton, ssoLoginInstructionsLabel);
+        webLoginEnabledComponents = webLoginVisibleComponents = Sets.newHashSet(infoPanel, platformUrlTitle, platformUrl, loginButton, ssoLoginInstructionsLabel, ssoCode);
 
         connectionDetailsEnabledComponents = connectionDetailsVisibleComponents = Sets.newHashSet(infoPanel, platformUrlTitle, platformUrl,
                 authenticationMethodTitle, usernamePasswordRadioButton, accessTokenRadioButton, usernameTitle, username,
@@ -473,7 +474,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
      * Init the "Login" button that do the SSO login.
      */
     private void initLoginViaBrowserButton() {
-        SSOCode.setText("");
+        ssoCode.setText("");
         ssoLoginInstructionsLabel.setText("");
         loginButton.setIcon(AllIcons.Ide.External_link_arrow);
         loginButton.addActionListener(e -> ApplicationManager.getApplication().executeOnPooledThread(() -> {
@@ -491,7 +492,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private void doSsoLogin() {
         String uuid = UUID.randomUUID().toString();
         String code = uuid.substring(uuid.length() - 4);
-        SSOCode.setText("Verification code: " + code);
+        ssoCode.setText("Verification code: " + code);
         ssoLoginInstructionsLabel.setText("After you login using the browser, you’ll be asked to enter the verification code above.");
 
         AsyncProcessIcon asyncProcessIcon = new AsyncProcessIcon("Connecting...");
