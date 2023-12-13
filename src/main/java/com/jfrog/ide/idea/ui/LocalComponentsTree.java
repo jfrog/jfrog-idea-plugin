@@ -60,9 +60,7 @@ public class LocalComponentsTree extends ComponentsTree {
 
     public void addScanResults(List<FileTreeNode> fileTreeNodes) {
         setCellRenderer(new ComponentsTreeCellRenderer());
-        ApplicationManager.getApplication().invokeLater(() -> {
-            doAddScanResults(fileTreeNodes);
-        });
+        ApplicationManager.getApplication().invokeLater(() -> doAddScanResults(fileTreeNodes));
     }
 
     /**
@@ -172,10 +170,9 @@ public class LocalComponentsTree extends ComponentsTree {
         return new JBMenuItem(new AbstractAction(headLine) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!(navigationTarget.getElement() instanceof Navigatable)) {
+                if (!(navigationTarget.getElement() instanceof Navigatable navigatable)) {
                     return;
                 }
-                Navigatable navigatable = (Navigatable) navigationTarget.getElement();
                 if (navigatable.canNavigate()) {
                     navigatable.navigate(true);
                 }
@@ -245,7 +242,7 @@ public class LocalComponentsTree extends ComponentsTree {
      * It means that this text will be shown only if the tree is empty.
      */
     public void setScanningEmptyText() {
-        getEmptyText().setText(SCANNING);
+        SwingUtilities.invokeLater(() -> getEmptyText().setText(SCANNING));
     }
 
     /**
@@ -253,13 +250,13 @@ public class LocalComponentsTree extends ComponentsTree {
      * It means that this indication will be shown only if the tree is empty.
      */
     public void setNoIssuesEmptyText() {
-        getEmptyText().setText(NO_ISSUES);
+        SwingUtilities.invokeLater(() -> getEmptyText().setText(NO_ISSUES));
     }
 
     /**
      * Sets the empty text to indicate that during the project scan an error occurred.
      */
     public void setScanErrorEmptyText() {
-        getEmptyText().setText(ERROR_WHILE_SCANNING);
+        SwingUtilities.invokeLater(() -> getEmptyText().setText(ERROR_WHILE_SCANNING));
     }
 }
