@@ -34,7 +34,6 @@ pipelines:
             - curl -fL https://install-cli.jfrog.io | sh
             - jf c rm --quiet
             - jf c add internal --url=$int_entplus_deployer_url --user=$int_entplus_deployer_user --password=$int_entplus_deployer_apikey
-            - jf gradlec --use-wrapper --repo-deploy ecosys-oss-snapshot-local --deploy-maven-desc --deploy-ivy-desc=false
 
             # Run audit
             - jf audit
@@ -43,6 +42,7 @@ pipelines:
             - jf rt del "ecosys-oss-snapshot-local/com/jfrog/ide/jfrog-idea-plugin/*" --quiet
 
             # Run test, build and publish snapshot
+            - jf gradlec --use-wrapper --repo-deploy ecosys-oss-snapshot-local --deploy-maven-desc --deploy-ivy-desc=false
             - >
               env -i PATH=$PATH HOME=$HOME CI=$CI
               JFROG_CLI_BUILD_NAME=$JFROG_CLI_BUILD_NAME
