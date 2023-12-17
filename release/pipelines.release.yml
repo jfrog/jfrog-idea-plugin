@@ -48,7 +48,7 @@ pipelines:
             - curl -fL https://install-cli.jfrog.io | sh
             - jf c rm --quiet
             - jf c add internal --url=$int_ecosys_entplus_deployer_url --user=$int_ecosys_entplus_deployer_user --password=$int_ecosys_entplus_deployer_apikey
-            - jf gradlec --use-wrapper --repo-resolve ecosys-intellij-plugin --repo-deploy ecosys-oss-release-local --deploy-maven-desc --deploy-ivy-desc=false
+            - jf gradlec --use-wrapper --repo-deploy ecosys-oss-release-local --deploy-maven-desc --deploy-ivy-desc=false
 
             # Run audit
             - jf audit
