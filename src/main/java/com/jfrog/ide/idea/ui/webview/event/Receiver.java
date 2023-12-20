@@ -78,7 +78,7 @@ public class Receiver {
             new JumpToCodeTask(this.project).execute(createMapper().convertValue(event.getData(), Location.class));
             Logger.getInstance().debug("Jump to " + event.getType());
         } else {
-            Logger.getInstance().error("Received unknown event from the webview: " + event.getType());
+            Logger.getInstance().debug("Received unknown event from the webview: " + event.getType());
         }
     }
 }
