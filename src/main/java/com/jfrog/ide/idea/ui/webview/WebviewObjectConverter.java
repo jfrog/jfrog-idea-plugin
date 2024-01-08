@@ -88,7 +88,7 @@ public class WebviewObjectConverter {
         return switch (reporterType) {
             case SECRETS -> "SECRETS";
             case IAC -> "IAC";
-            case SAST -> "EOS";
+            case SAST -> "SAST";
             default -> "EMPTY";
         };
     }

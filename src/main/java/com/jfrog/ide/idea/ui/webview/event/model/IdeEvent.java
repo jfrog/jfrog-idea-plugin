@@ -18,5 +18,5 @@ public class IdeEvent extends Event {
         this.type = type;
     }
 
-    public enum Type {JUMP_TO_CODE}
+    public enum Type {JUMP_TO_CODE, LOGIN, WEBVIEW_LOADED}
 }
