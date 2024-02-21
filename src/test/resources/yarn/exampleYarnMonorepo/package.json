@@ -9,7 +9,7 @@
     "mobile"
   ],
   "dependencies": {
-    "axios": "1.5.1",
+    "axios": "1.6.0",
     "cli-table": "0.3.1"
   }
 }
