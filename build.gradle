@@ -64,7 +64,7 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
     implementation group: 'com.google.guava', name: 'guava', version: '32.0.1-jre'
     implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.4'
-
+    implementation group: 'org.codehaus.plexus', name: 'plexus-utils', version: '3.4.1'
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
 
