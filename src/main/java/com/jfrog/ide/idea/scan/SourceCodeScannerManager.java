@@ -325,7 +325,6 @@ public class SourceCodeScannerManager {
         scanners.put(SourceCodeScanType.SECRETS, new SecretsScannerExecutor(Logger.getInstance()));
         scanners.put(SourceCodeScanType.IAC, new IACScannerExecutor(Logger.getInstance()));
         scanners.put(SourceCodeScanType.SAST, new SastScannerExecutor(Logger.getInstance()));
-        scanners.put(SourceCodeScanType.JAS, new JasScanExecutor(Logger.getInstance()));
         return scanners;
     }
 
