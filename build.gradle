@@ -54,7 +54,7 @@ def idePluginsCommonVersion = '2.3.6'
 dependencies {
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.15.2'
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-extractor', version: buildInfoVersion
-    implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: idePluginsCommonVersion
+    implementation files('../ide-plugins-common/build/libs/ide-plugins-common-2.3.x-SNAPSHOT.jar')
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-client', version: buildInfoVersion
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.15.2'
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-api', version: buildInfoVersion
