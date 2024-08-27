@@ -1,6 +1,7 @@
 package com.jfrog.ide.idea.actions;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.ToolbarLabelAction;
@@ -16,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 
 public class ScanTimeLabelAction extends ToolbarLabelAction {
+
     @Override
     public void update(@NotNull AnActionEvent e) {
         super.update(e);
@@ -37,5 +39,11 @@ public class ScanTimeLabelAction extends ToolbarLabelAction {
             presentation.setText("");
             presentation.setIcon(null);
         }
+    }
+
+    @NotNull
+    @Override
+    public ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.EDT;
     }
 }
