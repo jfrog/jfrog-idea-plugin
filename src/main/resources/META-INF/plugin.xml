@@ -42,10 +42,6 @@
     <depends config-file="with-kotlin.xml" optional="true">org.jetbrains.kotlin</depends>
     <depends config-file="with-maven.xml" optional="true">org.jetbrains.idea.maven</depends>
     <depends config-file="with-go.xml" optional="true">org.jetbrains.plugins.go</depends>
-    <depends config-file="with-webstorm.xml" optional="true">com.intellij.modules.web</depends>
-    <depends config-file="with-html.xml" optional="true">com.intellij.modules.html</depends>
-    <depends config-file="with-css.xml" optional="true">com.intellij.modules.css</depends>
-    <depends config-file="with-js.xml" optional="true">com.intellij.modules.javascript</depends>
     <depends config-file="with-python.xml" optional="true">com.intellij.modules.python</depends>
     <depends config-file="with-python-ce.xml" optional="true">PythonCore</depends>
 
