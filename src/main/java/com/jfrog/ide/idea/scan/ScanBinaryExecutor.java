@@ -124,8 +124,6 @@ public abstract class ScanBinaryExecutor {
     abstract List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled, ProgressIndicator indicator) throws IOException, InterruptedException, URISyntaxException;
 
     protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args, Runnable checkCanceled, ProgressIndicator indicator) throws IOException, InterruptedException {
-        log.warn("reading");
-        log.warn(execute(inputFileBuilder, args, checkCanceled, false, indicator).toString());
         return execute(inputFileBuilder, args, checkCanceled, false, indicator);
     }
 
