@@ -52,7 +52,7 @@ public class JFrogSecurityWarning {
         this.codeFlows = codeFlows;
     }
 
-    public JFrogSecurityWarning(SarifResult result, SourceCodeScanType reporter) {
+    public JFrogSecurityWarning(SarifResult result, SourceCodeScanType reporter, Rule rule) {
         this(getFirstRegion(result).getStartLine() - 1,
                 getFirstRegion(result).getStartColumn() - 1,
                 getFirstRegion(result).getEndLine() - 1,
@@ -62,7 +62,7 @@ public class JFrogSecurityWarning {
                 result.getRuleId(),
                 getFirstRegion(result).getSnippet().getText(),
                 reporter,
-                !result.getKind().equals("pass"),
+                (!result.getKind().equals("pass") && (rule.getRuleProperties().map(properties -> !properties.getApplicability().equals("not_applicable")).orElse(true))),
                 Severity.fromSarif(result.getSeverity()),
                 convertCodeFlowsToFindingInfo(result.getCodeFlows())
         );
