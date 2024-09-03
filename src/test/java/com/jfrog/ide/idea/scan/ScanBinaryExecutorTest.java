@@ -23,7 +23,7 @@ public class ScanBinaryExecutorTest extends TestCase {
     private final ScanBinaryExecutor scanner = new ApplicabilityScannerExecutor(new NullLog());
     private final Path SIMPLE_OUTPUT = new File("src/test/resources/sourceCode/simple_output.sarif").toPath();
     private final Path NOT_APPLIC_OUTPUT = new File("src/test/resources/sourceCode/not_applic_output.sarif").toPath();
-
+    private final Path NOT_APPLIC_KIND_PASS_OUTPUT = new File("src/test/resources/sourceCode/not_applic_kind_pass.sarif").toPath();
     public void testInputBuilder() throws IOException {
         ScanConfig.Builder inputFileBuilder = new ScanConfig.Builder();
         Path inputPath = null;
@@ -78,6 +78,19 @@ public class ScanBinaryExecutorTest extends TestCase {
         assertTrue(parsedOutput.get(0).isApplicable());
         assertEquals("CVE-2022-25978", parsedOutput.get(1).getRuleID());
         assertTrue(parsedOutput.get(1).isApplicable());
+        // 2 known no-applicable results (have a scanner but no code evidence returned)
+        assertEquals("applic_CVE-2021-25878", parsedOutput.get(2).getRuleID());
+        assertFalse(parsedOutput.get(2).isApplicable());
+        assertEquals("applic_CVE-2022-29019", parsedOutput.get(3).getRuleID());
+        assertFalse(parsedOutput.get(3).isApplicable());
+    }
+
+    public void testSarifParserNotApplicResultsButKindPass() throws IOException {
+        List<JFrogSecurityWarning> parsedOutput = scanner.parseOutputSarif(NOT_APPLIC_KIND_PASS_OUTPUT);
+        assertEquals(5, parsedOutput.size());
+        // 1 known applicable results (code evidence returned)
+        assertEquals("applic_CVE-2022-25878", parsedOutput.get(0).getRuleID());
+        assertTrue(parsedOutput.get(0).isApplicable());
         // 2 known no-applicable results (have a scanner but no code evidence returned)
         assertEquals("applic_CVE-2021-25878", parsedOutput.get(2).getRuleID());
         assertFalse(parsedOutput.get(2).isApplicable());
