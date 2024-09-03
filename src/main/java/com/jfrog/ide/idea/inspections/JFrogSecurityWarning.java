@@ -62,7 +62,7 @@ public class JFrogSecurityWarning {
                 result.getRuleId(),
                 getFirstRegion(result).getSnippet().getText(),
                 reporter,
-                (!result.getKind().equals("pass") && (rule.getRuleProperties().map(properties -> !properties.getApplicability().equals("not_applicable")).orElse(true))),
+                (!result.getKind().equals("pass") && (rule.getRuleProperties().map(properties -> properties.getApplicability().equals("applicable")).orElse(true))),
                 Severity.fromSarif(result.getSeverity()),
                 convertCodeFlowsToFindingInfo(result.getCodeFlows())
         );
@@ -114,3 +114,4 @@ public class JFrogSecurityWarning {
         return Paths.get(URI.create(path)).toString();
     }
 }
+

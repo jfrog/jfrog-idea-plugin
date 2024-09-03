@@ -40,12 +40,7 @@ public class Run {
     }
 
     public Rule getRuleFromRunById(String ruleId) {
-            List<Rule> rules = this.getTool().getDriver().getRules();
-            return rules.stream()
-                    .filter(rule -> rule.getId().equals(ruleId))
-                    .findFirst()
-                    .orElseThrow(() -> new NoSuchElementException("No rule found with id: " + ruleId));
-
+            return this.getTool().getDriver().getRuleById(ruleId);
     }
 
     public void setResults(List<SarifResult> results) {
