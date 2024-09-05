@@ -257,7 +257,7 @@ public abstract class ScanBinaryExecutor {
         return type != null && supportedPackageTypes.contains(type);
     }
 
-    protected List<JFrogSecurityWarning> parseOutputSarif(Path outputFile) throws IOException {
+    protected List<JFrogSecurityWarning> parseOutputSarif(Path outputFile) throws IOException,IndexOutOfBoundsException {
         Output output = getOutputObj(outputFile);
         List<JFrogSecurityWarning> warnings = new ArrayList<>();
 

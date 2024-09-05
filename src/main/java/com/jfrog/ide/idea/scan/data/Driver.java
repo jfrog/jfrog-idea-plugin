@@ -48,7 +48,7 @@ public class Driver {
         return (Objects.equals(this.name, rhs.name) && (CollectionUtils.isEqualCollection(this.rules, rhs.rules)));
     }
 
-    public Rule getRuleById(String ruleId) {
+    public Rule getRuleById(String ruleId) throws IndexOutOfBoundsException {
         return rules.stream()
                 .filter(rule -> rule.getId().equals(ruleId))
                 .findFirst()

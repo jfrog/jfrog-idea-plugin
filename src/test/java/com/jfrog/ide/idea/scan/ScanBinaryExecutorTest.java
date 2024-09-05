@@ -7,7 +7,6 @@ import com.jfrog.ide.idea.scan.data.ScansConfig;
 import junit.framework.TestCase;
 import org.apache.commons.io.FileUtils;
 import org.jfrog.build.api.util.NullLog;
-import org.junit.Assert;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,9 +22,9 @@ import static org.junit.Assert.assertThrows;
  **/
 public class ScanBinaryExecutorTest extends TestCase {
     private final ScanBinaryExecutor scanner = new ApplicabilityScannerExecutor(new NullLog());
+    private final Path FAULTY_OUTPUT = new File("src/test/resources/sourceCode/faulty_output.sarif").toPath();
     private final Path SIMPLE_OUTPUT = new File("src/test/resources/sourceCode/simple_output.sarif").toPath();
-    private final Path NOT_APPLIC_OUTPUT = new File("src/test/resources/sourceCode/not_applic_output.sarif").toPath();
-    private final Path APPLIC_KIND_PASS_OUTPUT = new File("src/test/resources/sourceCode/applicable_kind_pass_output.sarif").toPath();
+    private final Path APPLIC_KIND_PASS_AND_FAIL_OUTPUT = new File("src/test/resources/sourceCode/applicable_kind_pass_output.sarif").toPath();
     public void testInputBuilder() throws IOException {
         ScanConfig.Builder inputFileBuilder = new ScanConfig.Builder();
         Path inputPath = null;
@@ -72,23 +71,12 @@ public class ScanBinaryExecutorTest extends TestCase {
         assertEquals(73, parsedOutput.get(1).getColEnd());
     }
 
-    public void testSarifParserNotApplicResults() throws IOException {
-        List<JFrogSecurityWarning> parsedOutput = scanner.parseOutputSarif(NOT_APPLIC_OUTPUT);
-        assertEquals(4, parsedOutput.size());
-        // 2 known applicable results (code evidence returned)
-        assertEquals("applic_CVE-2022-25878", parsedOutput.get(0).getRuleID());
-        assertTrue(parsedOutput.get(0).isApplicable());
-        assertEquals("CVE-2022-25978", parsedOutput.get(1).getRuleID());
-        assertTrue(parsedOutput.get(1).isApplicable());
-        // 2 known no-applicable results (have a scanner but no code evidence returned)
-        assertEquals("applic_CVE-2021-25878", parsedOutput.get(2).getRuleID());
-        assertFalse(parsedOutput.get(2).isApplicable());
-        assertEquals("applic_CVE-2022-29019", parsedOutput.get(3).getRuleID());
-        assertFalse(parsedOutput.get(3).isApplicable());
+    public void testSarifParserWithMissingRole() throws IndexOutOfBoundsException {
+      assertThrows(IndexOutOfBoundsException.class,() -> scanner.parseOutputSarif(FAULTY_OUTPUT));
     }
 
-    public void testSarifParserApplicResultsWithKindPass() throws IOException {
-        List<JFrogSecurityWarning> parsedOutput = scanner.parseOutputSarif(APPLIC_KIND_PASS_OUTPUT);
+    public void testSarifParserApplicResultsWithKindPassAndFail() throws IOException {
+        List<JFrogSecurityWarning> parsedOutput = scanner.parseOutputSarif(APPLIC_KIND_PASS_AND_FAIL_OUTPUT);
         assertEquals(6, parsedOutput.size());
         //Not Applicable with kind pass
         assertEquals("applic_CVE-2022-25878", parsedOutput.get(0).getRuleID());
