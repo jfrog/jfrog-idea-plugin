@@ -1,6 +1,8 @@
 package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import org.apache.batik.svggen.font.table.RangeRecord;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -56,6 +58,7 @@ public class Rule {
         return Objects.hash(id);
     }
 
+
     @Override
     public boolean equals(Object other) {
         if (other == this) {
@@ -68,3 +71,5 @@ public class Rule {
         return Objects.equals(this.id, rhs.id);
     }
 }
+
+
