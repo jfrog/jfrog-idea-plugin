@@ -1,9 +1,6 @@
 package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import org.apache.batik.svggen.font.table.RangeRecord;
-
 import java.util.Objects;
 import java.util.Optional;
 
