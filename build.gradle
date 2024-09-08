@@ -37,6 +37,23 @@ patchPluginXml {
     untilBuild = ""
 }
 
+listProductsReleases {
+    doLast {
+        // At the end of the build, write the first and last versions of the products to the output file.
+        // This will be used by the runPluginVerifier task to validate the compatibility of the plugin against the
+        // first and last versions of IntelliJ IDEA.
+        def outputFileObj = outputFile.get().asFile
+        if (outputFileObj.exists()) {
+            def lines = outputFileObj.readLines()
+            if (!lines.isEmpty()) {
+                def firstVersion = lines.first()
+                def lastVersion = lines.last()
+                outputFileObj.write("$firstVersion\n$lastVersion")
+            }
+        }
+    }
+}
+
 repositories {
     mavenLocal()
     mavenCentral()
