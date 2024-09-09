@@ -52,20 +52,28 @@ public class JFrogSecurityWarning {
         this.codeFlows = codeFlows;
     }
 
-    public JFrogSecurityWarning(SarifResult result, SourceCodeScanType reporter) {
+    public JFrogSecurityWarning(SarifResult result, SourceCodeScanType reporter, Rule rule) {
         this(getFirstRegion(result).getStartLine() - 1,
                 getFirstRegion(result).getStartColumn() - 1,
                 getFirstRegion(result).getEndLine() - 1,
                 getFirstRegion(result).getEndColumn() - 1,
                 result.getMessage().getText(),
-                !result.getLocations().isEmpty() ? uriToPath(result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri()) : "",
+                getFilePath(result),
                 result.getRuleId(),
                 getFirstRegion(result).getSnippet().getText(),
                 reporter,
-                !result.getKind().equals("pass"),
+                isWarningApplicable(result,rule),
                 Severity.fromSarif(result.getSeverity()),
                 convertCodeFlowsToFindingInfo(result.getCodeFlows())
         );
+    }
+
+    private static boolean isWarningApplicable(SarifResult result,Rule rule){
+       return !result.getKind().equals("pass") && (rule.getRuleProperties().map(properties -> properties.getApplicability().equals("applicable")).orElse(true));
+    }
+
+    private static String getFilePath(SarifResult result){
+       return !result.getLocations().isEmpty() ? uriToPath(result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri()) : "";
     }
 
     private static FindingInfo[][] convertCodeFlowsToFindingInfo(List<CodeFlow> codeFlows) {
@@ -114,3 +122,4 @@ public class JFrogSecurityWarning {
         return Paths.get(URI.create(path)).toString();
     }
 }
+

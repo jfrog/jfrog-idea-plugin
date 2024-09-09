@@ -58,7 +58,7 @@ public abstract class ScanBinaryExecutor {
     private static final int USER_NOT_ENTITLED = 31;
     private static final int NOT_SUPPORTED = 13;
     private static final String SCANNER_BINARY_NAME = "analyzerManager";
-    private static final String SCANNER_BINARY_VERSION = "1.6.3";
+    private static final String SCANNER_BINARY_VERSION = "1.8.14";
     private static final String BINARY_DOWNLOAD_URL = "xsc-gen-exe-analyzer-manager-local/v1/" + SCANNER_BINARY_VERSION;
     private static final String DOWNLOAD_SCANNER_NAME = "analyzerManager.zip";
     private static final String MINIMAL_XRAY_VERSION_SUPPORTED_FOR_ENTITLEMENT = "3.66.0";
@@ -257,10 +257,11 @@ public abstract class ScanBinaryExecutor {
         return type != null && supportedPackageTypes.contains(type);
     }
 
-    protected List<JFrogSecurityWarning> parseOutputSarif(Path outputFile) throws IOException {
+    protected List<JFrogSecurityWarning> parseOutputSarif(Path outputFile) throws IOException,IndexOutOfBoundsException {
         Output output = getOutputObj(outputFile);
         List<JFrogSecurityWarning> warnings = new ArrayList<>();
-        output.getRuns().forEach(run -> run.getResults().stream().filter(SarifResult::isNotSuppressed).forEach(result -> warnings.add(new JFrogSecurityWarning(result, scanType))));
+
+        output.getRuns().forEach(run -> run.getResults().stream().filter(SarifResult::isNotSuppressed).forEach(result -> warnings.add(new JFrogSecurityWarning(result, scanType, run.getRuleFromRunById(result.getRuleId())))));
 
         Optional<Run> run = output.getRuns().stream().findFirst();
         if (run.isPresent()) {

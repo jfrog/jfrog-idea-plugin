@@ -39,6 +39,10 @@ public class Run {
         return results;
     }
 
+    public Rule getRuleFromRunById(String ruleId) {
+            return this.getTool().getDriver().getRuleById(ruleId);
+    }
+
     public void setResults(List<SarifResult> results) {
         this.results = results;
     }

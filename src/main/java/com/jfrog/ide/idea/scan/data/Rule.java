@@ -1,8 +1,8 @@
 package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Objects;
+import java.util.Optional;
 
 public class Rule {
 
@@ -14,6 +14,9 @@ public class Rule {
 
     @JsonProperty("fullDescription")
     private Message fullDescription;
+
+    @JsonProperty("properties")
+    private RuleProperties properties;
 
     public String getId() {
         return id;
@@ -43,10 +46,15 @@ public class Rule {
         this.fullDescription = fullDescription;
     }
 
+    public Optional<RuleProperties> getRuleProperties() {
+        return Optional.ofNullable(properties);
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(id);
     }
+
 
     @Override
     public boolean equals(Object other) {
@@ -60,3 +68,5 @@ public class Rule {
         return Objects.equals(this.id, rhs.id);
     }
 }
+
+

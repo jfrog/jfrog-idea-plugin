@@ -1,0 +1,178 @@
+{
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "JFrog Applicability Scanner",
+          "rules": [
+            {
+              "id": "applic_CVE-2022-25878",
+              "properties": {
+                "conclusion": "positive",
+                "applicability": "not_applicable"
+              },
+              "fullDescription": {
+                "text": "The scanner checks whether the vulnerable function `pem.Decode` is called.",
+                "markdown": "The scanner checks whether the vulnerable function `pem.Decode` is called."
+              },
+              "shortDescription": {
+                "text": "Scanner for applic_CVE-2022-25878"
+              }
+            },
+            {
+              "id": "applic_CVE-2022-25978",
+              "properties": {
+                "conclusion": "negative",
+                "applicability": "applicable"
+              },
+              "fullDescription": {
+                "text": "The scanner checks whether the vulnerable function `org.apache.xmlbeans.XmlObject.Factory.parse` is called or an interface that extends `org.apache.xmlbeans.XmlObject` is used.",
+                "markdown": "The scanner checks whether the vulnerable function `org.apache.xmlbeans.XmlObject.Factory.parse` is called or an interface that extends `org.apache.xmlbeans.XmlObject` is used."
+              },
+              "shortDescription": {
+                "text": "Scanner for applic_CVE-2022-25978"
+              }
+            },
+            {
+              "id": "applic_CVE-2021-25878",
+              "fullDescription": {
+                "text": "The scanner checks whether the vulnerable function `pem.Decode` is called.",
+                "markdown": "The scanner checks whether the vulnerable function `pem.Decode` is called."
+              },
+              "shortDescription": {
+                "text": "Scanner for applic_CVE-2021-25878"
+              }
+            },
+            {
+              "id": "applic_CVE-2022-29019",
+              "fullDescription": {
+                "text": "The scanner checks whether the vulnerable function `org.apache.xmlbeans.XmlObject.Factory.parse` is called or an interface that extends `org.apache.xmlbeans.XmlObject` is used.",
+                "markdown": "The scanner checks whether the vulnerable function `org.apache.xmlbeans.XmlObject.Factory.parse` is called or an interface that extends `org.apache.xmlbeans.XmlObject` is used."
+              },
+              "shortDescription": {
+                "text": "Scanner for applic_CVE-2022-29019"
+              }
+            },
+            {
+              "id": "applic_CVE-2022-29004",
+              "fullDescription": {
+                "text": "The scanner checks whether the vulnerable function `org.apache.xmlbeans.XmlObject.Factory.parse` is called or an interface that extends `org.apache.xmlbeans.XmlObject` is used.",
+                "markdown": "The scanner checks whether the vulnerable function `org.apache.xmlbeans.XmlObject.Factory.parse` is called or an interface that extends `org.apache.xmlbeans.XmlObject` is used."
+              },
+              "shortDescription": {
+                "text": "Scanner for applic_CVE-2022-29004"
+              }, "properties": {
+              "conclusion": "positive",
+              "applicability": "not_covered"
+            }
+            },
+            {
+              "id": "applic_CVE-2022-29014",
+              "fullDescription": {
+                "text": "The scanner checks whether the vulnerable function `org.apache.xmlbeans.XmlObject.Factory.parse` is called or an interface that extends `org.apache.xmlbeans.XmlObject` is used.",
+                "markdown": "The scanner checks whether the vulnerable function `org.apache.xmlbeans.XmlObject.Factory.parse` is called or an interface that extends `org.apache.xmlbeans.XmlObject` is used."
+              },
+              "shortDescription": {
+                "text": "Scanner for applic_CVE-2022-29014"
+              }, "properties": {
+              "conclusion": "positive",
+              "applicability": "undetermined"
+            }
+            }
+          ],
+          "version": "APPLIC_SCANNERv0.2.0"
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "arguments": [
+            "scan"
+          ],
+          "workingDirectory": {
+            "uri": ""
+          }
+        }
+      ],
+      "results": [
+        {
+          "message": {
+            "text": "The vulnerable function protobufjs.load is called"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///examples/applic-demo/index.js"
+                },
+                "region": {
+                  "endColumn": 17,
+                  "endLine": 20,
+                  "snippet": {
+                    "text": "protobuf.parse(p)"
+                  },
+                  "startColumn": 0,
+                  "startLine": 20
+                }
+              }
+            }
+          ],
+          "ruleId": "applic_CVE-2022-25878"
+        },
+        {
+          "message": {
+            "text": "The vulnerable function protobufjs.parse is called."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///examples/applic-demo/index.js"
+                },
+                "region": {
+                  "endColumn": 73,
+                  "endLine": 22,
+                  "snippet": {
+                    "text": "protobuf.load(\"/path/to/untrusted.proto\", function(err, root) { return })"
+                  },
+                  "startColumn": 0,
+                  "startLine": 18
+                }
+              }
+            }
+          ],
+          "ruleId": "applic_CVE-2022-25978"
+        },
+        {
+          "message": {
+            "text": "The scanner checks whether the vulnerable function `ansi-regex` is called."
+          },
+          "kind": "pass",
+          "ruleId": "applic_CVE-2021-25878"
+        },
+        {
+          "message": {
+            "text": "The scanner checks whether the vulnerable function `ansi-regex` is called."
+          },
+          "kind": "fail",
+          "ruleId": "applic_CVE-2022-29019"
+        },
+        {
+        "message": {
+          "text": "The scanner checks whether the vulnerable function `call-all-ansi` is called."
+        },
+        "kind": "pass",
+        "ruleId": "applic_CVE-2022-29004"
+        },
+        {"message": {
+          "text": "The scanner checks whether the vulnerable function `not-call-all-ansi` is called."
+        },
+        "kind": "pass",
+        "ruleId": "applic_CVE-2022-29014"
+        }
+      ]
+    }
+  ],
+  "version": "2.1.0",
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/cos02/schemas/sarif-schema-2.1.0.json"
+}
