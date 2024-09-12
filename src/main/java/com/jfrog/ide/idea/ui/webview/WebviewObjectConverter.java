@@ -52,10 +52,10 @@ public class WebviewObjectConverter {
 
     public static IssuePage convertFileIssueToIssuePage(FileIssueNode fileIssueNodeNode) {
         return new IssuePage()
+                .header(fileIssueNodeNode.getReason())
                 .type(ConvertPageType(fileIssueNodeNode.getReporterType()))
                 .severity(fileIssueNodeNode.getSeverity().name())
                 .description(fileIssueNodeNode.getReason())
-                .header(fileIssueNodeNode.getTitle())
                 .location(convertFileLocation(fileIssueNodeNode));
     }
 
