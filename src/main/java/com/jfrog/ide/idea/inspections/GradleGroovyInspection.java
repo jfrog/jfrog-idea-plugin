@@ -118,7 +118,6 @@ public class GradleGroovyInspection extends GradleInspection {
 
     @Override
     String createComponentName(PsiElement element) {
-        //element.getText()
         if (isNamedArgumentComponent(element)) {
             // implementation group: 'j', name: 'k', version: 'l'
             return String.join(":",

@@ -21,7 +21,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -119,7 +118,7 @@ public class LocalComponentsTree extends ComponentsTree {
 
         if (selected instanceof DependencyNode) {
 
-            this.createNodePopupMenu("asd" ,(DependencyNode) selected);
+            this.createNodePopupMenu((DependencyNode) selected);
         } else if (selected instanceof VulnerabilityNode) {
             createIgnoreRuleOption((VulnerabilityNode) selected, e);
         } else if (selected instanceof ApplicableIssueNode) {
@@ -139,19 +138,19 @@ public class LocalComponentsTree extends ComponentsTree {
         toolTip.setEnabled(true);
     }
 
-    private void createNodePopupMenu(String path,DependencyNode selectedNode) {
+    private void createNodePopupMenu(DependencyNode selectedNode) {
         popupMenu.removeAll();
         NavigationService navigationService = NavigationService.getInstance(project);
         Set<NavigationTarget> navigationCandidates = navigationService.getNavigation(selectedNode);
-        addNodeNavigation(path,navigationCandidates);
+        addNodeNavigation(navigationCandidates);
     }
 
-    private void addNodeNavigation( String parent,Set<NavigationTarget> navigationCandidates) {
+    private void addNodeNavigation(Set<NavigationTarget> navigationCandidates) {
         if (navigationCandidates == null) {
             return;
         }
         if (navigationCandidates.size() > 1) {
-            addMultiNavigation(parent,navigationCandidates);
+            addMultiNavigation(navigationCandidates);
         } else {
             addSingleNavigation(navigationCandidates.iterator().next());
         }
@@ -161,14 +160,10 @@ public class LocalComponentsTree extends ComponentsTree {
         popupMenu.add(createNavigationMenuItem(navigationTarget, SHOW_IN_PROJECT_DESCRIPTOR + " (" + navigationTarget.getComponentName() + ")"));
     }
 
-    private void addMultiNavigation(String parentFile,Set<NavigationTarget> navigationCandidates) {
+    private void addMultiNavigation(Set<NavigationTarget> navigationCandidates) {
         JMenu multiMenu = new JBMenu();
         multiMenu.setText(SHOW_IN_PROJECT_DESCRIPTOR);
         for (NavigationTarget navigationTarget : navigationCandidates) {
-//            if(parentFile.equals(navigationTarget.getElement().getContainingFile().getName())){
-//                continue;
-//            }
-
             multiMenu.add(createNavigationMenuItem(navigationTarget, navigationTarget.getComponentName()));
         }
         popupMenu.add(multiMenu);

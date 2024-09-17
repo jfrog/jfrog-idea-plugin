@@ -12,9 +12,6 @@ import com.intellij.psi.PsiManager;
 import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.deptree.DepTree;
 import com.jfrog.ide.common.gradle.GradleTreeBuilder;
-import com.jfrog.ide.common.nodes.DependencyNode;
-import com.jfrog.ide.common.nodes.DescriptorFileTreeNode;
-import com.jfrog.ide.common.nodes.FileTreeNode;
 import com.jfrog.ide.common.scan.ComponentPrefix;
 import com.jfrog.ide.common.scan.ScanLogic;
 import com.jfrog.ide.idea.inspections.AbstractInspection;
@@ -38,7 +35,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
 import static com.jfrog.ide.common.log.Utils.logError;

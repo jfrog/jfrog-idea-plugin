@@ -17,12 +17,8 @@ import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScannerBase;
 import com.jfrog.ide.idea.utils.Descriptor;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.dom.model.MavenDomArtifactCoordinates;
-import org.jetbrains.idea.maven.project.MavenProject;
-
 import java.util.Collection;
 /**
  * @author yahavi
