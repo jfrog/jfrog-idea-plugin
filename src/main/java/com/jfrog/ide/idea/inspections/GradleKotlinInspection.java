@@ -77,7 +77,8 @@ public class GradleKotlinInspection extends GradleInspection {
         List<KtValueArgument> argumentList = ((KtValueArgumentList) element).getArguments();
         if (argumentList.size() == 1) {
             // "commons-collections:commons-collections:3.2.2"
-            return extractArgument(argumentList.get(0));
+            String artifactId = extractArgument(argumentList.get(0));
+            return StringUtils.substringBeforeLast(artifactId, ":");
         }
         if (argumentList.size() >= 3) {
             // "commons-collections", "commons-collections"

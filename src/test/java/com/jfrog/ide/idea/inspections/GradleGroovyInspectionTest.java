@@ -17,13 +17,13 @@ public class GradleGroovyInspectionTest extends InspectionsTestBase {
     // files as groovy-script.
     private static final String PACKAGE_DESCRIPTOR = "build.groovy";
     private final InspectionTestDependency[] DEPENDENCIES = {
-            new InspectionTestDependency(96, "a", "b:c"),
-            new InspectionTestDependency(139, "d", "e:f"),
-            new InspectionTestDependency(180, "g", "h:i"),
-            new InspectionTestDependency(200, "j", "k:l"),
-            new InspectionTestDependency(225, "m", "n:o"),
-            new InspectionTestDependency(320, "net.lingala.zip4j", "zip4j:2.3.0"),
-            new InspectionTestDependency(390, "org.codehaus.groovy", "groovy-all:3.0.5"),
+            new InspectionTestDependency(96, "a", "b"),
+            new InspectionTestDependency(139, "d", "e"),
+            new InspectionTestDependency(180, "g", "h"),
+            new InspectionTestDependency(200, "j", "k"),
+            new InspectionTestDependency(225, "m", "n"),
+            new InspectionTestDependency(320, "net.lingala.zip4j", "zip4j"),
+            new InspectionTestDependency(390, "org.codehaus.groovy", "groovy-all"),
     };
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")
