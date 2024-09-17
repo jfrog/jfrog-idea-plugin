@@ -43,7 +43,12 @@ public class GradleGroovyInspection extends GradleInspection {
      * @return the value of the literal
      */
     public static String getLiteralValue(GrLiteral literal) {
-        return Objects.toString((literal).getValue(), "");
+        String artifact = Objects.toString((literal).getValue(), "");
+        int versionIndex = artifact.lastIndexOf(':');
+        if (versionIndex == -1) {
+            return artifact;
+        }
+        return artifact.substring(0, versionIndex);
     }
 
     public static boolean isNamedArgumentComponent(PsiElement element) {
@@ -113,13 +118,12 @@ public class GradleGroovyInspection extends GradleInspection {
 
     @Override
     String createComponentName(PsiElement element) {
+        //element.getText()
         if (isNamedArgumentComponent(element)) {
             // implementation group: 'j', name: 'k', version: 'l'
             return String.join(":",
                     extractExpression(element, GRADLE_GROUP_KEY),
-                    extractExpression(element, GRADLE_NAME_KEY),
-                    extractExpression(element, GRADLE_VERSION_KEY)
-            );
+                    extractExpression(element, GRADLE_NAME_KEY));
         }
         if (element instanceof GrLiteral) {
             //  implementation 'g:h:i'

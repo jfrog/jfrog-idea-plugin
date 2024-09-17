@@ -21,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -108,23 +109,27 @@ public class LocalComponentsTree extends ComponentsTree {
             return;
         }
         // Event is right-click.
+
         TreePath selectedPath = tree.getPathForRow(tree.getClosestRowForLocation(e.getX(), e.getY()));
         if (selectedPath == null) {
             return;
         }
+
         Object selected = selectedPath.getLastPathComponent();
+
         if (selected instanceof DependencyNode) {
-            createNodePopupMenu((DependencyNode) selected);
+
+            this.createNodePopupMenu("asd" ,(DependencyNode) selected);
         } else if (selected instanceof VulnerabilityNode) {
             createIgnoreRuleOption((VulnerabilityNode) selected, e);
         } else if (selected instanceof ApplicableIssueNode) {
             createIgnoreRuleOption(((ApplicableIssueNode) selected).getIssue(), e);
         } else {
-            // No context menu was created.
             return;
         }
         popupMenu.show(tree, e.getX(), e.getY());
     }
+
 
     private void createIgnoreRuleOption(VulnerabilityNode selectedIssue, MouseEvent mouseEvent) {
         popupMenu.removeAll();
@@ -134,20 +139,19 @@ public class LocalComponentsTree extends ComponentsTree {
         toolTip.setEnabled(true);
     }
 
-    private void createNodePopupMenu(DependencyNode selectedNode) {
+    private void createNodePopupMenu(String path,DependencyNode selectedNode) {
         popupMenu.removeAll();
         NavigationService navigationService = NavigationService.getInstance(project);
         Set<NavigationTarget> navigationCandidates = navigationService.getNavigation(selectedNode);
-
-        addNodeNavigation(navigationCandidates);
+        addNodeNavigation(path,navigationCandidates);
     }
 
-    private void addNodeNavigation(Set<NavigationTarget> navigationCandidates) {
+    private void addNodeNavigation( String parent,Set<NavigationTarget> navigationCandidates) {
         if (navigationCandidates == null) {
             return;
         }
         if (navigationCandidates.size() > 1) {
-            addMultiNavigation(navigationCandidates);
+            addMultiNavigation(parent,navigationCandidates);
         } else {
             addSingleNavigation(navigationCandidates.iterator().next());
         }
@@ -157,10 +161,14 @@ public class LocalComponentsTree extends ComponentsTree {
         popupMenu.add(createNavigationMenuItem(navigationTarget, SHOW_IN_PROJECT_DESCRIPTOR + " (" + navigationTarget.getComponentName() + ")"));
     }
 
-    private void addMultiNavigation(Set<NavigationTarget> navigationCandidates) {
+    private void addMultiNavigation(String parentFile,Set<NavigationTarget> navigationCandidates) {
         JMenu multiMenu = new JBMenu();
         multiMenu.setText(SHOW_IN_PROJECT_DESCRIPTOR);
         for (NavigationTarget navigationTarget : navigationCandidates) {
+//            if(parentFile.equals(navigationTarget.getElement().getContainingFile().getName())){
+//                continue;
+//            }
+
             multiMenu.add(createNavigationMenuItem(navigationTarget, navigationTarget.getComponentName()));
         }
         popupMenu.add(multiMenu);
@@ -260,3 +268,5 @@ public class LocalComponentsTree extends ComponentsTree {
         SwingUtilities.invokeLater(() -> getEmptyText().setText(ERROR_WHILE_SCANNING));
     }
 }
+
+

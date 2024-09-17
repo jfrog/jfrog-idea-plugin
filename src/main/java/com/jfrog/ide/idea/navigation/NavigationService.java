@@ -49,8 +49,10 @@ public class NavigationService {
         }
         NavigationTarget navigationTarget = new NavigationTarget(navigationTargetElement, document.getLineNumber(navigationTargetElement.getTextOffset()), componentName);
         Set<NavigationTarget> navigationTargets = navigationMap.get(treeNode);
+
         if (navigationTargets == null) {
             navigationTargets = new HashSet<>(Collections.singletonList(navigationTarget));
+
             navigationMap.put(treeNode, navigationTargets);
             return;
         }

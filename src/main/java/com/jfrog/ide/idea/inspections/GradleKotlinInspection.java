@@ -80,11 +80,11 @@ public class GradleKotlinInspection extends GradleInspection {
             return extractArgument(argumentList.get(0));
         }
         if (argumentList.size() >= 3) {
-            // "commons-collections", "commons-collections", "3.2.2"
+            // "commons-collections", "commons-collections"
             return String.join(":",
                     extractArgument(argumentList.get(0)),
-                    extractArgument(argumentList.get(1)),
-                    extractArgument(argumentList.get(2)));
+                    extractArgument(argumentList.get(1))
+                    );
         }
         return "";
     }
