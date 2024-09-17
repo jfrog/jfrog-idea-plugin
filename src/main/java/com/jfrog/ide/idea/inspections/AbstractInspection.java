@@ -235,7 +235,8 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     boolean isNodeMatch(DependencyNode node, String componentName) {
         String artifactID = node.getComponentIdWithoutPrefix();
         ImpactTree impactTree = node.getImpactTree();
-        return StringUtils.equals(extractArtifactIdWithoutVersion(artifactID), componentName) || impactTree.contains(componentName+":");
+        String versionPrefix = ":";
+        return StringUtils.equals(extractArtifactIdWithoutVersion(artifactID), componentName) || impactTree.contains(componentName+versionPrefix);
     }
 
     abstract UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issues, String descriptorPath);
