@@ -29,6 +29,7 @@ import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author yahavi
@@ -113,12 +114,12 @@ public class LocalComponentsTree extends ComponentsTree {
         if (selectedPath == null) {
             return;
         }
-
         Object selected = selectedPath.getLastPathComponent();
 
         if (selected instanceof DependencyNode) {
-
-            this.createNodePopupMenu((DependencyNode) selected);
+            DescriptorFileTreeNode descriptorFileTreeNode = (DescriptorFileTreeNode) selectedPath.getParentPath().getLastPathComponent();
+            String descriptorPath =  descriptorFileTreeNode.getSubtitle();
+            this.createNodePopupMenu((DependencyNode) selected, descriptorPath);
         } else if (selected instanceof VulnerabilityNode) {
             createIgnoreRuleOption((VulnerabilityNode) selected, e);
         } else if (selected instanceof ApplicableIssueNode) {
@@ -138,11 +139,20 @@ public class LocalComponentsTree extends ComponentsTree {
         toolTip.setEnabled(true);
     }
 
-    private void createNodePopupMenu(DependencyNode selectedNode) {
+    private void createNodePopupMenu(DependencyNode selectedNode, String descriptorPath) {
         popupMenu.removeAll();
         NavigationService navigationService = NavigationService.getInstance(project);
         Set<NavigationTarget> navigationCandidates = navigationService.getNavigation(selectedNode);
-        addNodeNavigation(navigationCandidates);
+       //filtering candidates in case of multi module project
+        Set<NavigationTarget> filteredCandidates = navigationCandidates.stream()
+                .filter(navigationTarget ->
+                        descriptorPath.equals(navigationTarget.getElement()
+                                .getContainingFile()
+                                .getVirtualFile()
+                                .getPath()))
+                .collect(Collectors.toSet());
+
+        addNodeNavigation(filteredCandidates);
     }
 
     private void addNodeNavigation(Set<NavigationTarget> navigationCandidates) {
