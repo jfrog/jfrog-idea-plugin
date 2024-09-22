@@ -116,10 +116,11 @@ public class LocalComponentsTree extends ComponentsTree {
         }
         Object selected = selectedPath.getLastPathComponent();
 
+        // Create the popup menu if clicked on a package. if it's a vulnerability, create ignore rule option.
         if (selected instanceof DependencyNode) {
             DescriptorFileTreeNode descriptorFileTreeNode = (DescriptorFileTreeNode) selectedPath.getParentPath().getLastPathComponent();
             String descriptorPath =  descriptorFileTreeNode.getSubtitle();
-            this.createNodePopupMenu((DependencyNode) selected, descriptorPath);
+            createNodePopupMenu((DependencyNode) selected, descriptorPath);
         } else if (selected instanceof VulnerabilityNode) {
             createIgnoreRuleOption((VulnerabilityNode) selected, e);
         } else if (selected instanceof ApplicableIssueNode) {
@@ -273,5 +274,3 @@ public class LocalComponentsTree extends ComponentsTree {
         SwingUtilities.invokeLater(() -> getEmptyText().setText(ERROR_WHILE_SCANNING));
     }
 }
-
-
