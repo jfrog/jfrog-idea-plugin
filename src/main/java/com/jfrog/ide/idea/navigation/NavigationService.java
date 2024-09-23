@@ -51,6 +51,7 @@ public class NavigationService {
         Set<NavigationTarget> navigationTargets = navigationMap.get(treeNode);
         if (navigationTargets == null) {
             navigationTargets = new HashSet<>(Collections.singletonList(navigationTarget));
+
             navigationMap.put(treeNode, navigationTargets);
             return;
         }

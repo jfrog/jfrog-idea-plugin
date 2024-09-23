@@ -180,6 +180,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
             return false; // File is not a package descriptor file
         }
 
+
         ScannerBase scanner = getScanner(project, editorFile.getParent().getPath());
         if (scanner == null) {
             return false; // Scan manager for this project not yet created
@@ -234,7 +235,8 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
     boolean isNodeMatch(DependencyNode node, String componentName) {
         String artifactID = node.getComponentIdWithoutPrefix();
         ImpactTree impactTree = node.getImpactTree();
-        return StringUtils.equals(artifactID, componentName) || impactTree.contains(componentName);
+        String versionPrefix = ":";
+        return StringUtils.equals(extractArtifactIdWithoutVersion(artifactID), componentName) || impactTree.contains(componentName+versionPrefix);
     }
 
     abstract UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issues, String descriptorPath);
@@ -296,4 +298,15 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         fixVersion = StringUtils.strip(fixVersion, "]");
         return fixVersion;
     }
-}
+
+
+    private String extractArtifactIdWithoutVersion(String artifact) {
+        int versionIndex = artifact.lastIndexOf(':');
+
+        if (versionIndex != -1) {
+           return artifact.substring(0, versionIndex);
+        } else {
+            return artifact;
+        }
+    }
+    }

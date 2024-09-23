@@ -19,9 +19,7 @@ import com.jfrog.ide.idea.utils.Descriptor;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.dom.model.MavenDomArtifactCoordinates;
-
 import java.util.Collection;
-
 /**
  * @author yahavi
  */
@@ -92,8 +90,7 @@ public class MavenInspection extends AbstractInspection {
         }
         DomElement domElement = DomManager.getDomManager(element.getProject()).getDomElement((XmlTag) element);
         if (domElement instanceof MavenDomArtifactCoordinates) {
-            String version = ((MavenDomArtifactCoordinates) domElement).getVersion().getStringValue();
-            return String.join(":", groupId.getValue().getText(), artifactId.getValue().getText(), version);
+            return String.join(":", groupId.getValue().getText(), artifactId.getValue().getText());
         }
         return null;
     }
@@ -102,4 +99,6 @@ public class MavenInspection extends AbstractInspection {
     UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issue, String descriptorPath) {
         return new MavenUpgradeVersion(componentName, fixVersion, issue);
     }
+
 }
+

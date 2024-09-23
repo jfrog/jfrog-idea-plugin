@@ -29,6 +29,7 @@ import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author yahavi
@@ -108,23 +109,28 @@ public class LocalComponentsTree extends ComponentsTree {
             return;
         }
         // Event is right-click.
+
         TreePath selectedPath = tree.getPathForRow(tree.getClosestRowForLocation(e.getX(), e.getY()));
         if (selectedPath == null) {
             return;
         }
         Object selected = selectedPath.getLastPathComponent();
+
+        // Create the popup menu if clicked on a package. if it's a vulnerability, create ignore rule option.
         if (selected instanceof DependencyNode) {
-            createNodePopupMenu((DependencyNode) selected);
+            DescriptorFileTreeNode descriptorFileTreeNode = (DescriptorFileTreeNode) selectedPath.getParentPath().getLastPathComponent();
+            String descriptorPath =  descriptorFileTreeNode.getSubtitle();
+            createNodePopupMenu((DependencyNode) selected, descriptorPath);
         } else if (selected instanceof VulnerabilityNode) {
             createIgnoreRuleOption((VulnerabilityNode) selected, e);
         } else if (selected instanceof ApplicableIssueNode) {
             createIgnoreRuleOption(((ApplicableIssueNode) selected).getIssue(), e);
         } else {
-            // No context menu was created.
             return;
         }
         popupMenu.show(tree, e.getX(), e.getY());
     }
+
 
     private void createIgnoreRuleOption(VulnerabilityNode selectedIssue, MouseEvent mouseEvent) {
         popupMenu.removeAll();
@@ -134,12 +140,20 @@ public class LocalComponentsTree extends ComponentsTree {
         toolTip.setEnabled(true);
     }
 
-    private void createNodePopupMenu(DependencyNode selectedNode) {
+    private void createNodePopupMenu(DependencyNode selectedNode, String descriptorPath) {
         popupMenu.removeAll();
         NavigationService navigationService = NavigationService.getInstance(project);
         Set<NavigationTarget> navigationCandidates = navigationService.getNavigation(selectedNode);
+       //filtering candidates in case of multi module project
+        Set<NavigationTarget> filteredCandidates = navigationCandidates.stream()
+                .filter(navigationTarget ->
+                        descriptorPath.equals(navigationTarget.getElement()
+                                .getContainingFile()
+                                .getVirtualFile()
+                                .getPath()))
+                .collect(Collectors.toSet());
 
-        addNodeNavigation(navigationCandidates);
+        addNodeNavigation(filteredCandidates);
     }
 
     private void addNodeNavigation(Set<NavigationTarget> navigationCandidates) {

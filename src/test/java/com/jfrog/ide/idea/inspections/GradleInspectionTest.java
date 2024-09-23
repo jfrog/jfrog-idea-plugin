@@ -23,7 +23,7 @@ public class GradleInspectionTest {
         return Arrays.asList(new Object[][]{
                 {"a:b:c", "a:b"},
                 {"a:b:c:d", "a:b"},
-                {"a:b", "a:b"},
+                {"a", "a"},
                 {"xyz", "xyz"}
         });
     }
