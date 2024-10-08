@@ -89,7 +89,7 @@ public class GradleScannerTest extends HeavyPlatformTestCase {
         // Check module dependency
         DepTreeNode moduleNode = getAndAssertChild(results, results.getRootNode(), "org.jfrog.test.gradle.publish:shared:1.0-SNAPSHOT");
         assertEquals(1, moduleNode.getChildren().size());
-        assertEquals(8, moduleNode.getScopes().size());
+        assertEquals(moduleNode.getScopes().toString(), 8, moduleNode.getScopes().size());
 
         // Check dependency
         DepTreeNode dependencyNode = getAndAssertChild(results, moduleNode, "junit:junit:4.7");
