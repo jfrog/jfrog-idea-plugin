@@ -90,16 +90,14 @@ public class SourceCodeScannerManager {
             return Collections.emptyList();
         }
         List<JFrogSecurityWarning> scanResults = new ArrayList<>();
-        Map<String, List<VulnerabilityNode>> issuesMap = mapDirectIssuesByCve(fileTreeNodes);
-
+        Map<String, List<VulnerabilityNode>> issuesMap = mapIssuesByCve(fileTreeNodes);
         try {
             if (applicability.isPackageTypeSupported(packageType)) {
                 indicator.setText("Running applicability scan");
                 indicator.setFraction(0.25);
-                Set<String> directIssuesCVEs = issuesMap.keySet();
-                // If no direct dependencies with issues are found by Xray, the applicability scan is irrelevant.
-                if (!directIssuesCVEs.isEmpty()) {
-                    List<JFrogSecurityWarning> applicabilityResults = applicability.execute(createBasicScannerInput().cves(List.copyOf(directIssuesCVEs)), checkCanceled, indicator);
+                Set<String> issuesCVEs = issuesMap.keySet();
+                if (!issuesCVEs.isEmpty()) {
+                    List<JFrogSecurityWarning> applicabilityResults = applicability.execute(createBasicScannerInput().cves(List.copyOf(issuesCVEs)), checkCanceled, indicator);
                     scanResults.addAll(applicabilityResults);
                 }
             }
@@ -294,14 +292,11 @@ public class SourceCodeScannerManager {
      * @param fileTreeNodes collection of FileTreeNodes.
      * @return a map of CVE IDs to lists of issues with them.
      */
-    private Map<String, List<VulnerabilityNode>> mapDirectIssuesByCve(Collection<FileTreeNode> fileTreeNodes) {
+    private Map<String, List<VulnerabilityNode>> mapIssuesByCve(Collection<FileTreeNode> fileTreeNodes) {
         Map<String, List<VulnerabilityNode>> issues = new HashMap<>();
         for (FileTreeNode fileTreeNode : fileTreeNodes) {
             for (TreeNode treeNode : fileTreeNode.getChildren()) {
                 DependencyNode dep = (DependencyNode) treeNode;
-                if (dep.isIndirect()) {
-                    continue;
-                }
                 Enumeration<TreeNode> treeNodeEnumeration = dep.children();
                 while (treeNodeEnumeration.hasMoreElements()) {
                     TreeNode node = treeNodeEnumeration.nextElement();
