@@ -43,6 +43,7 @@
     <depends config-file="with-maven.xml" optional="true">org.jetbrains.idea.maven</depends>
     <depends config-file="with-go.xml" optional="true">org.jetbrains.plugins.go</depends>
     <depends config-file="with-python.xml" optional="true">com.intellij.modules.python</depends>
+    <depends optional="true" >com.jetbrains.rider</depends>
     <depends config-file="with-python-ce.xml" optional="true">PythonCore</depends>
 
     <extensions defaultExtensionNs="com.intellij">
