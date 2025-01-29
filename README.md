@@ -73,6 +73,8 @@ In addition to IntelliJ IDEA, the plugin also supports the following IDEs:
 - PyCharm
 - Android Studio
 - GoLand
+- Rider
+- CLion
 
 # 📖 Documentation
 
