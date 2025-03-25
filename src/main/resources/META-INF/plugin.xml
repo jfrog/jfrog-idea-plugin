@@ -44,6 +44,8 @@
     <depends config-file="with-go.xml" optional="true">org.jetbrains.plugins.go</depends>
     <depends config-file="with-python.xml" optional="true">com.intellij.modules.python</depends>
     <depends config-file="with-python-ce.xml" optional="true">PythonCore</depends>
+    <depends>com.intellij.modules.json</depends>
+
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable id="JFrogGlobal" displayName="JFrog Global Configuration"
