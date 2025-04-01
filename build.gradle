@@ -4,7 +4,7 @@ import java.net.http.HttpResponse
 import java.nio.file.Paths
 
 plugins {
-    id "org.jetbrains.intellij" version "1.16.0"
+    id "org.jetbrains.intellij" version "1.17.0"
     id "java"
     id "maven-publish"
     id "de.undercouch.download" version "5.3.0"
@@ -39,20 +39,34 @@ patchPluginXml {
 
 listProductsReleases {
     doLast {
-        // At the end of the build, write the first and last versions of the products to the output file.
+        // At the end of the build, write the first and last stable versions of the products to the output file.
         // This will be used by the runPluginVerifier task to validate the compatibility of the plugin against the
-        // first and last versions of IntelliJ IDEA.
+        // first and last stable versions of IntelliJ IDEA (excluding betas, RCs, etc.)
         def outputFileObj = outputFile.get().asFile
         if (outputFileObj.exists()) {
             def lines = outputFileObj.readLines()
             if (!lines.isEmpty()) {
-                def firstVersion = lines.first()
-                def lastVersion = lines.last()
-                outputFileObj.write("$firstVersion\n$lastVersion")
+                // Filter out non-stable versions (EAP, beta, RC, etc.)
+                def stableVersions = lines.findAll { version ->
+                    !version.toLowerCase().contains('eap') &&
+                            !version.toLowerCase().contains('beta') &&
+                            !version.toLowerCase().contains('rc')
+                }
+                if (stableVersions.isEmpty()) {
+                    println "No stable versions found."
+                    return
+                }
+                // Get the first version and the last stable version
+                def firstVersion = stableVersions.first()
+                def lastStableVersion = stableVersions.last()
+
+                // Write the first and last stable versions to the output file
+                outputFileObj.write("$firstVersion\n$lastStableVersion")
             }
         }
     }
 }
+
 
 repositories {
     mavenLocal()
@@ -69,6 +83,7 @@ def buildInfoVersion = '2.41.13'
 def idePluginsCommonVersion = '2.3.6'
 
 dependencies {
+    implementation group: 'org.jetbrains.intellij.plugins', name: 'plugin-verifier', version: '1.383'
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.15.2'
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-extractor', version: buildInfoVersion
     implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: idePluginsCommonVersion

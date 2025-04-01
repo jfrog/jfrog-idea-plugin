@@ -22,4 +22,4 @@ jobs:
 
       # Run compatibility verification
       - name: Compatibility verification
-        run: ./gradlew clean verifyPlugin runPluginVerifier
+        run: ./gradlew clean verifyPlugin runPluginVerifier -DpluginVerifierVersion=1.383
