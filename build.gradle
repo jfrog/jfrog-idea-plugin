@@ -27,7 +27,7 @@ intellij {
 }
 
 runPluginVerifier {
-    verifierVersion = '1.383'
+    verifierVersion = '1.381'
 }
 
 runIde {
