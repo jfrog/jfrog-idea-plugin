@@ -61,22 +61,21 @@ public abstract class SingleDescriptorScanner extends ScannerBase {
     protected List<FileTreeNode> groupDependenciesToDescriptorNodes(Collection<DependencyNode> depScanResults, DepTree depTree, Map<String, Set<String>> parents) {
         DescriptorFileTreeNode fileTreeNode = new DescriptorFileTreeNode(descriptorFilePath);
         for (DependencyNode dependency : depScanResults) {
-            boolean directDep = false;
-            if(dependency.getComponentIdWithoutPrefix().equals(depTree.rootId())) {
-                directDep = true;
-            }
-            else {
-                for (String parentId : parents.get(dependency.getComponentIdWithoutPrefix())) {
-                    DepTreeNode parent = depTree.nodes().get(parentId);
-                    if (descriptorFilePath.equals(parent.getDescriptorFilePath())) {
-                        directDep = true;
-                        break;
-                    }
-                }
-            }
-            dependency.setIndirect(!directDep);
+            dependency.setIndirect(!isDirectDependency(dependency, depTree, parents));
             fileTreeNode.addDependency(dependency);
         }
         return new CopyOnWriteArrayList<>(List.of(fileTreeNode));
+    }
+
+    private boolean isDirectDependency(DependencyNode dependency, DepTree depTree, Map<String, Set<String>> parents) {
+        // Check if the component is the root node
+        if (dependency.getComponentIdWithoutPrefix().equals(depTree.rootId())) {
+            return true;
+        }
+        // Check if any of the parent's descriptor file path matches the current descriptor file path
+        return parents.getOrDefault(dependency.getComponentIdWithoutPrefix(), Collections.emptySet())
+                .stream()
+                .map(depTree.nodes()::get)
+                .anyMatch(parent -> descriptorFilePath.equals(parent.getDescriptorFilePath()));
     }
 }

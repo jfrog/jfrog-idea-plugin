@@ -186,12 +186,7 @@ public class MavenScanner extends ScannerBase {
                 // Each dependency might be a child of more than one POM file, but Artifact is a tree node, so it can have only one parent.
                 // The solution for this is to clone the dependency before adding it as a child of the POM.
                 DependencyNode clonedDep = (DependencyNode) dependencyNode.clone();
-                if (vulnerableDepId.equals(descriptorId)) {
-                    clonedDep.setIndirect(false);
-                }
-                else {
-                    clonedDep.setIndirect(!parents.get(vulnerableDepId).contains(descriptorId));
-                }
+                clonedDep.setIndirect(!vulnerableDepId.equals(descriptorId) && !parents.get(vulnerableDepId).contains(descriptorId));
                 descriptorMap.get(descriptorPath).addDependency(clonedDep);
             }
         }
