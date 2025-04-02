@@ -37,6 +37,7 @@
     </change-notes>
 
     <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.json</depends>
     <depends config-file="with-gradle.xml" optional="true">com.intellij.gradle</depends>
     <depends config-file="with-groovy.xml" optional="true">org.intellij.groovy</depends>
     <depends config-file="with-kotlin.xml" optional="true">org.jetbrains.kotlin</depends>
@@ -44,6 +45,7 @@
     <depends config-file="with-go.xml" optional="true">org.jetbrains.plugins.go</depends>
     <depends config-file="with-python.xml" optional="true">com.intellij.modules.python</depends>
     <depends config-file="with-python-ce.xml" optional="true">PythonCore</depends>
+
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationConfigurable id="JFrogGlobal" displayName="JFrog Global Configuration"
