@@ -23,11 +23,11 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public class ConnectionDetailsFromCliTest {
 
-    private final String[] cliParameters;
+    private final Map<String,String> cliParameters;
     private final Exception expectedException;
     private final boolean shouldSuccess;
 
-    public ConnectionDetailsFromCliTest(String[] cliParameters, Exception expectedException, boolean shouldSuccess) {
+    public ConnectionDetailsFromCliTest(Map<String,String> cliParameters, Exception expectedException, boolean shouldSuccess) {
         this.cliParameters = cliParameters;
         this.expectedException = expectedException;
         this.shouldSuccess = shouldSuccess;
@@ -71,8 +71,8 @@ public class ConnectionDetailsFromCliTest {
 
             // Config JFrog CLI
             if (cliParameters != null) {
-                JfrogCliDriver jfrogCliDriver = new JfrogCliDriver(envVars);
-                jfrogCliDriver.runCommand(null, cliParameters, new ArrayList<>(), null);
+                JfrogCliDriver jfrogCliDriver = new JfrogCliDriver(envVars, null, null);
+                jfrogCliDriver.runCommand(null, cliParameters, new String[0] ,new ArrayList<>(), null, null);
             }
 
             // Check results

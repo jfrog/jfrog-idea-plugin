@@ -68,10 +68,13 @@ repositories {
     maven {
         url "https://releases.jfrog.io/artifactory/oss-snapshots"
     }
+    maven {
+        url "https://cache-redirector.jetbrains.com/intellij-dependencies"
+    }
 }
 
 def buildInfoVersion = '2.41.13'
-def idePluginsCommonVersion = '2.3.6'
+def idePluginsCommonVersion = '2.4.4'
 
 dependencies {
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.15.2'

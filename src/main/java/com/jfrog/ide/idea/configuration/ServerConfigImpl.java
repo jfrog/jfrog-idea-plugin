@@ -30,6 +30,7 @@ import com.intellij.util.xmlb.annotations.Transient;
 import com.jfrog.ide.common.configuration.JfrogCliDriver;
 import com.jfrog.ide.common.configuration.JfrogCliServerConfig;
 import com.jfrog.ide.common.configuration.ServerConfig;
+import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.ui.configuration.ConnectionRetriesSpinner;
 import com.jfrog.ide.idea.ui.configuration.ConnectionTimeoutSpinner;
 import org.apache.commons.collections4.CollectionUtils;
@@ -482,7 +483,7 @@ public class ServerConfigImpl implements ServerConfig {
      * @return true if connection details loaded from JFrog CLI default server.
      */
     public boolean readConnectionDetailsFromJfrogCli() throws IOException {
-        JfrogCliDriver driver = new JfrogCliDriver(EnvironmentUtil.getEnvironmentMap());
+        JfrogCliDriver driver = new JfrogCliDriver(EnvironmentUtil.getEnvironmentMap(),null, Logger.getInstance());
         if (!driver.isJfrogCliInstalled()) {
             return false;
         }
