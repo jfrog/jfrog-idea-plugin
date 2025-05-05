@@ -1,11 +1,11 @@
 package com.jfrog.ide.idea.integration;
 
 import com.jfrog.ide.common.log.ProgressIndicator;
-import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.ApplicabilityScannerExecutor;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
+import com.jfrog.ide.idea.scan.utils.SourceScanType;
 
 import java.io.IOException;
 import java.util.List;
@@ -47,7 +47,7 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
         assertEquals(0, results.get(0).getColStart());
         assertEquals(17, results.get(0).getColEnd());
         assertTrue(results.get(0).getFilePath().endsWith("index.js"));
-        assertEquals(SourceCodeScanType.CONTEXTUAL, results.get(0).getReporter());
+        assertEquals(SourceScanType.CONTEXTUAL, results.get(0).getReporter());
 
     }
 
@@ -75,7 +75,7 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
         assertEquals(6, results.get(0).getColStart());
         assertEquals(24, results.get(0).getColEnd());
         assertTrue(results.get(0).getFilePath().endsWith("main.py"));
-        assertEquals(SourceCodeScanType.CONTEXTUAL, results.get(0).getReporter());
+        assertEquals(SourceScanType.CONTEXTUAL, results.get(0).getReporter());
     }
 
     public void testApplicabilityScannerJavaProject() throws IOException, InterruptedException {
@@ -92,7 +92,7 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
         assertEquals(26, results.get(0).getColStart());
         assertEquals(50, results.get(0).getColEnd());
         assertTrue(results.get(0).getFilePath().endsWith("VulnerableComponentsLesson.java"));
-        assertEquals(SourceCodeScanType.CONTEXTUAL, results.get(0).getReporter());
+        assertEquals(SourceScanType.CONTEXTUAL, results.get(0).getReporter());
     }
 
     @Override

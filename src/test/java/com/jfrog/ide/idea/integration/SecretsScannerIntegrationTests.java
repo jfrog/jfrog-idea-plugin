@@ -1,11 +1,11 @@
 package com.jfrog.ide.idea.integration;
 
 import com.jfrog.ide.common.log.ProgressIndicator;
-import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.SecretsScannerExecutor;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
+import com.jfrog.ide.idea.scan.utils.SourceScanType;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -39,7 +39,7 @@ public class SecretsScannerIntegrationTests extends BaseIntegrationTest {
         assertEquals(6, secretIndication.getColStart());
         assertEquals(118, secretIndication.getColEnd());
         assertTrue(secretIndication.getFilePath().endsWith("applicable_base64.js"));
-        assertEquals(SourceCodeScanType.SECRETS, secretIndication.getReporter());
+        assertEquals(SourceScanType.SECRETS, secretIndication.getReporter());
         assertTrue(StringUtils.isNotBlank(secretIndication.getScannerSearchTarget()));
         assertTrue(StringUtils.isNotBlank(secretIndication.getReason()));
     }

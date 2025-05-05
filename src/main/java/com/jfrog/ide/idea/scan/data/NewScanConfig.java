@@ -1,7 +1,7 @@
 package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
+import com.jfrog.ide.idea.scan.utils.SourceScanType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class NewScanConfig {
     @JsonProperty("type")
-    private SourceCodeScanType scanType;
+    private SourceScanType scanType;
     @JsonProperty("roots")
     private List<String> roots;
     @JsonProperty("language")

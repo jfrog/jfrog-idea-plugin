@@ -4,10 +4,10 @@ import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.nodes.FileIssueNode;
 import com.jfrog.ide.common.nodes.FileTreeNode;
 import com.jfrog.ide.common.nodes.SastIssueNode;
-import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
+import com.jfrog.ide.idea.scan.utils.SourceScanType;
 import com.jfrog.xray.client.services.entitlements.Feature;
 import org.jfrog.build.api.util.Log;
 
@@ -28,7 +28,7 @@ public class SastScannerExecutor extends ScanBinaryExecutor {
     private static final List<PackageManagerType> SUPPORTED_PACKAGE_TYPES = List.of(PackageManagerType.PYPI, PackageManagerType.NPM, PackageManagerType.YARN, PackageManagerType.GRADLE, PackageManagerType.MAVEN);
 
     public SastScannerExecutor(Log log) {
-        super(SourceCodeScanType.SAST, log);
+        super(SourceScanType.SAST, log);
     }
 
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled, ProgressIndicator indicator) throws IOException, InterruptedException {

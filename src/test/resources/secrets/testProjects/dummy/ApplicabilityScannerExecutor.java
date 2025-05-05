@@ -1,10 +1,10 @@
 package com.jfrog.ide.idea.scan;
 
 import com.jfrog.ide.common.configuration.ServerConfig;
-import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
+import com.jfrog.ide.idea.scan.utils.SourceScanType;
 import com.jfrog.xray.client.services.entitlements.Feature;
 import org.jfrog.build.api.util.Log;
 
@@ -24,7 +24,7 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
     }
 
     public ApplicabilityScannerExecutor(Log log, ServerConfig serverConfig, String binaryDownloadUrl, boolean useJFrogReleases) {
-        super(SourceCodeScanType.CONTEXTUAL, binaryDownloadUrl, log, serverConfig, useJFrogReleases);
+        super(SourceScanType.CONTEXTUAL, binaryDownloadUrl, log, serverConfig, useJFrogReleases);
         supportedPackageTypes = SUPPORTED_PACKAGE_TYPES;
     }
 

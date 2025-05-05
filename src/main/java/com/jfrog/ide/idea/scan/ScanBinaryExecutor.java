@@ -5,12 +5,12 @@ import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.nodes.FileTreeNode;
-import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.configuration.ServerConfigImpl;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.data.*;
+import com.jfrog.ide.idea.scan.utils.SourceScanType;
 import com.jfrog.xray.client.Xray;
 import com.jfrog.xray.client.services.entitlements.Feature;
 import lombok.Getter;
@@ -74,13 +74,13 @@ public abstract class ScanBinaryExecutor {
     @Getter
     private static String osDistribution;
     private static LocalDateTime nextUpdateCheck;
-    protected final SourceCodeScanType scanType;
+    protected final SourceScanType scanType;
     protected Collection<PackageManagerType> supportedPackageTypes;
     private final Log log;
     private boolean notSupported;
     private final static Object downloadLock = new Object();
 
-    ScanBinaryExecutor(SourceCodeScanType scanType, Log log) {
+    ScanBinaryExecutor(SourceScanType scanType, Log log) {
         this.scanType = scanType;
         this.log = log;
         String executable = SystemUtils.IS_OS_WINDOWS ? SCANNER_BINARY_NAME + ".exe" : SCANNER_BINARY_NAME;

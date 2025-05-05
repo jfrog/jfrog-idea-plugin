@@ -9,7 +9,6 @@ import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.nodes.DependencyNode;
 import com.jfrog.ide.common.nodes.FileTreeNode;
 import com.jfrog.ide.common.nodes.VulnerabilityNode;
-import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.configuration.GlobalSettings;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
@@ -19,6 +18,7 @@ import com.jfrog.ide.idea.scan.data.ScanConfig;
 import com.jfrog.ide.idea.scan.data.applications.JFrogApplicationsConfig;
 import com.jfrog.ide.idea.scan.data.applications.ModuleConfig;
 import com.jfrog.ide.idea.scan.data.applications.ScannerConfig;
+import com.jfrog.ide.idea.scan.utils.SourceScanType;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -58,7 +58,7 @@ public class SourceCodeScannerManager {
     private final Path jfrogApplictionsConfigPath;
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
     private final ApplicabilityScannerExecutor applicability = new ApplicabilityScannerExecutor(Logger.getInstance());
-    private final Map<SourceCodeScanType, ScanBinaryExecutor> scanners = initScannersCollection();
+    private final Map<SourceScanType, ScanBinaryExecutor> scanners = initScannersCollection();
     protected Project project;
     protected PackageManagerType packageType;
     private static final String SKIP_FOLDERS_SUFFIX = "*/**";
@@ -176,7 +176,7 @@ public class SourceCodeScannerManager {
 
     private void scan(ModuleConfig moduleConfig, ProgressIndicator indicator, Runnable checkCanceled, Logger log) {
         double fraction = 0;
-        for (SourceCodeScanType scannerType : scanners.keySet()) {
+        for (SourceScanType scannerType : scanners.keySet()) {
             checkCanceled.run();
             ScanBinaryExecutor scanner = scanners.get(scannerType);
             ScannerConfig scannerConfig = null;
@@ -320,11 +320,11 @@ public class SourceCodeScannerManager {
         return issues;
     }
 
-    private Map<SourceCodeScanType, ScanBinaryExecutor> initScannersCollection() {
-        Map<SourceCodeScanType, ScanBinaryExecutor> scanners = new HashMap<>();
-        scanners.put(SourceCodeScanType.SECRETS, new SecretsScannerExecutor(Logger.getInstance()));
-        scanners.put(SourceCodeScanType.IAC, new IACScannerExecutor(Logger.getInstance()));
-        scanners.put(SourceCodeScanType.SAST, new SastScannerExecutor(Logger.getInstance()));
+    private Map<SourceScanType, ScanBinaryExecutor> initScannersCollection() {
+        Map<SourceScanType, ScanBinaryExecutor> scanners = new HashMap<>();
+        scanners.put(SourceScanType.SECRETS, new SecretsScannerExecutor(Logger.getInstance()));
+        scanners.put(SourceScanType.IAC, new IACScannerExecutor(Logger.getInstance()));
+        scanners.put(SourceScanType.SAST, new SastScannerExecutor(Logger.getInstance()));
         return scanners;
     }
 

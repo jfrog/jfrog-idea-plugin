@@ -3,10 +3,10 @@ package com.jfrog.ide.idea.scan;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.nodes.FileIssueNode;
 import com.jfrog.ide.common.nodes.FileTreeNode;
-import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
+import com.jfrog.ide.idea.scan.utils.SourceScanType;
 import com.jfrog.xray.client.services.entitlements.Feature;
 import org.jfrog.build.api.util.Log;
 
@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import static com.jfrog.ide.idea.scan.utils.SourceScanType.toSourceCodeScanType;
 
 /**
  * @author Tal Arian
@@ -23,7 +25,7 @@ public class IACScannerExecutor extends ScanBinaryExecutor {
     private static final String ISSUE_TITLE = "Infrastructure as Code Vulnerability";
 
     public IACScannerExecutor(Log log) {
-        super(SourceCodeScanType.IAC, log);
+        super(SourceScanType.IAC, log);
     }
 
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled, ProgressIndicator indicator) throws IOException, InterruptedException {
@@ -43,7 +45,7 @@ public class IACScannerExecutor extends ScanBinaryExecutor {
 
             FileIssueNode issueNode = new FileIssueNode(ISSUE_TITLE,
                     warning.getFilePath(), warning.getLineStart(), warning.getColStart(), warning.getLineEnd(), warning.getColEnd(),
-                    warning.getScannerSearchTarget(), warning.getLineSnippet(), warning.getReporter(), warning.getSeverity(), warning.getRuleID());
+                    warning.getScannerSearchTarget(), warning.getLineSnippet(), toSourceCodeScanType(warning.getReporter()), warning.getSeverity(), warning.getRuleID());
             fileNode.addIssue(issueNode);
         }
         return new ArrayList<>(results.values());

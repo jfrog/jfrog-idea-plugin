@@ -2,8 +2,8 @@ package com.jfrog.ide.idea.inspections;
 
 import com.jfrog.ide.common.nodes.subentities.FindingInfo;
 import com.jfrog.ide.common.nodes.subentities.Severity;
-import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.scan.data.*;
+import com.jfrog.ide.idea.scan.utils.SourceScanType;
 import lombok.Getter;
 
 import java.net.URI;
@@ -21,7 +21,7 @@ public class JFrogSecurityWarning {
     private final String lineSnippet;
     private String scannerSearchTarget;
     private final String ruleID;
-    private final SourceCodeScanType reporter;
+    private final SourceScanType reporter;
     private final Severity severity;
     private final FindingInfo[][] codeFlows;
     private final boolean isApplicable;
@@ -33,7 +33,7 @@ public class JFrogSecurityWarning {
             String filePath,
             String ruleID,
             String lineSnippet,
-            SourceCodeScanType reporter,
+            SourceScanType reporter,
             boolean isApplicable,
             Severity severity,
             FindingInfo[][] codeFlows
@@ -52,7 +52,7 @@ public class JFrogSecurityWarning {
         this.codeFlows = codeFlows;
     }
 
-    public JFrogSecurityWarning(SarifResult result, SourceCodeScanType reporter, Rule rule) {
+    public JFrogSecurityWarning(SarifResult result, SourceScanType reporter, Rule rule) {
         this(getFirstRegion(result).getStartLine() - 1,
                 getFirstRegion(result).getStartColumn() - 1,
                 getFirstRegion(result).getEndLine() - 1,
@@ -122,8 +122,8 @@ public class JFrogSecurityWarning {
         return Paths.get(URI.create(path)).toString();
     }
 
-    private static String determineReason(String resultMessage, String ruleMessage, SourceCodeScanType scannerType) {
-        return scannerType.equals(SourceCodeScanType.SAST) ? ruleMessage : resultMessage;
+    private static String determineReason(String resultMessage, String ruleMessage, SourceScanType scannerType) {
+        return scannerType.equals(SourceScanType.SAST) ? ruleMessage : resultMessage;
     }
 }
 

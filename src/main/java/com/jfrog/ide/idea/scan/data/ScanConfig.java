@@ -1,7 +1,7 @@
 package com.jfrog.ide.idea.scan.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
+import com.jfrog.ide.idea.scan.utils.SourceScanType;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -12,7 +12,7 @@ import java.util.List;
 @ToString
 public class ScanConfig {
     @JsonProperty("type")
-    private SourceCodeScanType scanType;
+    private SourceScanType scanType;
     @JsonProperty("language")
     private String language;
     @JsonProperty("roots")
@@ -44,12 +44,12 @@ public class ScanConfig {
     }
 
     @SuppressWarnings("unused")
-    public SourceCodeScanType getScanType() {
+    public SourceScanType getScanType() {
         return scanType;
     }
 
     @SuppressWarnings("unused")
-    public void setScanType(SourceCodeScanType scanType) {
+    public void setScanType(SourceScanType scanType) {
         this.scanType = scanType;
     }
 
@@ -98,7 +98,7 @@ public class ScanConfig {
     }
 
     public static class Builder {
-        private SourceCodeScanType scanType;
+        private SourceScanType scanType;
         private String language;
         private List<String> roots;
         private String output;
@@ -115,7 +115,7 @@ public class ScanConfig {
         }
 
         @SuppressWarnings("UnusedReturnValue")
-        public Builder scanType(SourceCodeScanType scanType) {
+        public Builder scanType(SourceScanType scanType) {
             this.scanType = scanType;
             return this;
         }

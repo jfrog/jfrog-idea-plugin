@@ -1,11 +1,11 @@
 package com.jfrog.ide.idea.integration;
 
 import com.jfrog.ide.common.log.ProgressIndicator;
-import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.IACScannerExecutor;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
+import com.jfrog.ide.idea.scan.utils.SourceScanType;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -38,7 +38,7 @@ public class IACScannerIntegrationTests extends BaseIntegrationTest {
         assertEquals(0, iacIndication.getColStart());
         assertEquals(1, iacIndication.getColEnd());
         assertTrue(iacIndication.getFilePath().endsWith("req_sw_terraform_aws_alb_https_only.tf"));
-        assertEquals(SourceCodeScanType.IAC, iacIndication.getReporter());
+        assertEquals(SourceScanType.IAC, iacIndication.getReporter());
         assertTrue(StringUtils.isNotBlank(iacIndication.getScannerSearchTarget()));
         assertTrue(StringUtils.isNotBlank(iacIndication.getReason()));
     }
