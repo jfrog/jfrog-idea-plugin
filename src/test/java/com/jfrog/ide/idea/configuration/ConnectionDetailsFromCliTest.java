@@ -62,27 +62,30 @@ public class ConnectionDetailsFromCliTest {
     public void testReadConnectionDetailsFromJfrogCli() throws IOException, InterruptedException {
         Path jfrogCliHome = Files.createTempDirectory("testReadConnectionDetailsFromJfrogCli");
         try (MockedStatic<EnvironmentUtil> mockController = Mockito.mockStatic(EnvironmentUtil.class)) {
-            // Set environment variables
-            Map<String, String> envVars = new HashMap<>(System.getenv()) {{
-                put("JFROG_CLI_HOME_DIR", jfrogCliHome.toAbsolutePath().toString());
-                put("CI", "true");
-            }};
+            // Create a modifiable copy of the environment variables
+            Map<String, String> envVars = new HashMap<>(System.getenv());
+            envVars.put("JFROG_CLI_HOME_DIR", jfrogCliHome.toAbsolutePath().toString());
+            envVars.put("CI", "true");
+
+            // Mock getEnvironmentMap to return the modifiable map
             mockController.when(EnvironmentUtil::getEnvironmentMap).thenReturn(envVars);
 
             // Config JFrog CLI
             if (cliParameters != null) {
-                JfrogCliDriver jfrogCliDriver = new JfrogCliDriver(envVars, null, null);
-                jfrogCliDriver.runCommand(null, cliParameters, new String[0] ,new ArrayList<>(), null, null);
+                JfrogCliDriver jfrogCliDriver = new JfrogCliDriver(envVars, null);
+                jfrogCliDriver.runCommand(null, cliParameters, new String[0], new ArrayList<>(), null, null);
             }
 
             // Check results
             ServerConfigImpl serverConfig = new ServerConfigImpl();
             if (expectedException != null) {
-                Assert.assertThrows(expectedException.getMessage(), expectedException.getClass(), serverConfig::readConnectionDetailsFromJfrogCli);
+                Assert.assertThrows(expectedException.getMessage(), expectedException.getClass(),
+                        serverConfig::readConnectionDetailsFromJfrogCli);
             } else {
                 assertEquals(shouldSuccess, serverConfig.readConnectionDetailsFromJfrogCli());
             }
         } finally {
+            // Clean up the temporary directory
             FileUtils.forceDelete(jfrogCliHome.toFile());
         }
     }
