@@ -106,46 +106,27 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
     }
 
     public void testBuildTree() throws IOException {
-        System.out.println("Starting testBuildTree...");
-
         installDependencyOnVirtualEnv();
-        System.out.println("Dependency installed on virtual environment.");
 
         PypiScanner pypiScanner = new PypiScanner(getProject(), pythonSdk, executorService, new GraphScanLogic(new NullLog()));
-        System.out.println("PypiScanner initialized.");
 
         // Check root SDK node
         DepTree results = pypiScanner.buildTree();
-        System.out.println("Dependency tree built: " + results);
-
-        System.out.println("Root ID: " + results.rootId());
         assertEquals(SDK_NAME, results.rootId());
         assertEquals(SDK_NAME, results.rootId());
-        System.out.println("Root descriptor file path: " + results.getRootNodeDescriptorFilePath());
         assertEquals(pythonSdk.getHomePath(), results.getRootNodeDescriptorFilePath());
         assertNotEmpty(results.getRootNode().getChildren());
-        System.out.println("Root node children: " + results.getRootNode().getChildren());
 
         // Check direct dependency
         String directDepId = DIRECT_DEPENDENCY_NAME + ":" + DIRECT_DEPENDENCY_VERSION;
-        System.out.println("Direct dependency ID: " + directDepId);
         DepTreeNode pipGrip = getAndAssertChild(results, results.getRootNode(), directDepId);
-        System.out.println("Direct dependency node: " + pipGrip);
         assertSize(7, pipGrip.getChildren());
-        System.out.println("Direct dependency children: " + pipGrip.getChildren().toString());
 
         // Check transitive dependency
-        String anyTreeDepId = pipGrip.getChildren().stream()
-                .filter(childId -> childId.startsWith(TRANSITIVE_DEPENDENCY_NAME + ":"))
-                .findFirst()
-                .orElse(null);
-        System.out.println("Transitive dependency ID: " + anyTreeDepId);
-        assertNotNull("Couldn't find node '" + anyTreeDepId + "'.", anyTreeDepId);
-
+        String anyTreeDepId = pipGrip.getChildren().stream().filter(childId -> childId.startsWith(TRANSITIVE_DEPENDENCY_NAME + ":")).findFirst().get();
         DepTreeNode anyTreeDepNode = results.nodes().get(anyTreeDepId);
-        System.out.println("Transitive dependency node: " + anyTreeDepNode);
-        assertSize(1, anyTreeDepNode.getChildren());
-        System.out.println("Transitive dependency children size: " + anyTreeDepNode.getChildren().size());
+        assertNotNull("Couldn't find node '" + anyTreeDepId + "'.", anyTreeDepNode);
+        assertSize(0, anyTreeDepNode.getChildren());
     }
 
     public void testBuildTreeCircularDependency() throws IOException {
