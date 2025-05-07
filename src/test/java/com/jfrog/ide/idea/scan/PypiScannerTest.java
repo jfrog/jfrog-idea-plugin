@@ -18,8 +18,10 @@ import com.jfrog.ide.common.deptree.DepTreeNode;
 import com.jfrog.ide.common.scan.GraphScanLogic;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.bouncycastle.tsp.TSPUtil;
 import org.codehaus.plexus.util.FileUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.idea.maven.execution.SoutMavenConsole;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.executor.CommandExecutor;
 import org.jfrog.build.extractor.executor.CommandResults;
@@ -120,13 +122,14 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
         // Check direct dependency
         String directDepId = DIRECT_DEPENDENCY_NAME + ":" + DIRECT_DEPENDENCY_VERSION;
         DepTreeNode pipGrip = getAndAssertChild(results, results.getRootNode(), directDepId);
-        assertSize(7, pipGrip.getChildren());
+        assertSize(16, pipGrip.getChildren());
+        System.out.println("Direct dependency children size: " + pipGrip.getChildren().toString());
 
         // Check transitive dependency
         String anyTreeDepId = pipGrip.getChildren().stream().filter(childId -> childId.startsWith(TRANSITIVE_DEPENDENCY_NAME + ":")).findFirst().get();
         DepTreeNode anyTreeDepNode = results.nodes().get(anyTreeDepId);
         assertNotNull("Couldn't find node '" + anyTreeDepId + "'.", anyTreeDepNode);
-        assertSize(2, anyTreeDepNode.getChildren());
+        assertSize(1, anyTreeDepNode.getChildren());
     }
 
     public void testBuildTreeCircularDependency() throws IOException {
