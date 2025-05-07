@@ -40,9 +40,9 @@ import static com.jfrog.ide.idea.TestUtils.getAndAssertChild;
  **/
 public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String SDK_NAME = "Test Python SDK";
-    private static final String DIRECT_DEPENDENCY_NAME = "pipgrip";
-    private static final String DIRECT_DEPENDENCY_VERSION = "0.6.8";
-    private static final String TRANSITIVE_DEPENDENCY_NAME = "anytree";
+    private static final String DIRECT_DEPENDENCY_NAME = "Scrapy";
+    private static final String DIRECT_DEPENDENCY_VERSION = "2.9.0";
+    private static final String TRANSITIVE_DEPENDENCY_NAME = "cryptography";
 
     private ExecutorService executorService;
     private Sdk pythonSdk;
@@ -126,7 +126,7 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
         String anyTreeDepId = pipGrip.getChildren().stream().filter(childId -> childId.startsWith(TRANSITIVE_DEPENDENCY_NAME + ":")).findFirst().get();
         DepTreeNode anyTreeDepNode = results.nodes().get(anyTreeDepId);
         assertNotNull("Couldn't find node '" + anyTreeDepId + "'.", anyTreeDepNode);
-        assertSize(0, anyTreeDepNode.getChildren());
+        assertSize(2, anyTreeDepNode.getChildren());
     }
 
     public void testBuildTreeCircularDependency() throws IOException {
