@@ -126,6 +126,9 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
         System.out.println("Direct dependency children size: " + pipGrip.getChildren().toString());
 
         // Check transitive dependency
+        results.nodes().forEach((id, node) -> {
+            System.out.println(id + " -> " + node.getChildren());
+        });
         String anyTreeDepId = pipGrip.getChildren().stream().filter(childId -> childId.startsWith(TRANSITIVE_DEPENDENCY_NAME + ":")).findFirst().get();
         DepTreeNode anyTreeDepNode = results.nodes().get(anyTreeDepId);
         assertNotNull("Couldn't find node '" + anyTreeDepId + "'.", anyTreeDepNode);
