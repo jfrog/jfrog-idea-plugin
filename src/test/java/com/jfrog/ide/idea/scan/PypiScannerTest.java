@@ -40,9 +40,9 @@ import static com.jfrog.ide.idea.TestUtils.getAndAssertChild;
  **/
 public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String SDK_NAME = "Test Python SDK";
-    private static final String DIRECT_DEPENDENCY_NAME = "pipgrip";
-    private static final String DIRECT_DEPENDENCY_VERSION = "0.6.8";
-    private static final String TRANSITIVE_DEPENDENCY_NAME = "anytree";
+    private static final String DIRECT_DEPENDENCY_NAME = "Scrapy";
+    private static final String DIRECT_DEPENDENCY_VERSION = "2.9.0";
+    private static final String TRANSITIVE_DEPENDENCY_NAME = "pyOpenSSL";
 
     private ExecutorService executorService;
     private Sdk pythonSdk;
@@ -119,14 +119,14 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
 
         // Check direct dependency
         String directDepId = DIRECT_DEPENDENCY_NAME + ":" + DIRECT_DEPENDENCY_VERSION;
-        DepTreeNode pipGrip = getAndAssertChild(results, results.getRootNode(), directDepId);
-        assertSize(7, pipGrip.getChildren());
+        DepTreeNode scrappy = getAndAssertChild(results, results.getRootNode(), directDepId);
+        assertSize(16, scrappy.getChildren());
 
         // Check transitive dependency
-        String anyTreeDepId = pipGrip.getChildren().stream().filter(childId -> childId.startsWith(TRANSITIVE_DEPENDENCY_NAME + ":")).findFirst().get();
-        DepTreeNode anyTreeDepNode = results.nodes().get(anyTreeDepId);
-        assertNotNull("Couldn't find node '" + anyTreeDepId + "'.", anyTreeDepNode);
-        assertSize(1, anyTreeDepNode.getChildren());
+        String pyOpenSSLDepId = scrappy.getChildren().stream().filter(childId -> childId.startsWith(TRANSITIVE_DEPENDENCY_NAME + ":")).findFirst().get();
+        DepTreeNode pyOpenSSLDepNode = results.nodes().get(pyOpenSSLDepId);
+        assertNotNull("Couldn't find node '" + pyOpenSSLDepId + "'.", pyOpenSSLDepNode);
+        assertSize(1, pyOpenSSLDepNode.getChildren());
     }
 
     public void testBuildTreeCircularDependency() throws IOException {
