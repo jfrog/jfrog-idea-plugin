@@ -18,10 +18,8 @@ import com.jfrog.ide.common.deptree.DepTreeNode;
 import com.jfrog.ide.common.scan.GraphScanLogic;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.bouncycastle.tsp.TSPUtil;
 import org.codehaus.plexus.util.FileUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.idea.maven.execution.SoutMavenConsole;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.executor.CommandExecutor;
 import org.jfrog.build.extractor.executor.CommandResults;
@@ -44,7 +42,7 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String SDK_NAME = "Test Python SDK";
     private static final String DIRECT_DEPENDENCY_NAME = "Scrapy";
     private static final String DIRECT_DEPENDENCY_VERSION = "2.9.0";
-    private static final String TRANSITIVE_DEPENDENCY_NAME = "cryptography";
+    private static final String TRANSITIVE_DEPENDENCY_NAME = "pyOpenSSL";
 
     private ExecutorService executorService;
     private Sdk pythonSdk;
@@ -121,17 +119,12 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
 
         // Check direct dependency
         String directDepId = DIRECT_DEPENDENCY_NAME + ":" + DIRECT_DEPENDENCY_VERSION;
-        DepTreeNode pipGrip = getAndAssertChild(results, results.getRootNode(), directDepId);
-        assertSize(16, pipGrip.getChildren());
-        System.out.println("Direct dependency children size: " + pipGrip.getChildren().toString());
+        DepTreeNode scrappy = getAndAssertChild(results, results.getRootNode(), directDepId);
+        assertSize(16, scrappy.getChildren());
 
         // Check transitive dependency
-        results.nodes().forEach((id, node) -> {
-            System.out.println(id + " -> " + node.getChildren());
-        });
-        String anyTreeDepId = pipGrip.getChildren().stream().filter(childId -> childId.startsWith(TRANSITIVE_DEPENDENCY_NAME + ":")).findFirst().get();
-        DepTreeNode anyTreeDepNode = results.nodes().get(anyTreeDepId);
-        assertNotNull("Couldn't find node '" + anyTreeDepId + "'.", anyTreeDepNode);
+        String pyOpenSSLDepId = scrappy.getChildren().stream().filter(childId -> childId.startsWith(TRANSITIVE_DEPENDENCY_NAME + ":")).findFirst().get();
+        DepTreeNode anyTreeDepNode = results.nodes().get(pyOpenSSLDepId);
         assertSize(1, anyTreeDepNode.getChildren());
     }
 
