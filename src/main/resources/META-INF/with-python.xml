@@ -1,4 +1,6 @@
 <idea-plugin>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.python-pro-capable</depends>
+    <depends>com.jetbrains.python</depends>
+
 </idea-plugin>
