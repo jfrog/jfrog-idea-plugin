@@ -1,5 +1,6 @@
 <idea-plugin>
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.goide</depends>
     <extensions defaultExtensionNs="com.intellij">
         <localInspection language="vgo"
                          displayName="Show in JFrog plugin"
