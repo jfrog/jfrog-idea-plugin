@@ -67,7 +67,6 @@ public abstract class ScanBinaryExecutor {
     private static final String ENV_PASSWORD = "JF_PASS";
     private static final String ENV_ACCESS_TOKEN = "JF_TOKEN";
     private static final String ENV_HTTP_PROXY = "HTTP_PROXY";
-    private static final String ENV_HTTPS_PROXY = "HTTPS_PROXY";
     private static final String JFROG_RELEASES = "https://releases.jfrog.io/artifactory/";
     private static Path binaryTargetPath;
     private static Path archiveTargetPath;
@@ -328,8 +327,8 @@ public abstract class ScanBinaryExecutor {
             if (StringUtils.isNoneBlank(proxyConfiguration.username, proxyConfiguration.password)) {
                 proxyUrl = proxyConfiguration.username + ":" + proxyConfiguration.password + "@" + proxyUrl;
             }
+            //jfrog-ignore
             env.put(ENV_HTTP_PROXY, "http://" + proxyUrl);
-            env.put(ENV_HTTPS_PROXY, "https://" + proxyUrl);
         }
         return env;
     }
