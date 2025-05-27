@@ -42,7 +42,7 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
     private static final String SDK_NAME = "Test Python SDK";
     private static final String DIRECT_DEPENDENCY_NAME = "Scrapy";
     private static final String DIRECT_DEPENDENCY_VERSION = "2.9.0";
-    private static final String TRANSITIVE_DEPENDENCY_NAME = "pyOpenSSL";
+    private static final String TRANSITIVE_DEPENDENCY_NAME = "pyopenssl";
 
     private ExecutorService executorService;
     private Sdk pythonSdk;
