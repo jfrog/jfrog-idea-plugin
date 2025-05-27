@@ -28,7 +28,7 @@ intellij {
 
 //TODO: remove this segment and use latest when the OOM erro is solved https://youtrack.jetbrains.com/issue/MP-7366
 runPluginVerifier {
-    verifierVersion = '1.385'
+    verifierVersion = '1.381'
 }
 
 runIde {
