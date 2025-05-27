@@ -123,7 +123,6 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
         assertSize(16, scrappy.getChildren());
 
         // Check transitive dependency
-        System.out.println("Children of scrapy"  + ": " + scrappy.getChildren());
         String pyOpenSSLDepId = scrappy.getChildren().stream().filter(childId -> childId.startsWith(TRANSITIVE_DEPENDENCY_NAME + ":")).findFirst().get();
         DepTreeNode pyOpenSSLDepNode = results.nodes().get(pyOpenSSLDepId);
         assertNotNull("Couldn't find node '" + pyOpenSSLDepId + "'.", pyOpenSSLDepNode);
