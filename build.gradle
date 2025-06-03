@@ -78,7 +78,7 @@ dependencies {
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-extractor', version: buildInfoVersion
     implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: idePluginsCommonVersion
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-client', version: buildInfoVersion
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.15.2'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.15.3'
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-api', version: buildInfoVersion
     implementation group: 'com.jfrog.xray.client', name: 'xray-client-java', version: '0.14.1'
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
