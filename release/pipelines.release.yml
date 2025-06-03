@@ -12,6 +12,7 @@ pipelines:
         readOnly:
           NEXT_VERSION: 0.0.0
           NEXT_DEVELOPMENT_VERSION: 0.0.x-SNAPSHOT
+          SKIP_AUDIT: "false"
 
     steps:
       - name: Release
@@ -50,7 +51,12 @@ pipelines:
             - jf c add internal --url=$int_ecosys_entplus_deployer_url --user=$int_ecosys_entplus_deployer_user --password=$int_ecosys_entplus_deployer_apikey
 
             # Run audit
-            - jf audit
+            - |
+              if [ "$SKIP_AUDIT" != "true" ]; then
+                jf audit
+              else
+                echo "Skipping audit according to environment variable"
+              fi
 
             # Update version
             - sed -i "s/\(currentVersion=\).*\$/\1${NEXT_VERSION}/" gradle.properties
