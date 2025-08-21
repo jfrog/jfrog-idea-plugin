@@ -4,6 +4,7 @@ import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.callback.CefContextMenuParams;
 import org.cef.callback.CefMenuModel;
+import org.cef.callback.CefRunContextMenuCallback;
 import org.cef.handler.CefContextMenuHandler;
 
 import javax.swing.*;
@@ -40,5 +41,12 @@ public class JfrogContextMenuHandler implements CefContextMenuHandler {
 
     @Override
     public void onContextMenuDismissed(CefBrowser browser, CefFrame frame) {
+    }
+
+    @Override
+    public boolean runContextMenu(CefBrowser browser, CefFrame frame, CefContextMenuParams params, CefMenuModel model, CefRunContextMenuCallback callback) {
+        // Return false to use the default context menu handling
+        // This maintains the existing behavior while implementing the required method for IntelliJ 2025+
+        return false;
     }
 }
