@@ -91,3 +91,4 @@ We welcome community contribution through pull requests. To help us improve this
 # 🥏 Release Notes
 
 The release notes are available [here](https://github.com/jfrog/jfrog-idea-plugin/releases).
+...
