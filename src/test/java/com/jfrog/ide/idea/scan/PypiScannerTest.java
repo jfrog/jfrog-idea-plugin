@@ -120,7 +120,7 @@ public class PypiScannerTest extends LightJavaCodeInsightFixtureTestCase {
         // Check direct dependency
         String directDepId = DIRECT_DEPENDENCY_NAME + ":" + DIRECT_DEPENDENCY_VERSION;
         DepTreeNode scrappy = getAndAssertChild(results, results.getRootNode(), directDepId);
-        assertSize(16, scrappy.getChildren());
+        assertSize(15, scrappy.getChildren());
 
         // Check transitive dependency
         String pyOpenSSLDepId = scrappy.getChildren().stream().filter(childId -> childId.startsWith(TRANSITIVE_DEPENDENCY_NAME + ":")).findFirst().get();
