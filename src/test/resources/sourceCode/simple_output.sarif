@@ -8,6 +8,10 @@
                
                         {
                             "id": "applic_CVE-2022-25878",
+                            "properties": {
+                                "conclusion": "negative",
+                                "applicability": "applicable"
+                            },
                             "fullDescription": {
                                 "text": "The scanner checks whether the vulnerable function `pem.Decode` is called.",
                                 "markdown": "The scanner checks whether the vulnerable function `pem.Decode` is called."
@@ -18,6 +22,10 @@
                         },
                         {
                             "id": "CVE-2022-25978",
+                            "properties": {
+                                "conclusion": "negative",
+                                "applicability": "applicable"
+                            },
                             "fullDescription": {
                                 "text": "The scanner checks whether the vulnerable function `org.apache.xmlbeans.XmlObject.Factory.parse` is called or an interface that extends `org.apache.xmlbeans.XmlObject` is used.",
                                 "markdown": "The scanner checks whether the vulnerable function `org.apache.xmlbeans.XmlObject.Factory.parse` is called or an interface that extends `org.apache.xmlbeans.XmlObject` is used."

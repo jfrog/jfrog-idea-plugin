@@ -131,6 +131,8 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
     private JBLabel releasesRepoLinkJBLabel;
     private JBLabel ssoLoginInstructionsLabel;
     private JBTextArea ssoCode;
+    private JLabel scannerBinaryVersionJLabel;
+    private JBTextField scannerBinaryVersionJBTextField;
 
     private int selectedTabIndex;
 
@@ -242,6 +244,10 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         if (downloadResourcesThroughArtifactoryRadioButton.isSelected()) {
             builder.setExternalResourcesRepo(repositoryNameJBTextField.getText());
         }
+        String versionOverride = scannerBinaryVersionJBTextField.getText();
+        if (isNotBlank(versionOverride)) {
+            builder.setScannerBinaryVersion(versionOverride.trim());
+        }
         return builder.build();
     }
 
@@ -296,6 +302,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             } else {
                 downloadResourcesFromReleasesRadioButton.setSelected(true);
             }
+            scannerBinaryVersionJBTextField.setText(StringUtils.defaultString(serverConfig.getScannerBinaryVersion()));
         } else {
             clearText(platformUrl, xrayUrl, artifactoryUrl, username, password);
             excludedPaths.setText(DEFAULT_EXCLUSIONS);
@@ -306,6 +313,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
             connectionTimeout.setValue(ConnectionTimeoutSpinner.RANGE.initial);
             ssoLoginSelection.setSelected(true);
             downloadResourcesFromReleasesRadioButton.setSelected(true);
+            scannerBinaryVersionJBTextField.setText("");
         }
         updateExternalRepositoryFields();
         initAuthMethodSelection();

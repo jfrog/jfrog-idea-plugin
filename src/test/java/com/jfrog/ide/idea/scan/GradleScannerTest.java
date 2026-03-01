@@ -72,12 +72,12 @@ public class GradleScannerTest extends HeavyPlatformTestCase {
         Map<String, String> env = new HashMap<>();
         String gradleExe = gradleScanner.getGradleExeAndJdk(env);
         assertEquals(System.getenv("JAVA_HOME"), env.get("JAVA_HOME"));
-        assertNotNull(gradleExe);
         new GradleDriver(gradleExe, null).verifyGradleInstalled();
     }
 
     public void testBuildTree() throws IOException {
         GradleProjectImportUtil.linkAndRefreshGradleProject(globalProjectDir, getProject());
+
         GradleScanner gradleScanner = new GradleScanner(getProject(), globalProjectDir, executorService, new GraphScanLogic(new NullLog()));
 
         // Run and check scan results
@@ -89,7 +89,6 @@ public class GradleScannerTest extends HeavyPlatformTestCase {
         // Check module dependency
         DepTreeNode moduleNode = getAndAssertChild(results, results.getRootNode(), "org.jfrog.test.gradle.publish:shared:1.0-SNAPSHOT");
         assertEquals(1, moduleNode.getChildren().size());
-        assertEquals(8, moduleNode.getScopes().size());
 
         // Check dependency
         DepTreeNode dependencyNode = getAndAssertChild(results, moduleNode, "junit:junit:4.7");

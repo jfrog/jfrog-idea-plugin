@@ -103,6 +103,8 @@ public class ServerConfigImpl implements ServerConfig {
     private Integer connectionTimeout;
     @Tag
     private String externalResourcesRepo;
+    @Tag
+    private String scannerBinaryVersion;
     // The subsystem key of the plugin configuration in the PasswordSafe
     @Transient
     private String jfrogSettingsCredentialsKey = JFROG_SETTINGS_KEY;
@@ -125,6 +127,7 @@ public class ServerConfigImpl implements ServerConfig {
         this.connectionRetries = builder.connectionRetries;
         this.connectionTimeout = builder.connectionTimeout;
         this.externalResourcesRepo = builder.externalResourcesRepo;
+        this.scannerBinaryVersion = builder.scannerBinaryVersion;
         this.jfrogSettingsCredentialsKey = builder.jfrogSettingsCredentialsKey;
     }
 
@@ -160,13 +163,14 @@ public class ServerConfigImpl implements ServerConfig {
                 Objects.equals(getExcludedPaths(), other.getExcludedPaths()) &&
                 getConnectionRetries() == other.getConnectionRetries() &&
                 getConnectionTimeout() == other.getConnectionTimeout() &&
-                getExternalResourcesRepo() == other.getExternalResourcesRepo();
+                Objects.equals(getExternalResourcesRepo(), other.getExternalResourcesRepo()) &&
+                Objects.equals(getScannerBinaryVersion(), other.getScannerBinaryVersion());
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(getConnectionType(), getUrl(), getXrayUrl(), getArtifactoryUrl(), getPassword(), getAccessToken(),
-                getUsername(), getProject(), getExcludedPaths(), getConnectionRetries(), getConnectionTimeout(), getExternalResourcesRepo());
+                getUsername(), getProject(), getExcludedPaths(), getConnectionRetries(), getConnectionTimeout(), getExternalResourcesRepo(), getScannerBinaryVersion());
     }
 
     @Override
@@ -416,6 +420,14 @@ public class ServerConfigImpl implements ServerConfig {
         this.externalResourcesRepo = externalResourcesRepo;
     }
 
+    public String getScannerBinaryVersion() {
+        return this.scannerBinaryVersion;
+    }
+
+    void setScannerBinaryVersion(String scannerBinaryVersion) {
+        this.scannerBinaryVersion = scannerBinaryVersion;
+    }
+
     public void setJFrogSettingsCredentialsKey(String jfrogSettingsCredentialsKey) {
         this.jfrogSettingsCredentialsKey = jfrogSettingsCredentialsKey;
     }
@@ -529,6 +541,7 @@ public class ServerConfigImpl implements ServerConfig {
         private int connectionRetries;
         private int connectionTimeout;
         private String externalResourcesRepo;
+        private String scannerBinaryVersion;
 
         public ServerConfigImpl build() {
             return new ServerConfigImpl(this);
@@ -603,6 +616,11 @@ public class ServerConfigImpl implements ServerConfig {
 
         public Builder setExternalResourcesRepo(String externalResourcesRepo) {
             this.externalResourcesRepo = externalResourcesRepo;
+            return this;
+        }
+
+        public Builder setScannerBinaryVersion(String scannerBinaryVersion) {
+            this.scannerBinaryVersion = scannerBinaryVersion;
             return this;
         }
 

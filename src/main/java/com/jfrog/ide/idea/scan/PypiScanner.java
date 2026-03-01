@@ -7,7 +7,6 @@ import com.intellij.psi.PsiFile;
 import com.jetbrains.python.packaging.PyPackage;
 import com.jetbrains.python.packaging.PyPackageManager;
 import com.jetbrains.python.packaging.PyRequirement;
-import com.jetbrains.python.packaging.pipenv.PyPipEnvPackageManager;
 import com.jfrog.ide.common.deptree.DepTree;
 import com.jfrog.ide.common.deptree.DepTreeNode;
 import com.jfrog.ide.common.scan.ComponentPrefix;
@@ -60,7 +59,7 @@ public class PypiScanner extends SingleDescriptorScanner {
      */
     private DepTree createSdkDependencyTree(Sdk pythonSdk) throws ExecutionException {
         // Retrieve all PyPI packages
-        PyPackageManager packageManager = PyPipEnvPackageManager.getInstance(pythonSdk);
+        PyPackageManager packageManager = PyPackageManager.getInstance(pythonSdk);
         List<PyPackage> packages = packageManager.refreshAndGetPackages(true);
         getLog().debug(CollectionUtils.size(packages) + " PyPI packages found in SDK " + pythonSdk.getName());
 

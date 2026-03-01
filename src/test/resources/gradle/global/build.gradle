@@ -14,41 +14,17 @@
  * limitations under the License.
  */
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath(group: 'org.jfrog.buildinfo', name: 'build-info-extractor-gradle', version: '4.+')
-    }
-    configurations.classpath {
-        resolutionStrategy {
-            cacheDynamicVersionsFor 0, 'seconds'
-            cacheChangingModulesFor 0, 'seconds'
-        }
-    }
-}
-
 def javaProjects() {
     subprojects.findAll { new File(it.projectDir, 'src').directory }
 }
 
 allprojects {
-    apply plugin: 'com.jfrog.artifactory'
     group = 'org.jfrog.test.gradle.publish'
     version = currentVersion
     status = 'Integration'
     repositories {
         mavenCentral()
     }
-}
-
-// Setting this property to true will make the artifactoryPublish task
-// skip this module (in our case, the root module):
-artifactoryPublish.skip = true
-
-project('services') {
-    artifactoryPublish.skip = true
 }
 
 configure(javaProjects()) {
@@ -87,13 +63,6 @@ project('api') {
                     asNode().info[0].attributes().put('e:architecture', 'amd64')
                 }
             }
-        }
-    }
-
-    artifactoryPublish {
-        publications(publishing.publications.ivyJava)
-        properties {
-            simpleFile '**:**:**:*@*', simpleFile: 'only on settings file'
         }
     }
 }

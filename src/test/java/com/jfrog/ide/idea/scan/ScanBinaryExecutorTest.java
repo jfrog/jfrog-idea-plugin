@@ -22,9 +22,11 @@ import static org.junit.Assert.assertThrows;
  **/
 public class ScanBinaryExecutorTest extends TestCase {
     private final ScanBinaryExecutor scanner = new ApplicabilityScannerExecutor(new NullLog());
+    private final ScanBinaryExecutor secretsScanner = new SecretsScannerExecutor(new NullLog());
     private final Path FAULTY_OUTPUT = new File("src/test/resources/sourceCode/faulty_output.sarif").toPath();
     private final Path SIMPLE_OUTPUT = new File("src/test/resources/sourceCode/simple_output.sarif").toPath();
     private final Path APPLIC_KIND_PASS_AND_FAIL_OUTPUT = new File("src/test/resources/sourceCode/applicable_kind_pass_output.sarif").toPath();
+    private final Path SECRETS_WITH_INFORMATIONAL_OUTPUT = new File("src/test/resources/sourceCode/secrets_with_informational_output.sarif").toPath();
     public void testInputBuilder() throws IOException {
         ScanConfig.Builder inputFileBuilder = new ScanConfig.Builder();
         Path inputPath = null;
@@ -72,32 +74,27 @@ public class ScanBinaryExecutorTest extends TestCase {
     }
 
     public void testSarifParserWithMissingRole() throws IndexOutOfBoundsException {
-      assertThrows(IndexOutOfBoundsException.class,() -> scanner.parseOutputSarif(FAULTY_OUTPUT));
+      assertThrows(IndexOutOfBoundsException.class,() -> secretsScanner.parseOutputSarif(FAULTY_OUTPUT));
     }
 
-    public void testSarifParserApplicResultsWithKindPassAndFail() throws IOException {
+    public void testSarifParserApplicResultsWithRulesBasedParsing() throws IOException {
         List<JFrogSecurityWarning> parsedOutput = scanner.parseOutputSarif(APPLIC_KIND_PASS_AND_FAIL_OUTPUT);
-        assertEquals(6, parsedOutput.size());
-        //Not Applicable with kind pass
+        assertEquals(2, parsedOutput.size());
+        // Not applicable based on rule properties
         assertEquals("applic_CVE-2022-25878", parsedOutput.get(0).getRuleID());
         assertFalse(parsedOutput.get(0).isApplicable());
-        //Applicable with kind pass
+        // Applicable based on rule properties, with evidence location from result
         assertEquals("applic_CVE-2022-25978", parsedOutput.get(1).getRuleID());
         assertTrue(parsedOutput.get(1).isApplicable());
-        //Not applicable with kind pass and no properties
-        assertEquals("applic_CVE-2021-25878", parsedOutput.get(2).getRuleID());
-        assertFalse(parsedOutput.get(2).isApplicable());
-        //Applicable with kind fail
-        assertEquals("applic_CVE-2022-29019", parsedOutput.get(3).getRuleID());
-        assertTrue(parsedOutput.get(3).isApplicable());
-        //Not applicable as its not_covered
-        assertEquals("applic_CVE-2022-29004", parsedOutput.get(4).getRuleID());
-        assertFalse(parsedOutput.get(4).isApplicable());
-        //Not applicable as its undetermined
-        assertEquals("applic_CVE-2022-29014", parsedOutput.get(5).getRuleID());
-        assertFalse(parsedOutput.get(5).isApplicable());
     }
 
+
+    public void testSarifParserSkipsInformationalResults() throws IOException {
+        List<JFrogSecurityWarning> parsedOutput = secretsScanner.parseOutputSarif(SECRETS_WITH_INFORMATIONAL_OUTPUT);
+        assertEquals(1, parsedOutput.size());
+        assertEquals("REQ.SECRET.GENERIC.TEXT", parsedOutput.get(0).getRuleID());
+        assertEquals("Hardcoded secrets were found", parsedOutput.get(0).getReason());
+    }
 
     public void testGetBinaryDownloadURL() {
         final String externalRepoName = "test-releases-repo";

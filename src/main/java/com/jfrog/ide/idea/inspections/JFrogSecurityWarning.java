@@ -104,6 +104,10 @@ public class JFrogSecurityWarning {
         return results;
     }
 
+    public static JFrogSecurityWarning notApplicable(String ruleId, SourceCodeScanType reporter) {
+        return new JFrogSecurityWarning(0, 0, 0, 0, "", "", ruleId, "", reporter, false, Severity.Unknown, null);
+    }
+
     public boolean isApplicable() {
         return this.isApplicable;
     }

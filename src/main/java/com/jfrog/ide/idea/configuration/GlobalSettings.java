@@ -68,6 +68,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         serverConfig.setConnectionRetries(this.serverConfig.getConnectionRetries());
         serverConfig.setConnectionTimeout(this.serverConfig.getConnectionTimeout());
         serverConfig.setExternalResourcesRepo(this.serverConfig.getExternalResourcesRepo());
+        serverConfig.setScannerBinaryVersion(this.serverConfig.getScannerBinaryVersion());
 
         GlobalSettings settings = new GlobalSettings();
         settings.serverConfig = serverConfig;
@@ -134,6 +135,7 @@ public final class GlobalSettings implements PersistentStateComponent<GlobalSett
         this.serverConfig.setConnectionRetries(serverConfig.getConnectionRetries());
         this.serverConfig.setConnectionTimeout(serverConfig.getConnectionTimeout());
         this.serverConfig.setExternalResourcesRepo(serverConfig.getExternalResourcesRepo());
+        this.serverConfig.setScannerBinaryVersion(serverConfig.getScannerBinaryVersion());
         this.serverConfig.setPolicyType(serverConfig.getPolicyType());
         this.serverConfig.setProject(serverConfig.getProject());
         this.serverConfig.setWatches(serverConfig.getWatches());

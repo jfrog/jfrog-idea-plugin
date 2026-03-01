@@ -58,8 +58,8 @@ public abstract class ScanBinaryExecutor {
     private static final int USER_NOT_ENTITLED = 31;
     private static final int NOT_SUPPORTED = 13;
     private static final String SCANNER_BINARY_NAME = "analyzerManager";
-    private static final String SCANNER_BINARY_VERSION = "1.20.1";
-    private static final String BINARY_DOWNLOAD_URL = "xsc-gen-exe-analyzer-manager-local/v1/" + SCANNER_BINARY_VERSION;
+    static final String DEFAULT_SCANNER_BINARY_VERSION = "1.30.1";
+    private static final String BINARY_DOWNLOAD_URL_PREFIX = "xsc-gen-exe-analyzer-manager-local/v1/";
     private static final String DOWNLOAD_SCANNER_NAME = "analyzerManager.zip";
     private static final String MINIMAL_XRAY_VERSION_SUPPORTED_FOR_ENTITLEMENT = "3.66.0";
     private static final String ENV_PLATFORM = "JF_PLATFORM_URL";
@@ -73,6 +73,7 @@ public abstract class ScanBinaryExecutor {
     @Getter
     private static String osDistribution;
     private static LocalDateTime nextUpdateCheck;
+    private static String lastDownloadedVersion;
     protected final SourceCodeScanType scanType;
     protected Collection<PackageManagerType> supportedPackageTypes;
     private final Log log;
@@ -115,7 +116,20 @@ public abstract class ScanBinaryExecutor {
         if (!StringUtils.isEmpty(externalResourcesRepo)) {
             downloadUrlPrefix = String.format("%s/artifactory/", externalResourcesRepo);
         }
-        return String.format("%s%s/%s/%s", downloadUrlPrefix, BINARY_DOWNLOAD_URL, getOsDistribution(), DOWNLOAD_SCANNER_NAME);
+        String binaryDownloadUrl = BINARY_DOWNLOAD_URL_PREFIX + getEffectiveScannerVersion();
+        return String.format("%s%s/%s/%s", downloadUrlPrefix, binaryDownloadUrl, getOsDistribution(), DOWNLOAD_SCANNER_NAME);
+    }
+
+    String getEffectiveScannerVersion() {
+        try {
+            ServerConfigImpl serverConfig = GlobalSettings.getInstance().getServerConfig();
+            if (serverConfig != null && StringUtils.isNotBlank(serverConfig.getScannerBinaryVersion())) {
+                return serverConfig.getScannerBinaryVersion();
+            }
+        } catch (Exception e) {
+            log.debug("Could not read scanner binary version from settings, using default.");
+        }
+        return DEFAULT_SCANNER_BINARY_VERSION;
     }
 
     abstract Feature getScannerFeatureName();
@@ -196,7 +210,8 @@ public abstract class ScanBinaryExecutor {
         synchronized (downloadLock) {
             LocalDateTime currentTime = LocalDateTime.now();
             boolean targetExists = Files.exists(binaryTargetPath);
-            if (targetExists && nextUpdateCheck != null && currentTime.isBefore(nextUpdateCheck)) {
+            boolean versionChanged = !getEffectiveScannerVersion().equals(lastDownloadedVersion);
+            if (targetExists && !versionChanged && nextUpdateCheck != null && currentTime.isBefore(nextUpdateCheck)) {
                 return;
             }
             ServerConfig server = GlobalSettings.getInstance().getServerConfig();
@@ -209,6 +224,7 @@ public abstract class ScanBinaryExecutor {
                         String latestBinaryChecksum = getFileChecksumFromServer(artifactoryManager, externalResourcesRepo);
                         String currentBinaryCheckSum = DigestUtils.sha256Hex(archiveBinaryFile);
                         if (latestBinaryChecksum.equals(currentBinaryCheckSum)) {
+                            lastDownloadedVersion = getEffectiveScannerVersion();
                             nextUpdateCheck = currentTime.plusDays(UPDATE_INTERVAL);
                             return;
                         }
@@ -218,6 +234,7 @@ public abstract class ScanBinaryExecutor {
                     log.debug(String.format("Resource %s is not found. Downloading it.", binaryTargetPath));
                 }
                 downloadBinary(artifactoryManager, externalResourcesRepo);
+                lastDownloadedVersion = getEffectiveScannerVersion();
             }
         }
     }
@@ -260,7 +277,10 @@ public abstract class ScanBinaryExecutor {
         Output output = getOutputObj(outputFile);
         List<JFrogSecurityWarning> warnings = new ArrayList<>();
 
-        output.getRuns().forEach(run -> run.getResults().stream().filter(SarifResult::isNotSuppressed).forEach(result -> warnings.add(new JFrogSecurityWarning(result, scanType, run.getRuleFromRunById(result.getRuleId())))));
+        output.getRuns().forEach(run -> run.getResults().stream()
+                .filter(SarifResult::isNotSuppressed)
+                .filter(result -> !"informational".equals(result.getKind()))
+                .forEach(result -> warnings.add(new JFrogSecurityWarning(result, scanType, run.getRuleFromRunById(result.getRuleId())))));
 
         Optional<Run> run = output.getRuns().stream().findFirst();
         if (run.isPresent()) {
