@@ -10,9 +10,11 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.jfrog.ide.idea.inspections.upgradeversion.GoUpgradeVersion;
 import com.jfrog.ide.idea.inspections.upgradeversion.UpgradeVersion;
+import com.jfrog.ide.idea.scan.GoScanner;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScannerBase;
 import com.jfrog.ide.idea.utils.Descriptor;
+import com.jfrog.ide.idea.utils.DescriptorPathUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,7 +58,8 @@ public class GoInspection extends AbstractInspection {
     @Override
     ScannerBase getScanner(Project project, String path) {
         return ScanManager.getScanners(project).stream()
-                .filter(manager -> StringUtils.equals(manager.getProjectPath(), path))
+                .filter(GoScanner.class::isInstance)
+                .filter(manager -> DescriptorPathUtils.areDescriptorPathsEqual(manager.getProjectPath(), path))
                 .findAny()
                 .orElse(null);
     }

@@ -21,6 +21,7 @@ import com.jfrog.ide.common.nodes.subentities.ImpactTree;
 import com.jfrog.ide.idea.inspections.upgradeversion.UpgradeVersion;
 import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.scan.ScannerBase;
+import com.jfrog.ide.idea.utils.DescriptorPathUtils;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.utils.Descriptor;
@@ -142,7 +143,7 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         Enumeration<TreeNode> roots = ((SortableChildrenTreeNode) componentsTree.getModel().getRoot()).children();
         for (TreeNode root : Collections.list(roots)) {
             if (root instanceof DescriptorFileTreeNode fileNode) {
-                if (fileNode.getFilePath().equals(element.getContainingFile().getVirtualFile().getPath())) {
+                if (DescriptorPathUtils.areDescriptorPathsEqual(fileNode.getFilePath(), element.getContainingFile().getVirtualFile().getPath())) {
                     fileDescriptors.add(fileNode);
                 }
             }

@@ -5,7 +5,6 @@ import com.intellij.ide.plugins.PluginManagerCore;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
@@ -19,6 +18,7 @@ import com.jfrog.ide.idea.inspections.GradleGroovyInspection;
 import com.jfrog.ide.idea.inspections.GradleKotlinInspection;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.data.PackageManagerType;
+import com.jfrog.ide.idea.utils.DescriptorPathUtils;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
 import org.apache.commons.lang3.StringUtils;
@@ -71,11 +71,10 @@ public class GradleScanner extends SingleDescriptorScanner {
 
     @Override
     protected PsiFile[] getProjectDescriptors() {
-        LocalFileSystem localFileSystem = LocalFileSystem.getInstance();
         Path basePath = Paths.get(this.basePath);
-        VirtualFile file = localFileSystem.findFileByPath(basePath.resolve("build.gradle").toString());
+        VirtualFile file = DescriptorPathUtils.findLocalVirtualFile(basePath.resolve("build.gradle").toString());
         if (file == null) {
-            file = localFileSystem.findFileByPath(basePath.resolve("build.gradle.kts").toString());
+            file = DescriptorPathUtils.findLocalVirtualFile(basePath.resolve("build.gradle.kts").toString());
             if (file == null) {
                 return null;
             }

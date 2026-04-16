@@ -13,6 +13,7 @@ import com.jfrog.ide.idea.scan.NpmScanner;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScannerBase;
 import com.jfrog.ide.idea.utils.Descriptor;
+import com.jfrog.ide.idea.utils.DescriptorPathUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -55,7 +56,7 @@ public class NpmInspection extends AbstractInspection {
     @Override
     ScannerBase getScanner(Project project, String path) {
         return ScanManager.getScanners(project).stream()
-                .filter(manager -> StringUtils.equals(manager.getProjectPath(), path))
+                .filter(manager -> DescriptorPathUtils.areDescriptorPathsEqual(manager.getProjectPath(), path))
                 .filter(this::isMatchingScanner)
                 .findAny()
                 .orElse(null);

@@ -1,7 +1,6 @@
 package com.jfrog.ide.idea.scan;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
@@ -19,6 +18,7 @@ import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.scan.utils.ImpactTreeBuilder;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
+import com.jfrog.ide.idea.utils.DescriptorPathUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -55,7 +55,7 @@ public class YarnScanner extends SingleDescriptorScanner {
 
     @Override
     protected PsiFile[] getProjectDescriptors() {
-        VirtualFile file = LocalFileSystem.getInstance().findFileByPath(descriptorFilePath);
+        VirtualFile file = DescriptorPathUtils.findLocalVirtualFile(descriptorFilePath);
         if (file == null) {
             return null;
         }
