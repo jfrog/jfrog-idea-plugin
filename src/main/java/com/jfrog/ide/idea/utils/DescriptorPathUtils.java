@@ -2,7 +2,7 @@ package com.jfrog.ide.idea.utils;
 
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.jfrog.ide.common.utils.WslUtils;
+import org.jfrog.build.extractor.util.WslUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jetbrains.annotations.NotNull;
@@ -21,8 +21,8 @@ import java.util.Objects;
  * Compares filesystem paths that may refer to the same WSL-backed file but use different spellings
  * (e.g. {@code \\wsl$\Distro\...} from {@link java.nio.file.Path} vs {@code //wsl$/Distro/...} from IntelliJ VFS).
  * <p>
- * WSL UNC normalization and Linux-path conversion delegate to {@link WslUtils}. IntelliJ-style
- * {@code //wsl$/...} URLs are converted to Windows UNC here because that form is IDE-specific.
+ * WSL UNC normalization and Linux-path conversion delegate to {@link WslUtils} (build-info-extractor).
+ * IntelliJ-style {@code //wsl$/...} URLs are converted to Windows UNC here because that form is IDE-specific.
  */
 public final class DescriptorPathUtils {
 

@@ -14,6 +14,7 @@ import com.jfrog.ide.idea.navigation.NavigationService;
 import com.jfrog.ide.idea.navigation.NavigationTarget;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.ui.menus.ToolbarPopupMenu;
+import com.jfrog.ide.idea.utils.DescriptorPathUtils;
 import com.jfrog.ide.idea.utils.Utils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -75,7 +76,8 @@ public class LocalComponentsTree extends ComponentsTree {
         for (FileTreeNode node : fileTreeNodes) {
             FileTreeNode existingNode =(FileTreeNode) Optional.ofNullable(root.getChildren())
                     .orElseGet(Vector::new).stream()
-                    .filter(treeNode -> ((FileTreeNode) treeNode).getFilePath().equals(node.getFilePath()))
+                    .filter(treeNode -> DescriptorPathUtils.areDescriptorPathsEqual(
+                            ((FileTreeNode) treeNode).getFilePath(), node.getFilePath()))
                     .findFirst().orElse(null);
             if (existingNode != null) {
                 existingNode.mergeFileTreeNode(node);
