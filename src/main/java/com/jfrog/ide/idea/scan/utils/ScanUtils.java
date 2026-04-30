@@ -10,7 +10,7 @@ import com.jfrog.ide.common.utils.Utils;
 import com.jfrog.ide.idea.log.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.jfrog.build.extractor.util.WslUtils;
+import org.jfrog.build.extractor.WslUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
