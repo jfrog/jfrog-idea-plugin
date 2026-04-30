@@ -29,6 +29,7 @@ import org.jfrog.build.extractor.clientConfiguration.ArtifactoryManagerBuilder;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.build.extractor.executor.CommandExecutor;
 import org.jfrog.build.extractor.executor.CommandResults;
+import org.jfrog.build.extractor.util.WslUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,12 +40,15 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.jfrog.ide.common.utils.ArtifactoryConnectionUtils.createAnonymousAccessArtifactoryManagerBuilder;
 import static com.jfrog.ide.common.utils.ArtifactoryConnectionUtils.createArtifactoryManagerBuilder;
 import static com.jfrog.ide.common.utils.Utils.createMapper;
 import static com.jfrog.ide.common.utils.Utils.createYAMLMapper;
 import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBuilder;
+import com.jfrog.ide.idea.scan.utils.ScanUtils;
+
 import static com.jfrog.ide.idea.scan.utils.ScanUtils.getOSAndArc;
 import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
 import static java.lang.String.join;
@@ -79,14 +83,40 @@ public abstract class ScanBinaryExecutor {
     private final Log log;
     private boolean notSupported;
     private final static Object downloadLock = new Object();
+    // WSL support — null when not running against a WSL-hosted project
+    private static String wslDistro;
+    private static String binaryLinuxPath;
 
     ScanBinaryExecutor(SourceCodeScanType scanType, Log log) {
         this.scanType = scanType;
         this.log = log;
+        wslDistro = null;
+        binaryLinuxPath = null;
         String executable = SystemUtils.IS_OS_WINDOWS ? SCANNER_BINARY_NAME + ".exe" : SCANNER_BINARY_NAME;
         binaryTargetPath = BINARIES_DIR.resolve(SCANNER_BINARY_NAME).resolve(executable);
         archiveTargetPath = BINARIES_DIR.resolve(DOWNLOAD_SCANNER_NAME);
         setOsDistribution();
+    }
+
+    ScanBinaryExecutor(SourceCodeScanType scanType, Log log, String distro) {
+        this.scanType = scanType;
+        this.log = log;
+        wslDistro = distro;
+        try {
+            String linuxHome = ScanUtils.getWslLinuxHome(distro);
+            String linuxBinDir = linuxHome + "/.jfrog-idea-plugin/dependencies/jfrog-security";
+            binaryLinuxPath = linuxBinDir + "/" + SCANNER_BINARY_NAME + "/" + SCANNER_BINARY_NAME;
+            binaryTargetPath = toWslUncPath(distro, binaryLinuxPath);
+            archiveTargetPath = toWslUncPath(distro, linuxBinDir + "/" + DOWNLOAD_SCANNER_NAME);
+        } catch (IOException e) {
+            log.warn("Could not determine WSL home directory for distro '" + distro + "': " + e.getMessage());
+            notSupported = true;
+        }
+        setOsDistribution();
+    }
+
+    private static Path toWslUncPath(String distro, String linuxPath) {
+        return Path.of("\\\\wsl$\\" + distro + linuxPath.replace('/', '\\'));
     }
 
     private ArtifactoryManagerBuilder createManagerBuilder(boolean useJFrogReleases, ServerConfig server) {
@@ -103,6 +133,10 @@ public abstract class ScanBinaryExecutor {
     }
 
     protected void setOsDistribution() {
+        if (wslDistro != null) {
+            osDistribution = ScanUtils.getWslArch(wslDistro);
+            return;
+        }
         try {
             osDistribution = getOSAndArc();
         } catch (IOException e) {
@@ -149,27 +183,72 @@ public abstract class ScanBinaryExecutor {
         Path outputTempDir = null;
         Path inputFile = null;
         try {
-            outputTempDir = Files.createTempDirectory("");
-            Path outputFilePath = Files.createTempFile(outputTempDir, "", ".sarif");
-            inputFileBuilder.output(outputFilePath.toString());
-            inputFileBuilder.scanType(scanType);
-            ScanConfig inputParams = inputFileBuilder.Build();
-            args = new ArrayList<>(args);
-            inputFile = newConfigFormat ? createTempRunInputFile(new NewScansConfig(new NewScanConfig(inputParams))) : createTempRunInputFile(new ScansConfig(List.of(inputParams)));
-            args.add(inputFile.toString());
-            if (newConfigFormat) {
-                args.add(outputFilePath.toString());
-            }
-
             Logger log = Logger.getInstance();
-            // The following logging is done outside the commandExecutor because the commandExecutor log level is set to INFO.
-            //  As it is an internal binary execution, the message should be printed for DEBUG use only.
-            indicator.setText(String.format("Running %s scan at %s", scanType.toString().toLowerCase(), String.join(" ", inputParams.getRoots())));
-            String cmd = String.format("%s %s", binaryTargetPath.toString(), join(" ", args));
-            log.info(String.format("Executing JAS scanner %s with config: %s", cmd, inputParams));
-            CommandExecutor commandExecutor = new CommandExecutor(binaryTargetPath.toString(), createEnvWithCredentials());
-            CommandResults commandResults = commandExecutor.exeCommand(binaryTargetPath.toFile().getParentFile(), args,
-                    null, new NullLog(), Long.MAX_VALUE, TimeUnit.MINUTES);
+            inputFileBuilder.scanType(scanType);
+            args = new ArrayList<>(args);
+
+            final Path outputFilePath;
+            final CommandResults commandResults;
+            final String cmd;
+
+            if (wslDistro != null) {
+                // --- WSL execution path ---
+                // Create temp dirs inside the WSL distro's /tmp (accessible from Windows via UNC)
+                Path wslTmpBase = Path.of("\\\\wsl$\\" + wslDistro + "\\tmp");
+                outputTempDir = Files.createTempDirectory(wslTmpBase, "jfrog");
+                outputFilePath = Files.createTempFile(outputTempDir, "", ".sarif");
+                String linuxOutputPath = WslUtils.toLinuxPath(outputFilePath.toString());
+
+                // Convert project roots from Windows UNC to Linux paths
+                List<String> linuxRoots = inputFileBuilder.Build().getRoots().stream()
+                        .map(WslUtils::toLinuxPath)
+                        .collect(Collectors.toList());
+                inputFileBuilder.roots(linuxRoots).output(linuxOutputPath);
+                ScanConfig inputParams = inputFileBuilder.Build();
+
+                inputFile = createTempRunInputFileInWsl(
+                        newConfigFormat ? new NewScansConfig(new NewScanConfig(inputParams)) : new ScansConfig(List.of(inputParams)));
+                String linuxInputPath = WslUtils.toLinuxPath(inputFile.toString());
+
+                // Build: wsl.exe -d <distro> --cd <binaryParentLinux> -e <binaryLinux> <scanType> <inputLinux> <outputLinux>
+                // Use WSLENV to forward JFrog credential vars from the Windows process env to the Linux side —
+                // avoids putting secrets in command args where they would appear in logs.
+                Map<String, String> credentialEnv = createCredentialEnv();
+                Map<String, String> wslEnv = createEnvWithCredentials();
+                wslEnv.put("WSLENV", String.join(":", credentialEnv.keySet()));
+                String linuxParentDir = binaryLinuxPath.substring(0, binaryLinuxPath.lastIndexOf('/'));
+                List<String> wslArgs = new ArrayList<>(List.of("-d", wslDistro, "--cd", linuxParentDir, "-e", binaryLinuxPath));
+                wslArgs.addAll(args);
+                wslArgs.add(linuxInputPath);
+                wslArgs.add(linuxOutputPath);
+
+                indicator.setText(String.format("Running %s scan at %s", scanType.toString().toLowerCase(), String.join(" ", linuxRoots)));
+                cmd = "wsl.exe " + join(" ", wslArgs);
+                log.info(String.format("Executing JAS scanner (WSL) %s with config: %s", cmd, inputParams));
+                CommandExecutor commandExecutor = new CommandExecutor("wsl.exe", wslEnv);
+                commandResults = commandExecutor.exeCommand(null, wslArgs, null, new NullLog(), Long.MAX_VALUE, TimeUnit.MINUTES);
+            } else {
+                // --- Native execution path ---
+                outputTempDir = Files.createTempDirectory("");
+                outputFilePath = Files.createTempFile(outputTempDir, "", ".sarif");
+                inputFileBuilder.output(outputFilePath.toString());
+                ScanConfig inputParams = inputFileBuilder.Build();
+
+                inputFile = newConfigFormat ? createTempRunInputFile(new NewScansConfig(new NewScanConfig(inputParams))) : createTempRunInputFile(new ScansConfig(List.of(inputParams)));
+                args.add(inputFile.toString());
+                if (newConfigFormat) {
+                    args.add(outputFilePath.toString());
+                }
+
+                // The following logging is done outside the commandExecutor because the commandExecutor log level is set to INFO.
+                //  As it is an internal binary execution, the message should be printed for DEBUG use only.
+                indicator.setText(String.format("Running %s scan at %s", scanType.toString().toLowerCase(), String.join(" ", inputParams.getRoots())));
+                cmd = String.format("%s %s", binaryTargetPath.toString(), join(" ", args));
+                log.info(String.format("Executing JAS scanner %s with config: %s", cmd, inputParams));
+                CommandExecutor commandExecutor = new CommandExecutor(binaryTargetPath.toString(), createEnvWithCredentials());
+                commandResults = commandExecutor.exeCommand(binaryTargetPath.toFile().getParentFile(), args,
+                        null, new NullLog(), Long.MAX_VALUE, TimeUnit.MINUTES);
+            }
 
             checkCanceled.run();
 
@@ -316,8 +395,23 @@ public abstract class ScanBinaryExecutor {
         } catch (ZipException exception) {
             throw new IOException("An error occurred while trying to unarchived the JFrog executable:\n" + exception.getMessage());
         }
-        // Set executable permissions to the downloaded scanner
-        if (!binaryTargetPath.toFile().setExecutable(true)) {
+        setExecutablePermissions();
+    }
+
+    private void setExecutablePermissions() throws IOException {
+        if (wslDistro != null) {
+            String binaryLinuxDir = binaryLinuxPath.substring(0, binaryLinuxPath.lastIndexOf('/'));
+            try {
+                Process chmod = new ProcessBuilder("wsl.exe", "-d", wslDistro, "-e", "chmod", "-R", "+x", binaryLinuxDir)
+                        .redirectErrorStream(true).start();
+                if (chmod.waitFor() != 0) {
+                    throw new IOException("chmod -R +x failed for WSL scanner directory at " + binaryLinuxDir);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IOException("Interrupted while setting WSL scanner permissions", e);
+            }
+        } else if (!binaryTargetPath.toFile().setExecutable(true)) {
             throw new IOException("An error occurred while trying to give access permissions to the JFrog executable.");
         }
     }
@@ -330,8 +424,17 @@ public abstract class ScanBinaryExecutor {
         return inputPath;
     }
 
-    private Map<String, String> createEnvWithCredentials() {
-        Map<String, String> env = new HashMap<>(EnvironmentUtil.getEnvironmentMap());
+    private Path createTempRunInputFileInWsl(Object scanInput) throws IOException {
+        ObjectMapper om = createYAMLMapper();
+        Path wslTmpBase = Path.of("\\\\wsl$\\" + wslDistro + "\\tmp");
+        Path tempDir = Files.createTempDirectory(wslTmpBase, "jfrog");
+        Path inputPath = Files.createTempFile(tempDir, "", ".yaml");
+        om.writeValue(inputPath.toFile(), scanInput);
+        return inputPath;
+    }
+
+    private Map<String, String> createCredentialEnv() {
+        Map<String, String> env = new HashMap<>();
         ServerConfigImpl serverConfig = GlobalSettings.getInstance().getServerConfig();
         env.put(ENV_PLATFORM, serverConfig.getUrl());
         if (StringUtils.isNotEmpty(serverConfig.getAccessToken())) {
@@ -340,7 +443,6 @@ public abstract class ScanBinaryExecutor {
             env.put(ENV_USER, serverConfig.getUsername());
             env.put(ENV_PASSWORD, serverConfig.getPassword());
         }
-
         ProxyConfiguration proxyConfiguration = serverConfig.getProxyConfForTargetUrl(serverConfig.getUrl());
         if (proxyConfiguration != null) {
             String proxyUrl = proxyConfiguration.host + ":" + proxyConfiguration.port;
@@ -350,6 +452,12 @@ public abstract class ScanBinaryExecutor {
             //jfrog-ignore
             env.put(ENV_HTTP_PROXY, "http://" + proxyUrl);
         }
+        return env;
+    }
+
+    private Map<String, String> createEnvWithCredentials() {
+        Map<String, String> env = new HashMap<>(EnvironmentUtil.getEnvironmentMap());
+        env.putAll(createCredentialEnv());
         return env;
     }
 

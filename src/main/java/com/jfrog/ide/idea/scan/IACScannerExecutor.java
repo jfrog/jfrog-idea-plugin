@@ -26,6 +26,10 @@ public class IACScannerExecutor extends ScanBinaryExecutor {
         super(SourceCodeScanType.IAC, log);
     }
 
+    public IACScannerExecutor(Log log, String wslDistro) {
+        super(SourceCodeScanType.IAC, log, wslDistro);
+    }
+
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled, ProgressIndicator indicator) throws IOException, InterruptedException {
         return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled, indicator);
     }

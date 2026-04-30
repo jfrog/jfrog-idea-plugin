@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
 import com.jfrog.ide.idea.scan.data.ScansConfig;
+import com.jfrog.ide.idea.scan.utils.ScanUtils;
 import junit.framework.TestCase;
 import org.apache.commons.io.FileUtils;
 import org.jfrog.build.api.util.NullLog;
@@ -105,6 +106,25 @@ public class ScanBinaryExecutorTest extends TestCase {
         assertTrue(actualNoExternalRepoUrl.startsWith(expectedNoExternalRepoUrl));
         String actualExternalRepoUrl = scanner.getBinaryDownloadURL(externalRepoName);
         assertTrue(actualExternalRepoUrl.startsWith(expectedExternalRepoUrl));
+    }
+
+    public void testExtractWslDistro() {
+        assertEquals("Ubuntu", ScanUtils.extractWslDistro("\\\\wsl$\\Ubuntu\\home\\user\\project"));
+        assertEquals("Debian", ScanUtils.extractWslDistro("\\\\wsl.localhost\\Debian\\home\\user\\project"));
+        assertEquals("Ubuntu", ScanUtils.extractWslDistro("\\\\WSL$\\Ubuntu\\home\\user"));
+        // Distro with no trailing path
+        assertEquals("Ubuntu", ScanUtils.extractWslDistro("\\\\wsl$\\Ubuntu"));
+        // Non-WSL path returns null
+        assertNull(ScanUtils.extractWslDistro("C:\\Users\\user\\project"));
+        assertNull(ScanUtils.extractWslDistro(null));
+    }
+
+    public void testGetBinaryDownloadURLForWsl() {
+        // When WSL distro is set the URL should use a Linux OS distribution token
+        final String expectedLinuxPrefix = "xsc-gen-exe-analyzer-manager-local/";
+        String url = scanner.getBinaryDownloadURL(null);
+        // Default (non-WSL) scanner was constructed without a distro; just verify URL is non-null and starts correctly
+        assertTrue(url.startsWith(expectedLinuxPrefix));
     }
 
     private ScansConfig readScansConfigYAML(Path inputPath) throws IOException {

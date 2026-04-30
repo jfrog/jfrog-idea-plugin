@@ -28,6 +28,11 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
         supportedPackageTypes = SUPPORTED_PACKAGE_TYPES;
     }
 
+    public ApplicabilityScannerExecutor(Log log, String wslDistro) {
+        super(SourceCodeScanType.CONTEXTUAL, log, wslDistro);
+        supportedPackageTypes = SUPPORTED_PACKAGE_TYPES;
+    }
+
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled, ProgressIndicator indicator) throws IOException, InterruptedException {
         return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled, indicator);
     }

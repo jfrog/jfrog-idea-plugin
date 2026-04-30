@@ -114,7 +114,7 @@ public final class DescriptorPathUtils {
     /**
      * Converts IntelliJ-style WSL URLs ({@code //wsl$/Distro/...}) to Windows UNC for {@link WslUtils}.
      */
-    static String intellijWslUrlToUnc(String path) {
+    public static String intellijWslUrlToUnc(String path) {
         if (path == null || path.isEmpty()) {
             return path;
         }
