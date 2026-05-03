@@ -146,7 +146,13 @@ public class ScanUtils {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream(), StandardCharsets.UTF_8))) {
                 arch = reader.readLine();
             }
-            proc.waitFor();
+            try {
+                proc.waitFor();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                proc.destroyForcibly();
+                return "linux-amd64";
+            }
             if (StringUtils.isBlank(arch)) {
                 return "linux-amd64";
             }
@@ -155,7 +161,7 @@ public class ScanUtils {
                 case "armv7l", "arm" -> "linux-arm";
                 default -> "linux-amd64";
             };
-        } catch (Exception e) {
+        } catch (IOException e) {
             return "linux-amd64";
         }
     }

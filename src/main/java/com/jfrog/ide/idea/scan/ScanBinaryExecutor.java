@@ -30,6 +30,7 @@ import org.jfrog.build.extractor.clientConfiguration.client.artifactory.Artifact
 import org.jfrog.build.extractor.executor.CommandExecutor;
 import org.jfrog.build.extractor.executor.CommandResults;
 import org.jfrog.build.extractor.WslUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -72,10 +73,10 @@ public abstract class ScanBinaryExecutor {
     private static final String ENV_ACCESS_TOKEN = "JF_TOKEN";
     private static final String ENV_HTTP_PROXY = "HTTP_PROXY";
     private static final String JFROG_RELEASES = "https://releases.jfrog.io/artifactory/";
-    private static Path binaryTargetPath;
-    private static Path archiveTargetPath;
+    private Path binaryTargetPath;
+    private Path archiveTargetPath;
     @Getter
-    private static String osDistribution;
+    private String osDistribution;
     private static LocalDateTime nextUpdateCheck;
     private static String lastDownloadedVersion;
     protected final SourceCodeScanType scanType;
@@ -83,15 +84,16 @@ public abstract class ScanBinaryExecutor {
     private final Log log;
     private boolean notSupported;
     private final static Object downloadLock = new Object();
-    // WSL support — null when not running against a WSL-hosted project
-    private static String wslDistro;
-    private static String binaryLinuxPath;
+    /** WSL distro name when scanning a WSL-hosted project; {@code null} for native Windows/macOS/Linux execution. */
+    private final @Nullable String wslDistro;
+    /** Absolute Linux path to the analyzer binary inside the distro; {@code null} when {@link #wslDistro} is null or home lookup failed. */
+    private final @Nullable String binaryLinuxPath;
 
     ScanBinaryExecutor(SourceCodeScanType scanType, Log log) {
         this.scanType = scanType;
         this.log = log;
-        wslDistro = null;
-        binaryLinuxPath = null;
+        this.wslDistro = null;
+        this.binaryLinuxPath = null;
         String executable = SystemUtils.IS_OS_WINDOWS ? SCANNER_BINARY_NAME + ".exe" : SCANNER_BINARY_NAME;
         binaryTargetPath = BINARIES_DIR.resolve(SCANNER_BINARY_NAME).resolve(executable);
         archiveTargetPath = BINARIES_DIR.resolve(DOWNLOAD_SCANNER_NAME);
@@ -101,17 +103,23 @@ public abstract class ScanBinaryExecutor {
     ScanBinaryExecutor(SourceCodeScanType scanType, Log log, String distro) {
         this.scanType = scanType;
         this.log = log;
-        wslDistro = distro;
+        this.wslDistro = distro;
+        String linuxPath = null;
+        Path targetPath = null;
+        Path archivePath = null;
         try {
             String linuxHome = ScanUtils.getWslLinuxHome(distro);
             String linuxBinDir = linuxHome + "/.jfrog-idea-plugin/dependencies/jfrog-security";
-            binaryLinuxPath = linuxBinDir + "/" + SCANNER_BINARY_NAME + "/" + SCANNER_BINARY_NAME;
-            binaryTargetPath = toWslUncPath(distro, binaryLinuxPath);
-            archiveTargetPath = toWslUncPath(distro, linuxBinDir + "/" + DOWNLOAD_SCANNER_NAME);
+            linuxPath = linuxBinDir + "/" + SCANNER_BINARY_NAME + "/" + SCANNER_BINARY_NAME;
+            targetPath = toWslUncPath(distro, linuxPath);
+            archivePath = toWslUncPath(distro, linuxBinDir + "/" + DOWNLOAD_SCANNER_NAME);
         } catch (IOException e) {
             log.warn("Could not determine WSL home directory for distro '" + distro + "': " + e.getMessage());
             notSupported = true;
         }
+        this.binaryLinuxPath = linuxPath;
+        this.binaryTargetPath = targetPath;
+        this.archiveTargetPath = archivePath;
         setOsDistribution();
     }
 
@@ -191,7 +199,7 @@ public abstract class ScanBinaryExecutor {
             final CommandResults commandResults;
             final String cmd;
 
-            if (wslDistro != null) {
+            if (wslDistro != null && binaryLinuxPath != null) {
                 // --- WSL execution path ---
                 // Create temp dirs inside the WSL distro's /tmp (accessible from Windows via UNC)
                 Path wslTmpBase = Path.of("\\\\wsl$\\" + wslDistro + "\\tmp");
@@ -399,7 +407,7 @@ public abstract class ScanBinaryExecutor {
     }
 
     private void setExecutablePermissions() throws IOException {
-        if (wslDistro != null) {
+        if (wslDistro != null && binaryLinuxPath != null) {
             String binaryLinuxDir = binaryLinuxPath.substring(0, binaryLinuxPath.lastIndexOf('/'));
             try {
                 Process chmod = new ProcessBuilder("wsl.exe", "-d", wslDistro, "-e", "chmod", "-R", "+x", binaryLinuxDir)
