@@ -71,8 +71,8 @@ public class ConnectionDetailsFromCliTest {
 
             // Config JFrog CLI
             if (cliParameters != null) {
-                JfrogCliDriver jfrogCliDriver = new JfrogCliDriver(envVars);
-                jfrogCliDriver.runCommand(null, cliParameters, new ArrayList<>(), null);
+                JfrogCliDriver jfrogCliDriver = new JfrogCliDriver(envVars, null);
+                jfrogCliDriver.runCommand(null, envVars, cliParameters, new ArrayList<>(), null, null);
             }
 
             // Check results

@@ -44,6 +44,7 @@ import java.net.InetSocketAddress;
 import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -494,7 +495,7 @@ public class ServerConfigImpl implements ServerConfig {
      * @return true if connection details loaded from JFrog CLI default server.
      */
     public boolean readConnectionDetailsFromJfrogCli() throws IOException {
-        JfrogCliDriver driver = new JfrogCliDriver(EnvironmentUtil.getEnvironmentMap());
+        JfrogCliDriver driver = new JfrogCliDriver(new HashMap<>(EnvironmentUtil.getEnvironmentMap()), null);
         if (!driver.isJfrogCliInstalled()) {
             return false;
         }
