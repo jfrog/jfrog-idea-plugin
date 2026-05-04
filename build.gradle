@@ -74,13 +74,15 @@ repositories {
 
 def buildInfoVersion = '2.43.x-SNAPSHOT'
 def idePluginsCommonVersion = '2.4.x-SNAPSHOT'
+// Updated to 2.17.3 for security fixes - compatible with Java 8+
+def jacksonVersion = '2.17.3'
 
 dependencies {
-    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.15.2'
+    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: jacksonVersion
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-extractor', version: buildInfoVersion
     implementation group: 'com.jfrog.ide', name: 'ide-plugins-common', version: idePluginsCommonVersion
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-client', version: buildInfoVersion
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.15.3'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
     implementation group: 'org.jfrog.buildinfo', name: 'build-info-api', version: buildInfoVersion
     implementation group: 'com.jfrog.xray.client', name: 'xray-client-java', version: '0.14.1'
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
