@@ -63,7 +63,7 @@ public abstract class ScanBinaryExecutor {
     private static final int USER_NOT_ENTITLED = 31;
     private static final int NOT_SUPPORTED = 13;
     private static final String SCANNER_BINARY_NAME = "analyzerManager";
-    static final String DEFAULT_SCANNER_BINARY_VERSION = "1.30.1";
+    static final String DEFAULT_SCANNER_BINARY_VERSION = "1.31.1";
     private static final String BINARY_DOWNLOAD_URL_PREFIX = "xsc-gen-exe-analyzer-manager-local/v1/";
     private static final String DOWNLOAD_SCANNER_NAME = "analyzerManager.zip";
     private static final String MINIMAL_XRAY_VERSION_SUPPORTED_FOR_ENTITLEMENT = "3.66.0";
@@ -182,84 +182,100 @@ public abstract class ScanBinaryExecutor {
         return execute(inputFileBuilder, args, checkCanceled, false, indicator);
     }
 
+    /**
+     * WSL vs native is decided from per-executor instance state (not statics). An early WSL variant used
+     * static flags cleared by {@link #ScanBinaryExecutor(SourceCodeScanType, Log)}; that could mix
+     * "native" control flow with WSL UNC binary paths when multiple projects/managers shared the JVM.
+     */
+    private boolean useWslRuntime() {
+        return wslDistro != null && binaryLinuxPath != null && !binaryLinuxPath.isEmpty();
+    }
+
+    private record ScanRun(Path outputTempDir, Path inputFile, Path outputFilePath, CommandResults commandResults, String cmd) {
+    }
+
     protected List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, List<String> args, Runnable checkCanceled, boolean newConfigFormat, ProgressIndicator indicator) throws IOException, InterruptedException {
         if (!shouldExecute()) {
             return List.of();
         }
         checkCanceled.run();
         updateBinaryIfNeeded();
-        Path outputTempDir = null;
-        Path inputFile = null;
+        Logger log = Logger.getInstance();
+        List<String> cmdArgs = new ArrayList<>(args);
+        ScanRun run = useWslRuntime()
+                ? runWslScan(inputFileBuilder, cmdArgs, newConfigFormat, indicator, log)
+                : runNativeScan(inputFileBuilder, cmdArgs, newConfigFormat, indicator, log);
+        checkCanceled.run();
+        return handleScanCommandResult(run, log);
+    }
+
+    private ScanRun runWslScan(ScanConfig.Builder inputFileBuilder, List<String> args, boolean newConfigFormat, ProgressIndicator indicator, Logger log) throws IOException, InterruptedException {
+        int parentIdx = binaryLinuxPath.lastIndexOf('/');
+        if (parentIdx < 0) {
+            throw new IOException("Invalid WSL scanner path (no directory segment): " + binaryLinuxPath);
+        }
+        String linuxParentDir = binaryLinuxPath.substring(0, parentIdx);
+        inputFileBuilder.scanType(scanType);
+        Path wslTmpBase = Path.of("\\\\wsl$\\" + wslDistro + "\\tmp");
+        Path outputTempDir = Files.createTempDirectory(wslTmpBase, "jfrog");
+        Path outputFilePath = Files.createTempFile(outputTempDir, "", ".sarif");
+        String linuxOutputPath = WslUtils.toLinuxPath(outputFilePath.toString());
+
+        List<String> linuxRoots = inputFileBuilder.Build().getRoots().stream()
+                .map(WslUtils::toLinuxPath)
+                .collect(Collectors.toList());
+        inputFileBuilder.roots(linuxRoots).output(linuxOutputPath);
+        ScanConfig inputParams = inputFileBuilder.Build();
+
+        Path inputFile = createTempRunInputFileInWsl(
+                newConfigFormat ? new NewScansConfig(new NewScanConfig(inputParams)) : new ScansConfig(List.of(inputParams)));
+        String linuxInputPath = WslUtils.toLinuxPath(inputFile.toString());
+
+        Map<String, String> credentialEnv = createCredentialEnv();
+        Map<String, String> wslEnv = createEnvWithCredentials();
+        wslEnv.put("WSLENV", String.join(":", credentialEnv.keySet()));
+        List<String> wslArgs = new ArrayList<>(List.of("-d", wslDistro, "--cd", linuxParentDir, "-e", binaryLinuxPath));
+        wslArgs.addAll(args);
+        wslArgs.add(linuxInputPath);
+        wslArgs.add(linuxOutputPath);
+
+        indicator.setText(String.format("Running %s scan at %s", scanType.toString().toLowerCase(), String.join(" ", linuxRoots)));
+        String cmd = "wsl.exe " + join(" ", wslArgs);
+        log.info(String.format("Executing JAS scanner (WSL) %s with config: %s", cmd, inputParams));
+        CommandExecutor commandExecutor = new CommandExecutor("wsl.exe", wslEnv);
+        CommandResults commandResults = commandExecutor.exeCommand(null, wslArgs, null, new NullLog(), Long.MAX_VALUE, TimeUnit.MINUTES);
+        return new ScanRun(outputTempDir, inputFile, outputFilePath, commandResults, cmd);
+    }
+
+    private ScanRun runNativeScan(ScanConfig.Builder inputFileBuilder, List<String> args, boolean newConfigFormat, ProgressIndicator indicator, Logger log) throws IOException, InterruptedException {
+        Path outputTempDir = Files.createTempDirectory("");
+        Path outputFilePath = Files.createTempFile(outputTempDir, "", ".sarif");
+        inputFileBuilder.output(outputFilePath.toString());
+        inputFileBuilder.scanType(scanType);
+        ScanConfig inputParams = inputFileBuilder.Build();
+
+        Path inputFile = newConfigFormat ? createTempRunInputFile(new NewScansConfig(new NewScanConfig(inputParams))) : createTempRunInputFile(new ScansConfig(List.of(inputParams)));
+        args.add(inputFile.toString());
+        if (newConfigFormat) {
+            args.add(outputFilePath.toString());
+        }
+
+        indicator.setText(String.format("Running %s scan at %s", scanType.toString().toLowerCase(), String.join(" ", inputParams.getRoots())));
+        String cmd = String.format("%s %s", binaryTargetPath.toString(), join(" ", args));
+        log.info(String.format("Executing JAS scanner %s with config: %s", cmd, inputParams));
+        CommandExecutor commandExecutor = new CommandExecutor(binaryTargetPath.toString(), createEnvWithCredentials());
+        CommandResults commandResults = commandExecutor.exeCommand(binaryTargetPath.toFile().getParentFile(), args,
+                null, new NullLog(), Long.MAX_VALUE, TimeUnit.MINUTES);
+        return new ScanRun(outputTempDir, inputFile, outputFilePath, commandResults, cmd);
+    }
+
+    private List<JFrogSecurityWarning> handleScanCommandResult(ScanRun run, Logger log) throws IOException {
+        Path outputTempDir = run.outputTempDir();
+        Path inputFile = run.inputFile();
+        Path outputFilePath = run.outputFilePath();
+        CommandResults commandResults = run.commandResults();
+        String cmd = run.cmd();
         try {
-            Logger log = Logger.getInstance();
-            inputFileBuilder.scanType(scanType);
-            args = new ArrayList<>(args);
-
-            final Path outputFilePath;
-            final CommandResults commandResults;
-            final String cmd;
-
-            if (wslDistro != null && binaryLinuxPath != null) {
-                // --- WSL execution path ---
-                // Create temp dirs inside the WSL distro's /tmp (accessible from Windows via UNC)
-                Path wslTmpBase = Path.of("\\\\wsl$\\" + wslDistro + "\\tmp");
-                outputTempDir = Files.createTempDirectory(wslTmpBase, "jfrog");
-                outputFilePath = Files.createTempFile(outputTempDir, "", ".sarif");
-                String linuxOutputPath = WslUtils.toLinuxPath(outputFilePath.toString());
-
-                // Convert project roots from Windows UNC to Linux paths
-                List<String> linuxRoots = inputFileBuilder.Build().getRoots().stream()
-                        .map(WslUtils::toLinuxPath)
-                        .collect(Collectors.toList());
-                inputFileBuilder.roots(linuxRoots).output(linuxOutputPath);
-                ScanConfig inputParams = inputFileBuilder.Build();
-
-                inputFile = createTempRunInputFileInWsl(
-                        newConfigFormat ? new NewScansConfig(new NewScanConfig(inputParams)) : new ScansConfig(List.of(inputParams)));
-                String linuxInputPath = WslUtils.toLinuxPath(inputFile.toString());
-
-                // Build: wsl.exe -d <distro> --cd <binaryParentLinux> -e <binaryLinux> <scanType> <inputLinux> <outputLinux>
-                // Use WSLENV to forward JFrog credential vars from the Windows process env to the Linux side —
-                // avoids putting secrets in command args where they would appear in logs.
-                Map<String, String> credentialEnv = createCredentialEnv();
-                Map<String, String> wslEnv = createEnvWithCredentials();
-                wslEnv.put("WSLENV", String.join(":", credentialEnv.keySet()));
-                String linuxParentDir = binaryLinuxPath.substring(0, binaryLinuxPath.lastIndexOf('/'));
-                List<String> wslArgs = new ArrayList<>(List.of("-d", wslDistro, "--cd", linuxParentDir, "-e", binaryLinuxPath));
-                wslArgs.addAll(args);
-                wslArgs.add(linuxInputPath);
-                wslArgs.add(linuxOutputPath);
-
-                indicator.setText(String.format("Running %s scan at %s", scanType.toString().toLowerCase(), String.join(" ", linuxRoots)));
-                cmd = "wsl.exe " + join(" ", wslArgs);
-                log.info(String.format("Executing JAS scanner (WSL) %s with config: %s", cmd, inputParams));
-                CommandExecutor commandExecutor = new CommandExecutor("wsl.exe", wslEnv);
-                commandResults = commandExecutor.exeCommand(null, wslArgs, null, new NullLog(), Long.MAX_VALUE, TimeUnit.MINUTES);
-            } else {
-                // --- Native execution path ---
-                outputTempDir = Files.createTempDirectory("");
-                outputFilePath = Files.createTempFile(outputTempDir, "", ".sarif");
-                inputFileBuilder.output(outputFilePath.toString());
-                ScanConfig inputParams = inputFileBuilder.Build();
-
-                inputFile = newConfigFormat ? createTempRunInputFile(new NewScansConfig(new NewScanConfig(inputParams))) : createTempRunInputFile(new ScansConfig(List.of(inputParams)));
-                args.add(inputFile.toString());
-                if (newConfigFormat) {
-                    args.add(outputFilePath.toString());
-                }
-
-                // The following logging is done outside the commandExecutor because the commandExecutor log level is set to INFO.
-                //  As it is an internal binary execution, the message should be printed for DEBUG use only.
-                indicator.setText(String.format("Running %s scan at %s", scanType.toString().toLowerCase(), String.join(" ", inputParams.getRoots())));
-                cmd = String.format("%s %s", binaryTargetPath.toString(), join(" ", args));
-                log.info(String.format("Executing JAS scanner %s with config: %s", cmd, inputParams));
-                CommandExecutor commandExecutor = new CommandExecutor(binaryTargetPath.toString(), createEnvWithCredentials());
-                commandResults = commandExecutor.exeCommand(binaryTargetPath.toFile().getParentFile(), args,
-                        null, new NullLog(), Long.MAX_VALUE, TimeUnit.MINUTES);
-            }
-
-            checkCanceled.run();
-
             if (commandResults.isOk()) {
                 log.info(String.format("Finished successfully to run command: %s", cmd));
                 log.debug(commandResults.getRes());
@@ -407,8 +423,12 @@ public abstract class ScanBinaryExecutor {
     }
 
     private void setExecutablePermissions() throws IOException {
-        if (wslDistro != null && binaryLinuxPath != null) {
-            String binaryLinuxDir = binaryLinuxPath.substring(0, binaryLinuxPath.lastIndexOf('/'));
+        if (useWslRuntime()) {
+            int dirSep = binaryLinuxPath.lastIndexOf('/');
+            if (dirSep < 0) {
+                throw new IOException("Invalid WSL scanner path (no directory segment): " + binaryLinuxPath);
+            }
+            String binaryLinuxDir = binaryLinuxPath.substring(0, dirSep);
             try {
                 Process chmod = new ProcessBuilder("wsl.exe", "-d", wslDistro, "-e", "chmod", "-R", "+x", binaryLinuxDir)
                         .redirectErrorStream(true).start();
