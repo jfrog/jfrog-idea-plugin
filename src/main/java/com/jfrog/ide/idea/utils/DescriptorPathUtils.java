@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -126,6 +127,85 @@ public final class DescriptorPathUtils {
             return "\\\\wsl.localhost\\" + p.substring("//wsl.localhost/".length()).replace('/', '\\');
         }
         return path;
+    }
+
+    /**
+     * Converts a SARIF {@code artifactLocation.uri} to a path the IDE can open locally.
+     * <p>
+     * On Windows, {@link Paths#get(URI)} turns Linux {@code file:///home/...} URIs into unusable paths such as
+     * {@code \\home\\user\\...}. When {@code wslDistro} is set (WSL-hosted project), Linux absolute paths are mapped to
+     * {@code \\wsl$\{distro}\...}, consistent with {@link com.jfrog.ide.idea.scan.ScanBinaryExecutor} binary paths.
+     * Windows drive URIs ({@code file:///C:/...}) are left to the default JVM path conversion.
+     */
+    public static String sarifArtifactUriToLocalPath(@Nullable String uriString, @Nullable String wslDistro) {
+        if (StringUtils.isBlank(uriString)) {
+            return "";
+        }
+        URI uri;
+        try {
+            uri = URI.create(uriString.trim());
+        } catch (IllegalArgumentException e) {
+            return uriString.trim();
+        }
+        return sarifArtifactUriToLocalPath(uri, wslDistro);
+    }
+
+    private static String sarifArtifactUriToLocalPath(URI uri, @Nullable String wslDistro) {
+        String scheme = uri.getScheme();
+        if (!"file".equalsIgnoreCase(scheme != null ? scheme : "")) {
+            try {
+                return Paths.get(uri).toString();
+            } catch (InvalidPathException e) {
+                return uri.toString();
+            }
+        }
+        if (!SystemUtils.IS_OS_WINDOWS || StringUtils.isBlank(wslDistro)) {
+            try {
+                return Paths.get(uri).toString();
+            } catch (InvalidPathException e) {
+                String p = uri.getPath();
+                return p != null ? p : uri.toString();
+            }
+        }
+        String unc = tryLinuxFileUriToWslUnc(uri, wslDistro.trim());
+        if (unc != null) {
+            return unc;
+        }
+        try {
+            return Paths.get(uri).toString();
+        } catch (InvalidPathException e) {
+            String p = uri.getPath();
+            return p != null ? p : uri.toString();
+        }
+    }
+
+    /**
+     * Maps {@code file:///home/...} style URIs to {@code \\wsl$\{distro}\home\...} on Windows; returns null when the URI
+     * should use normal {@link Paths#get(URI)} handling (e.g. {@code file:///C:/...}).
+     */
+    @Nullable
+    static String tryLinuxFileUriToWslUnc(URI fileUri, String wslDistro) {
+        String rawPath = fileUri.getPath();
+        if (rawPath == null || rawPath.isEmpty()) {
+            return null;
+        }
+        if (isWindowsDriveFileUriPath(rawPath)) {
+            return null;
+        }
+        if (rawPath.startsWith("/") && rawPath.length() > 1) {
+            return "\\\\wsl$\\" + wslDistro + rawPath.replace('/', '\\');
+        }
+        return null;
+    }
+
+    /**
+     * Detects {@code file} URI paths that refer to a Windows absolute path ({@code /C:/...}).
+     */
+    static boolean isWindowsDriveFileUriPath(String uriPath) {
+        return uriPath.length() >= 4
+                && uriPath.charAt(0) == '/'
+                && Character.isLetter(uriPath.charAt(1))
+                && uriPath.charAt(2) == ':';
     }
 
     private static boolean startsWithIgnoreCase(String s, String prefix) {

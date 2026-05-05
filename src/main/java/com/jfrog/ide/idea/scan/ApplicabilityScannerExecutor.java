@@ -62,7 +62,7 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
                     List<SarifResult> evidence = resultsByRule.getOrDefault(rule.getId(), List.of());
                     for (SarifResult result : evidence) {
                         if (!result.getLocations().isEmpty()) {
-                            warnings.add(new JFrogSecurityWarning(result, scanType, rule));
+                            warnings.add(new JFrogSecurityWarning(result, scanType, rule, getWslDistro()));
                         }
                     }
                 } else if ("not_applicable".equals(applicability)) {

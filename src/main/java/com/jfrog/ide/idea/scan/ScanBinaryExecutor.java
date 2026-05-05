@@ -89,6 +89,14 @@ public abstract class ScanBinaryExecutor {
     /** Absolute Linux path to the analyzer binary inside the distro; {@code null} when {@link #wslDistro} is null or home lookup failed. */
     private final @Nullable String binaryLinuxPath;
 
+    /**
+     * Distro detected from the IDE project path when the project lives on a WSL filesystem ({@code \\wsl$\...});
+     * used to map SARIF Linux paths to UNC for navigation.
+     */
+    protected @Nullable String getWslDistro() {
+        return wslDistro;
+    }
+
     ScanBinaryExecutor(SourceCodeScanType scanType, Log log) {
         this.scanType = scanType;
         this.log = log;
@@ -383,7 +391,7 @@ public abstract class ScanBinaryExecutor {
         output.getRuns().forEach(run -> run.getResults().stream()
                 .filter(SarifResult::isNotSuppressed)
                 .filter(result -> !"informational".equals(result.getKind()))
-                .forEach(result -> warnings.add(new JFrogSecurityWarning(result, scanType, run.getRuleFromRunById(result.getRuleId())))));
+                .forEach(result -> warnings.add(new JFrogSecurityWarning(result, scanType, run.getRuleFromRunById(result.getRuleId()), getWslDistro()))));
 
         Optional<Run> run = output.getRuns().stream().findFirst();
         if (run.isPresent()) {

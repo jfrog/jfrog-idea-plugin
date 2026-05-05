@@ -4,10 +4,10 @@ import com.jfrog.ide.common.nodes.subentities.FindingInfo;
 import com.jfrog.ide.common.nodes.subentities.Severity;
 import com.jfrog.ide.common.nodes.subentities.SourceCodeScanType;
 import com.jfrog.ide.idea.scan.data.*;
+import com.jfrog.ide.idea.utils.DescriptorPathUtils;
 import lombok.Getter;
+import org.jetbrains.annotations.Nullable;
 
-import java.net.URI;
-import java.nio.file.Paths;
 import java.util.List;
 
 @Getter
@@ -53,18 +53,22 @@ public class JFrogSecurityWarning {
     }
 
     public JFrogSecurityWarning(SarifResult result, SourceCodeScanType reporter, Rule rule) {
+        this(result, reporter, rule, null);
+    }
+
+    public JFrogSecurityWarning(SarifResult result, SourceCodeScanType reporter, Rule rule, @Nullable String wslDistro) {
         this(getFirstRegion(result).getStartLine() - 1,
                 getFirstRegion(result).getStartColumn() - 1,
                 getFirstRegion(result).getEndLine() - 1,
                 getFirstRegion(result).getEndColumn() - 1,
                 determineReason(result.getMessage().getText(), rule.getShortDescription().getText(), reporter),
-                getFilePath(result),
+                getFilePath(result, wslDistro),
                 result.getRuleId(),
                 getFirstRegion(result).getSnippet().getText(),
                 reporter,
                 isWarningApplicable(result, rule),
                 Severity.fromSarif(result.getSeverity()),
-                convertCodeFlowsToFindingInfo(result.getCodeFlows())
+                convertCodeFlowsToFindingInfo(result.getCodeFlows(), wslDistro)
         );
     }
 
@@ -72,11 +76,14 @@ public class JFrogSecurityWarning {
         return !result.getKind().equals("pass") && (rule.getRuleProperties().map(properties -> properties.getApplicability().equals("applicable")).orElse(true));
     }
 
-    private static String getFilePath(SarifResult result) {
-        return !result.getLocations().isEmpty() ? uriToPath(result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri()) : "";
+    private static String getFilePath(SarifResult result, @Nullable String wslDistro) {
+        return !result.getLocations().isEmpty()
+                ? DescriptorPathUtils.sarifArtifactUriToLocalPath(
+                result.getLocations().get(0).getPhysicalLocation().getArtifactLocation().getUri(), wslDistro)
+                : "";
     }
 
-    private static FindingInfo[][] convertCodeFlowsToFindingInfo(List<CodeFlow> codeFlows) {
+    private static FindingInfo[][] convertCodeFlowsToFindingInfo(List<CodeFlow> codeFlows, @Nullable String wslDistro) {
         if (codeFlows == null || codeFlows.isEmpty()) {
             return null;
         }
@@ -92,7 +99,7 @@ public class JFrogSecurityWarning {
             for (int j = 0; j < locations.size(); j++) {
                 PhysicalLocation location = locations.get(j).getLocation().getPhysicalLocation();
                 results[i][j] = new FindingInfo(
-                        uriToPath(location.getArtifactLocation().getUri()),
+                        DescriptorPathUtils.sarifArtifactUriToLocalPath(location.getArtifactLocation().getUri(), wslDistro),
                         location.getRegion().getStartLine(),
                         location.getRegion().getStartColumn(),
                         location.getRegion().getEndLine(),
@@ -120,10 +127,6 @@ public class JFrogSecurityWarning {
 
     public void setScannerSearchTarget(String scannerSearchTarget) {
         this.scannerSearchTarget = scannerSearchTarget;
-    }
-
-    private static String uriToPath(String path) {
-        return Paths.get(URI.create(path)).toString();
     }
 
     private static String determineReason(String resultMessage, String ruleMessage, SourceCodeScanType scannerType) {

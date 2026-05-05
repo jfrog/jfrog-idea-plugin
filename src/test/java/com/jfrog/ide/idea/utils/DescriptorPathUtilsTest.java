@@ -1,10 +1,16 @@
 package com.jfrog.ide.idea.utils;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.net.URI;
+
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assume.assumeTrue;
 
 public class DescriptorPathUtilsTest {
 
@@ -56,5 +62,54 @@ public class DescriptorPathUtilsTest {
     public void testAreDescriptorPathsEqual_nullAndIdentical() {
         assertTrue(DescriptorPathUtils.areDescriptorPathsEqual(null, null));
         assertTrue(DescriptorPathUtils.areDescriptorPathsEqual("/a/b", "/a/b"));
+    }
+
+    @Test
+    public void tryLinuxFileUriToWslUnc_mapsLinuxRootToUnc() {
+        assertEquals(
+                "\\\\wsl$\\Ubuntu\\home\\user\\app.js",
+                DescriptorPathUtils.tryLinuxFileUriToWslUnc(URI.create("file:///home/user/app.js"), "Ubuntu"));
+    }
+
+    @Test
+    public void tryLinuxFileUriToWslUnc_skipsWindowsDriveUri() {
+        assertNull(DescriptorPathUtils.tryLinuxFileUriToWslUnc(URI.create("file:///C:/Users/dev/project"), "Ubuntu"));
+    }
+
+    @Test
+    public void isWindowsDriveFileUriPath_detectsDriveLetter() {
+        assertTrue(DescriptorPathUtils.isWindowsDriveFileUriPath("/C:/Users/dev"));
+        assertTrue(DescriptorPathUtils.isWindowsDriveFileUriPath("/c:/Users/dev"));
+        assertFalse(DescriptorPathUtils.isWindowsDriveFileUriPath("/home/user"));
+    }
+
+    @Test
+    public void sarifArtifactUriToLocalPath_windowsMapsLinuxFileUriToUnc() {
+        assumeTrue(SystemUtils.IS_OS_WINDOWS);
+        assertEquals(
+                "\\\\wsl$\\Ubuntu\\home\\user\\repo\\app.js",
+                DescriptorPathUtils.sarifArtifactUriToLocalPath("file:///home/user/repo/app.js", "Ubuntu"));
+    }
+
+    @Test
+    public void sarifArtifactUriToLocalPath_windowsLeavesWindowsDriveUriUnchangedStyle() {
+        assumeTrue(SystemUtils.IS_OS_WINDOWS);
+        String resolved = DescriptorPathUtils.sarifArtifactUriToLocalPath("file:///C:/Users/dev/x.txt", "Ubuntu");
+        assertTrue(resolved.endsWith("x.txt"));
+        assertFalse(resolved.startsWith("\\\\wsl$\\"));
+    }
+
+    @Test
+    public void sarifArtifactUriToLocalPath_nonWindowsUsesJvmPathForLinuxUri() {
+        assumeTrue(!SystemUtils.IS_OS_WINDOWS);
+        assertEquals(
+                "/home/user/app.js",
+                DescriptorPathUtils.sarifArtifactUriToLocalPath("file:///home/user/app.js", "Ubuntu"));
+    }
+
+    @Test
+    public void sarifArtifactUriToLocalPath_blankReturnsEmpty() {
+        assertEquals("", DescriptorPathUtils.sarifArtifactUriToLocalPath("", null));
+        assertEquals("", DescriptorPathUtils.sarifArtifactUriToLocalPath("   ", null));
     }
 }
