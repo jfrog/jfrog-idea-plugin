@@ -1,33 +1,33 @@
 package com.jfrog.ide.idea.utils;
 
 import org.apache.commons.lang3.SystemUtils;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.net.URI;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assume.assumeTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 public class DescriptorPathUtilsTest {
 
-    @DataProvider
-    public Object[][] intellijWslUrlToUnc() {
-        return new Object[][]{
-                {"//wsl$/Ubuntu/home/user/app", "\\\\wsl$\\Ubuntu\\home\\user\\app"},
-                {"//WSL$/Ubuntu/home/user/app", "\\\\wsl$\\Ubuntu\\home\\user\\app"},
-                {"//wsl.localhost/Ubuntu/home/user/app", "\\\\wsl.localhost\\Ubuntu\\home\\user\\app"},
-                {"//WSL.LOCALHOST/Ubuntu/home/user/app", "\\\\wsl.localhost\\Ubuntu\\home\\user\\app"},
-                {"C:\\plain\\path", "C:\\plain\\path"},
-        };
-    }
+    private static final Object[][] INTELLIJ_WSL_URL_TO_UNC_CASES = new Object[][]{
+            {"//wsl$/Ubuntu/home/user/app", "\\\\wsl$\\Ubuntu\\home\\user\\app"},
+            {"//WSL$/Ubuntu/home/user/app", "\\\\wsl$\\Ubuntu\\home\\user\\app"},
+            {"//wsl.localhost/Ubuntu/home/user/app", "\\\\wsl.localhost\\Ubuntu\\home\\user\\app"},
+            {"//WSL.LOCALHOST/Ubuntu/home/user/app", "\\\\wsl.localhost\\Ubuntu\\home\\user\\app"},
+            {"C:\\plain\\path", "C:\\plain\\path"},
+    };
 
-    @Test(dataProvider = "intellijWslUrlToUnc")
-    public void testIntellijWslUrlToUnc(String input, String expected) {
-        assertEquals(DescriptorPathUtils.intellijWslUrlToUnc(input), expected);
+    @Test
+    public void testIntellijWslUrlToUnc() {
+        for (Object[] row : INTELLIJ_WSL_URL_TO_UNC_CASES) {
+            String input = (String) row[0];
+            String expected = (String) row[1];
+            assertEquals(expected, DescriptorPathUtils.intellijWslUrlToUnc(input));
+        }
     }
 
     @Test
