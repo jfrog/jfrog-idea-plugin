@@ -72,10 +72,9 @@ repositories {
     }
 }
 
-def buildInfoVersion = '2.43.x-SNAPSHOT'
-def idePluginsCommonVersion = '2.4.x-SNAPSHOT'
-// Updated to 2.17.3 for security fixes - compatible with Java 8+
-def jacksonVersion = '2.17.3'
+def buildInfoVersion = '2.43.9'
+def idePluginsCommonVersion = '2.4.5'
+def jacksonVersion = '2.18.6'
 
 dependencies {
     implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: jacksonVersion
@@ -87,7 +86,7 @@ dependencies {
     implementation group: 'com.jfrog.xray.client', name: 'xray-client-java', version: '0.14.1'
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
     implementation group: 'org.jfrog.filespecs', name: 'file-specs-java', version: '1.1.2'
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.18.0'
     implementation group: 'com.google.guava', name: 'guava', version: '32.0.1-jre'
     implementation group: 'org.codehaus.plexus', name: 'plexus-utils', version: '3.4.1'
     implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.4'
