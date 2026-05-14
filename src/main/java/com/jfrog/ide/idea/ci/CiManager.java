@@ -24,6 +24,7 @@ import com.jfrog.ide.idea.ui.CiComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.CiFilterManager;
 import com.jfrog.ide.idea.utils.Utils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.build.extractor.scan.DependencyTree;
 
@@ -151,8 +152,8 @@ public class CiManager extends CiManagerBase implements Disposable {
         return (BuildGeneralInfo) root.getChildren().stream()
                 .map(DependencyTree::getGeneralInfo)
                 .map(generalInfo -> (BuildGeneralInfo) generalInfo)
-                .filter(generalInfo -> StringUtils.equals(buildName, generalInfo.getBuildName()))
-                .filter(generalInfo -> StringUtils.equals(buildNumber, generalInfo.getBuildNumber()))
+                .filter(generalInfo -> Strings.CS.equals(buildName, generalInfo.getBuildName()))
+                .filter(generalInfo -> Strings.CS.equals(buildNumber, generalInfo.getBuildNumber()))
                 .findAny().orElse(null);
     }
 

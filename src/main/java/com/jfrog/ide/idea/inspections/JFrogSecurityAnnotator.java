@@ -15,6 +15,7 @@ import com.jfrog.ide.common.nodes.SortableChildrenTreeNode;
 import com.jfrog.ide.idea.events.AnnotationEvents;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
+import com.jfrog.ide.idea.utils.DescriptorPathUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,7 +53,7 @@ public class JFrogSecurityAnnotator extends ExternalAnnotator<PsiFile, List<File
         Enumeration<TreeNode> roots = ((SortableChildrenTreeNode) componentsTree.getModel().getRoot()).children();
         roots.asIterator().forEachRemaining(root -> {
             FileTreeNode fileNode = (FileTreeNode) root;
-            if (fileNode.getFilePath().equals(file.getContainingFile().getVirtualFile().getPath())) {
+            if (DescriptorPathUtils.areDescriptorPathsEqual(fileNode.getFilePath(), file.getContainingFile().getVirtualFile().getPath())) {
                 fileNode.children().asIterator().forEachRemaining(issueNode -> {
                             if (issueNode instanceof FileIssueNode) {
                                 issues.add((FileIssueNode) issueNode);

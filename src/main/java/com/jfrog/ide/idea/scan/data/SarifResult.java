@@ -44,7 +44,7 @@ public class SarifResult {
     }
 
     public String getSeverity() {
-        return StringUtils.defaultString(severity, "warning");
+        return Objects.toString(severity, "warning");
     }
 
     public void setMessage(Message message) {

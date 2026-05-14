@@ -19,11 +19,16 @@ import com.jfrog.ide.idea.scan.data.ScanConfig;
 import com.jfrog.ide.idea.scan.data.applications.JFrogApplicationsConfig;
 import com.jfrog.ide.idea.scan.data.applications.ModuleConfig;
 import com.jfrog.ide.idea.scan.data.applications.ScannerConfig;
+import com.jfrog.ide.idea.scan.utils.ScanUtils;
 import com.jfrog.ide.idea.ui.LocalComponentsTree;
+import com.jfrog.ide.idea.utils.DescriptorPathUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jfrog.build.extractor.WslUtils;
 
 import javax.swing.tree.TreeNode;
 import java.io.File;
@@ -57,8 +62,8 @@ import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 public class SourceCodeScannerManager {
     private final Path jfrogApplictionsConfigPath;
     private final AtomicBoolean scanInProgress = new AtomicBoolean(false);
-    private final ApplicabilityScannerExecutor applicability = new ApplicabilityScannerExecutor(Logger.getInstance());
-    private final Map<SourceCodeScanType, ScanBinaryExecutor> scanners = initScannersCollection();
+    private final ApplicabilityScannerExecutor applicability;
+    private final Map<SourceCodeScanType, ScanBinaryExecutor> scanners;
     protected Project project;
     protected PackageManagerType packageType;
     private static final String SKIP_FOLDERS_SUFFIX = "*/**";
@@ -67,11 +72,34 @@ public class SourceCodeScannerManager {
     public SourceCodeScannerManager(Project project) {
         this.project = project;
         this.jfrogApplictionsConfigPath = getProjectBasePath(project).resolve(".jfrog").resolve("jfrog-apps-config.yml");
+        String wslDistro = detectWslDistro(project);
+        this.applicability = wslDistro != null
+                ? new ApplicabilityScannerExecutor(Logger.getInstance(), wslDistro)
+                : new ApplicabilityScannerExecutor(Logger.getInstance());
+        this.scanners = initScannersCollection(wslDistro);
     }
 
     public SourceCodeScannerManager(Project project, PackageManagerType packageType) {
         this(project);
         this.packageType = packageType;
+    }
+
+    /**
+     * Returns the WSL distro name when {@code project} lives inside a WSL filesystem, otherwise {@code null}.
+     */
+    private static String detectWslDistro(Project project) {
+        if (!SystemUtils.IS_OS_WINDOWS) {
+            return null;
+        }
+        String basePath = project.getBasePath();
+        if (basePath == null) {
+            return null;
+        }
+        String unc = DescriptorPathUtils.intellijWslUrlToUnc(basePath);
+        if (!WslUtils.isWslPath(unc)) {
+            return null;
+        }
+        return ScanUtils.extractWslDistro(unc);
     }
 
     /**
@@ -277,7 +305,7 @@ public class SourceCodeScannerManager {
             Matcher matcher = EXCLUSIONS_REGEX_PATTERN.matcher(excludePattern);
             if (!matcher.find()) {
                 // Convert pattern form shape "**/*a*" to "**/*a*/**"
-                return List.of(StringUtils.removeEnd(excludePattern, EXCLUSIONS_SUFFIX) + SKIP_FOLDERS_SUFFIX);
+                return List.of(Strings.CS.removeEnd(excludePattern, EXCLUSIONS_SUFFIX) + SKIP_FOLDERS_SUFFIX);
             }
             String[] dirsNames = matcher.group(1).split(",");
             for (String dirName : dirsNames) {
@@ -320,11 +348,17 @@ public class SourceCodeScannerManager {
         return issues;
     }
 
-    private Map<SourceCodeScanType, ScanBinaryExecutor> initScannersCollection() {
+    private Map<SourceCodeScanType, ScanBinaryExecutor> initScannersCollection(String wslDistro) {
         Map<SourceCodeScanType, ScanBinaryExecutor> scanners = new HashMap<>();
-        scanners.put(SourceCodeScanType.SECRETS, new SecretsScannerExecutor(Logger.getInstance()));
-        scanners.put(SourceCodeScanType.IAC, new IACScannerExecutor(Logger.getInstance()));
-        scanners.put(SourceCodeScanType.SAST, new SastScannerExecutor(Logger.getInstance()));
+        if (wslDistro != null) {
+            scanners.put(SourceCodeScanType.SECRETS, new SecretsScannerExecutor(Logger.getInstance(), wslDistro));
+            scanners.put(SourceCodeScanType.IAC, new IACScannerExecutor(Logger.getInstance(), wslDistro));
+            scanners.put(SourceCodeScanType.SAST, new SastScannerExecutor(Logger.getInstance(), wslDistro));
+        } else {
+            scanners.put(SourceCodeScanType.SECRETS, new SecretsScannerExecutor(Logger.getInstance()));
+            scanners.put(SourceCodeScanType.IAC, new IACScannerExecutor(Logger.getInstance()));
+            scanners.put(SourceCodeScanType.SAST, new SastScannerExecutor(Logger.getInstance()));
+        }
         return scanners;
     }
 

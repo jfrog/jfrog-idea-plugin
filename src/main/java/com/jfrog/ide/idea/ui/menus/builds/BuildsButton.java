@@ -13,6 +13,7 @@ import com.jfrog.ide.idea.events.BuildEvents;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.ui.menus.filtermanager.CiFilterManager;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import javax.swing.*;
 import java.awt.event.ItemEvent;
@@ -53,7 +54,7 @@ public class BuildsButton extends JComboBox<String> implements Syncable, Disposa
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 String selectedBuild = (String) e.getItem();
                 CiFilterManager.getInstance(project).getSelectableBuilds()
-                        .forEach(selectableItem -> selectableItem.setValue(StringUtils.equals(selectedBuild, selectableItem.getKey())));
+                        .forEach(selectableItem -> selectableItem.setValue(Strings.CS.equals(selectedBuild, selectableItem.getKey())));
                 MessageBus messageBus = project.getMessageBus();
                 messageBus.syncPublisher(getSyncEvent()).update();
                 BuildGeneralInfo generalInfo = CiManager.getInstance(project).getBuildGeneralInfo(selectedBuild);

@@ -8,6 +8,7 @@ import com.jfrog.ide.idea.inspections.upgradeversion.GradleGroovyUpgradeVersion;
 import com.jfrog.ide.idea.inspections.upgradeversion.UpgradeVersion;
 import com.jfrog.ide.idea.utils.Descriptor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.plugins.groovy.lang.psi.GroovyElementVisitor;
 import org.jetbrains.plugins.groovy.lang.psi.GroovyPsiElement;
@@ -22,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+
+import static org.apache.commons.lang3.Strings.CS;
 
 /**
  * @author yahavi
@@ -74,7 +77,7 @@ public class GradleGroovyInspection extends GradleInspection {
     boolean isDependency(PsiElement element) {
         PsiElement parent = element.getParent();
         for (int i = 0; i < 6; i++, parent = parent.getParent()) {
-            if (StringUtils.startsWith(parent.getText(), "dependencies")) {
+            if (Strings.CS.startsWith(parent.getText(), "dependencies")) {
                 return true;
             }
         }

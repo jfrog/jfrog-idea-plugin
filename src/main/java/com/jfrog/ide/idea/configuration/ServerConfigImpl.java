@@ -33,6 +33,7 @@ import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.idea.ui.configuration.ConnectionRetriesSpinner;
 import com.jfrog.ide.idea.ui.configuration.ConnectionTimeoutSpinner;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.Strings;
 import org.jfrog.build.client.ProxyConfiguration;
 
 import javax.annotation.CheckForNull;
@@ -51,7 +52,9 @@ import java.util.Objects;
 import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.DEFAULT_EXCLUSIONS;
 import static com.jfrog.ide.idea.ui.configuration.Utils.*;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.Strings.CS;
 
 /**
  * @author yahavi
@@ -234,7 +237,7 @@ public class ServerConfigImpl implements ServerConfig {
     }
 
     public String getExcludedPaths() {
-        return defaultIfNull(this.excludedPaths, DEFAULT_EXCLUSIONS);
+        return getIfNull(this.excludedPaths, DEFAULT_EXCLUSIONS);
     }
 
     @Override
@@ -259,12 +262,12 @@ public class ServerConfigImpl implements ServerConfig {
 
     @Override
     public int getConnectionRetries() {
-        return defaultIfNull(this.connectionRetries, ConnectionRetriesSpinner.RANGE.initial);
+        return getIfNull(this.connectionRetries, ConnectionRetriesSpinner.RANGE.initial);
     }
 
     @Override
     public int getConnectionTimeout() {
-        return defaultIfNull(this.connectionTimeout, ConnectionTimeoutSpinner.RANGE.initial);
+        return getIfNull(this.connectionTimeout, ConnectionTimeoutSpinner.RANGE.initial);
     }
 
     @Override
@@ -456,7 +459,7 @@ public class ServerConfigImpl implements ServerConfig {
         }
 
         setUrl(platformUrlEnv);
-        String platformUrlStr = removeEnd(platformUrlEnv, "/");
+        String platformUrlStr = Strings.CS.removeEnd(platformUrlEnv, "/");
         if (isBlank(xrayUrlEnv)) {
             setXrayUrl(platformUrlStr + "/xray");
         } else {

@@ -8,6 +8,7 @@ import com.jfrog.ide.common.utils.Utils;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
 import org.jfrog.build.extractor.scan.License;
@@ -26,7 +27,7 @@ public class ComponentDetails extends MoreInfoPanel {
         super();
         GeneralInfo generalInfo = node.getGeneralInfo();
         String pkgType = StringUtils.capitalize(generalInfo.getPkgType());
-        if (StringUtils.equalsAny(pkgType, "Npm", "Go")) {
+        if (Strings.CS.equalsAny(pkgType, "Npm", "Go")) {
             addText("Package", generalInfo.getGroupId());
         } else {
             // Maven/Gradle

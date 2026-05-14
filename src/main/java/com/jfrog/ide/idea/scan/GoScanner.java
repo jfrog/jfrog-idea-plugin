@@ -3,7 +3,6 @@ package com.jfrog.ide.idea.scan;
 import com.google.common.collect.Maps;
 import com.intellij.diagnostic.PluginException;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
@@ -17,6 +16,7 @@ import com.jfrog.ide.idea.inspections.GoInspection;
 import com.jfrog.ide.idea.scan.data.PackageManagerType;
 import com.jfrog.ide.idea.ui.ComponentsTree;
 import com.jfrog.ide.idea.ui.menus.filtermanager.ConsistentFilterManager;
+import com.jfrog.ide.idea.utils.DescriptorPathUtils;
 import com.jfrog.ide.idea.utils.GoUtils;
 
 import javax.annotation.Nullable;
@@ -58,7 +58,7 @@ public class GoScanner extends SingleDescriptorScanner {
 
     @Override
     protected PsiFile[] getProjectDescriptors() {
-        VirtualFile file = LocalFileSystem.getInstance().findFileByPath(descriptorFilePath);
+        VirtualFile file = DescriptorPathUtils.findLocalVirtualFile(descriptorFilePath);
         if (file == null) {
             return null;
         }

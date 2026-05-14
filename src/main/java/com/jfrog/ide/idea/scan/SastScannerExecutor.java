@@ -31,6 +31,10 @@ public class SastScannerExecutor extends ScanBinaryExecutor {
         super(SourceCodeScanType.SAST, log);
     }
 
+    public SastScannerExecutor(Log log, String wslDistro) {
+        super(SourceCodeScanType.SAST, log, wslDistro);
+    }
+
     public List<JFrogSecurityWarning> execute(ScanConfig.Builder inputFileBuilder, Runnable checkCanceled, ProgressIndicator indicator) throws IOException, InterruptedException {
         return super.execute(inputFileBuilder, SCANNER_ARGS, checkCanceled, RUN_WITH_NEW_CONFIG_FILE, indicator);
     }

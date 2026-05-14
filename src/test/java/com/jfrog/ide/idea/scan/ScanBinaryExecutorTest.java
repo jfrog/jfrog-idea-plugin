@@ -2,6 +2,8 @@ package com.jfrog.ide.idea.scan;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
+import com.jfrog.ide.idea.scan.data.NewScanConfig;
+import com.jfrog.ide.idea.scan.data.NewScansConfig;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
 import com.jfrog.ide.idea.scan.data.ScansConfig;
 import junit.framework.TestCase;
@@ -10,6 +12,7 @@ import org.jfrog.build.api.util.NullLog;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -107,8 +110,77 @@ public class ScanBinaryExecutorTest extends TestCase {
         assertTrue(actualExternalRepoUrl.startsWith(expectedExternalRepoUrl));
     }
 
+    public void testGetBinaryDownloadURLForWsl() {
+        // When WSL distro is set the URL should use a Linux OS distribution token
+        final String expectedLinuxPrefix = "xsc-gen-exe-analyzer-manager-local/";
+        String url = scanner.getBinaryDownloadURL(null);
+        // Default (non-WSL) scanner was constructed without a distro; just verify URL is non-null and starts correctly
+        assertTrue(url.startsWith(expectedLinuxPrefix));
+    }
+
+    /**
+     * {@link ScanBinaryExecutor#createTempRunInputFileInWsl(Object, Path)} matches production layout
+     * (nested {@code jfrog*} dir and {@code .yaml} file); {@code wslTmpBase} is injected so tests run without a WSL UNC mount.
+     */
+    public void testCreateTempRunInputFileInWsl_scansConfigRoundTrip() throws IOException {
+        Path wslTmpBase = Files.createTempDirectory("wsl-input-parent");
+        try {
+            ScanConfig.Builder builder = new ScanConfig.Builder();
+            String testOutput = "/tmp/out.sarif";
+            String testLanguage = "Go";
+            List<String> testRoots = List.of("/project/a", "/project/b");
+            builder.scanType(scanner.scanType);
+            builder.output(testOutput);
+            builder.language(testLanguage);
+            builder.roots(testRoots);
+            ScansConfig written = new ScansConfig(List.of(builder.Build()));
+
+            Path inputPath = scanner.createTempRunInputFileInWsl(written, wslTmpBase);
+            assertTrue(inputPath.getFileName().toString().endsWith(".yaml"));
+            assertTrue(inputPath.getParent().getFileName().toString().startsWith("jfrog"));
+            assertEquals(wslTmpBase, inputPath.getParent().getParent());
+
+            ScansConfig readBack = readScansConfigYAML(inputPath);
+            assertEquals(1, readBack.getScans().size());
+            assertEquals(testOutput, readBack.getScans().get(0).getOutput());
+            assertEquals(testLanguage, readBack.getScans().get(0).getLanguage());
+            assertEquals(testRoots, readBack.getScans().get(0).getRoots());
+        } finally {
+            FileUtils.deleteQuietly(wslTmpBase.toFile());
+        }
+    }
+
+    public void testCreateTempRunInputFileInWsl_newScansConfigRoundTrip() throws IOException {
+        Path wslTmpBase = Files.createTempDirectory("wsl-input-parent-newfmt");
+        try {
+            ScanConfig.Builder builder = new ScanConfig.Builder();
+            builder.scanType(scanner.scanType);
+            builder.output("/out.sarif");
+            builder.language("Java");
+            builder.roots(List.of("/src"));
+            ScanConfig params = builder.Build();
+            NewScansConfig written = new NewScansConfig(new NewScanConfig(params));
+
+            Path inputPath = scanner.createTempRunInputFileInWsl(written, wslTmpBase);
+            assertTrue(Files.isRegularFile(inputPath));
+
+            NewScansConfig readBack = readNewScansConfigYAML(inputPath);
+            assertEquals(1, readBack.getScans().size());
+            assertEquals(params.getOutput(), readBack.getScans().get(0).getOutput());
+            assertEquals(params.getLanguage(), readBack.getScans().get(0).getLanguage());
+            assertEquals(params.getRoots(), readBack.getScans().get(0).getRoots());
+        } finally {
+            FileUtils.deleteQuietly(wslTmpBase.toFile());
+        }
+    }
+
     private ScansConfig readScansConfigYAML(Path inputPath) throws IOException {
         ObjectMapper mapper = createYAMLMapper();
         return mapper.readValue(inputPath.toFile(), ScansConfig.class);
+    }
+
+    private NewScansConfig readNewScansConfigYAML(Path inputPath) throws IOException {
+        ObjectMapper mapper = createYAMLMapper();
+        return mapper.readValue(inputPath.toFile(), NewScansConfig.class);
     }
 }

@@ -10,6 +10,7 @@ import com.jfrog.ide.idea.ui.menus.SelectionCheckbox;
 import com.jfrog.ide.idea.ui.menus.ToolbarPopupMenu;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -17,6 +18,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+
+import static org.apache.commons.lang3.Strings.CS;
 
 /**
  * Created by Yahav Itzhak on 22 Nov 2017.
@@ -65,7 +68,7 @@ public abstract class FilterMenu<FilterType> extends ToolbarPopupMenu implements
         selectionMap.keySet().stream()
                 .filter(item -> checkBoxMenuItems.stream()
                         .map(AbstractButton::getText)
-                        .noneMatch(text -> StringUtils.equals(text, item.toString())))
+                        .noneMatch(text -> Strings.CS.equals(text, item.toString())))
                 .map(key -> new SelectionCheckbox<>(selectionMap, key, getSyncEvent()))
                 .forEach(checkBoxMenuItems::add);
         selectAllCheckbox.setListeners(selectionMap, checkBoxMenuItems);

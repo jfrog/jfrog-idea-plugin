@@ -17,6 +17,7 @@ import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.scan.ScannerBase;
 import com.jfrog.ide.idea.utils.Descriptor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.dom.model.MavenDomArtifactCoordinates;
 import java.util.Collection;
@@ -58,19 +59,19 @@ public class MavenInspection extends AbstractInspection {
     }
 
     boolean isDependencyOrPlugin(XmlTag xmlTag) {
-        return StringUtils.equalsAny(xmlTag.getName(), MAVEN_DEPENDENCY_TAG, MAVEN_PLUGIN_TAG);
+        return Strings.CS.equalsAny(xmlTag.getName(), MAVEN_DEPENDENCY_TAG, MAVEN_PLUGIN_TAG);
     }
 
     @Override
     boolean isDependency(PsiElement element) {
         PsiElement parentElement = element.getParent();
         if ((parentElement instanceof XmlTag) &&
-                StringUtils.equalsAny(((XmlTag) parentElement).getName(), MAVEN_DEPENDENCIES_TAG, MAVEN_PLUGINS_TAG)) {
+                Strings.CS.equalsAny(((XmlTag) parentElement).getName(), MAVEN_DEPENDENCIES_TAG, MAVEN_PLUGINS_TAG)) {
             return true;
         }
         PsiElement grandParentElement = parentElement.getParent();
         return (grandParentElement instanceof XmlTag &&
-                StringUtils.equals(((XmlTag) grandParentElement).getName(), MAVEN_DEPENDENCY_MANAGEMENT));
+                Strings.CS.equals(((XmlTag) grandParentElement).getName(), MAVEN_DEPENDENCY_MANAGEMENT));
     }
 
     @Override

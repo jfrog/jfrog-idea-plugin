@@ -9,10 +9,10 @@ import com.intellij.openapi.editor.markup.HighlighterTargetArea;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiUtilBase;
+import com.jfrog.ide.idea.utils.DescriptorPathUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -72,7 +72,10 @@ public class JumpToCode {
     }
 
     private VirtualFile getVirtualFile(String path) {
-        return LocalFileSystem.getInstance().findFileByPath(path);
+        if (path == null || path.isEmpty()) {
+            return null;
+        }
+        return DescriptorPathUtils.findLocalVirtualFile(path);
     }
 
     private Document getDocument(Editor editor) {

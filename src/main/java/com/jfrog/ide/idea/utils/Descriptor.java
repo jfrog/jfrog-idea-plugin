@@ -1,6 +1,7 @@
 package com.jfrog.ide.idea.utils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 /**
  * Represents all supported file descriptor types.
@@ -16,7 +17,7 @@ public enum Descriptor {
 
     public static Descriptor fromFileName(String fileName) {
         for (Descriptor descriptor : Descriptor.values()) {
-            if (StringUtils.equals(descriptor.getFileName(), fileName)) {
+            if (Strings.CS.equals(descriptor.getFileName(), fileName)) {
                 return descriptor;
             }
         }
