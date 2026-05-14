@@ -28,6 +28,7 @@ import com.jfrog.ide.idea.utils.Descriptor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import javax.swing.tree.TreeNode;
 import java.util.*;
@@ -237,13 +238,13 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         String artifactID = node.getComponentIdWithoutPrefix();
         ImpactTree impactTree = node.getImpactTree();
         String versionPrefix = ":";
-        return StringUtils.equals(extractArtifactIdWithoutVersion(artifactID), componentName) || impactTree.contains(componentName+versionPrefix);
+        return Strings.CS.equals(extractArtifactIdWithoutVersion(artifactID), componentName) || impactTree.contains(componentName+versionPrefix);
     }
 
     abstract UpgradeVersion getUpgradeVersion(String componentName, String fixVersion, Collection<String> issues, String descriptorPath);
 
     void registerProblem(ProblemsHolder problemsHolder, DependencyNode dependency, PsiElement element, String componentName) {
-        boolean isTransitive = dependency.isIndirect() || !StringUtils.contains(dependency.getTitle(), componentName);
+        boolean isTransitive = dependency.isIndirect() || !Strings.CS.contains(dependency.getTitle(), componentName);
         String dependencyDescription = getDependencyDescription(dependency.getTitle(), isTransitive);
         List<LocalQuickFix> quickFixes = new ArrayList<>();
         quickFixes.add(new ShowInDependencyTree(dependency, dependencyDescription));

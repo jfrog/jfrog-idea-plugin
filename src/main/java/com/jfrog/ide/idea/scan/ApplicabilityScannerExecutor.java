@@ -9,6 +9,7 @@ import com.jfrog.ide.idea.inspections.JFrogSecurityWarning;
 import com.jfrog.ide.idea.scan.data.*;
 import com.jfrog.xray.client.services.entitlements.Feature;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.jfrog.build.api.util.Log;
 
 import java.io.IOException;
@@ -101,7 +102,7 @@ public class ApplicabilityScannerExecutor extends ScanBinaryExecutor {
         HashMap<String, FileTreeNode> results = new HashMap<>();
         for (JFrogSecurityWarning warning : warnings) {
             // Update all VulnerabilityNodes that have the warning's CVE
-            String cve = StringUtils.removeStart(warning.getRuleID(), "applic_");
+            String cve = Strings.CS.removeStart(warning.getRuleID(), "applic_");
             List<VulnerabilityNode> issues = issuesMap.get(cve);
             if (issues != null) {
                 if (warning.isApplicable()) {

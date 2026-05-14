@@ -2,6 +2,7 @@ package com.jfrog.ide.idea.ui.configuration;
 
 import com.intellij.openapi.options.ConfigurationException;
 import com.jfrog.ide.common.configuration.ServerConfig;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -11,6 +12,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.Strings.CS;
 
 /**
  * @author yahavi
@@ -52,16 +54,16 @@ public class ConfigVerificationUtils {
      */
     private static void validateExcludedPaths(String excludedPaths) throws ConfigurationException {
         if (StringUtils.isNotBlank(excludedPaths)) {
-            if (!StringUtils.startsWith(excludedPaths, EXCLUSIONS_PREFIX)) {
+            if (!CS.startsWith(excludedPaths, EXCLUSIONS_PREFIX)) {
                 throw new ConfigurationException("Excluded paths pattern must start with " + EXCLUSIONS_PREFIX);
             }
-            if (!StringUtils.endsWith(excludedPaths, EXCLUSIONS_SUFFIX)) {
+            if (!CS.endsWith(excludedPaths, EXCLUSIONS_SUFFIX)) {
                 throw new ConfigurationException("Excluded paths pattern must end with " + EXCLUSIONS_SUFFIX);
             }
             try {
                 FileSystems.getDefault().getPathMatcher("glob:" + excludedPaths);
             } catch (PatternSyntaxException e) {
-                throw new ConfigurationException(ExceptionUtils.getRootCauseMessage(e), "Excluded paths pattern must be a valid glob pattern");
+                throw new ConfigurationException(ExceptionUtils.getRootCauseMessage(e), "Excluded Paths Pattern Must Be a Valid Glob Pattern");
             }
             Matcher matcher = EXCLUSIONS_REGEX_PATTERN.matcher(excludedPaths);
             if (!matcher.find()) {
@@ -82,7 +84,7 @@ public class ConfigVerificationUtils {
         if (isBlank(watches)) {
             throw new ConfigurationException("Watches must be configured");
         }
-        if (startsWith(watches, ",") || endsWith(watches, ",")) {
+        if (CS.startsWith(watches, ",") || Strings.CS.endsWith(watches, ",")) {
             throw new ConfigurationException("Watches list can't start or end with a delimiter");
         }
         for (String part : split(watches, ",")) {

@@ -20,6 +20,7 @@ import net.lingala.zip4j.model.UnzipParameters;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.http.Header;
 import org.jfrog.build.api.util.Log;
@@ -51,6 +52,7 @@ import static com.jfrog.ide.common.utils.XrayConnectionUtils.createXrayClientBui
 import com.jfrog.ide.idea.scan.utils.ScanUtils;
 
 import static com.jfrog.ide.idea.scan.utils.ScanUtils.getOSAndArc;
+import static com.jfrog.ide.idea.utils.DescriptorPathUtils.WIN_WSL_PREFIX;
 import static com.jfrog.ide.idea.utils.Utils.HOME_PATH;
 import static java.lang.String.join;
 
@@ -84,14 +86,11 @@ public abstract class ScanBinaryExecutor {
     private final Log log;
     private boolean notSupported;
     private final static Object downloadLock = new Object();
-    /** WSL distro name when scanning a WSL-hosted project; {@code null} for native Windows/macOS/Linux execution. */
     private final @Nullable String wslDistro;
-    /** Absolute Linux path to the analyzer binary inside the distro; {@code null} when {@link #wslDistro} is null or home lookup failed. */
     private final @Nullable String binaryLinuxPath;
 
     /**
-     * Distro detected from the IDE project path when the project lives on a WSL filesystem ({@code \\wsl$\...});
-     * used to map SARIF Linux paths to UNC for navigation.
+     * Returns the WSL distro name when scanning a WSL-hosted project
      */
     protected @Nullable String getWslDistro() {
         return wslDistro;
@@ -105,7 +104,7 @@ public abstract class ScanBinaryExecutor {
         String executable = SystemUtils.IS_OS_WINDOWS ? SCANNER_BINARY_NAME + ".exe" : SCANNER_BINARY_NAME;
         binaryTargetPath = BINARIES_DIR.resolve(SCANNER_BINARY_NAME).resolve(executable);
         archiveTargetPath = BINARIES_DIR.resolve(DOWNLOAD_SCANNER_NAME);
-        setOsDistribution();
+        setOsDistribution(log);
     }
 
     ScanBinaryExecutor(SourceCodeScanType scanType, Log log, String distro) {
@@ -128,11 +127,11 @@ public abstract class ScanBinaryExecutor {
         this.binaryLinuxPath = linuxPath;
         this.binaryTargetPath = targetPath;
         this.archiveTargetPath = archivePath;
-        setOsDistribution();
+        setOsDistribution(log);
     }
 
     private static Path toWslUncPath(String distro, String linuxPath) {
-        return Path.of("\\\\wsl$\\" + distro + linuxPath.replace('/', '\\'));
+        return Path.of(WIN_WSL_PREFIX + distro + linuxPath.replace('/', '\\'));
     }
 
     private ArtifactoryManagerBuilder createManagerBuilder(boolean useJFrogReleases, ServerConfig server) {
@@ -148,12 +147,12 @@ public abstract class ScanBinaryExecutor {
         return null;
     }
 
-    protected void setOsDistribution() {
-        if (wslDistro != null) {
-            osDistribution = ScanUtils.getWslArch(wslDistro);
-            return;
-        }
+    protected void setOsDistribution(Log log) {
         try {
+            if (wslDistro != null) {
+                osDistribution = ScanUtils.getWslArch(wslDistro, log);
+                return;
+            }
             osDistribution = getOSAndArc();
         } catch (IOException e) {
             log.warn(e.getMessage());
@@ -224,7 +223,7 @@ public abstract class ScanBinaryExecutor {
         }
         String linuxParentDir = binaryLinuxPath.substring(0, parentIdx);
         inputFileBuilder.scanType(scanType);
-        Path wslTmpBase = Path.of("\\\\wsl$\\" + wslDistro + "\\tmp");
+        Path wslTmpBase = Path.of(WIN_WSL_PREFIX + wslDistro + "\\tmp");
         Path outputTempDir = Files.createTempDirectory(wslTmpBase, "jfrog");
         Path outputFilePath = Files.createTempFile(outputTempDir, "", ".sarif");
         String linuxOutputPath = WslUtils.toLinuxPath(outputFilePath.toString());
@@ -354,7 +353,7 @@ public abstract class ScanBinaryExecutor {
         String url = getBinaryDownloadURL(externalResourcesRepo);
         Header[] headers = artifactoryManager.downloadHeaders(url);
         for (Header header : headers) {
-            if (StringUtils.equalsIgnoreCase(header.getName(), "x-checksum-sha256")) {
+            if (Strings.CI.equals(header.getName(), "x-checksum-sha256")) {
                 return header.getValue();
             }
         }
@@ -461,8 +460,16 @@ public abstract class ScanBinaryExecutor {
     }
 
     private Path createTempRunInputFileInWsl(Object scanInput) throws IOException {
+        Path wslTmpBase = Path.of(WIN_WSL_PREFIX + wslDistro + "\\tmp");
+        return createTempRunInputFileInWsl(scanInput, wslTmpBase);
+    }
+
+    /**
+     * Writes scan input YAML under a {@code jfrog*} temp subdirectory of {@code wslTmpBase}.
+     * Production passes the WSL distro tmp UNC root; tests pass a local writable directory.
+     */
+    Path createTempRunInputFileInWsl(Object scanInput, Path wslTmpBase) throws IOException {
         ObjectMapper om = createYAMLMapper();
-        Path wslTmpBase = Path.of("\\\\wsl$\\" + wslDistro + "\\tmp");
         Path tempDir = Files.createTempDirectory(wslTmpBase, "jfrog");
         Path inputPath = Files.createTempFile(tempDir, "", ".yaml");
         om.writeValue(inputPath.toFile(), scanInput);

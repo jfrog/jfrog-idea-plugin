@@ -8,6 +8,7 @@ import com.intellij.ui.components.JBTextField;
 import com.intellij.util.messages.MessageBus;
 import com.jfrog.ide.idea.events.ApplicationEvents;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -41,7 +42,7 @@ public class JFrogProjectConfiguration implements Configurable, Configurable.NoS
     @Override
     public boolean isModified() {
         PropertiesComponent propertiesComponent = PropertiesComponent.getInstance(project);
-        return !StringUtils.equals(propertiesComponent.getValue(BUILDS_PATTERN_KEY), buildsPattern.getText());
+        return !Strings.CS.equals(propertiesComponent.getValue(BUILDS_PATTERN_KEY), buildsPattern.getText());
     }
 
     @Override

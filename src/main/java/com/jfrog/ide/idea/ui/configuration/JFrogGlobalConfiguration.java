@@ -21,6 +21,7 @@ import com.jfrog.xray.client.impl.util.JFrogInactiveEnvironmentException;
 import com.jfrog.xray.client.services.system.Version;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.conn.ssl.TrustAllStrategy;
@@ -53,6 +54,7 @@ import static com.jfrog.ide.idea.ui.configuration.ConfigVerificationUtils.DEFAUL
 import static com.jfrog.ide.idea.ui.configuration.Utils.*;
 import static org.apache.commons.collections4.CollectionUtils.addIgnoreNull;
 import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.Strings.CS;
 
 /**
  * Created by romang on 1/29/17.
@@ -509,7 +511,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
         loginButton.setIcon(null);
         loginButton.add(asyncProcessIcon);
         loginButton.setEnabled(false);
-        String urlStr = removeEnd(trim(platformUrl.getText()), "/") + "/access";
+        String urlStr = Strings.CS.removeEnd(trim(platformUrl.getText()), "/") + "/access";
         try (AccessManager accessManager = new AccessManager(urlStr, "", Logger.getInstance())) {
             ProxyConfiguration proxyConfiguration = serverConfig.getProxyConfForTargetUrl(urlStr);
             if (proxyConfiguration != null) {
@@ -521,7 +523,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
 
             Thread.sleep(SSO_WAIT_BETWEEN_RETRIES_MILLIS);
             accessManager.sendBrowserLoginRequest(uuid);
-            BrowserUtil.browse(removeEnd(platformUrl.getText(), "/") + "/ui/login?jfClientSession=" + uuid +
+            BrowserUtil.browse(CS.removeEnd(platformUrl.getText(), "/") + "/ui/login?jfClientSession=" + uuid +
                     "&jfClientName=IDEA&jfClientCode=1");
 
             for (int i = 0; i < SSO_RETRIES; i++) {
@@ -669,7 +671,7 @@ public class JFrogGlobalConfiguration implements Configurable, Configurable.NoSc
      * Update the policy text fields according to the selected policy type.
      */
     void updatePolicyTextFields() {
-        switch (ObjectUtils.defaultIfNull(serverConfig.getPolicyType(), ServerConfig.PolicyType.VULNERABILITIES)) {
+        switch (ObjectUtils.getIfNull(serverConfig.getPolicyType(), ServerConfig.PolicyType.VULNERABILITIES)) {
             case WATCHES -> {
                 accordingToWatchesRadioButton.setSelected(true);
                 watches.setEnabled(true);

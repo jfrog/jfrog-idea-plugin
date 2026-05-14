@@ -14,6 +14,7 @@ import com.jfrog.ide.idea.log.Logger;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jfrog.build.extractor.scan.DependencyTree;
 import org.jfrog.build.extractor.scan.GeneralInfo;
@@ -50,8 +51,8 @@ public class Utils {
         GeneralInfo lhsGeneralInfo = lhs.getGeneralInfo();
         GeneralInfo rhsGeneralInfo = rhs.getGeneralInfo();
         return ObjectUtils.allNotNull(lhsGeneralInfo, rhsGeneralInfo) &&
-                StringUtils.equals(lhsGeneralInfo.getPath(), rhsGeneralInfo.getPath()) &&
-                StringUtils.equals(lhsGeneralInfo.getPkgType(), rhsGeneralInfo.getPkgType());
+                Strings.CS.equals(lhsGeneralInfo.getPath(), rhsGeneralInfo.getPath()) &&
+                Strings.CS.equals(lhsGeneralInfo.getPkgType(), rhsGeneralInfo.getPkgType());
     }
 
     public static void focusJFrogToolWindow(Project project) {

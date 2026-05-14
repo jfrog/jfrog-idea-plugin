@@ -24,6 +24,7 @@ import com.jfrog.ide.idea.ui.LocalComponentsTree;
 import com.jfrog.ide.idea.utils.DescriptorPathUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
@@ -304,7 +305,7 @@ public class SourceCodeScannerManager {
             Matcher matcher = EXCLUSIONS_REGEX_PATTERN.matcher(excludePattern);
             if (!matcher.find()) {
                 // Convert pattern form shape "**/*a*" to "**/*a*/**"
-                return List.of(StringUtils.removeEnd(excludePattern, EXCLUSIONS_SUFFIX) + SKIP_FOLDERS_SUFFIX);
+                return List.of(Strings.CS.removeEnd(excludePattern, EXCLUSIONS_SUFFIX) + SKIP_FOLDERS_SUFFIX);
             }
             String[] dirsNames = matcher.group(1).split(",");
             for (String dirName : dirsNames) {

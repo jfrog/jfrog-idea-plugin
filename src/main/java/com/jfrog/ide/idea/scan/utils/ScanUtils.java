@@ -8,7 +8,9 @@ import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.jfrog.ide.common.utils.Utils;
 import com.jfrog.ide.idea.log.Logger;
+import org.jfrog.build.api.util.Log;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.SystemUtils;
 import org.jfrog.build.extractor.WslUtils;
 
@@ -18,6 +20,9 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Set;
+
+import static com.jfrog.ide.idea.utils.DescriptorPathUtils.WIN_WSL_LOCALHOST_PREFIX;
+import static com.jfrog.ide.idea.utils.DescriptorPathUtils.WIN_WSL_PREFIX;
 
 /**
  * @author yahavi
@@ -51,7 +56,7 @@ public class ScanUtils {
         }
         // Mac
         if (SystemUtils.IS_OS_MAC) {
-            if (StringUtils.equalsAny(arch, "aarch64", "arm64")) {
+            if (Strings.CS.equalsAny(arch, "aarch64", "arm64")) {
                 return "mac-arm64";
             } else {
                 return "mac-amd64";
@@ -94,10 +99,10 @@ public class ScanUtils {
         }
         String p = WslUtils.normalizePathStringForWsl(uncPath);
         String withoutPrefix;
-        if (p.regionMatches(true, 0, "\\\\wsl.localhost\\", 0, "\\\\wsl.localhost\\".length())) {
-            withoutPrefix = p.substring("\\\\wsl.localhost\\".length());
-        } else if (p.regionMatches(true, 0, "\\\\wsl$\\", 0, "\\\\wsl$\\".length())) {
-            withoutPrefix = p.substring("\\\\wsl$\\".length());
+        if (p.regionMatches(true, 0, WIN_WSL_LOCALHOST_PREFIX, 0, WIN_WSL_LOCALHOST_PREFIX.length())) {
+            withoutPrefix = p.substring(WIN_WSL_LOCALHOST_PREFIX.length());
+        } else if (p.regionMatches(true, 0, WIN_WSL_PREFIX, 0, WIN_WSL_PREFIX.length())) {
+            withoutPrefix = p.substring(WIN_WSL_PREFIX.length());
         } else {
             return null;
         }
@@ -137,7 +142,7 @@ public class ScanUtils {
      * by running {@code wsl.exe -d <distro> -e uname -m}. Falls back to {@code "linux-amd64"}
      * on any error.
      */
-    public static String getWslArch(String distro) {
+    public static String getWslArch(String distro, Log log) {
         try {
             ProcessBuilder pb = new ProcessBuilder("wsl.exe", "-d", distro, "-e", "uname", "-m");
             pb.redirectErrorStream(true);
@@ -162,6 +167,7 @@ public class ScanUtils {
                 default -> "linux-amd64";
             };
         } catch (IOException e) {
+            log.warn(String.format("Failed to determine WSL architecture for distro '%s': %s", distro, e.getMessage()));
             return "linux-amd64";
         }
     }

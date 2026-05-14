@@ -27,6 +27,11 @@ import java.util.Objects;
  */
 public final class DescriptorPathUtils {
 
+    public static final String WSL_PREFIX = "//wsl$/";
+    public static final String WIN_WSL_PREFIX = "\\\\wsl$\\";
+    public static final String WSL_LOCALHOST_PREFIX = "//wsl.localhost/";
+    public static final String WIN_WSL_LOCALHOST_PREFIX = "\\\\wsl.localhost\\";
+
     private DescriptorPathUtils() {
     }
 
@@ -120,11 +125,11 @@ public final class DescriptorPathUtils {
             return path;
         }
         String p = path;
-        if (startsWithIgnoreCase(p, "//wsl$/")) {
-            return "\\\\wsl$\\" + p.substring("//wsl$/".length()).replace('/', '\\');
+        if (startsWithIgnoreCase(p, WSL_PREFIX)) {
+            return WIN_WSL_PREFIX + p.substring(WSL_PREFIX.length()).replace('/', '\\');
         }
-        if (startsWithIgnoreCase(p, "//wsl.localhost/")) {
-            return "\\\\wsl.localhost\\" + p.substring("//wsl.localhost/".length()).replace('/', '\\');
+        if (startsWithIgnoreCase(p, WSL_LOCALHOST_PREFIX)) {
+            return WIN_WSL_LOCALHOST_PREFIX + p.substring(WSL_LOCALHOST_PREFIX.length()).replace('/', '\\');
         }
         return path;
     }
@@ -193,7 +198,7 @@ public final class DescriptorPathUtils {
             return null;
         }
         if (rawPath.startsWith("/") && rawPath.length() > 1) {
-            return "\\\\wsl$\\" + wslDistro + rawPath.replace('/', '\\');
+            return WIN_WSL_PREFIX + wslDistro + rawPath.replace('/', '\\');
         }
         return null;
     }
