@@ -1,5 +1,6 @@
 [![](readme-resources/readme_image.png)](#readme)
 
+
 <div align="center">
 
 # JFrog IntelliJ IDEA Plugin
