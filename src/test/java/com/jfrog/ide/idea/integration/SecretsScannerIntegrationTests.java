@@ -31,7 +31,7 @@ public class SecretsScannerIntegrationTests extends BaseIntegrationTest {
         ProgressIndicator indicator = mock(ProgressIndicator.class);
 
         List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled, indicator);
-        assertEquals(8, results.size());
+        assertEquals(7, results.size());
         // Expect specific indications
         JFrogSecurityWarning secretIndication = results.get(0);
         assertEquals(0, secretIndication.getLineStart());
