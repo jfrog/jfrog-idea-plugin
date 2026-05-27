@@ -25,20 +25,6 @@ public class TestUtils {
         return element;
     }
 
-    public static <T extends PsiElement> List<T> findElementsOfType(PsiFile file, Class<T> type) {
-        return new ArrayList<>(PsiTreeUtil.findChildrenOfType(file, type));
-    }
-
-    public static <T extends PsiElement> T findElementByContainingText(PsiFile file, Class<T> type, String text) {
-        for (T element : findElementsOfType(file, type)) {
-            if (element.getText().contains(text)) {
-                return element;
-            }
-        }
-        Assert.fail("No " + type.getSimpleName() + " containing text: " + text);
-        return null;
-    }
-
     /**
      * Get the dependency tree child. Fail the test if it doesn't exist.
      *

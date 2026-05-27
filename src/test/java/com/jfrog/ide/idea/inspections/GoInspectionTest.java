@@ -12,6 +12,13 @@ import java.util.List;
 public class GoInspectionTest extends InspectionsTestBase {
 
     private static final String PACKAGE_DESCRIPTOR = "go.mod";
+    private final InspectionTestDependency[] DEPENDENCIES = {
+            new InspectionTestDependency(54, "github.com/jfrog/gocmd:0.1.12"),
+            new InspectionTestDependency(89, "github.com/jfrog/gofrog:1.0.5"),
+            new InspectionTestDependency(124, "github.com/jfrog/gogopowerrangers:1.2.3")
+    };
+
+    private final int[] NON_DEPENDENCIES_POSITIONS = {176, 202};
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
@@ -20,37 +27,14 @@ public class GoInspectionTest extends InspectionsTestBase {
     }
 
     public void testDependencies() {
-        assertDependency("github.com/jfrog/gocmd");
-        assertDependency("github.com/jfrog/gofrog");
-        assertDependency("github.com/jfrog/gogopowerrangers");
+        isDependencyTest(DEPENDENCIES);
     }
 
     public void testNonDependencies() {
-        List<VgoModuleSpec> nonDependencies = TestUtils.findElementsOfType(fileDescriptor, VgoModuleSpec.class).stream()
-                .filter(spec -> !inspection.isDependency(spec))
-                .toList();
-        assertFalse("Expected module specs in replace clause", nonDependencies.isEmpty());
-        for (VgoModuleSpec spec : nonDependencies) {
-            assertFalse("replace line should not be a dependency: " + spec.getText(), inspection.isDependency(spec));
-        }
+        isNonDependencyTest(NON_DEPENDENCIES_POSITIONS);
     }
 
     public void testCreateGeneralInfo() {
-        assertComponentName("github.com/jfrog/gocmd", "github.com/jfrog/gocmd:0.1.12");
-        assertComponentName("github.com/jfrog/gofrog", "github.com/jfrog/gofrog:1.0.5");
-        assertComponentName("github.com/jfrog/gogopowerrangers", "github.com/jfrog/gogopowerrangers:1.2.3");
-    }
-
-    private void assertDependency(String modulePath) {
-        PsiElement element = TestUtils.findElementByContainingText(fileDescriptor, VgoModuleSpec.class, modulePath);
-        assertTrue("isDependency should be true on " + element.getText(), inspection.isDependency(element));
-    }
-
-    private void assertComponentName(String modulePath, String expected) {
-        List<VgoModuleSpec> matches = TestUtils.findElementsOfType(fileDescriptor, VgoModuleSpec.class).stream()
-                .filter(spec -> spec.getText().contains(modulePath) && inspection.isDependency(spec))
-                .toList();
-        assertEquals(1, matches.size());
-        assertEquals(expected, inspection.createComponentName(matches.get(0)));
+        createComponentNameTest(DEPENDENCIES);
     }
 }
