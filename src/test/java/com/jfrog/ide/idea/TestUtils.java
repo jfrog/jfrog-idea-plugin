@@ -2,9 +2,13 @@ package com.jfrog.ide.idea;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.jfrog.ide.common.deptree.DepTree;
 import com.jfrog.ide.common.deptree.DepTreeNode;
 import org.junit.Assert;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Bar Belity on 11/06/2020.
@@ -19,6 +23,20 @@ public class TestUtils {
             Assert.assertNotNull(element);
         }
         return element;
+    }
+
+    public static <T extends PsiElement> List<T> findElementsOfType(PsiFile file, Class<T> type) {
+        return new ArrayList<>(PsiTreeUtil.findChildrenOfType(file, type));
+    }
+
+    public static <T extends PsiElement> T findElementByContainingText(PsiFile file, Class<T> type, String text) {
+        for (T element : findElementsOfType(file, type)) {
+            if (element.getText().contains(text)) {
+                return element;
+            }
+        }
+        Assert.fail("No " + type.getSimpleName() + " containing text: " + text);
+        return null;
     }
 
     /**
