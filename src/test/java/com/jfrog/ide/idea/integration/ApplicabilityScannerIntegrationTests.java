@@ -41,7 +41,8 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
         // Expect all issues to be applicable.
         assertTrue(results.stream().allMatch(JFrogSecurityWarning::isApplicable));
         // Expect specific indications
-        assertTrue(results.get(0).getLineSnippet().startsWith("protobuf.parse(p)"));
+        assertEquals("protobuf.parse(p)\n" +
+                "protobuf.load(\"/path/to/untrusted.proto\", function(err, root) { return })", results.get(0).getLineSnippet());
         assertEquals(20, results.get(0).getLineStart());
         assertEquals(20, results.get(0).getLineEnd());
         assertEquals(0, results.get(0).getColStart());
@@ -86,7 +87,8 @@ public class ApplicabilityScannerIntegrationTests extends BaseIntegrationTest {
         assertEquals(2, results.size());
         // Expect specific indications
         assertTrue(results.get(0).isApplicable());
-        assertTrue(results.get(0).getLineSnippet().startsWith("xstream.fromXML(payload)"));
+        assertEquals("xstream.fromXML(payload)\n" +
+                "stream.fromXML(http.toString())", results.get(0).getLineSnippet());
         assertEquals(56, results.get(0).getLineStart());
         assertEquals(56, results.get(0).getLineEnd());
         assertEquals(26, results.get(0).getColStart());
