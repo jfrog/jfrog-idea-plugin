@@ -1,10 +1,6 @@
 package com.jfrog.ide.idea.inspections;
 
 import com.goide.vgo.mod.psi.VgoModuleSpec;
-import com.intellij.psi.PsiElement;
-import com.jfrog.ide.idea.TestUtils;
-
-import java.util.List;
 
 /**
  * Created by Bar Belity on 23/02/2020.
