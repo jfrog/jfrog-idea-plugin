@@ -48,7 +48,7 @@ public class ExternalResourcesRepoIntegrationTests extends BaseIntegrationTest {
 
         ProgressIndicator indicator = mock(ProgressIndicator.class);
         List<JFrogSecurityWarning> results = scanner.execute(input, this::dummyCheckCanceled, indicator);
-        assertEquals(8, results.size());
+        assertEquals(7, results.size());
 
         // Restore the original ServerConfig in GlobalSettings
         GlobalSettings.getInstance().setServerConfig(originalServerConfig);

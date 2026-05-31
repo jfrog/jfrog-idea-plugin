@@ -40,7 +40,7 @@ public abstract class BaseIntegrationTest extends HeavyPlatformTestCase {
     private ServerConfigImpl createServerConfigFromEnv() {
         String platformUrl = addSlashIfNeeded(System.getenv(ENV_PLATFORM_URL));
         String token = System.getenv(ENV_ACCESS_TOKEN);
-        if (StringUtils.isEmpty(platformUrl) || StringUtils.isEmpty(ENV_ACCESS_TOKEN)) {
+        if (StringUtils.isEmpty(platformUrl) || StringUtils.isEmpty(token)) {
             return null;
         }
         return createServerConfig(platformUrl, token);

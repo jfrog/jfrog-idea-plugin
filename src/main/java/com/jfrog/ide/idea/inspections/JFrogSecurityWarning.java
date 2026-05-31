@@ -64,7 +64,7 @@ public class JFrogSecurityWarning {
                 determineReason(result.getMessage().getText(), rule.getShortDescription().getText(), reporter),
                 getFilePath(result, wslDistro),
                 result.getRuleId(),
-                getFirstRegion(result).getSnippet().getText(),
+                normalizeSnippetText(getFirstRegion(result).getSnippet().getText()),
                 reporter,
                 isWarningApplicable(result, rule),
                 Severity.fromSarif(result.getSeverity()),
@@ -104,7 +104,7 @@ public class JFrogSecurityWarning {
                         location.getRegion().getStartColumn(),
                         location.getRegion().getEndLine(),
                         location.getRegion().getEndColumn(),
-                        location.getRegion().getSnippet().getText()
+                        normalizeSnippetText(location.getRegion().getSnippet().getText())
                 );
             }
         }
@@ -131,6 +131,10 @@ public class JFrogSecurityWarning {
 
     private static String determineReason(String resultMessage, String ruleMessage, SourceCodeScanType scannerType) {
         return scannerType.equals(SourceCodeScanType.SAST) ? ruleMessage : resultMessage;
+    }
+
+    private static String normalizeSnippetText(String snippetText) {
+        return snippetText == null ? "" : snippetText.stripTrailing();
     }
 }
 
