@@ -2,6 +2,7 @@ package com.jfrog.ide.idea.configuration;
 
 import com.intellij.util.EnvironmentUtil;
 import com.jfrog.ide.common.configuration.JfrogCliDriver;
+import org.jfrog.build.api.util.NullLog;
 import org.apache.commons.io.FileUtils;
 import org.gradle.internal.impldep.org.junit.Assert;
 import org.junit.Test;
@@ -71,7 +72,7 @@ public class ConnectionDetailsFromCliTest {
 
             // Config JFrog CLI
             if (cliParameters != null) {
-                JfrogCliDriver jfrogCliDriver = new JfrogCliDriver(envVars, null);
+                JfrogCliDriver jfrogCliDriver = new JfrogCliDriver(envVars, new NullLog());
                 jfrogCliDriver.runCommand(null, envVars, cliParameters, new ArrayList<>(), null, null);
             }
 
