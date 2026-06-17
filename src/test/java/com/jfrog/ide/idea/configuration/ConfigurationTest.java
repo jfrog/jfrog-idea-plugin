@@ -173,12 +173,7 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
         }
     }
 
-    /**
-     * XRAY-145646: when jf is not installed, readConnectionDetailsFromJfrogCli must return false
-     * without NPE. NullLog must be passed to JfrogCliDriver (regression: null log NPEs in
-     * isJfrogCliInstalled). mockConstruction is used because CommandExecutor merges
-     * System.getenv() and appends /usr/local/bin on Unix, so PATH isolation is unreliable in CI.
-     */
+    /** XRAY-145646: CLI not installed must return false without NPE when Log is null-safe. */
     public void testReadConnectionDetailsFromJfrogCliWhenCliNotInstalled() throws IOException {
         try (MockedStatic<EnvironmentUtil> mockController = Mockito.mockStatic(EnvironmentUtil.class);
              MockedConstruction<JfrogCliDriver> driverConstruction = Mockito.mockConstruction(
