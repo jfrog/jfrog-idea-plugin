@@ -3,13 +3,13 @@ package com.jfrog.ide.idea.configuration;
 import com.intellij.credentialStore.Credentials;
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import com.intellij.util.EnvironmentUtil;
-import org.apache.commons.io.FileUtils;
+import com.jfrog.ide.common.configuration.JfrogCliDriver;
+import org.jfrog.build.api.util.Log;
+import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -174,18 +174,24 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
     }
 
     /**
-     * XRAY-145646: when jf is not on PATH, isJfrogCliInstalled() logs the failure and must not NPE.
+     * XRAY-145646: when jf is not installed, readConnectionDetailsFromJfrogCli must return false
+     * without NPE. NullLog must be passed to JfrogCliDriver (regression: null log NPEs in
+     * isJfrogCliInstalled). mockConstruction is used because CommandExecutor merges
+     * System.getenv() and appends /usr/local/bin on Unix, so PATH isolation is unreliable in CI.
      */
     public void testReadConnectionDetailsFromJfrogCliWhenCliNotInstalled() throws IOException {
-        Path emptyPath = Files.createTempDirectory("noJfrogCliOnPath");
-        try (MockedStatic<EnvironmentUtil> mockController = Mockito.mockStatic(EnvironmentUtil.class)) {
-            Map<String, String> envVars = new HashMap<>(System.getenv());
-            envVars.put("PATH", emptyPath.toAbsolutePath().toString());
-            mockController.when(EnvironmentUtil::getEnvironmentMap).thenReturn(envVars);
+        try (MockedStatic<EnvironmentUtil> mockController = Mockito.mockStatic(EnvironmentUtil.class);
+             MockedConstruction<JfrogCliDriver> driverConstruction = Mockito.mockConstruction(
+                     JfrogCliDriver.class,
+                     (mock, context) -> {
+                         assertNotNull(context.arguments().get(1));
+                         assertTrue(context.arguments().get(1) instanceof Log);
+                         Mockito.when(mock.isJfrogCliInstalled()).thenReturn(false);
+                     })) {
+            mockController.when(EnvironmentUtil::getEnvironmentMap).thenReturn(new HashMap<>());
 
             assertFalse(new ServerConfigImpl().readConnectionDetailsFromJfrogCli());
-        } finally {
-            FileUtils.forceDelete(emptyPath.toFile());
+            assertEquals(1, driverConstruction.constructed().size());
         }
     }
 
