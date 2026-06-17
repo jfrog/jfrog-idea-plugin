@@ -34,6 +34,7 @@ import com.jfrog.ide.idea.ui.configuration.ConnectionRetriesSpinner;
 import com.jfrog.ide.idea.ui.configuration.ConnectionTimeoutSpinner;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.Strings;
+import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ProxyConfiguration;
 
 import javax.annotation.CheckForNull;
@@ -498,7 +499,7 @@ public class ServerConfigImpl implements ServerConfig {
      * @return true if connection details loaded from JFrog CLI default server.
      */
     public boolean readConnectionDetailsFromJfrogCli() throws IOException {
-        JfrogCliDriver driver = new JfrogCliDriver(new HashMap<>(EnvironmentUtil.getEnvironmentMap()), null);
+        JfrogCliDriver driver = new JfrogCliDriver(new HashMap<>(EnvironmentUtil.getEnvironmentMap()), new NullLog());
         if (!driver.isJfrogCliInstalled()) {
             return false;
         }

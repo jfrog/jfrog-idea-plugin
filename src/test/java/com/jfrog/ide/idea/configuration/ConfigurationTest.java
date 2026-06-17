@@ -3,8 +3,15 @@ package com.jfrog.ide.idea.configuration;
 import com.intellij.credentialStore.Credentials;
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import com.intellij.util.EnvironmentUtil;
+import com.jfrog.ide.common.configuration.JfrogCliDriver;
+import org.jfrog.build.api.util.Log;
+import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.jfrog.ide.idea.configuration.ServerConfigImpl.*;
 
@@ -163,6 +170,23 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
             ServerConfigImpl actualServerConfig = globalSettings.getServerConfig();
             actualServerConfig.readMissingConfFromEnv();
             assertEquals("releases-test", actualServerConfig.getExternalResourcesRepo());
+        }
+    }
+
+    /** XRAY-145646: CLI not installed must return false without NPE when Log is null-safe. */
+    public void testReadConnectionDetailsFromJfrogCliWhenCliNotInstalled() throws IOException {
+        try (MockedStatic<EnvironmentUtil> mockController = Mockito.mockStatic(EnvironmentUtil.class);
+             MockedConstruction<JfrogCliDriver> driverConstruction = Mockito.mockConstruction(
+                     JfrogCliDriver.class,
+                     (mock, context) -> {
+                         assertNotNull(context.arguments().get(1));
+                         assertTrue(context.arguments().get(1) instanceof Log);
+                         Mockito.when(mock.isJfrogCliInstalled()).thenReturn(false);
+                     })) {
+            mockController.when(EnvironmentUtil::getEnvironmentMap).thenReturn(new HashMap<>());
+
+            assertFalse(new ServerConfigImpl().readConnectionDetailsFromJfrogCli());
+            assertEquals(1, driverConstruction.constructed().size());
         }
     }
 
