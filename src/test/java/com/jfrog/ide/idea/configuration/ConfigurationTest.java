@@ -3,8 +3,15 @@ package com.jfrog.ide.idea.configuration;
 import com.intellij.credentialStore.Credentials;
 import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import com.intellij.util.EnvironmentUtil;
+import org.apache.commons.io.FileUtils;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.jfrog.ide.idea.configuration.ServerConfigImpl.*;
 
@@ -163,6 +170,22 @@ public class ConfigurationTest extends LightJavaCodeInsightFixtureTestCase {
             ServerConfigImpl actualServerConfig = globalSettings.getServerConfig();
             actualServerConfig.readMissingConfFromEnv();
             assertEquals("releases-test", actualServerConfig.getExternalResourcesRepo());
+        }
+    }
+
+    /**
+     * XRAY-145646: when jf is not on PATH, isJfrogCliInstalled() logs the failure and must not NPE.
+     */
+    public void testReadConnectionDetailsFromJfrogCliWhenCliNotInstalled() throws IOException {
+        Path emptyPath = Files.createTempDirectory("noJfrogCliOnPath");
+        try (MockedStatic<EnvironmentUtil> mockController = Mockito.mockStatic(EnvironmentUtil.class)) {
+            Map<String, String> envVars = new HashMap<>(System.getenv());
+            envVars.put("PATH", emptyPath.toAbsolutePath().toString());
+            mockController.when(EnvironmentUtil::getEnvironmentMap).thenReturn(envVars);
+
+            assertFalse(new ServerConfigImpl().readConnectionDetailsFromJfrogCli());
+        } finally {
+            FileUtils.forceDelete(emptyPath.toFile());
         }
     }
 
