@@ -10,78 +10,96 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Two modules resolving the same component differently: 'includes' keeps commons-lang3 under
+ * commons-text, 'excludes' drops it. The merged tree holds the union of both, so only a walk that
+ * respects module boundaries can tell that commons-lang3 is unreachable from 'excludes'.
+ */
 public class ModuleImpactTreesTest {
     private static final String PROJECT_ROOT_ID = "multi-project";
-    private static final String MULTI1_COMP_ID = "org.jfrog.test:multi1:3.7.x-SNAPSHOT";
-    private static final String MULTI3_COMP_ID = "org.jfrog.test:multi3:3.7.x-SNAPSHOT";
-    private static final String SPRING_AOP_COMP_ID = "org.springframework:spring-aop:2.5.6";
-    private static final String LOG4J_COMP_ID = "log4j:log4j:1.2.17";
-    private static final String ABSENT_COMP_ID = "com.example:absent:1.0";
+    private static final String INCLUDES_COMP_ID = "org.jfrog.test:includes:1.0";
+    private static final String EXCLUDES_COMP_ID = "org.jfrog.test:excludes:1.0";
+    private static final String COMMONS_TEXT_COMP_ID = "org.apache.commons:commons-text:1.9";
+    private static final String COMMONS_LANG3_COMP_ID = "org.apache.commons:commons-lang3:3.11";
+    private static final String UNREACHABLE_COMP_ID = "com.example:unreachable:1.0";
 
     @Test
-    public void testPathIsBuiltOnlyFromTheModuleThatResolvesTheDependency() {
-        DependencyNode springAop = vulnerableDependency(SPRING_AOP_COMP_ID);
-        ScannerBase.populateImpactTrees(Map.of(SPRING_AOP_COMP_ID, springAop), multiModuleDepTree());
+    public void testExcludedTransitiveIsNotAttributedToTheModuleThatExcludesIt() {
+        DependencyNode commonsLang3 = vulnerableDependency(COMMONS_LANG3_COMP_ID);
+        ScannerBase.populateImpactTrees(Map.of(COMMONS_LANG3_COMP_ID, commonsLang3), multiModuleDepTree());
 
-        Assert.assertEquals(List.of(PROJECT_ROOT_ID + " -> " + MULTI3_COMP_ID + " -> " + SPRING_AOP_COMP_ID),
-                impactPaths(springAop));
+        Assert.assertEquals(
+                List.of(PROJECT_ROOT_ID + " -> " + INCLUDES_COMP_ID + " -> " + COMMONS_TEXT_COMP_ID + " -> " + COMMONS_LANG3_COMP_ID),
+                impactPaths(commonsLang3));
     }
 
     @Test
     public void testEveryModuleThatResolvesTheDependencyContributesAPath() {
-        DependencyNode log4j = vulnerableDependency(LOG4J_COMP_ID);
-        ScannerBase.populateImpactTrees(Map.of(LOG4J_COMP_ID, log4j), multiModuleDepTree());
+        DependencyNode commonsText = vulnerableDependency(COMMONS_TEXT_COMP_ID);
+        ScannerBase.populateImpactTrees(Map.of(COMMONS_TEXT_COMP_ID, commonsText), multiModuleDepTree());
 
-        List<String> paths = impactPaths(log4j);
-        Assert.assertEquals("log4j is resolved by both modules: " + paths, 2, paths.size());
-        Assert.assertTrue(paths.contains(PROJECT_ROOT_ID + " -> " + MULTI1_COMP_ID + " -> " + LOG4J_COMP_ID));
-        Assert.assertTrue(paths.contains(PROJECT_ROOT_ID + " -> " + MULTI3_COMP_ID + " -> " + LOG4J_COMP_ID));
+        List<String> paths = impactPaths(commonsText);
+        Assert.assertEquals("commons-text is resolved by both modules: " + paths, 2, paths.size());
+        Assert.assertTrue(paths.contains(PROJECT_ROOT_ID + " -> " + INCLUDES_COMP_ID + " -> " + COMMONS_TEXT_COMP_ID));
+        Assert.assertTrue(paths.contains(PROJECT_ROOT_ID + " -> " + EXCLUDES_COMP_ID + " -> " + COMMONS_TEXT_COMP_ID));
     }
 
     @Test
     public void testProjectRootIsNotPrependedWhenTheModuleIsTheProjectRoot() {
-        DepTree singleModule = new DepTree(MULTI1_COMP_ID, multi1Nodes(),
-                List.of(new DepTreeModule(MULTI1_COMP_ID, multi1Nodes())));
-        DependencyNode log4j = vulnerableDependency(LOG4J_COMP_ID);
-        ScannerBase.populateImpactTrees(Map.of(LOG4J_COMP_ID, log4j), singleModule);
+        DepTree singleModule = new DepTree(INCLUDES_COMP_ID, includesModuleNodes(),
+                List.of(new DepTreeModule(INCLUDES_COMP_ID, includesModuleNodes())));
+        DependencyNode commonsLang3 = vulnerableDependency(COMMONS_LANG3_COMP_ID);
+        ScannerBase.populateImpactTrees(Map.of(COMMONS_LANG3_COMP_ID, commonsLang3), singleModule);
 
-        Assert.assertEquals(List.of(MULTI1_COMP_ID + " -> " + LOG4J_COMP_ID), impactPaths(log4j));
+        Assert.assertEquals(List.of(INCLUDES_COMP_ID + " -> " + COMMONS_TEXT_COMP_ID + " -> " + COMMONS_LANG3_COMP_ID),
+                impactPaths(commonsLang3));
     }
 
     @Test
     public void testDependencyNoModuleResolvesStillGetsAnImpactTree() {
-        DependencyNode absent = vulnerableDependency(ABSENT_COMP_ID);
-        ScannerBase.populateImpactTrees(Map.of(ABSENT_COMP_ID, absent), multiModuleDepTree());
+        DependencyNode unreachable = vulnerableDependency(UNREACHABLE_COMP_ID);
+        ScannerBase.populateImpactTrees(Map.of(UNREACHABLE_COMP_ID, unreachable), multiModuleDepTree());
 
-        Assert.assertNotNull("a dependency no module resolves must not be left without an impact tree", absent.getImpactTree());
-        Assert.assertEquals(List.of(PROJECT_ROOT_ID + " -> " + ABSENT_COMP_ID), impactPaths(absent));
+        Assert.assertNotNull("a dependency no module resolves must not be left without an impact tree", unreachable.getImpactTree());
+        Assert.assertEquals(List.of(PROJECT_ROOT_ID + " -> " + UNREACHABLE_COMP_ID), impactPaths(unreachable));
     }
 
+    /**
+     * Mirrors {@code GradleTreeBuilder.createDependencyTrees}: the merged map unions the children of a
+     * component across modules, while each module keeps the children it resolved itself.
+     */
     private DepTree multiModuleDepTree() {
         Map<String, DepTreeNode> merged = new HashMap<>();
-        merged.putAll(multi1Nodes());
-        merged.putAll(multi3Nodes());
-        merged.put(PROJECT_ROOT_ID, new DepTreeNode().children(Set.of(MULTI1_COMP_ID, MULTI3_COMP_ID)));
+        mergeInto(merged, includesModuleNodes());
+        mergeInto(merged, excludesModuleNodes());
+        merged.put(PROJECT_ROOT_ID, new DepTreeNode().children(new HashSet<>(Set.of(INCLUDES_COMP_ID, EXCLUDES_COMP_ID))));
         return new DepTree(PROJECT_ROOT_ID, merged,
-                List.of(new DepTreeModule(MULTI1_COMP_ID, multi1Nodes()), new DepTreeModule(MULTI3_COMP_ID, multi3Nodes())));
+                List.of(new DepTreeModule(INCLUDES_COMP_ID, includesModuleNodes()),
+                        new DepTreeModule(EXCLUDES_COMP_ID, excludesModuleNodes())));
     }
 
-    private Map<String, DepTreeNode> multi1Nodes() {
+    private void mergeInto(Map<String, DepTreeNode> merged, Map<String, DepTreeNode> moduleNodes) {
+        moduleNodes.forEach((compId, node) ->
+                merged.computeIfAbsent(compId, id -> new DepTreeNode()).getChildren().addAll(node.getChildren()));
+    }
+
+    private Map<String, DepTreeNode> includesModuleNodes() {
         Map<String, DepTreeNode> nodes = new HashMap<>();
-        nodes.put(MULTI1_COMP_ID, new DepTreeNode().children(Set.of(LOG4J_COMP_ID)));
-        nodes.put(LOG4J_COMP_ID, new DepTreeNode());
+        nodes.put(INCLUDES_COMP_ID, new DepTreeNode().children(new HashSet<>(Set.of(COMMONS_TEXT_COMP_ID))));
+        nodes.put(COMMONS_TEXT_COMP_ID, new DepTreeNode().children(new HashSet<>(Set.of(COMMONS_LANG3_COMP_ID))));
+        nodes.put(COMMONS_LANG3_COMP_ID, new DepTreeNode());
         return nodes;
     }
 
-    private Map<String, DepTreeNode> multi3Nodes() {
+    private Map<String, DepTreeNode> excludesModuleNodes() {
         Map<String, DepTreeNode> nodes = new HashMap<>();
-        nodes.put(MULTI3_COMP_ID, new DepTreeNode().children(Set.of(LOG4J_COMP_ID, SPRING_AOP_COMP_ID)));
-        nodes.put(LOG4J_COMP_ID, new DepTreeNode());
-        nodes.put(SPRING_AOP_COMP_ID, new DepTreeNode());
+        nodes.put(EXCLUDES_COMP_ID, new DepTreeNode().children(new HashSet<>(Set.of(COMMONS_TEXT_COMP_ID))));
+        nodes.put(COMMONS_TEXT_COMP_ID, new DepTreeNode());
         return nodes;
     }
 
