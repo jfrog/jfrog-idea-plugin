@@ -1,0 +1,3 @@
+rootProject.name = 'orphanrepro'
+include 'moda'
+include 'modb'
