@@ -18,37 +18,54 @@ public class ImpactTreeBuilder {
      * @param rootId                 the project's root component ID
      */
     public static void populateImpactTrees(Map<String, DependencyNode> vulnerableDependencies, Map<String, Set<String>> parents, String rootId) {
-        for (DependencyNode vulnDep : vulnerableDependencies.values()) {
-            walkParents(vulnDep, parents, rootId, Collections.singletonList(vulnDep.getComponentIdWithoutPrefix()));
-        }
+        populateImpactTrees(vulnerableDependencies, parents, rootId, null);
     }
 
     /**
-     * Walks through a {@link DependencyNode}'s parents to build its impact paths.
+     * Builds impact paths for {@link DependencyNode} objects, within a single module of the project.
      *
-     * @param depNode         a vulnerable dependency
-     * @param parents         a map of all dependencies and their parents
-     * @param rootId          the project's root component ID
-     * @param path            a path of nodes (represented by their component IDs) from the current parent to the current node
+     * @param vulnerableDependencies a map of component IDs and the {@link DependencyNode} object matching each of them
+     * @param parents                a map of the module's dependencies and their parents
+     * @param rootId                 the module's root component ID, where every impact path ends
+     * @param projectRootId          the project's root component ID to prepend to each path, or null when the
+     *                               module root is already the project root
      */
-    private static void walkParents(DependencyNode depNode, Map<String, Set<String>> parents, String rootId, List<String> path) {
+    public static void populateImpactTrees(Map<String, DependencyNode> vulnerableDependencies, Map<String, Set<String>> parents, String rootId, String projectRootId) {
+        for (DependencyNode vulnDep : vulnerableDependencies.values()) {
+            String componentId = vulnDep.getComponentIdWithoutPrefix();
+            if (!componentId.equals(rootId) && !parents.containsKey(componentId)) {
+                continue;
+            }
+            walkParents(vulnDep, parents, rootId, Collections.singletonList(componentId), projectRootId);
+        }
+    }
+
+    private static void walkParents(DependencyNode depNode, Map<String, Set<String>> parents, String rootId, List<String> path, String projectRootId) {
         String currParentId = path.get(0);
         if (depNode.getImpactTree() != null && depNode.getImpactTree().getImpactPathsCount() >= ImpactTree.IMPACT_PATHS_LIMIT) {
             return;
         }
-        // If we arrived at the root, add the path to the impact tree
         if (currParentId.equals(rootId)) {
-            addImpactPathToDependencyNode(depNode, path);
-        } else {
-            for (String grandparentId : parents.get(currParentId)) {
-                if (path.contains(grandparentId)) {
-                    continue;
-                }
-                List<String> pathToGrandparent = new ArrayList<>(path);
-                pathToGrandparent.add(0, grandparentId);
-                walkParents(depNode, parents, rootId, pathToGrandparent);
-            }
+            addImpactPathToDependencyNode(depNode, prependProjectRoot(path, projectRootId));
+            return;
         }
+        for (String grandparentId : parents.getOrDefault(currParentId, Collections.emptySet())) {
+            if (path.contains(grandparentId)) {
+                continue;
+            }
+            List<String> pathToGrandparent = new ArrayList<>(path);
+            pathToGrandparent.add(0, grandparentId);
+            walkParents(depNode, parents, rootId, pathToGrandparent, projectRootId);
+        }
+    }
+
+    private static List<String> prependProjectRoot(List<String> path, String projectRootId) {
+        if (projectRootId == null) {
+            return path;
+        }
+        List<String> fullPath = new ArrayList<>(path);
+        fullPath.add(0, projectRootId);
+        return fullPath;
     }
 
     public static void addImpactPathToDependencyNode(DependencyNode dependencyNode, List<String> path) {

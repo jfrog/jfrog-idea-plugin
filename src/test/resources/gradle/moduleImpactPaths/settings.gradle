@@ -1,0 +1,3 @@
+rootProject.name = 'moduleImpactPaths'
+include 'moda'
+include 'modb'
