@@ -78,6 +78,8 @@ public class GradleModuleImpactPathsTest {
         String resource = "/" + GRADLE_DEP_TREE_CLASS.replace('.', '/') + ".class";
         URL location = Class.forName(GRADLE_DEP_TREE_CLASS).getResource(resource);
         Assert.assertNotNull("'" + GRADLE_DEP_TREE_CLASS + "' is expected on the test runtime classpath", location);
+        Assert.assertTrue("'" + GRADLE_DEP_TREE_CLASS + "' is expected to come from a jar, but was loaded from " + location,
+                StringUtils.startsWith(location.toString(), "jar:") && StringUtils.contains(location.toString(), "!"));
         String jarUrl = StringUtils.substringBefore(StringUtils.removeStart(location.toString(), "jar:"), "!");
         return Path.of(URI.create(jarUrl));
     }
