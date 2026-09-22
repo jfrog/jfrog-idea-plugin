@@ -216,7 +216,6 @@ public abstract class ScannerBase {
     private static void addMissingImpactTrees(Map<String, DependencyNode> vulnerableDependencies, String rootId) {
         for (DependencyNode dependency : vulnerableDependencies.values()) {
             if (dependency.getImpactTree() == null) {
-                Logger.getInstance().warn("No impact path was found for '" + dependency.getComponentIdWithoutPrefix() + "', attaching it directly to '" + rootId + "'.");
                 ImpactTreeBuilder.addImpactPathToDependencyNode(dependency, List.of(rootId, dependency.getComponentIdWithoutPrefix()));
             }
         }
