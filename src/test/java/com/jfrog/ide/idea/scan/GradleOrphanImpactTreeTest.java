@@ -26,7 +26,6 @@ import java.util.Map;
  */
 public class GradleOrphanImpactTreeTest {
     private static final String ORPHAN_COMP_ID = "org.apache.commons:commons-lang3:3.11";
-    private static final String SHARED_COMP_ID = "org.apache.commons:commons-text:1.9";
 
     @Test
     public void testImpactTreeOfDependencyDroppedByModuleMerge() throws Exception {

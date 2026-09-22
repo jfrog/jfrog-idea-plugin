@@ -195,6 +195,8 @@ public abstract class ScannerBase {
     /**
      * Build the impact paths of the vulnerable dependencies. Projects that report per-module trees get a path
      * only from the modules that actually resolve the dependency; all others are walked as a single tree.
+     * Every vulnerable dependency is guaranteed to end up with an impact tree, even one unreachable from any
+     * root, so no {@link DependencyNode} is ever left with a null impact tree.
      *
      * @param vulnerableDependencies a map of component IDs and the {@link DependencyNode} object matching each of them
      * @param depTree                the project's dependency tree
@@ -202,11 +204,11 @@ public abstract class ScannerBase {
     static void populateImpactTrees(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) {
         if (depTree.modules().isEmpty()) {
             ImpactTreeBuilder.populateImpactTrees(vulnerableDependencies, getParents(depTree.nodes()), depTree.rootId());
-            return;
-        }
-        for (DepTreeModule module : depTree.modules()) {
-            String projectRootId = module.rootId().equals(depTree.rootId()) ? null : depTree.rootId();
-            ImpactTreeBuilder.populateImpactTrees(vulnerableDependencies, getParents(module.nodes()), module.rootId(), projectRootId);
+        } else {
+            for (DepTreeModule module : depTree.modules()) {
+                String projectRootId = module.rootId().equals(depTree.rootId()) ? null : depTree.rootId();
+                ImpactTreeBuilder.populateImpactTrees(vulnerableDependencies, getParents(module.nodes()), module.rootId(), projectRootId);
+            }
         }
         addMissingImpactTrees(vulnerableDependencies, depTree.rootId());
     }
