@@ -99,6 +99,12 @@ dependencies {
 }
 
 test {
+    // The IDE's app.jar bundles an older Jackson. In the IDE the plugin's class loader prefers the plugin's own jars,
+    // but the test classpath is flat, so the plugin's Jackson jars are moved to its front.
+    doFirst {
+        def jacksonJars = classpath.filter { it.name.startsWith('jackson-') }
+        classpath = jacksonJars + (classpath - jacksonJars)
+    }
     scanForTestClasses false
     include "**/*Test.class"
     exclude "**/*IntegrationTest*", "**/*PypiScannerTest*"
