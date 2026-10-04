@@ -193,10 +193,7 @@ public abstract class ScannerBase {
     }
 
     /**
-     * Build the impact paths of the vulnerable dependencies. Projects that report per-module trees get a path
-     * only from the modules that actually resolve the dependency; all others are walked as a single tree.
-     * Every vulnerable dependency is guaranteed to end up with an impact tree, even one unreachable from any
-     * root, so no {@link DependencyNode} is ever left with a null impact tree.
+     * Build the impact paths of the vulnerable dependencies, walking each module's own tree when the project has modules.
      *
      * @param vulnerableDependencies a map of component IDs and the {@link DependencyNode} object matching each of them
      * @param depTree                the project's dependency tree

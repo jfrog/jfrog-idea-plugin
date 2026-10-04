@@ -16,9 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Two modules resolving the same component differently: 'includes' keeps commons-lang3 under
- * commons-text, 'excludes' drops it. The merged tree holds the union of both, so only a walk that
- * respects module boundaries can tell that commons-lang3 is unreachable from 'excludes'.
+ * Two modules where 'includes' gets commons-lang3 through commons-text and 'excludes' excludes it.
  */
 public class ModuleImpactTreesTest {
     private static final String PROJECT_ROOT_ID = "multi-project";
@@ -70,8 +68,7 @@ public class ModuleImpactTreesTest {
     }
 
     /**
-     * Mirrors {@code GradleTreeBuilder.createDependencyTrees}: the merged map unions the children of a
-     * component across modules, while each module keeps the children it resolved itself.
+     * Builds a tree whose merged map unions the children of a component across modules.
      */
     private DepTree multiModuleDepTree() {
         Map<String, DepTreeNode> merged = new HashMap<>();

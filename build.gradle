@@ -100,8 +100,7 @@ dependencies {
 }
 
 test {
-    // The IDE's app.jar bundles an older Jackson. In the IDE the plugin's class loader prefers the plugin's own jars,
-    // but the test classpath is flat, so the plugin's Jackson jars are moved to its front.
+    // The IDE's app.jar bundles an older Jackson; tests load the plugin's Jackson first, as the IDE does.
     def jacksonJars = classpath.filter { it.name.startsWith('jackson-') }
     classpath = jacksonJars + (classpath - jacksonJars)
     scanForTestClasses false

@@ -21,9 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A Gradle project whose modules resolve the same dependency differently: 'moda' pulls commons-lang3
- * in through commons-text, and 'modb' excludes it. The impact paths of commons-lang3 must therefore
- * name 'moda' alone.
+ * A Gradle project where 'moda' gets commons-lang3 through commons-text and 'modb' excludes it.
  */
 public class GradleModuleImpactPathsTest {
     private static final String EXCLUDED_BY_MODB_COMP_ID = "org.apache.commons:commons-lang3:3.11";

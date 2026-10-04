@@ -22,13 +22,12 @@ public class ImpactTreeBuilder {
     }
 
     /**
-     * Builds impact paths for {@link DependencyNode} objects, within a single module of the project.
+     * Builds impact paths for {@link DependencyNode} objects within a single module of the project.
      *
      * @param vulnerableDependencies a map of component IDs and the {@link DependencyNode} object matching each of them
      * @param parents                a map of the module's dependencies and their parents
      * @param rootId                 the module's root component ID, where every impact path ends
-     * @param projectRootId          the project's root component ID to prepend to each path, or null when the
-     *                               module root is already the project root
+     * @param projectRootId          the project's root component ID to prepend to each path, or null
      */
     public static void populateImpactTrees(Map<String, DependencyNode> vulnerableDependencies, Map<String, Set<String>> parents, String rootId, String projectRootId) {
         for (DependencyNode vulnDep : vulnerableDependencies.values()) {
@@ -40,11 +39,21 @@ public class ImpactTreeBuilder {
         }
     }
 
+    /**
+     * Walks through a {@link DependencyNode}'s parents to build its impact paths.
+     *
+     * @param depNode         a vulnerable dependency
+     * @param parents         a map of all dependencies and their parents
+     * @param rootId          the module's root component ID
+     * @param path            a path of nodes (represented by their component IDs) from the current parent to the current node
+     * @param projectRootId   the project's root component ID to prepend to each path, or null
+     */
     private static void walkParents(DependencyNode depNode, Map<String, Set<String>> parents, String rootId, List<String> path, String projectRootId) {
         String currParentId = path.get(0);
         if (depNode.getImpactTree() != null && depNode.getImpactTree().getImpactPathsCount() >= ImpactTree.IMPACT_PATHS_LIMIT) {
             return;
         }
+        // If we arrived at the root, add the path to the impact tree
         if (currParentId.equals(rootId)) {
             addImpactPathToDependencyNode(depNode, prependProjectRoot(path, projectRootId));
             return;
