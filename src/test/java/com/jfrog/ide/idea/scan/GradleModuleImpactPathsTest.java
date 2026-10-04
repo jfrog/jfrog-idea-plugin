@@ -1,5 +1,7 @@
 package com.jfrog.ide.idea.scan;
 
+import com.jfrog.ide.idea.scan.utils.ImpactTreeBuilder;
+
 import com.jfrog.ide.common.deptree.DepTree;
 import com.jfrog.ide.common.gradle.GradleTreeBuilder;
 import com.jfrog.ide.common.nodes.DependencyNode;
@@ -35,7 +37,7 @@ public class GradleModuleImpactPathsTest {
             Assert.assertTrue("commons-lang3 is expected in the dependency tree", depTree.nodes().containsKey(EXCLUDED_BY_MODB_COMP_ID));
 
             DependencyNode vulnerableDependency = new DependencyNode().componentId("gav://" + EXCLUDED_BY_MODB_COMP_ID);
-            ScannerBase.populateImpactTrees(Map.of(EXCLUDED_BY_MODB_COMP_ID, vulnerableDependency), depTree);
+            ImpactTreeBuilder.populateImpactTrees(Map.of(EXCLUDED_BY_MODB_COMP_ID, vulnerableDependency), depTree);
 
             Assert.assertNotNull("an impact path should have been built for commons-lang3", vulnerableDependency.getImpactTree());
             List<String> paths = new ArrayList<>();

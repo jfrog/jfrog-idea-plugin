@@ -18,8 +18,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.deptree.DepTree;
-import com.jfrog.ide.common.deptree.DepTreeModule;
-import com.jfrog.ide.common.deptree.DepTreeNode;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.nodes.DependencyNode;
 import com.jfrog.ide.common.nodes.FileTreeNode;
@@ -188,34 +186,8 @@ public abstract class ScannerBase {
 
     protected List<FileTreeNode> buildImpactGraph(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) throws IOException {
         Map<String, Set<String>> parents = getParents(depTree);
-        populateImpactTrees(vulnerableDependencies, depTree);
+        ImpactTreeBuilder.populateImpactTrees(vulnerableDependencies, depTree);
         return groupDependenciesToDescriptorNodes(vulnerableDependencies.values(), depTree, parents);
-    }
-
-    /**
-     * Build the impact paths of the vulnerable dependencies, walking each module's own tree when the project has modules.
-     *
-     * @param vulnerableDependencies a map of component IDs and the {@link DependencyNode} object matching each of them
-     * @param depTree                the project's dependency tree
-     */
-    static void populateImpactTrees(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) {
-        if (depTree.modules().isEmpty()) {
-            ImpactTreeBuilder.populateImpactTrees(vulnerableDependencies, getParents(depTree.nodes()), depTree.rootId());
-        } else {
-            for (DepTreeModule module : depTree.modules()) {
-                String projectRootId = module.rootId().equals(depTree.rootId()) ? null : depTree.rootId();
-                ImpactTreeBuilder.populateImpactTrees(vulnerableDependencies, getParents(module.nodes()), module.rootId(), projectRootId);
-            }
-        }
-        addMissingImpactTrees(vulnerableDependencies, depTree.rootId());
-    }
-
-    private static void addMissingImpactTrees(Map<String, DependencyNode> vulnerableDependencies, String rootId) {
-        for (DependencyNode dependency : vulnerableDependencies.values()) {
-            if (dependency.getImpactTree() == null) {
-                ImpactTreeBuilder.addImpactPathToDependencyNode(dependency, List.of(rootId, dependency.getComponentIdWithoutPrefix()));
-            }
-        }
     }
 
     /**
@@ -226,19 +198,7 @@ public abstract class ScannerBase {
      * @return a map of nodes from the {@link DepTree} amd each one's parents
      */
     static Map<String, Set<String>> getParents(DepTree depTree) {
-        return getParents(depTree.nodes());
-    }
-
-    private static Map<String, Set<String>> getParents(Map<String, DepTreeNode> nodes) {
-        Map<String, Set<String>> parents = new HashMap<>();
-        for (Map.Entry<String, DepTreeNode> node : nodes.entrySet()) {
-            String parentId = node.getKey();
-            for (String childId : node.getValue().getChildren()) {
-                parents.putIfAbsent(childId, new HashSet<>());
-                parents.get(childId).add(parentId);
-            }
-        }
-        return parents;
+        return ImpactTreeBuilder.getParents(depTree.nodes());
     }
 
     /**

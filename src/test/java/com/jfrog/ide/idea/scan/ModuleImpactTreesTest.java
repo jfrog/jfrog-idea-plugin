@@ -1,5 +1,7 @@
 package com.jfrog.ide.idea.scan;
 
+import com.jfrog.ide.idea.scan.utils.ImpactTreeBuilder;
+
 import com.jfrog.ide.common.deptree.DepTree;
 import com.jfrog.ide.common.deptree.DepTreeModule;
 import com.jfrog.ide.common.deptree.DepTreeNode;
@@ -29,7 +31,7 @@ public class ModuleImpactTreesTest {
     @Test
     public void testExcludedTransitiveIsNotAttributedToTheModuleThatExcludesIt() {
         DependencyNode commonsLang3 = vulnerableDependency(COMMONS_LANG3_COMP_ID);
-        ScannerBase.populateImpactTrees(Map.of(COMMONS_LANG3_COMP_ID, commonsLang3), multiModuleDepTree());
+        ImpactTreeBuilder.populateImpactTrees(Map.of(COMMONS_LANG3_COMP_ID, commonsLang3), multiModuleDepTree());
 
         Assert.assertEquals(
                 List.of(PROJECT_ROOT_ID + " -> " + INCLUDES_COMP_ID + " -> " + COMMONS_TEXT_COMP_ID + " -> " + COMMONS_LANG3_COMP_ID),
@@ -39,7 +41,7 @@ public class ModuleImpactTreesTest {
     @Test
     public void testEveryModuleThatResolvesTheDependencyContributesAPath() {
         DependencyNode commonsText = vulnerableDependency(COMMONS_TEXT_COMP_ID);
-        ScannerBase.populateImpactTrees(Map.of(COMMONS_TEXT_COMP_ID, commonsText), multiModuleDepTree());
+        ImpactTreeBuilder.populateImpactTrees(Map.of(COMMONS_TEXT_COMP_ID, commonsText), multiModuleDepTree());
 
         List<String> paths = impactPaths(commonsText);
         Assert.assertEquals("commons-text is resolved by both modules: " + paths, 2, paths.size());
@@ -52,7 +54,7 @@ public class ModuleImpactTreesTest {
         DepTree singleModule = new DepTree(INCLUDES_COMP_ID, includesModuleNodes(),
                 List.of(new DepTreeModule(INCLUDES_COMP_ID, includesModuleNodes())));
         DependencyNode commonsLang3 = vulnerableDependency(COMMONS_LANG3_COMP_ID);
-        ScannerBase.populateImpactTrees(Map.of(COMMONS_LANG3_COMP_ID, commonsLang3), singleModule);
+        ImpactTreeBuilder.populateImpactTrees(Map.of(COMMONS_LANG3_COMP_ID, commonsLang3), singleModule);
 
         Assert.assertEquals(List.of(INCLUDES_COMP_ID + " -> " + COMMONS_TEXT_COMP_ID + " -> " + COMMONS_LANG3_COMP_ID),
                 impactPaths(commonsLang3));
@@ -61,7 +63,7 @@ public class ModuleImpactTreesTest {
     @Test
     public void testDependencyNoModuleResolvesStillGetsAnImpactTree() {
         DependencyNode unreachable = vulnerableDependency(UNREACHABLE_COMP_ID);
-        ScannerBase.populateImpactTrees(Map.of(UNREACHABLE_COMP_ID, unreachable), multiModuleDepTree());
+        ImpactTreeBuilder.populateImpactTrees(Map.of(UNREACHABLE_COMP_ID, unreachable), multiModuleDepTree());
 
         Assert.assertNotNull("a dependency no module resolves must not be left without an impact tree", unreachable.getImpactTree());
         Assert.assertEquals(List.of(PROJECT_ROOT_ID + " -> " + UNREACHABLE_COMP_ID), impactPaths(unreachable));
