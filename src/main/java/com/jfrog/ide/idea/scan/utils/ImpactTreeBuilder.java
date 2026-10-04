@@ -103,6 +103,9 @@ public class ImpactTreeBuilder {
         }
     }
 
+    /**
+     * Gives unreachable libraries a direct path.
+     */
     private static void addMissingImpactTrees(Map<String, DependencyNode> vulnerableDependencies, String rootId) {
         for (DependencyNode dependency : vulnerableDependencies.values()) {
             if (dependency.getImpactTree() == null) {
