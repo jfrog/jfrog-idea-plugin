@@ -70,11 +70,7 @@ public class ImpactTreeBuilder {
      */
     private static void populateImpactTrees(Map<String, DependencyNode> vulnerableDependencies, Map<String, Set<String>> parents, String rootId, String projectRootId) {
         for (DependencyNode vulnDep : vulnerableDependencies.values()) {
-            String componentId = vulnDep.getComponentIdWithoutPrefix();
-            if (!componentId.equals(rootId) && !parents.containsKey(componentId)) {
-                continue;
-            }
-            walkParents(vulnDep, parents, rootId, Collections.singletonList(componentId), projectRootId);
+            walkParents(vulnDep, parents, rootId, Collections.singletonList(vulnDep.getComponentIdWithoutPrefix()), projectRootId);
         }
     }
 
