@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, windows-latest, macOS-latest, macos-13 ]
+        os: [ ubuntu-latest, windows-latest, macOS-latest ]
         include:
           - os: windows-latest
             gradlew_suffix: .bat
@@ -53,5 +53,4 @@ jobs:
         env:
           JFROG_IDE_PLATFORM_URL: ${{ secrets.PLATFORM_URL }}
           JFROG_IDE_ACCESS_TOKEN: ${{ secrets.PLATFORM_ADMIN_TOKEN }}
-          JFROG_IDE_TEST_EXTERNAL_RESOURCES_REPO: "releases-remote"
         run: ./gradlew${{ matrix.gradlew_suffix }} clean integrationTests

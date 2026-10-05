@@ -9,7 +9,7 @@ import com.jfrog.ide.idea.scan.ScanBinaryExecutor;
 import com.jfrog.ide.idea.scan.SecretsScannerExecutor;
 import com.jfrog.ide.idea.scan.data.ScanConfig;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.mockito.Mockito;
 
 import java.io.FileNotFoundException;
@@ -17,24 +17,36 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 
+import static com.jfrog.ide.common.utils.ArtifactoryConnectionUtils.createArtifactoryManagerBuilder;
 import static org.mockito.Mockito.mock;
 
 public class ExternalResourcesRepoIntegrationTests extends BaseIntegrationTest {
     private static final String TEST_PROJECT_PREFIX = "secrets/testProjects/";
-    private static final String ENV_EXTERNAL_RESOURCES_REPO = "JFROG_IDE_TEST_EXTERNAL_RESOURCES_REPO";
+    private static final String RELEASES_REMOTE_CONFIG = "{\"rclass\":\"remote\",\"packageType\":\"generic\",\"url\":\"https://releases.jfrog.io\"}";
 
     private SecretsScannerExecutor scanner;
+    private String externalResourcesRepo;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         scanner = new SecretsScannerExecutor(Logger.getInstance());
+        externalResourcesRepo = "ide-plugin-releases-remote-" + System.currentTimeMillis();
+        try (ArtifactoryManager artifactoryManager = createArtifactoryManagerBuilder(serverConfig, Logger.getInstance()).build()) {
+            artifactoryManager.createRepository(externalResourcesRepo, RELEASES_REMOTE_CONFIG);
+        }
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        try (ArtifactoryManager artifactoryManager = createArtifactoryManagerBuilder(serverConfig, Logger.getInstance()).build()) {
+            artifactoryManager.deleteRepository(externalResourcesRepo);
+        } finally {
+            super.tearDown();
+        }
     }
 
     public void testDownloadScannersFromExternalRepo() throws IOException, InterruptedException {
-        String externalResourcesRepo = System.getenv(ENV_EXTERNAL_RESOURCES_REPO);
-        assertFalse("The " + ENV_EXTERNAL_RESOURCES_REPO + " environment variable must be set to run this test", StringUtils.isEmpty(externalResourcesRepo));
-
         // Save the current ServerConfig and restore it at the end
         ServerConfigImpl originalServerConfig = GlobalSettings.getInstance().getServerConfig();
 
