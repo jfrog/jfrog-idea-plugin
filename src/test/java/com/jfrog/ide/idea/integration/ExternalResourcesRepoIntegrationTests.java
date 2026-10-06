@@ -31,16 +31,21 @@ public class ExternalResourcesRepoIntegrationTests extends BaseIntegrationTest {
     protected void setUp() throws Exception {
         super.setUp();
         scanner = new SecretsScannerExecutor(Logger.getInstance());
-        externalResourcesRepo = "ide-plugin-releases-remote-" + System.currentTimeMillis();
+        String repository = "ide-plugin-releases-remote-" + System.currentTimeMillis();
         try (ArtifactoryManager artifactoryManager = createArtifactoryManagerBuilder(serverConfig, Logger.getInstance()).build()) {
-            artifactoryManager.createRepository(externalResourcesRepo, RELEASES_REMOTE_CONFIG);
+            artifactoryManager.createRepository(repository, RELEASES_REMOTE_CONFIG);
         }
+        externalResourcesRepo = repository;
     }
 
     @Override
     protected void tearDown() throws Exception {
-        try (ArtifactoryManager artifactoryManager = createArtifactoryManagerBuilder(serverConfig, Logger.getInstance()).build()) {
-            artifactoryManager.deleteRepository(externalResourcesRepo);
+        try {
+            if (externalResourcesRepo != null) {
+                try (ArtifactoryManager artifactoryManager = createArtifactoryManagerBuilder(serverConfig, Logger.getInstance()).build()) {
+                    artifactoryManager.deleteRepository(externalResourcesRepo);
+                }
+            }
         } finally {
             super.tearDown();
         }
