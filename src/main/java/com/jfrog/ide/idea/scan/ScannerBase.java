@@ -18,7 +18,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
 import com.jfrog.ide.common.configuration.ServerConfig;
 import com.jfrog.ide.common.deptree.DepTree;
-import com.jfrog.ide.common.deptree.DepTreeNode;
 import com.jfrog.ide.common.log.ProgressIndicator;
 import com.jfrog.ide.common.nodes.DependencyNode;
 import com.jfrog.ide.common.nodes.FileTreeNode;
@@ -187,7 +186,7 @@ public abstract class ScannerBase {
 
     protected List<FileTreeNode> buildImpactGraph(Map<String, DependencyNode> vulnerableDependencies, DepTree depTree) throws IOException {
         Map<String, Set<String>> parents = getParents(depTree);
-        ImpactTreeBuilder.populateImpactTrees(vulnerableDependencies, parents, depTree.rootId());
+        ImpactTreeBuilder.populateImpactTrees(vulnerableDependencies, depTree);
         return groupDependenciesToDescriptorNodes(vulnerableDependencies.values(), depTree, parents);
     }
 
@@ -199,15 +198,7 @@ public abstract class ScannerBase {
      * @return a map of nodes from the {@link DepTree} amd each one's parents
      */
     static Map<String, Set<String>> getParents(DepTree depTree) {
-        Map<String, Set<String>> parents = new HashMap<>();
-        for (Map.Entry<String, DepTreeNode> node : depTree.nodes().entrySet()) {
-            String parentId = node.getKey();
-            for (String childId : node.getValue().getChildren()) {
-                parents.putIfAbsent(childId, new HashSet<>());
-                parents.get(childId).add(parentId);
-            }
-        }
-        return parents;
+        return ImpactTreeBuilder.getParents(depTree.nodes());
     }
 
     /**
