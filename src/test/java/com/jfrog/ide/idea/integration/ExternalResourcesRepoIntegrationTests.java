@@ -16,6 +16,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.UUID;
 
 import static com.jfrog.ide.common.utils.ArtifactoryConnectionUtils.createArtifactoryManagerBuilder;
 import static org.mockito.Mockito.mock;
@@ -31,7 +32,7 @@ public class ExternalResourcesRepoIntegrationTests extends BaseIntegrationTest {
     protected void setUp() throws Exception {
         super.setUp();
         scanner = new SecretsScannerExecutor(Logger.getInstance());
-        String repository = "ide-plugin-releases-remote-" + System.currentTimeMillis();
+        String repository = "ide-plugin-releases-remote-" + UUID.randomUUID();
         try (ArtifactoryManager artifactoryManager = createArtifactoryManagerBuilder(serverConfig, Logger.getInstance()).build()) {
             artifactoryManager.createRepository(repository, RELEASES_REMOTE_CONFIG);
         }
