@@ -90,6 +90,7 @@ dependencies {
     implementation group: 'com.google.guava', name: 'guava', version: '32.0.1-jre'
     implementation group: 'org.codehaus.plexus', name: 'plexus-utils', version: '4.0.3'
     implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.4'
+    implementation group: 'org.swinglabs.swingx', name: 'swingx-core', version: '1.6.5-1'
 
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
