@@ -32,7 +32,7 @@ public class ExternalResourcesRepoIntegrationTests extends BaseIntegrationTest {
     protected void setUp() throws Exception {
         super.setUp();
         scanner = new SecretsScannerExecutor(Logger.getInstance());
-        String repository = "ide-plugin-releases-remote-" + UUID.randomUUID();
+        String repository = "ide-plugin-releases-" + UUID.randomUUID();
         try (ArtifactoryManager artifactoryManager = createArtifactoryManagerBuilder(serverConfig, Logger.getInstance()).build()) {
             artifactoryManager.createRepository(repository, RELEASES_REMOTE_CONFIG);
         }
