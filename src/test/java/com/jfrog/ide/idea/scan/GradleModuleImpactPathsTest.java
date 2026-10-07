@@ -27,6 +27,7 @@ import java.util.Map;
  */
 public class GradleModuleImpactPathsTest {
     private static final String EXCLUDED_BY_MODB_COMP_ID = "org.apache.commons:commons-lang3:3.11";
+    private static final String PATH_THROUGH_MODA = "com.example:moda:1.0 -> org.apache.commons:commons-text:1.9 -> " + EXCLUDED_BY_MODB_COMP_ID;
     private static final String GRADLE_DEP_TREE_CLASS = "com.jfrog.GradleDependencyNode";
 
     @Test
@@ -43,7 +44,7 @@ public class GradleModuleImpactPathsTest {
             List<String> paths = new ArrayList<>();
             collectPaths(vulnerableDependency.getImpactTree().getRoot(), "", paths);
             Assert.assertEquals("commons-lang3 is only reachable through moda: " + paths, 1, paths.size());
-            Assert.assertTrue("the only impact path must go through moda: " + paths, paths.get(0).contains(":moda:"));
+            Assert.assertTrue("the only impact path must go through moda and commons-text: " + paths, paths.get(0).endsWith(PATH_THROUGH_MODA));
             Assert.assertFalse("modb excludes commons-lang3: " + paths, paths.get(0).contains(":modb:"));
         } finally {
             FileUtils.deleteQuietly(projectDir.toFile());
