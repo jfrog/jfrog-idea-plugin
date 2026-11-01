@@ -15,6 +15,7 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.PsiElement;
 import com.jfrog.ide.common.nodes.DependencyNode;
 import com.jfrog.ide.common.nodes.DescriptorFileTreeNode;
+import com.jfrog.ide.common.nodes.LicenseViolationNode;
 import com.jfrog.ide.common.nodes.SortableChildrenTreeNode;
 import com.jfrog.ide.common.nodes.VulnerabilityNode;
 import com.jfrog.ide.common.nodes.subentities.ImpactTree;
@@ -252,7 +253,10 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
         if (!isTransitive) {
             Multimap<String, String> fixVersionToCves = ArrayListMultimap.create();
             dependency.children().asIterator().forEachRemaining(issueNode -> {
-                List<String> fixVersionStrings = ListUtils.emptyIfNull(((VulnerabilityNode) issueNode).getFixedVersions());
+                if (!(issueNode instanceof VulnerabilityNode vulnerability)) {
+                    return;
+                }
+                List<String> fixVersionStrings = ListUtils.emptyIfNull(vulnerability.getFixedVersions());
                 for (String fixVersionString : fixVersionStrings) {
                     String fixVersion = convertFixVersionStringToMinFixVersion(fixVersionString);
                     fixVersionToCves.put(fixVersion, issueNode.toString());
@@ -268,10 +272,51 @@ public abstract class AbstractInspection extends LocalInspectionTool implements 
 
         problemsHolder.registerProblem(
                 element,
-                "JFrog: " + dependencyDescription + " has security vulnerabilities",
+                "JFrog: " + dependencyDescription + " " + findingDescription(dependency),
                 ProblemHighlightType.WARNING,
                 quickFixes.toArray(LocalQuickFix[]::new)
         );
+    }
+
+    /**
+     * One warning is registered per dependency. Name the findings that dependency actually has.
+     * Security-policy violations are stored as vulnerabilities, so they keep the vulnerability wording.
+     * Upgrade actions stay limited to vulnerabilities.
+     */
+    private static String findingDescription(DependencyNode dependency) {
+        boolean hasVulnerability = false;
+        boolean hasLicense = false;
+        List<String> licenseNames = new ArrayList<>();
+        Enumeration<TreeNode> children = dependency.children();
+        if (children != null) {
+            while (children.hasMoreElements()) {
+                TreeNode child = children.nextElement();
+                if (child instanceof VulnerabilityNode) {
+                    hasVulnerability = true;
+                } else if (child instanceof LicenseViolationNode license) {
+                    hasLicense = true;
+                    String name = StringUtils.trimToEmpty(license.getName());
+                    if (!name.isEmpty() && !licenseNames.contains(name)) {
+                        licenseNames.add(name);
+                    }
+                }
+            }
+        }
+        String licenseClause = licenseClause(licenseNames);
+        if (hasVulnerability && hasLicense) {
+            return "has security vulnerabilities and " + licenseClause;
+        }
+        if (hasLicense) {
+            return licenseClause;
+        }
+        return "has security vulnerabilities";
+    }
+
+    private static String licenseClause(List<String> licenseNames) {
+        if (licenseNames.isEmpty()) {
+            return "violates license policy";
+        }
+        return "violates license policy (" + String.join(", ", licenseNames) + ")";
     }
 
     private String getDependencyDescription(String depComponent, boolean isTransitive) {

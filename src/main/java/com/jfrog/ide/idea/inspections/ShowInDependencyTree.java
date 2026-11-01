@@ -21,7 +21,7 @@ import javax.swing.*;
  */
 public class ShowInDependencyTree implements LocalQuickFix, Iconable, HighPriorityAction {
 
-    final static String SHOW_IN_TREE_MESSAGE = "Show vulnerability info in JFrog plugin";
+    final static String SHOW_IN_TREE_MESSAGE = "Show in JFrog plugin";
     private final DependencyNode node;
     private final String dependencyDescription;
 
