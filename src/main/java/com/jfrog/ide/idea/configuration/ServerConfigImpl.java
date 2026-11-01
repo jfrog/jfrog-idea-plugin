@@ -464,20 +464,26 @@ public class ServerConfigImpl implements ServerConfig {
 
         setUrl(platformUrlEnv);
         String platformUrlStr = Strings.CS.removeEnd(platformUrlEnv, "/");
-        if (isBlank(xrayUrlEnv)) {
+        if (isNotBlank(xrayUrlEnv)) {
+            setXrayUrl(xrayUrlEnv);
+        } else if (isNotBlank(platformUrlStr)) {
             setXrayUrl(platformUrlStr + "/xray");
         } else {
-            setXrayUrl(xrayUrlEnv);
+            setXrayUrl("");
         }
-        if (isBlank(artifactoryUrlEnv)) {
+        if (isNotBlank(artifactoryUrlEnv)) {
+            setArtifactoryUrl(artifactoryUrlEnv);
+        } else if (isNotBlank(platformUrlStr)) {
             setArtifactoryUrl(platformUrlStr + "/artifactory");
         } else {
-            setArtifactoryUrl(artifactoryUrlEnv);
+            setArtifactoryUrl("");
         }
         if (isNotBlank(projectEnv)) {
             setProject(projectEnv);
         }
         if (isNotBlank(accessTokenEnv)) {
+            setUsername("");
+            setPassword("");
             setAccessToken(accessTokenEnv);
         } else {
             setUsername(usernameEnv);

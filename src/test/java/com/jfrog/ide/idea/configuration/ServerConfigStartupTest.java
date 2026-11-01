@@ -36,6 +36,29 @@ public class ServerConfigStartupTest {
             assertEquals("https://example.jfrog.io/xray", serverConfig.getXrayUrl());
             assertEquals("https://example.jfrog.io/artifactory", serverConfig.getArtifactoryUrl());
             assertEquals("token", serverConfig.getAccessToken());
+            assertEquals("", serverConfig.getUsername());
+            assertEquals("", serverConfig.getPassword());
+        }
+    }
+
+    @Test
+    public void artifactoryUrlAndAccessTokenDoNotInventAnXrayUrl() {
+        try (MockedStatic<EnvironmentUtil> environment = Mockito.mockStatic(EnvironmentUtil.class)) {
+            environment.when(() -> EnvironmentUtil.getValue(Mockito.anyString())).thenReturn(null);
+            environment.when(() -> EnvironmentUtil.getValue(ServerConfigImpl.ARTIFACTORY_URL_ENV)).thenReturn("https://example.jfrog.io/artifactory");
+            environment.when(() -> EnvironmentUtil.getValue(ServerConfigImpl.ACCESS_TOKEN_ENV)).thenReturn("token");
+
+            ServerConfigImpl serverConfig = new ServerConfigImpl();
+            serverConfig.setUsername("stale-user");
+            serverConfig.setPassword("stale-password");
+            serverConfig.readConnectionDetailsFromEnv();
+
+            assertEquals("", serverConfig.getXrayUrl());
+            assertEquals("https://example.jfrog.io/artifactory", serverConfig.getArtifactoryUrl());
+            assertEquals("", serverConfig.getUsername());
+            assertEquals("", serverConfig.getPassword());
+            assertEquals("token", serverConfig.getAccessToken());
+            assertFalse(serverConfig.isXrayConfigured());
         }
     }
 
