@@ -11,8 +11,6 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.*;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
-import com.intellij.ui.jcef.JBCefApp;
-import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.util.ui.UIUtil;
 import com.jfrog.ide.common.nodes.*;
 import com.jfrog.ide.idea.actions.CollapseAllAction;
@@ -25,6 +23,7 @@ import com.jfrog.ide.idea.inspections.JumpToCode;
 import com.jfrog.ide.idea.log.Logger;
 import com.jfrog.ide.idea.scan.ScanManager;
 import com.jfrog.ide.idea.ui.utils.ComponentUtils;
+import com.jfrog.ide.idea.ui.webview.JcefSupport;
 import com.jfrog.ide.idea.ui.webview.WebviewManager;
 import com.jfrog.ide.idea.ui.webview.WebviewObjectConverter;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -61,14 +60,18 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         verticalSplit = new OnePixelSplitter(false, 0.4f);
         verticalSplit.setFirstComponent(leftPanel);
         setContent(verticalSplit);
-        if (!JBCefApp.isSupported()) {
-            leftPanel.add(createJcefNotSupportedView(), 0);
+        JcefSupport.Availability browser = JcefSupport.availability();
+        if (browser != JcefSupport.Availability.AVAILABLE) {
+            buildResultsPanel(leftPanel);
+            verticalSplit.setSecondComponent(createJcefNotSupportedView(browser));
+            registerListeners(null);
+            isInitialized = true;
             return;
         }
-        JBCefBrowser jbCefBrowser;
+        JComponent browserComponent;
 
         try {
-            jbCefBrowser = initVulnerabilityInfoBrowser(project);
+            browserComponent = initVulnerabilityInfoBrowser(project);
         } catch (IOException | URISyntaxException e) {
             Logger.getInstance().error("Local view couldn't be initialized.", e);
             leftPanel.removeAll();
@@ -76,6 +79,12 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
             return;
         }
 
+        buildResultsPanel(leftPanel);
+        registerListeners(browserComponent);
+        isInitialized = true;
+    }
+
+    private void buildResultsPanel(JPanel leftPanel) {
         JPanel toolbar = createActionToolbar();
         toolbar.setBorder(IdeBorderFactory.createBorder(SideBorder.BOTTOM));
         leftPanel.add(toolbar, BorderLayout.PAGE_START);
@@ -85,8 +94,6 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
 
         alertIfCacheExpired();
         refreshView(true);
-        registerListeners(jbCefBrowser.getComponent());
-        isInitialized = true;
     }
 
     @Override
@@ -107,20 +114,30 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         appBusConnection.subscribe(ApplicationEvents.ON_CONFIGURATION_DETAILS_CHANGE, (ApplicationEvents) () -> ApplicationManager.getApplication().invokeLater(this::onConfigurationChange));
 
         // Wrap the browser component in a Panel to avoid display issues that may occur in some versions of IntelliJ in Windows.
-        JPanel browserWrapper = new JBPanel<>();
-        browserWrapper.setLayout(new GridLayout());
-        browserWrapper.add(browserComponent);
+        JPanel browserWrapper = null;
+        if (browserComponent != null) {
+            browserWrapper = new JBPanel<>();
+            browserWrapper.setLayout(new GridLayout());
+            browserWrapper.add(browserComponent);
+        }
+        JPanel detailsBrowser = browserWrapper;
 
         // Component selection listener
         componentsTree.addTreeSelectionListener(e -> {
             if (e == null || e.getNewLeadSelectionPath() == null || !(e.getNewLeadSelectionPath().getLastPathComponent() instanceof IssueNode)) {
-                verticalSplit.setSecondComponent(null);
+                if (detailsBrowser != null) {
+                    verticalSplit.setSecondComponent(null);
+                }
                 return;
             }
 
             selectedIssue = (IssueNode) e.getNewLeadSelectionPath().getLastPathComponent();
-            updateIssueOrLicenseInWebview(selectedIssue);
-            verticalSplit.setSecondComponent(browserWrapper);
+            if (detailsBrowser != null) {
+                updateIssueOrLicenseInWebview(selectedIssue);
+                verticalSplit.setSecondComponent(detailsBrowser);
+            } else if (selectedIssue instanceof FileIssueNode fileIssue) {
+                navigateToFile(fileIssue);
+            }
         });
         projectBusConnection.subscribe(ApplicationEvents.ON_SCAN_LOCAL_STARTED, (ApplicationEvents) () -> {
             setLeftPanelContent(compTreeView);
@@ -172,7 +189,29 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         return ComponentUtils.createUnsupportedPanel(readyEnvPanel);
     }
 
-    private JComponent createJcefNotSupportedView() {
+    private JComponent createJcefNotSupportedView(JcefSupport.Availability availability) {
+        if (availability == JcefSupport.Availability.PLUGIN_DISABLED) {
+            return createCenteredMessage("Enable Web Browser (JCEF) in Settings › Plugins and restart to see vulnerability details.");
+        }
+        if (availability == JcefSupport.Availability.PLUGIN_MISSING) {
+            return createCenteredMessage("Vulnerability details aren't available in this IDE. Scanning and results still work.");
+        }
+        return createUnsupportedRuntimeView();
+    }
+
+    private JComponent createCenteredMessage(String text) {
+        JPanel panel = new JBPanel<>();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
+        JBLabel thanksLabel = new JBLabel();
+        thanksLabel.setText("Thank you for installing the JFrog IntelliJ IDEA Plugin!");
+        ComponentUtils.addCenteredComponent(panel, thanksLabel);
+        JBLabel message = new JBLabel();
+        message.setText(text);
+        ComponentUtils.addCenteredComponent(panel, message);
+        return ComponentUtils.createUnsupportedPanel(panel);
+    }
+
+    private JComponent createUnsupportedRuntimeView() {
         JPanel jcefNotSupportedPanel = new JBPanel<>();
         jcefNotSupportedPanel.setLayout(new BoxLayout(jcefNotSupportedPanel, BoxLayout.PAGE_AXIS));
 
@@ -222,12 +261,12 @@ public class JFrogLocalToolWindow extends AbstractJFrogToolWindow {
         leftPanelContent.add(component, 0);
     }
 
-    private JBCefBrowser initVulnerabilityInfoBrowser(@NotNull Project project) throws IOException, URISyntaxException {
+    private JComponent initVulnerabilityInfoBrowser(@NotNull Project project) throws IOException, URISyntaxException {
         // When the webview is first opened, the issue/license message might be sent before the page is loaded, so we
         // send the message again when the page is done loading.
         webviewManager = new WebviewManager(project, () -> updateIssueOrLicenseInWebview(selectedIssue));
         Disposer.register(this, webviewManager);
-        return webviewManager.getBrowser();
+        return webviewManager.getComponent();
     }
 
     /**

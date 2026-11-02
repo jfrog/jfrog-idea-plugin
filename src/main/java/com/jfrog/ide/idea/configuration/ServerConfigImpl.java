@@ -439,7 +439,8 @@ public class ServerConfigImpl implements ServerConfig {
 
     /**
      * Read connection details from environment variables.
-     * All connection details must be provided from env, otherwise don't use them.
+     * A platform, Xray, or Artifactory URL is required, plus either a username and password or an access token.
+     * Anything less is ignored.
      */
     public void readConnectionDetailsFromEnv() {
         String platformUrlEnv = EnvironmentUtil.getValue(PLATFORM_URL_ENV);
@@ -449,7 +450,9 @@ public class ServerConfigImpl implements ServerConfig {
         String passwordEnv = EnvironmentUtil.getValue(PASSWORD_ENV);
         String accessTokenEnv = EnvironmentUtil.getValue(ACCESS_TOKEN_ENV);
         String projectEnv = EnvironmentUtil.getValue(PROJECT_ENV);
-        if (isAnyBlank(usernameEnv, passwordEnv) || isAllBlank(platformUrlEnv, xrayUrlEnv, artifactoryUrlEnv)) {
+        boolean hasUserAndPassword = isNoneBlank(usernameEnv, passwordEnv);
+        boolean hasAccessToken = isNotBlank(accessTokenEnv);
+        if ((!hasUserAndPassword && !hasAccessToken) || isAllBlank(platformUrlEnv, xrayUrlEnv, artifactoryUrlEnv)) {
             setUrl("");
             setXrayUrl("");
             setArtifactoryUrl("");
@@ -461,20 +464,26 @@ public class ServerConfigImpl implements ServerConfig {
 
         setUrl(platformUrlEnv);
         String platformUrlStr = Strings.CS.removeEnd(platformUrlEnv, "/");
-        if (isBlank(xrayUrlEnv)) {
+        if (isNotBlank(xrayUrlEnv)) {
+            setXrayUrl(xrayUrlEnv);
+        } else if (isNotBlank(platformUrlStr)) {
             setXrayUrl(platformUrlStr + "/xray");
         } else {
-            setXrayUrl(xrayUrlEnv);
+            setXrayUrl("");
         }
-        if (isBlank(artifactoryUrlEnv)) {
+        if (isNotBlank(artifactoryUrlEnv)) {
+            setArtifactoryUrl(artifactoryUrlEnv);
+        } else if (isNotBlank(platformUrlStr)) {
             setArtifactoryUrl(platformUrlStr + "/artifactory");
         } else {
-            setArtifactoryUrl(artifactoryUrlEnv);
+            setArtifactoryUrl("");
         }
         if (isNotBlank(projectEnv)) {
             setProject(projectEnv);
         }
         if (isNotBlank(accessTokenEnv)) {
+            setUsername("");
+            setPassword("");
             setAccessToken(accessTokenEnv);
         } else {
             setUsername(usernameEnv);

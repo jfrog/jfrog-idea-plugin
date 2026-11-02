@@ -16,6 +16,8 @@ import org.cef.handler.CefDisplayHandlerAdapter;
 import org.cef.handler.CefLoadHandlerAdapter;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.JComponent;
+
 public class WebviewManager implements Disposable {
     private final JBCefBrowser jbCefBrowser;
     public EventManager eventManager;
@@ -33,8 +35,8 @@ public class WebviewManager implements Disposable {
         jbCefBrowser.getJBCefClient().addContextMenuHandler(new JfrogContextMenuHandler(), jbCefBrowser.getCefBrowser());
     }
 
-    public JBCefBrowser getBrowser() {
-        return jbCefBrowser;
+    public JComponent getComponent() {
+        return jbCefBrowser.getComponent();
     }
 
     private void handleLoadEvent(Runnable onLoadEnd) {
